@@ -1,0 +1,31 @@
+#!/bin/bash
+
+
+usage() {
+    cat <<EOF
+Usage: $0 lvmvolumename exportformat exportfile
+
+EOF
+exit 1
+
+}
+if test "$1" == "help" -o "$1" == "--help" -o "$1" == "?" -o "$1" == "-?"; then usage; fi
+if test "$1" == ""; then usage; fi
+if test "$2" == ""; then usage; fi
+if test "$3" == ""; then usage; fi
+
+exportformat=$2
+exportfile=$3
+
+volumegroup=vg0
+volumename=$1
+volumepath=/dev/${volumegroup}/${volumename}
+if test ! -e $volumepath; then echo "$volumepath not found"; usage; fi
+
+for d in /sys/block/sd[a-z]/queue/scheduler; do echo "old: $d => $(cat $d)"; echo cfq > $d ; echo "new: $d => $(cat $d)"; done
+
+# ionice needs cfq scheduler to be effectiv, we are setting 
+nice -n 19 ionice -c 3 qemu-img convert -O $exportformat $volumepath $exportfile
+
+for d in /sys/block/sd[a-z]/queue/scheduler; do echo "old: $d => $(cat $d)"; echo deadline > $d ; echo "new: $d => $(cat $d)"; done
+

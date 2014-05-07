@@ -1,0 +1,131 @@
+# {{ pillar['message_do_not_modify'] }}
+
+import os.path
+
+from sentry.conf.server import *
+
+CONF_ROOT = os.path.dirname(__file__)
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '{{ db['name'] }}',
+        'USER': '{{ db['username'] }}',
+        'PASSWORD': '{{ db['password'] }}',
+        'HOST': '{{ db['host'] }}',
+        'PORT': '5432',
+    }
+}
+
+{#CACHE_PREFIX = 'sentry'#}
+{#CACHE_TIMEOUT = 300#}
+{#MIDDLEWARE_CLASSES.insert(0, 'johnny.middleware.QueryCacheMiddleware')#}
+{#MIDDLEWARE_CLASSES.insert(0, 'johnny.middleware.LocalStoreClearMiddleware')#}
+{#CACHES = {#}
+{#    'default' : dict(#}
+{#        BACKEND = 'johnny.backends.memcached.MemcachedCache',#}
+{#        LOCATION = [{% for ip in pillar['memcache_servers'] %}'{{ ip }}:11211'{% if not loop.last %},{% endif %}{% endfor %}],#}
+{#        JOHNNY_CACHE = True,#}
+{#    )#}
+{#}#}
+{#JOHNNY_MIDDLEWARE_KEY_PREFIX='sentry'#}
+
+SENTRY_KEY = '{{ django_key }}'
+
+# Set this to false to require authentication
+SENTRY_PUBLIC = False
+
+# You should configure the absolute URI to Sentry. It will attempt to guess it if you don't
+# but proxies may interfere with this.
+SENTRY_URL_PREFIX = '{% if ssl|default(False) %}https{% else %}http{% endif %}://{{ address }}'  # No trailing slash!
+
+{#SENTRY_WEB_HOST = '0.0.0.0'#}
+{#SENTRY_WEB_PORT = 8080#}
+{#SENTRY_WEB_OPTIONS = {#}
+{#    'workers': {{ pillar['sentry']['workers'] }},  # the number of gunicorn workers#}
+{#    'worker_class': 'gevent',#}
+{#}#}
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'django_statsd',
+{% if email['method'] == "amazon_ses" %}
+    'django_ses',
+{% endif %}
+)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'message_only': {
+            'format': '[graphite] %(message)s'
+        }
+    },
+    'handlers': {
+        'gelf': {
+            'level': 'NOTSET',
+            'class': 'graypy.handler.GELFHandler',
+            'host': '{{ pillar['graylog2_address'] }}',
+            'formatter': 'message_only'
+        },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.handlers.SentryHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['gelf', 'sentry'],
+            'propagate': True,
+            'level':'DEBUG',
+        },
+        'raven': {
+            'level': 'WARN',
+            'propagate': False,
+            'handlers': ['gelf', 'sentry']
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['gelf'],
+            'propagate': False,
+        }
+    },
+    'root': {
+        'handlers': ['gelf', 'sentry'],
+        'propagate': True,
+        'level': 'NOTSET'
+    }
+}
+
+{% if email['method'] == "amazon_ses" %}
+EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_REGION_NAME = '{{ grains['region'] }}'
+AWS_SES_REGION_ENDPOINT = 'email.us-east-1.amazonaws.com'
+AWS_ACCESS_KEY_ID = '{{ pillar['amazon-ses']['access-key'] }}'
+AWS_SECRET_ACCESS_KEY = '{{ pillar['amazon-ses']['secret-key'] }}'
+DEFAULT_FROM_EMAIL = '{{ pillar['amazon-ses']['address'] }}'
+{% else %}
+EMAIL_HOST = '{{ email['server'] }}'
+EMAIL_HOST_PASSWORD = '{{ email['password'] }}'
+EMAIL_HOST_USER = '{{ email['user'] }}'
+EMAIL_PORT = {{ email['port'] }}
+DEFAULT_FROM_EMAIL = '{{ email['from'] }}'
+{% if email['tls'] %}
+EMAIL_USE_TLS = True
+{% else %}
+EMAIL_USE_TLS = False
+{% endif %}
+{% endif %}
+
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+SENTRY_SERVER_EMAIL = SERVER_EMAIL
+
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware'
+)
+
+STATSD_PREFIX = 'sentry'
+STATSD_CLIENT = 'django_statsd.clients.normal'
+
+ALLOWED_HOSTS = ["{{ address }}"]

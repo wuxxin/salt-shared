@@ -1,0 +1,28 @@
+#!/bin/bash
+
+usage() {
+    cat <<EOF
+Usage: $0 vmname
+converts graphics, video, Copy&Paste & pointer support to spice.
+
+EOF
+
+exit 1
+
+}
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+if test "$1" == "help" -o "$1" == "--help" -o "$1" == "?" -o "$1" == "-?"; then usage; fi
+
+vmname=$1
+
+virsh dumpxml $vmname --inactive | 
+msub '<video>.*</video>' "<video><model type=\"qxl\"/></video>" |
+msub '<channel type=.spicevmc([^>]+/>|.*</channel>)' ' ' |
+msub "<graphics type([^>]+/>|.*</graphics>(<channel type=\"spicevmc.*</channel>)?)" "<graphics type=\"spice\" autoport=\"yes\" /><channel type=\"spicevmc\"><target type=\"virtio\" name=\"com.redhat.spice.0\"/></channel>"  > ${vmname}.xml
+#cat ${vmname}.xml
+virsh define ${vmname}.xml
+

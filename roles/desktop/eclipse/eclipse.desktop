@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=4.3
+Name=Eclipse
+GenericName=Eclipse IDE 4.3 - Kepler
+Exec="/usr/local/bin/eclipse" %f
+Terminal=false
+Icon=/opt/eclipse/icon.xpm
+Type=Application
+Categories=Development;IDE;
+Comment=Eclipse 4.3 (Kepler) Integrated Development Environment

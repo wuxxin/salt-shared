@@ -1,0 +1,6 @@
+precise_big:
+  provider: my-cheap-cloud
+  image: precise-default
+  region: default
+  size: 2g4cpu30g
+

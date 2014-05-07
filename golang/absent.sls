@@ -1,0 +1,4 @@
+golang:
+  pkg:
+    - removed
+

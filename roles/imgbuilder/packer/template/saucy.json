@@ -1,0 +1,74 @@
+{
+  "builders": [
+  {
+    "vm_name": "saucy",
+    "type": "virtualbox",
+    "http_directory": "http",
+    "iso_url": "http://releases.ubuntu.com/13.10/ubuntu-13.10-server-amd64.iso",
+    "iso_checksum": "5dd72c694c3a7e06a3b4dd651ca26cfc70985004",
+    "iso_checksum_type": "sha1",
+    "guest_os_type": "Ubuntu_64",
+    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+    "virtualbox_version_file": ".vbox_version",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_wait_timeout": "10000s",
+    "boot_command": [
+      "<esc><esc><enter><wait>",
+      "/install/vmlinuz noapic ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "hostname={{ .Name }} ",
+      "fb=false debconf/frontend=noninteractive ",
+      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+      "initrd=/install/initrd.gz -- <enter>"
+    ],
+    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+    "disk_size": 10140,
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "512"],
+      ["modifyvm", "{{.Name}}", "--cpus", "1"]
+    ]
+  },
+  {
+    "vm_name": "saucy",
+    "type": "qemu",
+    "http_directory": "http",
+    "iso_url": "http://releases.ubuntu.com/13.10/ubuntu-13.10-server-amd64.iso",
+    "iso_checksum": "5dd72c694c3a7e06a3b4dd651ca26cfc70985004",
+    "iso_checksum_type": "sha1",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_wait_timeout": "10000s",
+    "boot_command": [
+      "<esc><esc><enter><wait>",
+      "/install/vmlinuz noapic ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "hostname={{ .Name }} ",
+      "fb=false debconf/frontend=noninteractive ",
+      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+      "initrd=/install/initrd.gz -- <enter>"
+    ],
+    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+    "disk_size": 10140,
+    "boot_wait": "10s",
+    "format": "qcow2",
+    "headless": "true",
+    "accelerator": "kvm",
+    "qemuargs": [[ "-m", "512m" ]]
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E bash '{{.Path}}'",
+    "scripts": [
+      "linux_script/base.sh",
+      "linux_script/vagrant.sh",
+      "linux_script/vmtools.sh",
+      "linux_script/cleanup.sh",
+      "linux_script/zerodisk.sh"
+    ]
+  }]
+}

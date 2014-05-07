@@ -1,0 +1,4 @@
+### backupninja shell config file ###
+
+# will be run as root
+{{ data }}

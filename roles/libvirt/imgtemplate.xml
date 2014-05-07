@@ -1,0 +1,23 @@
+<!--
+WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE 
+OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
+  virsh pool-edit images
+or other application using the libvirt API.
+-->
+
+<pool type='dir'>
+  <name>{{ pool }}</name>
+  <capacity>0</capacity>
+  <allocation>0</allocation>
+  <available>0</available>
+  <source>
+  </source>
+  <target>
+    <path>{{ path }}</path>
+    <permissions>
+      <mode>0700</mode>
+      <owner>-1</owner>
+      <group>-1</group>
+    </permissions>
+  </target>
+</pool>

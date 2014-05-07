@@ -1,0 +1,31 @@
+# this is a example pillar layout
+
+file: top.sls in pillar root
+----
+base:
+  '*':
+    - timezone
+
+  'myminionid':
+    - myminionid
+
+----
+
+file: timezone.sls in pillar root
+----
+timezone: Europe/Vienna
+
+----
+
+file: myminionid.sls in pillar root
+----
+desktop:
+  status: present
+
+  commercial:
+    binary:
+      status: present
+
+  user: mymainusernameonthemachine
+----
+

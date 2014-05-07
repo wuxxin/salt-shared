@@ -1,0 +1,44 @@
+#!/bin/bash
+
+usage() {
+    cat <<EOF
+Usage: $0 name lvname os-variant [ram vcpus]
+       $0 list # list supported os-variants
+EOF
+
+exit 1
+
+}
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+if test "$1" == "help" -o "$1" == "--help" -o "$1" == "?" -o "$1" == "-?"; then usage; fi
+if test "$1" == "list"; then virt-install --os-variant=list; exit 1 ; fi
+
+if test "$1" == ""; then usage; fi
+if test "$2" == ""; then usage; fi
+if test "$3" == ""; then usage; fi
+
+vmname=$1
+volumegroup=vg0
+volumename=$2
+volumepath=/dev/mapper/${volumegroup}-${volumename}
+osvariant=$3
+bridge=br0
+ram=1024
+vcpus=2
+if test ! "$5" == ""; then ram=$4; vcpus=$5; fi
+if test ! -e $volumepath; then usage; fi
+
+execstr="virt-install --ram=${ram} --vcpus=${vcpus} --os-type=linux --os-variant=${osvariant} --import --network=bridge=${bridge},model=virtio --disk ${volumepath},device=disk,bus=virtio --name=$vmname --graphics spice --print-step 1"
+echo $execstr
+x=`$execstr`
+echo "$x" | msub "<interface type.*</interface>" "<interface type=\"bridge\"><source bridge=\"$bridge\"/></interface>" > ${vmname}.xml
+#<virtualport type=\"openvswitch\"></virtualport>
+pygmentize -g ${vmname}.xml
+virsh define ${vmname}.xml
+
+
+

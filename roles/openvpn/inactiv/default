@@ -1,0 +1,12 @@
+# {{ pillar['message_do_not_modify'] }}
+
+{#
+Running OpenVPN trough /etc/init.d/ is dangerous, because daemon might die for
+various reasons, such as OOM or just a bug.
+Because of that they don't respawn automatically.
+Turn off /etc/init.d/openvpn and just use upstart to start and keep running
+openvpn instances.
+ #}
+
+AUTOSTART="none"
+OPTARGS=""

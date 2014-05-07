@@ -1,0 +1,5 @@
+# This is the internal zone file.
+
+.:127.0.0.1:a:259200
+=localhost:127.0.0.1:86400
+.1.0.0.127.in-addr.arpa:127.0.0.1:a:259200

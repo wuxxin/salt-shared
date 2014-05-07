@@ -1,0 +1,6 @@
+#!/bin/sh
+exec 2>&1
+exec <seed
+exec envdir ./env sh -c '
+  exec envuidgid Gdnscache softlimit -o250 -d "$DATALIMIT" /usr/bin/dnscache
+'

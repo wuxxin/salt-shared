@@ -1,0 +1,28 @@
+#!/bin/bash
+
+usage() {
+    cat <<EOF
+Usage: $0 vmname bridgename
+converts network setup to use bridge bridgename (and copies mac address from original network device)
+
+EOF
+
+exit 1
+
+}
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+if test "$1" == "help" -o "$1" == "--help" -o "$1" == "?" -o "$1" == "-?"; then usage; fi
+if test "$1" == ""; then usage; fi
+
+vmname=$1
+bridge=$2
+
+virsh dumpxml $vmname --inactive | 
+msub "<interface type=.+<mac address=.([0-9a-f:]+).+</interface>" "<interface type=\"bridge\"><mac address=\"\\1\"/><source bridge=\"$bridge\"/></interface>" > ${vmname}.xml
+cat ${vmname}.xml
+virsh define ${vmname}.xml
+

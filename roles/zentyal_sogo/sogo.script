@@ -1,0 +1,35 @@
+defaults write sogod SOGoTimeZone "{{ timezone }}"
+defaults write sogod SOGoMailDomain "{{ fullhostname }}"
+defaults write sogod SOGoLanguage "German"
+defaults write sogod SOGoAppointmentSendEMailNotifications YES
+defaults write sogod SOGoFoldersSendEMailNotifications YES
+defaults write sogod SOGoACLsSendEMailNotifications YES
+defaults write sogod SOGoCalendarDefaultRoles '("PublicViewer","ConfidentialDAndTViewer")'
+defaults write sogod SOGoSieveServer "sieve://localhost:4190"
+defaults write sogod SOGoVacationEnabled YES
+defaults write sogod SOGoMailMessageCheck every_minute
+defaults write sogod SOGoFirstDayOfWeek 1
+defaults write sogod SOGoFoldersSendEMailNotifications = YES;
+defaults write sogod SOGoForwardEnabled = YES;
+defaults write sogod SOGoDraftsFolderName Drafts
+defaults write sogod SOGoSharedFolderName "Shared Folders"
+defaults write sogod SOGoTrashFolderName Trash
+defaults write sogod SOGoSentFolderName Sent
+defaults write sogod SOGoOtherUsersFolderName "Other Users"
+
+defaults write sogod SOGoSuperUsernames '({{ adminusername }})'
+
+defaults write sogod SOGoUserSources '({CNFieldName=cn; IDFieldName=uid; UIDFieldName=uid; IMAPHostFieldName=; baseDN="{{ baseDN }}"; bindDN="{{ bindDN"; bindPassword="{{ bindDNpassword }}"; canAuthenticate=YES; displayName="Shared Addresses"; hostname="localhost"; id=public; isAddressBook=YES; port=390;})'
+
+defaults write sogod SOGoMailingMechanism sendmail
+defaults write sogod SOGoSMTPServer "smtp://localhost:25"
+defaults write sogod SOGoIMAPServer "imap://localhost:143/?tls=YES"
+defaults write sogod SOGoForceIMAPLoginWithEmail YES
+defaults write sogod SOGoIMAPAclConformsToIMAPExt YES
+defaults write sogod SOGoMailAuxiliaryUserAccountsEnabled YES
+defaults write sogod SOGoMemcachedHost "localhost"
+defaults write sogod SOGoEnableEMailAlarms YES
+defaults write sogod OCSFolderInfoURL "mysql://sogo:{{ sogo_mysql_password }}@localhost:3306/sogo/sogo_folder_info"
+defaults write sogod SOGoProfileURL "mysql://sogo:{{ sogo_mysql_password }}@localhost:3306/sogo/sogo_user_profile"
+defaults write sogod OCSEMailAlarmsFolderURL "mysql://sogo:{{ sogo_mysql_password }}@localhost:3306/sogo/sogo_alarms_folder"
+defaults write sogod OCSSessionsFolderURL "mysql://sogo:{{ sogo_mysql_password }}@localhost:3306/sogo/sogo_sessions_folder"

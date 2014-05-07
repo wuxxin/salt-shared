@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Version=1.0
+Name=Idea
+GenericName=IntelliJ IDEA
+Exec="/usr/local/bin/idea" %f
+Terminal=false
+Icon=/opt/idea-IC-135.690/bin/idea.png
+Categories=Development;IDE;
+Comment=Integrated Development Environment
+StartupWMClass=jetbrains-idea-ce

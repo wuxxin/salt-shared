@@ -1,0 +1,4 @@
+
+openssh-client:
+  pkg:
+    - installed

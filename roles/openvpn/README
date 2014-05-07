@@ -1,0 +1,82 @@
+openvpn recipe
+==============
+
+installs and configures openvpn in routed mode on a server and generates client config packages.
+
+You will find the client config packages at /etc/openvpn/clients. 
+The key will be protected by the password set in the clients line.
+Additional a zip file will be generated (including the also secret ta.key)
+which is then encrypted using symetric gpg encryption and the same password used for the key.
+
+Attention: do not remove a generated key from pillar instead revoke the key.
+To revoke a key, simple add its keyname to the "revoke:" section and call highstate or 
+"salt-call state.sls roles.openvpn" again.
+
+if your setup fails for some reasons, you can restart from scratch by using
+
+salt-call state.sls roles.openvpn.absent
+
+Issues:
+Currently the private key is not encrypted.
+
+
+pillar config
+-------------
+
+/top.sls
+++++++++
+
+base:
+  'server.name.org':
+    - servername.openvpn
+
+/servername/openvpn.sls
++++++++++++++++++++++++
+
+openvpn_server:
+  status: present
+
+  mode: routed
+
+  # information: you can add custom server and client openvpn config options like below
+  #options:
+  #  - fragment 1400
+  #  - mssfix 1400
+
+  ip: 1.2.3.4  # public server ip
+  name: server.name.org
+
+  vpn_net: 10.1.2.0
+  vpn_mask: 255.255.255.0
+
+  dns_ip: 10.1.2.1
+  dns_domain: in.server.name.org
+
+  ip_routes:
+    # if value is empty, "255.255.255.0" is assumed
+    "10.1.2.0": ""
+    "10.1.3.0": ""
+    "10.1.4.0": ""
+
+  ca:
+    # key_size: 2048
+    # key_expire: 3650
+    country: AT
+    province: VIE
+    city: Vienna
+    org: Your Organisation
+    email: admin@server.name.org
+    cn: server.name.org
+    name: server.name-vpn
+    ou: security
+
+  clients:
+    "client1_2013_03_13": "somepassword"
+    "client2_2013_03_13": "somepassword"
+
+  # information: to revoke a client, enter the same client name like under clients (without password and with "-") in section revoked:
+  # example:
+  
+  #revoked:
+  #  - "client1_2013_03_13"
+

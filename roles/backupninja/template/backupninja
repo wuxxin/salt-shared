@@ -1,0 +1,6 @@
+# /etc/cron.d/backupninja -- cron tab entry for package backupninja
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# run backupninja every hour on the hour
+0 * * * * root if [ -x /usr/sbin/backupninja ]; then /usr/sbin/backupninja; fi

@@ -1,0 +1,42 @@
+# if you want to use this salt state top file, you should copy it to top.sls in one of your salt states root directories
+include:
+  - repo
+  - roles
+  - custom
+
+base: # try to sort from wider to narrow
+
+  # any machine (not running Windows)
+  'os:[^(Windows)]':
+    - match: grain_pcre
+    - timezone
+    - tmux
+    - acpi
+    - ssh
+    - ssh.server
+    - remotefs.clients
+
+  # any Windows machine
+  'os:Windows':
+    - match: grain
+    - win
+
+  # any physical machine and Debian Family:
+  'G@os_family:Debian and G@virtual:physical':  
+    - match: compound
+    - admin
+
+  # any physical machine and not windows: Harddisk Health Monitor
+  'G@virtual:physical and G@os:[^(Windows)]':
+    - match: compound
+    - smartmon
+
+  # any virtual machine and not windows: haveged (Entropy Daemon)
+  'G@virtual:[^(physical)] and G@os:[^(Windows)]':
+    - match: compound
+    - haveged
+
+  # any virtual machine and Windows: KVM Guest Tools
+  'G@os:Windows and G@manufacturer:Bochs':
+    - match: compound
+    - win.kvm.guest

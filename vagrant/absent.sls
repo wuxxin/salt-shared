@@ -1,0 +1,4 @@
+vagrant:
+  pkg:
+    - removed
+

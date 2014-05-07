@@ -1,0 +1,36 @@
+# {{ pillar['message_do_not_modify'] }}
+[uwsgi]
+master = true
+env = DJANGO_SETTINGS_MODULE=my_sentry_conf
+pymodule-alias = my_sentry_conf=/etc/sentry.conf.py
+module = sentry.wsgi
+processes = {{ workers }}
+harakiri = {{ timeout|default(45) }}
+harakiri-verbose = true
+{% if cheaper %}
+{% if cheaper > 0 %}
+cheaper = {{ cheaper }}
+{% else %}
+cheap = true
+{% endif %}
+{% if workers == 1 and cheaper == 0 %}
+idle = {{ idle|default(300) }}
+{% endif %}
+{% endif -%}
+{%- if grains['virtual'] == 'kvm' and salt['file.file_exists']('/sys/kernel/mm/ksm/run') %}
+ksm = 20
+{% endif -%}
+lazy-apps = true
+uid = www-data
+gid = www-data
+threaded-logger = true
+logger = graylog2:{{ pillar['graylog2_address'] }}:12201,{{ grains['id'] }}
+carbon-id = sentry
+carbon = {{ pillar['graphite_address'] }}:2003
+virtualenv = /usr/local/sentry
+chdir = /usr/local/sentry
+procname = sentry-worker
+procname-master = sentry-master
+socket = /var/lib/uwsgi/sentry.sock
+stats = /var/lib/uwsgi/sentry-stats.sock
+no-orphans = true

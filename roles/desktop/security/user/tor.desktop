@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Version={{ version }}
+Name=Tor-Browser-Bundle
+GenericName=Tor Browser Bundle
+Exec="{{ execute }}" %f
+Terminal=false
+Icon={{ icon }}
+Categories=Application;
+Comment=Everything you need to safely browse the Internet.
+StartupWMClass=tor-browser-bundle

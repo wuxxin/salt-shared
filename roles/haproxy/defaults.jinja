@@ -1,0 +1,18 @@
+{% load_yaml as template %}
+haproxy:
+  frontends:
+    default_https:
+      ip: " {{ grains['ipv4'] | first() }}"
+      port: 443
+      options:
+        - "mode tcp"
+        - "tcp-request inspect-delay 5s"
+        - "tcp-request content accept if { req_ssl_hello_type 1 }"
+        - "default_backend default_https"
+      backend_options:
+        - "mode tcp"
+        - "option ssl-hello-chk"
+
+{% endload %}
+
+       

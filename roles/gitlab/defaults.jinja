@@ -1,0 +1,67 @@
+{% load_yaml as template %}
+
+GITLAB_VERSION: "6.7.5"
+GITLAB_TGZ_MD5: "8472fb83399d566f644a8a736541bf9a"
+SHELL_VERSION: "1.9.3"
+SHELL_TGZ_MD5: "94e3f7c118d6b6798493177ad1cd27b2"
+
+GITLAB_HOST: "localhost"
+GITLAB_SERVER_FQDN: "localhost"
+GITLAB_PORT: "443"
+GITLAB_HTTPS: "true"
+GITLAB_EMAIL: "gitlab@localhost"
+GITLAB_SUPPORT: "support@localhost"
+GITLAB_SIGNUP: "false"
+GITLAB_PROJECTS_LIMIT: "10"
+
+GITLAB_BACKUPS: "disable"
+GITLAB_BACKUP_EXPIRY: "0"
+# in case of daily|monthly: GITLAB_BACKUP_EXPIRY: "604800"
+
+GITLAB_SHELL_SSH_PORT: "22"
+
+REDIS_HOST: "localhost"
+REDIS_PORT: "6379"
+
+UNICORN_WORKERS: "2"
+UNICORN_TIMEOUT: "60"
+SIDEKIQ_CONCURRENCY: "5"
+
+DB_TYPE: "postgresql"
+DB_ADAPTER: "postgresql"
+DB_ENCODING: "unicode"
+# db_type=mysql: DB_ADAPTER: "mysql2"
+# db_type=mysql: DB_ENCODING: "utf8"
+DB_HOST: "localhost"
+DB_PORT: ""
+DB_NAME: "gitlabhq_production"
+DB_USER: "gitlabhq"
+DB_PASS: "qb0Hotu55hJKyno"
+DB_POOL: "10"
+
+# DB_INIT: yes WIPES database every call!
+DB_INIT: "yes"
+
+
+SMTP_DOMAIN: "www.gmail.com"
+SMTP_HOST: "smtp.gmail.com"
+SMTP_PORT: "587"
+SMTP_USER: ""
+SMTP_PASS: ""
+SMTP_STARTTLS: "true"
+SMTP_AUTHENTICATION: ":login"
+
+LDAP_ENABLED: "false"
+LDAP_HOST: ""
+LDAP_PORT: "636"
+LDAP_UID: "sAMAccountName"
+LDAP_METHOD: "ssl"
+LDAP_BIND_DN: ""
+LDAP_PASS: ""
+LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN: ""
+LDAP_BASE: ""
+LDAP_USER_FILTER: ""
+# case "${LDAP_UID}" in UserPrincipalName) LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN=${LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN:-false} ;;
+# *) LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN=${LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN:-true}
+
+{% endload %}

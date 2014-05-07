@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# This is a postsetconf script for zentyal
+
+# postsetconf scripts are run after the configuration for a given module is
+# written. The module will check if an executable file called
+# <module>.postsetconf exists in /etc/zentyal/hooks and will try to run it
+
+# Copy this file or create a script with the appropriate name if you want
+# to run some customization script after a module writes its configuration
+
+# Hook scripts need to be executable by root (note that examples are not).
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+ssub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
+}
+
+# dns modifications
+cat /etc/bind/named.conf.local | 
+{% if dns.internal_local_nets|d(False) %}
+ msub '(acl "internal-local-nets" {[^}]+)};' '\1\n{% for a in dns.internal_local_nets %}    {{ a }};\n{% endfor %}\n};\n' |
+{% endif %}
+{% if dns.zones_new|d(False) %}
+ msub '(acl "internal-local-nets" {[^}]+};)' '\1\n{% for n, (s,t) in dns.zones_new.iteritems() %}zone "{{ n }}" { type master; file "{{ t }}"; };\n{% endfor %}\n' |
+{% endif %}
+cat > /etc/bind/named.conf.local.new
+rm /etc/bind/named.conf.local; mv /etc/bind/named.conf.local.new /etc/bind/named.conf.local
+
+{% if dns.zones_append|d(False) %}
+  {% for a,(s,i,t) in dns.zones_append.iteritems() %}
+# include zone {{ a }}
+cat {{ i }} >> {{ t }}
+  {% endfor %}
+{% endif %}
+
+exit 0

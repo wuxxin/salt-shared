@@ -1,0 +1,11 @@
+use diamond for sampling data of machines
+use graphite to store graph samples
+
+use sentry to collect sourcecode events
+
+https://github.com/arachnys/cabot use data from graphite for triggering alerts to user via telephone/sms a.s.o
+
+https://github.com/indygreg/collectd-carbon to route collectd samples to graphite
+https://github.com/sivy/pystatsd a statsd server to route samples to graphite
+
+

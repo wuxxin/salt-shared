@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# This is a postsetconf script for zentyal
+
+# postsetconf scripts are run after the configuration for a given module is
+# written. The module will check if an executable file called
+# <module>.postsetconf exists in /etc/zentyal/hooks and will try to run it
+
+# Copy this file or create a script with the appropriate name if you want
+# to run some customization script after a module writes its configuration
+
+# Hook scripts need to be executable by root (note that examples are not).
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+ssub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
+}
+
+# postfix modifications
+cat /etc/postfix/main.cf | ssub '.*smtp_tls_security_level.*' 'smtp_tls_security_level = may' > /etc/postfix/main.cf.new
+cat >> /etc/postfix/main.cf.new << EOF
+delay_warning_time = 2h
+#smtp_tls_mandatory_ciphers = high
+smtp_tls_policy_maps = hash:/etc/postfix/tls_policy
+sender_bcc_maps = hash:/etc/postfix/sender_bcc
+recipient_bcc_maps = hash:/etc/postfix/recipient_bcc
+transport_maps = hash:/etc/postfix/custom_transport
+ddropyear_destination_recipient_limit = 1
+dovedrop_destination_recipient_limit = 1
+droperror_destination_recipient_limit = 1
+
+EOF
+rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
+
+cat /etc/postfix/master.cf |
+ ssub '(smtp[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
+ ssub '(relay[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' > /etc/postfix/master.cf.new
+
+cat >> /etc/postfix/master.cf.new << EOF
+dovedrop        unix    -       n       n       -       -       pipe
+  flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m \${extension}
+
+ddropyear    unix    -       n       n       -       -       pipe
+  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda-year-append -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m \${extension}
+
+droperror    unix    -       n       n       -       -       pipe
+  flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda -f \${sender} -d postmaster@spitzauer.at -m public/diagnostic
+
+EOF
+rm /etc/postfix/master.cf; mv /etc/postfix/master.cf.new /etc/postfix/master.cf
+
+
+# dovecot modifications (look at extra.conf for additional included modifications)
+cat /etc/dovecot/dovecot.conf |
+ msub '^(protocol imap {)([^}]+)}$' '\1\n  mail_plugins = acl imap_acl quota imap_quota autocreate\n}\n' |
+ msub '^(protocol pop3 {)([^}]+)}$' '\1\n  mail_plugins = acl quota\n}\n' |
+ msub '^(protocol lda {)([^}]+)mail_plugins = ([^}]+)}$' '\1\n\2mail_plugins = acl \3\n}\n' |
+ msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile\n \2}\n' > /etc/dovecot/dovecot.conf.new
+rm /etc/dovecot/dovecot.conf; mv /etc/dovecot/dovecot.conf.new /etc/dovecot/dovecot.conf
+
+#  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile:/etc/dovecot/acl\n \2}\n' 
+
+exit 0

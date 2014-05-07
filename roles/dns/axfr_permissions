@@ -1,0 +1,5 @@
+# sample line:  1.2.3.4:allow,AXFR="heaven.af.mil/3.2.1.in-addr.arpa"
+{% for a in permissions %}
+{{ a }}
+{% endfor %}
+:deny

@@ -1,0 +1,3 @@
+npm:
+  pkg:
+    - installed
