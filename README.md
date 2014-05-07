@@ -1,6 +1,7 @@
-##shared-salt - useful Salt states
+##salt-shared - useful Salt states
 
-This is a collection of saltstates as a result of me learning to use saltstack.
+This is a collection of saltstates as a result of me learning how to use saltstack.
+Both quality and style differ from state to state, some are quite up2date, others dont.
 It is already in a useful state if you target ubuntu 14.04, but it completely lacks documentation.
 
 ###What can you do with it:
