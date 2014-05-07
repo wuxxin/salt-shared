@@ -1,5 +1,5 @@
 icons:
   pkg.installed:
-    pkgs:
+    - pkgs:
       - gnome-extra-icons
       - openstreetmap-map-icons-classic

@@ -1,6 +1,5 @@
 include:
   - java.browser
-  - .user
 
 chromium-browser:
   pkg.installed:
