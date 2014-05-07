@@ -1,9 +1,9 @@
-#shared-salt - useful Salt states
+##shared-salt - useful Salt states
 
 This is a collection of saltstates as a result of me learning to use saltstack.
 It is already in a useful state if you target ubuntu 14.04, but it completely lacks documentation.
 
-##What can you do with it:
+###What can you do with it:
 
  * Target Platform: Ubuntu 14.04
    * many states also work with older ubuntu and other debian based distros.
@@ -14,7 +14,7 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
    * imgbuilder: use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
    * developer desktop setup: look at roles/desktop/readme.md for details
 
-##How to start:
+###How to start:
 
  * look at salt-top.example and pillar-top.example for a start
 
@@ -25,7 +25,7 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
    * include this repository as a salt directory and point salt master config to it
 
 
-##directory layout:
+###directory layout:
 
  * /salt-top.example: Example states top file
  * /pillar-top.example: Example pillar data
