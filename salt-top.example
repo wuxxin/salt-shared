@@ -24,7 +24,7 @@ base: # try to sort from wider to narrow
   # any physical machine and Debian Family:
   'G@os_family:Debian and G@virtual:physical':  
     - match: compound
-    - admin
+    - console-tools
 
   # any physical machine and not windows: Harddisk Health Monitor
   'G@virtual:physical and G@os:[^(Windows)]':
