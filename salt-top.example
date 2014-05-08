@@ -16,10 +16,10 @@ base: # try to sort from wider to narrow
     - ssh.server
     - remotefs.clients
 
-  # any Windows machine
-  'os:Windows':
-    - match: grain
-    - win
+#  # any Windows machine
+#  'os:Windows':
+#    - match: grain
+#    - win
 
   # any physical machine and Debian Family:
   'G@os_family:Debian and G@virtual:physical':  

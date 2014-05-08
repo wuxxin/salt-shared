@@ -24,5 +24,4 @@ base-deps:
       - links
       - elinks
       - jupp
-      - efte
 {% endif %}
