@@ -16,13 +16,11 @@ template:
     disk_flavor:
       default:
         resize: --expand /dev/sda3
+        preseed: preseed.cfg
       lvm:
         resize: --expand /dev/sda1 --LV-expand /dev/trusty-vg/root
+        preseed: lvm_preseed.cfg
     packaging:
       virtualbox:
-      
       qemu:
-      
   vagrant:
-    
-    

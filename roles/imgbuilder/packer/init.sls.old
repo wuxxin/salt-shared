@@ -39,22 +39,51 @@ packer:
     - watch:
       - git: packer
     - require:
+      - file: correct_ip
+      - cmd: gox_import
+      - cmd: use-old-ssh-until-higebus-branch-is-ready
       - file: go_profile-activate
 
 go_profile:
   file.managed:
-    - name: /home/imgbuilder/.profile
+    - name: /home/imgbuilder/.bash_profile
     - user: imgbuilder
     - group: imgbuilder
 
 go_profile-activate:
   file.append:
-    - name: /home/imgbuilder/.profile
+    - name: /home/imgbuilder/.bash_profile
     - text: |
         export GOPATH=/home/imgbuilder/go
         export PATH=${GOPATH}/bin:$PATH
     - require:
       - file: go_profile
+
+correct_ip:
+  file.sed:
+    - name: /home/imgbuilder/go/src/github.com/mitchellh/packer/builder/qemu/step_type_boot_command.go
+    - before: '"127.0.0.1",'
+    - after: '"10.0.2.2",'
+    - user: imgbuilder
+    - require:
+      - git: packer
+
+gox_import:
+  cmd.run:
+    - name: go get -u github.com/mitchellh/gox
+    - user: imgbuilder
+    - group: imgbuilder
+    - require:
+      - git: packer
+      - file: go_profile-activate
+
+use-old-ssh-until-higebus-branch-is-ready:
+  cmd.run:
+    - name: cd /home/imgbuilder/go/src/github.com/mitchellh/packer; git pull https://github.com/rasa/packer.git use-old-ssh-until-higebus-branch-is-ready
+    - user: imgbuilder
+    - group: imgbuilder
+    - require:
+      - git: packer
 
 packer_templates:
   file.recurse:
@@ -63,9 +92,9 @@ packer_templates:
     - user: imgbuilder
     - file_mode: 664
     - dir_mode: 775
+    - template: jinja
     - include_empty: True
     - group: libvirtd
-    #- template: jinja
 
 box_add_script:
   file.managed:
