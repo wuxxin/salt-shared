@@ -1,5 +1,6 @@
 include:
   - roles.imgbuilder.local-ruby
+  - .dirs
 
 vagrant_plugin_deps:
   pkg.installed:
@@ -32,7 +33,8 @@ vagrant_compile_plugin_{{ t }}:
       - pkg: vagrant_plugin_deps
       - cmd: default-local-ruby-imgbuilder
   cmd.run:
-    - name: cd {{ build_dir }}; bundle install; rake build; touch {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
+    - name: . .profile; cd {{ build_dir }}; bundle install; rake build; touch {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
+    - user: imgbuilder
     - unless: test -f {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
     - require:
       - git: vagrant_compile_plugin_{{ t }}
@@ -40,8 +42,8 @@ vagrant_compile_plugin_{{ t }}:
 vagrant_plugin_{{ t }}:
   cmd.run:
     - name: vagrant plugin install {{ build_dir }}/pkg/{{ t }}*.gem
-    - unless: vagrant plugin list | grep -q {{ t }}
     - user: imgbuilder
+    - unless: vagrant plugin list | grep -q {{ t }}
     - require:
       - cmd: vagrant_compile_plugin_{{ t }}
 
@@ -52,8 +54,8 @@ vagrant_plugin_{{ t }}:
 vagrant_plugin_{{ t }}:
   cmd.run:
     - name: vagrant plugin install {{ t }} 
-    - unless: vagrant plugin list | grep -q {{ t }}
     - user: imgbuilder
+    - unless: vagrant plugin list | grep -q {{ t }}
     - require:
       - pkg: vagrant
       - pkg: vagrant_plugin_deps

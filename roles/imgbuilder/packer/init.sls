@@ -40,6 +40,7 @@ packer:
       - git: packer
     - require:
       - file: go_profile-activate
+      - cmd: gox_import
 
 go_profile:
   file.managed:
@@ -56,9 +57,18 @@ go_profile-activate:
     - require:
       - file: go_profile
 
+gox_import:
+  cmd.run:
+    - name: go get -u github.com/mitchellh/gox
+    - user: imgbuilder
+    - group: imgbuilder
+    - require:
+      - git: packer
+      - file: go_profile-activate
+
 packer_templates:
   file.recurse:
-    - source: salt://roles/imgbuilder/packer/template
+    - source: salt://roles/imgbuilder/packer/templates
     - name: /mnt/images/templates/packer/
     - user: imgbuilder
     - file_mode: 664

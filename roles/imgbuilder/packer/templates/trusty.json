@@ -16,7 +16,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_plain.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_simple.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -44,7 +44,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_plain.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_simple.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -67,7 +67,7 @@
       "linux_script/base.sh",
       "linux_script/vagrant.sh",
       "linux_script/vmtools.sh",
-      "linux_scripts/grub.sh",
+      "linux_script/grub.sh",
       "linux_script/cleanup.sh",
       "linux_script/zerodisk.sh"
     ]

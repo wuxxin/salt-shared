@@ -27,3 +27,18 @@
     - require:
       - file: /home/imgbuilder/.vagrant.d
 
+default_provider_create:
+  file.managed:
+    - name: /home/imgbuilder/.profile
+    - user: imgbuilder
+    - group: imgbuilder
+    - require: 
+      - cmd: vagrant_plugin_vagrant-libvirt
+
+default_provider:
+  file.append:
+    - name: /home/imgbuilder/.profile
+    - text: |
+        export VAGRANT_DEFAULT_PROVIDER=libvirt
+    - require:
+      - file: default_provider_create

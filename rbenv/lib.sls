@@ -12,7 +12,7 @@ local-ruby-{{ user }}:
     - require:
       - pkg: rbenv-deps
   file.managed:
-    - name: {{ user_home }}/.profile
+    - name: /home/{{ user }}/.profile
     - user: {{ user }}
     - group: {{ user }}
     - require: 
