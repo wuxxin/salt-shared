@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
     # drivers are qemu (KVM/qemu), xen (Xen hypervisor), lxc (Linux Containers),
     # esx (VMware ESX), vmwarews (VMware Workstation) and more. Refer to
     # documentation for available drivers (http://libvirt.org/drivers.html).
-    libvirt.driver = "qemu"
+    libvirt.driver = "kvm"
 
     # The name of the server, where libvirtd is running.
     libvirt.host = ""
