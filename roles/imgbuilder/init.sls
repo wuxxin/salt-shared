@@ -13,4 +13,3 @@ include:
     - makedirs: True
     - require:
       - user: imgbuilder
-

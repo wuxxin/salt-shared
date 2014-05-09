@@ -43,13 +43,13 @@ packer:
 
 go_profile:
   file.managed:
-    - name: /home/imgbuilder/.bash_profile
+    - name: /home/imgbuilder/.profile
     - user: imgbuilder
     - group: imgbuilder
 
 go_profile-activate:
   file.append:
-    - name: /home/imgbuilder/.bash_profile
+    - name: /home/imgbuilder/.profile
     - text: |
         export GOPATH=/home/imgbuilder/go
         export PATH=${GOPATH}/bin:$PATH
