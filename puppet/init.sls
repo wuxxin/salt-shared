@@ -8,7 +8,7 @@ puppet:
     - require:
       - rvm: ruby-1.9.3
   pkg.installed:
-    - names:
+    - pkgs:
       - zlib1g-dev
       - libssl-dev
       - libreadline6-dev

@@ -51,43 +51,8 @@ default-ruby:
 {% else %}
 
 include:
-  - .user
   - rbenv
 
-local-ruby-{{ user }}:
-  rbenv.installed:
-    - name: ruby-2.0.0-p353
-    - default: True
-    - user: {{ user }}
-    - require:
-      - user: {{ user }}
-      - pkg: rbenv-deps
-  file.managed:
-    - name: {{ user_home }}/.bash_profile
-    - user: {{ user }}
-    - group: {{ user }}
-    - require: 
-      - rbenv: local-ruby-{{ user }}
-
-local-ruby-profile-{{ user }}:
-  file.append:
-    - name: /home/git/.bash_profile
-    - text: |
-        export PATH="$HOME/.rbenv/bin:$PATH"
-        eval "$(rbenv init -)"
-    - require:
-      - file: local-ruby-{{ user }}
-
-default-bundler-{{ user }}:
-  pkg.installed:
-    - name: bundler
-    - require: 
-      - cmd: local-ruby-profile-{{ user }}
-
-default-ruby-{{ user }}:
-  cmd.run:
-    - name: "echo 'ok, default-ruby-{{ user }}'"
-    - require:
-      - pkg: default-bundler-{{ user }}
+user-ruby('root', None)
 
 {% endif %} 

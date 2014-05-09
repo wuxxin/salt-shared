@@ -1,10 +1,10 @@
 # 
-# ruby deps
+# ruby build deps for using rbenv, and a macro for installing a rbenv ruby as a user
 # 
 
 rbenv-deps:
   pkg.installed:
-    - names:
+    - pkgs:
       - git
       - build-essential
       - openssl
