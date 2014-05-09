@@ -42,7 +42,9 @@ vagrant_plugin_deps:
       - pkg: vagrant
 
 
-{% for t in ["vagrant-libvirt", "sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", 
+{% x = ('vagrant-libvirt', 'https://github.com/pradels/vagrant-libvirt.git') %}
+
+{% for t in [(vagrant-libvirt", "sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", 
 "vagrant-bindfs", "vagrant-windows", "docker-provider", "gusteau"] %}
 
 vagrant_plugin_{{ t }}:
