@@ -16,7 +16,6 @@ vagrant_plugin_deps:
     "vagrant-bindfs",  "gusteau"] %} # "vagrant-windows", "docker-provider",
 {% set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] %}
 
-
 {% for t,s in git_plugins %}
 
 {% set build_dir="/home/imgbuilder/.build/"+ t %}
@@ -33,14 +32,14 @@ vagrant_compile_plugin_{{ t }}:
       - pkg: vagrant_plugin_deps
       - cmd: default-local-ruby-imgbuilder
   cmd.run:
-    - name: cd {{ build_dir }}; bundle install; touch {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
+    - name: cd {{ build_dir }}; bundle install; rake build; touch {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
     - unless: test -f {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
     - require:
       - git: vagrant_compile_plugin_{{ t }}
 
 vagrant_plugin_{{ t }}:
   cmd.run:
-    - name: vagrant plugin install  
+    - name: vagrant plugin install {{ build_dir }}/pkg/{{ t }}*.gem
     - unless: vagrant plugin list | grep -q {{ t }}
     - user: imgbuilder
     - require:
