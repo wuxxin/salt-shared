@@ -1,8 +1,8 @@
-{% macro user_ruby(user, ruby, default=True) %}
+{% macro default_local_ruby(user, ruby) %}
 
 {% set rubyver= '2.0.0-p353' if not ruby else ruby %}
 {% set user_home= salt['user.info'](user)['home'] %}
-
+{% set default=True %}
 
 local-ruby-{{ user }}:
   rbenv.installed:
@@ -34,7 +34,7 @@ local-ruby-bundler-{{ user }}:
     - require: 
       - file: local-ruby-profile-{{ user }}
 
-default-ruby-{{ user }}:
+default-local-ruby-{{ user }}:
   cmd.run:
     - name: "echo 'ok, default-ruby-{{ user }}'"
     - require:

@@ -1,8 +1,8 @@
 include:
   - .user
+  - .local-ruby
   - .packer
   - .vagrant
-  #- .local-ruby
 
 
 /mnt/images/templates/imgbuilder:

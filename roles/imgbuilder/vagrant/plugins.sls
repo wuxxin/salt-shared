@@ -1,3 +1,6 @@
+include:
+  - roles.imgbuilder.local-ruby
+
 vagrant_plugin_deps:
   pkg.installed:
     - pkgs:
@@ -9,22 +12,22 @@ vagrant_plugin_deps:
     - require:
       - pkg: vagrant
 
+{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", 
+    "vagrant-bindfs",  "gusteau"] %} # "vagrant-windows", "docker-provider",
+{% set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] %}
 
-{% gem-plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", 
-    "vagrant-bindfs", "vagrant-windows", "docker-provider", "gusteau"] %}
-{% git-plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] %}
 
+{% for t,s in git_plugins %}
 
-{% for t,s in git-plugins %}
-
-{% build_dir=/home/imgbuilder/.build/{{ t }} %}
+{% set build_dir="/home/imgbuilder/.build/"+ t %}
 
 vagrant_compile_plugin_{{ t }}:
-  git.installed:
+  git.latest:
     - name: {{ s }}
     - target: {{ build_dir }}
-    - unless: vagrant plugin list | grep -q {{ t }}
     - user: imgbuilder
+    - submodules: True
+    - unless: vagrant plugin list | grep -q {{ t }}
     - require:
       - pkg: vagrant
       - pkg: vagrant_plugin_deps
@@ -45,7 +48,7 @@ vagrant_plugin_{{ t }}:
 
 {% endfor %}
 
-{% for t in gem-plugins %}
+{% for t in gem_plugins %}
 
 vagrant_plugin_{{ t }}:
   cmd.run:
