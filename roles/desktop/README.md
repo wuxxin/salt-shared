@@ -29,7 +29,7 @@ Installs and configures features you usually want to have in a working desktop
     * buildozer installation (kivy - python-for-android - android-sdk, android-ndk buildchain)
     * ide: eclipse and idea
     * emulator:
-      * install all qemu variants
+      * install all qemu variants, install virt-manager
 
   * security:
     * install programms that have keychain support
