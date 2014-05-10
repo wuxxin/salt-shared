@@ -13,13 +13,11 @@ libvirtd:
       - python-spice-client-gtk
       - python-guestfs
       - libguestfs-tools
-
       - nbdkit
       - lvm2
       - multipath-tools
       - bridge-utils
       - vlan
-      - nfs-common
 {% if grains['os'] == 'Ubuntu' %}
     - require:
       - pkgrepo: libvirt_ppa_ubuntu

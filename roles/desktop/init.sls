@@ -11,7 +11,6 @@ include:
   - .chipcard
   - .vcs
   - .ubuntu
-  - .ubuntu.enable-java-integration
   - .graphics
   - .security
 
