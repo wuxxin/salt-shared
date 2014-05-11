@@ -1,8 +1,9 @@
 include:
   - remotefs
-  - .kvm
-  - .images
   - .kernel
+  - .grub
+  - .storage
+  - .network
 
 libvirt:
   pkg.installed:
@@ -23,10 +24,10 @@ libvirt:
       - multipath-tools
       - bridge-utils
       - vlan
-  file:
-    - managed
-    - name: /etc/sysconfig/libvirtd
-    - contents: 'LIBVIRTD_ARGS="--listen"'
+  file.replace:
+    - name: /etc/default/libvirt-bin
+    - pattern: '#?start_libvirtd=.+'
+    - repl: 'start_libvirtd="yes"'
     - require:
       - pkg: libvirt
   libvirt:

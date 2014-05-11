@@ -9,7 +9,7 @@ vm.zone_reclaim_mode:
   sysctl.present:
     - value: 0
 
-#
+# disable netfilter arptables on linux bridges
 net.bridge.bridge-nf-call-arptables:
   sysctl.present:
     - value: 0
