@@ -6,4 +6,5 @@ include:
   - .vector
   - .publishing
   - .ocr
+  - .video
 

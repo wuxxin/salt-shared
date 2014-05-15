@@ -70,7 +70,3 @@ buildozer-init:
       - file: link-sdk
       - file: link-ndk
 
-#  cmd.run:
-#    - name: . env/bin/activate; ./distribute.sh -m "openssl pil kivy"
-#    - cwd: {{ user_home }}/.buildozer/
-#    - user: {{ user }}
