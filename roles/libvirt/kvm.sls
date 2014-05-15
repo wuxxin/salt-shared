@@ -1,36 +1,4 @@
 
-libvirtd:
-  pkg.installed:
-    - pkgs:
-      - ubuntu-virt-server
-      - libvirt-bin
-      - qemu-kvm
-      - virt-viewer
-      - virt-manager
-      - virtinst
-      - virt-top
-      - python-libvirt
-      - python-spice-client-gtk
-      - python-guestfs
-      - libguestfs-tools
-
-      - nbdkit
-      - lvm2
-      - multipath-tools
-      - bridge-utils
-      - vlan
-      - nfs-common
-{% if grains['os'] == 'Ubuntu' %}
-    - require:
-      - pkgrepo: libvirt_ppa_ubuntu
-{% endif %}
-  group.present:
-    - require:
-      - pkg: libvirtd
-#  libvirt.keys:
-#    - require:
-#      - group: libvirtd
-
 stopped_libvirt_bin:
   service.dead:
     - name: libvirt-bin

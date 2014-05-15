@@ -10,11 +10,12 @@ Installs and configures features you usually want to have in a working desktop
 
   * voice: mumble and jitsi and skype (if enabled)
 
-  * Ubuntu specific:
-    * freedom: restricted extras (codecs), libcss
-    * power:  tlp and other power savings, (ubuntu): reenable suspend to disk
-    * ubuntu/unity tweaks:  some unity tweaks (and disable shopping lenses)
-      * disable apport
+  * roles.desktop.ubuntu:
+    * restricted extras (codecs), libcss
+    * power:  tlp
+    * sensor: psensor
+    * user: disable shopping lenses
+    * /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie, install ubuntu/unity tweaks program
 
   * graphics:
     * installs Pixel Software: gimp, krita, darktable

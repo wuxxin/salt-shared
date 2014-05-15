@@ -5,6 +5,7 @@ base-deps:
     - pkgs:
       - mc
       - unzip
+      - zip
       - cabextract
       - pv
       - ncdu
@@ -13,10 +14,11 @@ base-deps:
       - htop
       - iftop
       - iotop
-      - cpu-checker
       - dstat
+      - cpu-checker
       - iperf
-      - sox 
+      - hwinfo
+      - pciutils
       - socat
       - netcat
       - nethogs
@@ -24,4 +26,6 @@ base-deps:
       - links
       - elinks
       - jupp
+      - sox
+
 {% endif %}
