@@ -1,9 +1,9 @@
 include:
   - java
   - .user
-  - .restricted
   - .power
   - .emulator
+  - .terminal
   - .chat
   - .voice
   - .ftp
@@ -14,11 +14,12 @@ include:
   - .graphics
   - .security
 
+#  - .eclipse.user
 #  - .android
-#  - .kivy
-#  - .eclipse
+#  - .android.user
 #  - .idea
+#  - .kivy
+
 #  - .contiki-tres
 #  - .openwrt
-#  
 

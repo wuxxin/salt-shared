@@ -1,6 +1,6 @@
 video:
   pkg.installed:
-    pkgs:
+    - pkgs:
       - vlc
       - vlc-nox
 

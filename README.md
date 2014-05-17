@@ -44,3 +44,9 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
  * /win/*   : Windows specific salt states
 
 
+
+###Todo:
+ * add partner and extra repositories (also needed for skype)
+ * make pillar state install skype
+ * add supported languages packages install (one click at languages)
+ * apt-get install exfat-fuse exfat-utils

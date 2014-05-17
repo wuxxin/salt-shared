@@ -25,6 +25,7 @@ android-sdk:
     - archive_format: tar
     - tar_options: z
     - if_missing: {{ ANDROIDSDK }}
+{#
   file.directory:
     - name: {{ ANDROIDSDK }}
     - user: root
@@ -34,10 +35,11 @@ android-sdk:
         - group
     - require:
       - archive: android-sdk
+#}
   cmd.run:
-    - name: echo "Android-sdk: OK, refresh grains {{ salt['saltutil.refresh_modules']() }}"
+    - name: 'echo "Android-sdk: OK, refresh grains"'
     - require: 
-      - file: android-sdk
+      - archive: android-sdk
 
 android-sdk-update:
   cmd.run:
@@ -83,6 +85,7 @@ android-ndk:
     - archive_format: tar
     - tar_options: j
     - if_missing: {{ ANDROIDNDK }}
+{#
   file.directory:
     - name: {{ ANDROIDNDK }}
     - user: root
@@ -92,11 +95,13 @@ android-ndk:
         - group
     - require:
       - pkg: android-prereq
+    - watch:
       - archive: android-ndk
+#}
   cmd.run:
-    - name: echo "Android-ndk: OK, refresh grains {{ salt['saltutil.refresh_modules']() }}"
+    - name: 'echo "Android-ndk: OK"'
     - require: 
-      - file: android-ndk
+      - archive: android-ndk
 
 android-grain-ANDROIDNDK:
   module.run:

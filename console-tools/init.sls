@@ -17,7 +17,6 @@ base-deps:
       - dstat
       - cpu-checker
       - iperf
-      - hwinfo
       - pciutils
       - socat
       - netcat

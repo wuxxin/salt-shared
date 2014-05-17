@@ -70,3 +70,7 @@ buildozer-init:
       - file: link-sdk
       - file: link-ndk
 
+# generate apk signing key: keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000
+# sign apk: jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore my_application.apk alias_name
+# verify:  jarsigner -verify -verbose my_application.apk
+# zipalign: zipalign -v 4 your_project_name-unaligned.apk your_project_name.apk

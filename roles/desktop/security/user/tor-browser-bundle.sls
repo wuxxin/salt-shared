@@ -1,10 +1,10 @@
 {% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
 
-{% set bundle_version = '3.6' %}
+{% set bundle_version = '3.6.1' %}
 {% set bundle_locale = 'en-US' %}
 {% set bundle_root = user_home+ '/.local/tor-browser_'+ bundle_locale %}
 {% set bits = '64' if grains['osarch'][-2:] == '64' else '32' %}
-{% set bundle_hash = {'32': 'sha1=53c2a4858e3c287c89f91763038634be6ec70ace', '64': 'sha1=41dfccde709350b4071d7871ef25a6bdb94dedac'} %}
+{% set bundle_hash = {'32': 'sha1=53c2a4858e3c287c89f91763038634be6ec70ace', '64': 'sha1=5d3d28eab9fc1e79f1f0b0998045a5cbc97ebcf8'} %}
 
 tor-browser-bundle:
   archive.extracted:
