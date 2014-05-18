@@ -53,6 +53,13 @@ default-ruby:
 include:
   - rbenv
 
-user-ruby('root', None)
+{% from "rbenv/lib.sls" import default_local_ruby with context %}
+{{ default_local_ruby('root','') }}
+
+default-ruby:
+  cmd.run:
+    - name: "echo 'ok, default-ruby via default-local-ruby-root'"
+    - require:
+      - cmd: default-local-ruby-root
 
 {% endif %} 

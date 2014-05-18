@@ -11,9 +11,13 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
    * some states may work with other linux distros
  * Windows Platform: there is some support for windows and windows packages (using chocolatey as pkg manager)
 
- * documented Features:
-   * imgbuilder: use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
-   * developer desktop setup: look at roles/desktop/readme.md for details
+ * Features to look at:
+   * roles.imgbuilder:
+     * use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
+     * deploy these easy to setup vagrant machines as production machines and control them via saltstack
+   * roles.desktop:
+     * everything needed from a desktop base installation for developing (ubuntu 14.04)
+     * look at roles/desktop/readme.md for details
 
 ###How to start:
 
@@ -40,3 +44,9 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
  * /win/*   : Windows specific salt states
 
 
+
+###Todo:
+ * add partner and extra repositories (also needed for skype)
+ * make pillar state install skype
+ * add supported languages packages install (one click at languages)
+ * apt-get install exfat-fuse exfat-utils

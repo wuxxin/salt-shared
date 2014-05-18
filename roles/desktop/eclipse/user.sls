@@ -2,7 +2,7 @@ include:
   - roles.desktop.eclipse
 
 {% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
-{% from 'lib.sls' import eclipse-plugin, keytool-cert with context %}
+{% from 'roles/desktop/eclipse/lib.sls' import eclipse_plugin, keytool_cert with context %}
 
 {% set plugins= [
     ('shelled bash editor', 'https://sourceforge.net/projects/shelled/files/shelled/update/', 'net.sourceforge.shelled.feature.group'),
@@ -20,10 +20,10 @@ include:
 #  ('pydev', 'http://pydev.org/pydev_certificate.cer', 'md5=c852152cde986ede2afd78ccee8272f5'),
  
 {% for name,url,hash in certs %}
-{{ keytool-cert(user,name,url,hash) }}
+{{ keytool_cert(user,name,url,hash) }}
 {% endfor %}
 {% for name,url,group in plugins %}
-{{ eclipse-plugin(user,name,url,group) }}
+{{ eclipse_plugin(user,name,url,group) }}
 {% endfor %}
 
 eclipse-desktop-icon:

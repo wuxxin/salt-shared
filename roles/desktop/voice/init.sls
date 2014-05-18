@@ -1,5 +1,9 @@
 include:
   - .ppa
+{% if pillar['desktop.commercial.binary.status']|d('false') == 'present' %}
+  - .skype
+{% endif %}
+
 
 mumble:
   pkg.installed:
@@ -15,8 +19,3 @@ linphone:
   pkg:
     - installed
 
-{% if pillar['desktop.commercial.binary.status']|d('false') == 'present' %}
-skype:
-  pkg:
-    - installed
-{% endif %}
