@@ -15,7 +15,8 @@ network-interface-{{ item }}:
     - name: {{ item }}
 {% for sub, subvalue in data.iteritems() %}
     - {{ sub }}: {{ subvalue }}
-{% endfor %}{% endfor %}
+{% endfor %}
+{% endfor %}
 
 {% for interface, data in routes.iteritems() %}
 network-route-{{ interface }}:
