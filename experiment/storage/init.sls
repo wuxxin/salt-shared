@@ -19,22 +19,26 @@ parted:
       - pkg: parted
 
 {% if data.parts|d('') %}
+{% set x=1 %}
+
 {% for part in data.parts %}
 
 {% set flags= [] %}
 {% if part.flags is defined %}
 {% for flagname in part.flags %}
-{% do flags.append("set "+ part.number|string+ " "+ flagname+ " on") %}
+{% do flags.append("set "+ x+ " "+ flagname+ " on") %}
 {% endfor %}
 {% endif %}
 
-"parted-{{ item }}-p{{ part.number|string }}":
+"parted-{{ item }}-{{ x }}-{{ part.name }}":
   cmd.run:
-    - name: parted --align optimal --script {{ item }} mkpart P{{ part.number|string }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
-    - onlyif: 'test -b {{ item }}{{ part.number|string }})"'
+    - name: parted --align optimal --script {{ item }} mkpart {{ part.name }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
+    - unless: 'test -b {{ item }}{{ x }})"'
     - require:
       - pkg: parted
       - cmd: "parted-{{ item }}"
+
+{% do x.add(1) %}
 
 {% endfor %}
 {% endif %}
