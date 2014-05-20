@@ -3,3 +3,4 @@ terminal-apps:
     - pkgs:
       - lxterminal
       - terminator
+

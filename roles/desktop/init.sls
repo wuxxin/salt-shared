@@ -14,6 +14,15 @@ include:
   - .graphics
   - .security
 
+
+#sysdig:
+#  pkg:
+#    - installed
+
+#minidlna:
+#  pkg:
+#    - installed
+
 #  - .eclipse.user
 #  - .android
 #  - .android.user
