@@ -15,6 +15,7 @@ vagrant_plugin_deps:
 
 {% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", 
     "vagrant-bindfs",  "gusteau"] %} # "vagrant-windows", "docker-provider",
+{# set git_plugins = [] #}
 {% set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] %}
 
 {% for t,s in git_plugins %}

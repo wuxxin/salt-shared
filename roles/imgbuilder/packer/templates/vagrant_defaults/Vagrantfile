@@ -14,16 +14,21 @@ Vagrant.configure("2") do |config|
     libvirt.driver = "kvm"
 
     # The name of the server, where libvirtd is running.
-    libvirt.host = ""
+    #libvirt.host = "localhost"
 
     # If use ssh tunnel to connect to Libvirt.
-    libvirt.connect_via_ssh = false
+    #libvirt.connect_via_ssh = false
 
     # The username and password to access Libvirt. Password is not used when
     # connecting via ssh.
-    libvirt.username = "root"
+    #libvirt.username = "root"
     #libvirt.password = "secret"
 
+    #libvirt.socket = "/var/run/libvirt/libvirt-sock"
+
+    # overrides above
+    libvirt.uri = "qemu:///system"
+    
     # Libvirt storage pool name, where box image and instance snapshots will
     # be stored.
     libvirt.storage_pool_name = "default"
