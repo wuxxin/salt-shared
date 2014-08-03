@@ -30,19 +30,7 @@ apt-cacher-ng:
       - service: apt-cacher-ng
 {% endif %}
 
-symlink-to-cache:
-  file.directory:
-    - name: /mnt/cache/apt-cacher-ng
-    - user: apt-cacher-ng
-    - group: apt-cacher-ng
-    - dir_mode: 2755
-  cmd.run:
-    - name: rm -r /var/cache/apt-cacher-ng; ln -s -T /mnt/cache/apt-cacher-ng /var/cache/apt-cacher-ng
-    - unless: test -L /var/cache/apt-cacher-ng
-    - require:
-      - file: symlink-to-cache
-    - watch_in:
-      - service: apt-cacher-ng
-
-
-
+{% if pillar.get('apt-cacher-ng:custom_storage') != '' %}
+{% from 'storage/lib.sls' import storage_setup with context %}
+{{ storage_setup(pillar.get('apt-cacher-ng:custom_storage')) }}
+{% endif %}

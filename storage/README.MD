@@ -13,7 +13,7 @@ Features:
 
 callable via:
 
-{% from 'experiment/storage/lib.sls' import storage_setup with context %}
+{% from 'storage/lib.sls' import storage_setup with context %}
 {{ storage_setup(data) }}
 
 sample data: example.pillar
