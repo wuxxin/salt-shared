@@ -14,6 +14,9 @@ include:
   - .graphics
   - .security
 
+cdargs:
+  pkg:
+    - installed
 
 #sysdig:
 #  pkg:

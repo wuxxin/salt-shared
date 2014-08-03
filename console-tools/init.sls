@@ -14,6 +14,7 @@ base-deps:
       - htop
       - iftop
       - iotop
+      - blktrace
       - dstat
       - cpu-checker
       - iperf
