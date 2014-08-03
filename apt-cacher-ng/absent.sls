@@ -1,6 +1,6 @@
 apt-cacher-ng:
   pkg:
-    - absent
+    - removed
   service:
     - dead
     - require:
