@@ -4,35 +4,35 @@
 
 {% macro storage_setup(data) %}
 
-{% if data.parted %}
+{% if data['parted'] is defined %}
 {{ storage_parted(data.parted) }}
 {% endif %}
 
-{% if data.mdadm %}
+{% if data['mdadm'] is defined %}
 {{ storage_mdadm(data.mdadm) }}
 {% endif %}
 
-{% if data.lvm %}
+{% if data['lvm'] is defined %}
 {{ storage_lvm(data.lvm) }}
 {% endif %}
 
-{% if data.format %}
+{% if data['format'] is defined %}
 {{ storage_format(data.format) }}
 {% endif %}
 
-{% if data.mount %}
+{% if data['mount'] is defined %}
 {{ storage_mount(data.mount) }}
 {% endif %}
 
-{% if data.swap %}
+{% if data['swap'] is defined %}
 {{ storage_swap(data.swap) }}
 {% endif %}
 
-{% if data.directories %}
+{% if data['directories'] is defined %}
 {{ storage_directories(data.directories) }}
 {% endif %}
 
-{% if data.relocate %}
+{% if data['relocate'] is defined %}
 {{ storage_relocate(data.relocate) }}
 {% endif %}
 
@@ -119,7 +119,7 @@ lvm2:
   pkg.installed
 
 # lvm - pv
-{% if input_data.pv %}
+{% if input_data.pv is defined %}
 {% for item in input_data.pv %}
 "lvm-pv-{{ item }}":
   lvm.pv_present:
@@ -130,7 +130,7 @@ lvm2:
 {% endif %}
 
 # lvm - vg
-{% if input_data.vg %}
+{% if input_data.vg is defined %}
 {% for item, data in input_data.vg.iteritems() %}
 "lvm-vg-{{ item }}":
   lvm.vg_present:
@@ -148,7 +148,7 @@ lvm2:
 
 # lvm - lv
 
-{% if input_data.lv %}
+{% if input_data.lv is defined %}
 {% for item, data in input_data.lv.iteritems() %}
 "lvm-lv-{{ item }}":
   lvm.lv_present:
@@ -216,28 +216,29 @@ lvm2:
 
 {% for item, data in input_data.iteritems() %}
 
-{% if input_data[item]['childs']|d({}) %}
-{% for child in input_data[item]['childs'] %}
+{% if input_data[item]['names']|d({}) %}
+{% for child in input_data[item]['names'] %}
 
-{{ item }}/{{ child }}-mkdir:
+"{{ item }}/{{ child }}-mkdir":
  file.directory:
-    - name: {{ item }}
+    - name: {{ item }}/{{ child }}
+    - makedirs: True
 {% if input_data[item]['options']|d({}) %}
-{% for option, optvalue in input_data[item]['options'].iteritems() %}
-    - {{ option }}{% if optvalue|d('') %}: {{ optvalue }}{% endif %}
+{% for option in input_data[item]['options'] %}
+    - {{ option }}
 {% endfor %}
 {% endif %}
 
 {% for a in ('onlyif', 'unless') %}
-{% if input_data[item][a] %}
-    - {{ a }}: input_data[item][a]
+{% if input_data[item][a] is defined %}
+    - {{ a }}: {{ input_data[item][a] }}
 {% endif %}
 {% endfor %}
 
 {% for a in ('watch_in', 'require_in', 'require', 'watch') %}
-{% if input_data[item][a] %}
+{% if input_data[item][a] is defined %}
     - {{ a }}:
-      input_data[item][a]
+      {{ input_data[item][a] }}
 {% endif %}
 {% endfor %}
 
@@ -257,7 +258,7 @@ lvm2:
 
 {% for item, data in input_data.iteritems() %}
 
-{{ item }}-relocate:
+{{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
 {% if data['copy_content']|d(true) %}
     - name: x={{ item }}; if test -d $x; then cp -r $x/* {{ data['destination'] }}; rm -r $x; fi; ln -s -T {{ data['destination'] }} {{ item }}
@@ -268,7 +269,7 @@ lvm2:
     - onlyif: test -d {{ data['destination'] }}
 
 {% for a in ('watch_in', 'require_in', 'require', 'watch') %}
-{% if input_data[item][a] %}
+{% if input_data[item][a] is defined %}
     - {{ a }}:
       - input_data[item][a]
 {% endif %}

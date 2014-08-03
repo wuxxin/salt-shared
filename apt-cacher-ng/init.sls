@@ -15,7 +15,7 @@ apt-cacher-ng:
     - require:
       - pkg: apt-cacher-ng
 
-{% if pillar.get('apt-cacher-ng:bindaddress') != '' %}
+{% if salt['pillar.get']('apt-cacher-ng:bindaddress', false) %}
 /etc/apt-cacher-ng/acng.conf:
   file.replace:
     - pattern: "^.*BindAddress:.*$"
@@ -30,7 +30,7 @@ apt-cacher-ng:
       - service: apt-cacher-ng
 {% endif %}
 
-{% if pillar.get('apt-cacher-ng:custom_storage') != '' %}
+{% if salt['pillar.get']('apt-cacher-ng:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
-{{ storage_setup(pillar.get('apt-cacher-ng:custom_storage')) }}
+{{ storage_setup(salt['pillar.get']('apt-cacher-ng:custom_storage')) }}
 {% endif %}

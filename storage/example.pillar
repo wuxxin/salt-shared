@@ -83,30 +83,18 @@ storage:
   directories:
     /mnt/images:
       names:
-        "default"
-        "templates"
-        "iso"
-        "tmp"
+        - "default"
+        - "templates"
+        - "iso"
+        - "tmp"
       options:
         - group: libvirtd
         - user: libvirt-qemu
         - dir_mode: 775
         - file_mode: 664
       onlyif: mountpoint -q /mnt/images
-      # onlyif: xxx
-      # unless: xxx
-      # require:
-      #   what: ever
-      # watch:
-      # watch_in:
-      # require_in:
 
-   relocate:
-      /var/lib/libvirt/images:
-        destination: /mnt/images/default
-        copy_content: True
-        # require:
-        #   what: ever
-        # watch:
-        # watch_in:
-        # require_in:
+  relocate:
+    /var/lib/libvirt/images:
+      destination: /mnt/images/default
+      copy_content: True
