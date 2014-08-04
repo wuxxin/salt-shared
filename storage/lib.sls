@@ -12,6 +12,10 @@
 {{ storage_mdadm(data.mdadm) }}
 {% endif %}
 
+{% if data['crypt'] is defined %}
+{{ storage_crypt(data.crypt) }}
+{% endif %}
+
 {% if data['lvm'] is defined %}
 {{ storage_lvm(data.lvm) }}
 {% endif %}
@@ -106,6 +110,29 @@ mdadm:
 {% endfor %}
     - require:
       - pkg: mdadm
+{% endfor %}
+
+{% endmacro %}
+
+
+# crypt
+#######
+{% macro storage_lvm(input_data) %}
+
+{% for item, data in input_data.iteritems() %}
+
+{{ item }}-luks-format:
+  cmd.run:
+    - unless: cryptsetup luksUUID {{ item }}
+    - name: echo "{{ data['password'] }}" | cryptsetup luksFormat {{ item }}
+
+{{ item }}-luks-open:
+  cmd.run:
+    - unless: stat {{ data['target'] }}
+    - name: echo "{{ data['password'] }}" | cryptsetup luksOpen {{ item }} {{ data['target'] }}
+    - require:
+      - cmd: {{ item }}-luks-format
+
 {% endfor %}
 
 {% endmacro %}

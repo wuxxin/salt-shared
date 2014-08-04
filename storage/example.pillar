@@ -34,6 +34,11 @@ storage:
       - /dev/vdc{{ b }}
 {% endfor %}
 
+  crypt:
+    "/dev/md1":
+      password: "my-useless-password"
+      target: "/dev/mapper/cryptlvm"
+
   lvm:
     pv:
       - /dev/md1

@@ -16,6 +16,8 @@ for x in `virsh dumpxml --inactive orion | xmlstarlet sel -I -t -m "domain//disk
    ./snapshot start $vg $vn ${vn}_snap $parts; 
 done
 
+  do not mount volumes, but start a backup domain with attached volumes, backup boot volume is sdh
+
   execute for a in backup.volumes: lvm create -s name_of(a).
   execute for a in snapshot(backup.volumes): add devices of partitions
   execute for a in partitions(backup.partitions): mount them readonly
