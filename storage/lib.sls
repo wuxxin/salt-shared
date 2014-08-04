@@ -78,7 +78,7 @@ parted:
 "parted-{{ item }}-{{ x }}-{{ part.name }}":
   cmd.run:
     - name: parted --align optimal --script {{ item }} mkpart {{ part.name }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
-    - unless: 'test -b {{ item }}{{ x }})"'
+    - unless: 'test -b {{ item }}{{ x }}'
     - require:
       - pkg: parted
       - cmd: "parted-{{ item }}"
@@ -117,7 +117,10 @@ mdadm:
 
 # crypt
 #######
-{% macro storage_lvm(input_data) %}
+{% macro storage_crypt(input_data) %}
+
+cryptsetup:
+  pkg.installed
 
 {% for item, data in input_data.iteritems() %}
 
@@ -125,6 +128,8 @@ mdadm:
   cmd.run:
     - unless: cryptsetup luksUUID {{ item }}
     - name: echo "{{ data['password'] }}" | cryptsetup luksFormat {{ item }}
+    - require:
+      - pkg: cryptsetup
 
 {{ item }}-luks-open:
   cmd.run:
@@ -132,6 +137,7 @@ mdadm:
     - name: echo "{{ data['password'] }}" | cryptsetup luksOpen {{ item }} {{ data['target'] }}
     - require:
       - cmd: {{ item }}-luks-format
+      - pkg: cryptsetup
 
 {% endfor %}
 

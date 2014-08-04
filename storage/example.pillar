@@ -37,15 +37,15 @@ storage:
   crypt:
     "/dev/md1":
       password: "my-useless-password"
-      target: "/dev/mapper/cryptlvm"
+      target: "cryptlvm"
 
   lvm:
     pv:
-      - /dev/md1
+      - /dev/mapper/cryptlvm
     vg:
       vg0:
         devices:
-          - /dev/md1
+          - /dev/mapper/cryptlvm
     lv:
       host_root:
         vgname: vg0
