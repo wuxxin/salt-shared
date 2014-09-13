@@ -1,3 +1,6 @@
+include:
+  - .ppa
+
 chat:
   pkg.installed:
     - pkgs:
@@ -10,7 +13,7 @@ chat:
       - pidgin-themes
       - pidgin-skype
       - pidgin-otr
+      - pidgin-whatsapp
       - bitlbee
-
-
-
+    - require:
+      - pkgrepo: whatsapp-ppa

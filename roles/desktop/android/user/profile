@@ -1,5 +1,6 @@
 export ANDROIDSDK={{ grains['ANDROIDSDK'] }}
+export ANDROIDAPI={{ grains['ANDROIDAPI'] }}
 export ANDROIDNDK={{ grains['ANDROIDNDK'] }}
 export ANDROIDNDKVER={{ grains['ANDROIDNDKVER'] }}
-export ANDROIDAPI={{ grains['ANDROIDAPI'] }}
+export ANDROID_TARGET={{ grains['ANDROID_TARGET'] }}
 export PATH=${PATH}:${ANDROIDSDK}/tools:${ANDROIDSDK}/platform-tools

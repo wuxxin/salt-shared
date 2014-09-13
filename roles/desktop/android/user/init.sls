@@ -23,3 +23,11 @@ android-modify-user-profile:
  #     - cmd: android-sdk
  #     - cmd: android-ndk
 
+
+android-create-avd:
+  cmd.run:
+    - name: 'echo -en "no\n" | android create avd --force --snapshot -n test -t android-19'
+
+android-run-avd:
+  cmd.run:
+    - name: 'emulator -gpu on -memory 1024 @test'

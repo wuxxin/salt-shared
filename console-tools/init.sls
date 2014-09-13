@@ -27,5 +27,7 @@ base-deps:
       - elinks
       - jupp
       - sox
+      - xmlstarlet
+      - hxselect
 
 {% endif %}

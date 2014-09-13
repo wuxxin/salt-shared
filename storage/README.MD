@@ -3,8 +3,9 @@ setup harddisk storage
 
 Features:
  * (gpt/mbr) partition creation
- * mdadm creation
- * lvm creation
+ * mdadm raid creation
+ * luks partition creation
+ * lvm logical volumes creation
  * format partitions
  * mount partitions
  * mount swap
