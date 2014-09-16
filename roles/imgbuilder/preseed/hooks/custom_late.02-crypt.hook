@@ -1,0 +1,66 @@
+#!/bin/sh
+
+. /usr/share/debconf/confmodule
+
+logger -t custom_late.sh "modify and update initramfs cryptroot script to make ssh unlock working again"
+
+mkdir -p /target/etc/initramfs-tools/hooks
+cat > /target/etc/initramfs-tools/hooks/cryptroot-patch << ENDOFFILE
+#!/bin/sh -e
+
+PREREQS=""
+
+prereqs() { echo "$PREREQS"; }
+
+case "\$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+if [ "$BUSYBOX" = "n" ] || [ ! -e ${BUSYBOXDIR}/busybox ]; then
+    copy_exec /bin/patch
+fi
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/hooks/cryptroot-patch
+
+mkdir -p /target/etc/initramfs-tools/scripts/init-premount/
+cat > /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch << ENDOFFILE
+#!/bin/sh
+
+PREREQ="udev"
+prereqs()
+{
+        echo "$PREREQ"
+}
+case "\$1" in
+# get pre-requisites
+prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+busybox uudecode << EOF -o /dev/stdout | gzip -d| patch "\$(dirname \$0)/../local-top/cryptroot"
+begin-base64 644 /dev/stdout
+H4sIAOtT8VMAA62Q0U6DMBSGr8dTnDTEQDIC1gnOye58BK+cybA7jAZWSNtd
+LMZ3t6VhVqJ3Xjb9z3e+89N8XdEiC7awWDB5GXSLl0q1Q6VUSV5E17OWiyPo
+BuHAVQvhGFL9WTKEyL10JY+o4514Fhol2NmhkZXCRyABLW4ZLeiSFnfBk1ly
+3fI/+CRJRncPG0aD5ELXQMLZRSQmP8PXS63nyjjmB1rcO89v4i9AErsQdgpn
+ccUkH3RJ0o6/p+4c1OchnRzMJlv5ekkfVqMNr+EVEuHRHYLAG2xsNcJJn9qa
+1z0kJ8jyLIM538JtwIUjiECiKvdehSXxCyXgdT19uReBnaMsZkp+A3vYTClk
+jfESaL4/zNJPAts/9SCGG4jHwZoHX2Fi3WB/AgAA
+====
+EOF
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch
+
+logger -t custom_late.sh "install dropbear, update-initramfs in target"
+apt-install dropbear
+in-target update-initramfs -k all -c
+

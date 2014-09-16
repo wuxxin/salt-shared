@@ -1,0 +1,17 @@
+#!/bin/sh
+
+logger -t custom_late.sh "in the late hook"
+
+# copy authorized_keys of ssh installer
+cd /target/home/*/
+mkdir .ssh
+chmod 0700 .ssh
+if test -f /.ssh/authorized_keys; then
+    logger -t custom_late.sh "copy authorized_keys to user/.ssh/"
+    cp /.ssh/authorized_keys .ssh/authorized_keys
+fi
+cd /
+
+logger -t custom_late.sh "make passwordless sudo"
+sed -i 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/' /target/etc/sudoers
+

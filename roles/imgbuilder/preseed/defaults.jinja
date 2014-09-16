@@ -1,0 +1,76 @@
+{% load_yaml as template %}
+
+{% set architecture= "amd64" %}
+{% set hash= "md5=35f591c65c83b19220bdf41d9c26e5da" %}
+{% set suite= "trusty" %}
+
+suite: {{ suite }}
+architecture: {{ architecture }}
+
+source: http://archive.ubuntu.com/ubuntu/dists/{{ suite }}/main/installer-{{ architecture }}/current/images/netboot/netboot.tar.gz
+source_hash: {{ hash }}
+initrd: ubuntu-installer/{{ architecture }}/initrd.gz
+kernel: ubuntu-installer/{{ architecture }}/linux
+
+cmdline: 'DEBCONF_DEBUG=5 ro hostname={{ suite }} auto=true priority=critical debconf/frontend=noninteractive'
+
+templates: 'salt://roles/imgbuilder/preseed/templates'
+hooks: 'salt://roles/imgbuilder/preseed/hooks'
+target: '/mnt/images/templates/imgbuilder/preseed'
+
+disks: /dev/vda
+diskpassword: {{ salt['cmd.run']('pwgen -s 16 1') }}
+
+username: vagrant
+hostname: {{ suite }}-default
+domainname: in.ep3.at
+password: {{ salt['cmd.run']('pwgen -s 13 1') }}
+netcfg: 
+  ip: ''
+  netmask: ''
+  gateway: ''
+  dns: ''
+  pointopoint: ''
+
+#additional_udeb:
+#  - 
+
+additional_layers:
+  - "salt://roles/imgbuilder/preseed/overlay"
+
+apt_proxy_mirror: "http://192.168.121.1:3142/"
+
+custom_files:
+  # - (,)
+
+default_preseed: preseed-custom.cfg
+
+preseed_list:
+{% set p_default=('base.cfg', 
+    'user.cfg', 'locale.cfg', 'package-setup.cfg', 
+    'tasks.cfg', 'apt-mirror.cfg', 'partman-base.cfg') %}
+
+{% for a in ('', '-http') %}
+  - preseed-custom{{ a }}.cfg:
+{% for p in p_default %}
+    - {{ p }}
+{% endfor %}
+    - custom_early{{ a }}.cfg
+    - custom_late{{ a }}.cfg
+  - preseed-custom{{ a }}-console.cfg:
+{% for p in p_default %}
+    - {{ p }}
+{% endfor %}
+    - custom_early{{ a }}.cfg
+    - custom_late{{ a }}.cfg
+    - network-console.cfg
+{% endfor %}
+{% for a in ('plain', 'simple', 'lvm') %}
+  - preseed-{{ a }}.cfg:
+{% for p in p_default %}
+    - {{ p }}
+{% endfor %}
+    - partman-{{ a }}.cfg
+{% endfor %}
+
+{% endload %}
