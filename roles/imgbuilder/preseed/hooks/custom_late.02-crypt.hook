@@ -5,14 +5,14 @@
 logger -t custom_late.sh "modify and update initramfs cryptroot script to make ssh unlock working again"
 
 mkdir -p /target/etc/initramfs-tools/hooks
-cat > /target/etc/initramfs-tools/hooks/cryptroot-patch << ENDOFFILE
+cat > /target/etc/initramfs-tools/hooks/cryptroot-patch << "ENDOFFILE"
 #!/bin/sh -e
 
 PREREQS=""
 
 prereqs() { echo "$PREREQS"; }
 
-case "\$1" in
+case "$1" in
     prereqs)
     prereqs
     exit 0
@@ -21,15 +21,14 @@ esac
 
 . /usr/share/initramfs-tools/hook-functions
 
-if [ "$BUSYBOX" = "n" ] || [ ! -e ${BUSYBOXDIR}/busybox ]; then
-    copy_exec /bin/patch
-fi
+copy_exec /usr/bin/patch
+copy_exec /usr/bin/dirname
 
 ENDOFFILE
 chmod +x /target/etc/initramfs-tools/hooks/cryptroot-patch
 
 mkdir -p /target/etc/initramfs-tools/scripts/init-premount/
-cat > /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch << ENDOFFILE
+cat > /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch << "ENDOFFILE"
 #!/bin/sh
 
 PREREQ="udev"
@@ -37,7 +36,7 @@ prereqs()
 {
         echo "$PREREQ"
 }
-case "\$1" in
+case "$1" in
 # get pre-requisites
 prereqs)
         prereqs
@@ -45,22 +44,48 @@ prereqs)
         ;;
 esac
 
-busybox uudecode << EOF -o /dev/stdout | gzip -d| patch "\$(dirname \$0)/../local-top/cryptroot"
-begin-base64 644 /dev/stdout
-H4sIAOtT8VMAA62Q0U6DMBSGr8dTnDTEQDIC1gnOye58BK+cybA7jAZWSNtd
-LMZ3t6VhVqJ3Xjb9z3e+89N8XdEiC7awWDB5GXSLl0q1Q6VUSV5E17OWiyPo
-BuHAVQvhGFL9WTKEyL10JY+o4514Fhol2NmhkZXCRyABLW4ZLeiSFnfBk1ly
-3fI/+CRJRncPG0aD5ELXQMLZRSQmP8PXS63nyjjmB1rcO89v4i9AErsQdgpn
-ccUkH3RJ0o6/p+4c1OchnRzMJlv5ekkfVqMNr+EVEuHRHYLAG2xsNcJJn9qa
-1z0kJ8jyLIM538JtwIUjiECiKvdehSXxCyXgdT19uReBnaMsZkp+A3vYTClk
-jfESaL4/zNJPAts/9SCGG4jHwZoHX2Fi3WB/AgAA
-====
+patch "$(dirname $0)/../local-top/cryptroot" << "EOF"
+--- cryptsetup-1.6.1/debian/initramfs/cryptroot-script	2013-11-01 17:57:02.000000000 +0100
++++ cryptroot	2014-06-24 11:24:49.540304681 +0200
+@@ -247,20 +247,24 @@
+ 			/bin/sleep 3
+ 		fi
+ 
++		cryptkeyaskpass="Unlocking the disk $cryptsource ($crypttarget)\nEnter passphrase: "
+ 		if [ -z "$cryptkeyscript" ]; then
+-			cryptkey="Unlocking the disk $cryptsource ($crypttarget)\nEnter passphrase: "
++			cryptkey="$(printf "$cryptkeyaskpass")"
++			cryptkeyaskpass=""
+ 			if [ -x /bin/plymouth ] && plymouth --ping; then
+ 				cryptkeyscript="plymouth ask-for-password --prompt"
+-				cryptkey=$(printf "$cryptkey")
+-			else
+-				cryptkeyscript="/lib/cryptsetup/askpass"
+ 			fi
+ 		fi
+ 
+-
+ 		if [ ! -e "$NEWROOT" ]; then
+-			if ! crypttarget="$crypttarget" cryptsource="$cryptsource" \
+-			     $cryptkeyscript "$cryptkey" | $cryptcreate --key-file=- ; then
++			if [ -n "$cryptkeyscript" ] ; then
++				mkfifo -m 0600 /lib/cryptsetup/passfifo
++				( ( res=`crypttarget="$crypttarget" cryptsource="$cryptsource" \
++					$cryptkeyscript "$cryptkey"` ;\
++					echo -ne "${res}" > /lib/cryptsetup/passfifo ) & )
++			fi
++			if ! crypttarget="$crypttarget" cryptsource="$cryptsource"\
++				/lib/cryptsetup/askpass "$cryptkeyaskpass" | $cryptcreate --key-file=- ; then
+ 				message "cryptsetup: cryptsetup failed, bad password or options?"
+ 				continue
+ 			fi
 EOF
 
 ENDOFFILE
+
 chmod +x /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch
 
-logger -t custom_late.sh "install dropbear, update-initramfs in target"
+logger -t custom_late.sh "install dropbear, copy /.ssh/authorized_keys, update-initramfs in target"
 apt-install dropbear
+cp /.ssh/authorized_keys /target/etc/initramfs-tools/root/.ssh/authorized_keys
 in-target update-initramfs -k all -c
-

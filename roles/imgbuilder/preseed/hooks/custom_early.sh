@@ -12,10 +12,12 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
         # if activated: watch daemon that reboots the system after reboot.seconds,
         # must be killed by hand if activated
         logger -t custom_early.sh "activated automatic reboot in `cat /reboot.seconds` seconds"
-        /watch `cat /reboot.seconds` &
+        chmod 0755 /watch
+        /watch `cat /reboot.seconds` < /dev/null &>/dev/null &
     fi
 
     if test "$cmd" = "fetch"; then
+        logger -t custom_early.sh "fetch custom.lst and all files included in it"
         preseed-fetch /custom/custom.lst /tmp/custom.lst
         for a in `/tmp/custom.lst`; do
             preseed-fetch $a /tmp/`basename $a`
@@ -27,6 +29,7 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
 
     # write all parameter to /tmp/custom.env
     if test "$#" -ne 0; then
+        logger -t custom_early.sh "write /tmp/custom.env with startup parameter of custom_early.sh"
         while test "$#" -ne 0; do
             echo "$1" >> /tmp/custom.env
             shift

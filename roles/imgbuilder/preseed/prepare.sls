@@ -2,7 +2,9 @@
 
 {% do settings.update({'custom_files':(
     ('/.ssh/authorized_keys', 'salt://roles/imgbuilder/preseed/vagrant.pub'),
-    ('/watch', 'salt://roles/imgbuilder/preseed/watch'))}) %}
+    ('/reboot.seconds', 'salt://roles/imgbuilder/preseed/reboot.seconds'),
+    ('/watch', 'salt://roles/imgbuilder/preseed/watch')
+    )}) %}
 {% do settings.update({'default_preseed': 'preseed-custom-console.cfg'}) %}
 {% do settings.update(
     {'cmdline': 'DEBCONF_DEBUG=5 ro hostname=testing priority=critical debconf/frontend=noninteractive'}) %}

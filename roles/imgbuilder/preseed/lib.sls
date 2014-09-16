@@ -101,17 +101,36 @@ debs-udeb-install:
 {% endif %}
 
 # copy additional layers
+{% if cs.additional_layers %}
+{% set tmp_layers="/mnt/images/tmp/initrd-"+ cs.suite+ "-"+ cs.architecture+ "-layers" %}
+
 {% for l in cs.additional_layers %}
-overlay-install-{{ l }}:
-  cmd.run:
-sdfgsfgklj replace with tar because extract does not want already populated dir
-    - name: tar xzf {{ l }}{{ tmp_target }}
-    - source: {{ l }}
+"clean-tmpdir-{{ l }}":
+  file.absent:
+    - name: {{ tmp_layers }}
+
+"mkdir-tmpdir-{{ l }}":
+  file.directory:
+    - name: {{ tmp_layers }}/
     - user: imgbuilder
     - group: imgbuilder
-    - archive_format: tar
-    - tar_options: z
+    - makedirs: true
+
+"overlay-install-{{ l }}":
+  file.managed:
+    - source: {{ l }}
+    - name: {{ tmp_layers }}/{{ salt['cmd.run']('basename '+ l) }}
+    - user: imgbuilder
+    - group: imgbuilder
+  cmd.run:
+    - name: tar xzf {{ tmp_layers }}/{{ salt['cmd.run']('basename '+ l) }} --overwrite --directory {{ tmp_target }}
 {% endfor %}
+
+"clean-tmpdir-done":
+  file.absent:
+    - name: {{ tmp_layers }}
+{% endif %}
+
 
 # add custom hook dir and scripts
 add-hooks:

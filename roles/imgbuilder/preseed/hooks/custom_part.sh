@@ -16,6 +16,11 @@ if test -f /tmp/custom.env; then
   . /tmp/custom.env
 fi
 
+SYSTEM_NAME=${VG_NAME}
+if test -n "$diskpassword"; then
+    SYSTEM_NAME=luks_${VG_NAME}
+fi
+
 
 case "$1" in
   partman)  
@@ -53,19 +58,17 @@ case "$1" in
       parted -s $disk -- set 2 boot on
       parted -s $disk -- set 2 raid on
       parted -s $disk -- mkpart reserved 256Mib ${RESERVED_END}
-      parted -s $disk -- mkpart ${VG_NAME} ${RESERVED_END} 100%
+      parted -s $disk -- mkpart ${SYSTEM_NAME} ${RESERVED_END} 100%
       parted -s $disk -- set 4 raid on
     done
 
     if [ $DISK_COUNT -ge 2 ]; then
-      BOOT=/dev/md0
-      RAW_SYSTEM_NAME=md1
-      RAW_SYSTEM_DEV=/dev/${RAW_NAME}
-      SYSTEM_NAME=${VG_NAME}
+      apt-install mdadm
 
-      if test -n "$diskpassword"; then
-          SYSTEM_NAME=luks_${VG_NAME}
-      fi
+      BOOT=/dev/md0
+      RAW_SYSTEM_NAME=${SYSTEM_NAME}
+      RAW_SYSTEM_DEV=/dev/md/${RAW_SYSTEM_NAME}
+      ln -s /dev/md1 /dev/md/${RAW_SYSTEM_NAME}
 
       mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --metadata=0.90 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
       mdadm -C /dev/md1 -v -f -R -n 2 -l 1 --assume-clean --name=${SYSTEM_NAME} /dev/${DISK_PREFIX}da4 /dev/${DISK_PREFIX}db4
@@ -73,21 +76,25 @@ case "$1" in
     elif [ $DISK_COUNT -eq 1 ]; then
       BOOT=/dev/${DISK_PREFIX}da2
       RAW_SYSTEM_NAME=${DISK_PREFIX}da4
-      RAW_SYSTEM_DEV=/dev/${RAW_NAME}
-      SYSTEM_NAME=${VG_NAME}
+      RAW_SYSTEM_DEV=/dev/${RAW_SYSTEM_NAME}
     fi
 
     if test -n "$diskpassword"; then
+        apt-install cryptsetup dropbear
+
         LUKS_NAME=${RAW_SYSTEM_NAME}_luks
         SYSTEM_DEV=/dev/mapper/${LUKS_NAME}
+        echo "LuksFormat $RAW_SYSTEM_DEV"
         echo "$diskpassword" | cryptsetup -q luksFormat $RAW_SYSTEM_DEV
         sleep 2
-        echo "$diskpassword" | cryptsetup -q luksOpen $RAW_SYSTEM_DEV $LUKS_NAME
+        echo "LuksOpen $RAW_SYSTEM_DEV $LUKS_NAME"
+        echo "$diskpassword" | cryptsetup luksOpen $RAW_SYSTEM_DEV $LUKS_NAME
         sleep 2
     else
         SYSTEM_DEV=$RAW_SYSTEM_DEV
     fi
 
+    apt-install lvm
     mkfs.ext3 -q -L boot $BOOT
     pvcreate -ff -y $SYSTEM_DEV
     vgcreate ${VG_NAME} $SYSTEM_DEV
@@ -117,8 +124,7 @@ case "$1" in
 
     # create crypttab, schedule installation of cryptsetup and dropbear if we use encryption
     if test -n "$diskpassword"; then
-        echo "$LUKS_NAME $RAW_SYSTEM none luks" > /target/etc/crypttab
-        apt-install cryptsetup dropbear
+        echo "$LUKS_NAME $RAW_SYSTEM_DEV none luks" > /target/etc/crypttab
     fi
 
     ;;
@@ -137,10 +143,15 @@ case "$1" in
     fi
 
     vgremove -ff -y /dev/${VG_NAME}
+    pvremove -ff -y /dev/mapper/md1_luks
+    pvremove -ff -y /dev/${DISK_PREFIX}da4
     pvremove -ff -y /dev/md1
     pvremove -ff -y /dev/md126
     pvremove -ff -y /dev/md0
     pvremove -ff -y /dev/md127
+
+    cryptsetup luksClose md1_luks
+    cryptsetup luksClose ${DISK_PREFIX}da4_luks
 
     mdadm --stop /dev/md0
     mdadm --remove /dev/md0

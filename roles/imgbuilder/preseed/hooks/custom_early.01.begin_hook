@@ -1,9 +1,0 @@
-#!/bin/sh
-
-logger -t custom_early.sh In the begin hook
-
-if test -f /usr/sbin/haveged; then
-    logger -t custom_early.sh start haveged daemon
-    /usr/sbin/haveged -w 1024 &
-fi
-

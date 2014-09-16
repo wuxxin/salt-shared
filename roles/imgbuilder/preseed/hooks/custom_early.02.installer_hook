@@ -1,0 +1,9 @@
+#!/bin/sh
+
+logger -t custom_early.sh "In the 02.installer hook"
+
+if test -f /usr/sbin/haveged; then
+    logger -t custom_early.sh "start haveged daemon"
+    /usr/sbin/haveged -r 0 -w 1024 < /dev/null &>/dev/null &
+    logger -t custom_early.sh "started haveged daemon"
+fi
