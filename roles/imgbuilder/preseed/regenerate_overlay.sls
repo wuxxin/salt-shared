@@ -1,16 +1,18 @@
 
 
 # set target: to targetdir
-{% set target="/srv/salt/custom/roles/imgbuilder/preseed/overlay" %}
+{% set target="/home/wuxxin/work/petit/salt/salt-shared/roles/imgbuilder/preseed/overlay" %}
 {% set workdir=target+ "/../debs" %}
 
-exists-targetdir:
+exists_targetdir:
   file.exists:
    - name: {{ target }}
 
-create-workdir:
+create_workdir:
   file.directory:
     - name: {{ workdir }}
+    - require:
+      - file: exists_targetdir
 
 {% load_yaml as cs %}
 additional_dpkg:
@@ -28,16 +30,26 @@ additional_dpkg:
 download-debs:
   cmd.run:
     - name: cd {{ workdir }}; apt-get -y  download {% for p in cs.additional_dpkg %}{{ p }} {% endfor %}
+    - cwd: {{ workdir }}
+    - require:
+      - file: create_workdir
 
 {% for d in cs.additional_dpkg %}
 unpack-{{ d }}:
   cmd.run:
     - name: dpkg-deb -X {{ workdir }}/{{ d }}*.deb {{ target }}
+    - require:
+      - file: create_workdir
+    
 {% endfor %}
 
 
+{# 
 patch_zcat_gunzip:
   cmd.run:
     - name: rm zcat; ln -s busybox zcat; rm gunzip; ln -s busybox gunzip
     - only_if: test -d {{ target }}/bin
     - cwd: {{ target }}/bin
+    - require:
+      - file: create_workdir
+#}
