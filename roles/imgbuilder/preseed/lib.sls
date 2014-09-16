@@ -100,22 +100,17 @@ debs-udeb-install:
 {% endfor %}
 {% endif %}
 
-# file append to /debs/dpkg-install.lst
-{% if cs.additional_dpkg %}
-debs-dpkg-install:
-  file.append:
-    - name: {{ tmp_target }}/debs/dpkg-install.lst
-    - makedirs: true
-    - text:
-{% for (d,s) in cs.additional_dpkg %}
-      - {{ d }}
-{% endfor %}
-
-# copy deb to debs/
-{% for (d,s) in cs.additional_dpkg %}
-add-deb-file-{{ d }}:
-  cmd.run:
-    - name: "cd {{ tmp_target}}/debs; wget {{ s }}"
+# copy additional layers
+{% if cs.additional_layers %}
+{% for l in cs.additional_layers %}
+overlay-install-{{ l }}:
+  archive.extracted:
+    - name: {{ tmp_target }}
+    - source: {{ l }}
+    - user: imgbuilder
+    - group: imgbuilder
+    - archive_format: tar
+    - tar_options: z
 {% endfor %}
 {% endif %}
 

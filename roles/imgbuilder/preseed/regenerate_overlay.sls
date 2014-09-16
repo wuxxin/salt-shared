@@ -43,6 +43,11 @@ unpack-{{ d }}:
     
 {% endfor %}
 
+tar_gz_overlay:
+  cmd.run:
+    - cwd: {{ workdir }}
+    - name: tar czf ../overlay.tar.gz .
+    - unless test -f ../overlay.tar.gz
 
 {# 
 patch_zcat_gunzip:
