@@ -58,29 +58,39 @@ case "$1" in
     done
 
     if [ $DISK_COUNT -ge 2 ]; then
-      mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --metadata=0.90 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
-      mdadm -C /dev/md1 -v -f -R -n 2 -l 1 --assume-clean --name=${VG_NAME} /dev/${DISK_PREFIX}da4 /dev/${DISK_PREFIX}db4
       BOOT=/dev/md0
-      RAW_NAME=md1
-      RAW_SYSTEM=/dev/${RAW_NAME}
+      RAW_SYSTEM_NAME=md1
+      RAW_SYSTEM_DEV=/dev/${RAW_NAME}
+      SYSTEM_NAME=${VG_NAME}
+
+      if test -n "$diskpassword"; then
+          SYSTEM_NAME=luks_${VG_NAME}
+      fi
+
+      mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --metadata=0.90 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
+      mdadm -C /dev/md1 -v -f -R -n 2 -l 1 --assume-clean --name=${SYSTEM_NAME} /dev/${DISK_PREFIX}da4 /dev/${DISK_PREFIX}db4
+      sleep 5
     elif [ $DISK_COUNT -eq 1 ]; then
       BOOT=/dev/${DISK_PREFIX}da2
-      RAW_NAME=${DISK_PREFIX}da4
-      RAW_SYSTEM=/dev/${RAW_NAME}
+      RAW_SYSTEM_NAME=${DISK_PREFIX}da4
+      RAW_SYSTEM_DEV=/dev/${RAW_NAME}
+      SYSTEM_NAME=${VG_NAME}
     fi
 
-    if test -z "$diskpassword"; then
-        SYSTEM=$RAW_SYSTEM
+    if test -n "$diskpassword"; then
+        LUKS_NAME=${RAW_SYSTEM_NAME}_luks
+        SYSTEM_DEV=/dev/mapper/${LUKS_NAME}
+        echo "$diskpassword" | cryptsetup -q luksFormat $RAW_SYSTEM_DEV
+        sleep 2
+        echo "$diskpassword" | cryptsetup -q luksOpen $RAW_SYSTEM_DEV $LUKS_NAME
+        sleep 2
     else
-        LUKS_NAME=${RAW_NAME}_luks
-        SYSTEM=/dev/mapper/${LUKS_NAME}
-        echo "$diskpassword" | cryptsetup -q luksFormat $RAW_SYSTEM
-        echo "$diskpassword" | cryptsetup -q luksOpen $RAW_SYSTEM $LUKS_NAME
+        SYSTEM_DEV=$RAW_SYSTEM_DEV
     fi
 
     mkfs.ext3 -q -L boot $BOOT
-    pvcreate -ff -y $SYSTEM
-    vgcreate ${VG_NAME} $SYSTEM
+    pvcreate -ff -y $SYSTEM_DEV
+    vgcreate ${VG_NAME} $SYSTEM_DEV
     lvcreate -L ${HOST_ROOT_SIZE} -n host_root ${VG_NAME}
     mkfs.ext4 -q -L host_root /dev/${VG_NAME}/host_root
    

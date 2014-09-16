@@ -2,25 +2,19 @@
 
 logger -t custom_early.sh "In the partman hook"
 
-# if you want to destroy disks first, uncomment
+# workaround: fix: somehow /media gets mounted with a partition on the host disk
+# (d-i installer searching for install media ?)
+umount /media
+
+# if you want to destroy disks first, uncomment the following:
 # logger -t custom_early.sh Destroying disks!
 # /tmp/custom_part.sh destroy
 # sgdisk -Z /dev/vda
 # sgdisk -Z /dev/vdb
 
-
-# workaround: fix: somehow /media gets mounted with a partition on the host disk
-# (d-i installer searching for install media ?)
-umount /media
-
-
-
 # run custom partitioning
 /tmp/custom_part.sh partman
 
-# or
-
-# run default partman
+# or run default partman
 #partman
-
 

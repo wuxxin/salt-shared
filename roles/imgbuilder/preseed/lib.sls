@@ -101,18 +101,17 @@ debs-udeb-install:
 {% endif %}
 
 # copy additional layers
-{% if cs.additional_layers %}
 {% for l in cs.additional_layers %}
 overlay-install-{{ l }}:
-  archive.extracted:
-    - name: {{ tmp_target }}
+  cmd.run:
+sdfgsfgklj replace with tar because extract does not want already populated dir
+    - name: tar xzf {{ l }}{{ tmp_target }}
     - source: {{ l }}
     - user: imgbuilder
     - group: imgbuilder
     - archive_format: tar
     - tar_options: z
 {% endfor %}
-{% endif %}
 
 # add custom hook dir and scripts
 add-hooks:

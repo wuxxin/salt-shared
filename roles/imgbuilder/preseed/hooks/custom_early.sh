@@ -6,6 +6,7 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     # phase 0
     # earliest hook
     logger -t custom_early.sh begin
+    shift
 
     if test -f /reboot.seconds -a -f /watch; then
         # if activated: watch daemon that reboots the system after reboot.seconds,
@@ -15,7 +16,6 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     fi
 
     if test "$cmd" = "fetch"; then
-        shift
         preseed-fetch /custom/custom.lst /tmp/custom.lst
         for a in `/tmp/custom.lst`; do
             preseed-fetch $a /tmp/`basename $a`
