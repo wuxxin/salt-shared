@@ -2,7 +2,7 @@
 
 logger -t custom_late.sh "modify /etc/grub.d/00_header and run update-grub"
 
-patch /target/etc/grub.d/00_header << "ENDOFFILE"
+cat > /target/tmp/00_header.patch << "ENDOFFILE"
 diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
 index 8dc5592..7ab59e3 100644
 --- a/util/grub.d/00_header.in
@@ -57,4 +57,5 @@ index 8dc5592..7ab59e3 100644
  fi
 ENDOFFILE
 
+in-target sh -c "cat /tmp/00_header.patch | patch /etc/grub.d/00_header"
 in-target update-grub

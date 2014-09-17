@@ -3,7 +3,8 @@
 logger -t custom_early.sh "In the 02.installer hook"
 
 if test -f /usr/sbin/haveged; then
-    logger -t custom_early.sh "start haveged daemon"
+    logger -t custom_early.sh "start haveged daemon, waiting for 4 to 12 sec"
     /usr/sbin/haveged -r 0 -w 1024 < /dev/null &>/dev/null &
+    for a in `seq 4` ; do x=$(( ( RANDOM % 3 )  + 1 )); echo "sleep $x sec"; sleep $x; done
     logger -t custom_early.sh "started haveged daemon"
 fi

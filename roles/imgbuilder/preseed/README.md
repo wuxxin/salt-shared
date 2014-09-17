@@ -2,11 +2,25 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
+ * for easy work: templates: base.cfg : commented out last keypress before reboot
  * preseed diskpassword empty problem
- * copy syslog to target at end
+ * add haveged also in initramfs of target boot
+ * more recordfail and other grub blockage (waits on mainscreen, and on a recordfail something screen)
+ * swap, now that we needed paths again in fstab, we can make swap without label
+ * custom_late.02-crypt.hook: mkfifo
+ * grub hook
+ * haveged hook (sleep)
 
+Target:
+-------
 
-usage: to make an customized automated install (currently ubuntu)
+ * currently Ubuntu 14.04 only, should be possible to adopt to other versions and debian derivates
+
+Usage:
+------
+
+ to make an customized automated install (currently ubuntu)
+
  * via packer using an iso image and http served preseed files
  * via kexec on a running system using the customized initrd and kernel
  * via vagrant-libvirt including libvirt.kernel,initrd,cmdline arguments
@@ -19,7 +33,7 @@ Features:
  * haveged (entropy generator) on install time
  * network console interactive ssh install with tmux on install time (option)
  * you can choose from different flavors of disk partitioning (simple, plain, lvm, lvm_crypt, custom)
- * uses apt-proxy at pillar('cache.apt') if present
+ * uses an apt-proxy for package download if apt_proxy_mirror is present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
  * a watcher that reset the machine after a certain amount of time (in case automated install goes wrong)
@@ -38,20 +52,22 @@ Example:
   luks encryption, raid1 on top, lvm on top, 
   ssh daemon inside initrd with the possiblity to ssh into and unlock the crypto root partition and boot
 
+ * use roles.imgbuilder.lib.sls to make a custom configuration
+ * example see prepare.sls
+
+
+Details:
+--------
+
 kexec enabled distros:
-----------------------
+......................
  * Ubuntu   >= 9.04
  * openSUSE >= 11.0"
  * Debian   >= 5.0
  * CentOS,
    RHEL     >= 5.3
 
-lib.sls Usage:
---------------
-  see prepare.sls
-
 Prepare:
---------
+........
  * compile new watch: gcc -O2 watch.c -o watch
  * make new overlay with extracted debs (runs only on same suite and architecture): ./generate_overlay.sh
-

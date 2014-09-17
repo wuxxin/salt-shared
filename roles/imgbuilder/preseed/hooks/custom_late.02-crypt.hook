@@ -5,10 +5,10 @@
 logger -t custom_late.sh "modify and update initramfs cryptroot script to make ssh unlock working again"
 
 mkdir -p /target/etc/initramfs-tools/hooks
-cat > /target/etc/initramfs-tools/hooks/cryptroot-patch << "ENDOFFILE"
+cat > /target/etc/initramfs-tools/hooks/cryptroot_patch << "ENDOFFILE"
 #!/bin/sh -e
 
-PREREQS=""
+PREREQS="cryptroot"
 
 prereqs() { echo "$PREREQS"; }
 
@@ -21,30 +21,7 @@ esac
 
 . /usr/share/initramfs-tools/hook-functions
 
-copy_exec /usr/bin/patch
-copy_exec /usr/bin/dirname
-
-ENDOFFILE
-chmod +x /target/etc/initramfs-tools/hooks/cryptroot-patch
-
-mkdir -p /target/etc/initramfs-tools/scripts/init-premount/
-cat > /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch << "ENDOFFILE"
-#!/bin/sh
-
-PREREQ="udev"
-prereqs()
-{
-        echo "$PREREQ"
-}
-case "$1" in
-# get pre-requisites
-prereqs)
-        prereqs
-        exit 0
-        ;;
-esac
-
-patch "$(dirname $0)/../local-top/cryptroot" << "EOF"
+patch $DESTDIR/scripts/local-top/cryptroot << "EOF"
 --- cryptsetup-1.6.1/debian/initramfs/cryptroot-script	2013-11-01 17:57:02.000000000 +0100
 +++ cryptroot	2014-06-24 11:24:49.540304681 +0200
 @@ -247,20 +247,24 @@
@@ -69,7 +46,7 @@ patch "$(dirname $0)/../local-top/cryptroot" << "EOF"
 -			if ! crypttarget="$crypttarget" cryptsource="$cryptsource" \
 -			     $cryptkeyscript "$cryptkey" | $cryptcreate --key-file=- ; then
 +			if [ -n "$cryptkeyscript" ] ; then
-+				mkfifo -m 0600 /lib/cryptsetup/passfifo
++				mkdir -p -m 0600 /lib/cryptsetup; mkfifo -m 0600 /lib/cryptsetup/passfifo
 +				( ( res=`crypttarget="$crypttarget" cryptsource="$cryptsource" \
 +					$cryptkeyscript "$cryptkey"` ;\
 +					echo -ne "${res}" > /lib/cryptsetup/passfifo ) & )
@@ -83,9 +60,9 @@ EOF
 
 ENDOFFILE
 
-chmod +x /target/etc/initramfs-tools/scripts/init-premount/cryptroot-patch
+chmod +x /target/etc/initramfs-tools/hooks/cryptroot_patch
 
-logger -t custom_late.sh "install dropbear, copy /.ssh/authorized_keys, update-initramfs in target"
-apt-install dropbear
+logger -t custom_late.sh "install dropbear and patch, copy /.ssh/authorized_keys, update-initramfs in target"
+apt-install cryptsetup dropbear patch
 cp /.ssh/authorized_keys /target/etc/initramfs-tools/root/.ssh/authorized_keys
 in-target update-initramfs -k all -c

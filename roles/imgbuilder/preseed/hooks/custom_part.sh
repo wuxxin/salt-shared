@@ -80,7 +80,7 @@ case "$1" in
     fi
 
     if test -n "$diskpassword"; then
-        apt-install cryptsetup dropbear
+        apt-install cryptsetup
 
         LUKS_NAME=${RAW_SYSTEM_NAME}_luks
         SYSTEM_DEV=/dev/mapper/${LUKS_NAME}
@@ -94,7 +94,7 @@ case "$1" in
         SYSTEM_DEV=$RAW_SYSTEM_DEV
     fi
 
-    apt-install lvm
+    apt-install lvm2
     mkfs.ext3 -q -L boot $BOOT
     pvcreate -ff -y $SYSTEM_DEV
     vgcreate ${VG_NAME} $SYSTEM_DEV
@@ -118,7 +118,7 @@ case "$1" in
     mkdir /target/etc 
     echo \# /etc/fstab: static file system information. > /target/etc/fstab
     echo \# >> /target/etc/fstab  echo "# <file system>   <mount point>   <type>   <options>       <dump> <pass>" >> /target/etc/fstab
-    echo LABEL=host_root     /       ext4 acl,user_xattr              1  1 >> /target/etc/fstab 
+    echo /dev/mapper/${VG_NAME}_host_root     /       ext4 acl,user_xattr              1  1 >> /target/etc/fstab 
     echo LABEL=boot     /boot   ext3 defaults,nodev,noexec       1  2 >> /target/etc/fstab 
     echo proc           /proc   proc defaults                    0  0 >> /target/etc/fstab
 
