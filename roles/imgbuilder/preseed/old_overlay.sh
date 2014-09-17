@@ -18,7 +18,7 @@ done
 # cd $overlay/bin; rm zcat; ln -s busybox zcat; rm gunzip; ln -s busybox gunzip
 
 cd $overlay
-tar czf ../overlay.tar.gz .
+tar czf ../files/overlay.tar.gz .
 
 cd ..
 rm -r $overlay

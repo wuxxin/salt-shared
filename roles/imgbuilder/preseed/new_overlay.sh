@@ -74,7 +74,7 @@ done
 
 
 cd $overlay
-tar czf ../overlay.tar.gz .
+tar czf ../files/overlay.tar.gz .
 
 cd ..
 rm -r $overlay

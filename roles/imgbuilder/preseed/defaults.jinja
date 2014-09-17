@@ -14,7 +14,7 @@ kernel: ubuntu-installer/{{ architecture }}/linux
 
 cmdline: 'DEBCONF_DEBUG=5 ro hostname={{ suite }} auto=true priority=critical debconf/frontend=noninteractive'
 
-templates: 'salt://roles/imgbuilder/preseed/templates'
+templates: 'salt://roles/imgbuilder/preseed/preseed'
 hooks: 'salt://roles/imgbuilder/preseed/hooks'
 target: '/mnt/images/templates/imgbuilder/preseed'
 
@@ -36,7 +36,7 @@ additional_udeb:
   # - 
 
 additional_layers:
-  - "salt://roles/imgbuilder/preseed/overlay.tar.gz"
+  - "salt://roles/imgbuilder/preseed/files/overlay.tar.gz"
 
 apt_proxy_mirror: "http://192.168.121.1:3142/"
 
