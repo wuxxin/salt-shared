@@ -57,5 +57,6 @@ index 8dc5592..7ab59e3 100644
  fi
 ENDOFFILE
 
+in-target sed -ire 's/^.*(GRUB_CMDLINE_LINUX_DEFAULT=).*/\1"quiet"/g' /etc/default/grub
 in-target sh -c "cat /tmp/00_header.patch | patch /etc/grub.d/00_header"
 in-target update-grub

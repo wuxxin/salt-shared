@@ -20,3 +20,6 @@ done
 cd $overlay
 tar czf ../overlay.tar.gz .
 
+cd ..
+rm -r $overlay
+rm -r $debs

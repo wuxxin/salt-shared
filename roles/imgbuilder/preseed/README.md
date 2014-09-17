@@ -2,14 +2,12 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
- * for easy work: templates: base.cfg : commented out last keypress before reboot
  * preseed diskpassword empty problem
  * add haveged also in initramfs of target boot
- * more recordfail and other grub blockage (waits on mainscreen, and on a recordfail something screen)
- * swap, now that we needed paths again in fstab, we can make swap without label
- * custom_late.02-crypt.hook: mkfifo
- * grub hook
  * haveged hook (sleep)
+ * more recordfail and other grub blockage (waits on mainscreen, and on a recordfail something screen), grub hook
+ * change overlay generation to initramfs-tools copy-exec 
+
 
 Target:
 -------
@@ -54,7 +52,6 @@ Example:
 
  * use roles.imgbuilder.lib.sls to make a custom configuration
  * example see prepare.sls
-
 
 Details:
 --------
