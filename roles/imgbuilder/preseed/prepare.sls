@@ -24,3 +24,7 @@ copy-diskpassword:
     - user: imgbuilder
     - group: imgbuilder
     - mode: 600
+
+{% from 'roles/imgbuilder/preseed/iso.sls' import mk_install_iso with context %}
+
+{{ mk_install_iso(settings) }}

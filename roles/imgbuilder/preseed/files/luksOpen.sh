@@ -1,3 +1,2 @@
- ssh -o "UserKnownHostsFile=~/.ssh/known_hosts.initramfs" \
--i "~/id_rsa.initramfs" root@initramfshost.example.com \
-"echo -ne \"secret\" >/lib/cryptsetup/passfifo" 
+#!/bin/bash
+ssh -o "UserKnownHostsFile=./known_hosts.initramfs" -i "vagrant.key" 192.168.121.27 "echo -ne \"$(cat disk.passwd)\" >/lib/cryptsetup/passfifo"

@@ -105,7 +105,7 @@ case "$1" in
     # BUG: It's not possible with busybox mkswap to set a swap label
     # we'll just deal with this after provisioning....
     lvcreate -L ${HOST_SWAP_SIZE} -n swap ${VG_NAME}
-    mkswap swap /dev/${VG_NAME}/swap
+    mkswap -L swap /dev/${VG_NAME}/swap
     swapon /dev/${VG_NAME}/swap
    
     # Create directory structure 
@@ -120,7 +120,7 @@ case "$1" in
     echo \# >> /target/etc/fstab  echo "# <file system>   <mount point>   <type>   <options>       <dump> <pass>" >> /target/etc/fstab
     echo /dev/mapper/${VG_NAME}_host_root    /       ext4 acl,user_xattr              1  1 >> /target/etc/fstab 
     echo LABEL=boot                          /boot   ext3 defaults,nodev,noexec       1  2 >> /target/etc/fstab 
-    echo /dev/mapper/${VG_NAME}_swap         swap    swap  defaults                   0  0 >> /target/etc/fstab 
+    echo LABEL=swap                          swap    swap  defaults                   0  0 >> /target/etc/fstab 
     echo proc                                /proc   proc defaults                    0  0 >> /target/etc/fstab
 
     # create crypttab, schedule installation of cryptsetup and dropbear if we use encryption

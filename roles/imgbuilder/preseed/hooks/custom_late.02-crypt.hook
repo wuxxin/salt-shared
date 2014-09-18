@@ -4,7 +4,13 @@
 
 logger -t custom_late.sh "modify and update initramfs cryptroot script to make ssh unlock working again"
 
+if test -f /tmp/custom.env; then
+    logger -t custom_late.sh "read /tmp/custom.env into environment"
+  . /tmp/custom.env
+fi
+
 mkdir -p /target/etc/initramfs-tools/hooks
+
 cat > /target/etc/initramfs-tools/hooks/cryptroot_patch << "ENDOFFILE"
 #!/bin/sh -e
 
@@ -22,9 +28,9 @@ esac
 . /usr/share/initramfs-tools/hook-functions
 
 patch $DESTDIR/scripts/local-top/cryptroot << "EOF"
---- cryptsetup-1.6.1/debian/initramfs/cryptroot-script	2013-11-01 17:57:02.000000000 +0100
-+++ cryptroot	2014-06-24 11:24:49.540304681 +0200
-@@ -247,20 +247,24 @@
+--- old-local-top/cryptroot	2014-09-17 23:49:36.836097471 +0200
++++ local-top/cryptroot	2014-09-17 23:46:12.072081752 +0200
+@@ -247,20 +247,25 @@
  			/bin/sleep 3
  		fi
  
@@ -46,7 +52,8 @@ patch $DESTDIR/scripts/local-top/cryptroot << "EOF"
 -			if ! crypttarget="$crypttarget" cryptsource="$cryptsource" \
 -			     $cryptkeyscript "$cryptkey" | $cryptcreate --key-file=- ; then
 +			if [ -n "$cryptkeyscript" ] ; then
-+				mkdir -p -m 0600 /lib/cryptsetup; mkfifo -m 0600 /lib/cryptsetup/passfifo
++				mkdir -m 0600 -p /lib/cryptsetup
++				mkfifo -m 0600 /lib/cryptsetup/passfifo
 +				( ( res=`crypttarget="$crypttarget" cryptsource="$cryptsource" \
 +					$cryptkeyscript "$cryptkey"` ;\
 +					echo -ne "${res}" > /lib/cryptsetup/passfifo ) & )
@@ -59,8 +66,29 @@ patch $DESTDIR/scripts/local-top/cryptroot << "EOF"
 EOF
 
 ENDOFFILE
-
 chmod +x /target/etc/initramfs-tools/hooks/cryptroot_patch
+
+cat > /target/etc/initramfs-tools/hooks/dropbear_patch << ENDOFFILE
+#!/bin/sh -e
+
+PREREQS="dropbear"
+
+prereqs() { echo "\$PREREQS"; }
+
+case "\$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+# add the username as virtual user in the initrd to make vagrant happy
+echo "$username:x:0:0:$username:/root:/bin/sh" >> "\${DESTDIR}/etc/passwd"
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/hooks/dropbear_patch
 
 logger -t custom_late.sh "install dropbear and patch, copy /.ssh/authorized_keys, update-initramfs in target"
 apt-install cryptsetup dropbear patch

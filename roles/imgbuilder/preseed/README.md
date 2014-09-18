@@ -4,10 +4,7 @@ Debian/Ubuntu Preseed and Initrd Generator
 TODO:
  * preseed diskpassword empty problem
  * add haveged also in initramfs of target boot
- * haveged hook (sleep)
  * more recordfail and other grub blockage (waits on mainscreen, and on a recordfail something screen), grub hook
- * change overlay generation to initramfs-tools copy-exec 
-
 
 Target:
 -------
