@@ -6,3 +6,4 @@ ocr:
       - cuneiform
       - tesseract-ocr
 
+https://github.com/fritz-hh/OCRmyPDF

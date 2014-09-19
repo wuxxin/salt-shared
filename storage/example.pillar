@@ -22,7 +22,6 @@ storage:
           end: "100%"
           flags:
             - raid
-            - lvm
 {% endfor %}
 
   mdadm:

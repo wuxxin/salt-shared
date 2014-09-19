@@ -2,7 +2,7 @@
 
 This is a collection of saltstates as a result of me learning how to use saltstack.
 Both quality and style differ from state to state, some are quite up2date, others dont.
-It is already in a useful state if you target ubuntu 14.04, but it completely lacks documentation.
+It is already in a useful state, but it completely lacks documentation, beside a few README.md
 
 ###What can you do with it:
 
@@ -13,8 +13,9 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
 
  * Features to look at:
    * roles.imgbuilder:
-     * use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
-     * deploy these easy to setup vagrant machines as production machines and control them via saltstack
+     * .packer: use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
+     * .preseed: make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
+     * .vagrant: deploy these easy to setup vagrant machines as production machines and control them via saltstack
    * roles.desktop:
      * everything needed from a desktop base installation for developing (ubuntu 14.04)
      * look at roles/desktop/readme.md for details
@@ -42,7 +43,6 @@ It is already in a useful state if you target ubuntu 14.04, but it completely la
 
  * /repo/*  : distribution specific repository setup
  * /win/*   : Windows specific salt states
-
 
 
 ###Todo:
