@@ -1,7 +1,8 @@
 if test "$1" != "firefox" -a "$1" != "thunderbird"; then
     cat <<EOF
 Usage:
-  $0 {firefox|thunderbird} exported-extension-list-file
+  $0 {firefox|thunderbird}:
+  about:support ; copy raw data to clipbaord ; save file; massage to a grepable format
 EOF
     exit 1
 fi
