@@ -2,12 +2,12 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
- * preseed diskpassword empty problem
- * make a disk_password to /tmp/custom_part.env creator 
-   * remove custom_env parameter support in early_custom
-   * modify all references to custom_env into debconf-get calls
+ * make set_diskpassword.sh working
+ * remove custom_env parameter support in early_custom
+ * modify all references to custom_env into debconf-get calls
  * add haveged also in initramfs of target boot
  * grub: textonly, no quiet as boot parameter
+ * disable first user password
 
 Target:
 -------

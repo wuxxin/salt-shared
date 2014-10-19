@@ -47,7 +47,7 @@ default_preseed: preseed-custom.cfg
 
 preseed_list:
 {% set p_default=('base.cfg', 
-    'user.cfg', 'locale.cfg', 'package-setup.cfg', 
+    'user.cfg', 'locale.cfg', 'package-setup.cfg', 'network.cfg',
     'tasks_minimal.cfg', 'apt-mirror.cfg', 'partman-base.cfg') %}
 
 {% for a in ('', '-http') %}

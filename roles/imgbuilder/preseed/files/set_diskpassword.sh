@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if test ! (-f ./diskpassword.crypted); then 
+if test ! -f ./diskpassword.crypted; then 
     echo "generate secret, you will be asked twice for a gpg symetric encryption passphrase to encrypt the secret"
     pwgen -s 22 1 | gpg --symmetric > ./diskpassword.crypted
 fi
