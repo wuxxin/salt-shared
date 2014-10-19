@@ -3,8 +3,11 @@ Debian/Ubuntu Preseed and Initrd Generator
 
 TODO:
  * preseed diskpassword empty problem
+ * make a disk_password to /tmp/custom_part.env creator 
+   * remove custom_env parameter support in early_custom
+   * modify all references to custom_env into debconf-get calls
  * add haveged also in initramfs of target boot
- * more recordfail and other grub blockage (waits on mainscreen, and on a recordfail something screen), grub hook
+ * grub: textonly, no quiet as boot parameter
 
 Target:
 -------
@@ -16,8 +19,8 @@ Usage:
 
  to make an customized automated install (currently ubuntu)
 
- * via packer using an iso image and http served preseed files
  * via kexec on a running system using the customized initrd and kernel
+ * via packer using an iso image and http served preseed files
  * via vagrant-libvirt including libvirt.kernel,initrd,cmdline arguments
  * via pxe
 

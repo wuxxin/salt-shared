@@ -28,3 +28,4 @@ copy-diskpassword:
 {% from 'roles/imgbuilder/preseed/iso.sls' import mk_install_iso with context %}
 
 {{ mk_install_iso(settings) }}
+

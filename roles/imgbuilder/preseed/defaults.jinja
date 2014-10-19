@@ -19,7 +19,7 @@ hooks: 'salt://roles/imgbuilder/preseed/hooks'
 target: '/mnt/images/templates/imgbuilder/preseed'
 
 disks: /dev/vda
-diskpassword: {{ salt['cmd.run']('pwgen -s 16 1') }}
+diskpassword: {{ salt['cmd.run']('pwgen -s 22 1') }}
 
 username: vagrant
 hostname: {{ suite }}-default

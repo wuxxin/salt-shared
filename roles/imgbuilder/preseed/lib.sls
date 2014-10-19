@@ -70,12 +70,12 @@ add-preseed-{{ k }}:
 {% endfor %}
     - template: jinja
     - context:
-        password: {{ cs.password|d(" ") }}
         username: {{ cs.username|d(" ") }}
         hostname: {{ cs.hostname|d(" ") }}
         domainname: {{ cs.domainname|d(" ") }}
-        netcfg: {{ cs.netcfg }}
+        password: {{ cs.password|d(" ") }}
         diskpassword: {{ cs.diskpassword|d(" ") }}
+        netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
         apt_proxy_mirror: {{ cs.apt_proxy_mirror|d(" ") }}
 
@@ -189,6 +189,29 @@ copy-password:
     - user: imgbuilder
     - group: imgbuilder
     - mode: 600
+
+{% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 'nw_console.sh', 'set_diskpassword.sh') %}
+
+preseed-lib-copy-{{ f }}:
+  file.managed:
+    - source: "salt://roles/imgbuilder/preseed/files/{{ f }}"
+    - name: {{ cs.target }}/{{ f }}
+    - user: imgbuilder
+    - group: imgbuilder
+    - mode: 700
+    - template: jinja
+    - context:
+        target: {{ cs.target }}
+        cmdline: {{ cs.cmdline }}
+        custom_ssh_identity: {{ cs.custom_ssh_identity|d("") }}
+        username: {{ cs.username|d(" ") }}
+        hostname: {{ cs.hostname|d(" ") }}
+        domainname: {{ cs.domainname|d(" ") }}
+        netcfg: {{ cs.netcfg }}
+        disks: {{ cs.disks|d("/dev/vda") }}
+        apt_proxy_mirror: {{ cs.apt_proxy_mirror|d(" ") }}
+
+{% endfor %}
 
 {% endmacro %}
 
