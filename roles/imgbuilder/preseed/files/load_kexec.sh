@@ -16,11 +16,11 @@ fi
 
 echo "copy linux, initrd.gz and a bash kexec execute file to target"
 for a in ./linux ./initrd.gz; do 
-    scp -o "UserKnownHostsFile=./known_hosts.legacy_system" $ssh_opts $a root@$ssh_target:/root
+    scp -o "UserKnownHostsFile=./known_hosts.legacy_system" -o "StrictHostKeyChecking=no" $ssh_opts $a root@$ssh_target:/root
 done
 
-echo "generate a kexec execute script (./kexec_this.sh) to target"
-cat | ssh -o "UserKnownHostsFile=./known_hosts.legacy_system" $ssh_opts -e none root@$ssh_target 'cat > /root/kexec_this.sh' << EOF
+echo "generate a kexec execute script (/root/kexec_this.sh) to target"
+cat | ssh -o "UserKnownHostsFile=./known_hosts.legacy_system" -o "StrictHostKeyChecking=no" $ssh_opts -e none root@$ssh_target 'cat > /root/kexec_this.sh; chmod +x /root/kexec_this.sh' << EOF
 #!/bin/bash
 
 sudo apt-get update
