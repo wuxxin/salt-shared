@@ -2,12 +2,9 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
- * remove custom_env parameter support in early_custom
  * modify all references to custom_env into debconf-get calls
  * add haveged also in initramfs of target boot
  * grub: textonly, no quiet as boot parameter
- * disable first user password
- * enable login as root on final target machine using same publickey as main user
 
 Target:
 -------
@@ -32,6 +29,8 @@ Features:
  * uses an apt-proxy for package download if apt_proxy_mirror is present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
+   * this enables both root and main user access via ssh authorized_keys, but deletes/locks the mainuser password
+     and sudo is configured to sudo from main user without password
  * a watcher that reset the machine after a certain amount of time (in case automated install goes wrong)
    * to activate include a custom_file "/reboot.seconds" into the setup (with seconds as value inside file)
  * include debian packages inside initrd and install on runtime
