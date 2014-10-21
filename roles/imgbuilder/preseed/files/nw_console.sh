@@ -13,4 +13,7 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
 fi
 
 echo "start tmux with tmux; inside tmux: /sbin/debian-installer /bin/network-console-menu"
-TERM=linux ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" -e none $ssh_opts $* root@$ssh_target "tmux new /sbin/debian-installer /bin/network-console-menu"
+tmux_opts="-s networkconsole '/sbin/debian-installer /bin/network-console-menu'"
+TERM=linux ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" \
+    -t $ssh_opts $* root@$ssh_target "tmux new $tmux_opts || tmux attach"
+

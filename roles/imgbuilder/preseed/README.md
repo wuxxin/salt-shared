@@ -2,7 +2,7 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
- * modify all references to custom_env into debconf-get calls
+ * modify custom_part.sh to include deb-conf hostname for lvm volume group name
  * add haveged also in initramfs of target boot
  * grub: textonly, no quiet as boot parameter
 
