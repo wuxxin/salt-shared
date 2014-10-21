@@ -2,7 +2,7 @@
 
 logger -t custom_late.sh "in the late hook"
 
-# copy authorized_keys of ssh installer
+# copy authorized_keys of ssh installer to main user and root
 cd /target/home/*/
 
 current_dir=`pwd`
@@ -16,8 +16,22 @@ if test -f /.ssh/authorized_keys; then
     chmod 0600 .ssh/authorized_keys
 fi
 chown -R 1000:1000 .ssh
+
+cd /target/root
+mkdir .ssh
+chmod 0700 .ssh
+if test -f /.ssh/authorized_keys; then
+    logger -t custom_late.sh "copy authorized_keys to /root/.ssh/"
+    cp /.ssh/authorized_keys .ssh/authorized_keys
+    chmod 0600 .ssh/authorized_keys
+fi
+
 cd /
 
 logger -t custom_late.sh "make passwordless sudo"
 sed -i 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/' /target/etc/sudoers
 
+if test -f /.ssh/authorized_keys; then
+    logger -t custom_late.sh "disable (passwd -d -l) first user password (in favor of ssh authorized_keys)"
+    in-target passwd -d -l $username
+fi

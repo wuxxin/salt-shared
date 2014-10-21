@@ -126,4 +126,3 @@ if test "$(debconf-get netcfg/disable_autoconfig)" = "true"; then
 fi
 
 in-target update-initramfs -k all -c
-

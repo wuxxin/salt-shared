@@ -102,8 +102,6 @@ case "$1" in
     mkfs.ext4 -q -L host_root /dev/${VG_NAME}/host_root
    
     # setup common swap  
-    # BUG: It's not possible with busybox mkswap to set a swap label
-    # we'll just deal with this after provisioning....
     lvcreate -L ${HOST_SWAP_SIZE} -n swap ${VG_NAME}
     mkswap -L swap /dev/${VG_NAME}/swap
     swapon /dev/${VG_NAME}/swap
