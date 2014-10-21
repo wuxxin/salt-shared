@@ -2,12 +2,10 @@ Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
 TODO:
- * remove custom_env parameter support in early_custom
  * modify all references to custom_env into debconf-get calls
  * add haveged also in initramfs of target boot
  * grub: textonly, no quiet as boot parameter
  * disable first user password
- * enable login as root on final target machine using same publickey as main user
 
 Target:
 -------

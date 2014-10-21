@@ -28,3 +28,8 @@ git commit
 
 # lock the repository
 git-crypt lock
+
+# look at the files
+# unlock the repository
+# git-crypt unlock
+# look at the files
