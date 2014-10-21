@@ -4,3 +4,6 @@ qrcode:
       - qrencode
       - imagemagick
       - zbar-tools
+      - poppler-utils
+      - pdftk
+

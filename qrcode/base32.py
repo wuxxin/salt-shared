@@ -10,11 +10,6 @@ with optional parameter unzip it will treat decoded data as zipfile and unzip it
 
 Limits: Only works for small (< RAM) files (everything is read in memory and processed later)
 
-To recreate a printed and splitted qrcode encoded file 
-use the barcodescanner an input each barcode after another using
-<< EOF | ./base32.py decode > destination.zip
-and put EOF and Return after the last barcode line
-
 """)
     sys.exit()
 
@@ -30,7 +25,7 @@ if sys.argv[1] == "encode":
 elif sys.argv[1] == "decode":
     y = base64.b32decode(x)
 
-    if len(sys.argv) >= 2 and sys.argv[2] == "unzip":
+    if len(sys.argv) >= 3 and sys.argv[2] == "unzip":
         f = StringIO.StringIO(y)
         z = zipfile.ZipFile(f)
 
