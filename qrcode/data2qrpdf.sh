@@ -82,13 +82,13 @@ data2pdf() {
   fsize=`stat -c "%s" $fname`
 
   if test ! -f $fname; then 
-    echo "ERROR: could not find datafile $fname"
-    usage
+    echo "ERROR: could not find datafile $fname; call "$0" for usage information"
+    exit 2
   fi
 
   if test $fsize -gt 114100; then
-    echo "ERROR: source file bigger than max capacity of 1141*100 bytes ($fsize)"
-    usage
+    echo "ERROR: source file bigger than max capacity of 1141*100 bytes ($fsize); call "$0" for usage information"
+    exit 3
   fi
 
   tempdir=`mktemp -d`
