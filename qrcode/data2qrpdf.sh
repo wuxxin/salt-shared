@@ -92,8 +92,8 @@ data2pdf() {
   fi
 
   tempdir=`mktemp -d`
-  if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 1; fi
-  if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 1; fi
+  if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 10; fi
+  if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 10; fi
 
   if test $fsize -le 2110; then
       cat $fname | ./base32.py encode | qrencode -o $tempdir/$fbase.png -l M -i
