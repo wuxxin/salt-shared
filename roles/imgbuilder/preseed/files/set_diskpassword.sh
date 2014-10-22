@@ -1,8 +1,19 @@
 #!/bin/bash
 
 if test ! -f ./diskpassword.crypted; then 
-    echo "generating secret, you will be asked twice for a gpg symetric encryption passphrase to encrypt the secret"
-    pwgen -s 22 1 | gpg --symmetric > ./diskpassword.crypted
+    echo "importing {{ diskpassword_receiver_key }}.key.asc into local keychain"
+    gpg --batch --yes --import ./{{ diskpassword_receiver_id }}.key.asc
+
+    if test -f ./{{ diskpassword_receiver_id }}.secret.asc; then
+        echo "importing {{ diskpassword_receiver_key }}.secret.asc into local keychain"
+        gpg --batch --yes --import ./{{ diskpassword_receiver_id }}.secret.asc
+    fi
+
+    echo "generating secret using {{ diskpassword_creation }} and encrypting it with {{ diskpassword_receiver_key }}"
+    {{ diskpassword_creation }} |
+    gpg --batch --yes --always-trust --recipient {{ diskpassword_receiver_id }} --output ./diskpassword.crypted --encrypt
+
+    echo "make zip of encrypted keys and shell scripts, convert that zip into a printable qrcode pdf"
 fi
 
 if test "{{ netcfg.ip|d('') }}" = ""; then
@@ -23,9 +34,10 @@ done
 echo "ok"
 
 echo "writing new custom.env to ssh_target, "
-echo "you will be asked 1.) for the gpg encryption passphrase and then 2.) for your ssh key phrase"
+echo "you may be asked 1.) for the gpg encryption passphrase and then 2.) for your ssh key phrase"
 
-ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" -f  -e none $ssh_opts root@$ssh_target "echo \"$(cat ./diskpassword.crypted | gpg --decrypt)\" > /tmp/custom.env"
+ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" \
+-f  -e none $ssh_opts root@$ssh_target \
+"echo -e \"diskpassword=$(cat ./diskpassword.crypted | gpg --decrypt)\n\" > /tmp/custom.env"
 
-echo "now execute ./nw-console.sh, to shell into target machine,"
-echo "and execute '/sbin/debian-installer /bin/network-console-menu'"
+echo "now execute ./nw-console.sh, to shell into target machine, for resuming installation"

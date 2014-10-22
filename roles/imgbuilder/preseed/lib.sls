@@ -1,5 +1,7 @@
 include:
   - .init
+  - gpg
+  - qrcode
 
 # preseed_make
 ###############
@@ -190,7 +192,24 @@ copy-password:
     - group: imgbuilder
     - mode: 600
 
-{% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 'nw_console.sh', 'set_diskpassword.sh') %}
+{% if cs.diskpassword_receiver_id == 'insecure_gpgkey' %}
+{% set keyfiles = ("salt://roles/imgbuilder/preseed/files/insecure_gpgkey.secret.asc",
+    "salt://roles/imgbuilder/preseed/files/insecure_gpgkey.key.asc") %}
+{% else %}
+{% set keyfiles = (diskpassword_receiver_key, ) %}
+{% endif %}
+
+{% for f in keyfiles %}
+preseed-lib-copy-{{ f }}:
+  file.managed:
+    - source: {{ f }}
+    - name: {{ cs.target }}/{{ salt['cmd.run']('basename '+ f) }}
+    - user: imgbuilder
+    - group: imgbuilder
+    - mode: 700
+{% endfor %}
+
+{% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 'nw_console.sh', 'set_diskpassword.sh', 'data2qrpdf.sh') %}
 
 preseed-lib-copy-{{ f }}:
   file.managed:
@@ -210,7 +229,9 @@ preseed-lib-copy-{{ f }}:
         netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
         apt_proxy_mirror: {{ cs.apt_proxy_mirror|d(" ") }}
-
+        diskpassword_receiver_id: {{ cs.diskpassword_receiver_id|d("") }}
+        diskpassword_receiver_key: {{ cs.diskpassword_receiver_key|d("") }}
+        diskpassword_creation: {{ cs.diskpassword_creation|d("") }}
 {% endfor %}
 
 {% endmacro %}

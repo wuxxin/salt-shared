@@ -8,7 +8,7 @@ debs="./debs"
 mkdir $overlay
 mkdir $debs
 
-deb_list="libgcc1 libstdc++6 libevent-2.0-5 libncursesw5 libtinfo5 libhavege1 haveged tmux"
+deb_list="libgcc1 libstdc++6 libevent-2.0-5 libncursesw5 libtinfo5 libhavege1 haveged tmux pwgen"
 
 cd $debs; apt-get -y  download $deb_list
 for d in $deb_list; do

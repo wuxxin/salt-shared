@@ -66,7 +66,7 @@ debs="./debs"
 mkdir $overlay
 mkdir $debs
 
-copy_list=`for a in haveged tmux; do echo $(which $a); done`
+copy_list=`for a in haveged tmux pwgen; do echo $(which $a); done`
 
 for d in $copy_list; do
     copy_exec $d 

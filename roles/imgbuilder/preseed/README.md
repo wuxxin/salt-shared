@@ -5,6 +5,9 @@ TODO:
  * modify custom_part.sh to include deb-conf hostname for lvm volume group name
  * add haveged also in initramfs of target boot
  * grub: textonly, no quiet as boot parameter
+ * extension: pwgen in initrd and seed debconf with it, use gpg to crypt for receiver and 
+      1.) transfer file via scp to a target host before reboot
+      2.) wait before reboot until file is marked as transfered
 
 Target:
 -------
