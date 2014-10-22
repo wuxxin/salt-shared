@@ -27,8 +27,9 @@ Features:
  * generates a customized initrd and kernel for kexec or kernel, initrd setup
    and additional files needed for iso + preseed http setup
  * haveged (entropy generator) on install time
- * network console interactive ssh install with tmux on install time (option)
- * you can choose from different flavors of disk partitioning (simple, plain, lvm, lvm_crypt, custom)
+ * network console interactive ssh install with tmux on install time
+ * you can choose from different flavors of disk partitioning 
+   * simple, plain, lvm, lvm_crypt, custom (which supports a working MDADM - LUKS - LVM setup)
  * uses an apt-proxy for package download if apt_proxy_mirror is present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
