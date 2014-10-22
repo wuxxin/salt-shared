@@ -14,6 +14,7 @@ if test ! -f ./diskpassword.crypted; then
     gpg --batch --yes --always-trust --recipient {{ diskpassword_receiver_id }} --output ./diskpassword.crypted --encrypt
 
     echo "make zip of encrypted keys and shell scripts, convert that zip into a printable qrcode pdf"
+    tar c --xz --exclude linux --exclude initrd.gz --exclude .vagrant 
 fi
 
 if test "{{ netcfg.ip|d('') }}" = ""; then

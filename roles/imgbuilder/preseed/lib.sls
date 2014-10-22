@@ -209,7 +209,8 @@ preseed-lib-copy-{{ f }}:
     - mode: 700
 {% endfor %}
 
-{% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 'nw_console.sh', 'set_diskpassword.sh', 'data2qrpdf.sh') %}
+{% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 
+'nw_console.sh', 'set_diskpassword.sh', 'make_paper_config.sh','data2qrpdf.sh') %}
 
 preseed-lib-copy-{{ f }}:
   file.managed:
