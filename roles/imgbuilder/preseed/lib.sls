@@ -149,6 +149,7 @@ add-custom-files-{{ s }}:
   file.managed:
     - name: {{ tmp_target }}/{{ d }}
     - source: {{ s }}
+    - makedirs: true
 {% endfor %}
 {% endif %}
 
@@ -196,7 +197,7 @@ copy-password:
 {% set keyfiles = ("salt://roles/imgbuilder/preseed/files/insecure_gpgkey.secret.asc",
     "salt://roles/imgbuilder/preseed/files/insecure_gpgkey.key.asc") %}
 {% else %}
-{% set keyfiles = (diskpassword_receiver_key, ) %}
+{% set keyfiles = (cs.diskpassword_receiver_key, ) %}
 {% endif %}
 
 {% for f in keyfiles %}
@@ -210,7 +211,7 @@ preseed-lib-copy-{{ f }}:
 {% endfor %}
 
 {% for f in ('Vagrantfile', 'load_kexec.sh', 'luksOpen.sh', 
-'nw_console.sh', 'set_diskpassword.sh', 'make_paper_config.sh','data2qrpdf.sh') %}
+'nw_console.sh', 'set_diskpassword.sh', 'connect_new.sh', 'make_paper_config.sh','data2qrpdf.sh') %}
 
 preseed-lib-copy-{{ f }}:
   file.managed:
