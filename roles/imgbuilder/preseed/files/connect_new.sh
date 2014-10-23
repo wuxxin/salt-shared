@@ -8,7 +8,9 @@ fi
 
 ssh_opts=""
 if test "{{ custom_ssh_identity|d('') }}" != ""; then
-  ssh_opts="-i {{ custom_ssh_identity }}"
+  if test "{{ custom_ssh_identity|d('') }}" != "None"; then
+    ssh_opts="-i {{ custom_ssh_identity }}"
+  fi
 fi
 
 ssh -o "UserKnownHostsFile=./known_hosts.newsystem" -o "StrictHostKeyChecking=no" $ssh_opts root@$ssh_target "exit"

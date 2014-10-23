@@ -12,9 +12,6 @@ if test ! -f ./diskpassword.crypted; then
     echo "generating secret using {{ diskpassword_creation }} and encrypting it with {{ diskpassword_receiver_key }}"
     {{ diskpassword_creation }} |
     gpg --batch --yes --always-trust --recipient {{ diskpassword_receiver_id }} --output ./diskpassword.crypted --encrypt
-
-    echo "make zip of encrypted keys and shell scripts, convert that zip into a printable qrcode pdf"
-    tar c --xz --exclude linux --exclude initrd.gz --exclude .vagrant 
 fi
 
 if test "{{ netcfg.ip|d('') }}" = ""; then
@@ -25,7 +22,9 @@ fi
 
 ssh_opts=""
 if test "{{ custom_ssh_identity|d('') }}" != ""; then
-  ssh_opts="-i {{ custom_ssh_identity }}"
+  if test "{{ custom_ssh_identity|d('') }}" != "None"; then
+    ssh_opts="-i {{ custom_ssh_identity }}"
+  fi
 fi
 
 echo -n  "testing access to target: "
