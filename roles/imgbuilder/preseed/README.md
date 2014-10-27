@@ -94,6 +94,13 @@ Prepare and install machine:
 
  * ssh into installer and resume installation at will
    * ./nw_console.sh
+     * optional: select "start shell"
+       * add custom settings like VG_NAME, HOST_ROOT_SIZE, HOST_SWAP_SIZE using "nano /tmp/custom.env"
+         * defaults for VG_NAME=`debconf-get partman-auto-lvm/new_vg_name` if set or `debconf-get netcfg/get_hostname`
+         * defaults for HOST_ROOT_SIZE='4G'
+         * defaults for HOST_SWAP_SIZE='2G'
+       * exit
+     * continue installation: select "continue installation"
 
  * after the installer is finished, and the machine is rebooted, open the cryptodisks on new machine, save hostkey.initramfs
    * you may remove old ssh known_hosts entry before this will work

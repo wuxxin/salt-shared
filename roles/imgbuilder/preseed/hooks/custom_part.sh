@@ -5,15 +5,10 @@
 # Partman appears to be entirely an external program, 
 # removing the call to partman from partman-base.postinst prevents it from running.
 
-if test -f /usr/share/debconf/confmodule; then
-    . /usr/share/debconf/confmodule
-fi
-
 VG_NAME=`debconf-get partman-auto-lvm/new_vg_name`
 if test "$VG_NAME" = ""; then
     VG_NAME=`debconf-get netcfg/get_hostname`
 fi
-
 HOST_ROOT_SIZE='4G'
 HOST_SWAP_SIZE='2G'
 DISKPASSWORD=''
