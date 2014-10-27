@@ -5,5 +5,7 @@ tar cf {{ hostname }}.config.tar.xz . --exclude linux --exclude initrd.gz --excl
 --exclude {{ hostname }}.config.tar.xz --exclude {{ hostname }}.config.tar.xz.pdf --exclude diskpassword.crypted.pdf
 ./data2qrpdf.sh {{ hostname }}.config.tar.xz
 
-echo "make diskpassword key only qrcode PDF"
-./data2qrpdf.sh diskpassword.crypted
+if test -f diskpassword.crypted; then
+  echo "make diskpassword key only qrcode PDF"
+  ./data2qrpdf.sh diskpassword.crypted
+fi

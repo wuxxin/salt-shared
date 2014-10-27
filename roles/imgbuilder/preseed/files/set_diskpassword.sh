@@ -38,6 +38,6 @@ echo "you may be asked 1.) for the gpg encryption passphrase and then 2.) for yo
 
 ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" \
 -f  -e none $ssh_opts root@$ssh_target \
-"echo -e \"diskpassword=$(cat ./diskpassword.crypted | gpg --decrypt)\n\" > /tmp/custom.env"
+"echo -e \"DISKPASSWORD=$(cat ./diskpassword.crypted | gpg --decrypt)\n\" > /tmp/custom.env"
 
 echo "now execute ./nw-console.sh, to shell into target machine, for resuming installation"

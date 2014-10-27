@@ -11,6 +11,7 @@ git-crypt:
       - libssl-dev
       - build-essential
       - git-buildpackage
+      - debhelper
   git.latest:
     - name: https://github.com/AGWA/git-crypt.git
     - target: {{ workdir }}

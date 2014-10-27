@@ -5,19 +5,25 @@
 # Partman appears to be entirely an external program, 
 # removing the call to partman from partman-base.postinst prevents it from running.
 
-VG_NAME='vg0'
-RESERVED_END='2304Mib'
+if test -f /usr/share/debconf/confmodule; then
+    . /usr/share/debconf/confmodule
+fi
+
+VG_NAME=`debconf-get partman-auto-lvm/new_vg_name`
+if test "$VG_NAME" = ""; then
+    VG_NAME=`debconf-get netcfg/get_hostname`
+fi
+
 HOST_ROOT_SIZE='4G'
 HOST_SWAP_SIZE='2G'
-
-diskpassword=''
+DISKPASSWORD=''
 
 if test -f /tmp/custom.env; then
   . /tmp/custom.env
 fi
 
 SYSTEM_NAME=${VG_NAME}
-if test -n "$diskpassword"; then
+if test -n "$DISKPASSWORD"; then
     SYSTEM_NAME=luks_${VG_NAME}
 fi
 
@@ -57,8 +63,8 @@ case "$1" in
       parted -s $disk -- mkpart boot 2048Kib 256Mib
       parted -s $disk -- set 2 boot on
       parted -s $disk -- set 2 raid on
-      parted -s $disk -- mkpart reserved 256Mib ${RESERVED_END}
-      parted -s $disk -- mkpart ${SYSTEM_NAME} ${RESERVED_END} 100%
+      parted -s $disk -- mkpart reserved 256Mib 2304Mib
+      parted -s $disk -- mkpart ${SYSTEM_NAME} 2304Mib 100%
       parted -s $disk -- set 4 raid on
     done
 
@@ -79,16 +85,16 @@ case "$1" in
       RAW_SYSTEM_DEV=/dev/${RAW_SYSTEM_NAME}
     fi
 
-    if test -n "$diskpassword"; then
+    if test -n "$DISKPASSWORD"; then
         apt-install cryptsetup
 
         LUKS_NAME=${RAW_SYSTEM_NAME}_luks
         SYSTEM_DEV=/dev/mapper/${LUKS_NAME}
         echo "LuksFormat $RAW_SYSTEM_DEV"
-        echo "$diskpassword" | cryptsetup -q luksFormat $RAW_SYSTEM_DEV
+        echo "$DISKPASSWORD" | cryptsetup -q luksFormat $RAW_SYSTEM_DEV
         sleep 2
         echo "LuksOpen $RAW_SYSTEM_DEV $LUKS_NAME"
-        echo "$diskpassword" | cryptsetup luksOpen $RAW_SYSTEM_DEV $LUKS_NAME
+        echo "$DISKPASSWORD" | cryptsetup luksOpen $RAW_SYSTEM_DEV $LUKS_NAME
         sleep 2
     else
         SYSTEM_DEV=$RAW_SYSTEM_DEV
@@ -122,7 +128,7 @@ case "$1" in
     echo proc                                /proc   proc defaults                    0  0 >> /target/etc/fstab
 
     # create crypttab, schedule installation of cryptsetup and dropbear if we use encryption
-    if test -n "$diskpassword"; then
+    if test -n "$DISKPASSWORD"; then
         echo "$LUKS_NAME $RAW_SYSTEM_DEV none luks" > /target/etc/crypttab
     fi
 
