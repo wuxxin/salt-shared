@@ -13,5 +13,6 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 
-ssh -o "UserKnownHostsFile=./known_hosts.newsystem" -o "StrictHostKeyChecking=no" $ssh_opts root@$ssh_target "exit"
+ssh -o "UserKnownHostsFile=./known_hosts.newsystem" -o "StrictHostKeyChecking=no" $ssh_opts root@$ssh_target $@
+
 

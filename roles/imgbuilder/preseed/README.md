@@ -4,10 +4,11 @@ Debian/Ubuntu Preseed and Initrd Generator
 Target:
 -------
 
- To make an customized automated install with advanced features.
-
- Beside some convinience features, its main target is a post-snowden setup,
+ A post-snowden root server setup generation tool,
  meaning a secure way to remotely install a server with fulldisk encryption. (eg. wholedisk RAID / CRYPT / LVM )
+
+ Secondary Target: a customized automated install with advanced features.
+
  currently Ubuntu 14.04 only, should be possible to adopt to other versions and debian derivates.
 
  * use it via:
@@ -20,7 +21,7 @@ Features:
 ---------
  * generates a customized initrd and kernel usable for many types of unattended installation
    (including a ISO image version, and support for whole disk encryption)
- * haveged (entropy generator) on install time
+ * haveged (entropy generator) early on install time
  * network console interactive ssh install with tmux on install time
  * you can choose from different flavors of disk partitioning including a custom partition installer:
    * standard flavors: simple, plain, lvm, lvm_crypt
@@ -31,7 +32,8 @@ Features:
  * uses an apt-proxy for package download if apt_proxy_mirror is present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
-   * this enables both root and main user access via ssh authorized_keys, but deletes/locks the mainuser password
+   * this enables both root and main user access via ssh authorized_keys, 
+     but deletes & locks the mainuser password
      and sudo is configured to sudo from main user without password
  * a optional watcher that reset the machine after a certain amount of time (in case automated install goes wrong)
    * to activate include a custom_file "/reboot.seconds" into the setup (with seconds as value inside file)
@@ -39,12 +41,12 @@ Features:
 Example:
 ........
 
- * headless server setup with two disks:
-  luks encryption, raid1 on top, lvm on top, 
+ * headless server setup with two disks:  luks encryption, raid1 on top, lvm on top,
   ssh daemon inside initrd with the possiblity to ssh into and unlock the crypto root partition and boot
 
- * use roles.imgbuilder.lib.sls to make a custom configuration
- * example see prepare.sls
+ * use roles.imgbuilder.prepare.sls as a start for a custom configuration
+ * execute "salt-call state.sls yourpreparestate.sls" to generate kernel,initrd and shell scripts setup
+ * go to "prepare and install machine"
 
 Usage:
 ------
@@ -107,7 +109,7 @@ Prepare and install machine:
    * ./luksOpen.sh
 
  * check installation, and save host key
-   * ./connect_new.sh
+   * ./connect_new.sh exit
 
  * create a config archive and a printable qr code pdf of this archive
    * ./make_paper_config.sh
@@ -132,9 +134,14 @@ kexec enabled distros:
 TODO:
 -----
 
+ * defaults.jinja: apt-proxy-mirror needs a pillar default instead a hardcoded entry
  * grub: textonly, no quiet as boot parameter
  * extensions:
    * add haveged also in initramfs of target boot
    * pwgen in initrd and seed debconf with it, use gpg to crypt for receiver and 
+      *) needs gpg in the in-target setup
       1.) transfer file via scp to a target host before reboot
       2.) wait before reboot until file is marked as transfered
+   * add qemu/kvm into initrd, start qemu/kvm with nested virtualization start a virtual machine inside the virtual machine
+    * measure: tsc times on bare metal, 1level virtualization, 2ndlevel virtualization, make sanity checks,
+      * mark system as "tainted" , delay ssh startup and for 5/10/whatever minutes if sanity checks fail

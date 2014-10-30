@@ -1,7 +1,5 @@
 include:
   - .init
-  - gpg
-  - qrcode
 
 # preseed_make
 ###############

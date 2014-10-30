@@ -1,11 +1,11 @@
 #!/bin/bash
 
 if test ! -f ./diskpassword.crypted; then 
-    echo "importing {{ diskpassword_receiver_key }}.key.asc into local keychain"
+    echo "importing {{ diskpassword_receiver_id }}.key.asc into local keychain"
     gpg --batch --yes --import ./{{ diskpassword_receiver_id }}.key.asc
 
     if test -f ./{{ diskpassword_receiver_id }}.secret.asc; then
-        echo "importing {{ diskpassword_receiver_key }}.secret.asc into local keychain"
+        echo "importing {{ diskpassword_receiver_id }}.secret.asc into local keychain"
         gpg --batch --yes --import ./{{ diskpassword_receiver_id }}.secret.asc
     fi
 
@@ -39,5 +39,9 @@ echo "you may be asked 1.) for the gpg encryption passphrase and then 2.) for yo
 ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -o "StrictHostKeyChecking=no" \
 -f  -e none $ssh_opts root@$ssh_target \
 "echo -e \"DISKPASSWORD=$(cat ./diskpassword.crypted | gpg --decrypt)\n\" > /tmp/custom.env"
-
-echo "now execute ./nw-console.sh, to shell into target machine, for resuming installation"
+x=$?
+if test $x -ne 0; then
+  echo "ERROR: ssh exited with error code $x"
+else
+  echo "now execute ./nw-console.sh, to shell into target machine, for resuming installation"
+fi

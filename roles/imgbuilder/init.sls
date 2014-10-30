@@ -3,6 +3,7 @@ include:
   - .local-ruby
   - .packer
   - .vagrant
+  - .preseed
 
 
 /mnt/images/templates/imgbuilder:
