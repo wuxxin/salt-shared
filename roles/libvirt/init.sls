@@ -8,8 +8,10 @@ include:
 libvirt:
   pkg.installed:
     - pkgs:
-      - ubuntu-virt-server
       - libvirt-bin
+      - libguestfs
+      - libguestfs-tools
+      - ubuntu-virt-server
       - qemu-kvm
       - virt-viewer
       - virt-manager

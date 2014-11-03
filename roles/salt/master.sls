@@ -4,6 +4,9 @@ include:
 {% if pillar.salt.reactor.status=="present" %}
   - .reactor
 {% endif %}
+{% if pillar.salt.git-crypt.status=="present" %}
+  - .git-crypt_pillar
+{% endif %}
 
 python-pip:
   pkg.installed

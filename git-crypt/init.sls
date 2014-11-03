@@ -26,22 +26,13 @@ git-crypt:
       - git: git-crypt
   cmd.run:
     - cwd: {{ workdir }}
-    - name: git-buildpackage -uc -us --git-ignore-new
+    - name: "git-buildpackage -uc -us --git-ignore-new && DEBIAN_FRONTEND=noninteractive dpkg -i `ls {{ tempdir }}/*.deb`"
     - require:
       - file: git-crypt
-
-git-crypt-install:
-  cmd.run:
-    - name: "DEBIAN_FRONTEND=noninteractive dpkg -i `ls {{ tempdir }}/*.deb`"
-    - require:
-      - cmd: git-crypt
 
 git-crypt-cleanup:
   file.absent:
     - name: {{ tempdir }}
     - require:
-      - cmd: git-crypt-install
-
-
-
+      - cmd: git-crypt
 

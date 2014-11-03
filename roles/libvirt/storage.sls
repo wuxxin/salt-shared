@@ -1,17 +1,4 @@
 
-volumes.images:
-  cmd.run:
-    - name: lvcreate -L {{ pillar.libvirt.volumes.images.size }} -n images {{ pillar.libvirt.volumes.images.vg }} && mkfs.{{ pillar.libvirt.volumes.images.fstype }} /dev/{{ pillar.libvirt.volumes.images.vg }}/images
-    - unless: lvs {{ pillar.libvirt.volumes.images.vg }}/images
-  mount.mounted:
-    - name: {{ pillar.libvirt.volumes.images.mount }}
-    - device: /dev/{{ pillar.libvirt.volumes.images.vg }}/images
-    - fstype: {{ pillar.libvirt.volumes.images.fstype }}
-    - mkmnt: True
-    - persist: True
-    - require:
-      - cmd: volumes.images
-
 /etc/libvirt/storage/autostart:
   file.directory:
     - makedirs: True
