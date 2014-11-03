@@ -5,11 +5,11 @@
 grub-settings:
   file.append:
     - name: /etc/default/grub
-    - text: 'GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0,9600n8 console=tty0 text nosplash nomodeset nohz=off transparent_hugepage=always"'
+    - text: 'GRUB_CMDLINE_LINUX_DEFAULT="text nosplash nomodeset nohz=off transparent_hugepage=always"'
 grub-settings2:
   file.append:
     - name: /etc/default/grub
-    - text: 'GRUB_CMDLINE_LINUX="console=ttyS0,9600n8 console=tty0 text nosplash nomodeset nohz=off transparent_hugepage=always"'
+    - text: 'GRUB_CMDLINE_LINUX="text nosplash nomodeset nohz=off transparent_hugepage=always"'
 
 update-grub:
   cmd.run:
