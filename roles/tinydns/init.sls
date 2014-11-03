@@ -43,7 +43,7 @@ djbdns:
 
 /etc/sv:
   file.recurse:
-    - source: salt://roles/dns/sv
+    - source: salt://roles/tinydns/sv
     - template: jinja
     - defaults: 
         dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
@@ -54,7 +54,7 @@ djbdns:
 
 /etc/sv/tinydns/root/data:
   file.managed:
-    - source: {{ "%s" % pillar.dns_server.data if pillar.dns_server.data else 'salt://roles/dns/localhost' }}
+    - source: {{ "%s" % pillar.dns_server.data if pillar.dns_server.data else 'salt://roles/tinydns/localhost' }}
     - require:
       - file: /etc/sv
 
@@ -79,7 +79,7 @@ create_seed:
 
 /etc/sv/axfrdns/tcp:
   file.managed:
-    - source: salt://roles/dns/axfr_permissions
+    - source: salt://roles/tinydns/axfr_permissions
     - template: jinja
     - context:
       permissions: {{ pillar.dns_server.axfr_permissions|d(None) }}
@@ -131,7 +131,7 @@ axfrdns_export:
 {% for n,s in dnscache_follow.iteritems() %}
 /etc/sv/dnscache/root/servers/{{ n }}:
   file.managed:
-    - source: salt://roles/dns/dnsfollow
+    - source: salt://roles/tinydns/dnsfollow
     - template: jinja
     - context:
         ip: {{ "%s" % s if s != '' else '127.0.0.1' }}
