@@ -1,36 +1,56 @@
 {% load_yaml as defaults %} 
-libvirt:
-  networks:
-    - default: |
-        <network>
-          <name>default</name>
-          <forward mode='nat'/>
-          <bridge name="isobr0" />
-          <forward/>
-          <ip address="10.9.141.1" netmask="255.255.255.0">
-            <dhcp>
-              <range start="10.9.141.2" end="10.9.141.64" />
-            </dhcp>
-          </ip>
-        </network>
+networks:
+  default: |
+    <network>
+      <name>default</name>
+      <forward mode='nat'/>
+      <bridge name="isobr0" />
+      <forward/>
+      <ip address="10.9.141.1" netmask="255.255.255.0">
+        <dhcp>
+          <range start="10.9.141.2" end="10.9.141.64" />
+        </dhcp>
+      </ip>
+    </network>
 
-  storage:
-    - default: |
-        <pool type='dir'>
-          <name>default</name>
-          <capacity>0</capacity>
-          <allocation>0</allocation>
-          <available>0</available>
-          <source>
-          </source>
-          <target>
-            <path>/mnt/images/default</path>
-            <permissions>
-              <mode>0700</mode>
-              <owner>-1</owner>
-              <group>-1</group>
-            </permissions>
-          </target>
-        </pool>
+storage:
+  default: |
+    <pool type='dir'>
+      <name>default</name>
+      <capacity>0</capacity>
+      <allocation>0</allocation>
+      <available>0</available>
+      <source>
+      </source>
+      <target>
+        <path>/srv/images/default</path>
+        <permissions>
+          <mode>0700</mode>
+          <owner>-1</owner>
+          <group>-1</group>
+        </permissions>
+      </target>
+    </pool>
+
+custom_storage:
+  directories:
+    /srv/images:
+      options:
+        - user: libvirt-qemu
+        - group: libvirtd
+        - dir_mode: 2775
+      names:
+        - default
+        - iso
+        - templates
+        - tmp
+  relocate:
+    /var/lib/libvirt/images:
+      destination: /srv/images/default
+      copy_content: true
+      require_in: "service: libvirt"
 
 {% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('libvirt', {})) %}

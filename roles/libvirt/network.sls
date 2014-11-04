@@ -1,13 +1,17 @@
+{% from "roles/libvirt/defaults.jinja" import settings as s with context %} 
 
-/etc/libvirt/qemu/networks:
-  file.recurse:
-    - source: {{ pillar.libvirt.networks if pillar['libvirt']['networks'] else 'salt://roles/libvirt/networks/' }}
+/etc/libvirt/qemu/networks/autostart:
+  file.directory:
+    - makedirs: True
 
-#{% for n in salt['file.find']('/etc/libvirt/qemu/networks',name='*', types='f') %}
-#/etc/libvirt/qemu/networks/autostart/{{ n }}:
-#  file.symlink:
-#    - target: /etc/libvirt/qemu/networks/{{ n }}
-#    - require:
-#      - file: /etc/libvirt/qemu/networks
-#{% endfor %}
+{% for item, data in s.networks.iteritems() %}
+/etc/libvirt/qemu/networks/{{ item }}.xml:
+  file.managed:
+    - contents: "{{ data }}"
 
+/etc/libvirt/qemu/networks/autostart/{{ item }}.xml:
+  file.symlink:
+    - target: /etc/libvirt/qemu/networks/{{ item }}.xml
+    - require:
+      - file: /etc/libvirt/qemu/networks/{{ item }}.xml
+{% endfor %}
