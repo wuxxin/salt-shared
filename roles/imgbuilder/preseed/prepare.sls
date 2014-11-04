@@ -1,3 +1,4 @@
+{% from "roles/imgbuilder/defaults.jinja" import settings as base_settings with context %}
 {% from "roles/imgbuilder/preseed/defaults.jinja" import template as settings with context %}
 
 {% do settings.update({
@@ -21,8 +22,8 @@ copy-diskpassword:
   file.managed:
     - name: {{ settings.target }}/disk.passwd
     - contents: "{{ settings.diskpassword }}"
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ base_settings.user }}
+    - group: {{ base_settings.user }}
     - mode: 600
 
 {% from 'roles/imgbuilder/preseed/iso.sls' import mk_install_iso with context %}

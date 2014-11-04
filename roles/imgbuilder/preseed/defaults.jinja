@@ -3,6 +3,7 @@
 {% set architecture= "amd64" %}
 {% set hash= "md5=35f591c65c83b19220bdf41d9c26e5da" %}
 {% set suite= "trusty" %}
+{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
 suite: {{ suite }}
 architecture: {{ architecture }}
@@ -16,7 +17,7 @@ cmdline: 'DEBCONF_DEBUG=5 ro hostname={{ suite }} auto=true priority=critical de
 
 templates: 'salt://roles/imgbuilder/preseed/preseed'
 hooks: 'salt://roles/imgbuilder/preseed/hooks'
-target: '/mnt/images/templates/imgbuilder/preseed'
+target: '{{ s.image_base }}/templates/imgbuilder/preseed'
 
 disks: /dev/vda
 diskpassword_creation: 'pwgen -s 22 1'

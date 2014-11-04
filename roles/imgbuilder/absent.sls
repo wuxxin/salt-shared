@@ -1,3 +1,4 @@
+
 imgbuilder:
   cmd.run:
     - name: rm -r /home/imgbuilder

@@ -6,11 +6,13 @@ include:
   - .preseed
 
 
-/mnt/images/templates/imgbuilder:
+{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
+
+{{ s.image_base }}/templates/imgbuilder:
   file.directory:
-    - user: imgbuilder
+    - user: {{ s.user }}
     - group: libvirtd
     - mode: 775
     - makedirs: True
     - require:
-      - user: imgbuilder
+      - user: {{ s.user }}

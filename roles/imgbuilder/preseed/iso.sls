@@ -4,8 +4,10 @@ iso-env:
       - syslinux
       - genisoimage
 
+
 {% macro mk_install_iso(cs) %}
 
+{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 {% set tmp_target=cs.target+ "/CD_root" %}
 
 iso-clean-tmp_target:
@@ -15,8 +17,8 @@ iso-clean-tmp_target:
 iso-make-tmp_target:
   file.directory:
     - name: {{ tmp_target }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ s.user }}
+    - group: {{ s.user }}
     - makedirs: true
     - require:
       - file: iso-clean-tmp_target

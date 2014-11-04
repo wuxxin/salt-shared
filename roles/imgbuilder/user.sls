@@ -1,3 +1,6 @@
+
+{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
+
 imgbuilder:
   pkg:
     - installed
@@ -7,11 +10,14 @@ imgbuilder:
       - libguestfs-tools
   group:
     - present
+    - name: {{ s.user }}
   user:
     - present
-    - gid: imgbuilder
-    - home: /home/imgbuilder
+    - name: {{ s.user }}
+    - gid: {{ s.user }}
+    - home: /home/{{ s.user }}
     - shell: /bin/bash
+    - remove_groups: False
     - groups:
       - kvm
       - libvirtd
@@ -19,9 +25,9 @@ imgbuilder:
       - group: imgbuilder
       - pkg: imgbuilder
   file.directory:
-    - name: /home/imgbuilder/.ssh
-    - user: imgbuilder
-    - group: imgbuilder
+    - name: /home/{{ s.user }}/.ssh
+    - user: {{ s.user }}
+    - group: {{ s.user }}
     - mode: 700
     - require:
       - user: imgbuilder
