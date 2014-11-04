@@ -33,7 +33,7 @@ def reset_keystore(gpghome):
         if os.path.isfile(path):
             os.remove(path)
 
-def gen_keypair(ownername, secretkey_filename, publickey_filename, keylength= 2048, ask_passphrase=False):
+def gen_keypair(ownername, secretkey_filename, publickey_filename, keylength= 2560, ask_passphrase=False):
     ''' writes a pair of ascii armored key files, first is secret key, second is publickey, minimum ownername length is five'''
     
     gpghome = tempfile.mkdtemp()
