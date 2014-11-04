@@ -1,7 +1,7 @@
 djbdns:
   pkg.removed:
     - pkgs:
-      - djbdns
+      - dbndns
       - runit
     - require:
       - cmd: dnscache_remove

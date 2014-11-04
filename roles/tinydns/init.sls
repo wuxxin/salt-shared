@@ -1,7 +1,7 @@
 djbdns:
   pkg.installed:
     - pkgs:
-      - djbdns
+      - dbndns
       - daemontools
       - runit
 
