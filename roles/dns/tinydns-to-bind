@@ -1,0 +1,128 @@
+#!/bin/bash
+#
+#http://www.ripe.net/ripe/maillists/archives/dns-wg/2005/msg00310.html
+#It is recommended to take note of these values, in order to restore this
+#configuration after the migration process is completed. Suggested values
+#for this field depend of the load of the servers, how critical the
+#services are, and if they can be duplicated. If some of them can be
+#duplicated and/or are not critical, the values can be relaxed.
+#Field          Old value       New value without dupl. New value with dupl.
+#Serial number  X               X+1                     X+1
+#Refresh        86400           300                     14400
+#Retry          7200            150                     (=)7200
+#Expire         2592000         (=)2592000              (=)2592000
+#TTL            172800          300                     14400
+#
+#
+#script takes tinydns data file (between-domains separator is three lines),
+
+#
+##--------------------(domain.com)-------------------------------------------
+#
+
+#then it separates each domain into file named as current record
+#numer (NR), and then each file is parsed and saved as bind zone file
+#finally, zone statement is added to config file, which may be included
+#in bind configuration. generated splitted files are removed.
+
+echo "START: $(date)"
+for zonefile in `ls|egrep '^[0-9]+$'|sort -n`; do rm $zonefile; done
+
+TINYDNSDATAFILE="/service/tinydns/root/data"
+awk 'BEGIN { RS = "##"; ORS = "" } { print RS$0 >> NR }' $TINYDNSDATAFILE
+
+CURRDATE=`date +%Y%m%d`
+CURRCONF=named.conf.master
+rm $CURRCONF 2>/dev/null
+
+for zonefile in `ls|egrep '^[0-9]+$'|sort -n`; do
+    if ( grep "##-.*--$" $zonefile 2>&1 >> /dev/null); then
+        CURRDOMNAME=`echo $(egrep "##--.*\(" $zonefile)| sed -e 's/^.*(//g'| sed -e 's/).*$//g'`;
+        CURRFILENAME=db.$CURRDOMNAME
+        rm db.$CURRDOMNAME 2>/dev/null
+
+        for i in "Z" "&" "@" "S" "+" "X";
+        do
+                case $i in
+                        "Z")
+
+#Zdomain.com:genhost.com.:dnsadmin.foo.com.:2006022201:3600:864:7200:3600
+                                ZLINE=`grep ^Z $zonefile|cut -d'Z' -f2-`
+                                MASTER=`echo $ZLINE|cut -d':' -f2`
+                                ADMIN=`echo $ZLINE|cut -d':' -f3`
+                                echo -e ";" >> $CURRFILENAME
+                                echo -e ";; BIND data file" >> $CURRFILENAME
+                                echo -e ";" >> $CURRFILENAME
+                                echo -e "\$TTL  300" >> $CURRFILENAME
+                                echo -e "@     IN      SOA     $MASTER $ADMIN (" >> $CURRFILENAME
+                                echo -e "$CURRDATE"05"  ; Serial" >> $CURRFILENAME
+                                echo -e " 300    ; Refresh" >> $CURRFILENAME
+                                echo -e " 150    ; Retry" >> $CURRFILENAME
+                                echo -e " 614440 ; Expire" >> $CURRFILENAME
+                                echo -e " 300 ); Negative Cache TTL" >> $CURRFILENAME
+                                echo -e ";" >> $CURRFILENAME
+                                echo "\$ORIGIN $CURRDOMNAME." >>$CURRFILENAME
+                                ;;
+                        "&")
+                                COUNTER=0
+                                #handling ns records, firstline is considered master - @ at the line start
+                                #&domain.com::ns.server.name.com 
+                                for nsname in `grep '^&'$CURRDOMNAME $zonefile|cut -d'&' -f2|cut -d':' -f3`; do
+                                COUNTER=`expr $COUNTER + 1`
+                                if ( [ $COUNTER -le 1 ]);
+                                        then echo "@            IN NS      $nsname"  >> $CURRFILENAME
+                                        else
+                                        echo "          IN      NS $nsname"  >> $CURRFILENAME
+                                fi
+
+                                done
+                                ;;
+                        "@")
+                                #handling MX records with priority
+(last field)
+                                #@domain.com::mx.server.name.coml.:2
+                                for mxline in `grep '^@' $zonefile|cut -d'@' -f2`; do
+                                        MXNAME=`echo $mxline|cut -d':' -f3`
+                                        MXPRIORITY=`echo $mxline|cut -d':' -f4`
+                                        echo "          IN      MX $MXPRIORITY $MXNAME"  >> $CURRFILENAME
+                                done
+                                ;;
+                        "+")
+                                #handling A records
+                                for aline in `grep '^\+' $zonefile|cut -d'+' -f2`; do
+                                        ANAME=`echo $aline|cut -d':' -f1`.
+                                        AIP=`echo $aline|cut -d':' -f2`
+                                        echo "$ANAME            IN A       $AIP"  >> $CURRFILENAME
+                                done
+
+                                ;;
+                        "X")
+                               #handling zone statements for domain
+                                echo "zone \"$CURRDOMNAME\" {" >> $CURRCONF
+                                echo "  type master;" >> $CURRCONF
+                                echo "  zone-statistics yes;" >> $CURRCONF
+                                echo "  file \"/etc/bind/master/db.$CURRDOMNAME\";" >> $CURRCONF
+                                echo "};" >> $CURRCONF
+                                ;;
+                        "S")
+                                #handling delegated subdomains #&domain.com::this.subdomain.nsserver.com
+                                for nsdlgline in `grep '^&' $zonefile|grep -v '^&'$CURRDOMNAME |cut -d'&' -f2-`; do
+                                        CURRDLGDOM=`echo $nsdlgline|cut -d':' -f1`
+                                        CURRDLGNS=`echo $nsdlgline|cut -d':' -f3`
+                                        echo "$CURRDLGDOM.      IN NS      $CURRDLGNS"  >> $CURRFILENAME
+                                done
+                                ;;
+                esac;
+        done;
+    fi
+done
+
+for zonefile in `ls|egrep '^[0-9]+$'|sort -n`; do rm $zonefile; done
+
+for moved in `cat moved-domains 2>/dev/null`; do
+        echo "zone \"$moved\" {" >> $CURRCONF
+        echo "  type forward;" >> $CURRCONF
+        echo "  forward only;" >> $CURRCONF
+        echo "  forwarders { 217.153.189.162; };" >> $CURRCONF
+        echo "};" >> $CURRCONF
+done
