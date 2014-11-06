@@ -1,0 +1,25 @@
+{% load_yaml as defaults %} 
+master:
+  config: |
+    fileserver_backend:
+      - roots
+      - git
+    pillar_roots:
+      base:
+        - /srv/pillar
+    file_roots:
+      base:
+        - /srv/salt/custom
+        - /srv/salt/salt-shared
+    file_recv: True
+    #gitfs_remotes:
+    #  - https://github.com/saltstack-formulas/docker-formula.git
+reactor:
+  base: /srv/reactor
+  includes:
+    - "roles/haproxy"
+    - "roles/dns"
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('salt', {})) %}

@@ -21,7 +21,7 @@ include:
 example_{{ x }}:
   git.latest:
     - name: https://github.com/{{ x }}.git
-    - target: /root/s/{{ x }}
+    - target: /root/salt-examples/{{ x }}
     - submodules: True
     - require:
       - pkg: git

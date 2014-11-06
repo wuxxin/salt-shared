@@ -1,11 +1,14 @@
+{% from "roles/libvirt/defaults.jinja" import settings as s with context %}
+
 include:
   - .ppa
   - .minion
-{% if pillar.salt.reactor.status=="present" %}
+{% if s.reactor.status=="present" %}
   - .reactor
 {% endif %}
-{% if pillar.salt.git-crypt.status=="present" %}
-  - .git-crypt_pillar
+{% if s.git-crypt.status=="present" %}
+  - git-crypt
+  - gpg
 {% endif %}
 
 python-pip:
@@ -23,6 +26,10 @@ salt-master:
     - require:
       - pkgrepo: salt_ppa
       - pip: salt-master-dependencies
+{% if s.git-crypt.status=="present" %}
+      - cmd: git-crypt
+      - pkg: gpg
+{% endif %}
   service:
     - running
     - require:
@@ -32,7 +39,7 @@ salt-master:
   file.managed:
     - user: root
     - group: root
-    - source: {{ pillar.salt.master.config }}
+    - content: {{ s.master.config }}
     - mode: 644
     - watch_in:
       - service: salt-master
