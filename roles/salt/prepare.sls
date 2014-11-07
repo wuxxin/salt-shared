@@ -1,6 +1,10 @@
 include:
   - git-crypt
 
+{% from "roles/salt/lib.sls" import saltmaster_make with context %}
+
+{{ saltmaster_make(None) }}
+
 {#
 
 macro prepare_saltmaster
@@ -9,7 +13,7 @@ paths_to_pillar
 paths_to_salt
 salt_master_config
 gpg_key of the user which the saltmaster gpg key is encrypted
-target_dir on preperation machine
+target_preperation_dir on preperation machine
 target_dir on target
 
 steps:
@@ -18,9 +22,10 @@ steps:
 . crypt saltmaster private gpg key with gpg_key of user
 . add public key of this to every path where git-crypt says its working
 . git-crypt lock on every path
-. make tar.gz out of temporary dir (without parents)
+. make tar.gz out of temporary dir (without parents) and save it under target_preperation_dir
 . remove temporary dir
-. generate a bootstrap.sh that:
+
+. generate a install_sw.sh script in target_preperation_dir that:
   . connects to target host
   . transfers tar.gz to target
   . installs gpg and inserts keys into keychain of root
