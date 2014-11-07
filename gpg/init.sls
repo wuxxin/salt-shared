@@ -1,3 +1,3 @@
-gpg:
+gnupg:
   pkg:
     - installed

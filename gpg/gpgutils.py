@@ -36,9 +36,7 @@ def reset_keystore(gpghome):
 def gen_keypair(ownername, secretkey_filename, publickey_filename, keylength= 2560, ask_passphrase=False):
     ''' writes a pair of ascii armored key files, first is secret key, second is publickey, minimum ownername length is five'''
     
-    gpghome = tempfile.mkdtemp()
-
-    batch_args = ""
+    batch_args = "%echo Generating key\n"
     if _strbool(ask_passphrase):
         batch_args += "%ask-passphrase\n"
 
@@ -47,13 +45,11 @@ def gen_keypair(ownername, secretkey_filename, publickey_filename, keylength= 25
 
     batch_args += "%commit\n%echo done\n"
     
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--armor', '--yes', '--gen-key']
+    args = [GPG_EXECUTABLE, '--no-default-keyring', '--batch', '--armor', '--yes', '--gen-key']
     popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, empty = popen.communicate(batch_args)
     popen.stdin.close()
     returncode = popen.returncode
-    
-    reset_keystore(gpghome) # wipe keystore after keypair creation
     
     if returncode != 0:
         raise IOError('gpg --gen-key returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
@@ -68,7 +64,29 @@ def import_key(keyfile, gpghome):
     returncode = popen.returncode
     if returncode != 0:
         raise IOError('gpg --import returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
-   
+
+def set_ownertrust(userid, trustlevel=5, gpghome)
+    ''' edit a already imported key and change the trustlevel (default 5=ultimate trust) '''
+    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
+"""
+gpg --fingerprint --with-colons --list-keys |
+  awk -F: -v keyname="$1" -v trustlevel="$2" '
+        $1=="pub" && $10 ~ keyname { fpr=1 }
+        $1=="fpr" && fpr { fpr=$10; exit }
+        END {
+            cmd="gpg --export-ownertrust"
+            while (cmd | getline) if ($1!=fpr) print
+            close(cmd)
+            print fpr ":" trustlevel ":"
+        }
+    ' | gpg --import-ownertrust
+"""
+    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+    stdout, empty = popen.communicate()
+    returncode = popen.returncode
+    if returncode != 0:
+        raise IOError('gpg returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
+
 def publickey_list(gpghome):
     ''' returns a string listing all keys in keystore of gpghome '''
     args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
@@ -83,7 +101,7 @@ def publickey_list(gpghome):
 def secretkey_list(gpghome):
     ''' returns a string listing all keys in keystore of gpghome '''
     args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
-        '--with-colons', '--list-secret-keys', '--with-fingerprint', '--with-fingerprint']
+        '--with-colons', '--list-secret-keys', '--with-fingerprint']
     popen = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     stdout, stderr = popen.communicate()
     returncode = popen.returncode
