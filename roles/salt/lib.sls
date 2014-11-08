@@ -4,11 +4,12 @@ include:
 # salt - master - make
 ##########################
 
-{% macro saltmaster_make(s, publicgpg_key, publicgpg_id, targetdir, targethost_targetdir) %}
+{% macro saltmaster_make(s, gpg_key_location, gpg_id, make_targetdir, hostname, host_targetdir) %}
 
 {% set salt_config=s.master.config|load_yaml %}
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
 {% set workdir= tempdir+ '/data' %}
+{% set gpg_key= tempdir+ '/'+ salt['cmd.run_stdout']('basename '+ gpg_key_location) %}
 
 {% for a in ("salt", "reactor", "pillar") %}
 smm-makedir-{{ a }}:
@@ -29,6 +30,67 @@ copy_pillardir_{{ a }}:
     - name: cp -ar -t {{ workdir }}/ {{ a }}
 {% endfor %}
 
+# this generates a new gpg key and pipes the secret portion of the key to gpg again to crypt it with the target recipient
+# note: generated secret key never touches storage unencrypted
+copy-publickey:
+  file.managed:
+    - name: {{ gpg_key }}
+    - source: {{ gpg_key_location }}
+
+import-target-publickey:
+  cmd.run:
+    - cwd: {{ tempdir }}
+    - name: gpg --batch --yes --no-default-keyring --keyring ./tempring --secret-keyring ./tempring.sec --import {{ gpg_key }}
+    - require:
+      - file: copy-publickey
+
+generate-saltmaster-gpgkey:
+  cmd.run:
+    - cwd: {{ tempdir }}
+    - name: | 
+       gpg --batch --yes --no-default-keyring --armor --enable-special-filenames --gen-key 3> >(\
+         gpg --batch --yes --no-default-keyring --keyring ./tempring --always-trust --recipient {{ gpg_id }} \
+         --output {{ tempdir }}/saltmaster@{{ hostname }}.secret.asc.crypted --encrypt) << EOF
+       %echo Generating key
+       Key-Type: 1
+       Key-Length: 2560
+       Name-Real: saltmaster@{{ hostname }}
+       Expire-Date: 0
+       %pubring {{ tempdir }}/saltmaster@{{ hostname }}.key.asc
+       %secring -&3
+       %commit
+       %echo done
+       EOF
+    - require:
+      - cmd: import-target-publickey
+
+add_key_and_lock_repos:
+  cmd.run:
+    - name: |
+        cd {{ tempdir }}
+        mkdir -m 0700 .gnupg
+        export GNUPGHOME={{ tempdir }}/.gnupg
+        gpg --batch --yes --import {{ tempdir }}/saltmaster@{{ hostname }}.key.asc
+        gpg --fingerprint --with-colons --list-keys |
+          awk -F: -v keyname="saltmaster@{{ hostname }}" -v trustlevel="6" '
+                $1=="pub" && $10 ~ keyname { fpr=1 }
+                $1=="fpr" && fpr { fpr=$10; exit }
+                END {
+                    cmd="gpg --export-ownertrust"
+                    while (cmd | getline) if ($1!=fpr) print
+                    close(cmd)
+                    print fpr ":" trustlevel ":"
+                }
+            ' | gpg --import-ownertrust
+        for a in `find {{ workdir }} -name .git-crypt -type d`; do 
+          cd $a/..
+          git-crypt add-gpg-user saltmaster@{{ hostname }}
+          git-crypt lock
+        done
+
+    - require:
+      - cmd: generate-saltmaster-gpgkey
+
 make_archive:
   cmd.run:
     - name: cd {{ workdir }}; tar caf {{ tempdir }}/saltmaster_config.tar.xz .
@@ -36,51 +98,30 @@ make_archive:
 
 copy_archive:
   file.copy:
-    - name: {{ targetdir }}/saltmaster_config.tar.xz
+    - name: {{ make_targetdir }}/saltmaster_config.tar.xz
     - source: {{ tempdir }}/saltmaster_config.tar.xz
     - makedirs: true
+    - force: true
+
+generate_install_sw:
+  file.managed:
+    - name: {{ make_targetdir }}/install_sw.sh
+
+copy_crypted_secret:
+  file.copy:
+    - name: {{ make_targetdir }}/saltmaster@{{ hostname }}.secret.asc.crypted
+    - source: {{ tempdir }}/saltmaster@{{ hostname }}.secret.asc.crypted
+    - force: true
 
 {% endmacro %}
 
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
 
-{{ saltmaster_make(s, "salt://roles/imgbuilder/files/insecure_gpgkey.key.asc", "insecure_gpgkey", "/mnt/images/templates/imgbuilder/omoikane/", "/srv") }} 
+{{ saltmaster_make(s, "salt://roles/imgbuilder/preseed/files/insecure_gpgkey.key.asc", "insecure_gpgkey", "/mnt/images/templates/imgbuilder/omoikane", "omoikane","/srv") }} 
 
 {#
-
-generate-saltmaster-gpgkey:
-  cmd.run:
-    - name: gpg --genkey whatever && gpg encrypt key.secret.asc key.secret.asc.encrypted
-    - unless: test -f key.secret.asc.encrypted
-
-cat >foo <<EOF
-     %echo Generating a standard key
-     Key-Type: 1
-     Key-Length: 2560
-     Name-Real: Joe Tester
-     Expire-Date: 0
-     %pubring foo.pub
-     %secring foo.sec
-     # Do a commit here, so that we can later print "done" :-)
-     %commit
-     %echo done
-EOF
-gpg --no-default-keyring --batch --gen-key foo
-gpg --no-default-keyring --secret-keyring ./foo.sec --keyring ./foo.pub --list-secret-keys
-gpg  --batch --yes --always-trust --recipient userid --encrypt sourcefile --output outputfile
 # set trustlevel ($1 = userid $2=trustlevel)
 
-gpg --fingerprint --with-colons --list-keys |
-  awk -F: -v keyname="$1" -v trustlevel="$2" '
-        $1=="pub" && $10 ~ keyname { fpr=1 }
-        $1=="fpr" && fpr { fpr=$10; exit }
-        END {
-            cmd="gpg --export-ownertrust"
-            while (cmd | getline) if ($1!=fpr) print
-            close(cmd)
-            print fpr ":" trustlevel ":"
-        }
-    ' | gpg --import-ownertrust
 
 steps:
 . copy all state and pillar paths together 
