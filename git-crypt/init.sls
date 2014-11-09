@@ -5,6 +5,9 @@ include:
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
 {% set workdir= tempdir+ '/git-crypt' %}
 
+
+# FIXME: need to look if git-crypt is already installed (as debian package) and skip rest if so
+
 git-crypt:
   pkg.installed:
     - pkgs:
