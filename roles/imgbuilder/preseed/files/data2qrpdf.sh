@@ -60,7 +60,7 @@ convert -font "DejaVu Sans Mono" text:- $1 <<"EOF"
 # replace output with your desired filename
 input="*.png"; output="file.data"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update; apt-get install zbar-tools
+apt-get -y update; apt-get -y install zbar-tools
 zbarimg --raw -q  "-S*.enable=0" "-Sqrcode.enable=1" $input |
 sort -n | cut -f 2 -d " " | tr -d "\n" |
 python -c "import sys, base64; \

@@ -1,5 +1,5 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as base_settings with context %}
-{% from "roles/imgbuilder/preseed/defaults.jinja" import template as settings with context %}
+{% from "roles/imgbuilder/preseed/defaults.jinja" import defaults as settings with context %}
 
 {% do settings.update({
   'custom_files':(

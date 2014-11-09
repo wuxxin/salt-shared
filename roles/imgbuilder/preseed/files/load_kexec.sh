@@ -26,8 +26,8 @@ cat | ssh -o "UserKnownHostsFile=./known_hosts.legacy_system" -o "StrictHostKeyC
 #!/bin/bash
 
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update
-sudo apt-get install kexec-tools
+sudo apt-get -y update
+sudo apt-get -y install kexec-tools
 sudo kexec -l linux --initrd=initrd.gz --append="{{ cmdline }}"
 sudo sync
 sudo kexec -e

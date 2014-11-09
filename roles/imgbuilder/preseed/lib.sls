@@ -6,8 +6,8 @@ include:
 
 {% macro preseed_make(cs) %}
 
-{% from "roles/imgbuilder/preseed/defaults.jinja" import template with context %}
-{% set settings=salt['grains.filter_by']({'none': template },
+{% from "roles/imgbuilder/preseed/defaults.jinja" import defaults with context %}
+{% set settings=salt['grains.filter_by']({'none': defaults },
   grain='none', default= 'none', merge= cs|d({})) %}
 
 {{ initrd_unpack(cs) }}
