@@ -4,9 +4,20 @@ include:
 # salt - master - make
 ##########################
 
-{% macro saltmaster_make(s, gpg_key_location, gpg_id, make_targetdir, hostname, host_targetdir) %}
+{#
+. copy all state and pillar paths together
+. generate saltmaster gpg key
+. crypt saltmaster private gpg key with gpg_key of user
+. add public key of saltmaster to every path where git-crypt says its working: git-crypt add-gpg-key 
+. git-crypt lock on every path: git-crypt lock
+. make tar.gz out of temporary dir (without parents) and save it under target_preperation_dir
+. remove temporary dir
+. generate a install_sw.sh and local_bootstrap.dat script in target_preperation_dir
+#}
 
-{% set salt_config=s.master.config|load_yaml %}
+{% macro saltmaster_make(salt_settings, gpg_id, gpg_key_location, make_targetdir, host_targetdir, hostname, domainname, custom_ssh_identity, netcfg) %}
+
+{% set salt_config=salt_settings.master.config|load_yaml %}
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
 {% set workdir= tempdir+ '/data' %}
 {% set gpg_key= tempdir+ '/'+ salt['cmd.run_stdout']('basename '+ gpg_key_location) %}
@@ -102,10 +113,8 @@ copy_archive:
     - source: {{ tempdir }}/saltmaster_config.tar.xz
     - makedirs: true
     - force: true
-
-generate_install_sw:
-  file.managed:
-    - name: {{ make_targetdir }}/install_sw.sh
+    - require:
+      - cmd: make_archive
 
 copy_crypted_secret:
   file.copy:
@@ -113,47 +122,38 @@ copy_crypted_secret:
     - source: {{ tempdir }}/saltmaster@{{ hostname }}.secret.asc.crypted
     - force: true
 
+{% for source,target in (('install_sw.sh', 'install_sw.sh'), ('local_bootstrap.sh', 'local_bootstrap.dat')) %}
+
+generate_bootstrap_{{ source }}:
+  file.managed:
+    - name: {{ make_targetdir }}/{{ target }}
+    - source: salt://roles/salt/files/{{ source }}
+    - mode: 700
+    - template: jinja
+    - context:
+        targetdir: {{ host_targetdir }}
+        hostname: {{ hostname|d(" ") }}
+        domainname: {{ domainname|d(" ") }}
+        custom_ssh_identity: {{ custom_ssh_identity|d("") }}
+        netcfg: {{ netcfg }}
+        states:
+{% for a in salt_config.file_roots.base %}
+          - {{ a }}
+{% endfor %}
+        pillars:
+{% for a in salt_config.pillar_roots.base %}
+          - {{ a }}
+{% endfor %}
+    - require_in:
+      - file: delete_temp_dir
+{% endfor %}
+
+delete_temp_dir:
+  file.absent:
+    - name: {{ tempdir }}
+    - require:
+      - file: copy_archive
+      - file: copy_crypted_secret
+
 {% endmacro %}
 
-{% from "roles/salt/defaults.jinja" import settings as s with context %}
-
-{{ saltmaster_make(s, "salt://roles/imgbuilder/preseed/files/insecure_gpgkey.key.asc", "insecure_gpgkey", "/mnt/images/templates/imgbuilder/omoikane", "omoikane","/srv") }} 
-
-{#
-# set trustlevel ($1 = userid $2=trustlevel)
-
-
-steps:
-. copy all state and pillar paths together 
-. generate saltmaster gpg key
-. crypt saltmaster private gpg key with gpg_key of user
-. add public key of this to every path where git-crypt says its working
-  . git-crypt add-gpg-key ; git commit -c "added public gpg key y"
-. git-crypt lock on every path
-  . git-crypt lock
-
-. make tar.gz out of temporary dir (without parents) and save it under target_preperation_dir
-. remove temporary dir
-
-. generate a install_sw.sh script in target_preperation_dir that:
-  . connects to target host
-  . transfers tar.gz to target
-  . installs gpg and inserts keys into keychain of root
-
-  . generate a local_bootstrap.sh to /targetdir for target machine that:
-    . make /targetdir/bootstrap.run and refuse to continue if already exists
-    . tar xaf tar.gz /targetdir
-    . generates sc.sh minion and grains in /targetdir for a masterless setup
-    . sc.sh state.sls repo 
-    . sc.sh state.sls salt.git-crypt
-    . checkout and unlocks git paths with git-unlock 
-    . sc.sh state.sls salt.master
-    . accept minion key
-    . copy grains from /targetdir to /etc/salt/
-    . /etc/init.d/salt-minion restart
-    . rm /targetdir/_run /targetdir/minion /targetdir/grains
-    . salt-call state.sls network.sls
-    . salt-call state.sls storage.sls
-    . salt-call state.highstate
-
-#}
