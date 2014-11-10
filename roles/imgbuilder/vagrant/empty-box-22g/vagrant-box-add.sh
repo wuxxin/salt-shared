@@ -1,6 +1,6 @@
 #!/bin/bash
 
-image_size=11g
+image_size=22g
 if test "$1" != ""; then
     image_size=$1
 fi
