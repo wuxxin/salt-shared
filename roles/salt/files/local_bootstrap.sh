@@ -58,15 +58,21 @@ for a in `find {{ targetdir }} -name .git-crypt -type d`; do
   git-crypt unlock
 done
 
-# install state.sls salt.master, copy grains, set salt minion name, accept minion key
+# install state.sls salt.master, copy grains, set salt minion name
 salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
 cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}" > /etc/salt/minion_id
 
-# restart minion, cleanup masterless leftovers, copy grains
-#/etc/init.d/salt-minion restart
-#rm -r {{ targetdir }}/_run
-#rm {{ targetdir }}/minion {{ targetdir }}/grains
+# cleanup masterless leftovers, copy grains
+rm -r {{ targetdir }}/_run
+rm {{ targetdir }}/minion {{ targetdir }}/grains
+
+# add "salt" to name in hosts for first non 127.0.0.1 address
+fixme
+
+# restart minion, accept minion key on master
+/etc/init.d/salt-minion restart
+salt-key -y -a {{ hostname }}
 
 # bootstrap network and storage, and finally call highstate
 #salt-call state.sls network.sls

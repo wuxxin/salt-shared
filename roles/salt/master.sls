@@ -37,9 +37,9 @@ salt-master:
 
 /etc/salt/master:
   file.managed:
-    - user: root
-    - group: root
-    - content: {{ s.master.config|load_yaml }}
+    - contents: |
+{{ s.master.config|indent(8, true) }}
+
     - mode: 644
     - watch_in:
       - service: salt-master
