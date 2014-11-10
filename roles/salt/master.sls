@@ -1,4 +1,4 @@
-{% from "roles/libvirt/defaults.jinja" import settings as s with context %}
+{% from "roles/salt/defaults.jinja" import settings as s with context %}
 
 include:
   - .ppa
@@ -6,9 +6,9 @@ include:
 {% if s.reactor.status=="present" %}
   - .reactor
 {% endif %}
-{% if s.git-crypt.status=="present" %}
+{% if s.gitcrypt.status=="present" %}
   - git-crypt
-  - gpg
+  - gnupg
 {% endif %}
 
 python-pip:
@@ -26,9 +26,9 @@ salt-master:
     - require:
       - pkgrepo: salt_ppa
       - pip: salt-master-dependencies
-{% if s.git-crypt.status=="present" %}
+{% if s.gitcrypt.status=="present" %}
       - cmd: git-crypt
-      - pkg: gpg
+      - pkg: gnupg
 {% endif %}
   service:
     - running
@@ -39,7 +39,7 @@ salt-master:
   file.managed:
     - user: root
     - group: root
-    - content: {{ s.master.config }}
+    - content: {{ s.master.config|load_yaml }}
     - mode: 644
     - watch_in:
       - service: salt-master

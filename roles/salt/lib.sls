@@ -1,5 +1,5 @@
 include:
-  - gpg
+  - gnupg
 
 # salt - master - make
 ##########################
@@ -104,13 +104,13 @@ add_key_and_lock_repos:
 
 make_archive:
   cmd.run:
-    - name: cd {{ workdir }}; tar caf {{ tempdir }}/saltmaster_config.tar.xz .
-    - unless: test -f {{ tempdir }}/saltmaster_config.tar.xz
+    - name: cd {{ workdir }}; tar caf {{ tempdir }}/saltmaster@{{ hostname }}_config.tar.xz .
+    - unless: test -f {{ tempdir }}/saltmaster@{{ hostname }}_config.tar.xz
 
 copy_archive:
   file.copy:
-    - name: {{ make_targetdir }}/saltmaster_config.tar.xz
-    - source: {{ tempdir }}/saltmaster_config.tar.xz
+    - name: {{ make_targetdir }}/saltmaster@{{ hostname }}_config.tar.xz
+    - source: {{ tempdir }}/saltmaster@{{ hostname }}_config.tar.xz
     - makedirs: true
     - force: true
     - require:
@@ -138,11 +138,11 @@ generate_bootstrap_{{ source }}:
         netcfg: {{ netcfg }}
         states:
 {% for a in salt_config.file_roots.base %}
-          - {{ a }}
+          - {{ salt['cmd.run_stdout']('basename '+ a) }}
 {% endfor %}
         pillars:
 {% for a in salt_config.pillar_roots.base %}
-          - {{ a }}
+          - {{ salt['cmd.run_stdout']('basename '+ a) }}
 {% endfor %}
     - require_in:
       - file: delete_temp_dir

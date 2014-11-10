@@ -13,15 +13,15 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 
-for a in saltadmin@{{ hostname }}.tar.xz local_bootstrap.dat; do
+for a in saltmaster@{{ hostname }}_config.tar.xz local_bootstrap.dat; do
     scp -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts ./$a root@$ssh_target:/root
 done
 
-ssh -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts -f -e none root@$ssh_target << EOF
+ssh -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts -e none root@$ssh_target << EOF
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y update
-apt-get -y install gpg
-echo "$(cat ./saltadmin@{{ hostname }}.secret.asc.crypted | gpg --decrypt)" | gpg --batch --yes --import - 
+apt-get -y install gnugpg
+echo "$(cat ./saltmaster@{{ hostname }}.secret.asc.crypted | gpg --decrypt)" | gpg --batch --yes --import
 cd /root
 mv local_bootstrap.dat local_bootstrap.sh
 chmod +x local_bootstrap.sh

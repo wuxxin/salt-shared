@@ -8,12 +8,12 @@ if test -f {{ targetdir }}/bootstrap.run; then
     echo "ERROR: {{ targetdir }}/bootstrap.run already exists, aborting"
     exit 1
 fi
-mkdir -p 0755 {{ targetdir }}
+mkdir -p -m 0755 {{ targetdir }}
 touch {{ targetdir }}/bootstrap.run
 
 # extract salt config to /targetdir
 cd {{ targetdir }}
-tar xaf /root/saltadmin@{{ hostname }}.tar.xz
+tar xaf /root/saltmaster@{{ hostname }}_config.tar.xz
 
 # install custom ppa (and requisites for it), install salt masterless
 export DEBIAN_FRONTEND=noninteractive
@@ -22,7 +22,6 @@ apt-get -y install python-software-properties software-properties-common mercuri
 apt-add-repository -y ppa:saltstack/salt
 apt-get -y update
 apt-get -y install salt-common python-msgpack python-zmq
-
 
 # generates minion config in /targetdir for a masterless setup
 cat > {{ targetdir }}/minion << EOF
@@ -65,11 +64,11 @@ cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}" > /etc/salt/minion_id
 
 # restart minion, cleanup masterless leftovers, copy grains
-/etc/init.d/salt-minion restart
-rm -r {{ targetdir }}/_run
-rm {{ targetdir }}/minion {{ targetdir }}/grains
+#/etc/init.d/salt-minion restart
+#rm -r {{ targetdir }}/_run
+#rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # bootstrap network and storage, and finally call highstate
-salt-call state.sls network.sls
-salt-call state.sls storage.sls
-salt-call state.highstate
+#salt-call state.sls network.sls
+#salt-call state.sls storage.sls
+#salt-call state.highstate

@@ -1,5 +1,5 @@
 include:
-  - gpg
+  - gnupg
   - qrcode
 
 preseed_pkgs:

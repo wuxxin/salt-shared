@@ -1,5 +1,6 @@
 {% load_yaml as defaults %} 
 master:
+  status: absent
   config: |
     fileserver_backend:
       - roots
@@ -15,10 +16,14 @@ master:
     #gitfs_remotes:
     #  - https://github.com/saltstack-formulas/docker-formula.git
 reactor:
+  status: absent
   base: /srv/reactor
   includes:
     - "roles/haproxy"
     - "roles/dns"
+gitcrypt:
+  status: present
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

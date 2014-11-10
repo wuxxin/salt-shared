@@ -1,7 +1,7 @@
 include:
   - .master
 
-{% from "roles/libvirt/defaults.jinja" import settings as s with context %}
+{% from "roles/salt/defaults.jinja" import settings as s with context %}
 {% set reactor_previous={} %}
 {% for part in s.reactor.includes|d({}) %}
   {% import_yaml part+"/reactor/reactor.conf" as single_reactor %}
