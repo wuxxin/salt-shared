@@ -56,6 +56,11 @@ set_salt_master_grain:
 
 {% endif %}
 
+salt-master-in-hosts:
+  host.present:
+    - name: salt
+    - ip: 127.0.0.1
+
 salt_create_bash_aliases:
   file:
     - touch

@@ -67,14 +67,11 @@ echo "{{ hostname }}" > /etc/salt/minion_id
 rm -r {{ targetdir }}/_run
 rm {{ targetdir }}/minion {{ targetdir }}/grains
 
-# add "salt" to name in hosts for first non 127.0.0.1 address
-fixme
-
 # restart minion, accept minion key on master
 /etc/init.d/salt-minion restart
 salt-key -y -a {{ hostname }}
 
 # bootstrap network and storage, and finally call highstate
-#salt-call state.sls network.sls
-#salt-call state.sls storage.sls
+salt-call state.sls network
+salt-call state.sls storage
 #salt-call state.highstate

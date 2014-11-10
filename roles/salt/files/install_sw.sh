@@ -25,7 +25,7 @@ echo "$(cat ./saltmaster@{{ hostname }}.secret.asc.crypted | gpg --decrypt)" | g
 cd /root
 mv local_bootstrap.dat local_bootstrap.sh
 chmod +x local_bootstrap.sh
-./local_bootstrap.sh
+#./local_bootstrap.sh
 EOF
 
 
