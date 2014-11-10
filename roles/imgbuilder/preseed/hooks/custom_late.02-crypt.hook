@@ -68,6 +68,7 @@ EOF
 ENDOFFILE
 chmod +x /target/etc/initramfs-tools/hooks/cryptroot_patch
 
+username="$(debconf-get passwd/username)"
 cat > /target/etc/initramfs-tools/hooks/dropbear_patch << ENDOFFILE
 #!/bin/sh -e
 
