@@ -64,14 +64,15 @@ cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}" > /etc/salt/minion_id
 
 # cleanup masterless leftovers, copy grains
-rm -r {{ targetdir }}/_run
-rm {{ targetdir }}/minion {{ targetdir }}/grains
+#rm -r {{ targetdir }}/_run
+#rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # restart minion, accept minion key on master
 /etc/init.d/salt-minion restart
+sleep 5
 salt-key -y -a {{ hostname }}
 
 # bootstrap network and storage, and finally call highstate
 salt-call state.sls network
-salt-call state.sls storage
+#salt-call state.sls storage
 #salt-call state.highstate

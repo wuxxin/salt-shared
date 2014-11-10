@@ -11,6 +11,10 @@ include:
 
 {% set reactor_dict= reactor_previous %}
 
+/etc/salt/master.d:
+  file:
+    - directory
+
 /etc/salt/master.d/reactor.conf:
   file.managed:
     - source: salt://roles/salt/files/reactor.conf
@@ -18,6 +22,8 @@ include:
     - context: 
         reactor: {{ reactor_dict }}
         base: {{ s.reactor.base }}
+    - require:
+      - file: /etc/salt/master.d
     - watch_in:
       - service: salt-master
 

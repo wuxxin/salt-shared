@@ -35,12 +35,18 @@ salt-master:
     - require:
       - pkg: salt-master
 
+/etc/salt:
+  file:
+    - directory
+
 /etc/salt/master:
   file.managed:
     - contents: |
 {{ s.master.config|indent(8, true) }}
 
     - mode: 644
+    - require:
+      - file: /etc/salt
     - watch_in:
       - service: salt-master
 
