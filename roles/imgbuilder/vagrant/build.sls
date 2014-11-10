@@ -12,7 +12,7 @@
     - dir_mode: 775
     - include_empty: True
   cmd.run:
-    - name: cd {{ s.images_base }}/templates/{{ a }}; ./vagrant-box-add.sh
+    - name: cd {{ s.image_base }}/templates/{{ a }}; chmod +x ./vagrant-box-add.sh; ./vagrant-box-add.sh
     - user: {{ s.user }}
-    - group: {{ s.user }}
-{{ endfor }}
+    - group: libvirtd
+{% endfor %}
