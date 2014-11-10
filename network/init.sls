@@ -18,15 +18,17 @@ network-interface-{{ item }}:
 {% endfor %}
 {% endfor %}
 
+
 {% for interface, data in routes.iteritems() %}
 network-route-{{ interface }}:
-  network.routes:
-    - name: {{ interface }}
-    - routes:
-{% for ipaddr, subdata in data.iteritems() %}
-      - name: route-{{ ipaddr }}
-        ipaddr: {{ ipaddr }}
-{% for item, value in subdata.iteritems() %}
-        {{ item }}: {{ value }}{% endfor %}{% endfor %}
+  file.replace:
+    - name: /etc/network/interfaces
+    - flags:
+      - MULTILINE
+      - IGNORECASE
+    - bufsize: file
+    - pattern: "^iface {{ interface }} inet ([a-z0-9]+)[ ]*$(^[ ]+(up)|(down) ip route .+$)?"
+    - repl: "iface {{ interface }} inet \\1\\n{% for ipaddr, subdata in data.iteritems() %}    up  ip route add {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n    down ip route del {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n{% endfor %}"
+
 {% endfor %}
 
