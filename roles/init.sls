@@ -12,9 +12,17 @@ base:
     - match: pillar
     - roles.dns
 
+  'tinydns_server:status:present':
+    - match: pillar
+    - roles.tinydns
+
   'dns_server:status:absent':
     - match: pillar
     - roles.dns.absent
+
+  'tinydns_server:status:absent':
+    - match: pillar
+    - roles.tinydns.absent
 
   'dhcp_server:status:present':
     - match: pillar

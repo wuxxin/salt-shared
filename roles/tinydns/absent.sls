@@ -6,6 +6,7 @@ djbdns:
     - require:
       - cmd: dnscache_remove
       - cmd: tinydns_remove
+      - cmd: axfrdns_remove
 
 {% for u in ("Gdnscache", "Gdnslog", "Gtinydns", "Gaxfrdns") %}
 {{ u }}:

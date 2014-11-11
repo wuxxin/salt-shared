@@ -47,14 +47,14 @@ djbdns:
     - template: jinja
     - defaults: 
         dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
-{% if pillar.dns_server.cache_ip %}
+{% if pillar.tinydns_server.cache_ip %}
     - context: 
-        dnscache_ip: {{ pillar.dns_server.cache_ip }}
+        dnscache_ip: {{ pillar.tinydns_server.cache_ip }}
 {% endif %}
 
 /etc/sv/tinydns/root/data:
   file.managed:
-    - source: {{ "%s" % pillar.dns_server.data if pillar.dns_server.data else 'salt://roles/tinydns/localhost' }}
+    - source: {{ "%s" % pillar.tinydns_server.data if pillar.tinydns_server.data else 'salt://roles/tinydns/localhost' }}
     - require:
       - file: /etc/sv
 
@@ -82,7 +82,7 @@ create_seed:
     - source: salt://roles/tinydns/axfr_permissions
     - template: jinja
     - context:
-      permissions: {{ pillar.dns_server.axfr_permissions|d(None) }}
+      permissions: {{ pillar.tinydns_server.axfr_permissions|d(None) }}
 
 compiled_tcp:
   cmd.run:
@@ -95,21 +95,21 @@ compiled_tcp:
     - require:
       - cmd: compiled_data
 
-{% if pillar.dns_server.axfr_export_cmd|d(false) %}
+{% if pillar.tinydns_server.axfr_export_cmd|d(false) %}
 axfrdns_export:
   cmd.run:
-    - name: {{ pillar.dns_server.axfr_export_cmd }}
+    - name: {{ pillar.tinydns_server.axfr_export_cmd }}
     - watch_in:
       - cmd: axfrdns_service
 {% endif %}
 
 {% set dnscache_serve_to= salt['network.ip_addrs']() %}
 {% set dnscache_follow= [('0.0.127.in-addr.arpa','127.0.0.1')] %}
-{% if pillar.dns_server.cache_serve_to %}
-    {% set dnscache_serve_to= pillar.dns_server.cache_serve_to %}
+{% if pillar.tinydns_server.cache_serve_to %}
+    {% set dnscache_serve_to= pillar.tinydns_server.cache_serve_to %}
 {% endif %}
-{% if pillar.dns_server.cache_follow %}
-    {% set dnscache_follow= pillar.dns_server.cache_follow %}
+{% if pillar.tinydns_server.cache_follow %}
+    {% set dnscache_follow= pillar.tinydns_server.cache_follow %}
 {% endif %}
 
 /etc/sv/dnscache/root/ip:
