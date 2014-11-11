@@ -15,6 +15,6 @@ update-grub:
   cmd.run:
     - name: update-grub
     - require:
-      - file.append: grub-settings
-      - file.append: grub-settings2
+      - file: grub-settings
+      - file: grub-settings2
 
