@@ -5,13 +5,13 @@ knot:
   pkg.installed:
     - require:
       - pkgrepo: knot-ppa
-  service.present:
+  service.running:
     - require:
       - pkg: knot
 
 unbound:
   pkg:
     - installed
-  service.present:
+  service.running:
     - require:
       - pkg: unbound
