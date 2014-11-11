@@ -28,6 +28,6 @@ base-deps:
       - jupp
       - sox
       - xmlstarlet
-      - hxselect
+      - html-xml-utils
 
 {% endif %}
