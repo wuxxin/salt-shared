@@ -6,8 +6,8 @@ include:
 {% set workdir= tempdir+ '/git-crypt' %}
 
 
-# FIXME: need to look if git-crypt is already installed (as debian package) and skip rest if so
-
+# TODO: make a debian package out of it and install it to a personal archive
+{% if salt['cmd.run_stdout']('which git-crypt') == "" %}
 git-crypt:
   pkg.installed:
     - pkgs:
@@ -39,3 +39,10 @@ git-crypt-cleanup:
     - require:
       - cmd: git-crypt
 
+{% else %}
+
+git-crypt:
+  cmd.run:
+    - name: "git-crypt help"
+
+{% endif %}
