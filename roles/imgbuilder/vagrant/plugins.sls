@@ -22,7 +22,7 @@ vagrant_plugin_deps:
 
 {% for t,src in git_plugins %}
 
-{% set build_dir="/home/{{ s.user }}/.build/"+ t %}
+{% set build_dir="/home/"+ s.user+ "/.build/"+ t %}
 
 vagrant_compile_plugin_{{ t }}:
   git.latest:
