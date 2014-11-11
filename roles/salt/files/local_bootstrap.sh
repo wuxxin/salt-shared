@@ -74,4 +74,7 @@ salt-key -y -a {{ hostname }}
 
 # bootstrap network and storage, and finally call highstate
 salt-call state.sls network
+/etc/init.d/salt-master restart
+/etc/init.d/salt-minion restart
+
 salt-call state.highstate
