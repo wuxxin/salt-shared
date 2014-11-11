@@ -1,4 +1,3 @@
-
 # storage_setup
 ###############
 
@@ -47,21 +46,20 @@
 #######
 {% macro storage_parted(input_data) %}
 
-parted:
-  pkg.installed
-
 {% for item, data in input_data.iteritems() %}
 
 {% set part_label = 'gpt' if data.label|d('') else data.label %}
 {% set blkid_label = 'dos' if part_label == 'msdos' else part_label %}
 
 "parted-{{ item }}":
+  pkg.installed:
+    - name: parted
   cmd.run:
     - name: parted --script {{ item }} mklabel {{ part_label }}
     - onlyif: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == ""'
     - unless: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == "{{ blkid_label }}"'
     - require:
-      - pkg: parted
+      - pkg: "parted-{{ item }}"
 
 {% if data.parts|d('') %}
 {% set x=1 %}
@@ -80,7 +78,6 @@ parted:
     - name: parted --align optimal --script {{ item }} mkpart {{ part.name }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
     - unless: 'test -b {{ item }}{{ x }}'
     - require:
-      - pkg: parted
       - cmd: "parted-{{ item }}"
 
 {% set x = x +1 %}
@@ -97,11 +94,10 @@ parted:
 #######
 {% macro storage_mdadm(input_data) %}
 
-mdadm:
-  pkg.installed
-
 {% for item, data in input_data.iteritems() %}
 "mdadm-raid-{{ item }}":
+  pkg.installed:
+    - name: mdadm
   raid.present:
     - name: {{ item }}
     - opts:
@@ -109,7 +105,8 @@ mdadm:
       - {{ sub }}
 {% endfor %}
     - require:
-      - pkg: mdadm
+      - pkg: "mdadm-raid-{{ item }}"
+
 {% endfor %}
 
 {% endmacro %}
@@ -119,17 +116,16 @@ mdadm:
 #######
 {% macro storage_crypt(input_data) %}
 
-cryptsetup:
-  pkg.installed
-
 {% for item, data in input_data.iteritems() %}
 
 {{ item }}-luks-format:
+  pkg.installed:
+    - name: cryptsetup
   cmd.run:
     - unless: cryptsetup luksUUID {{ item }}
     - name: echo "{{ data['password'] }}" | cryptsetup luksFormat {{ item }}
     - require:
-      - pkg: cryptsetup
+      - pkg: {{ item }}-luks-format
 
 {{ item }}-luks-open:
   cmd.run:
@@ -137,7 +133,6 @@ cryptsetup:
     - name: echo "{{ data['password'] }}" | cryptsetup luksOpen {{ item }} {{ data['target'] }}
     - require:
       - cmd: {{ item }}-luks-format
-      - pkg: cryptsetup
 
 {% endfor %}
 
@@ -148,17 +143,16 @@ cryptsetup:
 #######
 {% macro storage_lvm(input_data) %}
 
-lvm2:
-  pkg.installed
-
 # lvm - pv
 {% if input_data.pv is defined %}
 {% for item in input_data.pv %}
 "lvm-pv-{{ item }}":
+  pkg.installed:
+    - name: lvm2
   lvm.pv_present:
     - name: {{ item }}
     - require:
-      - pkg: lvm2
+      - pkg: "lvm-pv-{{ item }}"
 {% endfor %}
 {% endif %}
 
@@ -166,6 +160,8 @@ lvm2:
 {% if input_data.vg is defined %}
 {% for item, data in input_data.vg.iteritems() %}
 "lvm-vg-{{ item }}":
+  pkg.installed:
+    - name: lvm2
   lvm.vg_present:
     - name: {{ item }}
     - devices: {% for device in input_data.vg[item]['devices'] %}{{ device }}{% endfor %}
@@ -175,7 +171,7 @@ lvm2:
 {% endfor %}
 {% endif %}
     - require:
-      - pkg: lvm2
+      - pkg: "lvm-vg-{{ item }}"
 {% endfor %}
 {% endif %}
 
@@ -184,13 +180,15 @@ lvm2:
 {% if input_data.lv is defined %}
 {% for item, data in input_data.lv.iteritems() %}
 "lvm-lv-{{ item }}":
+  pkg.installed:
+    - name: lvm2
   lvm.lv_present:
     - name: {{ item }}
 {% for sub, subvalue in data.iteritems() %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
 {% endfor %}
     - require:
-      - pkg: lvm2
+      - pkg: "lvm-lv-{{ item }}"
 {% endfor %}
 {% endif %}
 

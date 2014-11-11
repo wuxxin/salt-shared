@@ -4,3 +4,5 @@
 {{ pkg }}:
   pkg.installed
 {% endfor %}
+
+{% endif %}
