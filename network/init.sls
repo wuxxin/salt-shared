@@ -16,6 +16,8 @@ network-interface-{{ item }}:
 {% for sub, subvalue in data.iteritems() %}
     - {{ sub }}: {{ subvalue }}
 {% endfor %}
+    - require_in:
+      - file: /etc/init/networking.override
 {% endfor %}
 
 
@@ -29,6 +31,13 @@ network-route-{{ interface }}:
     - bufsize: file
     - pattern: "^iface {{ interface }} inet ([a-z0-9]+)[ ]*$(^[ ]+(up)|(down) ip route .+$)?"
     - repl: "iface {{ interface }} inet \\1\\n{% for ipaddr, subdata in data.iteritems() %}    up  ip route add {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n    down ip route del {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n{% endfor %}"
+    - require_in:
+      - file: /etc/init/networking.override
 
 {% endfor %}
 
+/etc/init/networking.override:
+  file:
+    - absent
+    - require:
+      - network: network-system
