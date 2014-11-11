@@ -13,5 +13,9 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 
-ssh -o "UserKnownHostsFile=./known_hosts.initramfs" -o "StrictHostKeyChecking=no" -e none $ssh_opts root@$ssh_target "echo -ne \"$(cat ./diskpassword.crypted | gpg --decrypt)\" >/lib/cryptsetup/passfifo"
+if test ! -f ./known_hosts.initramfs; then
+    $ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
+fi
+
+ssh -o "UserKnownHostsFile=./known_hosts.initramfs" -e none $ssh_opts root@$ssh_target "echo -ne \"$(cat ./diskpassword.crypted | gpg --decrypt)\" >/lib/cryptsetup/passfifo"
 

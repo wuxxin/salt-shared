@@ -13,6 +13,10 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 
+if test ! -f ./known_hosts.newsystem; then
+    $ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
+fi
+
 ssh -o "UserKnownHostsFile=./known_hosts.newsystem" -o "StrictHostKeyChecking=no" $ssh_opts root@$ssh_target $@
 
 
