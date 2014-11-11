@@ -9,7 +9,6 @@ libvirt:
   pkg.installed:
     - pkgs:
       - libvirt-bin
-      - libguestfs
       - libguestfs-tools
       - ubuntu-virt-server
       - qemu-kvm
@@ -38,7 +37,7 @@ libvirt:
       - pkg: libvirt
   service:
     - running
-    - name: libvirtd
+    - name: libvirt-bin
     - require:
       - pkg: libvirt
       - libvirt: libvirt

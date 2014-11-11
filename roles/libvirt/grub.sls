@@ -14,7 +14,7 @@ grub-settings2:
 update-grub:
   cmd.run:
     - name: update-grub
-    - require:
+    - watch:
       - file: grub-settings
       - file: grub-settings2
 

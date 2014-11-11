@@ -32,6 +32,9 @@ storage:
       </target>
     </pool>
 
+{% endload %}
+
+{% load_yaml as default_storage %} 
 custom_storage:
   directories:
     /srv/images:
@@ -44,13 +47,19 @@ custom_storage:
         - iso
         - templates
         - tmp
+      require: "pkg: libvirt"
+      require_in: "service: libvirt"
   relocate:
     /var/lib/libvirt/images:
       destination: /srv/images/default
       copy_content: true
       require_in: "service: libvirt"
-
+      require: "pkg: libvirt"
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('libvirt', {})) %}
+
+{% if settings.custom_storage is not defined %}
+{% do settings.update(default_storage) %}
+{% endif %}
