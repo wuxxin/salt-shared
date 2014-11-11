@@ -47,14 +47,14 @@ djbdns:
     - template: jinja
     - defaults: 
         dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
-{% if pillar.tinydns_server.cache_ip %}
+{% if pillar.tinydns_server.cache_dns %}
     - context: 
-        dnscache_ip: {{ pillar.tinydns_server.cache_ip }}
+        dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
 {% endif %}
 
 /etc/sv/tinydns/root/data:
   file.managed:
-    - source: {{ "%s" % pillar.tinydns_server.data if pillar.tinydns_server.data else 'salt://roles/tinydns/localhost' }}
+    - source: {{ "%s" % pillar.tinydns_server.internal_data if pillar.tinydns_server.internal_data else 'salt://roles/tinydns/localhost' }}
     - require:
       - file: /etc/sv
 
