@@ -35,13 +35,13 @@ packer:
       - file: packer
       - pkg: packer-prereq
   cmd.wait:
-    - name: cd $GOPATH/src/github.com/mitchellh/packer; make
+    - name: cd $GOPATH/src/github.com/mitchellh/packer; make dev
     - user: {{ s.user }}
     - group: {{ s.user }}
     - watch:
       - git: packer
     - require:
-      - cmd: packer_updatedeps
+      - cmd: packer_make_test
 
 go_profile:
   file.managed:
@@ -76,6 +76,16 @@ packer_updatedeps:
       - git: packer
     - require:
       - cmd: gox_import
+
+packer_make_test:
+  cmd.run:
+    - name: cd $GOPATH/src/github.com/mitchellh/packer; make
+    - user: {{ s.user }}
+    - group: {{ s.user }}
+    - watch:
+      - git: packer
+    - require:
+      - cmd: packer_updatedeps
 
 packer_templates:
   file.recurse:
