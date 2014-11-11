@@ -269,7 +269,7 @@
 {% for a in ('watch_in', 'require_in', 'require', 'watch') %}
 {% if input_data[item][a] is defined %}
     - {{ a }}:
-      {{ input_data[item][a] }}
+      - {{ input_data[item][a] }}
 {% endif %}
 {% endfor %}
 
@@ -302,7 +302,7 @@
 {% for a in ('watch_in', 'require_in', 'require', 'watch') %}
 {% if input_data[item][a] is defined %}
     - {{ a }}:
-      - input_data[item][a]
+      - {{ input_data[item][a] }}
 {% endif %}
 {% endfor %}
 
