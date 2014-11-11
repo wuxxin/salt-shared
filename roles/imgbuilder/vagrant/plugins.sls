@@ -26,7 +26,7 @@ vagrant_plugin_deps:
 
 vagrant_compile_plugin_{{ t }}:
   git.latest:
-    - name: {{ src }
+    - name: {{ src }}
     - target: {{ build_dir }}
     - user: {{ s.user }}
     - submodules: True
