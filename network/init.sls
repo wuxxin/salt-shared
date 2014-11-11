@@ -32,3 +32,5 @@ network-route-{{ interface }}:
 
 {% endfor %}
 
+
+FIXME: salt state.network something inserts /etc/init/networking.override with "manual" as data and this fails network setup on boot
