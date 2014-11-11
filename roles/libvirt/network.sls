@@ -7,7 +7,8 @@
 {% for item, data in s.networks.iteritems() %}
 /etc/libvirt/qemu/networks/{{ item }}.xml:
   file.managed:
-    - contents: "{{ data }}"
+    - contents: |
+{{ data|indent(8, true) }}
 
 /etc/libvirt/qemu/networks/autostart/{{ item }}.xml:
   file.symlink:
