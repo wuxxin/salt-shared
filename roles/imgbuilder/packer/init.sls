@@ -41,8 +41,7 @@ packer:
     - watch:
       - git: packer
     - require:
-      - file: go_profile-activate
-      - cmd: gox_import
+      - cmd: packer_updatedeps
 
 go_profile:
   file.managed:
@@ -67,6 +66,16 @@ gox_import:
     - require:
       - git: packer
       - file: go_profile-activate
+
+packer_updatedeps:
+  cmd.run:
+    - name: cd $GOPATH/src/github.com/mitchellh/packer; make updatedeps
+    - user: {{ s.user }}
+    - group: {{ s.user }}
+    - watch:
+      - git: packer
+    - require:
+      - cmd: gox_import
 
 packer_templates:
   file.recurse:
