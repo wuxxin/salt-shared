@@ -17,7 +17,7 @@ salt_ppa:
 {% if grains['os'] == 'Ubuntu' %}
 salt_ppa:
   pkgrepo.managed:
-    - ppa: saltstack/ubuntu
+    - ppa: saltstack/salt
 {#
     - name: deb http://ppa.launchpad.net/saltstack/salt/ubuntu {{ grains['lsb_distrib_codename'] }} main
     - humanname: "Ubuntu salt Repository"
