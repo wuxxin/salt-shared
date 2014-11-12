@@ -27,6 +27,10 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 
+if test ! -f ./known_hosts.networkconsole; then
+    ssh_opts="$ssh_opts -o StrictHostKeyChecking=no"
+fi
+
 echo -n  "testing access to target: "
 until ping $ssh_target -c 4 -q; do
   echo -n .
@@ -37,9 +41,6 @@ sleep 5
 
 echo "writing new custom.env to ssh_target, "
 echo "you may be asked 1.) for the gpg encryption passphrase and then 2.) for your ssh key phrase"
-if test ! -f ./known_hosts.networkconsole; then
-    ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
-fi
 
 ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" -f -e none $ssh_opts root@$ssh_target \
 "echo -e \"DISKPASSWORD=$(cat ./diskpassword.crypted | gpg --decrypt)\n\" > /tmp/custom.env"
