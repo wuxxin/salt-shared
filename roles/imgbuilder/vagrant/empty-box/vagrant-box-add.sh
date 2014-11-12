@@ -30,11 +30,10 @@ cat > ./metadata.json << EOF
 EOF
 
 tar cvzf $name.box ./metadata.json ./Vagrantfile ./box.img
-
-#vagrant box add $name $name.box --provider libvirt
+vagrant box add $name $name.box --provider libvirt
 e=$?
-#if test $? -eq 0; then
-  #rm  box.img $name.box $name.qcow2 metadata.json
-#else
-#  exit $e
-#fi
+if test $? -eq 0; then
+  rm  box.img $name.box $name.qcow2 metadata.json
+else
+  exit $e
+fi
