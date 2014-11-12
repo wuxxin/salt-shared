@@ -1,7 +1,7 @@
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
-{% for a in ('empty-box', 'empty-box-22g', 'empty-box-25g) %}
+{% for a in ('empty-box', 'empty-box-26g') %}
 {{ a }}:
   file.recurse:
     - source: salt://roles/imgbuilder/vagrant/{{ a }}
