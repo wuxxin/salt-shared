@@ -16,7 +16,7 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 if test ! -f ./known_hosts.legacy_ystem; then
-    $ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
+    ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
 fi
 
 echo "copy linux, initrd.gz and a bash kexec execute file to target"

@@ -13,7 +13,7 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
   fi
 fi
 if test ! -f ./known_hosts.networkconsole; then
-    $ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
+    ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
 fi
 
 tmux_opts="-s networkconsole '/sbin/debian-installer /bin/network-console-menu'"
