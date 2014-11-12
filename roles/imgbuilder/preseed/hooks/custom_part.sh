@@ -9,8 +9,8 @@ VG_NAME=`debconf-get partman-auto-lvm/new_vg_name`
 if test "$VG_NAME" = ""; then
     VG_NAME=`debconf-get netcfg/get_hostname`
 fi
-HOST_ROOT_SIZE='4G'
-HOST_SWAP_SIZE='2G'
+HOST_ROOT_SIZE='8g'
+HOST_SWAP_SIZE='2g'
 DISKPASSWORD=''
 
 if test -f /tmp/custom.env; then
