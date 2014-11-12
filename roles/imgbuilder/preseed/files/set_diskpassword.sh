@@ -31,11 +31,12 @@ echo -n  "testing access to target: "
 until ping $ssh_target -c 4 -q; do
   echo -n .
 done
-echo "ok"
+
+echo "ok, waiting 5 more seconds for ssh"
+sleep 5
 
 echo "writing new custom.env to ssh_target, "
 echo "you may be asked 1.) for the gpg encryption passphrase and then 2.) for your ssh key phrase"
-
 if test ! -f ./known_hosts.networkconsole; then
     $ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
 fi
