@@ -48,16 +48,16 @@ storage:
     lv:
       host_root:
         vgname: vg0
-        size: 2G
+        size: 2g
       host_swap:
         vgname: vg0
-        size: 2G
+        size: 2g
       images:
         vgname: vg0
-        size: 1G
+        size: 1g
       cache:
         vgname: vg0
-        size: 1G
+        size: 1g
 
   format:
     /dev/md1:

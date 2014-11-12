@@ -12,6 +12,22 @@ Features:
  * skeleton directory creation
  * relocate data and make a symlink from old location to new location
 
+Warning: lvm makes a difference if you use "g" or "G" for gigabyte.
+g=GiB (1024*1024*1024) and G means 1000*1000*1000
+
+todo:
+  * restructure lvm.lv that you can write, and expand:True means if size of current existing lv is less than we will expand to size
+
+lvm:
+  lv:
+    vg0:
+      host_root:
+        size: 2g
+      host_swap:
+        size: 2g
+        expand: True (default false)
+
+
 callable via:
 
 {% from 'storage/lib.sls' import storage_setup with context %}

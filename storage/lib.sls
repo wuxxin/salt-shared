@@ -192,6 +192,8 @@
 {% endfor %}
 {% endif %}
 
+{# lvs --units g vg0/host_root --noheadings -o lv_size | sed -re "s/[ ]+([0-9]+).[0-9]+g/\1/g" #}
+
 {% endmacro %}
 
 
