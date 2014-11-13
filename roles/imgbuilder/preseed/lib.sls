@@ -10,17 +10,17 @@ include:
 {% set settings=salt['grains.filter_by']({'none': defaults },
   grain='none', default= 'none', merge= cs|d({})) %}
 
-{{ initrd_unpack(cs) }}
-{{ add_preseed_files(cs) }}
-{{ initrd_pack(cs) }}
+{% set tmp_target="/mnt/images/tmp/initrd-"+ cs.suite+ "-"+ cs.architecture %}
+{% set netboot_target="/mnt/images/tmp/netboot-"+ cs.suite+ "-"+ cs.architecture %}
+
+{{ initrd_unpack(cs, tmp_target, netboot_target) }}
+{{ add_preseed_files(cs, tmp_target) }}
+{{ initrd_pack(cs, tmp_target, netboot_target) }}
 
 {% endmacro %}
 
 
-{% macro initrd_unpack(cs) %}
-
-{% set tmp_target="/mnt/images/tmp/initrd-"+ cs.suite+ "-"+ cs.architecture %}
-{% set netboot_target="/mnt/images/tmp/netboot-"+ cs.suite+ "-"+ cs.architecture %}
+{% macro initrd_unpack(cs, tmp_target, netboot_target) %}
 
 get-netboot:
   archive.extracted:
@@ -53,9 +53,7 @@ unpack-initrd:
 {% endmacro %}
 
 
-{% macro add_preseed_files(cs) %}
-
-{% set tmp_target="/mnt/images/tmp/initrd-"+ cs.suite+ "-"+ cs.architecture %}
+{% macro add_preseed_files(cs, tmp_target) %}
 
 # generate preseed templates
 {% for p in cs.preseed_list %}
@@ -131,7 +129,6 @@ debs-udeb-install:
     - name: {{ tmp_layers }}
 {% endif %}
 
-
 # add custom hook dir and scripts
 add-hooks:
   file.recurse:
@@ -159,10 +156,7 @@ make-custom-list:
 {% endmacro %}
 
 
-{% macro initrd_pack(cs) %}
-
-{% set tmp_target="/mnt/images/tmp/initrd-"+ cs.suite+ "-"+ cs.architecture %}
-{% set netboot_target="/mnt/images/tmp/netboot-"+ cs.suite+ "-"+ cs.architecture %}
+{% macro initrd_pack(cs, tmp_target, netboot_target) %}
 
 pack-initrd:
   file.directory:
