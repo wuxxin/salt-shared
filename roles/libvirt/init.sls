@@ -22,6 +22,7 @@ libvirt:
       - libguestfs-tools
       - nbdkit
       - lvm2
+      - cgroup-bin
       - multipath-tools
       - bridge-utils
       - vlan
