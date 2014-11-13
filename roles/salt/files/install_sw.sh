@@ -14,7 +14,7 @@ if test "{{ custom_ssh_identity|d('') }}" != ""; then
 fi
 
 if test ! -f ./known_hosts.newsystem; then
-    ssh_opts="$ssh_opts -o \"StrictHostKeyChecking=no\""
+    ssh_opts="$ssh_opts -o StrictHostKeyChecking=no"
 fi
 
 for a in saltmaster@{{ hostname }}_config.tar.xz local_bootstrap.dat; do
