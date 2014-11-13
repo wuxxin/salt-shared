@@ -13,7 +13,7 @@ source_hash: {{ hash }}
 initrd: ubuntu-installer/{{ architecture }}/initrd.gz
 kernel: ubuntu-installer/{{ architecture }}/linux
 
-cmdline: 'DEBCONF_DEBUG=5 ro hostname={{ suite }} auto=true priority=critical debconf/frontend=noninteractive'
+cmdline: 'DEBCONF_DEBUG=5 ro hostname={{ suite }} fb=false auto=true priority=critical debconf/frontend=noninteractive'
 
 templates: 'salt://roles/imgbuilder/preseed/preseed'
 hooks: 'salt://roles/imgbuilder/preseed/hooks'
