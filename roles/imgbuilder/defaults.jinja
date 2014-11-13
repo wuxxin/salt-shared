@@ -2,8 +2,43 @@
 
 user: imgbuilder
 image_base: /srv/images
+vagrantfile: |
+    # -*- mode: ruby -*-
+    # vi: set ft=ruby :
+    Vagrant.configure("2") do |config|
+      # Options for libvirt vagrant provider.
+      config.vm.provider :libvirt do |libvirt|
+        
+        # A hypervisor name to access.
+        libvirt.driver = "kvm"
+        
+        # The name of the server, where libvirtd is running.
+        #libvirt.host = "localhost"
+        
+        # If use ssh tunnel to connect to Libvirt.
+        #libvirt.connect_via_ssh = false
+        
+        # The username and password to access Libvirt. Password is not used when
+        # connecting via ssh.
+        #libvirt.username = "root"
+        #libvirt.password = "secret"
+        
+        #libvirt.socket = "/var/run/libvirt/libvirt-sock"
+        
+        # overrides above
+        libvirt.uri = "qemu:///system"
+        
+        # Libvirt storage pool name, where box image and instance snapshots will
+        # be stored.
+        libvirt.storage_pool_name = "default"
+        
+        # do not cache i/o
+        libvirt.volume_cache = "none"
+      end
+    end
 
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('imgbuilder:settings', {})) %}
+
