@@ -39,7 +39,7 @@ box_add_script:
 build_{{ name }}:
   cmd.run:
     - name: cd {{ s.image_base }}/templates/packer; rm -r output-qemu; packer build --only=qemu {{ name }}.json && ./vagrant-box-add.sh
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ s.user }}
+    - group: {{ s.user }}
 
 {% endfor %}
