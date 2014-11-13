@@ -1,6 +1,6 @@
 #!/bin/sh
 
-logger -t custom_late.sh "modify /etc/grub.d/00_header and run update-grub"
+logger -t custom_late.sh "in the custom_late.03 hook, modify /etc/grub.d/00_header and run update-grub"
 
 cat > /target/tmp/00_header.patch << "ENDOFFILE"
 --- old/00_header	2014-09-18 15:53:12.983999619 +0200

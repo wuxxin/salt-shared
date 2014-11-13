@@ -1,6 +1,6 @@
 #!/bin/sh
 
-logger -t custom_early.sh In the installer hook
+logger -t custom_early.sh "In the custom_early.01.installer hook"
 
 if test -f /tmp/custom_udeb-install.lst; then
     for a in `cat /tmp/custom_udeb-install.lst`; do

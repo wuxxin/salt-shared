@@ -1,6 +1,6 @@
 #!/bin/sh
 
-logger -t custom_late.sh "in the late hook"
+logger -t custom_late.sh "in the custom_late.01 hook"
 
 # copy authorized_keys of ssh installer to main user and root
 cd /target/home/*/

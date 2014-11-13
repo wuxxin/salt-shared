@@ -1,6 +1,6 @@
 #!/bin/sh
 
-logger -t custom_early.sh "In the partman hook"
+logger -t custom_early.sh "In the custom_early.01.partman hook"
 
 # workaround: fix: somehow /media gets mounted with a partition on the host disk
 # (d-i installer searching for install media ?)

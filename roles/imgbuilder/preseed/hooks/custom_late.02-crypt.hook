@@ -2,7 +2,7 @@
 
 . /usr/share/debconf/confmodule
 
-logger -t custom_late.sh "modify and update initramfs to make ssh unlock work (also with static ip)"
+logger -t custom_late.sh "in the custom_late.02 hook, modify and update initramfs to make ssh unlock work (also with static ip)"
 
 if test -f /tmp/custom.env; then
     logger -t custom_late.sh "read /tmp/custom.env into environment"
