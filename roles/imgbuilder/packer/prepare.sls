@@ -12,3 +12,18 @@ build_{{ name }}:
 
 {% endfor %}
 
+{% from "roles/imgbuilder/preseed/defaults.jinja" import defaults as ps_s with context %}
+{% do ps_s.update({
+  'target': s.image_base+ '/templates/packer/http',
+  'username': 'vagrant',
+  'password': 'vagrant',
+  'hostname': 'trusty',
+  'custom_files':(
+    ('/.ssh/authorized_keys', 'salt://roles/imgbuilder/preseed/files/vagrant.pub'),
+  ),
+  'default_preseed': 'preseed-custom.cfg',
+}) %}
+
+{% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
+{{ add_preseed_files(ps_s) }}
+
