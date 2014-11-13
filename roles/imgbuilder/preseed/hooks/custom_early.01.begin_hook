@@ -1,0 +1,4 @@
+#!/bin/sh
+
+logger -t custom_early.sh "In the begin hook"
+
