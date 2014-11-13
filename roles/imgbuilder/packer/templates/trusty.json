@@ -43,9 +43,9 @@
     "ssh_wait_timeout": "10000s",
     "boot_command": [
       "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic DEBCONF_DEBUG=5 ",
+      "/install/vmlinuz noapic fb=false ",
       "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
-      "auto=true priority=critical debconf/frontend=noninteractive ",
+      "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=5 ",
       "hostname={{ .Name }} ",
       "initrd=/install/initrd.gz -- <enter>"
     ],
