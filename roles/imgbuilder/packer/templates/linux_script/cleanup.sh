@@ -45,8 +45,10 @@ if test -f /etc/sysconfig/network-scripts/ifcfg-eth0; then
     echo "cleaning up network uuid, hwaddr, /etc/ssh/ssh_host_* (centos)"
     sed -i '/UUID/d' /etc/sysconfig/network-scripts/ifcfg-eth0
     sed -i '/HWADDR/d' /etc/sysconfig/network-scripts/ifcfg-eth0
-    rm -f /etc/ssh/ssh_host_*
 fi
+
+echo "remove ssh hostkeys (will be regenerated next boot) because we are a template"
+rm -f /etc/ssh/ssh_host_*
 
 echo "remove password from root"
 passwd -d root
