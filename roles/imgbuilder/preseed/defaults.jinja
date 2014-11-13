@@ -41,7 +41,7 @@ additional_udeb:
 additional_layers:
   - "salt://roles/imgbuilder/preseed/files/overlay.tar.gz"
 
-apt_proxy_mirror: "http://192.168.121.1:3142/"
+apt_proxy_mirror: ""
 
 custom_files:
   # - (,)
@@ -55,25 +55,27 @@ preseed_list:
 
 {% for a in ('', '-http') %}
   - preseed-custom{{ a }}.cfg:
-{% for p in p_default %}
+  {% for p in p_default %}
     - {{ p }}
-{% endfor %}
+  {% endfor %}
     - custom_early{{ a }}.cfg
     - custom_late{{ a }}.cfg
   - preseed-custom{{ a }}-console.cfg:
-{% for p in p_default %}
+  {% for p in p_default %}
     - {{ p }}
-{% endfor %}
+  {% endfor %}
     - custom_early{{ a }}.cfg
     - custom_late{{ a }}.cfg
     - network-console.cfg
-{% endfor %}
-{% for a in ('plain', 'simple', 'lvm') %}
+  {% for a in ('plain', 'simple', 'lvm') %}
   - preseed-{{ a }}.cfg:
-{% for p in p_default %}
+    {% for p in p_default %}
     - {{ p }}
-{% endfor %}
+    {% endfor %}
+    - custom_early{{ a }}.cfg
+    - custom_late{{ a }}.cfg
     - partman-{{ a }}.cfg
+  {% endfor %}
 {% endfor %}
 
 {% endload %}

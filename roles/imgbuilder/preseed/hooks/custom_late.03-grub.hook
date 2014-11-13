@@ -68,7 +68,7 @@ cat > /target/tmp/00_header.patch << "ENDOFFILE"
  fi
 ENDOFFILE
 
-in-target sed -i -r -e 's/^.*(GRUB_CMDLINE_LINUX_DEFAULT=).*/\1"text"/g' /etc/default/grub
+in-target sed -i -r -e 's/^.*(GRUB_CMDLINE_LINUX_DEFAULT=).*/\1"quiet"/g' /etc/default/grub
 in-target sed -i -r -e 's/^.*(GRUB_TIMEOUT=).*/\1"2"/g' /etc/default/grub
 in-target sh -c 'echo "GRUB_RECORDFAIL_TIMEOUT=2" >> /etc/default/grub'
 in-target sh -c "cat /tmp/00_header.patch | patch /etc/grub.d/00_header"

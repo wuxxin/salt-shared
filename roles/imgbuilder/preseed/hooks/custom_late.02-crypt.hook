@@ -9,6 +9,12 @@ if test -f /tmp/custom.env; then
   . /tmp/custom.env
 fi
 
+method="$(debconf-get partman-auto/method)"
+if test -n "$method" -a "$method" != "custom"; then
+    logger -t custom_late.sh "aborted. partitioning method was not custom, so we do this hook. exit"
+    exit 0
+fi
+
 mkdir -p /target/etc/initramfs-tools/hooks
 
 cat > /target/etc/initramfs-tools/hooks/cryptroot_patch << "ENDOFFILE"
