@@ -5,7 +5,7 @@ cmd="$1"
 if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     # phase 0
     # earliest hook
-    logger -t custom_early.sh begin
+    logger -t custom_early.sh "begin custom_early.sh"
     shift
 
     if test -f /reboot.seconds -a -f /watch; then
@@ -37,7 +37,9 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     fi
 
     anna-install parted-udeb
+    logger -t custom_early.sh "add hooks (custom_early.sh installer) to download-installer and load-cdrom postinst"
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/download-installer.postinst
+    echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/load-cdrom.postinst
 
 elif test "$cmd" = "installer"; then
     # phase 1
