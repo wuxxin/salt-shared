@@ -36,12 +36,6 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
         done
     fi
 
-    # execute /tmp/custom_early*begin_hook
-    for a in `ls /tmp/custom_early*begin_hook | sort -n`; do
-        logger -t custom_begin_hook $a
-        log-output -t custom_begin_hook sh $a
-    done
-
     anna-install parted-udeb
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/download-installer.postinst
 
