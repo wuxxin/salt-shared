@@ -25,5 +25,5 @@ build_{{ name }}:
 }) %}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
-{{ add_preseed_files(ps_s) }}
+{{ add_preseed_files(ps_s, ps_s.target) }}
 
