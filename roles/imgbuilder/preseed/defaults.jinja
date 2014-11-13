@@ -67,14 +67,14 @@ preseed_list:
     - custom_early{{ a }}.cfg
     - custom_late{{ a }}.cfg
     - network-console.cfg
-  {% for a in ('plain', 'simple', 'lvm') %}
-  - preseed-{{ a }}.cfg:
+  {% for b in ('plain', 'simple', 'lvm') %}
+  - preseed-{{ b }}{{ a }}.cfg:
     {% for p in p_default %}
     - {{ p }}
     {% endfor %}
     - custom_early{{ a }}.cfg
     - custom_late{{ a }}.cfg
-    - partman-{{ a }}.cfg
+    - partman-{{ b }}.cfg
   {% endfor %}
 {% endfor %}
 
