@@ -18,9 +18,9 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
 
     if test "$cmd" = "fetch"; then
         logger -t custom_early.sh "fetch custom.lst and all files included in it"
-        preseed-fetch /custom/custom.lst /tmp/custom.lst
+        preseed_fetch /custom/custom.lst /tmp/custom.lst
         for a in `/tmp/custom.lst`; do
-            preseed-fetch $a /tmp/`basename $a`
+            preseed_fetch $a /tmp/`basename $a`
         done
     else
         cp /custom/* /tmp/
