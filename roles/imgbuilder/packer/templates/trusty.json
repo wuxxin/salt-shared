@@ -43,13 +43,10 @@
     "ssh_wait_timeout": "10000s",
     "boot_command": [
       "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic ",
+      "/install/vmlinuz noapic DEBCONF_DEBUG=5 ",
       "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "auto=true priority=critical debconf/frontend=noninteractive ",
       "hostname={{ .Name }} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
       "initrd=/install/initrd.gz -- <enter>"
     ],
     "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
