@@ -27,7 +27,7 @@ box_add_script:
   'custom_files':(
     ('/.ssh/authorized_keys', 'salt://roles/imgbuilder/preseed/files/vagrant.pub'),
   ),
-  'default_preseed': 'preseed-custom.cfg',
+  'default_preseed': 'preseed-custom-http.cfg',
 }) %}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
