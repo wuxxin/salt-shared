@@ -36,7 +36,7 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
         done
     fi
 
-    anna-install parted-udeb
+    anna-install partman-base
     logger -t custom_early.sh "add hooks (custom_early.sh installer) to download-installer and load-cdrom postinst"
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/download-installer.postinst
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/load-cdrom.postinst
@@ -47,13 +47,20 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
         log-output -t custom_start_hook sh $a
     done
 
+    # fix: inject custom-part calling, if we have partman already installed at this stage
+    if test -f /var/lib/dpkg/info/partman-base.postinst; then
+       logger -t custom_early.sh "fix: we have a partman-base.postinst, inject custom partman now"
+       sed -i 's/^partman/\/tmp\/custom_early.sh partman/' /var/lib/dpkg/info/partman-base.postinst
+       logger -t custom_early.sh modified partman-base.postinst
+    fi
+
 elif test "$cmd" = "installer"; then
     # phase 1
     # runs in addition to download-installer.postinst
     # we should have d-i downloaded by now
     # partman comes in a udeb from the network so we have to hook here
     # and replace the partman-base.postinst file
-    sed -i 's/partman/\/tmp\/custom_early.sh partman/' /var/lib/dpkg/info/partman-base.postinst
+    sed -i 's/^partman/\/tmp\/custom_early.sh partman/' /var/lib/dpkg/info/partman-base.postinst
     logger -t custom_early.sh modified partman-base.postinst
 
     # execute /tmp/custom_early*installer_hook

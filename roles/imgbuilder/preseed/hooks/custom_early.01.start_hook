@@ -9,3 +9,4 @@ if test ! -f /.ssh/authorized_keys; then
         cp /tmp/authorized_keys /.ssh/authorized_keys
         chmod 0600 /.ssh/authorized_keys
     fi
+fi
