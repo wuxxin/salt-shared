@@ -3,29 +3,6 @@ zip:
   pkg:
     - installed
 
-/etc/openvpn/easy-rsa/is-revoked:
-  file.managed:
-    - source: salt://roles/openvpn/is-revoked
-    - mode: 775
-    - require:
-      - file: /etc/openvpn/server.conf
-
-/etc/openvpn/crl.pem:
-  cmd.run:
-    - cwd: /etc/openvpn/easy-rsa/keys
-    - name: cp -u crl.pem /etc/openvpn/
-    - onlyif: test crl.pem -nt /etc/openvpn/crl.pem
-    - require:
-      - cmd: /etc/openvpn/easy-rsa/keys/crl.pem
-
-/etc/openvpn/easy-rsa/keys/crl.pem:
-   cmd.run:
-    - onlyif: test ! -f /etc/openvpn/easy-rsa/keys/crl.pem
-    - cwd: /etc/openvpn/easy-rsa
-    - name: ". ./vars; cd $KEY_DIR; $OPENSSL ca -gencrl -crldays 3650 -out crl.pem -config $KEY_CONFIG"
-    - require:
-      - file: /etc/openvpn/server.conf
-
 {% for (client, keyword) in pillar.openvpn_server.clients|dictsort %}
 
 /etc/openvpn/easy-rsa/keys/{{ client }}.key:
