@@ -57,7 +57,7 @@ unpack-initrd:
 
 {% macro add_preseed_files(cs, tmp_target) %}
 
-{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %
+{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %}
 
 # generate preseed templates
 {% for p in cs.preseed_list %}
@@ -172,7 +172,7 @@ make-custom-list:
 
 {% macro initrd_pack(cs, tmp_target, netboot_target) %}
 
-{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %
+{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %}
 
 pack-initrd:
   file.directory:
