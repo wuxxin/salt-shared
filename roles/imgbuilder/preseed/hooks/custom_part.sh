@@ -58,8 +58,8 @@ case "$1" in
       parted -s $disk -- mkpart boot 2048Kib 256Mib
       parted -s $disk -- set 2 boot on
       parted -s $disk -- set 2 raid on
-      parted -s $disk -- mkpart reserved 256Mib 2304Mib
-      parted -s $disk -- mkpart ${SYSTEM_NAME} 2304Mib 100%
+      parted -s $disk -- mkpart reserved 256Mib 1280Mib
+      parted -s $disk -- mkpart ${SYSTEM_NAME} 1280Mib 100%
       parted -s $disk -- set 4 raid on
     done
 
