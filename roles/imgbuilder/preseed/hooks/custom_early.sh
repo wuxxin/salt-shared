@@ -18,9 +18,9 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
 
     if test "$cmd" = "fetch"; then
         logger -t custom_early.sh "fetch custom.lst and all files included in it"
-        preseed_fetch /custom/custom.lst /tmp/mycustom.lst
-        for a in `cat /tmp/mycustom.lst`; do
-            preseed_fetch /custom/$a /tmp/`basename $a`
+        preseed_fetch /custom.lst /tmp/_custom.lst
+        for a in `cat /tmp/_custom.lst`; do
+            preseed_fetch $a /tmp/`basename $a`
         done
     else
         cp /custom/* /tmp/
@@ -40,6 +40,12 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     logger -t custom_early.sh "add hooks (custom_early.sh installer) to download-installer and load-cdrom postinst"
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/download-installer.postinst
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/load-cdrom.postinst
+
+    # execute /tmp/custom_early*start_hook
+    for a in `ls /tmp/custom_early*start_hook | sort -n`; do
+        logger -t custom_start_hook $a
+        log-output -t custom_start_hook sh $a
+    done
 
 elif test "$cmd" = "installer"; then
     # phase 1
