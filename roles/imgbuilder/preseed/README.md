@@ -1,6 +1,11 @@
 Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
+TODO:
+-----
+ * defaults.jinja: apt-proxy-mirror needs a pillar default instead a hardcoded entry
+ * crypt late hook: only execute if hardisk is found encrypted
+
 Target:
 -------
 
@@ -131,12 +136,9 @@ kexec enabled distros:
  * make new overlay with extracted debs (runs only on same suite and architecture): ./generate_overlay.sh
  * compile new watch: gcc -O2 watch.c -o watch
 
-TODO:
------
+further possible extensions:
+----------------------------
 
- * defaults.jinja: apt-proxy-mirror needs a pillar default instead a hardcoded entry
- * grub: textonly, no quiet as boot parameter
- * extensions:
    * add haveged also in initramfs of target boot
    * pwgen in initrd and seed debconf with it, use gpg to crypt for receiver and 
       *) needs gpg in the in-target setup
@@ -145,3 +147,4 @@ TODO:
    * add qemu/kvm into initrd, start qemu/kvm with nested virtualization start a virtual machine inside the virtual machine
     * measure: tsc times on bare metal, 1level virtualization, 2ndlevel virtualization, make sanity checks,
       * mark system as "tainted" , delay ssh startup and for 5/10/whatever minutes if sanity checks fail
+
