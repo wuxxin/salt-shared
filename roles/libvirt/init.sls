@@ -12,6 +12,7 @@ libvirt:
       - libguestfs-tools
       - ubuntu-virt-server
       - qemu-kvm
+      - python-openssl
       - virt-viewer
       - virt-manager
       - virtinst

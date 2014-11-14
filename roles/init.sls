@@ -36,6 +36,10 @@ base:
     - match: pillar
     - roles.libvirt
 
+  'openvpn_server:status:present':
+    - match: pillar
+    - roles.openvpn
+
   'imgbuilder:status:present':
     - match: pillar
     - roles.imgbuilder
@@ -47,11 +51,6 @@ base:
   'backupninja:status:present':
     - match: pillar
     - roles.backupninja
-
-  'openvpn_server:status:present':
-    - match: pillar
-    - roles.openvpn
-
 
   'zentyal:status:present':
     - match: pillar

@@ -7,6 +7,7 @@ docker-dependencies:
       - iptables
       - ca-certificates
       - lxc
+      - cgroup-bin
 
 lxc-docker:
   pkg.latest:
@@ -18,6 +19,4 @@ docker:
   service.running
     - require:
       - pkg: lxc-docker
-
-    
 
