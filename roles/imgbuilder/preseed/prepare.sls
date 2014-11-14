@@ -10,7 +10,7 @@
 }) %}
 
 {#     ('/reboot.seconds', 'salt://roles/imgbuilder/preseed/files/reboot.seconds'),
-  'cmdline': 'DEBCONF_DEBUG=5 ro hostname=testing priority=critical debconf/frontend=noninteractive'
+  'cmdline': 'DEBCONF_DEBUG=1 ro hostname=testing priority=critical debconf/frontend=noninteractive'
 
 #}
 

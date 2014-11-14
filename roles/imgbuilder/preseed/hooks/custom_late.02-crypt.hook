@@ -11,7 +11,7 @@ fi
 
 method="$(debconf-get partman-auto/method)"
 if test -n "$method" -a "$method" != "custom"; then
-    logger -t custom_late.sh "aborted. partitioning method was not custom, so we do this hook. exit"
+    logger -t custom_late.sh "aborted. partitioning method was not custom, so we do not do this hook. exit"
     exit 0
 fi
 

@@ -22,13 +22,15 @@ include:
 
 {% macro initrd_unpack(cs, tmp_target, netboot_target) %}
 
+{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %}
+
 get-netboot:
   archive.extracted:
     - name: {{ netboot_target }}/
     - source: {{ cs.source }}
     - source_hash: {{ cs.source_hash }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - archive_format: tar
     - tar_options: z
     - if_missing: {{ netboot_target }}/
@@ -40,8 +42,8 @@ clean-initrd:
 unpack-initrd:
   file.directory:
     - name: {{ tmp_target }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - makedirs: true
     - require:
       - file: clean-initrd
@@ -54,6 +56,8 @@ unpack-initrd:
 
 
 {% macro add_preseed_files(cs, tmp_target) %}
+
+{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %
 
 # generate preseed templates
 {% for p in cs.preseed_list %}
@@ -110,16 +114,16 @@ debs-udeb-install:
 "mkdir-tmpdir-{{ l }}":
   file.directory:
     - name: {{ tmp_layers }}/
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - makedirs: true
 
 "overlay-install-{{ l }}":
   file.managed:
     - source: {{ l }}
     - name: {{ tmp_layers }}/{{ salt['cmd.run']('basename '+ l) }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
   cmd.run:
     - name: tar xzf {{ tmp_layers }}/{{ salt['cmd.run']('basename '+ l) }} --overwrite --directory {{ tmp_target }}
 {% endfor %}
@@ -168,11 +172,13 @@ make-custom-list:
 
 {% macro initrd_pack(cs, tmp_target, netboot_target) %}
 
+{% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %
+
 pack-initrd:
   file.directory:
     - name: {{ cs.target }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - makedirs: true
     - clean: true
   cmd.run:
@@ -191,8 +197,8 @@ copy-password:
   file.managed:
     - name: {{ cs.target }}/{{ cs.username }}.passwd
     - contents: "{{ cs.password }}"
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - mode: 600
 
 {% if cs.diskpassword_receiver_id == 'insecure_gpgkey' %}
@@ -207,8 +213,8 @@ preseed-lib-copy-{{ f }}:
   file.managed:
     - source: {{ f }}
     - name: {{ cs.target }}/{{ salt['cmd.run']('basename '+ f) }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - mode: 700
 {% endfor %}
 
@@ -219,8 +225,8 @@ preseed-lib-copy-{{ f }}:
   file.managed:
     - source: "salt://roles/imgbuilder/preseed/files/{{ f }}"
     - name: {{ cs.target }}/{{ f }}
-    - user: imgbuilder
-    - group: imgbuilder
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
     - mode: 700
     - template: jinja
     - context:
