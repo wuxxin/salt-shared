@@ -13,6 +13,7 @@ libvirt:
       - ubuntu-virt-server
       - qemu-kvm
       - python-openssl
+      - gnutls-bin
       - virt-viewer
       - virt-manager
       - virtinst
