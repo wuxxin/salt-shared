@@ -151,9 +151,9 @@ add-custom-files-{{ s }}:
 # make /custom/custom.lst 
 make-custom-list:
   file.managed:
-    name: {{ tmp_target }}/custom.lst
-    contents: |
-{% for n in salt['cmd.run_stdout']('cd '+ tmp_target+ '; ls custom/*') %}
+    - name: {{ tmp_target }}/custom.lst
+    - contents: |
+{%- for n in salt['cmd.run']('cd '+ tmp_target+ '; ls custom/*').split() %}
 {{ n|indent(8, true) }}
 {%- endfor %}
 {%- if cs.custom_files %}

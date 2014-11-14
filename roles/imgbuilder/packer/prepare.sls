@@ -1,5 +1,9 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
+packer_refresh:
+  cmd.run:
+    - name: "cd {{ s.image_base}}/templates/packer/ && for a in `find . | grep -v '/packer_cache'`; do rm $a; done"
+
 packer_templates:
   file.recurse:
     - source: salt://roles/imgbuilder/packer/templates
@@ -9,11 +13,15 @@ packer_templates:
     - file_mode: 664
     - dir_mode: 775
     - include_empty: True
+    - require:
+      - cmd: packer_refresh
     #- template: jinja
 
 box_add_script:
   file.managed:
     - name: {{ s.image_base}}/templates/packer/vagrant-box-add.sh
+    - user: {{ s.user }}
+    - group: libvirtd
     - mode: 775
     - require:
       - file: packer_templates
@@ -34,7 +42,6 @@ box_add_script:
 {{ add_preseed_files(ps_s, ps_s.target) }}
 
 {% for name in ['trusty'] %}
- # 'precise', 'saucy', 'trusty'
 
 build_{{ name }}:
   cmd.run:
