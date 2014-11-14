@@ -12,7 +12,7 @@
       "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
     ],
     "shutdown_command": "sudo /sbin/halt -p",
-    "disk_size": 10140,
+    "disk_size": 11264,
     "headless": "true",
 
     "hard_drive_interface": "sata",
@@ -36,7 +36,7 @@
       "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
     ],
     "shutdown_command": "sudo /sbin/halt -p",
-    "disk_size": 10140,
+    "disk_size": 11264,
     "headless": "true",
 
     "ssh_wait_timeout": "10000s",
