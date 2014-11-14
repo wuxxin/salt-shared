@@ -45,7 +45,7 @@
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic fb=false ",
       "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
-      "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=5 ",
+      "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
       "initrd=/install/initrd.gz -- <enter>"
     ],
