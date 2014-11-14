@@ -32,7 +32,7 @@ modify_service:
     - source: salt://roles/openvpn/vars
     - template: jinja
     - context:
-      key_size: {{ pillar.openvpn_server.ca.key_size|d('2048') }}
+      key_size: {{ pillar.openvpn_server.ca.key_size|d('2560') }}
       key_expire: {{ pillar.openvpn_server.ca.key_expire|d('3650') }}
       country: {{ pillar.openvpn_server.ca.country }}
       province: {{ pillar.openvpn_server.ca.province }}
