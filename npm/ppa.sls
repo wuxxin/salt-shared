@@ -1,13 +1,10 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
-{% endif %}
 
-
-{% if grains['os'] == 'Ubuntu' %}
-golang_ppa:
+nodejs_ppa:
   pkgrepo.managed:
-    - ppa: ubuntu-cloud-archive/cloud-tools-next
+    - ppa: chris-lea/node.js
     - require:
       - pkg: ppa_ubuntu_installer
 {% endif %}
