@@ -37,6 +37,7 @@ if test "$cmd" = "copy" -o "$cmd" = "fetch"; then
     fi
 
     anna-install partman-base
+    anna-install parted-udeb
     logger -t custom_early.sh "add hooks (custom_early.sh installer) to download-installer and load-cdrom postinst"
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/download-installer.postinst
     echo /tmp/custom_early.sh installer >> /var/lib/dpkg/info/load-cdrom.postinst
