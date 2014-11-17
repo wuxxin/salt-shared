@@ -1,17 +1,21 @@
-salt master based snapshot backup and recovery 
+virtual machine based lvm snapshot backup and recovery using duplicity for backup
+=================================================================================
 
-Creates and Spawns a backup_vm that gets LVM snapshots of other vm's 
-(automatically) attached  as disks connected to vm,
-can backup these lvm snapshots according to the desires of the vm.
- - can backup the backup_vm itself (duply config)
- - can backup the host system
+Creates and spawns a backup vm that get LVM snapshots of other vm's by the hypervisor host, 
+(automatically) attaches them as disks connected to vm,
+so the vm can backup these lvm snapshots according to the desires of the original vm,
+using duplicity to a target space (eg. ftp, ssh+sftp, s3)
+
+In addition it can
+ - backup the backup vm itself
+ - backup the host system
 
 roles.snapshot_backup.
   host
     . generate_backup_vm
     . scheduled_backup_runner
     . reactor event-target: snapshot_backup_config_update
-  backup_vm
+  backupvm
     . mount_and_duply
   client
 
@@ -31,9 +35,19 @@ hypervisor_pillar:
 snapshot_backup:
   host:
     state: "present"
-    data:
-      volume: "omoikane/backup_config_cache"
+    data_volume:
+      name: "omoikane/backup_config_cache"
       attach_as: "vdy"
+    duply:
+      recipient_id: saltmaster@omoikane backup_snapshot@backupvm
+      signing_id: backup_snapshot@backupvm
+      signing_gpg_secret_asc: |
+        whatever
+      target: 'ftp://%(backup.username)s:%(backup.password)s@%(backup.host)s/%(duplicity.root)s'
+      options:
+        max_age: 2M
+        max_fullbackups: 2
+        duply_options: "whatever"
     custom_storage:
       lvm:
         lv:
@@ -45,73 +59,76 @@ snapshot_backup:
           - opts: "xattr"
           - require_in: "cmd: roles.snapshot_backup.host.ready"
 
-backup_vm pillar:
+backupvm pillar:
 ---
 snapshot_backup:
-  backup_vm:
+  backupvm:
     state: present
-    recipient_id: saltmaster@omoikane backup_snapshot@backupvm
-    signing_id: backup_snapshot@backupvm
-    signing_gpg_secret_asc: |
-        whatever
-    target: 'ftp://%(backup.username)s:%(backup.password)s@%(backup.host)s/%(duplicity.root)s'
-    options:
-      max_age: 2M
-      max_fullbackups: 2
-      duply_options: "whatever"
 
-client-vm pillar:
+client pillar:
 this will call state roles.snapshot_backup.client,
   which emits "snapshot_config_update" as minion with self minion id
 ---
 snapshot_backup:
   client:
     status: present
-    type: "libvirt_lvm" {# get attached disks, snapshot all of them, and make available in backup_vm #}
-    offline_ok: false {# do not backup if domain offline #}
-    pre_snapshot:
-      - "backupninja -n"
-      - "hot-snapshot-prepare.sh  pause"
-      - "sync"
-    on_snapshot:
-      - "hot-snapshot-prepare.sh continue"
-    post_snapshot:
-      - "echo 'success' > /var/run/snapshot_ok
-    pre_recovery:
-      - "echo 'installed but with blank data  machine is booted and then shutdown, make it possible to restore data, eg. delete some default files, or prevent daemons from starting after restore'"
-      - "shutdown"
-    end_recovery:
-      - "this is if needed run in backupvm via chroot"
-    post_recovery:
-      - "echo 'data is overwritten, machine is booted again, with loaded data, after restore, now reintegrate data, start daemons if neccecary'
-    backup:
-      mount: "vg0/host_root"
-      source: "/"
-      exclude: |
-          bla
-          blu
+    config:
+      type: "libvirt_lvm" {# get attached disks, snapshot all of them, and make available in backup_vm, is default #}
+      offline_ok: false {# do not backup if domain offline #}
+      pre_snapshot:
+        - "backupninja -n"
+        - "hot-snapshot-prepare.sh  pause"
+        - "sync"
+      on_snapshot:
+        - "hot-snapshot-prepare.sh continue"
+      post_snapshot:
+        - "echo 'success' > /var/run/snapshot_ok
+      pre_recovery:
+        - "echo 'installed but with blank data  machine is booted and then shutdown, make it possible to restore data, eg. delete some default files, or prevent daemons from starting after restore'"
+        - "shutdown"
+      end_recovery:
+        - "this is if needed run in backupvm via chroot"
+      post_recovery:
+        - "echo 'data is overwritten, machine is booted again, with loaded data, after restore, now reintegrate data, start daemons if neccecary'
+      backup:
+        mount: "vg0/host_root"
+        source: "/"
+        exclude: |
+            bla
+            blu
 
 --- client pillar for hypervisor host itself: 
     type="host_lvm", add host_device (for snapshot), target_device (for backup_vm), and mount
 snapshot_backup:
   client:
     status: "present"
-    backup:
-      type: "host_lvm"
-      host_device: "omoikane/host_root"
-      target_device: "vda"
-      mount: "vda"
-      source: "/"
-      exclude:
+    config:
+      backup:
+        type: "host_lvm" {# restricted to same host where snapshot_backup:host:present = True, backup_snapshot host will enforce this #}
+        host_device: "omoikane/host_root"
+        target_device: "vda"
+        mount: "vda"
+        source: "/"
+        exclude:
 
 --- client pillar for the backup vm itself: type="self", omit "mount" 
 snapshot_backup:
   client:
     status: "present"
-    type: "self"
-    backup: 
-      source: "/mnt/backup_config_cache/config"
-      exclude:
+    config:
+      type: "self" {# do not use libvirt for vm management, ignore lvm, just execute duply from local source #}
+      backup: 
+        source: "/mnt/backup_config_cache/config"
+        exclude:
+ 
+reactor-snapshot_backup-client-update pillar:
+---
+snapshot_backup:
+  update:
+    minion: {{ data.id }}
+    config: 
+      # normal client config comes here
+
 
 
 salt master:
