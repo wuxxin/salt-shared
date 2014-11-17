@@ -47,4 +47,8 @@ usage for pillars
  * inside the sls (which does not contain sensitive information)
 
 {% import_yaml "pillardirectory/pillar-file.secrets" as my_data %}
-  what-ever-pillar-data-name inside a yaml structure: {{ my_data }}
+ what-ever-pillar-data-name inside a yaml structure: {{ my_data }}
+
+ * workaround for inclusion in pillar without complaining:
+{% if salt['cmd.run_stdout']('which git-crypt') != "" %}
+{% endif %}
