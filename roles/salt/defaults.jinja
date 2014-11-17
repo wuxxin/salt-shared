@@ -17,7 +17,6 @@ master:
     #  - https://github.com/saltstack-formulas/docker-formula.git
 reactor:
   status: absent
-  base: /srv/reactor
   includes:
     - "roles/haproxy"
     - "roles/dns"

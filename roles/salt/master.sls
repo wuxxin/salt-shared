@@ -39,6 +39,12 @@ salt-master:
   file:
     - directory
 
+/etc/salt/master.d:
+  file:
+    - directory
+    - require:
+      - file: /etc/salt
+
 /etc/salt/master:
   file.managed:
     - contents: |
