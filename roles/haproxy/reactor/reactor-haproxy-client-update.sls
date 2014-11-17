@@ -1,6 +1,6 @@
 haproxy-client-update:
   cmd.state.sls:
-    - tgt: haproxy:status:enabled
+    - tgt: haproxy:status:present
     - expr_form: pillar
     - name: roles.proxy.server.update.sls
     - pillar:

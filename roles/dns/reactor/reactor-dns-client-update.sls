@@ -1,6 +1,6 @@
 dns-client-update:
   cmd.state.sls:
-    - tgt: dns:status:enabled
+    - tgt: dns:status:present
     - expr_form: pillar
     - name: roles.dns.server.update.sls
     - pillar:
