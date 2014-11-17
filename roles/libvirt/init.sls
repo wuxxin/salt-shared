@@ -12,8 +12,8 @@ libvirt:
       - libguestfs-tools
       - ubuntu-virt-server
       - qemu-kvm
-      - python-openssl
-      - gnutls-bin
+      - python-openssl {# is needed for states.libvirt.keys #}
+      - gnutls-bin {# is needed for states.libvirt.keys #}
       - virt-viewer
       - virt-manager
       - virtinst
@@ -24,7 +24,7 @@ libvirt:
       - libguestfs-tools
       - nbdkit
       - lvm2
-      - cgroup-bin
+      - cgroup-bin {# library and kernel support is needed, bin package catches requisites #}
       - multipath-tools
       - bridge-utils
       - vlan
