@@ -7,31 +7,60 @@ so the vm can backup these lvm snapshots according to the desires of the origina
 using duplicity to a target space (eg. ftp, ssh+sftp, s3)
 
 In addition it can
- - backup the backup vm itself
- - backup the host system
+  - backup the backup vm itself
+  - backup the host system
 
-roles.snapshot_backup.
-  host
-    . generate_backup_vm
-    . scheduled_backup_runner
-    . reactor event-target: snapshot_backup_config_update
-  backupvm
-    . mount_and_duply
-  client
+Setup:
+------
+  - for every minion(may be configured on the saltmaster in master.d/):
+    -  returner.smtp_return must be configured for every minion targeted
+  - on salt master: pillar item salt.reactor.includes must include "- roles.snapshot_backup"
+  - on hypervisor host: pillar item 
+    - schedule.snapshot_backup
+    - snapshot_backup.host
+  - for every minion that wants to be backuped: pillar item snapshot_backup.client must be configured
 
 Workflow:
- roles.snapshot_backup.host is run on host
-   generates backup_vm
- roles.snapshot_backup.client is run on client
-   emits snapshot_backup_config_update
- roles.snapshot_baclup.scheduled_backup_runner
-   for every config:
-      prework
-      salt "backup.minion_id" state.sls onlyonce=true roles.snapshot_backup.backup_vm.mount_and_duply target_minion.id
-      postwork
+---------
+  - roles.snapshot_backup.host is run on host
+    - generates backup_vm
+
+  - roles.snapshot_backup.client is run on client
+    - emits reactor signal snapshot_backup/client/config-update
+    - signal is received on hosts that match pillar "snapshot_backup:host:status:present"
+      - add config update to /srv/snapshot_backup, backup config for client is saved
+
+  - roles.snapshot_backup.host.backup_run is run on the host via the salt scheduler added to the host pillar
+    - for every config in /srv/snapshot_backup/client
+      - pre snapshot work
+      - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot_backup.backupvm.mount_and_duply target_minion.id
+        pillar: snapshot_backup:run:config 
+      - post snapshot work
+    - return the findings and work results via returner.smtp_return
+
+Convinience
+-----------
+
+salt-call state.sls roles.snapshot_backup.generate_cfg x=z z=e k=o l=i
+
+
+Example Files:
+--------------
 
 hypervisor_pillar:
 ---
+schedule:
+  snapshot_backup:
+    jid_include: True
+    maxrunning: 1
+    when: 3:30am
+    returner: smtp_return
+    function: state.sls
+    args:
+      - roles.snapshot_backup.host.backup_run
+    kwargs:
+      test: True
+
 snapshot_backup:
   host:
     state: "present"
@@ -66,8 +95,6 @@ snapshot_backup:
     state: present
 
 client pillar:
-this will call state roles.snapshot_backup.client,
-  which emits "snapshot_config_update" as minion with self minion id
 ---
 snapshot_backup:
   client:
@@ -97,21 +124,22 @@ snapshot_backup:
             bla
             blu
 
---- client pillar for hypervisor host itself: 
-    type="host_lvm", add host_device (for snapshot), target_device (for backup_vm), and mount
+client pillar for hypervisor host itself: type="host_lvm", add host_device and target_device
+--- 
 snapshot_backup:
   client:
     status: "present"
     config:
       backup:
         type: "host_lvm" {# restricted to same host where snapshot_backup:host:present = True, backup_snapshot host will enforce this #}
-        host_device: "omoikane/host_root"
-        target_device: "vda"
+        host_device: "omoikane/host_root" {# the lvm device we are going to make a snapshot from #}
+        target_device: "vda" {# the desired target device name in the backupvm #}
         mount: "vda"
         source: "/"
         exclude:
 
---- client pillar for the backup vm itself: type="self", omit "mount" 
+client pillar for the backup vm itself: type="self", omit "mount" 
+--- 
 snapshot_backup:
   client:
     status: "present"
@@ -131,71 +159,10 @@ snapshot_backup:
 
 
 
-salt master:
-------------
- - generate backup_vm: generate a "trusty_simple" plus salt install duply, duplicity, 
-   - maybe modprobe acpiphp
-   - modprobe pci_hotplug
-   - for hotplug support
-   - very simple disk: one partition disk virtual image (readonly if possible):
-      boots from there, best readonly with temporary storage, and as something unusual like /vd10
-      has salt installed and has some grains that are specific to the underlying machine
-       eg. original minion so it can retrieve snapshot_config: backup
-  - generate a cache volume for this machine, simple ext4 filesystem, but writeable for backup vm
+Implementation Design
+---------------------
 
-schedule config
-----
-schedule:
-  backup_runner:
-    fuction: master-backup-runner
-    jid_include: true
-    hours: 24
-
-one-runner
-    args:
-      - backup_vm
-      - roles.snapshot_backup.backup_run
-
-
-roles.snapshot_backup.master-backup-runner
-----
-
-for each configured backup run do
-
-  salt "minion_id" cmd.run config.pre_snapshot
-  salt.cloud "minion_id" pause
-  for x in lvm volumes connected to minion id  do
-    snapshot begin x
-  salt.cloud "minion_id" unpause
-  salt "minion_id" cmd.run config.on_snapshot
-  attach_disk x to backup_vm
-  attach_disk backupvm_cache_volume to backup_vm
-
-  stop_delay_timer stop_backup_vm
-  if not running:
-    cloud.start backup_vm minion_id
-  salt "backup.minion_id" state.sls onlyonce=true roles.snapshot_backup.mount_and_duply target_minion.id
-    mount access to a file share or a lvm filesystem volume 
-        (backupvm_cache_volume with write access, 
-        for storing duplicity cache files (--archive-dir --name ),
-        duply config files)
-    mdadm --assemble --scan # assemble raid 
-    lvchange something # and lvm
-    mount -ro something /target/something
-    update duply config from salt to duply_config dir
-    run duply
-    unmount everthing we can
-    emit snapshot done target_minion.id result
-  start_delay_timer 10m stop_backup_vm cloud.stop backup_vm minion_id # will call the cmd within 10minutes if not aborted
-
-
-detach all lvm volumes of minion_id
-detach cache_volume
-snapshot delete
-salt "minion_id" cmd.run config.post_snapshot
-
-
-recovery:
+roles.snapshot_backup.recovery:
 .........
 
 create machine using pillar vagrant and reboot into final stage, including salt minion running but empty
@@ -219,7 +186,6 @@ detach all lvm volumes of minion_id from backup_vm
 detach cache volume
 cloud.start minion_id
 salt "minion_id" cmd.run config.post_recovery
-
 
 snippets:
 .........
