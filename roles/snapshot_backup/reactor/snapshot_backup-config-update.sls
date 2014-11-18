@@ -7,4 +7,5 @@ snapshot_backup-config-update:
       snapshot_backup:
         update:
           minion: {{ data.id }}
+          status: {{ data.status }}
           config: {{ data.config }}

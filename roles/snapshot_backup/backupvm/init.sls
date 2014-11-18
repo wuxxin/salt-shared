@@ -6,7 +6,8 @@ snapshot_backup_vm:
       - lvm2
       - mdadm
       - cryptsetup
-
-
-
-
+{#
+   - maybe modprobe acpiphp
+   - modprobe pci_hotplug
+   - for hotplug support
+#}

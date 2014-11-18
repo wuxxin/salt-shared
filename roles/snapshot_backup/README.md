@@ -7,8 +7,9 @@ so the vm can backup these lvm snapshots according to the desires of the origina
 using duplicity to a target space (eg. ftp, ssh+sftp, s3)
 
 In addition it can
-  - backup the backup vm itself
-  - backup the host system
+  - backup the host system using lvm snapshots
+  - run a backup on itself, not using snapshots
+  - future: run a snapshot backup of a docker container
 
 Setup:
 ------
@@ -47,6 +48,13 @@ salt-call state.sls roles.snapshot_backup.generate_cfg x=z z=e k=o l=i
 Example Files:
 --------------
 
+backup-types:
+  "lvm_libvirt"
+  "lvm_host"
+  "self"
+  "plain"
+
+
 hypervisor_pillar:
 ---
 schedule:
@@ -64,19 +72,20 @@ schedule:
 snapshot_backup:
   host:
     state: "present"
-    data_volume:
-      name: "omoikane/backup_config_cache"
-      attach_as: "vdy"
-    duply:
-      recipient_id: saltmaster@omoikane backup_snapshot@backupvm
-      signing_id: backup_snapshot@backupvm
-      signing_gpg_secret_asc: |
-        whatever
-      target: 'ftp://%(backup.username)s:%(backup.password)s@%(backup.host)s/%(duplicity.root)s'
-      options:
-        max_age: 2M
-        max_fullbackups: 2
-        duply_options: "whatever"
+    config:
+      data_container:
+        name: "omoikane/backup_config_cache"
+        attach_as: "vdy"
+      duply:
+        recipient_id: saltmaster@omoikane backup_snapshot@backupvm
+        signing_id: backup_snapshot@backupvm
+        signing_gpg_secret_asc: |
+          whatever
+        target: 'ftp://%(backup.username)s:%(backup.password)s@%(backup.host)s/%(duplicity.root)s'
+        options:
+          max_age: 2M
+          max_fullbackups: 2
+          duply_options: "whatever"
     custom_storage:
       lvm:
         lv:
@@ -100,23 +109,14 @@ snapshot_backup:
   client:
     status: present
     config:
-      type: "libvirt_lvm" {# get attached disks, snapshot all of them, and make available in backup_vm, is default #}
+      type: "lvm_libvirt" {# get attached disks, snapshot all of them, and make available in backupvm, is default #}
       offline_ok: false {# do not backup if domain offline #}
-      pre_snapshot:
-        - "backupninja -n"
-        - "hot-snapshot-prepare.sh  pause"
-        - "sync"
-      on_snapshot:
-        - "hot-snapshot-prepare.sh continue"
-      post_snapshot:
-        - "echo 'success' > /var/run/snapshot_ok
-      pre_recovery:
-        - "echo 'installed but with blank data  machine is booted and then shutdown, make it possible to restore data, eg. delete some default files, or prevent daemons from starting after restore'"
-        - "shutdown"
-      end_recovery:
-        - "this is if needed run in backupvm via chroot"
-      post_recovery:
-        - "echo 'data is overwritten, machine is booted again, with loaded data, after restore, now reintegrate data, start daemons if neccecary'
+      pre_snapshot: "backupninja -n && hot-snapshot-prepare.sh pause && sync"
+      on_snapshot: "hot-snapshot-prepare.sh continue"
+      post_snapshot: "echo 'success' > /var/run/snapshot_ok"
+      pre_recovery: "echo 'installed blank machine is booted, prepare for restore and then shutdown' && shutdown"
+      end_recovery: "echo 'this is if needed run in backupvm via chroot'"
+      post_recovery: "echo 'data is overwritten, machine booted again, with data, after restore, now reintegrate data, start daemons if neccecary'"
       backup:
         mount: "vg0/host_root"
         source: "/"
@@ -131,20 +131,20 @@ snapshot_backup:
     status: "present"
     config:
       backup:
-        type: "host_lvm" {# restricted to same host where snapshot_backup:host:present = True, backup_snapshot host will enforce this #}
+        type: "lvm_host" {# restricted to same host where snapshot_backup:host:present = True, backup_snapshot host will enforce this #}
         host_device: "omoikane/host_root" {# the lvm device we are going to make a snapshot from #}
         target_device: "vda" {# the desired target device name in the backupvm #}
         mount: "vda"
         source: "/"
         exclude:
 
-client pillar for the backup vm itself: type="self", omit "mount" 
+client pillar for the backup vm itself: type="plain", omit "mount" 
 --- 
 snapshot_backup:
   client:
     status: "present"
     config:
-      type: "self" {# do not use libvirt for vm management, ignore lvm, just execute duply from local source #}
+      type: "plain" {# do not use libvirt for vm management, ignore lvm, just execute duply from local source #}
       backup: 
         source: "/mnt/backup_config_cache/config"
         exclude:
