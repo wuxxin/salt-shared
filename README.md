@@ -1,8 +1,8 @@
 ##salt-shared - useful Salt states
 
-This is a collection of saltstack states.
-As a result of me learining saltstack,
-both quality and style differ from state to state,
+This is a collection of saltstack states 
+as a result of me learning saltstack.
+Both quality and style differ from state to state,
 most states are working, some not.
 
 It is already in a useful condition,
