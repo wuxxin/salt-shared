@@ -1,7 +1,7 @@
 {
   "builders": [
   {
-    "vm_name": "trusty",
+    "vm_name": "trusty-simple",
     "type": "virtualbox",
     "http_directory": "http",
     "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04.1-server-amd64.iso",
@@ -16,7 +16,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -32,7 +32,7 @@
     ]
   },
   {
-    "vm_name": "trusty",
+    "vm_name": "trusty-simple",
     "type": "qemu",
     "http_directory": "http",
     "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04.1-server-amd64.iso",
@@ -44,7 +44,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic fb=false ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
       "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
       "initrd=/install/initrd.gz -- <enter>"
