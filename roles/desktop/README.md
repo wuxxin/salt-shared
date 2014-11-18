@@ -2,6 +2,25 @@
 
 Installs and configures features you usually want to have in a working desktop
 
+##Todo:
+ * add partner and extra repositories (also needed for skype)
+ * add supported languages packages install (one click at languages)
+ * apt-get install exfat-fuse exfat-utils
+ * install-css does install libcss even if already installed
+
+ * development:
+   * openwrt: tiny linux distribution
+   * tinyos: TinyOS for 16bit embedded processors
+   * contiki, contiki-tres: OS for 16 bit processors
+   * riot: OS for 16 bit processors
+   * arduino: semi os stack for 16 bit processors
+   * pymite: python on a chip
+   * more internet of things stuff and bridging of technology between:
+    *  python on 16bit, linux embedded, android, desktop 
+       * contiki: https://github.com/tecip-nes/contiki-tres
+       * openwrt: https://github.com/nodesign/weio
+       * android: 
+
 ##Features:
 
   * Electronic Signing: installes a jre, java browser plugin, chipcard daemon
@@ -50,22 +69,3 @@ desktop:
   commercial:
     binary:
       status: present # current status: decide if skype is to be installed
-
-
-##Todo:
-
-install-css does install libcss even if already installed
-
- * development:
-   * openwrt: tiny linux distribution
-   * tinyos: TinyOS for 16bit embedded processors
-   * contiki, contiki-tres: OS for 16 bit processors
-   * riot: OS for 16 bit processors
-   * arduino: semi os stack for 16 bit processors
-   * pymite: python on a chip
-   * more internet of things stuff and bridging of technology between:
-    *  python on 16bit, linux embedded, android, desktop 
-
-       * contiki: https://github.com/tecip-nes/contiki-tres
-       * openwrt: https://github.com/nodesign/weio
-       * android: 
