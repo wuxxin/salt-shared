@@ -50,5 +50,15 @@ fi
 echo "remove ssh hostkeys (will be regenerated next boot) because we are a template"
 rm -f /etc/ssh/ssh_host_*
 
+if type apt-get >/dev/null 2>&1; then
+    echo "insert dpkg-reconfigure openssh-server in /etc/rc.local because ubuntu does not regenerate host keys on startup"
+    cat >> /etc/rc.local << EOF
+if test ! -f /etc/ssh/ssh_host_rsa_key; then
+    echo "regenerate ssh host keys ..."
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure openssh-server
+fi
+EOF
+fi
+
 echo "remove password from root"
 passwd -d root
