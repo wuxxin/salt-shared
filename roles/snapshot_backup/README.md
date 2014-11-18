@@ -11,6 +11,11 @@ In addition it can
   - run a backup on itself, not using snapshots
   - future: run a snapshot backup of a docker container
 
+Requirements:
+-------------
+  - a libvirt capable host
+  - a backup space (accessable via ssh/sftp or duplicity supported protocols
+
 Setup:
 ------
   - for every minion(may be configured on the saltmaster in master.d/):
@@ -20,6 +25,15 @@ Setup:
     - schedule.snapshot_backup
     - snapshot_backup.host
   - for every minion that wants to be backuped: pillar item snapshot_backup.client must be configured
+
+Convinience
+...........
+
+salt-call state.sls roles.snapshot_backup.generate_cfg ./ snapshot_backup@host z=e k=o l=i
+  - can generate gpg keys and include them in a pillar file,
+  - connect via ssh using password, makedir .ssh/authorized_keys
+  - make stub directories (eg omoikane)
+
 
 Workflow:
 ---------
@@ -38,11 +52,6 @@ Workflow:
         pillar: snapshot_backup:run:config 
       - post snapshot work
     - return the findings and work results via returner.smtp_return
-
-Convinience
------------
-
-salt-call state.sls roles.snapshot_backup.generate_cfg x=z z=e k=o l=i
 
 
 Example Files:
