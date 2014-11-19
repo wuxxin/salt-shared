@@ -7,10 +7,10 @@
 {{ vagrant_halt(settings) }}
 
 {{ detach_vm(settings) }}
-{{ macro vm-move-network(name) }}
-{{ macro vm-copy-resize(name) }}
-{{ macro spicify(name) }}
-{{ macro set_autostart(settings, autostart='on') }}
+{{ vm-move-network(settings) }}
+{{ vm-copy-resize(settings) }}
+{{ spicify(settings) }}
+{{ set_autostart(settings, autostart='on') }}
 
 {{ vm_start(settings) }}
 
@@ -32,7 +32,6 @@
     - user: {{ settings.user }}
     - name: vagrant halt
 {% endmacro %}
-
 
 {% macro saltify_vm(settings) %}
 template_dir:
@@ -140,11 +139,3 @@ virt-resize $sourcefile /dev/mapper/$volumegroup-$volumename $expand_pt $expand_
       - cmd: {{ name }}-spicify
 {% endmacro %}
 
-
-{% macro set_autostart(settings, autostart='on') %}
-set_autostart_vm:
-  module.run:
-    - name: virt.set_autostart
-    - vm: {{ settings.hostname }}
-    - state: {{ autostart }}
-{% endmacro %}
