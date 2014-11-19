@@ -17,10 +17,10 @@ transfer_backupvm_config:
     - sls: roles.snapshot_backup.backupvm.put_backupvm_config
     - pillar: 
         snapshot_backup:
-          base_config: {{ salt['pillar.get']('snapshot_backup:host:config')|json }}
+          base_config: {{ salt['pillar.get']('snapshot_backup:host:config')|yaml }}
           client_config:
 {%- for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
-            {{ a }}: {{ salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml|json }}
+            {{ a }}: {{ salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml|yaml }}
 {%- endfor %}
 
 {% for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
