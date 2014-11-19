@@ -13,8 +13,8 @@ snapshot_backup_host:
 {% endif %}
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as im_set with context %}
+{% from "roles/imgbuilder/vagrant/lib.sls" import deploy_vagrant_vm with context %}
 {% from "roles/snapshot_backup/defaults.jinja" import settings with context %}
-{% from "roles/snapshot_backup/host/lib.sls" import create_backup_vm, start_backup_vm with context %}
 
 {% load_yaml as config %}
 hostname: {{ settings.backup_vm_name }}
@@ -23,8 +23,29 @@ username: {{ im_set.user }}
 {% endload %}
 
 {% if settings.backup_vm_name not in salt['virt.list']['local'] %}
-    {{ create_backup_vm(config) }}
-    {{ start_backup_vm(config.hostname) }}
+
+{% for a in ('Vagrantfile',) %}
+backup_vm-copy-{{ a }}:
+  file.managed:
+    - source: "salt://roles/snapshot_backup/files/{{ a }}"
+    - name: {{ config.target }}/{{ a }}
+    - user: {{ config.user }}
+    - group: {{ config.user }}
+    - mode: 644
+    - template: jinja
+    - makedirs: True
+    - context:
+        target: {{ config.target }}
+        hostname: {{ config.hostname|d(" ") }}
+{% endfor %}
+
+{{ deploy_vagrant_vm(config) }}
+
+start_backup_vm:
+  module.run:
+    - name: virt.start
+    - m_name: {{ config.hostname }}
+
 {% endif %}
 
 backup_vm_is_ready:

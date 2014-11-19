@@ -1,53 +1,47 @@
 {% from "roles/snapshot_backup/defaults.jinja" import settings as s with context %}
-{% from "roles/snapshot_backup/host/lib.sls" import start_backup_vm with context %}
 
 stop_delaytimer:
   cmd.run:
     - name: true
 
 {% if s.backup_vm_name not in salt['virt.list_active']['local'] %} 
-  {{ start_backup_vm(s.backup_vm_name) }}
+start_backup_vm:
+  module.run:
+    - name: virt.start
+    - m_name: {{ s.backup_vm_name }}
 {% endif %}
 
-transfer_base_config:
-  module.run:
-    - name: state.sls
-    - mods: roles.snapshot_backup.backupvm.put_base_config
+transfer_backupvm_config:
+  salt.state:
+    - tgt: {{ s.backup_vm_name }}
+    - sls: roles.snapshot_backup.backupvm.put_backupvm_config
     - pillar: 
         snapshot_backup:
           base_config: {{ salt['pillar.get']('snapshot_backup:host:config')|json }}
+          client_config:
+{%- for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
+            {{ a }}: {{ salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml|json }}
+{%- endfor %}
 
 {% for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
-transfer_client_config_{{ a }}:
-  module.run:
-    - name: state.sls
-    - mods: roles.snapshot_backup.backupvm.put_client_config
-    - pillar: 
-        snapshot_backup:
-          client_id: {{ a }}
-          client_config: {{ salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml|json }}
-{% endfor %}
+{% set client=a %}
+{% set client_config= salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml }}
+{% if not defined client_config['absent'] %}
 
-
-
-{% for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
-  {% set client=a %}
-  {% set client_config= salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml }}
-
-  {% if not defined client_config['absent'] %}
-
-  {% set client_disks= salt['cmd.run_stdout'](
+{% set client_disks= salt['cmd.run_stdout'](
 'virsh dumpxml --inactive {{ client }} |
  xmlstarlet sel -I -t -m "domain//disk[@type='block']" -v "source/@dev" -o ":" -n -o "  " -v "target/@dev" -n')|load_yaml %}
 
 config-pre_snapshot-{{ client }}:
-  cmd.run:
-    - name: salt "{{ client }}" cmd.retcode "{{ client_config.pre_snapshot|d('true') }}"
+  salt.function:
+    - tgt: {{ client }}
+    - name: cmd.run
+    - m_name: "{{ client_config.pre_snapshot|d('true') }}"
 
 libvirt-{{ client }}-pause:
   module.run:
-    - name: virt.somethign
-    - m_name: another
+    - name: virt.pause
+    - vm: {{ client }}
     - require:
       - cmd: config-pre_snapshot-{{ client }}
 
@@ -67,20 +61,26 @@ lvm-snapshot-{{ d }}:
 
 libvirt-{{ client }}-resume:
   module.run:
-    - name: virt.somethign
-    - m_name: another
+    - name: virt.resume
+    - vm: {{ client }}
 
 config-on_snapshot-{{ client }}:
-  cmd.run:
-    - name: salt "{{ client }}" cmd.retcode "{{ client_config.on_snapshot|d('true') }}"
+  salt.function:
+    - tgt: {{ client }}
+    - name: cmd.run
+    - m_name: "{{ client_config.on_snapshot|d('true') }}"
 
 {% for d,t in client_disks.iteritems() %}
 attach_disk-{{ d }}:
 {% endfor %}
   
 mount-and-backup-{{ client }}:
-  cmd.run:
-    - name: salt "{{ s.backup_vm_name }}" state.sls roles.snapshot_backup.backupvm.mount_and_backup
+  salt.state:
+    - tgt: {{ s.backup_vm_name }}
+    - sls: roles.snapshot_backup.backupvm.mount_and_backup
+    - pillar:
+        snapshot_backup:
+          run: {{ client }}
 
 {% for d,t in client_disks.iteritems() %}
 detach_disk-{{ d }}:
@@ -96,13 +96,16 @@ lvm-remove-snapshot-{{ d }}:
       - module: detach_disk-{{ d }}
     - require_in:
       - cmd: config-post_snapshot-{{ client }}
-  
-  {% endif %}
+{% endfor %}
+
+{% endif %}
 {% endfor %}
 
 config-post_snapshot-{{ client }}:
-  cmd.run:
-    - name: salt "{{ client }}" cmd.retcode "{{ client_config.post_snapshot|d('true') }}"
+  salt.function:
+    - tgt: {{ client }}
+    - name: cmd.run
+    - m_name: "{{ client_config.post_snapshot|d('true') }}"
     - require_in:
       - cmd: start_delaytimer
 
@@ -128,10 +131,8 @@ for each configured backup run do
   start_delay_timer 10m stop_backup_vm cloud.stop backup_vm minion_id # will call the cmd within 10minutes if not aborted
   salt "minion_id" cmd.run config.post_snapshot
 
-
 snippets:
 .........
-
  * find out all file backing images of a domain:
 for a in `virsh dumpxml --inactive $id |
   xmlstarlet sel -I -t -m "domain//disk[@type='file']" -v "source/@file" -o " " -v "target/@dev" -n`; do
@@ -149,9 +150,7 @@ cat << EOF
 </disk>
 | virsh attach-device $domainid
  * attach a snapshot lvm volume to a domain
-
 cpu and io nicing:
-
 ${GHE_NICE:="nice -n 19"}
 ${GHE_IONICE:="ionice -c 3"}
 #}

@@ -15,6 +15,12 @@ snapshot_backup_mount_and_backup:
     unmount everthing we can
     emit snapshot done target_minion.id result
 
+check free space on backup drive
+apt-get install sftp
+echo "df"     | sftp BENUTZERNAME@BACKUPSERVER
+echo "df -h"  | sftp BENUTZERNAME@BACKUPSERVER
+echo "df -hi" | sftp BENUTZERNAME@BACKUPSERVER
+
 cpu and io nicing:
 ${GHE_NICE:="nice -n 19"}
 ${GHE_IONICE:="ionice -c 3"}
