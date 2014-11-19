@@ -38,6 +38,9 @@ vagrantfile: |
         
         # do not cache i/o
         libvirt.volume_cache = "none"
+
+        # use modern virtual gpu hardware
+        libvirt.video_type = 'qxl'
       end
     end
 
