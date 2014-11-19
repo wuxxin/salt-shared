@@ -3,7 +3,7 @@
 set_autostart_vm:
   module.run:
     - name: virt.set_autostart
-    - vm: {{ settings.hostname }}
+    - vm: {{ hostname }}
     - state: {{ autostart }}
 {% endmacro %}
 
