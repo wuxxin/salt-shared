@@ -7,7 +7,6 @@ base-deps:
       - unzip
       - zip
       - cabextract
-      - pv
       - ncdu
       - pwgen
       - command-not-found
@@ -19,12 +18,13 @@ base-deps:
       - cpu-checker
       - iperf
       - pciutils
+      - pv
       - socat
       - netcat
       - nethogs
       - curl
-      - links
       - elinks
+      - links
       - jupp
       - sox
       - xmlstarlet
