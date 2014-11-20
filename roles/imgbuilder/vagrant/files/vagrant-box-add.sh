@@ -16,7 +16,6 @@ fi
 
 image_size_nr=${image_size:0:-1}
 echo "Name,size_parsed,Imgsize, size: $name:$size_parsed:$image_size:$image_size_nr"
-sleep 5
 
 qemu-img create -f qcow2 $name.qcow2 $image_size
 qemu-img convert -c -O qcow2 $name.qcow2 box.img

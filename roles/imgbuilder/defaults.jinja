@@ -6,7 +6,7 @@ libvirt:
   final_deploy_storage: default
   final_deploy_network: default
 
-vagrantfile: |
+Vagrantfile: |
     # -*- mode: ruby -*-
     # vi: set ft=ruby :
     Vagrant.configure("2") do |config|
@@ -32,6 +32,9 @@ vagrantfile: |
         # overrides above
         libvirt.uri = "qemu:///system"
         
+        # do not append random bits to the hostname
+        libvirt.random_hostname = false
+
         # Libvirt storage pool name, where box image and instance snapshots will
         # be stored.
         libvirt.storage_pool_name = "default"
