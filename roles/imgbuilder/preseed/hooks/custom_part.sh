@@ -1,22 +1,32 @@
 #!/bin/sh
 # Manually create partition configuration
-# Designed to be run after download-installer but before partman-base
-# This allows us to modify partman-base.postinst after it's been dropped in by anna
-# Partman appears to be entirely an external program, 
-# removing the call to partman from partman-base.postinst prevents it from running.
+#
+# Partition map (type gpt) - on first two drives
+#  1 - bios_grub (1Mb)
+#  2 - /boot     (256meg)
+#  3 - reserved  (1GiG, can be adjusted by $RESERVED_END in Mib)
+#  4 - LVM-${VG_NAME}  (Remainder of disk)
+#       ${VG_NAME}/host_root ($HOST_ROOT_SIZE)
+#       ${VG_NAME}/host_swap ($HOST_SWAP_SIZE)
+# if two drives, 2nd and 4rd partition will be mdadm RAID1 (2nd(boot) with 0.9 Metadata))
 
+
+# defaults
 VG_NAME=`debconf-get partman-auto-lvm/new_vg_name`
 if test "$VG_NAME" = ""; then
     VG_NAME=`debconf-get netcfg/get_hostname`
 fi
 HOST_ROOT_SIZE='8g'
 HOST_SWAP_SIZE='2g'
+RESERVED_END='1280Mib'
 DISKPASSWORD=''
 
+# read and update environment variables from custom.env
 if test -f /tmp/custom.env; then
   . /tmp/custom.env
 fi
 
+# prepare system name with luks if DISKPASSWORD is set
 SYSTEM_NAME=${VG_NAME}
 if test -n "$DISKPASSWORD"; then
     SYSTEM_NAME=luks_${VG_NAME}
@@ -27,8 +37,6 @@ case "$1" in
   partman)  
     # do filesystem stuff: detect our config, fdisk, lvms, mount /target
     logger -t custom_part.sh partition configuration starting 
-
-    #modprobe dm_mod
 
     DISK_PREFIX='s'
     DISK_COUNT=`ls -1 /dev/${DISK_PREFIX}d? | wc -l`
@@ -43,14 +51,7 @@ case "$1" in
       exit
     fi
 
-    # Partition map (type gpt) - on first two drives
-    #  1 - bios_grub (1Mb)
-    #  2 - /boot     (256meg)
-    #  3 - reserved  (2GIG)
-    #  4 - LVM-${VG_NAME}  (Remainder of disk)
-    #       ${VG_NAME}/host_root ($HOST_ROOT_SIZE)
-    #       ${VG_NAME}/host_swap ($HOST_SWAP_SIZE)
-    # Create partitions - first partition is mdadm software RAID, remainder for LVM
+    # Create partitions -
     for disk in /dev/${DISK_PREFIX}d[ab]; do
       parted -s $disk -- mklabel gpt
       parted -s $disk -- mkpart bios_grub 1024Kib 2048Kib
@@ -58,12 +59,13 @@ case "$1" in
       parted -s $disk -- mkpart boot 2048Kib 256Mib
       parted -s $disk -- set 2 boot on
       parted -s $disk -- set 2 raid on
-      parted -s $disk -- mkpart reserved 256Mib 1280Mib
-      parted -s $disk -- mkpart ${SYSTEM_NAME} 1280Mib 100%
+      parted -s $disk -- mkpart reserved 256Mib ${RESERVED_END}
+      parted -s $disk -- mkpart ${SYSTEM_NAME} ${RESERVED_END} 100%
       parted -s $disk -- set 4 raid on
     done
 
     if [ $DISK_COUNT -ge 2 ]; then
+      # setup mdadm raid1
       apt-install mdadm
 
       BOOT=/dev/md0
@@ -81,6 +83,7 @@ case "$1" in
     fi
 
     if test -n "$DISKPASSWORD"; then
+        # setup disk encryption
         apt-install cryptsetup
 
         LUKS_NAME=${RAW_SYSTEM_NAME}_luks
@@ -95,8 +98,11 @@ case "$1" in
         SYSTEM_DEV=$RAW_SYSTEM_DEV
     fi
 
-    apt-install lvm2
+    # setup boot partition
     mkfs.ext3 -q -L boot $BOOT
+
+    # setup lvm
+    apt-install lvm2
     pvcreate -ff -y $SYSTEM_DEV
     vgcreate ${VG_NAME} $SYSTEM_DEV
     lvcreate -L ${HOST_ROOT_SIZE} -n host_root ${VG_NAME}
@@ -117,9 +123,9 @@ case "$1" in
     mkdir /target/etc 
     echo \# /etc/fstab: static file system information. > /target/etc/fstab
     echo \# >> /target/etc/fstab  echo "# <file system>   <mount point>   <type>   <options>       <dump> <pass>" >> /target/etc/fstab
-    echo /dev/mapper/${VG_NAME}_host_root    /       ext4 acl,user_xattr              1  1 >> /target/etc/fstab 
-    echo LABEL=boot                          /boot   ext3 defaults,nodev,noexec       1  2 >> /target/etc/fstab 
-    echo LABEL=swap                          swap    swap  defaults                   0  0 >> /target/etc/fstab 
+    echo /dev/mapper/${VG_NAME}-host_root    /       ext4 acl,user_xattr              1  1 >> /target/etc/fstab
+    echo LABEL=boot                          /boot   ext3 defaults,nodev,noexec       1  2 >> /target/etc/fstab
+    echo LABEL=swap                          swap    swap  defaults                   0  0 >> /target/etc/fstab
     echo proc                                /proc   proc defaults                    0  0 >> /target/etc/fstab
 
     # create crypttab, schedule installation of cryptsetup and dropbear if we use encryption
