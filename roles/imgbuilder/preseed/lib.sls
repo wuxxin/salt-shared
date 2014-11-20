@@ -32,7 +32,7 @@ get-netboot:
     - user: {{ ib_s.user }}
     - group: {{ ib_s.user }}
     - archive_format: tar
-    - tar_options: z
+    - tar_options: axz
     - if_missing: {{ netboot_target }}/
 
 clean-initrd:
@@ -143,7 +143,7 @@ add-hooks:
 
 # copy custom files to tmp target
 {% if cs.custom_files %}
-{% for (d,s) in cs.custom_files  %}
+{% for d,s in cs.custom_files.iteritems()  %}
 add-custom-files-{{ s }}:
   file.managed:
     - name: {{ tmp_target }}/{{ d }}
@@ -161,7 +161,7 @@ make-custom-list:
 {{ n|indent(8, true) }}
 {%- endfor %}
 {%- if cs.custom_files %}
-{%- for (d,s) in cs.custom_files  %}
+{%- for d,s in cs.custom_files.iteritems() %}
 {{ d|indent(8, true) }}
 {%- endfor %}
 {%- endif %}
