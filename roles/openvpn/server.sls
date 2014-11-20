@@ -5,6 +5,7 @@ openvpn:
       - openssl
       - openvpn
   service.running:
+    - enable: true
     - require:
       - pkg: openvpn
       - file: /etc/openvpn/server.conf
