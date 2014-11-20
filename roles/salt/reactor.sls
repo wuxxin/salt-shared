@@ -3,7 +3,7 @@ include:
 
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
 {% set reactor_dict={} %}
-{% for part in s.reactor.includes|d({}) %}
+{% for part in s.master.reactor.includes|d({}) %}
   {% import_yaml part+"/reactor/reactor.conf" as single_reactor %}
   {% do reactor_dict.update(single_reactor) %}
 {% endfor %}

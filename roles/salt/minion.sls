@@ -2,9 +2,7 @@ include:
   - .ppa
 
 salt-minion:
-  pkg:
-    - latest
-    # Ensure that the salt minion is running and up to date
+  pkg.installed:
     - require:
       - pkgrepo: salt_ppa
   service:

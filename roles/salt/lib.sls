@@ -1,8 +1,8 @@
 include:
   - gnupg
 
-# salt - master - make
-##########################
+# salt.master - bootstrap make
+##############################
 
 {#
 . copy all state and pillar paths together
@@ -22,7 +22,7 @@ include:
 {% set workdir= tempdir+ '/data' %}
 {% set gpg_key= tempdir+ '/'+ salt['cmd.run_stdout']('basename '+ gpg_key_location) %}
 
-{% for a in ("salt", "reactor", "pillar") %}
+{% for a in ("salt", "pillar") %}
 smm-makedir-{{ a }}:
   file.directory:
     - name: {{ workdir }}/{{ a }}

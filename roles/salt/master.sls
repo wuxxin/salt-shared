@@ -1,37 +1,36 @@
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
 
 include:
+  - python
   - .ppa
   - .minion
-{% if s.reactor.status=="present" %}
+{% if s.master.reactor.status=="present" %}
   - .reactor
 {% endif %}
-{% if s.gitcrypt.status=="present" %}
+{% if s.master.gitcrypt.status=="present" %}
   - git-crypt
   - gnupg
 {% endif %}
 
-python-pip:
-  pkg.installed
 
 salt-master-dependencies:
   pip.installed:
     - name: GitPython
     - require:
-      - pkg: python-pip
+      - pkg: python
 
 salt-master:
-  pkg:
-    - latest
+  pkg.installed:
     - require:
       - pkgrepo: salt_ppa
       - pip: salt-master-dependencies
-{% if s.gitcrypt.status=="present" %}
+{% if s.master.gitcrypt.status=="present" %}
       - cmd: git-crypt
       - pkg: gnupg
 {% endif %}
-  service:
-    - running
+  service.running:
+    - enable: true
+    - reload: true
     - require:
       - pkg: salt-master
 
@@ -56,6 +55,18 @@ salt-master:
     - watch_in:
       - service: salt-master
 
+{% for f, d in s.master_d.iteritems() %}
+/etc/salt/master.d/{{ f }}.conf:
+  file.managed:
+    - contents: |
+{{ d|yaml(False)|indent(8,True) }}
+
+    - watch_in:
+      - service: salt-master
+
+{% endfor %}
+
+
 {% if grains.salt_master|d(None)!= True %}
 
 set_salt_master_grain:
@@ -64,7 +75,7 @@ set_salt_master_grain:
       key: salt_master
       val: True
     - require:
-      - pkg: salt-master 
+      - pkg: salt-master
 
 {% endif %}
 

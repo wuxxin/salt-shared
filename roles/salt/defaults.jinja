@@ -1,6 +1,13 @@
 {% load_yaml as defaults %} 
 master:
   status: absent
+
+  reactor:
+    status: absent
+
+  gitcrypt:
+    status: present
+
   config: |
     fileserver_backend:
       - roots
@@ -15,16 +22,16 @@ master:
     file_recv: True
     #gitfs_remotes:
     #  - https://github.com/saltstack-formulas/docker-formula.git
-reactor:
-  status: absent
-  includes:
-    - "roles/haproxy"
-    - "roles/dns"
-gitcrypt:
-  status: present
+
+master_d:
+  smtp_return:
+    smtp:
+      from: "saltmaster@localhost"
+      to: "root"
+      host: localhost
+      fields: id,fun,jid
 
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('salt', {})) %}
-
