@@ -1,4 +1,2 @@
-
-openssh-client:
-  pkg:
-    - installed
+include:
+  - .client

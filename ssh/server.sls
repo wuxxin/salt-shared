@@ -1,11 +1,12 @@
 include:
-  - ssh
+  - .client
 
 openssh-server:
   pkg:
     - installed
   service:
     - running
+    - enable: True
     - name: ssh
     - require:
       - pkg: openssh-server
