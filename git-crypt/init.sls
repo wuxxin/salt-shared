@@ -43,6 +43,6 @@ git-crypt-cleanup:
 
 git-crypt:
   cmd.run:
-    - name: "git-crypt help"
+    - name: "which git-crypt"
 
 {% endif %}

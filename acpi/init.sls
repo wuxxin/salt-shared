@@ -3,6 +3,7 @@ acpid:
     - installed
   service:
     - running
+    - enable: true
     - require:
       - pkg: acpid
 

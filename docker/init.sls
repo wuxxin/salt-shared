@@ -16,7 +16,8 @@ lxc-docker:
       - pkgrepo: docker_ppa
 
 docker:
-  service.running
+  service.running:
+    - enable: true
     - require:
       - pkg: lxc-docker
 

@@ -1,5 +1,5 @@
 include:
-  - x2go.ppa
+  - .ppa
 
 x2goclient:
   pkg:

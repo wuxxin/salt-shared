@@ -3,6 +3,7 @@ apt-cacher-ng:
     - installed
   service:
     - running
+    - enable: True
     - require:
       - pkg: apt-cacher-ng
     - watch:

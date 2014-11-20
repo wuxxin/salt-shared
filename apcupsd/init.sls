@@ -3,6 +3,7 @@ apcupsd:
     - installed
   service:
     - running
+    - enable: true
     - require:
       - pkg: apcupsd
     - watch:

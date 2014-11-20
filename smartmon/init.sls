@@ -1,8 +1,8 @@
 smartmontools:
   pkg:
     - installed
-  service:
-    - running
+  service.running:
+    - enable: true
     - require:
       - pkg: smartmontools
     - watch:

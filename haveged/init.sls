@@ -1,7 +1,7 @@
 haveged:
   pkg:
     - installed
-  service:
-    - running
+  service.running:
+    - enable: True
     - require:
       - pkg: haveged
