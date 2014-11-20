@@ -51,6 +51,13 @@ file_roots:
 
 EOF
 
+# add some extra commands if they are defined
+{% if bootstrap_extra %}
+{% for l in bootstrap_extra %}
+{{ l }}
+{% endfor %}
+{% endif %}
+
 # install git-crypt, checkout and unlocks git paths with git-unlock
 salt-call --local --config-dir={{ targetdir }} state.sls git-crypt
 for a in `find {{ targetdir }} -name .git-crypt -type d`; do 
