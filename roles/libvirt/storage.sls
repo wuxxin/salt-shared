@@ -7,7 +7,9 @@
 {% for item, data in s.storage.iteritems() %}
 /etc/libvirt/storage/{{ item }}.xml:
   file.managed:
-    - contents: "{{ data }}"
+    - contents: |
+{{ data|indent(8,True) }}
+
 
 /etc/libvirt/storage/autostart/{{ item }}.xml:
   file.symlink:

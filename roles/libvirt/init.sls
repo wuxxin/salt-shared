@@ -1,9 +1,12 @@
+#!jinja|yaml
+
 include:
   - remotefs
   - .kernel
   - .grub
   - .storage
   - .network
+  - .salt_master
 
 libvirt:
   pkg.installed:
@@ -41,9 +44,13 @@ libvirt:
   service:
     - running
     - name: libvirt-bin
+    - enable: True
     - require:
       - pkg: libvirt
       - libvirt: libvirt
+      - sls: roles.libvirt.storage
+      - sls: roles.libvirt.network
+      - sls: roles.libvirt.kernel
     - watch:
       - file: libvirt
 
