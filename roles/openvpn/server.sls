@@ -70,7 +70,7 @@ modify_service:
 
 {% for n, c in [
 ("ca.crt", "./clean-all; ./pkitool --initca"),
-(pillar.openvpn_server.name+ ".crt", "./pkitool --server "+ pillar.openvpn_server.name),
+(pillar.openvpn_server.name+ ".key", "./pkitool --server "+ pillar.openvpn_server.name),
 ("dh"+ key_size+ ".pem", "./build-dh"),
 ("crl.pem", "cd $KEY_DIR; $OPENSSL ca -gencrl -crldays "+ key_expire+ " -out crl.pem -config $KEY_CONFIG"),
 ("ta.key", "openvpn --genkey --secret /etc/openvpn/easy-rsa/keys/ta.key"),
@@ -112,7 +112,7 @@ modify_service:
       key_expire: {{ key_expire }}
     - require:
       - cmd: "/etc/openvpn/ca.crt"
-      - cmd: "/etc/openvpn/{{ pillar.openvpn_server.name }}.crt"
+      - cmd: "/etc/openvpn/{{ pillar.openvpn_server.name }}.key"
       - cmd: "/etc/openvpn/dh{{ key_size }}.pem"
       - cmd: "/etc/openvpn/crl.pem"
       - cmd: "/etc/openvpn/ta.key"
