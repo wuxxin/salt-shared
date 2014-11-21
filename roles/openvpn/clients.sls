@@ -65,11 +65,10 @@ revoke_{{ client }}:
     - unless: . ./vars; ./is-revoked {{ client }}.crt
     - cwd: /etc/openvpn/easy-rsa
     - name: . ./vars; ./revoke-full {{ client }}
-    - require_in:
-      - cmd: /etc/openvpn/crl.pem
     - require:
       - cmd: /etc/openvpn/easy-rsa/keys/{{ client }}.key
       - file: /etc/openvpn/easy-rsa/is-revoked
+      - cmd: /etc/openvpn/crl.pem
 
 {% endfor %}
 
