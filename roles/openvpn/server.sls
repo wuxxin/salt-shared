@@ -12,6 +12,7 @@ openvpn:
     - require:
       - pkg: openvpn
       - cmd: modify_service
+      - file: /etc/openvpn/easy-rsa/vars
     - watch:
       - file: /etc/openvpn/server.conf
 
