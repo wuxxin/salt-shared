@@ -44,12 +44,12 @@ box_add_script:
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
 {{ add_preseed_files(ps_s, ps_s.target) }}
 
-{% for name in ['trusty'] %}
-{#
+{% for name in ['trusty', 'trusty-simple'] %}
+
 build_{{ name }}:
   cmd.run:
     - name: cd {{ s.image_base }}/templates/packer; rm -r output-qemu; packer build --only=qemu {{ name }}.json && ./vagrant-box-add.sh
     - user: {{ s.user }}
     - group: {{ s.user }}
-#}
+
 {% endfor %}
