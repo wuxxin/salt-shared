@@ -95,6 +95,14 @@ modify_service:
 
 {% endfor %}
 
+/etc/openvpn/{{ pillar.openvpn_server.name }}.crt
+  cmd.run:
+    - cwd: /etc/openvpn/easy-rsa/keys
+    - name: cp -u {{ pillar.openvpn_server.name }}.crt /etc/openvpn/
+    - onlyif: test {{ pillar.openvpn_server.name }}.crt -nt /etc/openvpn/{{ pillar.openvpn_server.name }}.crt
+    - require:
+      - cmd: /etc/openvpn/easy-rsa/keys/{{ pillar.openvpn_server.name}}.key
+
 /etc/openvpn/server.conf:
   file.managed:
     - source: salt://roles/openvpn/{{ pillar.openvpn_server.mode }}-server.conf
@@ -113,6 +121,7 @@ modify_service:
     - require:
       - cmd: "/etc/openvpn/ca.crt"
       - cmd: "/etc/openvpn/{{ pillar.openvpn_server.name }}.key"
+      - cmd: "/etc/openvpn/{{ pillar.openvpn_server.name }}.crt"
       - cmd: "/etc/openvpn/dh{{ key_size }}.pem"
       - cmd: "/etc/openvpn/crl.pem"
       - cmd: "/etc/openvpn/ta.key"
