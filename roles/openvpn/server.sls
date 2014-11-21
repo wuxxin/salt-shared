@@ -95,7 +95,7 @@ modify_service:
 
 {% endfor %}
 
-/etc/openvpn/{{ pillar.openvpn_server.name }}.crt
+/etc/openvpn/{{ pillar.openvpn_server.name }}.crt:
   cmd.run:
     - cwd: /etc/openvpn/easy-rsa/keys
     - name: cp -u {{ pillar.openvpn_server.name }}.crt /etc/openvpn/
