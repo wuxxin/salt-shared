@@ -23,7 +23,7 @@ modify_service:
     - name: /etc/openvpn
     - source: salt://roles/openvpn/easy-rsa.tar.gz
     - archive_format: tar
-    - tar_options: z
+    - tar_options: ax
     - if_missing: /etc/openvpn/easy-rsa
     - require:
       - pkg: openvpn
