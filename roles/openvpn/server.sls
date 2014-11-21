@@ -1,3 +1,6 @@
+{% set key_size= pillar.openvpn_server.ca.key_size|d('2560') %}
+{% set key_expire= pillar.openvpn_server.ca.key_expire|d('3650') %}
+
 openvpn:
   pkg.installed:
     - pkgs:
@@ -49,8 +52,8 @@ modify_service:
     - source: salt://roles/openvpn/vars
     - template: jinja
     - context:
-      key_size: {{ pillar.openvpn_server.ca.key_size|d('2560') }}
-      key_expire: {{ pillar.openvpn_server.ca.key_expire|d('3650') }}
+      key_size: {{ key_size }}
+      key_expire: {{ key_expire }}
       country: {{ pillar.openvpn_server.ca.country }}
       province: {{ pillar.openvpn_server.ca.province }}
       city: {{ pillar.openvpn_server.ca.city }}
@@ -64,50 +67,34 @@ modify_service:
       - file: /etc/openvpn/easy-rsa/pkitool
       - file: /etc/openvpn/easy-rsa/is-revoked
 
-/etc/openvpn/easy-rsa/keys/ca.crt:
+{% for n, c in (
+("ca.crt", "./clean-all; ./pkitool --initca"),
+(pillar.openvpn_server.name+ ".crt", "./pkitool --server "+ pillar.openvpn_server.name),
+("dh"+ key_size+ ".pem", "./build-dh"),
+("ta.key", "openvpn --genkey --secret /etc/openvpn/keys/ta.key"),
+("crl.pem", "cd $KEY_DIR; $OPENSSL ca -gencrl -crldays "+ key_expire+ " -out crl.pem -config $KEY_CONFIG")
+) %}
+
+/etc/openvpn/easy-rsa/keys/{{ n }}:
   cmd.run:
-    - unless: test -f /etc/openvpn/easy-rsa/keys/ca.crt
+    - unless: test -f /etc/openvpn/easy-rsa/keys/{{ n }}
     - user: root
     - cwd: /etc/openvpn/easy-rsa
-    - name: . ./vars; ./clean-all; ./pkitool --initca; ./build-dh; ./pkitool --server {{ pillar.openvpn_server.name }}
+    - name: . ./vars; {{ c }}
     - require:
       - file: /etc/openvpn/easy-rsa/vars
 
-/etc/openvpn/ta.key:
-  cmd.run:
-    - unless: test -f /etc/openvpn/ta.key
-    - cwd: /etc/openvpn/easy-rsa
-    - name: . ./vars; openvpn --genkey --secret /etc/openvpn/ta.key
-    - require:
-      - file: /etc/openvpn/easy-rsa/vars
-      - cmd: /etc/openvpn/easy-rsa/keys/ca.crt
-
-/etc/openvpn/easy-rsa/keys/crl.pem:
-   cmd.run:
-    - onlyif: test ! -f /etc/openvpn/easy-rsa/keys/crl.pem
-    - cwd: /etc/openvpn/easy-rsa
-    - name: ". ./vars; cd $KEY_DIR; $OPENSSL ca -gencrl -crldays 3650 -out crl.pem -config $KEY_CONFIG"
-    - require:
-      - file: /etc/openvpn/easy-rsa/vars
-      - cmd: /etc/openvpn/easy-rsa/keys/ca.crt
-
-/etc/openvpn/crl.pem:
+/etc/openvpn/{{ n }}:
   cmd.run:
     - cwd: /etc/openvpn/easy-rsa/keys
-    - name: cp -u crl.pem /etc/openvpn/
-    - onlyif: test crl.pem -nt /etc/openvpn/crl.pem
+    - name: cp -u {{ n }} /etc/openvpn/
+    - onlyif: test {{ n }} -nt /etc/openvpn/{{ n }}
     - require:
-      - cmd: /etc/openvpn/easy-rsa/keys/crl.pem
+      - cmd: /etc/openvpn/easy-rsa/keys/{{ n }}
+    - require_in:
+      - file: /etc/openvpn/server.conf
 
-openvpn_server_keys:
-  cmd.run:
-    - unless: test -f /etc/openvpn/ca.crt
-    - cwd: /etc/openvpn/easy-rsa/keys
-    - name: cp -u ca.crt dh2048.pem {{ pillar.openvpn_server.name }}.crt {{ pillar.openvpn_server.name }}.key /etc/openvpn
-    - require:
-      - cmd: /etc/openvpn/easy-rsa/keys/ca.crt
-      - cmd: /etc/openvpn/ta.key
-      - cmd: /etc/openvpn/crl.pem
+{% endfor %}
 
 /etc/openvpn/server.conf:
   file.managed:
@@ -122,5 +109,5 @@ openvpn_server_keys:
       dns_domain:  {{ pillar.openvpn_server.dns_domain }}
       ip_routes:  {{ pillar.openvpn_server.ip_routes }}
       options: {{ pillar.openvpn_server.options|d([]) }}
-    - require:
-      - cmd: openvpn_server_keys
+      key_size: {{ key_size }}
+      key_expire: {{ key_expire }}
