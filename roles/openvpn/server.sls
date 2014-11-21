@@ -73,7 +73,7 @@ modify_service:
 (pillar.openvpn_server.name+ ".crt", "./pkitool --server "+ pillar.openvpn_server.name),
 ("dh"+ key_size+ ".pem", "./build-dh"),
 ("crl.pem", "cd $KEY_DIR; $OPENSSL ca -gencrl -crldays "+ key_expire+ " -out crl.pem -config $KEY_CONFIG"),
-("ta.key", "openvpn --genkey --secret /etc/openvpn/keys/ta.key"),
+("ta.key", "openvpn --genkey --secret /etc/openvpn/easy-rsa/keys/ta.key"),
 ] %}
 
 /etc/openvpn/easy-rsa/keys/{{ n }}:
