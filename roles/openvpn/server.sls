@@ -71,8 +71,8 @@ modify_service:
 ("ca.crt", "./clean-all; ./pkitool --initca"),
 (pillar.openvpn_server.name+ ".crt", "./pkitool --server "+ pillar.openvpn_server.name),
 ("dh"+ key_size+ ".pem", "./build-dh"),
+("crl.pem", "cd $KEY_DIR; $OPENSSL ca -gencrl -crldays "+ key_expire+ " -out crl.pem -config $KEY_CONFIG"),
 ("ta.key", "openvpn --genkey --secret /etc/openvpn/keys/ta.key"),
-("crl.pem", "cd $KEY_DIR; $OPENSSL ca -gencrl -crldays "+ key_expire+ " -out crl.pem -config $KEY_CONFIG")
 ] %}
 
 /etc/openvpn/easy-rsa/keys/{{ n }}:
