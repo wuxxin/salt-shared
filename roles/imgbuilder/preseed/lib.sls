@@ -32,7 +32,7 @@ get-netboot:
     - user: {{ ib_s.user }}
     - group: {{ ib_s.user }}
     - archive_format: tar
-    - tar_options: axz
+    - tar_options: ax
     - if_missing: {{ netboot_target }}/
 
 clean-initrd:
