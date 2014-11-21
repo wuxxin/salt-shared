@@ -92,8 +92,6 @@ modify_service:
     - onlyif: test {{ n }} -nt /etc/openvpn/{{ n }}
     - require:
       - cmd: /etc/openvpn/easy-rsa/keys/{{ n }}
-    - require_in:
-      - file: /etc/openvpn/server.conf
 
 {% endfor %}
 
@@ -112,3 +110,9 @@ modify_service:
       options: {{ pillar.openvpn_server.options|d([]) }}
       key_size: {{ key_size }}
       key_expire: {{ key_expire }}
+    - require:
+      - cmd: "/etc/openvpn/ca.crt"
+      - cmd: "/etc/openvpn/{{ pillar.openvpn_server.name }}.crt"
+      - cmd: "/etc/openvpn/dh{{ key_size }}.pem"
+      - cmd: "/etc/openvpn/crl.pem"
+      - cmd: "/etc/openvpn/ta.key"
