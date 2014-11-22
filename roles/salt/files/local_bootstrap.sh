@@ -77,6 +77,8 @@ rm {{ targetdir }}/minion {{ targetdir }}/grains
 # restart minion, accept minion key on master
 /etc/init.d/salt-minion restart
 sleep 5
+/etc/init.d/salt-minion restart
+sleep 5
 salt-key -y -a {{ hostname }}
 
 # finally call highstate
