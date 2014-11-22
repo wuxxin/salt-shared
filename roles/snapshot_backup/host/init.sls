@@ -22,15 +22,16 @@ target: '{{ im_set.image_base }}/templates/imgbuilder/{{ settings.backup_vm_name
 username: {{ im_set.user }}
 {% endload %}
 
-{% if settings.backup_vm_name not in salt['virt.list']['local'] %}
+{% set l = salt['virt.list_vms']()['local'] %}
+{% if l is undefined or settings.backup_vm_name not in l %}
 
 {% for a in ('Vagrantfile',) %}
 backup_vm-copy-{{ a }}:
   file.managed:
     - source: "salt://roles/snapshot_backup/files/{{ a }}"
     - name: {{ config.target }}/{{ a }}
-    - user: {{ config.user }}
-    - group: {{ config.user }}
+    - user: {{ im_set.user }}
+    - group: {{ im_set.user }}
     - mode: 644
     - template: jinja
     - makedirs: True
