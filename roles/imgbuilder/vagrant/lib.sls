@@ -7,8 +7,8 @@
 {{ vagrant_halt(settings) }}
 
 {{ detach_vm(settings) }}
-{{ vm-move-network(settings) }}
-{{ vm-copy-resize(settings) }}
+{{ vm_move_network(settings) }}
+{{ vm_copy_resize(settings) }}
 {{ spicify(settings) }}
 {{ set_autostart(settings, autostart='on') }}
 
@@ -92,20 +92,20 @@ vagrant shell --command "/bin/bash" -c "
 {% endmacro %}
 
 
-{% macro vm-memsize-cpus(name,memsize,cpus) %}
-{{ name }}-vm-memsize-cpus:
+{% macro vm_memsize_cpus(name,memsize,cpus) %}
+{{ name }}-vm_memsize_cpus:
   cmd.run:
     - name: /mnt/images/templates/imgbuilder/scripts/memsize-cpus {{ name }} 768 2
     - require:
       - cmd: {{ name }}-vm-detach
 {% endmacro %}
 
-{% macro vm-move-network(name) %}
-{{ name }}-vm-move-network:
+{% macro vm_move_network(name) %}
+{{ name }}-vm_move_network:
   cmd.run:
 msub "<interface type=.+<mac address=.([0-9a-f:]+).+</interface>" "<interface type=\"bridge\"><mac address=\"\\1\"/><source bridge=\"$bridge\"/></interface>" > ${vmname}.xml    - name: /mnt/images/templates/imgbuilder/scripts/def2bridge {{ name }} br1
     - require:
-      - cmd: {{ name }}-vm-memsize-cpus
+      - cmd: {{ name }}-vm_memsize-cpus
 {% endmacro %}
 
 {% macro spicify(name) %}
@@ -122,13 +122,13 @@ msub "<interface type=.+<mac address=.([0-9a-f:]+).+</interface>" "<interface ty
     - marker_end: me
     - content: co
     - require: 
-      - cmd: {{ name }}-vm-move-network
+      - cmd: {{ name }}-vm_move_network
 {% endfor %}
 
 {% endmacro %}
 
-{% macro vm-copy-resize(name) %}
-{{ name }}-vm-copy-resize:
+{% macro vm_copy_resize(name) %}
+{{ name }}-vm_copy_resize:
   cmd.run:
     - name: /mnt/images/templates/imgbuilder/scripts/copy_resize {{ name }} vg0 15G
 virt-resize $sourcefile /dev/mapper/$volumegroup-$volumename $expand_pt $expand_lv
