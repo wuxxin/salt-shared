@@ -8,29 +8,25 @@ base:
     - match: pillar
     - roles.dns
 
-  'dns_server:status:absent':
-    - match: pillar
-    - roles.dns.absent
-
   'tinydns_server:status:present':
     - match: pillar
     - roles.tinydns
-
-  'tinydns_server:status:absent':
-    - match: pillar
-    - roles.tinydns.absent
 
   'dhcp_server:status:present':
     - match: pillar
     - roles.dhcp
 
-  'dhcp_server:status:absent':
-    - match: pillar
-    - roles.dhcp.absent
-
   'shorewall:status:present':
     - match: pillar
     - roles.shorewall
+
+  'apt-cacher-ng:server:status:present':
+    - match: pillar
+    - roles.apt-cacher-ng
+
+  'apt-cacher-ng:client:status:present':
+    - match: pillar
+    - roles.apt-cacher-ng.client
 
   'libvirt:status:present':
     - match: pillar
@@ -44,9 +40,9 @@ base:
     - match: pillar
     - roles.imgbuilder
 
-  #'snapshot_backup:status:present':
-  #  - match: pillar
-  #  - roles.snapshot_backup
+  'snapshot-backup:status:present':
+    - match: pillar
+    - roles.snapshot-backup
 
   'backupninja:status:present':
     - match: pillar
