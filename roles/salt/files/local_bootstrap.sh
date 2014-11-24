@@ -25,7 +25,7 @@ apt-get -y install salt-common python-msgpack python-zmq
 
 # generates minion config in /targetdir for a masterless setup
 cat > {{ targetdir }}/minion << EOF
-id: {{ hostname }}
+id: {{ hostname }}.{{ domainname }}
 root_dir: {{ targetdir }}/_run
 pidfile: salt-minion.pid
 pki_dir: pki
@@ -66,9 +66,9 @@ for a in `find {{ targetdir }} -name .git-crypt -type d`; do
 done
 
 # install state.sls salt.master, copy grains, set salt minion name
-salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master,haveged,network
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,roles.salt.master,network
 cp {{ targetdir }}/grains /etc/salt/grains
-echo "{{ hostname }}" > /etc/salt/minion_id
+echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
 # cleanup masterless leftovers, copy grains
 rm -r {{ targetdir }}/_run
@@ -79,7 +79,7 @@ rm {{ targetdir }}/minion {{ targetdir }}/grains
 sleep 5
 /etc/init.d/salt-minion restart
 sleep 5
-salt-key -y -a {{ hostname }}
+salt-key -y -a {{ hostname }}.{{ domainname }}
 
 # finally call highstate
 salt-call state.highstate
