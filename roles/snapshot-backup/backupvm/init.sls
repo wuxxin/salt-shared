@@ -1,4 +1,4 @@
-snapshot_backup_vm:
+snapshot-backup_vm:
   pkg.installed:
     - pkgs:
       - duplicity

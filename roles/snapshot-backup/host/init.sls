@@ -1,20 +1,20 @@
 include:
   - imgbuilder
 
-snapshot_backup_host:
+snapshot-backup-host:
   pkg.installed:
     - pkgs:
       - lvm2
       - xmlstarlet
 
-{% if salt['pillar.get']('snapshot_backup:custom_storage', false) %}
+{% if salt['pillar.get']('snapshot-backup:custom_storage', false) %}
   {% from 'storage/lib.sls' import storage_setup with context %}
-  {{ storage_setup(salt['pillar.get']('snapshot_backup:custom_storage')) }}
+  {{ storage_setup(salt['pillar.get']('snapshot-backup:custom_storage')) }}
 {% endif %}
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as im_set with context %}
 {% from "roles/imgbuilder/vagrant/lib.sls" import deploy_vagrant_vm with context %}
-{% from "roles/snapshot_backup/defaults.jinja" import settings with context %}
+{% from "roles/snapshot-backup/defaults.jinja" import settings with context %}
 
 {% load_yaml as config %}
 hostname: {{ settings.backup_vm_name }}
@@ -28,7 +28,7 @@ username: {{ im_set.user }}
 {% for a in ('Vagrantfile',) %}
 backup_vm-copy-{{ a }}:
   file.managed:
-    - source: "salt://roles/snapshot_backup/files/{{ a }}"
+    - source: "salt://roles/snapshot-backup/files/{{ a }}"
     - name: {{ config.target }}/{{ a }}
     - user: {{ im_set.user }}
     - group: {{ im_set.user }}

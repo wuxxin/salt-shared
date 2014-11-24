@@ -20,16 +20,16 @@ Setup:
 ------
   - for every minion(may be configured on the saltmaster in master.d/):
     -  returner.smtp_return must be configured for every minion targeted
-  - on salt master: pillar item salt.reactor.includes must include "- roles.snapshot_backup"
+  - on salt master: pillar item salt.reactor.includes must include "- roles.snapshot-backup"
   - on hypervisor host: pillar item 
-    - schedule.snapshot_backup
-    - snapshot_backup.host
-  - for every minion that wants to be backuped: pillar item snapshot_backup.client must be configured
+    - schedule.snapshot-backup
+    - snapshot-backup.host
+  - for every minion that wants to be backuped: pillar item snapshot-backup.client must be configured
 
 Convinience
 ...........
 
-salt-call state.sls roles.snapshot_backup.generate_cfg ./ snapshot_backup@host z=e k=o l=i
+salt-call state.sls roles.snapshot-backup.generate_cfg ./ snapshot-backup@host z=e k=o l=i
   - can generate gpg keys and include them in a pillar file,
   - connect via ssh using password, makedir .ssh/authorized_keys
   - make stub directories (eg omoikane)
@@ -37,19 +37,19 @@ salt-call state.sls roles.snapshot_backup.generate_cfg ./ snapshot_backup@host z
 
 Workflow:
 ---------
-  - roles.snapshot_backup.host is run on host
+  - roles.snapshot-backup.host is run on host
     - generates backup_vm
 
-  - roles.snapshot_backup.client is run on client
-    - emits reactor signal snapshot_backup/client/config-update
-    - signal is received on hosts that match pillar "snapshot_backup:host:status:present"
-      - add config update to /srv/snapshot_backup, backup config for client is saved
+  - roles.snapshot-backup.client is run on client
+    - emits reactor signal snapshot-backup/client/config-update
+    - signal is received on hosts that match pillar "snapshot-backup:host:status:present"
+      - add config update to /srv/snapshot-backup, backup config for client is saved
 
-  - roles.snapshot_backup.host.backup_run is run on the host via the salt scheduler added to the host pillar
-    - for every config in /srv/snapshot_backup/client
+  - roles.snapshot-backup.host.backup_run is run on the host via the salt scheduler added to the host pillar
+    - for every config in /srv/snapshot-backup/client
       - pre snapshot work
-      - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot_backup.backupvm.mount_and_duply target_minion.id
-        pillar: snapshot_backup:run:config 
+      - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot-backup.backupvm.mount_and_duply target_minion.id
+        pillar: snapshot-backup:run:config 
       - post snapshot work
     - return the findings and work results via returner.smtp_return
 
@@ -67,18 +67,18 @@ backup-types:
 hypervisor_pillar:
 ---
 schedule:
-  snapshot_backup:
+  snapshot-backup:
     jid_include: True
     maxrunning: 1
     when: 3:30am
     returner: smtp_return
     function: state.sls
     args:
-      - roles.snapshot_backup.host.backup_run
+      - roles.snapshot-backup.host.backup_run
     kwargs:
       test: True
 
-snapshot_backup:
+snapshot-backup:
   host:
     state: "present"
     config:
@@ -104,17 +104,17 @@ snapshot_backup:
           - name
           - type: "ext4"
           - opts: "xattr"
-          - require_in: "cmd: roles.snapshot_backup.host.ready"
+          - require_in: "cmd: roles.snapshot-backup.host.ready"
 
 backupvm pillar:
 ---
-snapshot_backup:
+snapshot-backup:
   backupvm:
     state: present
 
 client pillar:
 ---
-snapshot_backup:
+snapshot-backup:
   client:
     status: present
     config:
@@ -135,12 +135,12 @@ snapshot_backup:
 
 client pillar for hypervisor host itself: type="host_lvm", add host_device and target_device
 --- 
-snapshot_backup:
+snapshot-backup:
   client:
     status: "present"
     config:
       backup:
-        type: "lvm_host" {# restricted to same host where snapshot_backup:host:present = True, backup_snapshot host will enforce this #}
+        type: "lvm_host" {# restricted to same host where snapshot-backup:host:present = True, backup_snapshot host will enforce this #}
         host_device: "omoikane/host_root" {# the lvm device we are going to make a snapshot from #}
         target_device: "vda" {# the desired target device name in the backupvm #}
         mount: "vda"
@@ -149,7 +149,7 @@ snapshot_backup:
 
 client pillar for the backup vm itself: type="plain", omit "mount" 
 --- 
-snapshot_backup:
+snapshot-backup:
   client:
     status: "present"
     config:
@@ -158,9 +158,9 @@ snapshot_backup:
         source: "/mnt/backup_config_cache/config"
         exclude:
  
-reactor-snapshot_backup-client-update pillar:
+reactor-snapshot-backup-client-update pillar:
 ---
-snapshot_backup:
+snapshot-backup:
   update:
     minion: {{ data.id }}
     config: 
@@ -171,7 +171,7 @@ snapshot_backup:
 Implementation Design
 ---------------------
 
-roles.snapshot_backup.recovery:
+roles.snapshot-backup.recovery:
 .........
 
 create machine using pillar vagrant and reboot into final stage, including salt minion running but empty

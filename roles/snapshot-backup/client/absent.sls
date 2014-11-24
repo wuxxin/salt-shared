@@ -1,6 +1,6 @@
 update_config:
   event.fire_master:
-    - name: "snapshot_backup/client/config-update"
+    - name: "snapshot-backup/client/config-update"
     - data:
       status: absent
-      config: {{ salt['pillar.get']('snapshot_backup:client:config', {}) }}
+      config: {{ salt['pillar.get']('snapshot-backup:client:config', {}) }}

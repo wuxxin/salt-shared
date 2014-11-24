@@ -7,5 +7,5 @@ snapshot_size: '2g'
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
-  grain='none', default= 'none', merge= salt['pillar.get']('snapshot_backup:host', {})) %}
+  grain='none', default= 'none', merge= salt['pillar.get']('snapshot-backup:host', {})) %}
 

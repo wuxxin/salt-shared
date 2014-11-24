@@ -1,4 +1,4 @@
-{% from "roles/snapshot_backup/defaults.jinja" import settings as s with context %}
+{% from "roles/snapshot-backup/defaults.jinja" import settings as s with context %}
 
 stop_delaytimer:
   cmd.run:
@@ -14,10 +14,10 @@ start_backup_vm:
 transfer_backupvm_config:
   salt.state:
     - tgt: {{ s.backup_vm_name }}
-    - sls: roles.snapshot_backup.backupvm.put_backupvm_config
+    - sls: roles.snapshot-backup.backupvm.put_backupvm_config
     - pillar: 
-        snapshot_backup:
-          base_config: {{ salt['pillar.get']('snapshot_backup:host:config')|yaml }}
+        snapshot-backup:
+          base_config: {{ salt['pillar.get']('snapshot-backup:host:config')|yaml }}
           client_config:
 {%- for a in salt['cmd.run_stdout']('find '+ s.config_base+ '/clients.d/ -maxdepth 1 -type d -printf "%f\n"') %}
             {{ a }}: {{ salt['cmd.run_stdout']('cat '+ s.config_base+ '/clients.d/'+ a)|load_yaml|yaml }}
@@ -77,9 +77,9 @@ attach_disk-{{ d }}:
 mount-and-backup-{{ client }}:
   salt.state:
     - tgt: {{ s.backup_vm_name }}
-    - sls: roles.snapshot_backup.backupvm.mount_and_backup
+    - sls: roles.snapshot-backup.backupvm.mount_and_backup
     - pillar:
-        snapshot_backup:
+        snapshot-backup:
           run: {{ client }}
 
 {% for d,t in client_disks.iteritems() %}
@@ -125,7 +125,7 @@ for each configured backup run do
   salt.cloud "minion_id" unpause
   salt "minion_id" cmd.run config.on_snapshot
   attach_disk x to backup_vm
-  salt "backup-minion-id" state.sls onlyonce=true roles.snapshot_backup.mount_and_backup target_minion.id
+  salt "backup-minion-id" state.sls onlyonce=true roles.snapshot-backup.mount_and_backup target_minion.id
   detach all lvm volumes of minion_id
   snapshot delete
   start_delay_timer 10m stop_backup_vm cloud.stop backup_vm minion_id # will call the cmd within 10minutes if not aborted

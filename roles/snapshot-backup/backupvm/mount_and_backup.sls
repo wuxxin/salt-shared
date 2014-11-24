@@ -1,8 +1,8 @@
-snapshot_backup_mount_and_backup:
+snapshot-backup_mount_and_backup:
   cmd.run:
     - name: false
 {#
-  salt "backup.minion_id" state.sls onlyonce=true roles.snapshot_backup.backupvm.mount_and_backup target_minion.id
+  salt "backup.minion_id" state.sls onlyonce=true roles.snapshot-backup.backupvm.mount_and_backup target_minion.id
     mount access to a file share or a lvm filesystem volume 
         (backupvm_cache_volume with write access, 
         for storing duplicity cache files (--archive-dir --name ),
