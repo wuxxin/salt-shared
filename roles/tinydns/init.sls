@@ -160,3 +160,19 @@ axfrdns_export:
     - require:
       - cmd: {{ u }}_install
 {% endfor %}
+
+{% if pillar.tinydns_server.cache_serve_to and pillar.tinydns_server.redirect_host_dns %}
+{# fixme: debian/ubuntu specific #}
+
+/etc/network/interfaces:
+  file.replace:
+    pattern: |
+        ^([ \t]+dns-nameservers:)(.+)$
+    repl: "\1\2 {{ pillar.tinydns_server.cache_serve_to }}"
+
+refresh-resolvconf:
+  cmd.wait:
+    - name 'echo "nameserver {{ pillar.tinydns_server.cache_serve_to }}" | resolvconf -a eth0'
+
+{% endif %}
+

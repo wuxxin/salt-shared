@@ -1,0 +1,9 @@
+{% load_yaml as defaults %}
+redirect_host_dns: true
+cache_dns: {{ salt['network.ip_addrs']()[0] }}
+internal_dns: 127.0.0.1
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('tinydns_server', {})) %}
