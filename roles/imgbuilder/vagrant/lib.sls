@@ -131,7 +131,14 @@ msub "<interface type=.+<mac address=.([0-9a-f:]+).+</interface>" "<interface ty
 {{ name }}-vm_copy_resize:
   cmd.run:
     - name: /mnt/images/templates/imgbuilder/scripts/copy_resize {{ name }} vg0 15G
-virt-resize $sourcefile /dev/mapper/$volumegroup-$volumename $expand_pt $expand_lv
+use cgroup 
+for all interesting device nodes:
+mkdir /sys/fs/cgroup/blkio/1mbpersecond
+ echo "$devicenode  bytes_per_second" > /sys/fs/cgroup/blkio/1mbpersecond/blkio.throttle.read_bps_device"
+
+virt-resize $sourcefile /dev/mapper/$volumegroup-$volumename $expand_pt $expand_lv &
+echo $! > /sys/fs/cgroup/blkio/1mbpersecond/tasks
+cat /sys/fs/cgroup/blkio/1mbpersecond/tasks
 
     - user: imgbuilder
     - group: imgbuilder
