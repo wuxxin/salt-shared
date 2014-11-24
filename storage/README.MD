@@ -35,11 +35,10 @@ callable via:
 
 sample data: example.pillar
 
-pillar structure "directories" and "relocate" take optional arguments, that behave like in states:
-  onlyif, unless: (only in directories)
-  watch_in, require_in, require, watch
+pillar structure "format", "directories" and "relocate" take optional arguments, that behave like in states:
+ watch_in, require_in, require, watch but only take one item.
 
-you can only list one watch_in, require_in, require, watch, onlyif, unless statement per pillar structure.
+pillar structure "directories" also have "onlyif, unless" as possibility
 
 example:
   see /apt-cacher-ng

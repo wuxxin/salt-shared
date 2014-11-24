@@ -209,6 +209,14 @@
     - name: '{{ mkfs }} {{ opts }} {{ item }}'
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
     - unless: 'test "$(blkid -p -s TYPE -o value {{ item }})" == "{{ data.fstype }}"'
+
+{% for a in ('watch_in', 'require_in', 'require', 'watch') %}
+{% if input_data[item][a] is defined %}
+    - {{ a }}:
+      - {{ input_data[item][a] }}
+{% endif %}
+{% endfor %}
+
 {% endfor %}
 
 {% endmacro %}
