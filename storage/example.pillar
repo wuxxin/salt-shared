@@ -102,3 +102,4 @@ storage:
     /var/lib/libvirt/images:
       destination: /mnt/images/default
       copy_content: True
+      watch_in: "service: apt-cacher-ng"

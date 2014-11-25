@@ -182,6 +182,22 @@
 "lvm-lv-{{ item }}":
   pkg.installed:
     - name: lvm2
+
+{%- set lvtarget='/dev/'+ data['vgname']+ '/' + item %}
+{%- if "size" in data and "expand" in data and data['expand'] == True and 
+salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
+{%- set req_size=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', data['size']) %}
+{%- set nomination=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\2', data['size']) %}
+{%- set current=salt['cmd.run']('lvdisplay -C --noheadings --units '+ nomination+ ' -o size '+ lvtarget) %}
+{%- set curr_size=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', current) %}
+
+{%- if req_size > curr_size %}
+  cmd.run:
+    - name: lvresize -L {{ data['size'] }} {{ lvtarget }}
+    - require:
+      - pkg: "lvm-lv-{{ item }}"
+{%- endif %}
+{%- else %}
   lvm.lv_present:
     - name: {{ item }}
 {% for sub, subvalue in data.iteritems() %}
@@ -189,10 +205,10 @@
 {% endfor %}
     - require:
       - pkg: "lvm-lv-{{ item }}"
-{% endfor %}
 {% endif %}
 
-{# lvs --units g vg0/host_root --noheadings -o lv_size | sed -re "s/[ ]+([0-9]+).[0-9]+g/\1/g" #}
+{% endfor %}
+{% endif %}
 
 {% endmacro %}
 
