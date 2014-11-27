@@ -1,15 +1,6 @@
 
-etcd:
-  cmd.run:
-    - name: rm -r /home/etcd
-    - onlyif: test -d /home/etcd
-  user:
+{% for a in ['etcd'] %}
+/usr/local/bin/{{ a }}:
+  file:
     - absent
-    - gid: etcd
-    - home: /home/etcd
-    - require:
-      - cmd: etcd
-  group:
-    - absent
-    - require:
-      - user: etcd
+{% endfor %}
