@@ -1,6 +1,11 @@
+include:
+  - git
+  - mercurial
+  - bzr
+
 golang:
   pkg.installed:
-    - pkgs:
-      - golang
-      - git
-      - mercurial
+    - require:
+      - pkg: git
+      - pkg: mercurial
+      - pkg: bzr
