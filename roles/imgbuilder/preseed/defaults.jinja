@@ -26,7 +26,7 @@ diskpassword_receiver_key: salt://roles/imgbuilder/preseed/files/insecure_gpgkey
 
 username: vagrant
 hostname: {{ suite }}-default
-domainname: in.ep3.at
+domainname: me.local
 password: {{ salt['cmd.run']('pwgen -s 13 1') }}
 netcfg: 
   ip: ''

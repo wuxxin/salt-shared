@@ -73,7 +73,7 @@ case "$1" in
       RAW_SYSTEM_DEV=/dev/md/${RAW_SYSTEM_NAME}
       ln -s /dev/md1 /dev/md/${RAW_SYSTEM_NAME}
 
-      mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --metadata=0.90 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
+      mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
       mdadm -C /dev/md1 -v -f -R -n 2 -l 1 --assume-clean --name=${SYSTEM_NAME} /dev/${DISK_PREFIX}da4 /dev/${DISK_PREFIX}db4
       sleep 5
     elif [ $DISK_COUNT -eq 1 ]; then
