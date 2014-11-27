@@ -1,3 +1,6 @@
 golang:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs:
+      - golang
+      - git
+      - mercurial
