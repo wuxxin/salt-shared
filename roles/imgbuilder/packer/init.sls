@@ -1,23 +1,16 @@
 include:
   - roles.imgbuilder.user
   - golang
-  - mercurial
-  - git
-  - bzr
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
+{% from 'golang/lib.sls' import go_build_from_git with context %}
 
-packer-prereq:
+packer:
   pkg.installed:
     - pkgs:
       - qemu-utils
       - qemu-kvm
       - golang
-      - mercurial
-      - git
-      - bzr
-
-packer:
   file.directory:
     - name: /home/{{ s.user }}/go
     - user: {{ s.user }}
@@ -26,66 +19,58 @@ packer:
     - makedirs: True
     - require:
       - user: imgbuilder
-  git.latest:
-    - name: https://github.com/mitchellh/packer.git
-    - target: /home/{{ s.user }}/go/src/github.com/mitchellh/packer
-    - user: {{ s.user }}
-    - submodules: True
-    - require:
-      - file: packer
-      - pkg: packer-prereq
-  cmd.wait:
-    - name: cd $GOPATH/src/github.com/mitchellh/packer; make dev
-    - user: {{ s.user }}
-    - group: {{ s.user }}
-    - watch:
-      - git: packer
-    - require:
-      - cmd: packer_make_test
+      - pkg: packer
 
-go_profile:
-  file.managed:
-    - name: /home/{{ s.user }}/.profile
-    - user: {{ s.user }}
-    - group: {{ s.user }}
+{% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
-go_profile-activate:
-  file.append:
-    - name: /home/{{ s.user }}/.profile
-    - text: |
-        export GOPATH=/home/{{ s.user }}/go
-        export PATH=${GOPATH}/bin:$PATH
+packer_binary:
+  file.directory:
+    - name: /usr/local/src/packer-v0.7.2-linux-amd64
+    - makedirs: true
+  archive.extracted:
+    - name: /usr/local/src/packer-v0.7.2-linux-amd64
+    - source: https://dl.bintray.com/mitchellh/packer/packer_0.7.2_linux_amd64.zip
+    - source_hash: sha256=2e0a7971d0df81996ae1db0fe04291fb39a706cc9e8a2a98e9fe735c7289379f
+    - archive_format: zip
+    - if_missing: /usr/local/src/packer-v0.7.2-linux-amd64/packer
     - require:
-      - file: go_profile
-
-gox_import:
+      - file: packer_binary
   cmd.run:
-    - name: go get -u github.com/mitchellh/gox
-    - user: {{ s.user }}
-    - group: {{ s.user }}
+    - name: |
+        for n in `ls /usr/local/src/packer-v0.7.2-linux-amd64`; do
+            ln -s -f -T /usr/local/src/packer-v0.7.2-linux-amd64/$n /usr/local/bin/$n 
+        done
     - require:
-      - git: packer
-      - file: go_profile-activate
+      - archive: packer_binary
 
-packer_updatedeps:
-  cmd.run:
-    - name: cd $GOPATH/src/github.com/mitchellh/packer; make updatedeps
-    - user: {{ s.user }}
-    - group: {{ s.user }}
-    - watch:
-      - git: packer
-    - require:
-      - cmd: gox_import
+{% else %}
 
-packer_make_test:
-  cmd.run:
-    - name: cd $GOPATH/src/github.com/mitchellh/packer; make
-    - user: {{ s.user }}
-    - group: {{ s.user }}
-    - watch:
-      - git: packer
-    - require:
-      - cmd: packer_updatedeps
+{% load_yaml as config %}
+user: {{ s.user }}
+source:
+  repo: 'https://github.com/mitchellh/packer.git'
+build:
+  rev: 'v0.8~1'
+  make: 'go get -u github.com/mitchellh/gox && cd $GOPATH/src/github.com/mitchellh/packer && make updatedeps && make dev'
+  check: 'packer'
+  bin_files: ['packer', 'builder-*', 'command-*', 'packer-*', 'post-processor-*', 'provisioner-*']
+{% endload %}
+{{ go_build_from_git(config) }}
+
+{% endif %}
+
+{% load_yaml as config %}
+user: {{ s.user }}
+source:
+  repo: 'https://github.com/shaunduncan/packer-provisioner-host-command.git'
+build:
+  rev: 'latest'
+  make: 'cd $GOPATH/src/github.com/shaunduncan/packer-provisioner-host-command && make'
+  check: 'packer-provisioner-host-command'
+  bin_files: ['packer-provisioner-host-command']
+{% endload %}
+{{ go_build_from_git(config) }}
+
 
 packer_templates:
   file.recurse:
@@ -104,4 +89,3 @@ box_add_script:
     - mode: 775
     - require:
       - file: packer_templates
-
