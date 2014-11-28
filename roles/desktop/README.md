@@ -56,14 +56,15 @@ Installs and configures features you usually want to have in a working desktop
     * install a metadata stripper (mat)
     * install a tor browser bundle
 
-  * div:
-    * chromium browser
-
+  * browser:
+    * chromium browser, firefox, java plugin
 
 ##Pillar-Example:
 
 desktop:
   status: present # installs all sub parts as included in roles.desktop.init.sls
+  developer:
+    status: present # installs developer packages (see init.sls)
   big:
     status: present # currently unused, but in the future if not set, very big packages will be skipped
   commercial:

@@ -1,10 +1,10 @@
 include:
-  - .fonts
   - .clipart
+  - .fonts
   - .icons
-  - .pixel
-  - .vector
-  - .publishing
   - .ocr
+  - .pixel
+  - .publishing
+  - .vector
   - .video
 

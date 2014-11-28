@@ -1,18 +1,37 @@
 include:
   - java
   - .user
-  - .power
-  - .emulator
-  - .terminal
-  - .chat
-  - .voice
-  - .ftp
+
+  . .bitcoin
   - .browser
+  - .chat
   - .chipcard
-  - .vcs
-  - .ubuntu
+  - .email
+  - .fixes
+  - .ftp
   - .graphics
+  - .mozilla
+  - .network
+  - .power
   - .security
+  - .terminal
+  - .ubuntu
+  - .video-audio
+  - .voice
+
+{% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
+  - .android
+  - .eclipse
+  - .arduino
+  - .atom
+  - .emulator
+  - .etckeeper
+  - .idea
+  - .kivy
+  - .openwrt
+  - .vcs
+  - .tmbundles
+{% endif %}
 
 cdargs:
   pkg:
@@ -26,12 +45,4 @@ cdargs:
 #  pkg:
 #    - installed
 
-#  - .eclipse.user
-#  - .android
-#  - .android.user
-#  - .idea
-#  - .kivy
-
-#  - .contiki-tres
-#  - .openwrt
 
