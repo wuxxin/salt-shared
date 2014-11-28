@@ -5,6 +5,7 @@ TODO:
 -----
  * defaults.jinja: apt-proxy-mirror needs a pillar default instead a hardcoded entry
  * crypt late hook: only execute if hardisk is found encrypted
+ * add virt-what to optional install initrd and optional host boot initrd (see extra/virt-what)
 
 Target:
 -------
