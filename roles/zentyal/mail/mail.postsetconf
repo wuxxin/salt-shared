@@ -23,7 +23,7 @@ ssub() {
 cat /etc/postfix/main.cf | ssub '.*smtp_tls_security_level.*' 'smtp_tls_security_level = may' > /etc/postfix/main.cf.new
 cat >> /etc/postfix/main.cf.new << EOF
 delay_warning_time = 2h
-#smtp_tls_mandatory_ciphers = high
+smtp_tls_mandatory_ciphers = high
 smtp_tls_policy_maps = hash:/etc/postfix/tls_policy
 sender_bcc_maps = hash:/etc/postfix/sender_bcc
 recipient_bcc_maps = hash:/etc/postfix/recipient_bcc
@@ -37,14 +37,18 @@ rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
 
 cat /etc/postfix/master.cf |
  ssub '(smtp[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
- ssub '(relay[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' > /etc/postfix/master.cf.new
+ ssub '(relay[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
+ ssub '(smtp-amavis[ ]+unix.*)' '\1 -o receive_override_options=no_address_mappings' |
+ ssub '(127.0.0.1:10025[ ]+inet.*)-o receive_override_options=no_milters' '\1 -o receive_override_options=no_milters,no_address_mappings' > /etc/postfix/master.cf.new
 
 cat >> /etc/postfix/master.cf.new << EOF
 dovedrop        unix    -       n       n       -       -       pipe
-  flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m \${extension}
+  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
+# -m \${extension}
 
 ddropyear    unix    -       n       n       -       -       pipe
-  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda-year-append -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m \${extension}
+  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda-year-append -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
+# -m \${extension}
 
 droperror    unix    -       n       n       -       -       pipe
   flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda -f \${sender} -d postmaster@spitzauer.at -m public/diagnostic

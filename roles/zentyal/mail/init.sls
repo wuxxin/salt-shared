@@ -1,6 +1,6 @@
 # ### postfix
 
-{% if pillar.zentyal.mail.status|d(absent) == "present" %}
+{% if salt['pillar.get']('zentyal:mail:status', "absent") == "present" %}
 
 /etc/zentyal/hooks/mail.postsetconf:
   file.managed:
@@ -41,6 +41,13 @@
     - require:
       - pkg: zentyal
 
+/usr/local/lib/dovecot-lda:
+  file.managed:
+    - source: salt://roles/zentyal/mail/dovecot-lda
+    - mode: 755
+    - require:
+      - pkg: zentyal
+
 /etc/dovecot/extra.conf:
   file.managed:
     - source: salt://roles/zentyal/mail/extra.conf
@@ -56,7 +63,7 @@
 
 # create sieve of postmaster@spitzauer.at
 ## rule:[delete_from_to_same]
-#if allof (not header :contains "To" "postmaster+public/incoming@spitzauer.at", not header :contains "To" "postmaster+public/sent@spitzauer.at", header :contains "To" "spitzauer.at", header :contains "From" "spitzauer.at")
+#if allof (not header :contains "To" "postmaster_public/incoming@spitzauer.at", not header :contains "To" "postmaster_public/sent@spitzauer.at", header :contains "To" "spitzauer.at", header :contains "From" "spitzauer.at")
 #{
 #        discard;
 #        stop;

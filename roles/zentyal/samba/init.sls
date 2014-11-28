@@ -1,6 +1,6 @@
 # ### postfix
 
-{% if pillar.zentyal.samba.status|d(absent) == "present" %}
+{% if salt['pillar.get']('zentyal:samba:status', "absent") == "present" %} 
 
 /etc/zentyal/hooks/samba.postsetconf:
   file.managed:

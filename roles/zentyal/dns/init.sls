@@ -1,6 +1,6 @@
 # ### bind
 
-{% if pillar.zentyal.dns.status|d("absent") == "present" %}
+{% if salt['pillar.get']('zentyal:dns:status', "absent") == "present" %}
 
 /etc/zentyal/hooks/dns.postsetconf:
   file.managed:
