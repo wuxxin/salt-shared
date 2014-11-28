@@ -18,6 +18,5 @@ we need to be sure it is already running the service
       - service: apt-cacher-ng
 {% endif %}
     - contents: 'Acquire::http { Proxy "http://'+
-salt['mine.get']('apt-cacher-ng:server:present', 'get_fqdn', expr_form='pillar')+ 
-':3142"; };'
+salt['mine.get']('apt-cacher-ng:server:present', 'get_fqdn', expr_form='pillar')[0]+ ':3142"; };'
 
