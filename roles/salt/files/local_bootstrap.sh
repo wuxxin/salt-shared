@@ -75,7 +75,7 @@ rm -r {{ targetdir }}/_run
 rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # restart minion, accept minion key on master
-/etc/init.d/salt-minion restart
+/etc/init.d/salt-master restart
 sleep 5
 /etc/init.d/salt-minion restart
 sleep 5
