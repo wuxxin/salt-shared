@@ -11,12 +11,15 @@ we need to be sure it is already running the service
 {% endif %}
 
 
+{% set proxy_string = 'Acquire::http { Proxy "http://'+ salt.mine.get(
+"apt-cacher-ng:server:present", "get_fqdn", expr_form="pillar")[0]+ ':3142"; };' %}
+
 /etc/apt/apt.conf.d/02proxy:
   file.managed:
 {% if salt['pillar.get']('apt-cacher-ng:server:status', 'absent') == 'present' %}
     - require:
       - service: apt-cacher-ng
 {% endif %}
-    - contents: 'Acquire::http { Proxy "http://'+
-salt['mine.get']('apt-cacher-ng:server:present', 'get_fqdn', expr_form='pillar')[0]+ ':3142"; };'
+    - contents: {{ proxy_string }}
+
 
