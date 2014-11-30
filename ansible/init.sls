@@ -1,7 +1,10 @@
-ansible:
-  pkgrepo.managed:
-    - ppa: rquillo/ansible
-  pkg.installed:
-    - require:
-      - pkgrepo: ansible
+include:
+  - .ppa
 
+ansible:
+  pkg:
+    - installed
+{% if grains['os'] == 'Ubuntu' %}
+    - require:
+      - pkgrepo: ansible_ppa
+{% endif %}
