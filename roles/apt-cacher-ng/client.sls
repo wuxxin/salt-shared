@@ -12,7 +12,7 @@ we need to be sure it is already running the service
 
 
 {% set proxy_string = 'Acquire::http { Proxy "http://'+ salt.mine.get(
-"apt-cacher-ng:server:present", "get_fqdn", expr_form="pillar")[0]+ ':3142"; };' %}
+"apt-cacher-ng:server:status:present", "get_fqdn", expr_form="pillar")[0]+ ':3142"; };' %}
 
 /etc/apt/apt.conf.d/02proxy:
   file.managed:
