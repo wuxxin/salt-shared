@@ -11,6 +11,12 @@ openssh-server:
     - require:
       - pkg: openssh-server
 
+/etc/ssh/sshd_config:
+  file.append:
+    - text: "UseDNS no"
+    - watch_in:
+      - service: openssh-server
+
 {% if pillar['adminkeys_present']|d(False) %}
 adminkeys_present:
   ssh_auth.present:
