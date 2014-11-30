@@ -250,7 +250,7 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
 {% endfor %}
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ data['device'] }})" == "{{ data['fstype'] }}"'
-    - unless: 'test ! -b {{ data['device'] }}
+    - unless: 'test ! -b {{ data['device'] }}'
 {% endfor %}
 
 {% endmacro %}
