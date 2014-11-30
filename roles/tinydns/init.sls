@@ -168,7 +168,8 @@ axfrdns_export:
   file.replace:
     - pattern: |
         ^([ \t]+dns-nameservers:)(.+)$
-    - repl: "\1 {{ pillar.tinydns_server.cache_dns }}"
+
+    - repl: '\1 {{ pillar.tinydns_server.cache_dns }}'
 
 refresh-resolvconf:
   cmd.wait:
