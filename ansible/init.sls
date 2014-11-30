@@ -8,3 +8,8 @@ ansible:
     - require:
       - pkgrepo: ansible_ppa
 {% endif %}
+
+librarian-ansible:
+  gem:
+    - installed
+
