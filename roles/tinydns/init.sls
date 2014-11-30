@@ -168,11 +168,11 @@ axfrdns_export:
   file.replace:
     pattern: |
         ^([ \t]+dns-nameservers:)(.+)$
-    repl: "\1 {{ pillar.tinydns_server.cache_dns }}"
+    repl: "\\1 {{ pillar.tinydns_server.cache_dns }}"
 
 refresh-resolvconf:
   cmd.wait:
-    - name 'echo "nameserver {{ pillar.tinydns_server.cache_dns }}" | resolvconf -a eth0'
+    - name: 'echo "nameserver {{ pillar.tinydns_server.cache_dns }}" | resolvconf -a eth0'
 
 {% endif %}
 
