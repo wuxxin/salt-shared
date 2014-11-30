@@ -41,7 +41,12 @@ additional_udeb:
 additional_layers:
   - "salt://roles/imgbuilder/preseed/files/overlay.tar.gz"
 
+{% from "roles/apt-cacher-ng/lib.sls" import proxy_address with context %}
+{% if proxy_address != false %}
+apt_proxy_mirror: {{ proxy_address }}
+{% else %}
 apt_proxy_mirror: ""
+{% endif %}
 
 custom_files: {}
   {# - "destination": "source" #}
