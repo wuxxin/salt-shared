@@ -1,4 +1,4 @@
-{% if salt['pillar.get']('apt-cacher-ng:server:status', 'absent') = 'present' %}
+{% if salt['pillar.get']('apt-cacher-ng:server:status', 'absent') == 'present' %}
 include:
   - .server
 
@@ -13,7 +13,7 @@ we need to be sure it is already running the service
 
 /etc/apt/apt.conf.d/02proxy:
   file.managed:
-{% if salt['pillar.get']('apt-cacher-ng:server:status', 'absent') = 'present' %}
+{% if salt['pillar.get']('apt-cacher-ng:server:status', 'absent') == 'present' %}
     - require:
       - service: apt-cacher-ng
 {% endif %}
