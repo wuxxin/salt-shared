@@ -10,9 +10,8 @@ we need to be sure it is already running the service
 
 {% endif %}
 
-
-{% set proxy_string = 'Acquire::http { Proxy "http://'+ salt.mine.get(
-"apt-cacher-ng:server:status:present", "get_fqdn", expr_form="pillar")[0]+ ':3142"; };' %}
+{% from 'roles/apt-cacher-ng/lib.sls' import proxy_address with context %}
+{% set apt_proxy= 'Acquire::http { Proxy "'+ proxy_address+ '"; };' %}
 
 /etc/apt/apt.conf.d/02proxy:
   file.managed:
@@ -20,6 +19,6 @@ we need to be sure it is already running the service
     - require:
       - service: apt-cacher-ng
 {% endif %}
-    - contents: {{ proxy_string }}
+    - contents: {{ apt_proxy }}
 
 
