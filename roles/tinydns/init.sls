@@ -167,9 +167,9 @@ axfrdns_export:
 /etc/network/interfaces:
   file.replace:
     - pattern: |
-        ^([ \t]+dns-nameservers:)(.+)$
+        ^([ \t]+dns-nameservers )(.+)
 
-    - repl: '\1 {{ pillar.tinydns_server.cache_dns }}'
+    - repl: '\1 {{ pillar.tinydns_server.cache_dns }}\n'
 
 refresh-resolvconf:
   cmd.wait:
