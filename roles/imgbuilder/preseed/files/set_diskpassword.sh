@@ -39,6 +39,7 @@ done
 echo -n "testing ssh access to target: "
 until ssh -o "UserKnownHostsFile=./known_hosts.networkconsole" $ssh_opts root@$ssh_target exit; do
   echo -n .
+  sleep 1
 done
 
 echo "writing new custom.env to ssh_target, "
