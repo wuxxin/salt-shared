@@ -82,10 +82,10 @@ mkdir -p /etc/salt
 cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-{% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt-call') %}
+if test "{{ install.type }}" == "git"; then
 # install salt-minion and salt-master, but only do configuration (no install)
 {{ targetdir }}/bootstrap-salt.sh -M -C git {{ install.rev }}
-{% endif %}
+fi
 # call state.sls roles.salt.master
 salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
 
