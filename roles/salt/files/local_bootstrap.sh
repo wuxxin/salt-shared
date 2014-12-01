@@ -17,8 +17,10 @@ tar xaf /root/saltmaster@{{ hostname }}_config.tar.xz
 
 if test "{{ install.type }}" == "git"; then
   rev="{{ install.rev }}"
-  curl -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh -o {{ targetdir }}/bootstrap-salt.sh
-  chmod +x {{ targetdir }}/bootstrap-salt.sh
+  if test ! -f {{ targetdir }}/bootstrap-salt.sh; then
+    curl -L {{ install.bootstrap }} -o {{ targetdir }}/bootstrap-salt.sh
+    chmod +x {{ targetdir }}/bootstrap-salt.sh
+  fi
   {{ targetdir }}/bootstrap-salt.sh -X git {{ install.rev }}
   # install salt-minion but do not start daemon
 else
