@@ -1,19 +1,10 @@
 Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
-TODO:
------
- * defaults.jinja: apt-proxy-mirror needs a pillar default instead a hardcoded entry
- * crypt late hook: only execute if hardisk is found encrypted
- * add virt-what to optional install initrd and optional host boot initrd (see extra/virt-what)
+ A post-snowden network only access server setup generation tool
+ to remotely install a server with fulldisk encryption in a secure way.
 
-Target:
--------
-
- A post-snowden root server setup generation tool,
- meaning a secure way to remotely install a server with fulldisk encryption. (eg. wholedisk RAID / CRYPT / LVM )
-
- Secondary Target: a customized automated install with advanced features.
+ Secondary Target: a customized automated ubuntu/debian machine install with advanced features.
 
  currently Ubuntu 14.04 only, should be possible to adopt to other versions and debian derivates.
 
@@ -22,6 +13,20 @@ Target:
    * packer using an iso image and http served preseed files
    * vagrant-libvirt including libvirt.kernel,initrd,cmdline arguments
    * pxe boot
+
+ * Warning:
+   This scripts only try to protect the permanent storage, aka. the harddisks, 
+   and tries to safeguard the key material from accidently written to temporary storage
+
+   If a attacker can snapshot the memory of the machine somehow, eg. pysically by
+   "shuting off the machine while cooling memory chips before replugging them in a memory reader"
+   he/she can then derive the encryption keys from the memory snapshot.
+
+   This is also true for almost all types of hypervisors that are running a virtual machine.
+   Eg. Your instance in the cloud.
+
+   Therefore the only way to asure you can safely process encryption data is when you do the virtualization yourself,
+   and you are not emulated while doing so.
 
 Features:
 ---------
@@ -35,7 +40,7 @@ Features:
        including dropbear initrd support and patched initrd scripts for cryptdisk remote unlocking
  * generate and encrypt the diskkey with a gpg public key on the source host and transfer it via ssh to the target
  * a paper backup script for generating a pdf with qrcodes of the setup files used (excluding initrd and kernel)
- * uses an apt-proxy for package download if apt_proxy_mirror is present
+ * uses an apt-proxy for package download if present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
    * this enables both root and main user access via ssh authorized_keys, 
@@ -47,10 +52,10 @@ Features:
 Example:
 ........
 
- * headless server setup with two disks:  luks encryption, raid1 on top, lvm on top,
+headless server setup with two disks:  luks encryption, raid1 on top, lvm on top,
   ssh daemon inside initrd with the possiblity to ssh into and unlock the crypto root partition and boot
 
- * use roles.imgbuilder.prepare.sls as a start for a custom configuration
+ * use roles.imgbuilder.preseed.example.sls as a start for a custom configuration
  * execute "salt-call state.sls yourpreparestate.sls" to generate kernel,initrd and shell scripts setup
  * go to "prepare and install machine"
 
@@ -72,8 +77,8 @@ Prepare and install machine:
 ............................
 
  * make a new directory (salt state)
-  * copy roles/imgbuilder/preseed/prepare.sls and Vagrantfile to it as a starting point
-  * modify prepare.sls to fit your needs
+  * copy roles/imgbuilder/preseed/example.sls and Vagrantfile to it as a starting point
+  * modify example.sls to fit your needs
   * copy public ssh key and public gpg key to directory
 
  * prepare initrd and other files
@@ -147,5 +152,5 @@ further possible extensions:
       2.) wait before reboot until file is marked as transfered
    * add qemu/kvm into initrd, start qemu/kvm with nested virtualization start a virtual machine inside the virtual machine
     * measure: tsc times on bare metal, 1level virtualization, 2ndlevel virtualization, make sanity checks,
-      * mark system as "tainted" , delay ssh startup and for 5/10/whatever minutes if sanity checks fail
+      * mark system as "tainted" , change ssh setup to accept only recovery.key and has a different host key.
 
