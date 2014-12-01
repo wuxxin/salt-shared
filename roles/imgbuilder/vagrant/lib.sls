@@ -1,51 +1,56 @@
 
-{% macro deploy_vagrant_vm(settings) %}
+{% macro deploy_vagrant_vm(vagrantdir, fqdn, disksize=None, memsize=None, cpus=None, user=None) %}
 
-{{ vagrant_up(settings) }}
-{{ saltify_vm(settings) }}
-{{ network_cleanup(settings) }}
-{{ vagrant_halt(settings) }}
+{% if user = None %}
+{% from roles.imgbuilder.defaults.jinja import settings as s %}
+{% set user= s.user %}
+{% endif %}
 
-{{ detach_vm(settings) }}
-{{ vm_move_network(settings) }}
-{{ vm_copy_resize(settings) }}
-{{ spicify(settings) }}
-{{ set_autostart(settings, autostart='on') }}
+{{ vagrant_up(vagrantdir, user) }}
+{{ saltify_vm(vagrantdir, user, fqdn) }}
+{{ network_cleanup(vagrantdir, user) }}
+{{ vagrant_halt(vagrantdir, user) }}
 
-{{ vm_start(settings) }}
+{% set libvirt_id = detach_vm(vagrantdir, user) }}
+{{ vm_move_network(libvirt_id) }}
+{{ spicify(libvirt_id) }}
+{{ vm_copy_resize(libvirt_id) }}
+
+{{ set_autostart(libvirt_id, autostart='on') }}
+{{ vm_start(libvirt_id) }}
 
 {% endmacro %}
 
 
-{% macro vagrant_up(settings) %}
-{{ settings.hostname }}-vm-up:
+{% macro vagrant_up(target, user) %}
+{{ target }}-vm-up:
   cmd.run:
-    - cwd: {{ settings.target }}
-    - user: {{ settings.user }}
+    - cwd: {{ target }}
+    - user: {{ user }}
     - name: vagrant up
 {% endmacro %}
 
-{% macro vagrant_halt(settings) %}
-{{ settings.hostname }}-vm-halt:
+{% macro vagrant_halt(target, user) %}
+{{ target }}-vm-halt:
   cmd.run:
-    - cwd: {{ settings.target }}
-    - user: {{ settings.user }}
+    - cwd: {{ target }}
+    - user: {{ user }}
     - name: vagrant halt
 {% endmacro %}
 
-{% macro saltify_vm(settings) %}
+{% macro saltify_vm(target, user, fqdn) %}
 template_dir:
   file.directory:
-    - name: {{ settings.target }}/salt/key
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - name: {{ target }}/salt/key
+    - user: {{ user }}
+    - group: {{ user }}
     - makedirs: true
 
 generate_and_accept_minion_key:
   cmd.run:
-    - cwd:  {{ settings.target }}/salt/key
-    - name: "salt-key -y --gen-keys={{ hostname }} && cp {{ hostname }}.pub /etc/salt/pki/master/minions/{{ hostname }}"
-    - unless: test -f /etc/salt/pki/master/minions/{{ hostname }}
+    - cwd:  {{ target }}/salt/key
+    - name: "salt-key -y --gen-keys={{ fqdn }} && cp {{ fqdn }}.pub /etc/salt/pki/master/minions/{{ fqdn }}"
+    - unless: test -f /etc/salt/pki/master/minions/{{ fqdn }}
     - require:
       - file: template_dir
     - require_in:
@@ -53,23 +58,23 @@ generate_and_accept_minion_key:
 
 modify_vagrant_file:
   cmd.run:
-    - cwd: {{ settings.target }}
-    - user: {{ settings.user }}
+    - cwd: {{ target }}
+    - user: {{ user }}
     - name: 
   config.vm.provision :salt do |salt|
-    salt.minion_key = "salt/key/{{ settings.hostname }}.pem"
-    salt.minion_pub = "salt/key/{{ settings.hostname }}.pub"
+    salt.minion_key = "salt/key/{{ fqdn }}.pem"
+    salt.minion_pub = "salt/key/{{ fqdn }}.pub"
   end
 
 vagrant_provision:
   cmd.run:
-    - cwd: {{ settings.target }}
-    - user: {{ settings.user }}
+    - cwd: {{ target }}
+    - user: {{ user }}
     - name: vagrant provision
 {% endmacro %}
   
 
-{% macro network_cleanup(settings) %}
+{% macro network_cleanup(target, user) %}
 copy
 salt://roles/imgbuilder/vagrant/files/network-cleanup.sh
 to target /tmp
@@ -78,17 +83,26 @@ vagrant shell --command "/bin/bash" -c "
 {% endmacro %}
 
 
-{% macro vm_detach(name) %}
-{{ name }}-vm-detach:
+{% macro vm_detach(target, user, fqdn) %}
+{{ vagrant_halt(target, user) }}
+
+{{ target }}-vm-detach:
   file.absent:
-    - name: /mnt/images/templates/imgbuilder/{{ name }}-vm/.vagrant
+    - name: {{ target }}/.vagrant
     - require:
-      - cmd: {{ name }}-vm-halt
+      - cmd: {{ target }}-vm-halt
   cmd.run:
-    - name: virsh dumpxml $vmname --inactive > /mnt/images/templates/imgbuilder/{{ name }}-vm/libvirt.xml
-    - creates: /mnt/images/templates/imgbuilder/{{ name }}-vm/libvirt.xml
+    - name: virsh dumpxml {{ fqdn }} --inactive > {{ target }}/libvirt.xml
+    - creates: {{ target}}/libvirt.xml
     - require:
-      - file: {{ name }}-vm-detach
+      - file: {{ target }}-vm-detach
+  file.managed:
+    - name: {{ target }}/libvirt.xml
+    - file_mode: 0664
+    - user: {{ user }}
+    - require: 
+      - cmd: {{ target }}-vm-detach
+
 {% endmacro %}
 
 
@@ -100,45 +114,47 @@ vagrant shell --command "/bin/bash" -c "
       - cmd: {{ name }}-vm-detach
 {% endmacro %}
 
-{% macro vm_move_network(name) %}
-{{ name }}-vm_move_network:
+{% macro vm_move_network(target) %}
+{{ target }}-vm_move_network:
   cmd.run:
 msub "<interface type=.+<mac address=.([0-9a-f:]+).+</interface>" "<interface type=\"bridge\"><mac address=\"\\1\"/><source bridge=\"$bridge\"/></interface>" > ${vmname}.xml    - name: /mnt/images/templates/imgbuilder/scripts/def2bridge {{ name }} br1
     - require:
       - cmd: {{ name }}-vm_memsize-cpus
 {% endmacro %}
 
-{% macro spicify(name) %}
+{% macro spicify(target, fqdn) %}
 {% for i, ms,me,co in [
 (0, "<video>", "</video>", "<video><model type=\"qxl\"/></video>"),
 (1, "<channel type=.spicevmc", "</channel>", ""),
 (2, "<graphics type", "</channel>", "<graphics type=\"spice\" autoport=\"yes\" /><channel type=\"spicevmc\"><target type=\"virtio\" name=\"com.redhat.spice.0\"/></channel>"),
 ] %}
 
-{{ name }}-spicify-{{ i }}
+{{ target }}-spicify-{{ i }}
   file.blockreplace:
-    - name: /mnt/images/templates/imgbuilder/{{ name }}-vm/libvirt.xml
+    - name: {{ target }}/libvirt.xml
     - marker_start: ms
     - marker_end: me
     - content: co
     - require: 
-      - cmd: {{ name }}-vm_move_network
+      - cmd: {{ target }}-vm_move_network
 {% endfor %}
 
 {% endmacro %}
 
-{% macro vm_copy_resize(name) %}
+{% macro vm_copy_resize(target, user, fqdn, size) %}
 {{ name }}-vm_copy_resize:
   cmd.run:
     - name: /mnt/images/templates/imgbuilder/scripts/copy_resize {{ name }} vg0 15G
 use cgroup 
 for all interesting device nodes:
-mkdir /sys/fs/cgroup/blkio/1mbpersecond
- echo "$devicenode  bytes_per_second" > /sys/fs/cgroup/blkio/1mbpersecond/blkio.throttle.read_bps_device"
-
+mkdir /sys/fs/cgroup/blkio/10mbwritepersecond
+ echo "$devicenode  bytes_per_second" > /sys/fs/cgroup/blkio/10mbwritepersecond/blkio.throttle.write_bps_device"
+create lvm that matches >= exact size of image
+echo $! > /sys/fs/cgroup/blkio/10mbpersecond/tasks
+cat /sys/fs/cgroup/blkio/10mbpersecond/tasks
+qemu-img convert -O raw -S 1k empty-box-26g_vagrant_box_image.img /dev/vg0/test
 virt-resize $sourcefile /dev/mapper/$volumegroup-$volumename $expand_pt $expand_lv &
-echo $! > /sys/fs/cgroup/blkio/1mbpersecond/tasks
-cat /sys/fs/cgroup/blkio/1mbpersecond/tasks
+remove from cgroups limit
 
     - user: imgbuilder
     - group: imgbuilder

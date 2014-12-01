@@ -102,8 +102,6 @@ salt_create_bash_aliases:
   file:
     - touch
     - name: /root/.bash_aliases
-    - require:
-      - pkg: salt-master
 
 salt_append_bash_aliases:
   file.append:
