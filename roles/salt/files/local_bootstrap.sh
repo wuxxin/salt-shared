@@ -79,16 +79,16 @@ done
 # call state.sls haveged and network, copy grains, set salt minion name
 salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
 mkdir -p /etc/salt
-cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
 if test "{{ install.type }}" == "git"; then
 # install salt-minion and salt-master, but only do configuration (no install)
-{{ targetdir }}/bootstrap-salt.sh -M -C git {{ install.rev }}
+{{ targetdir }}/bootstrap-salt.sh -M git {{ install.rev }}
 fi
-# call state.sls roles.salt.master
-salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
 
+# call state.sls roles.salt.master, copy grains afterwards to final destination
+salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
+cp {{ targetdir }}/grains /etc/salt/grains
 
 # cleanup masterless leftovers, copy grains
 rm -r {{ targetdir }}/_run
