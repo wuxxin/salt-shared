@@ -40,4 +40,6 @@ network-route-{{ interface }}:
   file:
     - absent
     - require:
-      - network: network-system
+{%- for item, data in interfaces.iteritems() %}
+      - network: network-interface-{{ item }}
+{%- endfor %}
