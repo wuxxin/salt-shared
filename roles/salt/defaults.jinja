@@ -20,8 +20,6 @@ master:
         - /srv/salt/custom
         - /srv/salt/salt-shared
     file_recv: True
-    #gitfs_remotes:
-    #  - https://github.com/saltstack-formulas/docker-formula.git
 
 master_d:
   smtp_return:
@@ -30,6 +28,7 @@ master_d:
       to: "root"
       host: localhost
       fields: id,fun,jid
+
   mine_functions:
     mine_functions:
       test.ping: []
@@ -38,6 +37,11 @@ master_d:
       get_fqdn:
         mine_function: cmd.run
         name: 'hostname -f'
+
+install:
+  type: git
+  rev: 2017.7
+  
 
 {% endload %}
 

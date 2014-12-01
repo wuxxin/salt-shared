@@ -15,13 +15,22 @@ touch {{ targetdir }}/bootstrap.run
 cd {{ targetdir }}
 tar xaf /root/saltmaster@{{ hostname }}_config.tar.xz
 
-# install custom ppa (and requisites for it), install salt masterless
-export DEBIAN_FRONTEND=noninteractive
-apt-get -y update
-apt-get -y install python-software-properties software-properties-common mercurial git-core
-apt-add-repository -y ppa:saltstack/salt
-apt-get -y update
-apt-get -y install salt-common python-msgpack python-zmq
+if test "{{ install.type }}" == "git"; then
+  rev="{{ install.rev }}"
+  curl -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh -o {{ targetdir }}/bootstrap-salt.sh
+  chmod +x {{ targetdir }}/bootstrap-salt.sh
+  {{ targetdir }}/bootstrap-salt.sh -X git {{ install.rev }}
+  # install salt-minion but do not start daemon
+else
+  # install custom ppa (and requisites for it), install salt masterless
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get -y update
+  apt-get -y install python-software-properties software-properties-common mercurial git-core
+  apt-add-repository -y ppa:saltstack/salt
+  apt-get -y update
+  apt-get -y install salt-common
+  # only install salt-call
+fi
 
 # generates minion config in /targetdir for a masterless setup
 cat > {{ targetdir }}/minion << EOF
@@ -65,21 +74,29 @@ for a in `find {{ targetdir }} -name .git-crypt -type d`; do
   git-crypt unlock
 done
 
-# install state.sls salt.master, copy grains, set salt minion name
-salt-call --local --config-dir={{ targetdir }} state.sls haveged,roles.salt.master,network
+# call state.sls haveged and network, copy grains, set salt minion name
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
+mkdir -p /etc/salt
 cp {{ targetdir }}/grains /etc/salt/grains
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
+
+{% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt-call') %}
+# install salt-minion and salt-master, but only do configuration (no install)
+{{ targetdir }}/bootstrap-salt.sh -M -C git {{ install.rev }}
+{% endif %}
+# call state.sls roles.salt.master
+salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
+
 
 # cleanup masterless leftovers, copy grains
 rm -r {{ targetdir }}/_run
 rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # restart minion, accept minion key on master
-/etc/init.d/salt-master restart
-sleep 5
-/etc/init.d/salt-minion restart
-sleep 5
+service salt-master stop; sleep 1; killall salt-master; service salt-master start; sleep 3
+service salt-minion stop; sleep 1; killall salt-minion; service salt-minion start; sleep 5
+
 salt-key -y -a {{ hostname }}.{{ domainname }}
 
 # finally call highstate
-salt-call state.highstate
+#salt-call state.highstate

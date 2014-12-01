@@ -1,4 +1,9 @@
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
+{% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt') %}
+{% set leave_alone= true %}
+{% else %}
+{% set leave_alone= false %}
+{% endif %}
 
 include:
   - python
@@ -20,7 +25,12 @@ salt-master-dependencies:
       - pkg: python
 
 salt-master:
+{% if leave_alone %}
+  cmd.run:
+    - name: which salt
+{% else %}
   pkg.installed:
+{% endif %}
     - require:
       - pkgrepo: salt_ppa
       - pip: salt-master-dependencies
@@ -30,9 +40,13 @@ salt-master:
 {% endif %}
   service.running:
     - enable: true
-    - reload: true
     - require:
+{% if leave_alone %}
+      - cmd: salt-master
+{% else %}
       - pkg: salt-master
+{% endif %}
+
 
 /etc/salt:
   file:

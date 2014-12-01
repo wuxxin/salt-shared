@@ -1,8 +1,9 @@
 include:
   - gnupg
 
-# salt.master - bootstrap make
-##############################
+
+# salt deploy - prepare
+#######################
 
 {#
 . copy all state and pillar paths together
@@ -15,7 +16,7 @@ include:
 . generate a install_sw.sh and local_bootstrap.dat script in target_preperation_dir
 #}
 
-{% macro saltmaster_make(salt_settings, gpg_id, gpg_key_location, make_targetdir, host_targetdir, hostname, domainname, custom_ssh_identity, netcfg) %}
+{% macro saltdeploy_prepare(salt_settings, gpg_id, gpg_key_location, make_targetdir, host_targetdir, hostname, domainname, custom_ssh_identity, netcfg) %}
 
 {% set salt_config=salt_settings.master.config|load_yaml %}
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
@@ -137,6 +138,7 @@ generate_bootstrap_{{ source }}:
         custom_ssh_identity: {{ custom_ssh_identity|d("") }}
         netcfg: {{ netcfg }}
         bootstrap_extra: {{ salt_settings.bootstrap.extra|d({}) }}
+        install: {{ salt_settings.install|d(none) }}
         states:
 {% for a in salt_config.file_roots.base %}
           - {{ salt['cmd.run_stdout']('basename '+ a) }}
