@@ -35,8 +35,8 @@ master_d:
       network.interfaces: []
       network.get_hostname: []
       get_fqdn:
-        mine_function: cmd.run
-        name: 'hostname -f'
+        mine_function: cmd.run_stdout
+        cmd: hostname -f
 
 install:
   type: git
