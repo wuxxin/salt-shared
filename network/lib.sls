@@ -19,8 +19,14 @@ network-interface-{{ item }}:
     - {{ sub }}: {{ subvalue }}
 {% endfor %}
     - require_in:
-      - file: /etc/init/networking.override
+      - file: config_interfaces_override
 {% endfor %}
+
+config_interfaces_override:
+  file:
+    - absent
+    - name: /etc/init/networking.override
+
 
 {% endmacro %}
 
@@ -54,16 +60,13 @@ network-route-{{ interface }}:
 {% for item, value in subdata.iteritems() %}
         {{ item }}: {{ value }}{% endfor %}{% endfor %}
     - require_in:
-      - file: /etc/init/networking.override
+      - file: config_routes_override
 {% endif %}
 {% endfor %}
 
-/etc/init/networking.override:
+config_routes_override:
   file:
     - absent
-    - require:
-{%- for item, data in interfaces.iteritems() %}
-      - network: network-interface-{{ item }}
-{%- endfor %}
+    - name: /etc/init/networking.override
 
 {% endmacro %}
