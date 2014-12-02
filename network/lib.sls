@@ -72,26 +72,39 @@ config_routes_override:
 {% endmacro %}
 
 
-{% macro change_dns(dns) %}
+{% macro change_dns(interface, oldconfig, newdns) %}
 
+{#
 change_dns_in_interfaces:
   file.replace:
     - name: /etc/network/interfaces
     - pattern: '^([ \t]+dns-nameservers)(.+)'
-    - repl: '\1 {{ dns }}'
+    - repl: '\1 {{ newdns }}'
 
 /var/run/resolvconf/resolv.conf:
   file.replace:
     - pattern: "^[ \t]*nameserver (.+)"
-    - repl: "nameserver {{ dns }}"
+    - repl: "nameserver {{ newdns }}"
     - require:
       - file: change_dns_in_interfaces
+#}
+
+change_network_managed_dns:
+  network.managed:
+    - name: {{ interface }}
+    - dns:
+      - {{ newdns }}
+{%- for sub, subvalue in oldconfig.iteritems() %}
+{% if sub != 'dns' %}
+    - {{ sub }}: {{ subvalue }}
+{%- endif %}
+{%- endfor %}
 
 update_library:
   cmd.run:
-    - name: echo "nameserver {{ dns }}" | resolvconf -a eth0 resolvconf --enable-updates; resolvconf -u
+    - name: resolvconf --enable-updates; resolvconf -u
     - require:
-      - file: /var/run/resolvconf/resolv.conf
+      - network: change_network_managed_dns
 
 {% endmacro %}
 

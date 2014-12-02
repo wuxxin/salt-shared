@@ -164,7 +164,8 @@ axfrdns_export:
 {% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
 
 {% from "network/lib.sls" import change_dns with context %}
-{{ change_dns(pillar.tinydns_server.cache_dns) }}
+{% set oldconfig = salt['pillar.get']('network:interfaces:eth0', {}) %}
+{{ change_dns('eth0', oldconfig, pillar.tinydns_server.cache_dns) }}
 
 {% endif %}
 
