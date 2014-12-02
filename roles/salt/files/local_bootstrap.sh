@@ -83,7 +83,7 @@ echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
 if test "{{ install.type }}" == "git"; then
 # install salt-minion and salt-master, but only do configuration (no install)
-{{ targetdir }}/bootstrap-salt.sh -M git {{ install.rev }}
+{{ targetdir }}/bootstrap-salt.sh -X -M git {{ install.rev }}
 fi
 
 # call state.sls roles.salt.master, copy grains afterwards to final destination
