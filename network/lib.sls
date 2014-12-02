@@ -9,6 +9,7 @@ network-system:
 
 {% endmacro %}
 
+
 {% macro config_interfaces(interfaces) %}
 
 {% for item, data in interfaces.iteritems() %}
@@ -26,7 +27,6 @@ config_interfaces_override:
   file:
     - absent
     - name: /etc/init/networking.override
-
 
 {% endmacro %}
 
@@ -70,3 +70,20 @@ config_routes_override:
     - name: /etc/init/networking.override
 
 {% endmacro %}
+
+
+{% macro change_dns(dns) %}
+
+/etc/resolv.conf:
+  file.replace:
+    - pattern: "^[ \t]*nameserver (.+)"
+    - repl: "nameserver {{ dns }}"
+
+change_dns_in_interfaces:
+  file.replace:
+    - name: /etc/network/interfaces
+    - pattern: "^([ \t]+dns-nameservers)(.+)"
+    - repl: "\\1 {{ dns }}"
+
+{% endmacro %}
+

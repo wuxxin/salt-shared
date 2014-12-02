@@ -162,26 +162,9 @@ axfrdns_export:
 {% endfor %}
 
 {% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
-{# todo: make this also working if type of eth0 can be != eth (get old parameter, because type is mandatory #}
 
-{% set old_eth0= salt['pillar.get']('network:interfaces:eth0', {}) %}
-{% from "network/lib.sls" import config_system, config_interfaces, config_routes with context %}
+{% from "network/lib.sls" import change_dns with context %}
+{{ change_dns(pillar.tinydns_server.cache_dns) }}
 
-change_internal_dns:
-  network.managed:
-    - name: eth0
-    - dns:
-      - {{ pillar.tinydns_server.cache_dns }}
-{%- for sub, subvalue in old_eth0.iteritems() %}
-{% if sub != 'dns' %}
-    - {{ sub }}: {{ subvalue }}
-{%- endif %}
-{%- endfor %}
-    - require:
-      - cmd: dnscache_service
-  cmd.run:
-    - name: "svc -d /etc/service/dnscache; sleep 2; svc -u /etc/service/dnscache; sleep 2; ping -c 4 {{ pillar.tinydns_server.cache_dns }}"
-    - require:
-      - network: change_internal_dns
 {% endif %}
 
