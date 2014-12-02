@@ -38,7 +38,7 @@ network-route-{{ interface }}:
     - name: "ifup --force {{ interface }}"
     - require:
       - file: network-route-{{ interface }}
-{% else
+{% else %}
   network.routes:
     - name: {{ interface }}
     - routes:
