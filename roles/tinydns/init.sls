@@ -162,18 +162,14 @@ axfrdns_export:
 {% endfor %}
 
 {% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
-{# fixme: debian/ubuntu specific #}
 
-/etc/network/interfaces:
-  file.replace:
-    - pattern: |
-        ^([ \t]+dns-nameservers )(.+)
-
-    - repl: '\1 {{ pillar.tinydns_server.cache_dns }}\n'
-
-refresh-resolvconf:
-  cmd.wait:
-    - name: 'echo "nameserver {{ pillar.tinydns_server.cache_dns }}" | resolvconf -a eth0'
+change_internal_dns:
+  network.managed:
+    - name: eth0
+    - dns:
+      - {{ pillar.tinydns_server.cache_dns }}
+    - require:
+      - cmd: dnscache_service
 
 {% endif %}
 

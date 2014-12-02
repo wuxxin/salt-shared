@@ -23,6 +23,17 @@ network-interface-{{ item }}:
 
 {% for interface, data in routes.iteritems() %}
 network-route-{{ interface }}:
+  network.routes:
+    - name: {{ interface }}
+    - routes:
+{% for ipaddr, subdata in data.iteritems() %}
+      - name: route-{{ ipaddr }}
+        ipaddr: {{ ipaddr }}
+{% for item, value in subdata.iteritems() %}
+        {{ item }}: {{ value }}{% endfor %}{% endfor %}
+    - require_in:
+      - file: /etc/init/networking.override
+{#
   file.replace:
     - name: /etc/network/interfaces
     - flags:
@@ -33,7 +44,7 @@ network-route-{{ interface }}:
     - repl: "iface {{ interface }} inet \\1\\n{% for ipaddr, subdata in data.iteritems() %}    up  ip route add {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n    down ip route del {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n{% endfor %}"
     - require_in:
       - file: /etc/init/networking.override
-
+#}
 {% endfor %}
 
 /etc/init/networking.override:
