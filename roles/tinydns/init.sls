@@ -168,6 +168,8 @@ axfrdns_export:
 {% from "network/lib.sls" import config_system, config_interfaces, config_routes with context %}
 
 change_internal_dns:
+  cmd.run:
+    - name: "sleep 10; ping {{ pillar.tinydns_server.cache_dns }}"
   network.managed:
     - name: eth0
     - dns:
@@ -179,5 +181,6 @@ change_internal_dns:
 {%- endfor %}
     - require:
       - cmd: dnscache_service
+      - cmd: change_internal_dns
 {% endif %}
 
