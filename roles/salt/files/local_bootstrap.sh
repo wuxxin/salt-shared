@@ -97,8 +97,10 @@ rm {{ targetdir }}/minion {{ targetdir }}/grains
 # restart minion, accept minion key on master
 service salt-master stop; sleep 1; killall salt-master; service salt-master start; sleep 3
 service salt-minion stop; sleep 1; killall salt-minion; service salt-minion start; sleep 5
-
 salt-key -y -a {{ hostname }}.{{ domainname }}
+
+# sync grains, modules, states, etc.
+salt-call saltutil.sync_all
 
 # finally call highstate
 #salt-call state.highstate
