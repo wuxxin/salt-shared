@@ -162,10 +162,11 @@ axfrdns_export:
 {% endfor %}
 
 {% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
-
+{% todo: make this also working if type of eth0 can be != eth (get old parameter, because type is mandatory %}
 change_internal_dns:
   network.managed:
     - name: eth0
+    - type: eth
     - dns:
       - {{ pillar.tinydns_server.cache_dns }}
     - require:
