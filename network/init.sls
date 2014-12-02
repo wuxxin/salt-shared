@@ -23,7 +23,7 @@ network-interface-{{ item }}:
 
 {% for interface, data in routes.iteritems() %}
 network-route-{{ interface }}:
-{% if salt.grains('os:family') == 'debian' %}
+{% if grains['os_family'] == 'Debian' %}
   file.replace:
     - name: /etc/network/interfaces
     - flags:
