@@ -74,16 +74,24 @@ config_routes_override:
 
 {% macro change_dns(dns) %}
 
-/etc/resolv.conf:
-  file.replace:
-    - pattern: "^[ \t]*nameserver (.+)"
-    - repl: "nameserver {{ dns }}"
-
 change_dns_in_interfaces:
   file.replace:
     - name: /etc/network/interfaces
-    - pattern: "^([ \t]+dns-nameservers)(.+)"
-    - repl: "\\1 {{ dns }}"
+    - pattern: '^([ \t]+dns-nameservers)(.+)'
+    - repl: '\1 {{ dns }}'
+
+/var/run/resolvconf/resolv.conf:
+  file.replace:
+    - pattern: "^[ \t]*nameserver (.+)"
+    - repl: "nameserver {{ dns }}"
+    - require:
+      - file: change_dns_in_interfaces
+
+update_library:
+  cmd.run:
+    - name: echo "nameserver {{ dns }}" | resolvconf -a eth0 resolvconf --enable-updates; resolvconf -u
+    - require:
+      - file: /var/run/resolvconf/resolv.conf
 
 {% endmacro %}
 

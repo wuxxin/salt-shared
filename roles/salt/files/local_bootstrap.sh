@@ -76,10 +76,13 @@ for a in `find {{ targetdir }} -name .git-crypt -type d`; do
   git-crypt unlock
 done
 
-# call state.sls haveged and network, copy grains, set salt minion name
-salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
+# set salt minion name
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
+
+# call state.sls haveged and network
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
+sleep 2
 
 if test "{{ install.type }}" == "git"; then
 # install salt-minion and salt-master, but only do configuration (no install)
