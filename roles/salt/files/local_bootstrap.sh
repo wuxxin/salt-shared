@@ -80,8 +80,8 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# local call state.sls haveged and network
-salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
+# local call state.sls network
+salt-call --local --config-dir={{ targetdir }} state.sls network
 sleep 2
 
 if test "{{ install.type }}" == "git"; then
@@ -89,8 +89,8 @@ if test "{{ install.type }}" == "git"; then
 {{ targetdir }}/bootstrap-salt.sh -X -M git {{ install.rev }}
 fi
 
-# local call state.sls roles.salt.master (reconfigures salt.master)
-salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
+# local call state.sls haveged,roles.salt.master (starts entropy daemon, reconfigures salt.master)
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,roles.salt.master
 
 # copy grains to final destination
 cp {{ targetdir }}/grains /etc/salt/grains
@@ -102,7 +102,7 @@ service salt-master stop; sleep 1; killall salt-master; service salt-master star
 service salt-minion stop; sleep 1; killall salt-minion
 if test -f /var/log/salt/minion.new; then rm /var/log/salt/minion.new; fi
 mv /var/log/salt/minion /var/log/salt/minion.new
-mv /srv/_run/log/minion /var/log/salt/minion
+mv /srv/_run/var/log/salt /var/log/salt/minion
 cat /var/log/salt/minion.new >> /var/log/salt/minion
 rm /var/log/salt/minion.new
 service salt-minion start; sleep 5
