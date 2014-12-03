@@ -7,6 +7,6 @@ include:
 
 bitcoin-ppa:
   pkgrepo.managed:
-    - ppa:bitcoin/bitcoin
+    - ppa: bitcoin/bitcoin
 
 {% endif %} 

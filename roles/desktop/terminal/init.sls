@@ -1,12 +1,11 @@
-terminal-apps:
+terminator:
+  pkg:
+    - installed
+
+other-terminal:
   pkg.installed:
     - pkgs:
       - lxterminal
-      - terminator
-
-mc:
-  pkg.installed:
-    - pkgs:
       - mc
       - arj
       - bzip2
