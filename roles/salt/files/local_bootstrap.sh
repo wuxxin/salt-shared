@@ -80,7 +80,8 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# local call state.sls network
+# local call state.sls network (twice, no idea, but dns gets lost)
+salt-call --local --config-dir={{ targetdir }} state.sls network
 salt-call --local --config-dir={{ targetdir }} state.sls network
 sleep 2
 
