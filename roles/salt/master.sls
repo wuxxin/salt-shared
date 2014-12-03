@@ -89,7 +89,7 @@ set_salt_master_grain:
       key: salt_master
       val: True
     - require:
-      - pkg: salt-master
+      - service: salt-master
 
 {% endif %}
 

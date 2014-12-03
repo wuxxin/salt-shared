@@ -21,7 +21,7 @@ for a in saltmaster@{{ hostname }}_config.tar.xz local_bootstrap.dat; do
     scp -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts ./$a root@$ssh_target:/root
 done
 
-ssh -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts -e none root@$ssh_target 2>&1 | tee ./install_sw.log << EOF
+ssh -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts -e none root@$ssh_target << EOF
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y update
 apt-get -y install gnupg
@@ -31,7 +31,6 @@ mv local_bootstrap.dat local_bootstrap.sh
 chmod +x local_bootstrap.sh
 ./local_bootstrap.sh
 EOF
-
 
 scp -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts root@$ssh_target:/var/log/salt/minion ./install_sw-minion.log
 

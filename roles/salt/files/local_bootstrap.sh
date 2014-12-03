@@ -103,7 +103,7 @@ service salt-master stop; sleep 1; killall salt-master; service salt-master star
 service salt-minion stop; sleep 1; killall salt-minion
 if test -f /var/log/salt/minion.new; then rm /var/log/salt/minion.new; fi
 mv /var/log/salt/minion /var/log/salt/minion.new
-mv /srv/_run/var/log/salt /var/log/salt/minion
+mv /srv/_run/var/log/salt/minion /var/log/salt/minion
 cat /var/log/salt/minion.new >> /var/log/salt/minion
 rm /var/log/salt/minion.new
 service salt-minion start; sleep 5
