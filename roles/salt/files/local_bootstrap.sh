@@ -80,27 +80,39 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# call state.sls haveged and network
+# local call state.sls haveged and network
 salt-call --local --config-dir={{ targetdir }} state.sls haveged,network
 sleep 2
 
 if test "{{ install.type }}" == "git"; then
-# install salt-minion and salt-master, but only do configuration (no install)
+# install salt-master from git
 {{ targetdir }}/bootstrap-salt.sh -X -M git {{ install.rev }}
 fi
 
-# call state.sls roles.salt.master, copy grains afterwards to final destination
+# local call state.sls roles.salt.master (reconfigures salt.master)
 salt-call --local --config-dir={{ targetdir }} state.sls roles.salt.master
+
+# copy grains to final destination
 cp {{ targetdir }}/grains /etc/salt/grains
 
-# cleanup masterless leftovers, copy grains
-rm -r {{ targetdir }}/_run
-rm {{ targetdir }}/minion {{ targetdir }}/grains
-
-# restart minion, accept minion key on master
+# restart master
 service salt-master stop; sleep 1; killall salt-master; service salt-master start; sleep 3
-service salt-minion stop; sleep 1; killall salt-minion; service salt-minion start; sleep 5
+
+# stop minion, prepend logfiles from localrun over current minion logs, start minion
+service salt-minion stop; sleep 1; killall salt-minion
+if test -f /var/log/salt/minion.new; then rm /var/log/salt/minion.new; fi
+mv /var/log/salt/minion /var/log/salt/minion.new
+mv /srv/_run/log/minion /var/log/salt/minion
+cat /var/log/salt/minion.new >> /var/log/salt/minion
+rm /var/log/salt/minion.new
+service salt-minion start; sleep 5
+
+# accept minion key on master
 salt-key -y -a {{ hostname }}.{{ domainname }}
+
+# cleanup masterless leftovers, copy grains
+#rm -r {{ targetdir }}/_run
+rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # sync grains, modules, states, etc.
 salt-call saltutil.sync_all
