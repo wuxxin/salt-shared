@@ -32,7 +32,8 @@ chmod +x local_bootstrap.sh
 ./local_bootstrap.sh
 EOF
 
-scp -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts root@$ssh_target:/var/log/salt/minion ./install_sw-minion.log
+if test ! -d ./log ; then mkdir ./log; fi
+scp -o "UserKnownHostsFile=./known_hosts.newsystem" $ssh_opts root@$ssh_target:/var/log/salt/minion ./log/install_sw-minion.log
 
 
 

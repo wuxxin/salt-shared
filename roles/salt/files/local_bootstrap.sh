@@ -21,8 +21,8 @@ if test "{{ install.type }}" == "git"; then
     curl -L {{ install.bootstrap }} -o {{ targetdir }}/bootstrap-salt.sh
     chmod +x {{ targetdir }}/bootstrap-salt.sh
   fi
-  {{ targetdir }}/bootstrap-salt.sh -X git {{ install.rev }}
-  # install salt-minion but do not start daemon
+  {{ targetdir }}/bootstrap-salt.sh -M -X git {{ install.rev }}
+  # install salt-minion and salt-master, but do not start daemon
 else
   # install custom ppa (and requisites for it), install salt masterless
   export DEBIAN_FRONTEND=noninteractive
@@ -80,18 +80,10 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# local call state.sls network (twice, no idea, but dns gets lost)
-salt-call --local --config-dir={{ targetdir }} state.sls network
-salt-call --local --config-dir={{ targetdir }} state.sls network
-sleep 2
-
-if test "{{ install.type }}" == "git"; then
-# install salt-master from git
-{{ targetdir }}/bootstrap-salt.sh -X -M git {{ install.rev }}
-fi
-
-# local call state.sls haveged,roles.salt.master (starts entropy daemon, reconfigures salt.master)
-salt-call --local --config-dir={{ targetdir }} state.sls haveged,roles.salt.master
+# sync everything, local call state.sls haveged,network, roles.salt.master 
+# (entropy daemon, network, re/install salt.master)
+salt-call --local --config-dir={{ targetdir }} saltutil.sync_all
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master
 
 # copy grains to final destination
 cp {{ targetdir }}/grains /etc/salt/grains
