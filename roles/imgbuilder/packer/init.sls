@@ -65,7 +65,7 @@ source:
   repo: 'https://github.com/shaunduncan/packer-provisioner-host-command.git'
 build:
   rev: 'latest'
-  make: 'cd $GOPATH/src/github.com/shaunduncan/packer-provisioner-host-command && make'
+  make: 'cd $GOPATH/src/github.com/shaunduncan/packer-provisioner-host-command && go get -d -v -p 2 ./... && make build'
   check: 'packer-provisioner-host-command'
   bin_files: ['packer-provisioner-host-command']
 {% endload %}
