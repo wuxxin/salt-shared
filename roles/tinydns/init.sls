@@ -13,7 +13,20 @@ djbdns:
     - system: True
     - require_in:
       - file: /etc/sv
+    - require:
+      - pkg: djbdns
 {% endfor %}
+
+/etc/sv:
+  file.recurse:
+    - source: salt://roles/tinydns/sv
+    - template: jinja
+    - defaults: 
+        dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
+{% if pillar.tinydns_server.cache_dns %}
+    - context: 
+        dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
+{% endif %}
 
 {% for u in ("dnscache", "tinydns", "axfrdns") %}
 /var/log/{{ u }}:
@@ -38,19 +51,9 @@ djbdns:
      - unless: test -x /etc/sv/{{ u }}{{ v }}/run
      - require:
        - file: /etc/sv
-{% endfor %}  
-{% endfor %}  
+{% endfor %}
+{% endfor %}
 
-/etc/sv:
-  file.recurse:
-    - source: salt://roles/tinydns/sv
-    - template: jinja
-    - defaults: 
-        dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
-{% if pillar.tinydns_server.cache_dns %}
-    - context: 
-        dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
-{% endif %}
 
 /etc/sv/tinydns/root/data:
   file.managed:
@@ -83,6 +86,8 @@ create_seed:
     - template: jinja
     - context:
       permissions: {{ pillar.tinydns_server.axfr_permissions|d(None) }}
+    - require:
+      - file: /etc/sv
 
 compiled_tcp:
   cmd.run:
@@ -101,6 +106,9 @@ axfrdns_export:
     - name: {{ pillar.tinydns_server.axfr_export_cmd }}
     - watch_in:
       - cmd: axfrdns_service
+    - require:
+      - file: /etc/sv/axfrdns/tcp
+      - cmd: compiled_data
 {% endif %}
 
 {% set dnscache_serve_to= salt['network.ip_addrs']() %}
