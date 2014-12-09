@@ -3,7 +3,6 @@ include:
   - repo.ubuntu
 {% endif %}
 
-# if grains['os'] == '(RedHat|CentOS)'
 
 {% if grains['os'] == 'Debian' %}
 salt_ppa:
