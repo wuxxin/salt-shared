@@ -163,7 +163,7 @@ axfrdns_export:
 
 {{ u }}_service:
    cmd.run:
-    - name: svc -t /etc/service/{{ u }}
+    - name: svc -t -u /etc/service/{{ u }}
     - onlyif: test -e /etc/service/{{ u }}
     - require:
       - cmd: {{ u }}_install
