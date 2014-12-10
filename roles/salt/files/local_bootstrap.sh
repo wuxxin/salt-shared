@@ -81,9 +81,9 @@ mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
 # sync everything, local call state.sls haveged,network, roles.salt.master 
-# (entropy daemon, network, re/install salt.master)
+# (entropy daemon, network, re/install salt.master, add dnscache)
 salt-call --local --config-dir={{ targetdir }} saltutil.sync_all
-salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master
+salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master,roles.tinydns
 
 # copy grains to final destination
 cp {{ targetdir }}/grains /etc/salt/grains
