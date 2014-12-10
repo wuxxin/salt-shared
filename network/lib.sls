@@ -74,21 +74,6 @@ config_routes_override:
 
 {% macro change_dns(interface, oldconfig, newdns) %}
 
-{#
-change_dns_in_interfaces:
-  file.replace:
-    - name: /etc/network/interfaces
-    - pattern: '^([ \t]+dns-nameservers)(.+)'
-    - repl: '\1 {{ newdns }}'
-
-/var/run/resolvconf/resolv.conf:
-  file.replace:
-    - pattern: "^[ \t]*nameserver (.+)"
-    - repl: "nameserver {{ newdns }}"
-    - require:
-      - file: change_dns_in_interfaces
-#}
-
 change_network_managed_dns:
   network.managed:
     - name: {{ interface }}
