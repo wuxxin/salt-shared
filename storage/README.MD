@@ -5,7 +5,7 @@ Features:
  * (gpt/mbr) partition creation
  * mdadm raid creation
  * luks partition creation
- * lvm logical volumes creation and expansion
+ * lvm logical volumes creation and expansion (with expansion of fs if in ext2,ext3,ext4)
  * format partitions
  * mount partitions
  * mount swap
@@ -70,6 +70,8 @@ if set to true and volume exists,
 it will try to expand the existing lv to the desired size, 
 ignoring any other parameters beside size and vgname.
 if lv does not exist it will create it with all parameters attached.
+if the lv exists and has a filesystem of ext2,ext3 or ext4 already on it,
+the filesystem will be resized.
 
 Example:
 

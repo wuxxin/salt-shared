@@ -196,7 +196,16 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
     - name: lvresize -L {{ data['size'] }} {{ lvtarget }}
     - require:
       - pkg: "lvm-lv-{{ item }}"
+
+{%- if salt.cmd.run_stdout('blkid -p -s TYPE -o value '+ lvtarget) in (['ext2', 'ext3', 'ext4']) %}
+"lvm-lv-{{ item }}-resize":
+  cmd.run:
+    - name: resize2fs {{ lvtarget }}
+    - require:
+      - cmd: "lvm-lv-{{ item }}"
 {%- endif %}
+{%- endif %}
+
 {%- else %}
   lvm.lv_present:
     - name: {{ item }}
