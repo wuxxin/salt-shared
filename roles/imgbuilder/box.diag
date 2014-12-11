@@ -1,0 +1,35 @@
+{
+
+imgbuilder -> packer
+imgbuilder -> vagrant
+imgbuilder -> docker
+
+vagrant -> libvirt
+libvirt -> file_cqow2_provision
+libvirt -> file_cqow2_snapshot
+file_cqow2_provision -> file
+file_cqow2_snapshot -> file
+file -> lvm_volume
+
+docker -> lvm_thin_provision
+docker -> lvm_thin_snapshot
+docker -> cgroups
+lvm_thin_provision -> lvm_volume
+lvm_thin_snapshot -> lvm_volume
+
+libvirt -> qemu_kvm
+qemu_kvm -> kvm 
+
+packer -> qemu_kvm
+packer -> file_cqow2_provision
+
+group {
+    orientation = portrait
+
+    lvm_volume -> lvm
+    lvm -> luksCrypt -> raid1
+    raid1 -> sda
+    raid1 -> sdb
+}
+
+}
