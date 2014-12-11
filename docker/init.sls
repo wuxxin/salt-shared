@@ -1,5 +1,5 @@
 include:
-  .ppa
+  - .ppa
 
 docker-dependencies:
    pkg.installed:
