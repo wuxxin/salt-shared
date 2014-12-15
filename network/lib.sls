@@ -93,3 +93,94 @@ update_library:
 
 {% endmacro %}
 
+
+
+{%- macro net_addr(interface) %}
+{{- salt.extip.start_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_short(interface) %}
+{{- salt.extip.short_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_addr_cidr(interface) %}
+{{- salt.extip.netcidr_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_broadcast(interface) %}
+{{- salt.extip.end_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_reverse(interface) %}
+{{- salt.extip.reverse_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_reverse_short(interface) %}
+{{- salt.extip.short_reverse_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_calc(interface, offset) %}
+{{- salt.extip.calc_ip_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    , offset) }}
+{%- endmacro %}
+
+
+{%- macro net_list(group, format=None, groups=None, interfaces=None ) %}
+{%- if groups == None %}
+{%- set groups = salt['pillar.get']('network:groups', {}) %}
+{%- endif %}
+{%- if interfaces == None %}
+{%- set interfaces = salt['pillar.get']('network:interfaces', {}) %}
+{%- endif %}
+{%- set out=[] %}
+{%- for n in groups[group] %}
+{%- if   format == 'interface_ip' %}{%- do      out.append(interfaces[n].ipaddr) %}
+{%- elif format == 'net_addr' %}{%- do          out.append(net_addr(interfaces[n])) %}
+{%- elif format == 'net_short' %}{%- do         out.append(net_short(interfaces[n])) %}
+{%- elif format == 'net_addr_cidr' %}{%- do     out.append(net_addr_cidr(interfaces[n])) %}
+{%- elif format == 'net_broadcast' %}{%- do     out.append(net_broadcast(interfaces[n])) %}
+{%- elif format == 'net_reverse' %}{%- do       out.append(net_reverse(interfaces[n])) %}
+{%- elif format == 'net_reverse_short' %}{%- do out.append(net_reverse_short(interfaces[n])) %}
+{%- endif %}
+{%- endfor %}
+{{- out }}
+{%- endmacro %}
+
+
+{#
+def combine_net_mask(net, mask):
+def cidr_from_net(combined):
+def start_from_net(combined):
+def end_from_net(combined):
+def netcidr_from_net(combined):
+def short_from_net(combined):
+def reverse_from_net(combined):
+def short_reverse_from_net(combined):
+def size_from_net(combined):
+def calc_ip_from_net(combined, offset):
+#}
