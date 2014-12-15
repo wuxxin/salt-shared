@@ -1,3 +1,11 @@
+
+# for easy usage import sys_network,interfaces,routes
+# in addition to the macros you want
+{% set sys_network = salt['pillar.get']('network:system', {}) %}
+{% set interfaces = salt['pillar.get']('network:interfaces', {}) %}
+{% set routes = salt['pillar.get']('network:routes', {}) %} 
+
+# configuring macros
 {% macro config_system(sys_network) %}
 
 {% if sys_network %}
@@ -95,6 +103,7 @@ update_library:
 
 
 
+# ip and network addresses filtering 
 {%- macro net_addr(interface) %}
 {{- salt.extip.start_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
 {%- endmacro %}
@@ -150,37 +159,13 @@ update_library:
 {%- endmacro %}
 
 
-{%- macro net_list(group, format=None, groups=None, interfaces=None ) %}
+{%- macro net_list(group, format=None, groups=None, interfaces=None) %}
 {%- if groups == None %}
 {%- set groups = salt['pillar.get']('network:groups', {}) %}
 {%- endif %}
 {%- if interfaces == None %}
 {%- set interfaces = salt['pillar.get']('network:interfaces', {}) %}
 {%- endif %}
-{%- set out=[] %}
-{%- for n in groups[group] %}
-{%- if   format == 'interface_ip' %}{%- do      out.append(interfaces[n].ipaddr) %}
-{%- elif format == 'net_addr' %}{%- do          out.append(net_addr(interfaces[n])) %}
-{%- elif format == 'net_short' %}{%- do         out.append(net_short(interfaces[n])) %}
-{%- elif format == 'net_addr_cidr' %}{%- do     out.append(net_addr_cidr(interfaces[n])) %}
-{%- elif format == 'net_broadcast' %}{%- do     out.append(net_broadcast(interfaces[n])) %}
-{%- elif format == 'net_reverse' %}{%- do       out.append(net_reverse(interfaces[n])) %}
-{%- elif format == 'net_reverse_short' %}{%- do out.append(net_reverse_short(interfaces[n])) %}
-{%- endif %}
-{%- endfor %}
-{{- out }}
+{{- salt.extip.net_list(format, groups[group], interfaces, kwargs) }}
 {%- endmacro %}
 
-
-{#
-def combine_net_mask(net, mask):
-def cidr_from_net(combined):
-def start_from_net(combined):
-def end_from_net(combined):
-def netcidr_from_net(combined):
-def short_from_net(combined):
-def reverse_from_net(combined):
-def short_reverse_from_net(combined):
-def size_from_net(combined):
-def calc_ip_from_net(combined, offset):
-#}

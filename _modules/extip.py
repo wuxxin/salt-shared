@@ -9,6 +9,10 @@ import salt.utils.validate.net as nw_validate
 def __virtual__():
     return True
 
+format_choice = ['net_addr', 'net_addr_mask', 'net_short', 'net_addr_cidr', 
+    'net_broadcast', 'net_reverse', 'net_reverse_short', 
+    'net_calc', 'interface_ip']
+
 
 def _net_mask(combined):
     if "/" in combined:
@@ -44,6 +48,11 @@ def combine_net_mask(net, mask):
     return addr+ "/"+ netmask
 
 
+def net_interface_addr(combined):
+    addr, netmask = _net_mask(combined)
+    return addr
+    
+
 def cidr_from_net(combined):
     addr, netmask = _net_mask(combined)
     return str(nw.get_net_size(netmask))
@@ -60,6 +69,11 @@ def end_from_net(combined):
     return _32bit_to_ip(ipaddr_end)
 
 
+def start_and_mask_from_net(combined, prefix='', middle=': ', postfix=''):
+    addr, netmask = _net_mask(combined)
+    return prefix+ nw.get_net_start(addr, netmask)+ middle+ netmask
+
+
 def netcidr_from_net(combined):
     addr, netmask = _net_mask(combined)
     return nw.calculate_subnet(addr, netmask)
@@ -72,20 +86,24 @@ def short_from_net(combined):
     return '.'.join([addr_split[a] for a in (0,1,2,3) if int(netmask_split[a]) != 0])
 
 
-def reverse_from_net(combined):
+def reverse_from_net(combined, address_postfix= '.in-addr.arpa.', prefix_dot= False):
     addr, netmask = _net_mask(combined)
     addr_split_reverse = addr.split('.', 3)
     addr_split_reverse.reverse()
-    return '.'.join(addr_split_reverse)+ '.in-addr.arpa.'
+    r = '.' if prefix_dot else ''
+    r = r+ '.'.join(addr_split_reverse)+ address_postfix
+    return r
 
 
-def short_reverse_from_net(combined):
+def short_reverse_from_net(combined, address_postfix= '.in-addr.arpa.', prefix_dot= False):
     addr, netmask = _net_mask(combined)
     addr_split_reverse = addr.split('.', 3)
     addr_split_reverse.reverse()
     netmask_split_reverse = netmask.split('.', 3)
     netmask_split_reverse.reverse()
-    return '.'.join([addr_split_reverse[a] for a in (0,1,2,3) if int(netmask_split_reverse[a]) != 0])+ '.in-addr.arpa.'
+    r = '.' if prefix_dot else ''
+    r = r+ '.'.join([str(addr_split_reverse[a]) for a in (0,1,2,3) if int(netmask_split_reverse[a]) != 0])+ address_postfix
+    return r
 
 
 def size_from_net(combined):
@@ -102,9 +120,51 @@ def calc_ip_from_net(combined, offset):
     return _32bit_to_ip(_ip_to_32bit(start_addr)+ offset)
 
 
+def net_list(format, interface_list, interfaces, kwargs={}):
+    if format not in format_choice:
+        raise TypeError('not a valid format choice (not one of {0}): {1}'.format(format_choice, format))
+    
+    result = []
+
+    for i in interface_list:
+        if   format == 'net_addr':
+            result.append(start_from_net(combine_net_mask(
+                interfaces[i]['ipaddr'], interfaces[i]['netmask'])))
+        elif format == 'net_addr_mask':
+            result.append(start_and_mask_from_net(combine_net_mask(
+                interfaces[i]['ipaddr'], interfaces[i]['netmask']), **kwargs))
+        elif format == 'net_short':
+            result.append(short_from_net(combine_net_mask(start_from_net(
+                combine_net_mask(interfaces[i]['ipaddr'], interfaces[i]['netmask'])),
+                interfaces[i]['netmask'])))
+        elif format == 'net_addr_cidr':
+            result.append(netcidr_from_net(combine_net_mask(
+                interfaces[i]['ipaddr'], interfaces[i]['netmask'])))
+        elif format == 'net_broadcast':
+            result.append(end_from_net(combine_net_mask(
+                interfaces[i]['ipaddr'], interfaces[i]['netmask'])))
+        elif format == 'net_reverse':
+            result.append(reverse_from_net(combine_net_mask(start_from_net(
+                combine_net_mask(interfaces[i]['ipaddr'], interfaces[i]['netmask'])),
+                interfaces[i]['netmask']), **kwargs))
+        elif format == 'net_reverse_short':
+            result.append(short_reverse_from_net(combine_net_mask(start_from_net(
+                combine_net_mask(interfaces[i]['ipaddr'], interfaces[i]['netmask'])),
+                interfaces[i]['netmask']), **kwargs))
+        elif format == 'net_calc':
+            result.append(calc_ip_from_net(combine_net_mask(start_from_net(
+                combine_net_mask(interfaces[i]['ipaddr'], interfaces[i]['netmask'])),
+                interfaces[i]['netmask']), **kwargs))
+        elif format == 'interface_ip':
+            result.append(net_interface_addr(combine_net_mask(
+                interfaces[i]['ipaddr'], interfaces[i]['netmask'])))
+
+    return result
+
+
 class TestSequenceFunctions(unittest.TestCase):
 
-  def test_all(self):
+  def test_single_functions(self):
 
     a = "10.9.0.0"
     b = "24"
@@ -174,6 +234,39 @@ class TestSequenceFunctions(unittest.TestCase):
     f = calc_ip_from_net(d, -1)
     self.assertEqual(f, '10.9.0.254')
 
+
+  def test_list_function(self):
+
+    interfaces= {'br0': {'ipaddr': '10.9.0.1', 'netmask': '255.255.255.0'},
+        'virbr1': {'ipaddr': '10.10.0.1', 'netmask': '255.255.255.0'},
+        'resbr0': {'ipaddr': '10.11.0.1', 'netmask': '255.255.255.0'},
+        'hubr0':  {'ipaddr': '192.168.121.1', 'netmask': '255.255.255.0'},
+        }
+
+    interface_list= ['br0', 'virbr1', 'resbr0', 'hubr0']
+
+    expected_result_list=[
+['10.9.0.0', '10.10.0.0', '10.11.0.0', '192.168.121.0'],
+['  10.9.0.0: 255.255.255.0', '  10.10.0.0: 255.255.255.0', '  10.11.0.0: 255.255.255.0', '  192.168.121.0: 255.255.255.0'],
+['10.9.0', '10.10.0', '10.11.0', '192.168.121'],
+['10.9.0.0/24', '10.10.0.0/24', '10.11.0.0/24', '192.168.121.0/24'],
+['10.9.0.255', '10.10.0.255', '10.11.0.255', '192.168.121.255'],
+['.0.0.9.10.in-addr.arpa', '.0.0.10.10.in-addr.arpa', '.0.0.11.10.in-addr.arpa', '.0.121.168.192.in-addr.arpa'],
+['.0.9.10.in-addr.arpa', '.0.10.10.in-addr.arpa', '.0.11.10.in-addr.arpa', '.121.168.192.in-addr.arpa'],
+['10.9.0.5', '10.10.0.5', '10.11.0.5', '192.168.121.5'],
+['10.9.0.1', '10.10.0.1', '10.11.0.1', '192.168.121.1'],
+]
+    result_list=[]
+    result_list.append(net_list('net_addr', interface_list, interfaces))
+    result_list.append(net_list('net_addr_mask', interface_list, interfaces, kwargs={'prefix': '  '}))
+    result_list.append(net_list('net_short', interface_list, interfaces))
+    result_list.append(net_list('net_addr_cidr', interface_list, interfaces))
+    result_list.append(net_list('net_broadcast', interface_list, interfaces))
+    result_list.append(net_list('net_reverse', interface_list, interfaces, kwargs={'address_postfix': '.in-addr.arpa', 'prefix_dot': True}))
+    result_list.append(net_list('net_reverse_short', interface_list, interfaces, kwargs={'address_postfix': '.in-addr.arpa', 'prefix_dot': True}))
+    result_list.append(net_list('net_calc', interface_list, interfaces, kwargs={'offset': 5}))
+    result_list.append(net_list('interface_ip', interface_list, interfaces))
+    self.assertEqual(expected_result_list, result_list)
 
 if __name__ == '__main__':
     unittest.main()
