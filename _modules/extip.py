@@ -86,23 +86,21 @@ def short_from_net(combined):
     return '.'.join([addr_split[a] for a in (0,1,2,3) if int(netmask_split[a]) != 0])
 
 
-def reverse_from_net(combined, address_postfix= '.in-addr.arpa.', prefix_dot= False):
+def reverse_from_net(combined, prefix= '', postfix= '.in-addr.arpa'):
     addr, netmask = _net_mask(combined)
     addr_split_reverse = addr.split('.', 3)
     addr_split_reverse.reverse()
-    r = '.' if prefix_dot else ''
-    r = r+ '.'.join(addr_split_reverse)+ address_postfix
+    r = prefix+ '.'.join(addr_split_reverse)+ postfix
     return r
 
 
-def short_reverse_from_net(combined, address_postfix= '.in-addr.arpa.', prefix_dot= False):
+def short_reverse_from_net(combined, prefix= '', postfix= '.in-addr.arpa'):
     addr, netmask = _net_mask(combined)
     addr_split_reverse = addr.split('.', 3)
     addr_split_reverse.reverse()
     netmask_split_reverse = netmask.split('.', 3)
     netmask_split_reverse.reverse()
-    r = '.' if prefix_dot else ''
-    r = r+ '.'.join([str(addr_split_reverse[a]) for a in (0,1,2,3) if int(netmask_split_reverse[a]) != 0])+ address_postfix
+    r = prefix+ '.'.join([str(addr_split_reverse[a]) for a in (0,1,2,3) if int(netmask_split_reverse[a]) != 0])+ postfix
     return r
 
 
@@ -215,13 +213,13 @@ class TestSequenceFunctions(unittest.TestCase):
 
     f = reverse_from_net(d)
     g = reverse_from_net(d_plus1)
-    self.assertEqual(f, '0.0.9.10.in-addr.arpa.')
-    self.assertEqual(g, '30.0.9.10.in-addr.arpa.')
+    self.assertEqual(f, '0.0.9.10.in-addr.arpa')
+    self.assertEqual(g, '30.0.9.10.in-addr.arpa')
 
     f = short_reverse_from_net(d)
     g = short_reverse_from_net(d_plus1)
-    self.assertEqual(f, '0.9.10.in-addr.arpa.')
-    self.assertEqual(f, '0.9.10.in-addr.arpa.')
+    self.assertEqual(f, '0.9.10.in-addr.arpa')
+    self.assertEqual(f, '0.9.10.in-addr.arpa')
 
     f = size_from_net(d)
     g = size_from_net(d_plus1)
@@ -262,8 +260,8 @@ class TestSequenceFunctions(unittest.TestCase):
     result_list.append(net_list('net_short', interface_list, interfaces))
     result_list.append(net_list('net_addr_cidr', interface_list, interfaces))
     result_list.append(net_list('net_broadcast', interface_list, interfaces))
-    result_list.append(net_list('net_reverse', interface_list, interfaces, kwargs={'address_postfix': '.in-addr.arpa', 'prefix_dot': True}))
-    result_list.append(net_list('net_reverse_short', interface_list, interfaces, kwargs={'address_postfix': '.in-addr.arpa', 'prefix_dot': True}))
+    result_list.append(net_list('net_reverse', interface_list, interfaces, kwargs={'prefix': '.', 'postfix': '.in-addr.arpa' }))
+    result_list.append(net_list('net_reverse_short', interface_list, interfaces, kwargs={'prefix': '.', 'postfix': '.in-addr.arpa' }))
     result_list.append(net_list('net_calc', interface_list, interfaces, kwargs={'offset': 5}))
     result_list.append(net_list('interface_ip', interface_list, interfaces))
     self.assertEqual(expected_result_list, result_list)
