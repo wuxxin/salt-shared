@@ -21,6 +21,7 @@ network-system:
 {% macro config_interfaces(interfaces) %}
 
 {% for item, data in interfaces.iteritems() %}
+{% if data['type']|d('virtual') != 'virtual' %}
 network-interface-{{ item }}:
   network.managed:
     - name: {{ item }}
@@ -29,6 +30,7 @@ network-interface-{{ item }}:
 {% endfor %}
     - require_in:
       - file: config_interfaces_override
+{% endif %}
 {% endfor %}
 
 config_interfaces_override:
