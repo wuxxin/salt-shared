@@ -79,7 +79,7 @@ case "$1" in
 
     # Create partitions
     for dshort in `echo ${DISK_NAMES} | sed 's/.\{1\}/& /g'`; do
-      disk='${DISK_PART}$dshort'
+      disk=${DISK_PART}${dshort}
       parted -s $disk -- mklabel gpt
 
       parted -s $disk -- mkpart bios_grub 1Mib 2Mib
