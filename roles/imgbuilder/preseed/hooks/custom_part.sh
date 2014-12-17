@@ -1,25 +1,42 @@
 #!/bin/sh
-# Manually create partition configuration
+# Create partition configuration
 #
-# Partition map (type gpt) - on first two drives
-#  1 - bios_grub (1Mb)
-#  2 - /boot     (256meg)
-#  3 - reserved  (1GiG, can be adjusted by $RESERVED_END in Mib)
-#  4 - LVM-${VG_NAME}  (Remainder of disk)
-#       ${VG_NAME}/host_root ($HOST_ROOT_SIZE)
-#       ${VG_NAME}/host_swap ($HOST_SWAP_SIZE)
-# if two drives, 2nd and 4rd partition will be mdadm RAID1 (2nd(boot) with 0.9 Metadata))
-
+# Partition map (type gpt)
+#  1 - bios_grub  (1Mb)
+#  2 - /boot      (256Mb)
+#  3 - boot2      (256Mb)
+#  4 - reserved   (1024Mb)
+#  5 - ${VG_NAME} (LVM, remaining space of disk)
+#      ${VG_NAME}/host_root ($HOST_ROOT_SIZE)
+#      ${VG_NAME}/host_swap ($HOST_SWAP_SIZE)
+#
+# all size parameters are in megabyte, minimum disk size is 2+ 256*2+ 1024+ 8192+ 2048 = 11,5 GB ~ 12Gb
+#
+# if two or more drives, 2nd, 3rd partition will be mdadm RAID1
+# if two drives: 5th partition will be RAID1, if more than two drives 5th partition will be RAID10
+# if you have more drives than you want to use, you can limit the drives to use with MAX_DISKS=2 or 1 as you like
+# if you want to encrypt the disks set DISKPASSWORD. Only Part 5 (RAID, LVM) will be crypted
+# VG_NAME defaults to patman-auto-lvm/new_vg_name or netcfg/get_hostname if first is empty
 
 # defaults
 VG_NAME=`debconf-get partman-auto-lvm/new_vg_name`
 if test "$VG_NAME" = ""; then
     VG_NAME=`debconf-get netcfg/get_hostname`
 fi
-HOST_ROOT_SIZE='8g'
-HOST_SWAP_SIZE='2g'
-RESERVED_END='1280Mib'
+
+BOOT_SIZE='256'
+BOOT2_SIZE='256'
+RESERVED_SIZE='1024'
+HOST_ROOT_SIZE='8192'
+HOST_SWAP_SIZE='2048'
+MAX_DISKS=6
+
 DISKPASSWORD=''
+
+# read and update environment variables from custom_part.env
+if test -f /tmp/custom_part.env; then
+  . /tmp/custom_part.env
+fi
 
 # read and update environment variables from custom.env
 if test -f /tmp/custom.env; then
@@ -51,34 +68,63 @@ case "$1" in
       exit
     fi
 
-    # Create partitions -
-    for disk in /dev/${DISK_PREFIX}d[ab]; do
+    # limit used disks, generate name of device
+    if test $DISK_COUNT -gt $MAX_DISKS; then
+        DISK_COUNT = $MAX_DISKS
+    fi
+    DISK_NAMES='abcdef'
+    DISK_NAMES=${DISK_NAMES:0:$DISK_COUNT}
+    DISK_PART="/dev/${DISK_PREFIX}d"
+
+    # Create partitions
+    for dshort in `echo ${DISK_NAMES} | sed 's/.\{1\}/& /g'`; do
+      disk='${DISK_PART}$dshort'
       parted -s $disk -- mklabel gpt
-      parted -s $disk -- mkpart bios_grub 1024Kib 2048Kib
+
+      parted -s $disk -- mkpart bios_grub 1Mib 2Mib
       parted -s $disk -- set 1 bios_grub on
-      parted -s $disk -- mkpart boot 2048Kib 256Mib
+
+      posend=$((3+ BOOT_SIZE))
+      parted -a optimal -s $disk -- mkpart boot 3Mib ${posend}Mib
       parted -s $disk -- set 2 boot on
       parted -s $disk -- set 2 raid on
-      parted -s $disk -- mkpart reserved 256Mib ${RESERVED_END}
-      parted -s $disk -- mkpart ${SYSTEM_NAME} ${RESERVED_END} 100%
-      parted -s $disk -- set 4 raid on
+
+      posbegin=$posend
+      posend=$((posbegin+ BOOT2_SIZE))
+      parted -a optimal -s $disk -- mkpart boot2 ${posbegin}Mib ${posend}Mib
+      parted -s $disk -- set 3 raid on
+
+      posbegin=$posend
+      posend=$((posbegin+ RESERVED_SIZE))
+      parted -a optimal -s $disk -- mkpart reserved ${posbegin}Mib ${posend}Mib
+
+      posbegin=$posend
+      parted -a optimal -s $disk -- mkpart ${SYSTEM_NAME} ${postbegin}Mib 100%
+      parted -s $disk -- set 5 raid on
     done
 
     if [ $DISK_COUNT -ge 2 ]; then
       # setup mdadm raid1
       apt-install mdadm
 
-      BOOT=/dev/md0
+      BOOT=/dev/md/boot
+      BOOT2=/dev/md/boot2
       RAW_SYSTEM_NAME=${SYSTEM_NAME}
       RAW_SYSTEM_DEV=/dev/md/${RAW_SYSTEM_NAME}
-      ln -s /dev/md1 /dev/md/${RAW_SYSTEM_NAME}
+      ln -s /dev/md0 $BOOT
+      ln -s /dev/md1 $BOOT2
+      ln -s /dev/md2 /dev/md/${RAW_SYSTEM_NAME}
 
-      mdadm -C /dev/md0 -v -f -R -n 2 -l 1 --assume-clean --name=boot /dev/${DISK_PREFIX}da2 /dev/${DISK_PREFIX}db2
-      mdadm -C /dev/md1 -v -f -R -n 2 -l 1 --assume-clean --name=${SYSTEM_NAME} /dev/${DISK_PREFIX}da4 /dev/${DISK_PREFIX}db4
+      if test $DISK_COUNT -ge 3; then datalevel=10; else datalevel=1; fi
+      mdadm -C /dev/md0 -v -f -R -n ${DISK_COUNT} -l 1 --assume-clean --name=boot `ls ${DISK_PART}[${DISK_NAMES}]2 | sort`
+      mdadm -C /dev/md1 -v -f -R -n ${DISK_COUNT} -l 1 --assume-clean --name=boot2 `ls ${DISK_PART}[${DISK_NAMES}]3 | sort`
+      mdadm -C /dev/md2 -v -f -R -n ${DISK_COUNT} -l $datalevel --assume-clean --name=${SYSTEM_NAME} `ls ${DISK_PART}[${DISK_NAMES}]5 | sort`
+
       sleep 5
     elif [ $DISK_COUNT -eq 1 ]; then
       BOOT=/dev/${DISK_PREFIX}da2
-      RAW_SYSTEM_NAME=${DISK_PREFIX}da4
+      BOOT2=/dev/${DISK_PREFIX}da3
+      RAW_SYSTEM_NAME=${DISK_PREFIX}da5
       RAW_SYSTEM_DEV=/dev/${RAW_SYSTEM_NAME}
     fi
 
@@ -135,11 +181,12 @@ case "$1" in
 
     ;;
   destroy)
-    logger -t custom_part.sh Destroying existing volumes
+    logger -t custom_part.sh disabled: Destroying existing volumes
     umount /target/boot
     umount /target
     umount /media
     swapoff /dev/${VG_NAME}/swap
+    exit 1
 
     DISK_PREFIX='s'
     DISK_COUNT=`ls -1 /dev/${DISK_PREFIX}d? | wc -l`
