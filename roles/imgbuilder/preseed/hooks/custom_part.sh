@@ -100,7 +100,7 @@ case "$1" in
       parted -a optimal -s $disk -- mkpart reserved ${posbegin}Mib ${posend}Mib
 
       posbegin=$posend
-      parted -a optimal -s $disk -- mkpart ${SYSTEM_NAME} ${postbegin}Mib 100%
+      parted -a optimal -s $disk -- mkpart ${SYSTEM_NAME} ${posbegin}Mib 100%
       parted -s $disk -- set 5 raid on
     done
 
