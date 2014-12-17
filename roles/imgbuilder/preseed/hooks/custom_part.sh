@@ -70,10 +70,11 @@ case "$1" in
 
     # limit used disks, generate name of device
     if test $DISK_COUNT -gt $MAX_DISKS; then
-        DISK_COUNT = $MAX_DISKS
+        DISK_COUNT=$MAX_DISKS
     fi
     DISK_NAMES='abcdef'
-    DISK_NAMES=${DISK_NAMES:0:$DISK_COUNT}
+    # next line substitutes for bashism ${DISKNAMES:0:$DISK_COUNT}
+    DISK_NAMES=$(expr "x$DISK_NAMES" : "x.\{,0\}\(.\{,$DISK_COUNT\}\)")
     DISK_PART="/dev/${DISK_PREFIX}d"
 
     # Create partitions
