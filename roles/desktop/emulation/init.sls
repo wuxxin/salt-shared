@@ -1,3 +1,6 @@
+include:
+  - .ppa
+
 qemu:
   pkg.installed:
     - pkgs:
@@ -15,4 +18,9 @@ virt-manager:
       - ssh-askpass
       - virt-viewer
       - virt-manager
+{% if grains['os'] == 'Ubuntu' %}
+    - require:
+      - pkgrepo: getdeb_ppa
+{% endif %}
+
 
