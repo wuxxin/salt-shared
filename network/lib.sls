@@ -1,3 +1,11 @@
+
+# for easy usage import sys_network,interfaces,routes
+# in addition to the macros you want
+{% set sys_network = salt['pillar.get']('network:system', {}) %}
+{% set interfaces = salt['pillar.get']('network:interfaces', {}) %}
+{% set routes = salt['pillar.get']('network:routes', {}) %} 
+
+# configuring macros
 {% macro config_system(sys_network) %}
 
 {% if sys_network %}
@@ -13,6 +21,7 @@ network-system:
 {% macro config_interfaces(interfaces) %}
 
 {% for item, data in interfaces.iteritems() %}
+{% if data['type']|d('virtual') != 'virtual' %}
 network-interface-{{ item }}:
   network.managed:
     - name: {{ item }}
@@ -21,6 +30,7 @@ network-interface-{{ item }}:
 {% endfor %}
     - require_in:
       - file: config_interfaces_override
+{% endif %}
 {% endfor %}
 
 config_interfaces_override:
@@ -92,4 +102,72 @@ update_library:
       - network: change_network_managed_dns
 
 {% endmacro %}
+
+
+
+# ip and network addresses filtering 
+{%- macro net_addr(interface) %}
+{{- salt.extip.start_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_short(interface) %}
+{{- salt.extip.short_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_addr_cidr(interface) %}
+{{- salt.extip.netcidr_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_broadcast(interface) %}
+{{- salt.extip.end_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{%- endmacro %}
+
+
+{%- macro net_reverse(interface) %}
+{{- salt.extip.reverse_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_reverse_short(interface) %}
+{{- salt.extip.short_reverse_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    ) }}
+{%- endmacro %}
+
+
+{%- macro net_calc(interface, offset) %}
+{{- salt.extip.calc_ip_from_net(
+    salt.extip.combine_net_mask(
+        salt.extip.start_from_net(
+            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+        ), interface.netmask)
+    , offset) }}
+{%- endmacro %}
+
+
+{%- macro net_list(group, format=None, groups=None, interfaces=None) %}
+{%- if groups == None %}
+{%- set groups = salt['pillar.get']('network:groups', {}) %}
+{%- endif %}
+{%- if interfaces == None %}
+{%- set interfaces = salt['pillar.get']('network:interfaces', {}) %}
+{%- endif %}
+{{- salt.extip.net_list(format, groups[group], interfaces, kwargs) }}
+{%- endmacro %}
 

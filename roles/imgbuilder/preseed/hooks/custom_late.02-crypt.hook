@@ -4,14 +4,25 @@
 
 logger -t custom_late.sh "in the custom_late.02 hook, modify and update initramfs to make ssh unlock work (also with static ip)"
 
+if test -f /tmp/custom_part.env; then
+    logger -t custom_late.sh "read /tmp/custom_part.env into environment"
+  . /tmp/custom_part.env
+fi
+
 if test -f /tmp/custom.env; then
     logger -t custom_late.sh "read /tmp/custom.env into environment"
   . /tmp/custom.env
 fi
 
+need_crypt="false"
 method="$(debconf-get partman-auto/method)"
-if test -n "$method" -a "$method" != "custom"; then
-    logger -t custom_late.sh "aborted. partitioning method was not custom, so we do not do this hook. exit"
+if test "$method" = "crypto"; then need_crypt="true"; fi
+if test "$method" = "custom"; then
+    if test "$DISKPASSWORD" != ""; then need_crypt="true"; fi
+fi
+
+if test "$need_crypt" = "false"; then
+    logger -t custom_late.sh "aborted. partitioning method was not crypto or custom with diskpassword, so we do not do this hook. exit"
     exit 0
 fi
 
