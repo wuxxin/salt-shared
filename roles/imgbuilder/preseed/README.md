@@ -13,6 +13,9 @@ Debian/Ubuntu Preseed and Initrd Generator
    * packer using an iso image and http served preseed files
    * vagrant-libvirt including libvirt.kernel,initrd,cmdline arguments
    * pxe boot
+   * write iso image to usbstick (iso is hybrid image), but from stick
+     * *Important* do not forget to remove stick once booted, because stick will occupy one drive
+       which means /dev/sda so your harddisk setup will fail if you do not remove stick
 
  * Warning:
    This scripts only try to protect the permanent storage, aka. the harddisks, 

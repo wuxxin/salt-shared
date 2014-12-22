@@ -146,7 +146,7 @@ generate_bootstrap_{{ source }}:
         domainname: {{ domainname|d(" ") }}
         custom_ssh_identity: {{ custom_ssh_identity|d("") }}
         netcfg: {{ netcfg }}
-        bootstrap_extra: {{ salt_settings.bootstrap.extra|d({}) }}
+        bootstrap_extra: {{ salt_settings.bootstrap_extra|d({}) }}
         install: {{ salt_settings.install|d(none) }}
         states:
 {% for a in salt_config.file_roots.base %}
