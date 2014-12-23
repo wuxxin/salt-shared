@@ -9,10 +9,12 @@ git-crypt init
 
 # define which files to be encrypted
 cat > .gitattributes << EOF
+*secrets* filter=git-crypt diff=git-crypt
+*secret* filter=git-crypt diff=git-crypt
 *.sec filter=git-crypt diff=git-crypt
-*.secret filter=git-crypt diff=git-crypt
-*.secrets filter=git-crypt diff=git-crypt
 *.key filter=git-crypt diff=git-crypt
+**/secret/** filter=git-crypt diff=git-crypt
+**/secrets/** filter=git-crypt diff=git-crypt
 EOF
 git-crypt status
 git add .
@@ -25,12 +27,17 @@ gpg --import whateveruser.text.gpgkey
 # add colaborator to the git repository as crypt target
 git-crypt add-gpg-user user.email@address.org
 
-# add some new files (susi ans sls will be plain text; key, sec will be encrypted) to repo
+# add some new files (susi and sls will be plain text; key, sec will be encrypted) to repo
 echo 1 > test.susi
 echo 2 > test.sls
 echo 3 > test.key
 echo 4 > test.sec
-git add test.*
+mkdir -p test/secret
+mkdir -p bli/bla/blu/secrets/peng
+echo 1 > bli/bla/blu/secrets/peng/test
+echo 2 > bli/bla/blu/test
+echo 3 > testsecret.sls
+git add .
 git commit
 
 # lock the repository
