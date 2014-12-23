@@ -65,10 +65,9 @@ def import_key(keyfile, gpghome):
     if returncode != 0:
         raise IOError('gpg --import returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
 
-def set_ownertrust(userid, trustlevel=5, gpghome)
+def set_ownertrust(userid,  gpghome, trustlevel=5):
     ''' edit a already imported key and change the trustlevel (default 5=ultimate trust) '''
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
-"""
+    """
 gpg --fingerprint --with-colons --list-keys |
   awk -F: -v keyname="$1" -v trustlevel="$2" '
         $1=="pub" && $10 ~ keyname { fpr=1 }
@@ -80,12 +79,15 @@ gpg --fingerprint --with-colons --list-keys |
             print fpr ":" trustlevel ":"
         }
     ' | gpg --import-ownertrust
-"""
+    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
     popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
     stdout, empty = popen.communicate()
     returncode = popen.returncode
     if returncode != 0:
         raise IOError('gpg returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
+"""
+    pass
+
 
 def publickey_list(gpghome):
     ''' returns a string listing all keys in keystore of gpghome '''
