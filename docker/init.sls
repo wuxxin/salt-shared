@@ -1,23 +1,20 @@
 include:
   - .ppa
 
-docker-dependencies:
-   pkg.installed:
+docker:
+  pkg.installed:
     - pkgs:
       - iptables
       - ca-certificates
       - lxc
       - cgroup-bin
-
-lxc-docker:
-  pkg.latest:
+      - lxc-docker
+{% if grains['os'] == 'Ubuntu' %}
     - require:
-      - pkg: docker-dependencies
       - pkgrepo: docker_ppa
-
-docker:
+{% endif %}
   service.running:
     - enable: true
     - require:
-      - pkg: lxc-docker
+      - pkg: docker
 
