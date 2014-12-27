@@ -2,8 +2,6 @@ include:
   - .ppa
   - docker
   - nginx
-  - uml
-  - slirp
 
 dokku-alt:
   pkg:
