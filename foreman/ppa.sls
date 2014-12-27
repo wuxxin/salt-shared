@@ -3,8 +3,7 @@ include:
   - repo.ubuntu
 {% endif %}
 
-
-{% if grains['os'] == 'Ubuntu' or grains['os'] == 'Debian' %}
+{% if grains['os_family'] == 'Debian' %}
 forman_ppa:
   pkgrepo.managed:
     - repo: 'deb http://deb.theforeman.org/ {{ grains['lsb_distrib_codename'] }} stable'
