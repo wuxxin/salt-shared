@@ -3,4 +3,7 @@ video:
     - pkgs:
       - vlc
       - vlc-nox
+      - mplayer2
+      - umplayer
+
 
