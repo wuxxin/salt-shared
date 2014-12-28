@@ -15,11 +15,11 @@ vagrant_plugin_deps:
     - require:
       - pkg: vagrant
 
-{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate"] %} 
-{# ,"gusteau", "vagrant-bindfs","vagrant-windows", "docker-provider", #}
+{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", "vagrant-triggers", "vagrant-libvirt"] %} 
+{# ,"gusteau", "vagrant-bindfs", #}
 
-{# set git_plugins = [] #}
-{% set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] %}
+{% set git_plugins = [] %}
+{# set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] #}
 
 {% for t,src in git_plugins %}
 
