@@ -1,13 +1,15 @@
 include:
   - .ppa
 
-video-audio-packages:
+video-packages:
   pkg.installed:
     - pkgs:
       - lame
       - vlc
+      - vlc-nox
+      - mplayer2
+      - umplayer
       - libav-tools
-      - mencoder
       - libavcodec-extra
       - libdvdread4
 
@@ -15,7 +17,7 @@ install-css:
   cmd.run:
     - name: /usr/share/doc/libdvdread4/install-css.sh
     - require:
-      - pkg: video-audio-packages
+      - pkg: video-packages
 
 x256-packages:
   pkg.installed:
@@ -24,4 +26,3 @@ x256-packages:
       - vlc-plugin-libde265
     - require:
       - pkgrepo: x265-ppa
-

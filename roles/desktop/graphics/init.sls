@@ -7,5 +7,4 @@ include:
   - .pixel
   - .publishing
   - .vector
-  - .video
 
