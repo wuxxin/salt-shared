@@ -107,55 +107,55 @@ update_library:
 
 # ip and network addresses filtering 
 {%- macro net_addr(interface) %}
-{{- salt.extip.start_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{{- salt['extip.start_from_net'](salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)) }}
 {%- endmacro %}
 
 
 {%- macro net_short(interface) %}
-{{- salt.extip.short_from_net(
-    salt.extip.combine_net_mask(
-        salt.extip.start_from_net(
-            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+{{- salt['extip.short_from_net'](
+    salt['extip.combine_net_mask'](
+        salt['extip.start_from_net'](
+            salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)
         ), interface.netmask)
     ) }}
 {%- endmacro %}
 
 
 {%- macro net_addr_cidr(interface) %}
-{{- salt.extip.netcidr_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{{- salt['extip.netcidr_from_net'](salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)) }}
 {%- endmacro %}
 
 
 {%- macro net_broadcast(interface) %}
-{{- salt.extip.end_from_net(salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)) }}
+{{- salt['extip.end_from_net'](salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)) }}
 {%- endmacro %}
 
 
 {%- macro net_reverse(interface) %}
-{{- salt.extip.reverse_from_net(
-    salt.extip.combine_net_mask(
-        salt.extip.start_from_net(
-            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+{{- salt['extip.reverse_from_net'](
+    salt['extip.combine_net_mask'](
+        salt['extip.start_from_net'](
+            salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)
         ), interface.netmask)
     ) }}
 {%- endmacro %}
 
 
 {%- macro net_reverse_short(interface) %}
-{{- salt.extip.short_reverse_from_net(
-    salt.extip.combine_net_mask(
-        salt.extip.start_from_net(
-            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+{{- salt['extip.short_reverse_from_net'](
+    salt['extip.combine_net_mask'](
+        salt['extip.start_from_net'](
+            salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)
         ), interface.netmask)
     ) }}
 {%- endmacro %}
 
 
 {%- macro net_calc(interface, offset) %}
-{{- salt.extip.calc_ip_from_net(
-    salt.extip.combine_net_mask(
-        salt.extip.start_from_net(
-            salt.extip.combine_net_mask(interface.ipaddr, interface.netmask)
+{{- salt['extip.calc_ip_from_net'](
+    salt['extip.combine_net_mask'](
+        salt['extip.start_from_net'](
+            salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)
         ), interface.netmask)
     , offset) }}
 {%- endmacro %}
@@ -168,6 +168,6 @@ update_library:
 {%- if interfaces == None %}
 {%- set interfaces = salt['pillar.get']('network:interfaces', {}) %}
 {%- endif %}
-{{- salt.extip.net_list(format, groups[group], interfaces, kwargs) }}
+{{- salt['extip.net_list'](format, groups[group], interfaces, kwargs) }}
 {%- endmacro %}
 
