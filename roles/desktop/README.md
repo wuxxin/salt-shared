@@ -3,10 +3,13 @@
 Installs and configures features you usually want to have in a working desktop
 
 ##Todo:
- * add partner and extra repositories (also needed for skype)
+ * add partner and extra repositories
  * add supported languages packages install (one click at languages)
  * apt-get install exfat-fuse exfat-utils
  * install-css does install libcss even if already installed
+
+ * interesting stuff to look at:
+   * utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
 
  * development:
    * openwrt: tiny linux distribution
@@ -28,6 +31,7 @@ Installs and configures features you usually want to have in a working desktop
   * chat: pidgin for chat with otr and other plugins
 
   * voice: mumble and jitsi and skype (if enabled)
+  * video: vlc and mplayer2 and codecs
 
   * roles.desktop.ubuntu:
     * restricted extras (codecs), libcss
@@ -65,8 +69,3 @@ desktop:
   status: present # installs all sub parts as included in roles.desktop.init.sls
   developer:
     status: present # installs developer packages (see init.sls)
-  big:
-    status: present # currently unused, but in the future if not set, very big packages will be skipped
-  commercial:
-    binary:
-      status: present # current status: decide if skype is to be installed
