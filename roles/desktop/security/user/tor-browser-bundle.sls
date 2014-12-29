@@ -1,4 +1,4 @@
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_home, user_download with context %}
 
 {% set bundle_version = '3.6.1' %}
 {% set bundle_locale = 'en-US' %}
