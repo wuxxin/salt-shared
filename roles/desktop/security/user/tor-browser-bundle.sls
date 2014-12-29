@@ -1,14 +1,21 @@
 {% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
-
-{% set bundle_version = '3.6.1' %}
-{% set bundle_locale = 'en-US' %}
-{% set bundle_root = user_home+ '/.local/tor-browser_'+ bundle_locale %}
+https://www.torproject.org/dist/torbrowser/4.0.2/tor-browser-linux64-4.0.2_de.tar.xz.asc
+{% set bundle_version = '4.0.2' %}
+{% set bundle_locale = 'de' %}{# en-US #}
+{% set bundle_base = user_home+ '/.local' %}
+{% set bundle_root = bundle_base+ '/tor-browser_'+ bundle_locale %}
 {% set bits = '64' if grains['osarch'][-2:] == '64' else '32' %}
 {% set bundle_hash = {'32': 'sha1=53c2a4858e3c287c89f91763038634be6ec70ace', '64': 'sha1=5d3d28eab9fc1e79f1f0b0998045a5cbc97ebcf8'} %}
+{% set bundle_name = 'tor-browser-linux'+ bits+ '-'+ bundle_version+ '_'+ bundle_locale+ '.tar.xz'
 
 tor-browser-bundle:
+  file.managed:
+    - name: {{ bundle_base }}/{{ bundle_name }}
+    - source: https://www.torproject.org/dist/torbrowser/{{ bundle_version }}/{{ bundle_name }}
+    - source_hash: https://www.torproject.org/dist/torbrowser/{{ bundle_version }}/{{ bundle_name }}.asc
+    - makedirs: true
   archive.extracted:
-    - source: https://www.torproject.org/dist/torbrowser/{{ bundle_version }}/tor-browser-linux{{ bits }}-{{ bundle_version }}_{{ bundle_locale }}.tar.xz
+    - source: {{ bundle_base }}/{{ bundle_name }}.asc
     - name: {{ user_home }}/.local/
     - if_missing: {{ bundle_root }}
     - user: {{ user }}
