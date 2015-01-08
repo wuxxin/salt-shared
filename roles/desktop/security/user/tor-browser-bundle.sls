@@ -5,7 +5,12 @@
 {% set bundle_base = user_home+ '/.local' %}
 {% set bundle_root = bundle_base+ '/tor-browser_'+ bundle_locale %}
 {% set bits = '64' if grains['osarch'][-2:] == '64' else '32' %}
-{% set bundle_name = 'tor-browser-linux'+ bits+ '-'+ bundle_version+ '_'+ bundle_locale+ '.tar.xz'
+{% set bundle_name = 'tor-browser-linux'+ bits+ '-'+ bundle_version+ '_'+ bundle_locale+ '.tar.xz' %}
+gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys 0x416F061063FEE659
+gpg --fingerprint 0x416F061063FEE659
+Key fingerprint = 8738 A680 B84B 3031 A630  F2DB 416F 0610 63FE E659
+gpg --verify tor-browser-2.3.25-13_en-US.exe.asc tor-browser-2.3.25-13_en-US.exe
+The output should say "Good signature": 
 
 tor-browser-bundle:
   file.managed:
