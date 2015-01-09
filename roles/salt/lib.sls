@@ -42,13 +42,13 @@ copy_bootstrap-salt.sh:
 {% for a in salt_config.file_roots.base %}
 copy_statedir_{{ a }}:
   cmd.run:
-    - name: cp -ar -t {{ workdir }}/salt/ {{ a }}
+    - name: cp -ar -H -t {{ workdir }}/salt/ {{ a }}
 {% endfor %}
 
 {% for a in salt_config.pillar_roots.base %}
 copy_pillardir_{{ a }}:
   cmd.run:
-    - name: cp -ar -t {{ workdir }}/ {{ a }}
+    - name: cp -ar -H -t {{ workdir }}/ {{ a }}
 {% endfor %}
 
 # this generates a new gpg key and pipes the secret portion of the key to gpg again to crypt it with the target recipient
