@@ -29,6 +29,7 @@ include:
   - .idea
   - .kivy
   - .openwrt
+  - .python
   - .vcs
   - .tmbundles
 {% endif %}
@@ -44,5 +45,4 @@ cdargs:
 #minidlna:
 #  pkg:
 #    - installed
-
 
