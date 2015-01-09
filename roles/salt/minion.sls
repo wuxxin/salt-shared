@@ -36,3 +36,12 @@ psmisc:
     - installed
     - order: 2
 
+{% for source in ['update-salt-from-git.sh',] %}
+
+create_usr_local_{{ source }}:
+  file.managed:
+    - name: /usr/local/sbin/{{ source }}
+    - source: salt://roles/salt/files/{{ source }}
+    - mode: 700
+
+{% endfor %}
