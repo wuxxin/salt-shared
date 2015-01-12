@@ -25,6 +25,11 @@ include:
 {% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %}
 
 get-netboot:
+  file.directory:
+    - name: {{ netboot_target }}
+    - makedirs: true
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
   archive.extracted:
     - name: {{ netboot_target }}/
     - source: {{ cs.source }}
@@ -33,7 +38,9 @@ get-netboot:
     - group: {{ ib_s.user }}
     - archive_format: tar
     - tar_options: ax
-    - if_missing: {{ netboot_target }}/
+    - if_missing: {{ netboot_target }}/ubuntu-installer/amd64/initrd.gz
+    - require:
+      - file: get-netboot
 
 clean-initrd:
   file.absent:
