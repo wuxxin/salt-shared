@@ -34,10 +34,9 @@ get-netboot:
     - name: {{ netboot_target }}/
     - source: {{ cs.source }}
     - source_hash: {{ cs.source_hash }}
-    - user: {{ ib_s.user }}
-    - group: {{ ib_s.user }}
+    - archive_user: {{ ib_s.user }}
     - archive_format: tar
-    - tar_options: ax
+    - tar_options: xz
     - if_missing: {{ netboot_target }}/ubuntu-installer/amd64/initrd.gz
     - require:
       - file: get-netboot
