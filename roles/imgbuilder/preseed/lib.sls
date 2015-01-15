@@ -14,7 +14,7 @@ include:
 {% set netboot_target="/mnt/images/tmp/netboot-"+ cs.suite+ "-"+ cs.architecture %}
 
 {{ initrd_unpack(cs, tmp_target, netboot_target) }}
-{{ add_preseed_files(cs, tmp_target) }}
+{# {{ add_preseed_files(cs, tmp_target) }} #}
 {{ initrd_pack(cs, tmp_target, netboot_target) }}
 
 {% endmacro %}
@@ -22,25 +22,33 @@ include:
 
 {% macro initrd_unpack(cs, tmp_target, netboot_target) %}
 
+{% set download_target="/mnt/images/tmp" %}
+
 {% from "roles/imgbuilder/defaults.jinja" import settings as ib_s with context %}
 
-get-netboot:
+netboot-dir:
   file.directory:
     - name: {{ netboot_target }}
     - makedirs: true
     - user: {{ ib_s.user }}
     - group: {{ ib_s.user }}
-  archive.extracted:
-    - name: {{ netboot_target }}/
-    - source: {{ cs.source }}
+
+get-netboot:
+  file.managed:
+    - name: "{{ download_target }}/netboot.tar.gz"
+    - source: "{{ cs.source }}"
     - source_hash: {{ cs.source_hash }}
-    - archive_user: {{ ib_s.user }}
-    - archive_format: tar
-    - tar_options: xz
-    - if_missing: {{ netboot_target }}/ubuntu-installer/amd64/initrd.gz
+    - user: {{ ib_s.user }}
+    - group: {{ ib_s.user }}
+    - require:
+      - file: netboot-dir
+  cmd.run:
+    - name: "tar xzf {{ download_target }}/netboot.tar.gz && chown -R {{ ib_s.user }}:{{ ib_s.user }} ."
+    - cwd: {{ netboot_target }}
+    - unless: test -f {{ netboot_target }}/ubuntu-installer/amd64/initrd.gz
     - require:
       - file: get-netboot
-
+  
 clean-initrd:
   file.absent:
     - name: {{ tmp_target }}
@@ -56,7 +64,7 @@ unpack-initrd:
   cmd.run:
     - name:  cd {{ tmp_target }}; cat {{ netboot_target }}/{{ cs.initrd }} | gzip -d | cpio --extract --make-directories --no-absolute-filenames
     - require:
-      - archive: get-netboot
+      - cmd: get-netboot
 
 {% endmacro %}
 
