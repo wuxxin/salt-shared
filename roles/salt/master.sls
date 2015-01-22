@@ -16,6 +16,9 @@ include:
   - git-crypt
   - gnupg
 {% endif %}
+{% if s.master.extensions.status=="present" %}
+  - .extensions
+{% endif %}
 
 
 salt-master-dependencies:

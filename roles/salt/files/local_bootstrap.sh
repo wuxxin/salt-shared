@@ -46,7 +46,6 @@ file_client: local
 
 fileserver_backend:
   - roots
-  - git
 
 pillar_roots:
   base:

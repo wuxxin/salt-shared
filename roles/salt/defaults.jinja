@@ -8,6 +8,11 @@ master:
   gitcrypt:
     status: present
 
+  extensions:
+    status: present
+    base: /srv/salt_ext
+    modules: /srv/salt/salt-shared/_modules
+
   config: |
     fileserver_backend:
       - roots
