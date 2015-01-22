@@ -18,7 +18,7 @@
 
 /etc/salt/master.d/extensions.conf:
   file.managed:
-    - contents: 
+    - contents: |
         extension_modules: {{ s.master.extensions.base }}
     - watch_in:
       - service: salt-master
