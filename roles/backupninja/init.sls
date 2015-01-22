@@ -6,7 +6,6 @@ backupninja:
   pkg.installed:
     - pkgs:
       - backupninja
-      - hwinfo
 
 {% if backupninja.at == 'manual' %}
 
