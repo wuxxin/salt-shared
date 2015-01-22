@@ -22,6 +22,7 @@ base-deps:
       - socat
       - netcat
       - nethogs
+      - trickle
       - curl
       - elinks
       - links
