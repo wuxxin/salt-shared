@@ -14,7 +14,7 @@ include:
 {% set netboot_target="/mnt/images/tmp/netboot-"+ cs.suite+ "-"+ cs.architecture %}
 
 {{ initrd_unpack(cs, tmp_target, netboot_target) }}
-{# {{ add_preseed_files(cs, tmp_target) }} #}
+{{ add_preseed_files(cs, tmp_target) }}
 {{ initrd_pack(cs, tmp_target, netboot_target) }}
 
 {% endmacro %}
