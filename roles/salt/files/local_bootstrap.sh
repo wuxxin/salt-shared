@@ -1,7 +1,7 @@
 #!/bin/bash
 
-myprog=`readlink -f $0`
-mydir=`dirname $myprog`
+prog=`readlink -f $0`
+dir=`dirname $prog`
 
 # test for /targetdir/bootstrap.run and refuse to continue if already exists
 if test -f {{ targetdir }}/bootstrap.run; then
@@ -16,7 +16,6 @@ cd {{ targetdir }}
 tar xaf /root/saltmaster@{{ hostname }}_config.tar.xz
 
 if test "{{ install.type }}" == "git"; then
-  rev="{{ install.rev }}"
   if test ! -f {{ targetdir }}/bootstrap-salt.sh; then
     curl -L {{ install.bootstrap }} -o {{ targetdir }}/bootstrap-salt.sh
     chmod +x {{ targetdir }}/bootstrap-salt.sh
@@ -49,15 +48,15 @@ fileserver_backend:
 
 pillar_roots:
   base:
-{% for a in pillars %}
+{%- for a in pillars %}
     - {{ targetdir }}/{{ a }}
-{% endfor %}
+{%- endfor %}
 
 file_roots:
   base:
-{% for a in states %}
+{%- for a in states %}
     - {{ targetdir }}/salt/{{ a }}
-{% endfor %}
+{%- endfor %}
 
 EOF
 
@@ -67,6 +66,9 @@ EOF
 {{ l }}
 {% endfor %}
 {% endif %}
+
+# sync custom _modules and therelike
+salt-call --local --config-dir={{ targetdir }} saltutil.sync_all
 
 # install git-crypt, checkout and unlocks git paths with git-unlock
 salt-call --local --config-dir={{ targetdir }} state.sls git-crypt
@@ -79,9 +81,8 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# sync everything, local call state.sls haveged,network, roles.salt.master 
+# local call state.sls haveged,network, roles.salt.master 
 # (entropy daemon, network, re/install salt.master, add dnscache)
-salt-call --local --config-dir={{ targetdir }} saltutil.sync_all
 salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master,roles.tinydns
 
 # copy grains to final destination
@@ -103,7 +104,7 @@ service salt-minion start; sleep 5
 salt-key -y -a {{ hostname }}.{{ domainname }}
 
 # cleanup masterless leftovers, copy grains
-#rm -r {{ targetdir }}/_run
+rm -r {{ targetdir }}/_run
 rm {{ targetdir }}/minion {{ targetdir }}/grains
 
 # sync grains, modules, states, etc.
