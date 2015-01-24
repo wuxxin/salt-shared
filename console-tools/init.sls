@@ -17,6 +17,7 @@ base-deps:
       - dstat
       - cpu-checker
       - iperf
+      - glances
       - pciutils
       - pv
       - socat
