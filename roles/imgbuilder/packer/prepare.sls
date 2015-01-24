@@ -44,7 +44,7 @@ box_add_script:
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
 {{ add_preseed_files(ps_s, ps_s.target) }}
 
-{% for name in ['trusty-simple', 'trusty'] %}
+{% for name in ['trusty-simple'] %}
 
 build_{{ name }}:
   cmd.run:
