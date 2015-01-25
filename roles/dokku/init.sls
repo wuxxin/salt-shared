@@ -1,7 +1,7 @@
 include:
   - .ppa
-  - docker
   - nginx
+  - roles.docker
 
 dokku-alt:
   pkg:
