@@ -18,7 +18,12 @@ djbdns:
 {% endfor %}
 
 /etc/sv:
+  file:
+    - directory
+
+populate_etc_sv:
   file.recurse:
+    - name: /etc/sv
     - source: salt://roles/tinydns/sv
     - template: jinja
     - defaults: 
@@ -27,6 +32,8 @@ djbdns:
     - context: 
         dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
 {% endif %}
+    - require:
+      - file: /etc/sv
 
 {% for u in ("dnscache", "tinydns", "axfrdns") %}
 /var/log/{{ u }}:
@@ -42,7 +49,7 @@ djbdns:
     - target: /var/log/{{ u }}
     - require:
       - file: /var/log/{{ u }}
-      - file: /etc/sv
+      - file: populate_etc_sv
 
 {% for v in ("", "/log") %}
 /etc/sv/{{ u }}{{ v }}/run:
@@ -50,7 +57,7 @@ djbdns:
      - name: chmod +x /etc/sv/{{ u }}{{ v }}/run
      - unless: test -x /etc/sv/{{ u }}{{ v }}/run
      - require:
-       - file: /etc/sv
+       - file: populate_etc_sv
 {% endfor %}
 {% endfor %}
 
@@ -59,7 +66,7 @@ djbdns:
   file.managed:
     - source: {{ "%s" % pillar.tinydns_server.internal_data if pillar.tinydns_server.internal_data else 'salt://roles/tinydns/localhost' }}
     - require:
-      - file: /etc/sv
+      - file: populate_etc_sv
 
 compiled_data:
   cmd.run:
@@ -77,7 +84,7 @@ create_seed:
     - name: dnscache-conf Gdnscache Gdnslog /tmp/dnscache.$$; mv /tmp/dnscache.$$/seed /etc/sv/dnscache/seed; rm -r /tmp/dnscache.$$
     - unless: test -e /etc/sv/dnscache/seed
     - require:
-      - file: /etc/sv
+      - file: populate_etc_sv
       - pkg: djbdns
 
 /etc/sv/axfrdns/tcp:
@@ -87,7 +94,7 @@ create_seed:
     - context:
       permissions: {{ pillar.tinydns_server.axfr_permissions|d(None) }}
     - require:
-      - file: /etc/sv
+      - file: populate_etc_sv
 
 compiled_tcp:
   cmd.run:
@@ -128,7 +135,7 @@ axfrdns_export:
 /etc/sv/dnscache/root/ip/{{ n }}:
   file.touch:
     - require:
-      - file: /etc/sv
+      - file: populate_etc_sv
       - file: /etc/sv/dnscache/root/ip
     - require_in: 
       - cmd: dnscache_service
@@ -144,7 +151,7 @@ axfrdns_export:
     - context:
         ip: {{ "%s" % s if s != '' else '127.0.0.1' }}
     - require:
-      - file: /etc/sv
+      - file: populate_etc_sv
     - require_in: 
       - cmd: dnscache_service
     - watch_in:
@@ -158,7 +165,7 @@ axfrdns_export:
     - unless: test -e /etc/service/{{ u }}
     - require:
       - pkg: djbdns
-      - file: /etc/sv
+      - file: populate_etc_sv
       - file: /var/log/{{ u }}
 
 {{ u }}_service:
