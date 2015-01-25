@@ -1,6 +1,6 @@
 #!/bin/sh
 
-logger -t custom_late.sh "in the custom_late.03 hook, modify /etc/grub.d/00_header and run update-grub"
+logger -t custom_late.sh "in the custom_late.03 hook, modify /etc/grub.d/00_header, /etc/default/grub and run update-grub"
 
 cat > /target/tmp/00_header.patch << "ENDOFFILE"
 --- old/00_header	2014-09-18 15:53:12.983999619 +0200
@@ -68,7 +68,9 @@ cat > /target/tmp/00_header.patch << "ENDOFFILE"
  fi
 ENDOFFILE
 
+in-target sh -c 'mkdir -p /etc/default/grub.d; echo "GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX biosdevname=0\"" > /etc/default/grub.d/no_biosdevname.cfg'
 in-target sed -i -r -e 's/^.*(GRUB_CMDLINE_LINUX_DEFAULT=).*/\1"quiet"/g' /etc/default/grub
+in-target sed -i -r -e 's/^.*(GRUB_CMDLINE_LINUX=).*/\1"text nosplash nomodeset"/g' /etc/default/grub
 in-target sed -i -r -e 's/^.*(GRUB_TIMEOUT=).*/\1"2"/g' /etc/default/grub
 in-target sh -c 'echo "GRUB_RECORDFAIL_TIMEOUT=2" >> /etc/default/grub'
 in-target sh -c "cat /tmp/00_header.patch | patch /etc/grub.d/00_header"
