@@ -28,6 +28,14 @@ base:
     - match: pillar
     - roles.apt-cacher-ng.client
 
+  'docker:status:present':
+    - match: pillar
+    - roles.docker
+
+  'dokku:status:present':
+    - match: pillar
+    - roles.dokku
+
   'libvirt:status:present':
     - match: pillar
     - roles.libvirt
