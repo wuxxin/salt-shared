@@ -101,9 +101,9 @@
   raid.present:
     - name: {{ item }}
     - opts:
-{% for sub in data %}
+{%- for sub in data %}
       - {{ sub }}
-{% endfor %}
+{%- endfor %}
     - require:
       - pkg: "mdadm-raid-{{ item }}"
 
@@ -165,11 +165,11 @@
   lvm.vg_present:
     - name: {{ item }}
     - devices: {% for device in input_data.vg[item]['devices'] %}{{ device }}{% endfor %}
-{% if input_data.vg[item]['options']|d({}) %}
-{% for option, optvalue in input_data.vg[item]['options'].iteritems() %}
+{%- if input_data.vg[item]['options']|d({}) %}
+{%- for option, optvalue in input_data.vg[item]['options'].iteritems() %}
     - {{ option }}{% if optvalue|d('') %}: {{ optvalue }}{% endif %}
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
     - require:
       - pkg: "lvm-vg-{{ item }}"
 {% endfor %}
@@ -209,11 +209,23 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 {%- else %}
   lvm.lv_present:
     - name: {{ item }}
-{% for sub, subvalue in data.iteritems() %}
+{%- for sub, subvalue in data.iteritems() %}
+{%- if sub not in ('watch_in', 'require_in', 'require', 'watch') %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
     - require:
       - pkg: "lvm-lv-{{ item }}"
+{%- if 'require' in data %}
+      - {{ data['require'] }}
+{%- endif %}
+{%- for sub, subvalue in data.iteritems() %}
+{%- if sub in ('watch_in', 'require_in', 'watch') %}
+    - {{ sub }}:
+      - {{ subvalue }}
+{%- endif %}
+{%- endfor %}
+
 {% endif %}
 
 {% endfor %}
@@ -234,13 +246,12 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
     - name: '{{ mkfs }} {{ opts }} {{ item }}'
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
     - unless: 'test "$(blkid -p -s TYPE -o value {{ item }})" == "{{ data.fstype }}"'
-
-{% for a in ('watch_in', 'require_in', 'require', 'watch') %}
-{% if input_data[item][a] is defined %}
+{%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
+{%- if input_data[item][a] is defined %}
     - {{ a }}:
       - {{ input_data[item][a] }}
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 
 {% endfor %}
 
@@ -255,9 +266,9 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 "mount-{{ item }}":
   mount.mounted:
     - name: {{ item }}
-{% for sub, subvalue in data.iteritems() %}
+{%- for sub, subvalue in data.iteritems() %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
-{% endfor %}
+{%- endfor %}
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ data['device'] }})" == "{{ data['fstype'] }}"'
     - unless: 'test ! -b {{ data['device'] }}'
 {% endfor %}
@@ -291,27 +302,27 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
  file.directory:
     - name: {{ item }}/{{ child }}
     - makedirs: True
-{% if input_data[item]['options']|d({}) %}
-{% for option in input_data[item]['options'] %}
+{%- if input_data[item]['options']|d({}) %}
+{%- for option in input_data[item]['options'] %}
     - {{ option }}
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
-{% for a in ('onlyif', 'unless') %}
-{% if input_data[item][a] is defined %}
+{%- for a in ('onlyif', 'unless') %}
+{%- if input_data[item][a] is defined %}
     - {{ a }}: {{ input_data[item][a] }}
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 
-{% for a in ('watch_in', 'require_in', 'require', 'watch') %}
-{% if input_data[item][a] is defined %}
+{%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
+{%- if input_data[item][a] is defined %}
     - {{ a }}:
       - {{ input_data[item][a] }}
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
 {% endfor %}
 
@@ -328,20 +339,20 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 
 {{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
-{% if data['copy_content']|d(true) %}
+{%- if data['copy_content']|d(true) %}
     - name: x={{ item }}; if test -d $x; then cp -r $x/* {{ data['destination'] }}; rm -r $x; fi; ln -s -T {{ data['destination'] }} {{ item }}
-{% else %}
+{%- else %}
     - name: rm -r {{ item }}; ln -s -T {{ data['destination'] }} {{ item }}
-{% endif %}
+{%- endif %}
     - unless: test -L {{ item }}
     - onlyif: test -d {{ data['destination'] }}
 
-{% for a in ('watch_in', 'require_in', 'require', 'watch') %}
-{% if input_data[item][a] is defined %}
+{%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
+{%- if input_data[item][a] is defined %}
     - {{ a }}:
       - {{ input_data[item][a] }}
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 
 {% endfor %}
 
