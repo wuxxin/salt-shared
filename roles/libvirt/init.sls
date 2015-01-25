@@ -51,6 +51,7 @@ libvirt:
       - sls: roles.libvirt.storage
       - sls: roles.libvirt.network
       - sls: roles.libvirt.kernel
+      - sls: roles.libvirt.grub
     - watch:
       - file: libvirt
 
