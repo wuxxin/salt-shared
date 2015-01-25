@@ -1,4 +1,4 @@
-= setup harddisk storage
+# setup harddisk storage
 
 Features:
  * parted:      (gpt/mbr) partition creation
@@ -13,7 +13,7 @@ Features:
  * directories: skeleton directory creation
  * relocate:    relocate data and make a symlink from old to new location
 
-== Usage
+## Usage
 
 ```
 {% load_yaml as data %}
@@ -32,9 +32,9 @@ For a complete example see: example.pillar
 **Warning**: lvm makes a difference if you use "g" or "G" for gigabyte.
 g=GiB (1024*1024*1024) and G means 1000*1000*1000
 
-== Additional options
-=== for "lvm: lv", "format", "directories", "relocate"
-==== option: watch_in/require_in/require/watch
+## Additional options
+### for "lvm: lv", "format", "directories", "relocate"
+#### option: watch_in/require_in/require/watch
 
 if set will insert a "watch/require/_in" into the state
 
@@ -46,8 +46,8 @@ Example:
       copy_content: false
       watch_in: "service: apt-cacher-ng"
 ```
-=== for "directories"
-==== option: onlyif/unless
+### for "directories"
+#### option: onlyif/unless
 
 will insert a onlyif/unless state requirement
 
@@ -67,8 +67,8 @@ Example:
       onlyif: mountpoint -q /mnt/images
 ```
 
-=== for "lvm:lv"
-==== option: expand
+### for "lvm:lv"
+#### option: expand
 
 if set to true and volume exists, 
 it will try to expand the existing lv to the desired size, 
@@ -88,7 +88,7 @@ Example:
 ```
 
 
-=== other additional options ===
+### other additional options 
 
 some (!list them) states try to expose additional arguments to the primary underlying state.
 
