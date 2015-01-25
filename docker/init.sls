@@ -1,5 +1,6 @@
 include:
   - .ppa
+  - .grub
 
 docker:
   pkg.installed:
@@ -17,4 +18,6 @@ docker:
     - enable: true
     - require:
       - pkg: docker
+      - sls: docker.grub
+
 
