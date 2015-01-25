@@ -63,6 +63,8 @@ Example:
       onlyif: mountpoint -q /mnt/images
 
 
+
+
 "lvm:lv": additional argument: "expand":
 ........................................
 
@@ -83,3 +85,15 @@ Example:
         size: 12g
         expand: true
 
+"lvm:lv": optional arguments:
+.............................
+
+Example:
+
+---
+  lvm:
+    lv:
+      test:
+        vgname: omoikane
+        size: 10g
+        wipesignatures: y
