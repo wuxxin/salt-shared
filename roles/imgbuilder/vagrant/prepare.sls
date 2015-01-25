@@ -1,6 +1,6 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
-{% for a in ('empty-box', 'empty-box-26g') %}
+{% for a in ('empty-box', 'empty-box-26g', 'empty-box-45g') %}
 {{ a }}:
   file.managed:
     - source: salt://roles/imgbuilder/vagrant/files/vagrant-box-add.sh
