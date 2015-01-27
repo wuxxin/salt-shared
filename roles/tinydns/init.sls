@@ -11,8 +11,6 @@ djbdns:
     - shell: /bin/false
     - home: /home/{{ u }}
     - system: True
-    - require_in:
-      - file: /etc/sv
     - require:
       - pkg: djbdns
 {% endfor %}
