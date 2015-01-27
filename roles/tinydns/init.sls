@@ -13,11 +13,13 @@ djbdns:
     - system: True
     - require:
       - pkg: djbdns
+    - require_in:
+      - file: populate_etc_sv
 {% endfor %}
 
-/etc/sv:
-  file:
-    - directory
+create_etc_sv:
+  file.directory:
+    - name: /etc/sv
 
 populate_etc_sv:
   file.recurse:
@@ -31,7 +33,7 @@ populate_etc_sv:
         dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
 {% endif %}
     - require:
-      - file: /etc/sv
+      - file: create_etc_sv
 
 {% for u in ("dnscache", "tinydns", "axfrdns") %}
 /var/log/{{ u }}:
