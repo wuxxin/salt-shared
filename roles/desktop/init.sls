@@ -1,8 +1,7 @@
 include:
   - java
   - .user
-
-  . .bitcoin
+  - .bitcoin
   - .browser
   - .chat
   - .chipcard
