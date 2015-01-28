@@ -67,5 +67,5 @@ Installs and configures features you usually want to have in a working desktop
 
 desktop:
   status: present # installs all sub parts as included in roles.desktop.init.sls
-  developer:
-    status: present # installs developer packages (see init.sls)
+  developer: status: present # installs developer packages (see init.sls)
+  commercial: status: present # installs also commercial software (eg. skype)
