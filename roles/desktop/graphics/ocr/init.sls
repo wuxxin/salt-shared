@@ -5,5 +5,7 @@ ocr:
       - yagf
       - cuneiform
       - tesseract-ocr
+      - unpaper
+      - poppler-utils
 
-https://github.com/fritz-hh/OCRmyPDF
+# remember to look at !!! TODO, FIXME  https://github.com/fritz-hh/OCRmyPDF
