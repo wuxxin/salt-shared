@@ -6,16 +6,14 @@ include:
   - .chat
   - .chipcard
   - .email
-  - .fixes
   - .ftp
   - .graphics
-  - .mozilla
   - .network
   - .power
   - .security
   - .terminal
   - .ubuntu
-  - .video-audio
+  - .video
   - .voice
 
 {% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
