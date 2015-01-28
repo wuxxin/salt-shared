@@ -39,9 +39,12 @@ Vagrant.configure("2") do |config|
     # try to use spice
     libvirt.graphics_type = "spice"
 
-    # fast spice compatible video settings
-    libvirt.video_type = "qxl"
-    libvirt.video_vram = 32768
+    # standard vvmware vga 
+    libvirt.videotype = "vmvga"
+
+    # fast but memory intense (+64MB) qxl video settings 
+    # libvirt.video_type = "qxl"
+    # libvirt.video_vram = 65536
   end
 end
 
