@@ -1,22 +1,18 @@
 include:
   - java
   - .user
-
-  . .bitcoin
   - .browser
   - .chat
   - .chipcard
   - .email
-  - .fixes
   - .ftp
   - .graphics
-  - .mozilla
   - .network
   - .power
   - .security
   - .terminal
   - .ubuntu
-  - .video-audio
+  - .video
   - .voice
 
 {% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
@@ -32,6 +28,10 @@ include:
   - .python
   - .vcs
   - .tmbundles
+{% endif %}
+
+{% if pillar.get('desktop.bitcoin.status', 'absent') == 'present' %}
+  - .bitcoin
 {% endif %}
 
 cdargs:

@@ -1,6 +1,6 @@
 include:
   - .ppa
-{% if pillar['desktop.commercial.binary.status']|d('false') == 'present' %}
+{% if pillar['desktop.commercial.status']|d('false') == 'present' %}
   - .skype
 {% endif %}
 

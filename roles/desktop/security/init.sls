@@ -1,4 +1,4 @@
 include:
   - .keyring
   - .metadata
-  - .user.tor-browser-bundle
+  # disabled for now  - .user.tor-browser-bundle
