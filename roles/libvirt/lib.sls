@@ -1,6 +1,6 @@
 
 {% macro set_autostart(hostname, autostart='on') %}
-set_autostart_vm:
+set_autostart_{{ hostname }}:
   module.run:
     - name: virt.set_autostart
     - vm: {{ hostname }}
@@ -10,7 +10,7 @@ set_autostart_vm:
 
 {% macro start_vm(hostname) %}
 
-start_backup_vm:
+start_vm_{{ hostname }}:
   module.run:
     - name: virt.start
     - m_name: {{ hostname }}

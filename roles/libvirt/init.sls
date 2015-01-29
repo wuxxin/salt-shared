@@ -31,10 +31,17 @@ libvirt:
       - multipath-tools
       - bridge-utils
       - vlan
-  file.replace:
+  file.managed:
     - name: /etc/default/libvirt-bin
-    - pattern: '#?start_libvirtd=.+'
-    - repl: 'start_libvirtd="yes"'
+    - contents: |
+        # Defaults for libvirt-bin initscript (/etc/init.d/libvirt-bin)
+        # This is a POSIX shell fragment
+        # Start libvirtd to handle qemu/kvm:
+        start_libvirtd="yes"
+        # options passed to libvirtd, add "-l" to listen on tcp
+        libvirtd_opts="-d -l"
+        # pass in location of kerberos keytab
+        #export KRB5_KTNAME=/etc/libvirt/libvirt.keytab
     - require:
       - pkg: libvirt
   libvirt:
