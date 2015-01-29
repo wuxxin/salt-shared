@@ -1,0 +1,5 @@
+spice-vdagent:
+  pkg:
+    - installed
+
+    
