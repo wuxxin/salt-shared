@@ -1,7 +1,6 @@
 include:
   - java
   - .user
-  - .bitcoin
   - .browser
   - .chat
   - .chipcard
@@ -29,6 +28,10 @@ include:
   - .python
   - .vcs
   - .tmbundles
+{% endif %}
+
+{% if pillar.get('desktop.bitcoin.status', 'absent') == 'present' %}
+  - .bitcoin
 {% endif %}
 
 cdargs:

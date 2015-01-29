@@ -3,6 +3,9 @@ include:
 
 bitcoin:
   pkg.installed:
+    - pkgs:
+      - bitcoin-qt
+      - bitcoind
     - require:
       - pkgrepo: bitcoin-ppa
 

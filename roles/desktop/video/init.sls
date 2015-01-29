@@ -8,7 +8,7 @@ video-packages:
       - vlc
       - vlc-nox
       - mplayer2
-      - umplayer
+      - smplayer
       - libav-tools
       - libavcodec-extra
       - libdvdread4
