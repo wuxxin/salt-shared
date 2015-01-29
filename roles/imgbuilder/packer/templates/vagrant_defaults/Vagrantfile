@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
     libvirt.graphics_type = "spice"
 
     # standard vvmware vga 
-    libvirt.videotype = "vmvga"
+    libvirt.video_type = "vmvga"
 
     # fast but memory intense (+64MB) qxl video settings 
     # libvirt.video_type = "qxl"
