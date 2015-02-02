@@ -31,5 +31,6 @@ base-deps:
       - sox
       - xmlstarlet
       - html-xml-utils
+      - etherwake
 
 {% endif %}
