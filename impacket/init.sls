@@ -2,6 +2,10 @@ include:
   - subversion
   - python
 
+python-pyasn1:
+  pkg:
+    - installed
+
 impacket:
   pip.installed:
     - name: "svn+http://impacket.googlecode.com/svn/trunk/"
@@ -9,3 +13,5 @@ impacket:
     - require:
       - pkg: subversion
       - pkg: python
+      - pkg: python-pyasn1
+
