@@ -1,7 +1,3 @@
-test_for_precise:
-  cmd.run:
-    - name: test "precise" = {{ grains['lsb_distrib_codename'] }}
-
 # ### package installation
 
 zentyal:
@@ -10,8 +6,6 @@ zentyal:
       - zentyal
     - require:
       - pkgrepo: zentyal_main_ubuntu
-      - pkgrepo: zentyal_extra_ubuntu
-      - cmd: test_for_precise
 
 set_os_extra:
   module.run:

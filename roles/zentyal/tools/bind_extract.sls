@@ -1,4 +1,4 @@
-{% set domain_name = 'in.spitzauer.at' %}
+{% set domain_name = 'my-test-domain.org' %}
 {% set sed_filter = '1,4d;$d' %}
 
 bind_extract:

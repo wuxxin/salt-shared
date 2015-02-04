@@ -11,7 +11,6 @@ ppa_test_for_precise:
 
 {% set zentyal_version = salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"') %}
 {% if zentyal_version == "3.2" %}
-
 zentyal_main_ubuntu:
   pkgrepo.managed:
     - name: deb http://ppa.launchpad.net/zentyal/3.2/ubuntu {{ grains['lsb_distrib_codename'] }} main
@@ -22,7 +21,6 @@ zentyal_main_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
       - cmd: ppa_test_for_precise
-
 zentyal_extra_ubuntu:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 3.2 extra 
@@ -32,21 +30,10 @@ zentyal_extra_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
       - cmd: ppa_test_for_precise
+    - require_in:
+      - pkgrepo: zentyal_main_ubuntu
 
-{% else %}
-
-add_legacy_zentyal_sources:
-  file.append:
-    - name: /etc/apt/sources.list
-    - text: '#deb http://archive.zentyal.org/zentyal 3.3 main extra'
-
-remove_zentyal_from_main_sources_list:
-  file.comment:
-    - name: /etc/apt/sources.list
-    - regex: 'deb http://archive.zentyal.org/zentyal 3.3 main extra'
-    - require:
-      - file: add_legacy_zentyal_sources
-
+{% elif zentyal_version == "3.3" %}
 zentyal_main_ubuntu:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 3.3 main
@@ -56,8 +43,6 @@ zentyal_main_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
       - cmd: ppa_test_for_precise
-      - file: remove_zentyal_from_main_sources_list
-
 zentyal_extra_ubuntu:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 3.3 extra
@@ -67,8 +52,18 @@ zentyal_extra_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
       - cmd: ppa_test_for_precise
-      - file: remove_zentyal_from_main_sources_list
+    - require_in:
+      - pkgrepo: zentyal_main_ubuntu
+{% else %}
+
+zentyal_main_ubuntu:
+  pkgrepo.managed:
+    - name: deb http://archive.zentyal.org/zentyal 4.0 main
+    - key_url: http://keys.zentyal.org/zentyal-4.0-archive.asc
+    - require:
+      - pkg: ppa_ubuntu_installer
 
 {% endif %}
+
 {% endif %}
 
