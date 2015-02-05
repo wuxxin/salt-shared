@@ -20,7 +20,7 @@ include:
   - .eclipse
   - .arduino
   - .atom
-  - .emulator
+  - .emulation
   - .etckeeper
   - .idea
   - .kivy
@@ -28,6 +28,10 @@ include:
   - .python
   - .vcs
   - .tmbundles
+{% endif %}
+
+{% if pillar.get('desktop.games.status', 'absent') == 'present' %}
+  - .emulation.games
 {% endif %}
 
 {% if pillar.get('desktop.bitcoin.status', 'absent') == 'present' %}
