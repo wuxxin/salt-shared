@@ -109,7 +109,7 @@ def size_from_net(combined):
 
 
 def calc_ip_from_net(combined, offset):
-    # if positive: adds offset to first ip, if negative: subtracts from broadcast ip
+    # if 0 or positive: adds offset to first ip, if negative: subtracts from broadcast ip
     if offset < 0:
         start_addr = end_from_net(combined)
     else:
