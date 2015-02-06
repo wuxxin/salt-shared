@@ -1,13 +1,6 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
-{% endif %}
-
-ppa_test_for_precise:
-  cmd.run:
-    - name: test "precise" = {{ grains['lsb_distrib_codename'] }}
-
-{% if grains['os'] == 'Ubuntu' %}
 
 {% set zentyal_version = salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"') %}
 {% if zentyal_version == "3.2" %}
@@ -20,7 +13,6 @@ zentyal_main_ubuntu:
     - keyserver: keyserver.ubuntu.com
     - require:
       - pkg: ppa_ubuntu_installer
-      - cmd: ppa_test_for_precise
 zentyal_extra_ubuntu:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 3.2 extra 
@@ -29,7 +21,6 @@ zentyal_extra_ubuntu:
     - key_url: http://keys.zentyal.org/zentyal-3.2-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
-      - cmd: ppa_test_for_precise
     - require_in:
       - pkgrepo: zentyal_main_ubuntu
 
@@ -42,7 +33,6 @@ zentyal_main_ubuntu:
     - key_url: http://keys.zentyal.org/zentyal-3.3-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
-      - cmd: ppa_test_for_precise
 zentyal_extra_ubuntu:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 3.3 extra
@@ -51,7 +41,6 @@ zentyal_extra_ubuntu:
     - key_url: http://keys.zentyal.org/zentyal-3.3-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
-      - cmd: ppa_test_for_precise
     - require_in:
       - pkgrepo: zentyal_main_ubuntu
 {% else %}
@@ -66,4 +55,3 @@ zentyal_main_ubuntu:
 {% endif %}
 
 {% endif %}
-
