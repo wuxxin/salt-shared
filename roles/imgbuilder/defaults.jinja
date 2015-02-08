@@ -8,6 +8,23 @@ libvirt:
   final_deploy_storage: default
   final_deploy_network: default
 
+downloads:
+  android-x86-4.4-r2.iso: 
+    url: http://downloads.sourceforge.net/project/android-x86/Release%204.4/android-x86-4.4-r2.iso?r=http%3A%2F%2Fwww.android-x86.org%2Fdownload&ts=1422588983&use_mirror=garr
+    hash:
+  Fedora-Live-Workstation-x86_64-21-5.iso: 
+    url: http://download.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso
+    hash: 
+  kali-linux-1.0.9a-amd64.iso: 
+    url: http://cdimage.kali.org/kali-1.0.9a/kali-linux-1.0.9a-amd64.iso
+    hash: sha1=2744d50f56c3d6332bc75e676f36aad3058d0aad
+  gentoo-install-amd64-minimal-20131204.iso:
+    url: http://distfiles.gentoo.org/releases/amd64/autobuilds/current-install-amd64-minimal/install-amd64-minimal-20141204.iso
+    hash: sha512=364d32c4f8420605f8a9fa3a0fc55864d5b0d1af11aa62b7a4d4699a427e5144b2d918225dfb7c5dec8d3f0fe2cddb7cc306da6f0cef4f01abec33eec74f3024
+  bitrig-cd-1.0.iso:
+    url: http://bitrig.antarctica.no/pub/bitrig/release/1.0/amd64/cd10.iso
+    hash: sha256=beb1d74567839a53008b0a1cf6e11c016c867bafb30a417be72aedb6cb93122b
+
 Vagrantfile: |
     # -*- mode: ruby -*-
     # vi: set ft=ruby :
@@ -45,7 +62,7 @@ Vagrantfile: |
         libvirt.volume_cache = "none"
 
         # use modern virtual gpu hardware
-        libvirt.video_type = 'qxl'
+        libvirt.video_type = 'vmvga'
       end
     end
 

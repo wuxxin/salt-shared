@@ -6,6 +6,7 @@
   file.managed:
     - source: salt://roles/zentyal/dns/dns.postsetconf
     - template: jinja
+    - makedirs: true
     - context:
       dns: {{ pillar.zentyal.dns }}
     - mode: 755
