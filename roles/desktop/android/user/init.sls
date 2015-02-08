@@ -1,5 +1,5 @@
-#include:
-#  - roles.desktop.android
+include:
+  - roles.desktop.android
 
 {% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
 

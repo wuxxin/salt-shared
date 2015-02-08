@@ -2,7 +2,7 @@ include:
   - python
   - git
   - java.jdk
-  - .init
+  - roles.desktop.android.user
 
 {% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
 
