@@ -31,7 +31,9 @@ default_libvirt_keys:
     - require:
       - pkg: libvirt
 
-{% for a in ['vnc_tls', 'vnc_tls_x509_verify', 'spice_tls',] %}
+{#for a in ['vnc_tls', 'vnc_tls_x509_verify', 'spice_tls',] %}
+disabled for now
+
 qemu_conf_{{ a }}:
   file.replace:
     - name: /etc/libvirt/qemu.conf
@@ -43,7 +45,7 @@ qemu_conf_{{ a }}:
       - service: libvirt
 {% endfor %}
 
-{# for a in ['/etc/pki/libvirt-vnc', '/etc/pki/libvirt-spice'] %}
+{% for a in ['/etc/pki/libvirt-vnc', '/etc/pki/libvirt-spice'] %}
 disabled for now
 symlinks_{{ a }}:
   file.symlink:
