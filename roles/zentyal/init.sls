@@ -4,3 +4,4 @@ include:
   - .mail
   - .samba
   - .dns
+  - .user

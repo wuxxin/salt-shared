@@ -2,6 +2,13 @@
 
 {% if salt['pillar.get']('zentyal:dns:status', "absent") == "present" %}
 
+zentyal-dns:
+  pkg.installed:
+    - pkgs:
+      - zentyal-dns
+    - require:
+      - pkg: zentyal
+
 /etc/zentyal/hooks/dns.postsetconf:
   file.managed:
     - source: salt://roles/zentyal/dns/dns.postsetconf
@@ -10,8 +17,8 @@
     - context:
       dns: {{ pillar.zentyal.dns }}
     - mode: 755
-#    - require:
-#      - pkg: zentyal
+    - require:
+      - pkg: zentyal-dns
 
 {% if pillar.zentyal.dns.zones_new|d(False) != False %}
 {% for n,d in pillar.zentyal.dns.zones_new.iteritems() %}
@@ -21,8 +28,8 @@
     - source: {{ s }}
     - name: {{ t }}
     - mode: 644
-#    - require:
-#      - pkg: zentyal
+    - require:
+      - pkg: zentyal-dns
 {% endfor %}
 {% endif %}
 
@@ -34,18 +41,21 @@
     - source: {{ s }}
     - name: {{ i }}
     - mode: 644
-#    - require:
-#      - pkg: zentyal
+    - require:
+      - pkg: zentyal-dns
 {% endfor %}
 {% endif %}
 
+
+{% if pillar.zentyal.dns.zones_samba|d(False) != False %}
 
 /opt/samba4/private/dns_update_list.template:
   file.managed:
     - source: salt://roles/zentyal/dns/dns_update_list
     - mode: 644
+    - require:
+      - pkg: zentyal-samba
 
-{% if pillar.zentyal.dns.zones_samba|d(False) != False %}
 {% for n,d in pillar.zentyal.dns.zones_samba.iteritems() %}
 {% set s,t=d %}
 {{ n }}_file:
@@ -57,8 +67,8 @@
       - file: /opt/samba4/private/dns_update_list.template
     - require_in:
       - cmd: update_dynamic_list
-#    - require:
-#      - pkg: zentyal
+    - require:
+      - pkg: zentyal-samba
 {% endfor %}
 
 update_dynamic_list:

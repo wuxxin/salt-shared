@@ -2,12 +2,21 @@
 
 {% if salt['pillar.get']('zentyal:mail:status', "absent") == "present" %}
 
+zentyal-mail:
+  pkg.installed:
+    - pkgs:
+      - zentyal-mail
+      - zentyal-mailfilter
+      - zentyal-openchange
+    - require:
+      - pkg: zentyal
+
 /etc/zentyal/hooks/mail.postsetconf:
   file.managed:
     - source: salt://roles/zentyal/mail/mail.postsetconf
     - mode: 755
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
 
 {% for filename, pillaritem in 
   ('tls_policy', 'zentyal:mail:tls_policy'),
@@ -23,7 +32,7 @@
     - context:
         dataset: {{ salt['pillar.get'](pillaritem, ' ') }}
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
   cmd.run:
     - name: postmap /etc/postfix/{{ filename }}
     - watch:
@@ -39,21 +48,20 @@
     - source: salt://roles/zentyal/mail/dovecot-lda-year-append
     - mode: 755
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
 
 /usr/local/lib/dovecot-lda:
   file.managed:
     - source: salt://roles/zentyal/mail/dovecot-lda
     - mode: 755
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
 
 /etc/dovecot/extra.conf:
   file.managed:
     - source: salt://roles/zentyal/mail/extra.conf
     - require:
-      - pkg: zentyal
-
+      - pkg: zentyal-mail
 
 # todo:
 
@@ -78,7 +86,7 @@
     - after: 'START_DAEMON=yes'
     - backup: ''
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
 
 /etc/fetchmailrc:
   file.managed:
@@ -89,7 +97,7 @@
     - context:
         dataset: {{ salt['pillar.get']('zentyal:mail:fetchmail', ' ') }}
     - require:
-      - pkg: zentyal
+      - pkg: zentyal-mail
 
 fetchmail:
   service.running:
