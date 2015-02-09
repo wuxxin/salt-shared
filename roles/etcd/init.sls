@@ -6,7 +6,7 @@ include:
 {% load_yaml as config %}
 source:
   repo: 'https://github.com/coreos/etcd.git'
-  rev: 'v0.4.6'
+  rev: 'v2.0'
 build:
   check: 'etcd'
   bin_files: ['etcd']
