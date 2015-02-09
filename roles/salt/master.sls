@@ -99,7 +99,9 @@ set_salt_master_grain:
 salt-master-in-hosts:
   host.present:
     - name: salt
-    - ip: 127.0.0.1
+    # fixme default should be like present, but 1.) there may be no eth0 (modern udev), 2.) overrideable
+    # get eth0 address, warning this can backfire in case of dnsmasq and serving /etc/hosts entries
+    - ip: {{ salt['network.interface_ip']('eth0') }}
 
 salt_create_bash_aliases:
   file:
