@@ -1,11 +1,11 @@
 {
   "builders": [
   {
-    "vm_name": "trusty-simple",
+    "vm_name": "trusty",
     "type": "virtualbox",
     "http_directory": "http",
-    "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04.1-server-amd64.iso",
-    "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
+    "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/netboot/mini.iso",
+    "iso_checksum": "94eb14114323daed4251fe84c9cb4948c2210a856c58500b79a32feb1fea3702",
     "iso_checksum_type": "sha256",
     "guest_os_type": "Ubuntu_64",
     "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
@@ -16,7 +16,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -32,11 +32,11 @@
     ]
   },
   {
-    "vm_name": "trusty-simple",
+    "vm_name": "trusty",
     "type": "qemu",
     "http_directory": "http",
-    "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04.1-server-amd64.iso",
-    "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
+    "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/netboot/mini.iso",
+    "iso_checksum": "94eb14114323daed4251fe84c9cb4948c2210a856c58500b79a32feb1fea3702",
     "iso_checksum_type": "sha256",
     "ssh_username": "vagrant",
     "ssh_password": "vagrant",
@@ -44,7 +44,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic fb=false ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
       "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
       "initrd=/install/initrd.gz -- <enter>"

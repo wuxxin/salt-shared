@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "trusty"
+  config.vm.hostname = "trusty-mate"
+  config.vm.provider "libvirt" do |lv|
+    lv.memory = 2048
+    lv.cpus = 2
+    lv.graphics_type = "spice"
+    lv.video_type = "qxl"
+    lv.video_vram = 65536
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo sed -ire 's/^.*GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="nosplash nomodeset"/g' /etc/default/grub
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common spice-vdagent
+    sudo DEBIAN_FRONTEND=noninteractive apt-add-repository -y ppa:ubuntu-mate-dev/ppa
+    sudo DEBIAN_FRONTEND=noninteractive apt-add-repository -y ppa:ubuntu-mate-dev/trusty-mate
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ubuntu-mate-core ubuntu-mate-desktop
+  SHELL
+
+end
