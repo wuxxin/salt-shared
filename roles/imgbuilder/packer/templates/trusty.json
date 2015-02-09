@@ -14,18 +14,16 @@
     "ssh_password": "vagrant",
     "ssh_wait_timeout": "10000s",
     "boot_command": [
-      "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic ",
+      "<esc><esc><wait>",
+      "linux fb=false ",
       "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-      "initrd=/install/initrd.gz -- <enter>"
+      "initrd=initrd.gz -- <enter>"
     ],
     "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
     "disk_size": 11264,
+    "boot_wait": "10s",
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "512"],
       ["modifyvm", "{{.Name}}", "--cpus", "1"]
@@ -42,12 +40,12 @@
     "ssh_password": "vagrant",
     "ssh_wait_timeout": "10000s",
     "boot_command": [
-      "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic fb=false ",
+      "<esc><esc><wait>",
+      "linux fb=false ",
       "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-simple-http.cfg ",
       "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
-      "initrd=/install/initrd.gz -- <enter>"
+      "initrd=initrd.gz -- <enter>"
     ],
     "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
     "disk_size": 11264,
