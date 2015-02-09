@@ -43,8 +43,9 @@ qemu_conf_{{ a }}:
       - service: libvirt
 {% endfor %}
 
-{% for a in ['/etc/pki/libvirt-vnc', '/etc/pki/libvirt-spice'] %}
-symlinks_{{ a }}
+{# for a in ['/etc/pki/libvirt-vnc', '/etc/pki/libvirt-spice'] %}
+disabled for now
+symlinks_{{ a }}:
   file.symlink:
     - name: {{ a }}
     - source: /etc/pki/libvirt
@@ -52,7 +53,7 @@ symlinks_{{ a }}
       - libvirt: default_libvirt_keys
     - watch_in:
       - service: libvirt
-{% endfor %}
+{% endfor #}
 
 libvirt:
   pkg.installed:
