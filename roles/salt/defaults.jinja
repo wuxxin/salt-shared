@@ -43,10 +43,11 @@ master_d:
         cmd: hostname -f
 
 install:
-  type: git
-  rev: 2014.7
-  bootstrap: 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/v2014.10.30/bootstrap-salt.sh'
-  bootstrap_hash: 'sha256=3e7ee81d8d08b85227ba6eeaa46483fc9ab382d34088f80549835ea688b148f1'
+  type: normal
+  # type: git
+  # rev: 2014.7
+  bootstrap: 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/v2015.01.12/bootstrap-salt.sh'
+  bootstrap_hash: 'sha256=a96e679287430213203adcbbc4bf5e27cdb79c0a50aafed0f4a2553f347477ed'
 
 {% endload %}
 
