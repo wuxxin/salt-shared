@@ -8,7 +8,7 @@ fi
 target=$1
 master=$2
 minion=$3
-installer="Salt-Minion-2014.7.1-AMD64-Setup.exe"
+installer="Salt-Minion-2014.7.2-AMD64-Setup.exe"
 
 smbclient.py "$target" << EOF
 use C\$
