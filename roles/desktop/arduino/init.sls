@@ -10,13 +10,13 @@ arduino:
     - extracted
     - name: /home/{{ arduino_user }}
 {% if grains['cpuarch'] = 'x86_64' %}
-    - source: http://arduino.googlecode.com/files/arduino-1.0.4-linux64.tgz
+    - source: http://arduino.cc/download_handler.php?f=/arduino-1.6.0-linux64.tar.xz
 {% else %}
-    - source: http://arduino.googlecode.com/files/arduino-1.0.4-linux32.tgz
+    - source: http://arduino.cc/download_handler.php?f=/arduino-1.6.0-linux32.tar.xz
 {% endif %}
     - archive_format: tar
     - tar_options: z
-    - if_missing: /home/{{ arduino_user }}/arduino-1.0.4
+    - if_missing: /home/{{ arduino_user }}/arduino-1.6.0
     - require:
       - pkg: default-jre
 
