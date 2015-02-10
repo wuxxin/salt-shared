@@ -1,5 +1,5 @@
 
-{% for a in ['etcd'] %}
+{% for a in ['hugo'] %}
 /usr/local/bin/{{ a }}:
   file:
     - absent
