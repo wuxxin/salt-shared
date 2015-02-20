@@ -23,3 +23,8 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
+zentyal_first_backup:
+  cmd.run:
+    - name: /usr/share/zentyal/make-backup
+    - require:
+      - pkg: zentyal
