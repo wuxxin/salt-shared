@@ -1,6 +1,15 @@
 virtual machine based lvm snapshot backup and recovery using duplicity for backup
 =================================================================================
 
+ snapshot-backup.target.openwrt:
+   * openwrt router software deployment with usb attached harddisk, listens on tor
+   * so we can transport the backup back to a location 
+
+ duplicity need lots of temp space so put /tmp and /usr/tmp to the backup_config_cache
+ make patch duplicity to add paramiko proxy command support:
+   http://stackoverflow.com/questions/17681031/python-ssh-using-tor-proxy
+
+
 Creates and spawns a backup vm that get LVM snapshots of other vm's by the hypervisor host, 
 (automatically) attaches them as disks connected to vm,
 so the vm can backup these lvm snapshots according to the desires of the original vm,
