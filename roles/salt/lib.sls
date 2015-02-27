@@ -30,14 +30,12 @@ smm-makedir-{{ a }}:
     - makedirs: true
 {% endfor %}
 
-{% if salt_settings.install.type|d("normal") == "git" %}
 copy_bootstrap-salt.sh:
   file.managed:
     - name: {{ workdir }}/bootstrap-salt.sh
     - source: {{ salt_settings.install.bootstrap }}
     - source_hash: {{ salt_settings.install.bootstrap_hash }}
     - mode: 755
-{% endif %}
 
 {% for a in salt_config.file_roots.base %}
 copy_statedir_{{ a }}:

@@ -22,8 +22,8 @@ In addition it can
 
 Requirements:
 -------------
-  - a libvirt capable host
-  - a backup space (accessable via ssh/sftp or duplicity supported protocols
+  - a libvirt capable host and lvm for snapshoting
+  - a backup space (accessable via ssh/sftp or duplicity supported protocols)
 
 Setup:
 ------
@@ -57,7 +57,7 @@ Workflow:
   - roles.snapshot-backup.host.backup_run is run on the host via the salt scheduler added to the host pillar
     - for every config in /srv/snapshot-backup/client
       - pre snapshot work
-      - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot-backup.backupvm.mount_and_duply target_minion.id
+      - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot-backup.backupvm.mount_and_backup target_minion.id
         pillar: snapshot-backup:run:config 
       - post snapshot work
     - return the findings and work results via returner.smtp_return
@@ -132,8 +132,8 @@ snapshot-backup:
       pre_snapshot: "backupninja -n && hot-snapshot-prepare.sh pause && sync"
       on_snapshot: "hot-snapshot-prepare.sh continue"
       post_snapshot: "echo 'success' > /var/run/snapshot_ok"
-      pre_recovery: "echo 'installed blank machine is booted, prepare for restore and then shutdown' && shutdown"
-      end_recovery: "echo 'this is if needed run in backupvm via chroot'"
+      pre_recovery: "echo 'installed blank machine is booted, prepare for restore and then shutdown'"
+      end_recovery: "echo 'this is, if needed, run in backupvm via chroot to target'"
       post_recovery: "echo 'data is overwritten, machine booted again, with data, after restore, now reintegrate data, start daemons if neccecary'"
       backup:
         mount: "vg0/host_root"
@@ -148,10 +148,10 @@ snapshot-backup:
   client:
     status: "present"
     config:
+      type: "lvm_host" {# restricted to same host where snapshot-backup:host:present = True, backup_snapshot host will enforce this #}
       backup:
-        type: "lvm_host" {# restricted to same host where snapshot-backup:host:present = True, backup_snapshot host will enforce this #}
         host_device: "omoikane/host_root" {# the lvm device we are going to make a snapshot from #}
-        target_device: "vda" {# the desired target device name in the backupvm #}
+        target_device: "vdb" {# the desired target device name in the backupvm #}
         mount: "vda"
         source: "/"
         exclude:

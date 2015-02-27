@@ -1,22 +1,23 @@
-Vagrant.configure("2") do |config|
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
 
-  config.vm.synced_folder ".", "/vagrant", disabled: true
-
-  config.vm.define :{{ hostname }} do |vm|
-    vm.xm.box = "trusty-simple"
-    vm.vm.hostname = "{{ hostname }}"
+  config.vm.box = "trusty"
+  config.vm.hostname = "{{ hostname }}"
+  config.vm.provider "libvirt" do |lv|
+    lv.memory = 512
+    lv.cpus = 2
   end
 
-  config.vm.provider :libvirt do |libvirt|
-    libvirt.memory = 512
-    libvirt.cpus = 2
-    libvirt.video_type = 'qxl'
-    libvirt.volume_cache = 'none'
-  end
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo mkdir -p /etc/salt
+    sudo cp /vagrant/minion_id /etc/salt/
+  SHELL
 
   config.vm.provision :salt do |salt|
-    salt.minion_key = "salt/key/{{ hostname }}.pem"
-    salt.minion_pub = "salt/key/{{ hostname }}.pub"
+    salt.minion_pub = "{{ fqdn }}.pub"
+    salt.minion_key = "{{ fqdn }}.pem"
+    salt.run_highstate = true
   end
 
 end
