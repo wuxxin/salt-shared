@@ -26,7 +26,6 @@ docker:
     - source: salt://roles/docker/files/docker
     - context:
       docker: {{ pillar.docker|d({}) }}
-
   service.running:
     - enable: true
     - require:
@@ -34,5 +33,3 @@ docker:
       - sls: roles.docker.grub
     - watch:
       - file: docker
-
-
