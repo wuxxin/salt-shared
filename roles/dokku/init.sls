@@ -1,6 +1,5 @@
 include:
   - .ppa
-  - .build
   - ruby
   - nginx
   - roles.docker
