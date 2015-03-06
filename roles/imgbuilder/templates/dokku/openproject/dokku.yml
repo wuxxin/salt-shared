@@ -1,0 +1,16 @@
+source: https://github.com/abevoelker/docker-openproject
+data_container:
+  openproject_data:
+    - /mydata
+database:
+  postgresql:
+    - openproject
+env:
+  DOKKU_VERBOSE_DATABASE_ENV: "true"
+
+#docker-opts: '-h host.domain.com'
+
+#files:
+
+#prepare:
+

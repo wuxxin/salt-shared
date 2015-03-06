@@ -1,0 +1,10 @@
+source: https://github.com/bmorton/pghero_solo.git
+database:
+  postgresql:
+    - tracks
+#docker-opts:
+
+#files:
+
+#prepare:
+

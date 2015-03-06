@@ -1,0 +1,18 @@
+source: https://github.com/dperson/owncloud.git
+data_container:
+  owncloud_data:
+    - /var/www/owncloud/apps
+    - /var/www/owncloud/config
+    - /var/www/owncloud/data
+database:
+  mariadb:
+    - owncloud
+env:
+  DOKKU_VERBOSE_DATABASE_ENV: "true"
+
+docker-opts: '-h host.domain.com'
+
+#files:
+
+#prepare:
+

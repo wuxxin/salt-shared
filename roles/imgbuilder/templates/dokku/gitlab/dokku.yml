@@ -1,0 +1,22 @@
+source: https://github.com/sameersbn/docker-gitlab.git
+
+data_container:
+  gitlab_data:
+    - /home/git/data
+database:
+  postgresql:
+    - gitlab
+  redis: true
+ssl:
+  certificate: selfsigned
+  key: none
+env:
+  DOKKU_VERBOSE_DATABASE_ENV: "true"
+  DB_TYPE: postgres
+  SMTP_USER: gitlab@gitlab.somehost.domain'
+  SMTP_PASS: PASSWORD
+
+#docker-opts:
+
+#files:
+#execute:

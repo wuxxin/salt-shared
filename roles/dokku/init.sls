@@ -38,6 +38,7 @@ create_dokkurc:
     - append_if_not_found: True
     - content: |
         export POSTGRESQL_IMAGE="ayufan/dokku-alt-postgresql:9.3"
+        export DOKKU_VERBOSE_DATABASE_ENV=1
     - user: dokku
     - require: 
       - file: create_dokkurc

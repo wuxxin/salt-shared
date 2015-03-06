@@ -1,23 +1,17 @@
-source: https://github.com/ianblenke/docker-huginn.git
+source: https://github.com/TracksApp/tracks.git
 requisites:
   - libpq-dev
 data_container:
-  huggin_data:
+  tracks_data:
     - /app/public/uploads
 database:
   postgresql:
-    - huggin
+    - tracks
+ssl:
+  certificate: selfsigned
+  key:
 env:
   BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"
-  APP_SECRET_TOKEN: "whatever rake secret"
-  DATABASE_ADAPTER=mysql2
-  DATABASE_ENCODING=utf8
-  DATABASE_RECONNECT=true
-  DATABASE_NAME=huginn_development
-  DATABASE_POOL=5
-  DATABASE_USERNAME=root
-  DATABASE_PASSWORD=""
-
 #docker-opts:
 
 files:

@@ -1,0 +1,15 @@
+source: https://github.com/talexand/etherpad-lite-heroku.git
+database:
+  postgresql:
+    - etherpad
+env:
+  DOKKU_VERBOSE_DATABASE_ENV: "true"
+
+#docker-opts:
+
+files:
+  templates:
+    - "/settings.json": salt://roles/imgbuilder/templates/dokku/etherpad/settings.json.template
+
+#prepare:
+

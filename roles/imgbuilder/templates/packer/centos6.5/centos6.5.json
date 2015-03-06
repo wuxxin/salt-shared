@@ -1,0 +1,62 @@
+{
+  "builders": [
+    {
+    "type": "virtualbox",
+    "http_directory": "http",
+    "iso_url": "http://ftp-stud.fht-esslingen.de/pub/Mirrors/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+    "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+    "iso_checksum_type": "md5",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "boot_command": [
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+    ],
+    "shutdown_command": "sudo /sbin/halt -p",
+    "disk_size": 11264,
+    "headless": "true",
+
+    "hard_drive_interface": "sata",
+    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+    "guest_additions_sha256": "c76dd5ec86f61ad72263ab6d2405723b06badfc2fae57f83ffa5de96f553400d",
+    "guest_os_type": "RedHat_64",
+    "vboxmanage": [
+      [ "modifyvm", "{{.Name}}", "--memory", "512" ],
+      [ "modifyvm", "{{.Name}}", "--cpus", "1" ]
+    ]
+    },
+    {
+    "type": "qemu",
+    "http_directory": "http",
+    "iso_url": "http://ftp-stud.fht-esslingen.de/pub/Mirrors/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+    "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+    "iso_checksum_type": "md5",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "boot_command": [
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+    ],
+    "shutdown_command": "sudo /sbin/halt -p",
+    "disk_size": 11264,
+    "headless": "true",
+
+    "ssh_wait_timeout": "10000s",
+    "boot_wait": "10s",
+    "format": "qcow2",
+    "accelerator": "kvm",
+    "qemuargs": [[ "-m", "512m" ]]
+  }
+  ],
+  "provisioners": [{
+    "type": "shell",
+    "execute_command": "sudo sh {{.Path}}",
+    "scripts": [
+      "linux_script/base.sh",
+      "linux_script/vagrant.sh",
+      "linux_script/vmtools.sh",
+      "linux_script/grub.sh",
+      "linux_script/cleanup.sh",
+      "linux_script/zerodisk.sh"
+    ]
+  }]
+}
+

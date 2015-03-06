@@ -1,0 +1,15 @@
+source: https://github.com/adelton/docker-freeipa.git
+
+#data_container:
+#  freeipa_data:
+#    - /home/freeipa
+#database:
+ssl:
+  certificate: selfsigned
+  key: none
+env:
+
+docker-opts: '-h auth.in.ep3.at'
+
+#files:
+#execute:
