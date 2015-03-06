@@ -8,28 +8,33 @@ ruby-sinatra:
   pkg:
     - installed
 
-dokku-alt:
-  pkg:
-    - installed
-{% if grains['os'] == 'Ubuntu' %}
+{% if salt['pillar.get']('dokku:custom_storage', false) %}
+{% from 'storage/lib.sls' import storage_setup with context %}
+{{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
+{% endif %}
+
+dokku:
+  pkg.installed:
+    - name: dokku-alt
     - require:
+{% if grains['os'] == 'Ubuntu' %}
       - pkgrepo: dokku-alt_ppa
+{% endif %}
       - pkg: docker
       - pkg: nginx
       - cmd: default-ruby
       - pkg: ruby-sinatra
 
-{% endif %}
   service.running:
     - name: dokku-daemon
     - require:
-      - pkg: dokku-alt
+      - pkg: dokku
 
 create_dokkurc:
   file.touch:
     - name: /home/dokku/dokkurc
     - require:
-      - pkg: dokku-alt
+      - pkg: dokku
 
 /home/dokku/dokkurc:
   file.blockreplace:
@@ -43,7 +48,11 @@ create_dokkurc:
     - require: 
       - file: create_dokkurc
     - watch_in:
-      - service: dokku-alt
+      - service: dokku
+{#
+/home/dokku/VHOST:
+/home/dokku/HOSTNAME:
+#}
 
 {% if pillar['adminkeys_present']|d(False) %}
 {% for adminkey in pillar['adminkeys_present'] %}
@@ -73,3 +82,4 @@ install_dokku_plugin_{{ n }}:
     - target: /var/lib/dokku-alt/plugins/{{ n }}
 
 {% endfor %}
+
