@@ -15,7 +15,7 @@ ruby-sinatra:
 
 dokku:
   pkg.installed:
-    - name: dokku-alt
+    - name: dokku-alt-beta
     - require:
 {% if grains['os'] == 'Ubuntu' %}
       - pkgrepo: dokku-alt_ppa
