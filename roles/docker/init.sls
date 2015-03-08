@@ -7,6 +7,8 @@ include:
 {{ storage_setup(salt['pillar.get']('docker:custom_storage')) }}
 {% endif %}
 
+{% from "roles/docker/defaults.jinja" import settings as s with context %}
+
 docker:
   pkg.installed:
     - pkgs:
@@ -14,8 +16,12 @@ docker:
       - ca-certificates
       - lxc
       - cgroup-bin
+{% if s.dev_version == true %}
+      - docker.io
+{% else %}
       - lxc-docker
-{% if grains['os'] == 'Ubuntu' %}
+{% endif %}
+{% if grains['os_family'] == 'Debian' %}
     - require:
       - pkgrepo: docker_ppa
 {% endif %}
