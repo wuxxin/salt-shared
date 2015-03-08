@@ -5,5 +5,5 @@ docker:
       - lxc-docker*
       - docker.io
   service:
-    - stopped
+    - dead
 
