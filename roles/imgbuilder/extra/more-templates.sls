@@ -13,9 +13,13 @@ basebox-packer:
       - cmd: packer
       - pkg: git
 
+{#
+    - name: https://github.com/opscode/bento.git
+#}
+
 bento:
   git.latest:
-    - name: https://github.com/opscode/bento.git
+    - name: https://github.com/chef/bento.git
     - target: /home/imgbuilder/bento
     - user: imgbuilder
     - submodules: True
