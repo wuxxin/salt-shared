@@ -24,7 +24,7 @@ storage:
       <source>
       </source>
       <target>
-        <path>/srv/images/default</path>
+        <path>/srv/images/libvirt/images</path>
         <permissions>
           <mode>0700</mode>
           <owner>-1</owner>
@@ -51,8 +51,8 @@ custom_storage:
       require: "pkg: libvirt"
       require_in: "service: libvirt"
   relocate:
-    /var/lib/libvirt/images:
-      destination: /srv/images/default
+    /var/lib/libvirt:
+      destination: /srv/images
       copy_content: true
       require_in: "service: libvirt"
       require: "pkg: libvirt"
