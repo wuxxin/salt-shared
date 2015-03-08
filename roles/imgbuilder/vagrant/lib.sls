@@ -11,6 +11,9 @@
 
 {{ vagrant_detach(vagrantdir, user, libvirt_xml_file) }}
 
+newest dev version has many function already working
+https://github.com/saltstack/salt/blob/develop/salt/modules/virt.py
+
 {{ vm_move_network(libvirt_xml_file, s.libvirt.final_deploy_bridge) }}
 {{ vm_memsize_cpus(libvirt_xml_file, memsize, cpus) }}
 {% if spicify == True %}{{ vm_spicify(libvirt_xml_file) }}{% endif %}
