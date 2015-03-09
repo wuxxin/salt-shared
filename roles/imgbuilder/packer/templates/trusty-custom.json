@@ -1,7 +1,7 @@
 {
   "builders": [
   {
-    "vm_name": "trusty",
+    "vm_name": "trusty-custom",
     "type": "virtualbox",
     "http_directory": "http",
     "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/netboot/mini.iso",
@@ -32,7 +32,7 @@
     ]
   },
   {
-    "vm_name": "trusty",
+    "vm_name": "trusty-custom",
     "type": "qemu",
     "http_directory": "http",
     "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/netboot/mini.iso",

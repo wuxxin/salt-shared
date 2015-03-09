@@ -4,15 +4,16 @@
     "vm_name": "trusty",
     "type": "virtualbox",
     "http_directory": "http",
+
     "iso_url": "http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/netboot/mini.iso",
     "iso_checksum": "94eb14114323daed4251fe84c9cb4948c2210a856c58500b79a32feb1fea3702",
     "iso_checksum_type": "sha256",
-    "guest_os_type": "Ubuntu_64",
-    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-    "virtualbox_version_file": ".vbox_version",
+
     "ssh_username": "vagrant",
     "ssh_password": "vagrant",
     "ssh_wait_timeout": "10000s",
+
+    "boot_wait": "10s",
     "boot_command": [
       "<esc><esc><wait>",
       "linux fb=false ",
@@ -23,7 +24,10 @@
     ],
     "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
     "disk_size": 11264,
-    "boot_wait": "10s",
+
+    "guest_os_type": "Ubuntu_64",
+    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+    "virtualbox_version_file": ".vbox_version",
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "512"],
       ["modifyvm", "{{.Name}}", "--cpus", "1"]

@@ -1,6 +1,7 @@
 {
   "builders": [
     {
+    "vm_name": "centos6.5",
     "type": "virtualbox",
     "http_directory": "http",
     "iso_url": "http://ftp-stud.fht-esslingen.de/pub/Mirrors/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
@@ -9,7 +10,7 @@
     "ssh_username": "vagrant",
     "ssh_password": "vagrant",
     "boot_command": [
-      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos-6.5/ks.cfg<enter><wait>"
     ],
     "shutdown_command": "sudo /sbin/halt -p",
     "disk_size": 11264,
@@ -25,6 +26,7 @@
     ]
     },
     {
+    "vm_name": "centos6.5",
     "type": "qemu",
     "http_directory": "http",
     "iso_url": "http://ftp-stud.fht-esslingen.de/pub/Mirrors/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
@@ -33,7 +35,7 @@
     "ssh_username": "vagrant",
     "ssh_password": "vagrant",
     "boot_command": [
-      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos-6.5/ks.cfg<enter><wait>"
     ],
     "shutdown_command": "sudo /sbin/halt -p",
     "disk_size": 11264,
