@@ -41,6 +41,9 @@ update-mine:
       - service: apt-cacher-ng
 {% endif %}
 
+# FIXME: add some workarounds for https apt references, eg.
+# PassThroughPattern: private-ppa\.launchpad\.net:443$
+
 {% if salt['pillar.get']('apt-cacher-ng:server:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
 {{ storage_setup(salt['pillar.get']('apt-cacher-ng:server:custom_storage')) }}
