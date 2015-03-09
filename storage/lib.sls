@@ -340,9 +340,9 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 {{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
 {%- if data['copy_content']|d(true) %}
-    - name: x={{ item }}; if test -d $x; then cp -a -t {{ data['destination'] }} $x && rm -r $x; fi; ln -s -T {{ data['destination'] }} {{ item }}
+    - name: x={{ item }}; y=`basename $x`; if test -d $x; then cp -a -t {{ data['destination'] }} $x && rm -r $x; fi; ln -s -T {{ data['destination'] }}/$y {{ item }}
 {%- else %}
-    - name: rm -r {{ item }}; ln -s -T {{ data['destination'] }} {{ item }}
+    - name: rm -r {{ item }}; ln -s -T {{ data['destination'] }}/`basename {{ item }}` {{ item }}
 {%- endif %}
     - unless: test -L {{ item }}
     - onlyif: test -d {{ data['destination'] }}
