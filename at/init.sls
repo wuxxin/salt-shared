@@ -5,4 +5,4 @@ at:
     - name: atd
     - enable: true
     - require:
-      - pkg: atd
+      - pkg: at
