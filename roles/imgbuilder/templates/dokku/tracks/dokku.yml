@@ -3,8 +3,7 @@ volume:
   tracks_data:
     - /app/public/uploads
 database:
-  postgresql:
-    - tracks
+  postgresql: tracks
 ssl:
   certificate: selfsigned
   key:

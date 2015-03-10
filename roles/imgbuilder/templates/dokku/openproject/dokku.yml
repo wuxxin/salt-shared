@@ -1,12 +1,12 @@
-source: https://github.com/abevoelker/docker-openproject
+source: https://github.com/dockerimages/openproject
+branch: stable
 volume:
   openproject_data:
     - /mydata
 database:
-  postgresql:
-    - openproject
-env:
-  DOKKU_VERBOSE_DATABASE_ENV: "true"
+  postgresql: openproject
+#env:
+  # DOKKU_VERBOSE_DATABASE_ENV: "true"
 
 #docker-opts: '-h host.domain.com'
 

@@ -5,8 +5,7 @@ volume:
     - /var/www/owncloud/config
     - /var/www/owncloud/data
 database:
-  mariadb:
-    - owncloud
+  mariadb: owncloud
 env:
   DOKKU_VERBOSE_DATABASE_ENV: "true"
 

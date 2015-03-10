@@ -4,8 +4,7 @@ volume:
   gitlab_data:
     - /home/git/data
 database:
-  postgresql:
-    - gitlab
+  postgresql: gitlab
   redis: true
 ssl:
   certificate: selfsigned

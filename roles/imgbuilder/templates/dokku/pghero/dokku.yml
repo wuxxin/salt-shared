@@ -1,7 +1,6 @@
 source: https://github.com/bmorton/pghero_solo.git
 database:
-  postgresql:
-    - tracks
+  postgresql: tracks
 #docker-opts:
 
 #files:

@@ -1,9 +1,8 @@
 source: https://github.com/talexand/etherpad-lite-heroku.git
 database:
-  postgresql:
-    - etherpad
-env:
-  DOKKU_VERBOSE_DATABASE_ENV: "true"
+  postgresql: etherpad
+#env:
+#  DOKKU_VERBOSE_DATABASE_ENV: "true"
 
 #docker-opts:
 
