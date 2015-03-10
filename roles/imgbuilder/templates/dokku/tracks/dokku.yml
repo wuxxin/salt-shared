@@ -1,7 +1,5 @@
 source: https://github.com/TracksApp/tracks.git
-requisites:
-  - libpq-dev
-data_container:
+volume:
   tracks_data:
     - /app/public/uploads
 database:

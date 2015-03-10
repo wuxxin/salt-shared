@@ -1,7 +1,7 @@
 source: https://github.com/adelton/docker-freeipa.git
 branch: fedora-21
 
-#data_container:
+#volume:
 #  freeipa_data:
 #    - /home/freeipa
 #database:

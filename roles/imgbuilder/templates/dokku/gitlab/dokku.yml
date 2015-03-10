@@ -1,6 +1,6 @@
 source: https://github.com/sameersbn/docker-gitlab.git
 
-data_container:
+volume:
   gitlab_data:
     - /home/git/data
 database:

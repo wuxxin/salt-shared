@@ -1,5 +1,5 @@
 source: https://github.com/abevoelker/docker-openproject
-data_container:
+volume:
   openproject_data:
     - /mydata
 database:

@@ -1,5 +1,5 @@
 source: https://github.com/dperson/owncloud.git
-data_container:
+volume:
   owncloud_data:
     - /var/www/owncloud/apps
     - /var/www/owncloud/config
