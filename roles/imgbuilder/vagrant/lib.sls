@@ -1,24 +1,23 @@
+
 {% macro deploy_vagrant_vm(vagrantdir, fqdn, saltify=False, spicify=False, disksize=None, memsize=None, cpus=None, user=None) %}
 
 {% from roles.imgbuilder.defaults.jinja import settings as s %}
 {% if user == None %}{% set user= s.user %}{% endif %}
 {% set libvirt_xml_file= vagrantdir+ "/libvirt.xml" %}
+{% set id_file= vagrantdir+ "/id" %}
 
 {{ vagrant_up(vagrantdir, user) }}
-{% if saltify == True %}{{ saltify_running(vagrantdir, user, fqdn) }}{% endif %}
-{{ network_cleanup(vagrantdir, user) }}
+{% if saltify == True %}{{ vagrant_saltify_running(vagrantdir, user, fqdn) }}{% endif %}
+{{ vagrant_network_cleanup(vagrantdir, user) }}
 {{ vagrant_halt(vagrantdir, user) }}
+{{ vagrant_detach(vagrantdir, user, id_file) }}
 
-{{ vagrant_detach(vagrantdir, user, libvirt_xml_file) }}
+{{ vm_memsize_cpus(id_file, memsize, cpus) }}
 
-newest dev version has many function already working
-https://github.com/saltstack/salt/blob/develop/salt/modules/virt.py
-
-{{ vm_move_network(libvirt_xml_file, s.libvirt.final_deploy_bridge) }}
-{{ vm_memsize_cpus(libvirt_xml_file, memsize, cpus) }}
+{{ vm_dump_xml(vagrantdir, user, id_file, libvirt_xml_file) }}
 {% if spicify == True %}{{ vm_spicify(libvirt_xml_file) }}{% endif %}
+{# vm_move_network(libvirt_xml_file, s.libvirt.final_deploy_bridge) #}
 {{ vm_copy_resize(libvirt_xml_file, fqdn, s.libvirt.final_deploy_lvm, disksize) }}
-
 {{ vm_update(libvirt_xml_file, user, start=true, autostart=true) }}
 
 {% endmacro %}
@@ -42,7 +41,7 @@ https://github.com/saltstack/salt/blob/develop/salt/modules/virt.py
 {% endmacro %}
 
 
-{% macro saltify_running(target, user, fqdn) %}
+{% macro vagrant_saltify_running(target, user, fqdn) %}
 {% from "roles/salt/defaults.jinja" import settings as salt_settings with context %}
 
 template_dir_salt_key_{{ fqdn }}:
@@ -74,14 +73,13 @@ transfer_and_bootstrap_{{ fqdn }}:
   cmd.run:
     - cwd: {{ target }}
     - user: {{ user }}
-    - name: 'vagrant rsync && vagrant ssh -c "/bin/bash" -- -c "cd /vagrant/salt && sudo ./bootstrap-salt.sh something"'
+    - name: 'vagrant rsync && vagrant ssh -c "/bin/bash" -- -c "cd /vagrant/salt && sudo ./bootstrap-salt.sh -X"'
     - require:
       - file: download_bootstrap_salt_{{ fqdn }}
-
 {% endmacro %}
   
 
-{% macro network_cleanup(target, user) %}
+{% macro vagrant_network_cleanup(target, user) %}
 "{{ target }}/network-cleanup.sh":
   file.managed:
     - user: {{ user }}
@@ -93,56 +91,59 @@ transfer_and_bootstrap_{{ fqdn }}:
     - name: 'vagrant rsync && vagrant ssh -c "/bin/bash" -- -c "cd /vagrant && sudo ./network-cleanup.sh"'
     - require:
       - file: "{{ target }}/network-cleanup.sh"
-
 {% endmacro %}
 
 
-{% macro vagrant_detach(target, user, libvirt_xml_file) %}
+{% macro vagrant_detach(target, user, id_file) %}
 {{ vagrant_halt(target, user) }}
 
-{{ target }}-vm-detach:
+{{ target }}-save-current-id:
   cmd.run:
-    - name: virsh dumpxml `cat {{ target }}.vagrant/machines/default/libvirt/id` --migratable > {{ libvirt_xml_file }}
-    - creates: {{ libvirt_xml_file }}
-    - require:
-      - cmd: {{ target }}-vm-halt
+    - name: cp {{ target }}.vagrant/machines/default/libvirt/id {{ id_file }}
+
+{{ target }}-vm-detach:
   file.absent:
     - name: {{ target }}/.vagrant
     - require:
-      - cmd: {{ target }}-vm-detach
-
-{{ target }}-vm-xmlfile:
-  file.managed:
-    - name: {{ libvirt_xml_file }}
-    - file_mode: 0660
-    - user: {{ user }}
-    - require: 
-      - file: {{ target }}-vm-detach
-
+      - cmd: {{ target }}-save-current-id
 {% endmacro %}
 
 
-{% macro vm_move_network(xmlfile, target_network) %}
+{% macro vm_memsize_cpus(idfile, memsize, cpus) %}
 
-{% if target_network != 'default' %}
-{{ xmlfile }}-vm_move_network:
-  file.replace:
-    - name: {{ xmlfile }}/libvirt.xml
-    - pattern: |
-        <interface type=.+<mac address=.([0-9a-f:]+).+</interface>
-    - repl: |
-        <interface type="bridge"><mac address="\1"><source bridge="{{ target_network }}"/></interface>
-    - flags: ['MULTILINE']
-    - bufsize: 'file'
-    - user: {{ user }}
+{% if memsize is not None %}
+change_memsize_{{ idfile }}:
+  module.run:
+    - name: virt.setmem
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - memory: {{ memsize }}
+    - config: True
+{% endif %}
+
+{% if cpus is not None %}
+change_cpus_{{ idfile }}:
+  module.run:
+    - name: virt.setvcpus
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - vcpus: {{ cpus }}
+    - config: True
 {% endif %}
 
 {% endmacro %}
 
 
-{% macro vm_memsize_cpus(xmlfile,memsize,cpus) %}
+{% macro vm_dump_xml(target, user, id_file, libvirt_xml_file) %}
 
-# noop currently
+{{ target }}-dump_xml:
+  cmd.run:
+    - name: virsh dumpxml `cat {{ id_file }}` --migratable > {{ libvirt_xml_file }}
+    - creates: {{ libvirt_xml_file }}
+  file.managed:
+    - name: {{ libvirt_xml_file }}
+    - file_mode: 0660
+    - user: {{ user }}
+    - require:
+      - cmd: {{ target }}-dump_xml
 
 {% endmacro %}
 
@@ -165,6 +166,24 @@ transfer_and_bootstrap_{{ fqdn }}:
 {% endmacro %}
 
 
+{% macro vm_move_network(xmlfile, target_network) %}
+
+{% if target_network != 'default' %}
+{{ xmlfile }}-vm_move_network:
+  file.replace:
+    - name: {{ xmlfile }}
+    - pattern: |
+        <interface type=.+<mac address=.([0-9a-f:]+).+</interface>
+    - repl: |
+        <interface type="bridge"><mac address="\1"><source bridge="{{ target_network }}"/></interface>
+    - flags: ['MULTILINE']
+    - bufsize: 'file'
+    - user: {{ user }}
+{% endif %}
+
+{% endmacro %}
+
+
 {% macro vm_copy_resize(xmlfile, fqdn, s.libvirt.final_deploy_lvm, disksize) %}
 
 "{{ target }}/image-file-to-lvm.sh":
@@ -173,17 +192,32 @@ transfer_and_bootstrap_{{ fqdn }}:
     - source:  salt://roles/imgbuilder/vagrant/files/image-file-to-lvm.sh
     - mode: 755
   cmd.run:
-    - name: '{{ target }}/image-file-to-lvm.sh {{ xmlfile }} {{ fqdn }} s.libvirt.final_deploy_lvm'
+    - name: '{{ target }}/image-file-to-lvm.sh {{ xmlfile }} {{ fqdn }} s.libvirt.final_deploy_lvm {{ disksize }}'
 
 {% endmacro %}
 
 
-{% macro vm_update(xmlfile, user, start=true, autostart=true) %}
+
+{% macro vm_update(xmlfile, idfile, user, start=true, autostart=true) %}
 
 {{ xmlfile }}-vm-update:
   cmd.run:
     - name: virsh define {{ xmlfile }}
 
-{{ set_autostart(libvirt_xml_file, autostart='on') }}
+{% set auto_state='on' if autostart else 'off' %}
+change_autostart_{{ idfile }}:
+  module.run:
+    - name: virt.set_autostart
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - state: {{ auto_state }}
+    - require:
+      - cmd: {{ xmlfile }}-vm-update
+
+start_{{ idfile }}:
+  module.run:
+    - name: virt.start
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - require:
+      - module: change_autostart_{{ idfile }}
 
 {% endmacro %}

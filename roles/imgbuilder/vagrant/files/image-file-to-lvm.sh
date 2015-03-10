@@ -42,5 +42,3 @@ for disk in `cat $xmlfile | xmlstarlet sel -I -t -m "domain//disk[@type='file']"
 done
 
 # remove old file_harddisks from xml and add new lvm_harddisks to xml
-
-    
