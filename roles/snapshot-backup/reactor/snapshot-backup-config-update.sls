@@ -1,5 +1,5 @@
 snapshot-backup-config-update:
-  local.cmd.state.sls:
+  local.state.sls:
     - tgt: snapshot-backup:host:status:present
     - expr_form: pillar
     - name: roles.snapshot-backup.host.config-update.sls
