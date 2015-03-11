@@ -1,9 +1,8 @@
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
-
 {% set base= s.image_base+ "/templates/git-buildpackage" %}
-{% set name= "dokku-alt" %}
-{% set source= "https://github.com/dokku-alt/dokku-alt.git" %}
+
+{% macro buildpackage(name, source) %}
 
 clone_{{ name }}:
   git.latest:
@@ -19,3 +18,4 @@ build_{{ name }}:
     - user: {{ s.user }}
     - group: {{ s.user }}
 
+{% endmacro %}
