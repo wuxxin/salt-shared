@@ -6,10 +6,10 @@ volume:
     - /uploads
 database:
   postgresql: openproject
-  memcache: true
-ssl:
-  certificate: selfsigned
-  key:
+  memcached: openproject
+#ssl:
+#  certificate: selfsigned
+#  key:
 env:
   BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"
   BUNDLE_WITH: "production:postgres"
@@ -30,6 +30,18 @@ files:
     config/database.yml: |
         production:
           url: <%= ENV['DATABASE_URL'] %>
+    .buildpacks: |
+        https://github.com/heroku/heroku-buildpack-nodejs.git#v70
+        https://github.com/heroku/heroku-buildpack-ruby.git#v133
   append:
     Gemfile: |
         gem "rails_12factor", group: :production
+    .gitignore: |
+        /*.bak
+  comment:
+    .gitignore: ^/?config/database.yml
+    Gemfile: ^ *gem "mysql2"
+
+pre_commit:
+  - 'bundle install --without="development test selenium mysql sqlite"'
+

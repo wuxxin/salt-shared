@@ -6,7 +6,7 @@ volume:
     - /uploads
 database:
   postgresql: loomio
-  memcache: true
+  memcached: loomio
 ssl:
   certificate: selfsigned
   key:
