@@ -65,17 +65,21 @@ dokku_access_add_{{ adminkey }}:
 {% endif %}
 
 {% set plugin_list=[
-('dokku-rethinkdb-plugin', 'https://github.com/stuartpb/dokku-rethinkdb-plugin.git'),
-('dokku-elasticsearch-plugin', 'https://github.com/jezdez/dokku-elasticsearch-plugin.git'),
-('dokku-alt-memcached', 'https://github.com/maccman/dokku-alt-memcached'),
+('dokku-rethinkdb', 'https://github.com/stuartpb/dokku-rethinkdb-plugin.git'),
+('dokku-elasticsearch', 'https://github.com/jezdez/dokku-elasticsearch-plugin.git'),
+('link', 'https://github.com/rlaneve/dokku-link.git'),
+('dokku-memcached', 'https://github.com/jezdez/dokku-memcached-plugin.git'),
 ('dokku-docker-options', 'https://github.com/dyson/dokku-docker-options.git'),
-('dokku-timezone-plugin', 'https://github.com/udzura/dokku-timezone-plugin'),
+('dokku-timezone', 'https://github.com/udzura/dokku-timezone-plugin.git'),
 ('dokku-apt', 'https://github.com/F4-Group/dokku-apt.git'),
-('dokku-jenkins', 'https://github.com/alessio/dokku-jenkins'),
-('dokku-bash-completion', 'https://github.com/osv/dokku-bash-completion'),
+('dokku-jenkins', 'https://github.com/alessio/dokku-jenkins.git'),
+('dokku-bash-completion', 'https://github.com/osv/dokku-bash-completion.git'),
 ] %}
 
-{# ('dokku-django', 'https://github.com/mirmedia/dokku-django'), #}
+{#
+ ('dokku-alt-memcached', 'https://github.com/maccman/dokku-alt-memcached'),
+ ('dokku-django', 'https://github.com/mirmedia/dokku-django'),
+#}
 
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
@@ -85,3 +89,7 @@ install_dokku_plugin_{{ n }}:
 
 {% endfor %}
 
+
+dokku_install_plugins:
+  cmd.run:
+    - name: dokku plugins-install
