@@ -2,10 +2,11 @@
 {% set base= s.image_base+ "/templates/dokku" %}
 
 
-{% macro dokku(command, param1, param2) %}
-"{{ command }}_{{ param1 }}_{{ param2 }}":
+{% macro dokku(command, param1, param2=None) %}
+{% set opt_para="" if param2 == None else param2 %}
+"{{ command }}_{{ param1 }}_{{ opt_para }}":
   cmd.run:
-    - name: dokku {{ command }} {{ param1 }} {{ param2 }}
+    - name: dokku {{ command }} {{ param1 }} {{ opt_para }}
 
 {% endmacro %}
 
@@ -33,12 +34,12 @@ branch: branchname
 {% set data=orgdata %}
 {% endif %}
 
-name_checkout:
+{{ name }}_checkout:
   git.latest:
     - name: {{ data['source'] }}
-    - target: {{ s.base }}/{{ name }}
+    - target: {{ base }}/{{ name }}
 {% if data['branch'] is defined %}
-    - branch: {{ data ['branch'] }}
+    - rev: {{ data ['branch'] }}
 {% endif %}
     - user: {{ s.user }} 
 
@@ -54,7 +55,7 @@ volume:
 #}
 
   {% for cname, cpaths in data['volume'].iteritems() %}
-{{ dokku("volume:create", cname, cpaths.join(',')) }}
+{{ dokku("volume:create", cname, cpaths|join(',')) }}
 {{ dokku("volume:link", name, cname) }}
   {% endfor %}
 {% endif %}
@@ -69,11 +70,11 @@ database:
 #}
 
   {% for dbtype, dbname in data['database'].iteritems() %}
-    {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch' ] %}
+    {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch', 'memcached' ] %}
 {{ dokku(dbtype+ ":create", dbname) }}
 {{ dokku(dbtype+ ":link", name, dbname) }}
     {% endif %}
-    {% if dbtype in ['memcached', 'redis'] %}
+    {% if dbtype in ['redis'] %}
 {{ dokku(dbtype+ ":create", name) }}
     {% endif %}
   {% endfor %}
@@ -91,7 +92,7 @@ env:
   {% for ename, edata in data['env'].iteritems() %}
   {% do newenv.append(ename+'='+edata) %}
   {% endfor %}
-  {{ dokku("config:set", name, newenv.join(' ')) }}
+  {{ dokku("config:set", name, newenv|join(' ')) }}
 {% endif %}
 
 
@@ -144,31 +145,34 @@ files:
 
 {% if data['files']['content'] is defined %}
   {% for fname, fcontent in data['files']['content'].iteritems() %}
-  {% do files_touched.add([fname]) %}
-{{ workdir }}/{{ fname }}:
+  {% do files_touched.append(fname) %}
+content_{{ base }}/{{ name }}/{{ fname }}:
   file.managed:
-    - content: |
-{{ fcontent }}.ident(8, true)
+    - name: {{ base }}/{{ name }}/{{ fname }}
+    - contents: |
+{{ fcontent|indent(8, true) }}
     - user: {{ s.user }} 
   {% endfor %}
 {% endif %}
 
 {% if data['files']['append'] is defined %}
   {% for fname, fappend in data['files']['append'].iteritems() %}
-  {% do files_touched.add([fname]) %}
-{{ workdir }}/{{ fname }}:
+  {% do files_touched.append(fname) %}
+append_{{ base }}/{{ name }}/{{ fname }}:
   file.append:
-    - content: |
-{{ fappend }}.ident(8, true)
+    - name: {{ base }}/{{ name }}/{{ fname }}
+    - text: |
+{{ fappend|indent(8, true) }}
     - user: {{ s.user }} 
   {% endfor %}
 {% endif %}
 
 {% if data['files']['comment'] is defined %}
   {% for fname, fregex in data['files']['comment'].iteritems() %}
-  {% do files_touched.add([fname]) %}
-{{ workdir }}/{{ fname }}:
+  {% do files_touched.append(fname) %}
+comment_{{ base }}/{{ name }}/{{ fname }}:
   file.comment:
+    - name: {{ base }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
     - user: {{ s.user }} 
   {% endfor %}
@@ -176,14 +180,26 @@ files:
 
 {% if data['files']['templates'] is defined %}
   {% for fname, fsource in data['files']['templates'].iteritems() %}
-  {% do files_touched.add([fname]) %}
-{{ workdir }}/{{ fname }}:
+  {% do files_touched.append(fname) %}
+managed_{{ base }}/{{ name }}/{{ fname }}:
   file.managed:
+    - name: {{ base }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
     - user: {{ s.user }} 
   {% endfor %}
 {% endif %}
 
+{% endif %}
+
+
+{% if data['pre_commit'] is defined %}
+  {% for fname in data['pre_commit'] %}
+pre_commit_{{ fname }}:
+  cmd.run:
+    - cwd: {{ base }}/{{ name }}
+    - name: {{ fname }}
+    - user: {{ s.user }}
+  {% endfor %}
 {% endif %}
 
 
@@ -194,27 +210,28 @@ files:
 
 git_add_user_{{ name }}:
   cmd.run:
-    - cwd: {{ s.base }}/{{ name }}
+    - cwd: {{ base }}/{{ name }}
     - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
     - user: {{ s.user }} 
 
 git_add_and_commit_{{ name }}:
   cmd.run:
-    - cwd: {{ s.base }}/{{ name }}
-    - name: git add {{ fname.join(' ') }} && git commit -a -m "modified by salt"
+    - cwd: {{ base }}/{{ name }}
+    - name: git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt"
     - user: {{ s.user }} 
 
-git_add_remote_{{ name }}_{{ branch }}:
+git_add_remote_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ s.base }}/{{ name }}
+    - cwd: {{ base }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
     - user: {{ s.user }} 
 
-push_{{ name }}_{{ branch }}:
+{#
+push_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ s.base }}/{{ name }}
+    - cwd: {{ base }}/{{ name }}
     - name: git push dokku {{ ourbranch }}:master
-    - user: {{ s.user }} 
+#}
 
 {% endmacro %}
 
