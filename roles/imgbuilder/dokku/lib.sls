@@ -3,7 +3,7 @@
 
 
 {% macro dokku(command, param1, param2) %}
-"{{ command }}_{{ param1 }}_{{ param2 }}:
+"{{ command }}_{{ param1 }}_{{ param2 }}":
   cmd.run:
     - name: dokku {{ command }} {{ param1 }} {{ param2 }}
 
@@ -11,19 +11,27 @@
 
 
 {% macro dokku_pipe(pipedata, command, param1) %}
-"{{ command }}_{{ param1 }}:
+"{{ command }}_{{ param1 }}":
   cmd.run:
     - name: echo -e '{{ pipedata }}' | dokku {{ command }} {{ param1 }}
 
 {% endmacro %}
 
 
-{% macro create_container(name, data) %}
+{% macro create_container(name, orgdata) %}
 
 {#
+orgdata: loaded yml dict or filenamestring to import_yaml 
+data: loaded yml dict
+---
 source: url
 branch: branchname
 #}
+{% if orgdata is string %}
+{% import_yaml orgdata as data %}
+{% else %}
+{% set data=orgdata %}
+{% endif %}
 
 name_checkout:
   git.latest:
@@ -32,6 +40,7 @@ name_checkout:
 {% if data['branch'] is defined %}
     - branch: {{ data ['branch'] }}
 {% endif %}
+    - user: {{ s.user }} 
 
 {{ dokku("create",name) }}
 
@@ -125,34 +134,56 @@ files:
         gem "pg", group: :postgres
         gem "rails_12factor", group: :production
         gem "puma", group: :production
+  comment:
+    .gitignore: ^(config/site.yml)|(config/database.yml)
   templates:
     /config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
 #}
 
+{% set files_touched=[] %}
+
 {% if data['files']['content'] is defined %}
   {% for fname, fcontent in data['files']['content'].iteritems() %}
-{{ workdir }}/fname:
+  {% do files_touched.add([fname]) %}
+{{ workdir }}/{{ fname }}:
   file.managed:
     - content: |
 {{ fcontent }}.ident(8, true)
+    - user: {{ s.user }} 
   {% endfor %}
 {% endif %}
 
 {% if data['files']['append'] is defined %}
   {% for fname, fappend in data['files']['append'].iteritems() %}
-{{ workdir }}/fname:
+  {% do files_touched.add([fname]) %}
+{{ workdir }}/{{ fname }}:
   file.append:
     - content: |
 {{ fappend }}.ident(8, true)
+    - user: {{ s.user }} 
+  {% endfor %}
+{% endif %}
+
+{% if data['files']['comment'] is defined %}
+  {% for fname, fregex in data['files']['comment'].iteritems() %}
+  {% do files_touched.add([fname]) %}
+{{ workdir }}/{{ fname }}:
+  file.comment:
+    - regex: {{ fregex }}
+    - user: {{ s.user }} 
   {% endfor %}
 {% endif %}
 
 {% if data['files']['templates'] is defined %}
-  {% for fname, fsource in data['files']['append'].iteritems() %}
-{{ workdir }}/fname:
+  {% for fname, fsource in data['files']['templates'].iteritems() %}
+  {% do files_touched.add([fname]) %}
+{{ workdir }}/{{ fname }}:
   file.managed:
     - source: {{ fsource }}
+    - user: {{ s.user }} 
   {% endfor %}
+{% endif %}
+
 {% endif %}
 
 
@@ -161,15 +192,29 @@ files:
 {% set ourbranch=data['branch'] %}
 {% endif %}
 
+git_add_user_{{ name }}:
+  cmd.run:
+    - cwd: {{ s.base }}/{{ name }}
+    - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
+    - user: {{ s.user }} 
+
+git_add_and_commit_{{ name }}:
+  cmd.run:
+    - cwd: {{ s.base }}/{{ name }}
+    - name: git add {{ fname.join(' ') }} && git commit -a -m "modified by salt"
+    - user: {{ s.user }} 
+
 git_add_remote_{{ name }}_{{ branch }}:
   cmd.run:
     - cwd: {{ s.base }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
+    - user: {{ s.user }} 
 
 push_{{ name }}_{{ branch }}:
   cmd.run:
     - cwd: {{ s.base }}/{{ name }}
     - name: git push dokku {{ ourbranch }}:master
+    - user: {{ s.user }} 
 
 {% endmacro %}
 
