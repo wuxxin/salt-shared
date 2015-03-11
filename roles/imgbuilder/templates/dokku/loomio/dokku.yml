@@ -1,23 +1,24 @@
-source: https://github.com/opf/openproject.git
-branch: stable
+source: https://github.com/loomio/loomio.git
+#branch: master
 
 volume:
-  openproject_data:
+  loomio_data:
     - /uploads
 database:
-  postgresql: openproject
+  postgresql: loomio
   memcache: true
 ssl:
   certificate: selfsigned
   key:
 env:
-  BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"
-  BUNDLE_WITH: "production:postgres"
-  attachments_storage_path: "/uploads"
-  rails_cache_store: "memcache"
-  cache_namespace: "openproject"
+  RACK_ENV: production
+  RAILS_ENV: production
+  DEVISE_SECRET: `openssl rand -base64 48`
+  SECRET_COOKIE_TOKEN: `openssl rand -base64 48`
+  CANONICAL_HOST: loomio.omoikane.ep3.at
+  TLD_LENGTH: 3
 
-#docker-opts: '-h host.domain.com'
+#docker-opts: '-h test.domain.com'
 
 files:
   content:
@@ -33,3 +34,5 @@ files:
   append:
     /Gemfile: |
         gem "rails_12factor", group: :production
+  templates:
+    /config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
