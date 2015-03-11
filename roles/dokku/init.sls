@@ -15,7 +15,9 @@ ruby-sinatra:
 
 dokku:
   pkg.installed:
-    - name: dokku-alt-beta
+    - sources:
+      - "dokku-alt-beta": "salt://dokku-alt-beta-0.3.10-144-g82deb5a-amd64.deb"
+{#    - name: dokku-alt-beta #}
     - require:
 {% if grains['os'] == 'Ubuntu' %}
       - pkgrepo: dokku-alt_ppa

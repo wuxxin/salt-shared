@@ -1,5 +1,5 @@
-# dokku support
-###############
+{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
+{% set base= s.image_base+ "/templates/dokku" %}
 
 
 {% macro dokku(command, param1, param2) %}
@@ -25,9 +25,14 @@ source: url
 branch: branchname
 #}
 
-.) make a workdir
-.) checkout data['source'] branch data['branch'] to workdir
-{% if data['branch'] is defined %}{% endif %}
+name_checkout:
+  git.latest:
+    - name: {{ data['source'] }}
+    - target: {{ s.base }}/{{ name }}
+{% if data['branch'] is defined %}
+    - branch: {{ data ['branch'] }}
+{% endif %}
+
 {{ dokku("create",name) }}
 
 
@@ -151,25 +156,25 @@ files:
 {% endif %}
 
 
-git_add_remote_{{ name }}_{{ branch }}:
-  cmd.run:
-    - cwd: {{ workdir }}
-    - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
-
 {% set ourbranch='master' %}
 {% if data['branch'] is defined %}
 {% set ourbranch=data['branch'] %}
 {% endif %}
 
+git_add_remote_{{ name }}_{{ branch }}:
+  cmd.run:
+    - cwd: {{ s.base }}/{{ name }}
+    - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
+
 push_{{ name }}_{{ branch }}:
   cmd.run:
-    - cwd: {{ workdir }}
+    - cwd: {{ s.base }}/{{ name }}
     - name: git push dokku {{ ourbranch }}:master
 
 {% endmacro %}
 
 
-{% macro destroy_container(data) %}
+{% macro destroy_container(name) %}
 
 {% endmacro %}
 
