@@ -21,15 +21,15 @@ env:
 
 files:
   content:
-    /Procfile: |
+    Procfile: |
         web: bundle exec unicorn -p $PORT -c ./config/unicorn.rb
         worker: bundle exec rake jobs:work
         backup: ./packaging/scripts/backup
         check: ./packaging/scripts/check
         seed: bundle exec rake db:seed
-    /config/database.yml: |
+    config/database.yml: |
         production:
           url: <%= ENV['DATABASE_URL'] %>
   append:
-    /Gemfile: |
+    Gemfile: |
         gem "rails_12factor", group: :production

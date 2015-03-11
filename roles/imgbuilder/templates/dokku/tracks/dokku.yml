@@ -13,19 +13,17 @@ env:
 
 files:
   content:
-    /Procfile: |
+    Procfile: |
         web: RAILS_ENV=${RACK_ENV:-production} rake db:migrate && bundle exec puma -t 5:5 -p ${PORT:-8080} -e ${RAILS_ENV}
-    /config/database.yml: |
+    config/database.yml: |
         production:
           url: <%= ENV['DATABASE_URL'] %>
   append:
-    /Gemfile: |
+    Gemfile: |
         gem "pg", group: :postgres
         gem "rails_12factor", group: :production
         gem "puma", group: :production
+  comment:
+    .gitignore: ^(config/site.yml)|(config/database.yml)
   templates:
-    /config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
-execute:
-  - config: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
-  - bundle: bundle install --without mysql:sqlite:test:development:selenium
-  - commit: git add Procfile config/site.yml config/database.yml && git commit -a -m "modified by salt"
+    config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"

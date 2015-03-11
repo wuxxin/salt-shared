@@ -8,7 +8,7 @@ database:
 
 files:
   templates:
-    - "/settings.json": salt://roles/imgbuilder/templates/dokku/etherpad/settings.json.template
+    settings.json: salt://roles/imgbuilder/templates/dokku/etherpad/settings.json.template
 
 #prepare:
 
