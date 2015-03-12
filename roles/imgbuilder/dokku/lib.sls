@@ -6,7 +6,7 @@
 {% set opt_para="" if param2 == None else param2 %}
 "{{ command }}_{{ param1 }}_{{ opt_para }}":
   cmd.run:
-    - name: dokku {{ command }} "{{ param1 }}" "{{ opt_para }}"
+    - name: dokku {{ command }} {{ param1 }} {{ opt_para }}
 {% endmacro %}
 
 
@@ -131,13 +131,26 @@ volume:
 {#
 database:
   mariadb: databasecontainername
+  [mariadb:]
+    - first_database
+    - second_database
   postgresql: databasecontainername
+  [postgresql:]
+    - first_database
+    - second_database
   redis: true
 #}
   {% for dbtype, dbname in data['database'].iteritems() %}
     {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch', 'memcached' ] %}
+      {% if dbname is string %}
 {{ dokku(dbtype+ ":create", dbname) }}
 {{ dokku(dbtype+ ":link", name, dbname) }}
+      {% else %}
+        {% for singledb in dbname %}
+{{ dokku(dbtype+ ":create", singledb) }}
+{{ dokku(dbtype+ ":link", name, singledb) }}
+        {% endfor %}
+      {% endif %}
     {% endif %}
     {% if dbtype in ['redis'] %}
 {{ dokku(dbtype+ ":create", name) }}
@@ -303,7 +316,7 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_files(name, data, files_touched) }}
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
-{# dokku_git_push(name, data) #}
+{{ dokku_git_push(name, data) }}
 {{ dokku_post_commit(name, data) }}
 
 {% endmacro %}
