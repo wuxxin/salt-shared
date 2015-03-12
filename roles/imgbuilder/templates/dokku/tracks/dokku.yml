@@ -1,4 +1,5 @@
-source: https://github.com/TracksApp/tracks.git
+source:
+  url: https://github.com/TracksApp/tracks.git
 volume:
   tracks_data:
     - /app/public/uploads
@@ -6,9 +7,9 @@ database:
   postgresql: tracks
 ssl:
   certificate: selfsigned
-  key:
 env:
   BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"
+#hostname: tracks.omoikane.ep3.at
 #docker-opts:
 
 files:
@@ -26,4 +27,4 @@ files:
   comment:
     .gitignore: ^(config/site.yml)|(config/database.yml)
   templates:
-    config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
+    config/site.yml: "salt://roles/imgbuilder/templates/dokku/tracks/site.yml"

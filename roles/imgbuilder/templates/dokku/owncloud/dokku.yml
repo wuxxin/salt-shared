@@ -1,17 +1,85 @@
-source: https://github.com/dperson/owncloud.git
+source:
+  url: https://github.com/owncloud/core.git
+  rev: stable8
 volume:
   owncloud_data:
-    - /var/www/owncloud/apps
-    - /var/www/owncloud/config
-    - /var/www/owncloud/data
+    - /app/data
 database:
-  mariadb: owncloud
+  postgresql: owncloud
 env:
-  DOKKU_VERBOSE_DATABASE_ENV: "true"
+  DB_TYPE: pgsql
+  DB_HOST: postgresql
+  DATA_DIR: /app/data
+  TIMEZONE: "{{ salt['pillar.get']('timezone', 'UTC') }}"
+ssl:
+  certificate: selfsigned
+hostname: owncloud.omoikane.ep3.at
+files:
+  content:
+    apt-packages: |
+        smbclient
+        libav-tools
+        tesseract-ocr
+        tesseract-ocr-deu
+        tesseract-ocr-eng
+    Procfile: |
+        web: vendor/bin/heroku-php-nginx -F fpm_custom.conf
+    fpm_custom.conf: |
+        php_value[post_max_size]= 5G
+        php_value[upload_max_filesize]= 5G
+        php_value[max_execution_time]= 3600
+        php_value[max_input_time]= 3600
+        php_value[output_buffering] = 0
+        php_value[always_populate_raw_post_data] = -1
+    composer.json: |
+        {
+        "require": {
+          "php": "~5.6.0",
+          "ext-gd": "*",
+          "ext-mbstring": "*",
+          "ext-intl": "*",
+          "ext-imagick": "*",
+          "ext-apcu": "*",
+          "ext-ftp": "*"
+        },
+        "scripts": {
+          "post-create-project-cmd" : [
+            "/bin/bash /app/post-create-project.sh"
+          ]
+        }
+        }
+    post-create-project.sh: |
+        find /app -type f -print0 | xargs -0 chmod 0640
+        find /app -type d -print0 | xargs -0 chmod 0750
+        chown -Rh root:u1000 /app
+        chown -Rh u1000 /app/apps /app/config /app/data
+        chown root:u1000 /app/data/.htaccess 2>/dev/null
+        chmod 0644 /app/.htaccess /app/data/.htaccess 2>/dev/null
+        ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+        cd /app
+        git clone https://github.com/owncloud/gallery.git apps/gallery
+        git clone https://github.com/shibby/owncloud-youtubedl.git apps/youtubedl_temp; mv apps/youtubedl_temp/youtubedl apps/youtubedl; rm -rf apps/youtubedl_temp
+        curl https://yt-dl.org/downloads/2015.03.09/youtube-dl -o /app/.heroku/php/bin/youtube-dl; chmod a+x /app/.heroku/php/bin/youtube-dl
+        git clone https://github.com/Pogij/owncloudOCR.git apps/owncloudOCR
+        git clone https://github.com/owncloud/files_pdfviewer apps/files_pdfviewer
+        git clone https://github.com/owncloud/videos apps/videos
+        git clone https://github.com/bastienho/Owncloud-Ether-Docs.git apps/Owncloud-Ether-Docs
+{#
+  - "git clone https://github.com/interfasys/galleryplus.git apps/galleryplus"
 
-docker-opts: '-h host.domain.com'
+    config/autoconfig.php: |
+        <?php
+        $AUTOCONFIG = array(
+          "directory"     => getenv('DATA_DIR'),
+          "dbtype"        => getenv('DB_TYPE'),
+          "dbname"        => getenv('DB_NAME'),
+          "dbuser"        => getenv('DB_USER'),
+          "dbpass"        => getenv('DB_PASS'),
+          "dbhost"        => getenv('DB_HOST'),
+          "dbtableprefix" => "",
+        );
+        ?>
 
-#files:
-
-#prepare:
-
+          "adminlogin"    => "root",
+          "adminpass"     => "root-password",
+#}

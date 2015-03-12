@@ -1,5 +1,5 @@
-source: https://github.com/sameersbn/docker-gitlab.git
-
+source:
+  url: https://github.com/sameersbn/docker-gitlab.git
 volume:
   gitlab_data:
     - /home/git/data
@@ -10,12 +10,9 @@ ssl:
   certificate: selfsigned
   key: none
 env:
-  DOKKU_VERBOSE_DATABASE_ENV: "true"
   DB_TYPE: postgres
   SMTP_USER: gitlab@gitlab.somehost.domain'
   SMTP_PASS: PASSWORD
 
 #docker-opts:
-
 #files:
-#execute:

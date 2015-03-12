@@ -1,9 +1,9 @@
-source: https://github.com/bmorton/pghero_solo.git
+source:
+  url: https://github.com/bmorton/pghero_solo.git
 database:
   postgresql: tracks
+ssl:
+  certificate: selfsigned
 #docker-opts:
-
 #files:
-
-#prepare:
 

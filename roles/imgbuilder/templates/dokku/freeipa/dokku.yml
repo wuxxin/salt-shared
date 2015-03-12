@@ -1,5 +1,6 @@
-source: https://github.com/adelton/docker-freeipa.git
-branch: fedora-21
+source: 
+  url: https://github.com/adelton/docker-freeipa.git
+  rev: fedora-21
 
 #volume:
 #  freeipa_data:
@@ -7,10 +8,8 @@ branch: fedora-21
 #database:
 ssl:
   certificate: selfsigned
-  key: none
+hostname: freeipa.omoikane.ep3.at
 #env:
 
-docker-opts: '-h auth.in.ep3.at'
 
 #files:
-#execute:
