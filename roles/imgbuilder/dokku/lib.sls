@@ -322,7 +322,44 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {% endmacro %}
 
 
-{% macro destroy_container(name) %}
+
+{% macro destroy_container(name, orgdata) %}
+
+{% if orgdata is string %}
+{% import_yaml orgdata as data with context %}
+{% else %}
+{% set data=orgdata %}
+{% endif %}
+
+{{ dokku("disable", name) }}
+
+{% if data['volume'] is defined %}
+  {% for cname, cpaths in data['volume'].iteritems() %}
+{{ dokku("volume:unlink", name, cname) }}
+{{ dokku("volume:delete", cname) }}
+  {% endfor %}
+{% endif %}
+
+{% if data['database'] is defined %}
+  {% for dbtype, dbname in data['database'].iteritems() %}
+    {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch', 'memcached' ] %}
+      {% if dbname is string %}
+{{ dokku(dbtype+ ":unlink", name, dbname) }}
+{{ dokku(dbtype+ ":delete", dbname) }}
+      {% else %}
+        {% for singledb in dbname %}
+{{ dokku(dbtype+ ":unlink", name, singledb) }}
+{{ dokku(dbtype+ ":delete", singledb) }}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+    {% if dbtype in ['redis'] %}
+{{ dokku(dbtype+ ":delete", name) }}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{{ dokku("delete", name) }}
 
 {% endmacro %}
 
