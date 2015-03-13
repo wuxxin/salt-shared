@@ -12,12 +12,27 @@ ssl:
   certificate: selfsigned
 hostname: seafile.omoikane.ep3.at
 env:
- DOMAIN: seafile.omoikane.ep3.at
- NAME: seafile
- SEAFILE_IP: seafile.omoikane.ep3.at
- MYSQL_HOST: mariadb
- MYSQL_USER: seafile
- AUTO_CONF_DB: "false"
- SEAHUB_DB_NAME: seahub
- CCNET_DB_NAME: ccnet
- SEAFILE_DB_NAME: seafile
+  DOMAIN: seafile.omoikane.ep3.at
+  NAME: seafile
+  SEAFILE_IP: seafile.omoikane.ep3.at
+  MYSQL_HOST: mariadb
+  MYSQL_USER: seafile
+  AUTO_CONF_DB: "false"
+  SEAHUB_DB_NAME: seahub
+  CCNET_DB_NAME: ccnet
+  SEAFILE_DB_NAME: seafile
+files:
+  uncomment:
+    Dockerfile: EXPOSE
+  replace:
+    Dockerfile:
+      change_baseimage:
+        pattern: |
+            FROM[ \t]+sudokeys/baseimage
+        repl: |
+            FROM husion/baseimage
+  append:
+    scripts/deploy-seafile.sh: |
+        touch /opt/seafile/seahub_settings.py
+        chown seafile:seafile /opt/seafile/seahub_settings.py
+
