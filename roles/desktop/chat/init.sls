@@ -13,7 +13,9 @@ chat:
       - pidgin-themes
       - pidgin-skype
       - pidgin-otr
+      - pidgin-gnome-keyring
       - pidgin-whatsapp
       - bitlbee
     - require:
-      - pkgrepo: whatsapp-ppa
+      - pkgrepo: whatsapp_ppa
+      - pkgrepo: pidgin_gnome_keyring_ppa
