@@ -380,5 +380,9 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 
 {{ dokku("delete", name) }}
 
+{{ name }}_delete:
+  file.absent:
+    - name: {{ base }}/{{ name }}
+
 {% endmacro %}
 

@@ -30,7 +30,7 @@ files:
         pattern: |
             FROM[ \t]+sudokeys/baseimage
         repl: |
-            FROM husion/baseimage
+            FROM phusion/baseimage
   append:
     scripts/deploy-seafile.sh: |
         touch /opt/seafile/seahub_settings.py
