@@ -1,0 +1,23 @@
+source:
+  url: https://github.com/bretif/docker-seafile.git
+volume:
+  seafile_data:
+    - /opt/seafile
+database:
+  mariadb: 
+    - seafile
+    - ccnet
+    - seahub
+ssl:
+  certificate: selfsigned
+hostname: seafile.omoikane.ep3.at
+env:
+ DOMAIN: seafile.omoikane.ep3.at
+ NAME: seafile
+ SEAFILE_IP: seafile.omoikane.ep3.at
+ MYSQL_HOST: mariadb
+ MYSQL_USER: seafile
+ AUTO_CONF_DB: "false"
+ SEAHUB_DB_NAME: seahub
+ CCNET_DB_NAME: ccnet
+ SEAFILE_DB_NAME: seafile

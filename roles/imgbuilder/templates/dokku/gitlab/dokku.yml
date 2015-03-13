@@ -3,6 +3,7 @@ source:
 volume:
   gitlab_data:
     - /home/git/data
+    - /var/log/gitlab
 database:
   postgresql: gitlab
   redis: true
@@ -11,8 +12,12 @@ ssl:
   key: none
 env:
   DB_TYPE: postgres
-  SMTP_USER: gitlab@gitlab.somehost.domain'
-  SMTP_PASS: PASSWORD
+  DB_HOST: postgresql
+  DB_NAME: gitlab
+  REDIS_HOST: redis
+
+#  GITLAB_TIMEZONE: "{{ salt['pillar.get']('timezone', 'UTC') }}"
+#  REDMINE_URL: 
 
 #docker-opts:
 #files:

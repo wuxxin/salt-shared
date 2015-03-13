@@ -43,12 +43,12 @@ files:
           "ext-ftp": "*"
         },
         "scripts": {
-          "post-create-project-cmd" : [
-            "/bin/bash /app/post-create-project.sh"
+          "post-install-cmd" : [
+            "/bin/bash /app/post-install-project.sh"
           ]
         }
         }
-    post-create-project.sh: |
+    post-install-project.sh: |
         find /app -type f -print0 | xargs -0 chmod 0640
         find /app -type d -print0 | xargs -0 chmod 0750
         chown -Rh root:u1000 /app
