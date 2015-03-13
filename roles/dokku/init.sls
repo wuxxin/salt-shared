@@ -46,6 +46,7 @@ create_dokkurc:
     - content: |
         export POSTGRESQL_IMAGE="ayufan/dokku-alt-postgresql:9.3"
         export DOKKU_VERBOSE_DATABASE_ENV=1
+        export DOKKU_EXPOSED_PORTS="5000 8080 8000 80"
     - user: dokku
     - require: 
       - file: create_dokkurc
