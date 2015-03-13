@@ -1,3 +1,6 @@
+from:
+  url: https://github.com/wuxxin/dokku-eafile.git
+  
 source:
   url: https://github.com/bretif/docker-seafile.git
 volume:
@@ -12,6 +15,7 @@ ssl:
   certificate: selfsigned
 hostname: seafile.omoikane.ep3.at
 env:
+  VIRTUAL_HOST: seafile.omoikane.ep3.at
   DOMAIN: seafile.omoikane.ep3.at
   NAME: seafile
   SEAFILE_IP: seafile.omoikane.ep3.at
@@ -35,4 +39,5 @@ files:
     scripts/deploy-seafile.sh: |
         touch /opt/seafile/seahub_settings.py
         chown seafile:seafile /opt/seafile/seahub_settings.py
+        ln -s /opt/seafile/seafile-server-${SEAFILE_VERSION} /opt/seafile/seafile-server-latest
 
