@@ -205,16 +205,35 @@ append_{{ base }}/{{ name }}/{{ fname }}:
   {% endfor %}
 {% endif %}
 
-{% if data['files']['comment'] is defined %}
-  {% for fname, fregex in data['files']['comment'].iteritems() %}
-  {% do files_touched.append(fname) %}
-comment_{{ base }}/{{ name }}/{{ fname }}:
-  file.comment:
+{% if data['files']['replace'] is defined %}
+  {% for fname, freplace in data['files']['replace'].iteritems() %}
+    {% do files_touched.append(fname) %}
+    {% for pname, pdata in freplace.iteritems() %}
+replace_{{ base }}/{{ name }}/{{ fname }}_{{ pname }}:
+  file.replace:
+    - name: {{ base }}/{{ name }}/{{ fname }}
+    - pattern: |
+{{ pdata['pattern']|indent(8, true) }}
+    - repl: |
+{{ pdata['repl']|indent(8, true) }}
+    - user: {{ s.user }}
+    {% endfor %}
+  {% endfor %}
+{% endif %}
+
+{% for a in ['comment', 'uncomment'] %}
+  {% if data['files'][a] is defined %}
+    {% for fname, fregex in data['files'][a].iteritems() %}
+    {% do files_touched.append(fname) %}
+{{ a }}_{{ base }}/{{ name }}/{{ fname }}:
+  file.{{ a }}:
     - name: {{ base }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
     - user: {{ s.user }} 
-  {% endfor %}
-{% endif %}
+    - backup: false
+    {% endfor %}
+  {% endif %}
+{% endfor %}
 
 {% if data['files']['templates'] is defined %}
   {% for fname, fsource in data['files']['templates'].iteritems() %}
