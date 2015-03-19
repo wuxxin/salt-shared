@@ -1,6 +1,3 @@
-from:
-  url: https://github.com/wuxxin/dokku-eafile.git
-  
 source:
   url: https://github.com/bretif/docker-seafile.git
 volume:
@@ -15,10 +12,14 @@ ssl:
   certificate: selfsigned
 hostname: seafile.omoikane.ep3.at
 env:
+  ## DOKKU_ENABLE_HTTP_HOST=1
+  ## DOKKU_ENABLE_HSTS=1
+  ## PROXY_HTTP_8002: /seafhttp /
+  ## PROXY_HTTP_8000: /
   VIRTUAL_HOST: seafile.omoikane.ep3.at
   DOMAIN: seafile.omoikane.ep3.at
-  NAME: seafile
   SEAFILE_IP: seafile.omoikane.ep3.at
+  NAME: seafile
   MYSQL_HOST: mariadb
   MYSQL_USER: seafile
   AUTO_CONF_DB: "false"
