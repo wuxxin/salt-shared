@@ -8,9 +8,17 @@ database:
     - seafile
     - ccnet
     - seahub
-ssl:
-  certificate: selfsigned
-hostname: seafile.omoikane.ep3.at
+http:
+  hostname: seafile.omoikane.ep3.at
+  ssl:
+    certificate: selfsigned
+  proxy:
+  - port: 8002
+    match: path_beg
+    pattern: /seafhttp
+    target: /
+  - port: 8000
+    target: / 
 env:
   ## DOKKU_ENABLE_HTTP_HOST=1
   ## DOKKU_ENABLE_HSTS=1
@@ -41,4 +49,3 @@ files:
         touch /opt/seafile/seahub_settings.py
         chown seafile:seafile /opt/seafile/seahub_settings.py
         ln -s /opt/seafile/seafile-server-${SEAFILE_VERSION} /opt/seafile/seafile-server-latest
-
