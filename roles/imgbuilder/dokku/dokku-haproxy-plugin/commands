@@ -49,3 +49,4 @@ def run_cli():
 if __name__ == '__main__':
     run_cli()
 
+    # templatepath = [basedir,os.path.dirname(realpath)]
