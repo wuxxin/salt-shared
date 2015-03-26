@@ -2,6 +2,11 @@
 
 dev_version: true
 
+kernel:
+  version: 4.0.0-040000rc5
+  patches:
+    - https://launchpadlibrarian.net/149319334/overlayfs_inotify.patch
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
