@@ -1,20 +1,19 @@
-{% load_yaml as template %}
 haproxy:
   serve: 5.9.61.139
 
   http_ssl_to_http:
     openproject.omoikane.ep3.at:
-      ip: 10.9.140.62
-      port: 5000
+      - ip: 10.9.140.62
+        port: 5000
     node-js-app.omoikane.ep3.at:
-      ip: 10.9.140.191
-      port: 5000
+      - ip: 10.9.140.191
+        port: 5000
     seafile.omoikane.ep3.at:
-      path_beg: /seafhttp
+      - path_beg: /seafhttp
         ip: 10.9.140.38
         port: 8002
-      ip:  10.9.140.38
-      port: 8000
+      - ip:  10.9.140.38
+        port: 8000
   http_ssl_to_http_ssl:
     sipwise.omoikane.ep3.at:
       ip: 10.9.140.40
@@ -25,5 +24,3 @@ haproxy:
       port: 5000
   redirect_to_http_ssl:
     - seafile.omoikane.ep3.at
-
-{% endload %}

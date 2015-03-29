@@ -32,5 +32,6 @@ base-deps:
       - xmlstarlet
       - html-xml-utils
       - etherwake
+      - httpie
 
 {% endif %}

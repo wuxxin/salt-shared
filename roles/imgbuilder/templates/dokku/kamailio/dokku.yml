@@ -1,0 +1,7 @@
+source:
+  url: https://github.com/Ntipa/docker-kamailio
+database:
+  mariadb: kamailio
+env:
+  DOMAIN: sip.omoikane.ep3.at
+  PUBLIC_IP: "{{ salt['pillar.get']('public_ip'[0]) }}"

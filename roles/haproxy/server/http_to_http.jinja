@@ -1,0 +1,2 @@
+  use-server {{ hostname }}_{{ backend_port }} if { hdr(host) -i {{ hostname }} }
+  server     {{ hostname }}_{{ backend_port }} {{ ip }}:{{ backend_port }} send-proxy check weight 0

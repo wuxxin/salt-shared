@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import click
+from pydokku import dokku_help, cat_stdin, dokku_common
+
+
+@click.group()
+@click.option('--debug/--no-debug', default=False, envvar='DOKKU_TRACE')
+@click.pass_context
+def cli(ctx, debug):
+    ctx.obj['DEBUG'] = debug
+
+@cli.command(name="domains:get")
+@click.argument('app')
+def domains_get(app):
+    """Get domains for an app"""
+    pass
+
+@cli.command(name="domains:redirect:get")
+@click.argument('app')
+def domains_redirect_get(app):
+    """Get redirect domains for an app"""
+    pass
+
+@cli.command(name="domains:set")
+@click.argument('app')
+@click.argument('domain', nargs=-1)
+def domains_set(app, domain):
+    """Set app domains"""
+    for d in domain:
+        click.echo(d)
+
+@cli.command(name="domains:redirect:set")
+@click.argument('app')
+@click.argument('domain', nargs=-1)
+def domains_redirect_set(app, domain):
+    """Set redirect app domains"""
+    pass
+
+@cli.command(name="help")
+@click.pass_context
+def help(ctx):
+    cat_stdin()
+    dokku_help(ctx)
+
+def run_cli():
+    cli(obj={})
+
+if __name__ == '__main__':
+    run_cli()
+
+    # templatepath = [basedir,os.path.dirname(realpath)]

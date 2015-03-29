@@ -8,13 +8,26 @@ database:
     - seafile
     - ccnet
     - seahub
-ssl:
-  certificate: selfsigned
-hostname: seafile.omoikane.ep3.at
+http:
+  hostname: seafile.omoikane.ep3.at
+  ssl:
+    certificate: selfsigned
+  proxy:
+  - port: 8002
+    match: path_beg
+    pattern: /seafhttp
+    target: /
+  - port: 8000
+    target: / 
 env:
+  ## DOKKU_ENABLE_HTTP_HOST=1
+  ## DOKKU_ENABLE_HSTS=1
+  ## PROXY_HTTP_8002: /seafhttp /
+  ## PROXY_HTTP_8000: /
+  VIRTUAL_HOST: seafile.omoikane.ep3.at
   DOMAIN: seafile.omoikane.ep3.at
-  NAME: seafile
   SEAFILE_IP: seafile.omoikane.ep3.at
+  NAME: seafile
   MYSQL_HOST: mariadb
   MYSQL_USER: seafile
   AUTO_CONF_DB: "false"
@@ -35,4 +48,4 @@ files:
     scripts/deploy-seafile.sh: |
         touch /opt/seafile/seahub_settings.py
         chown seafile:seafile /opt/seafile/seahub_settings.py
-
+        ln -s /opt/seafile/seafile-server-${SEAFILE_VERSION} /opt/seafile/seafile-server-latest
