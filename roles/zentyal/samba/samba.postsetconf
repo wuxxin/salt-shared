@@ -21,8 +21,21 @@ ssub() {
 
 # samba modifications
 cat /etc/samba/smb.conf | 
- ssub '.*path = /home/samba/profiles.*' '    path = /data/profiles' |
- ssub '.*path = /home/%S.*' '    path = /data/home/%S' > /etc/samba/smb.conf.new
+{%- for i in modify_smb %}
+ {{ i.func }} '{{ i.pattern }}' '{{ i.replace }}' |
+{%- endfor %}
+ cat > /etc/samba/smb.conf.new
 rm /etc/samba/smb.conf; mv /etc/samba/smb.conf.new /etc/samba/smb.conf
+
+cat /etc/samba/shares.conf | 
+{%- for i in modify_shares %}
+ {{ i.func }} "{{ i.pattern }}" "{{ i.replace }}" |
+{%- endfor %}
+ cat > /etc/samba/shares.conf.new
+rm /etc/samba/shares.conf; mv /etc/samba/shares.conf.new /etc/samba/shares.conf
+
+cat /etc/nsswitch.conf |
+  ssub 'sudoers:.+files.*' 'sudoers:        files' > /etc/nsswitch.conf.new
+rm /etc/nsswitch.conf; mv /etc/nsswitch.conf.new /etc/nsswitch.conf
 
 exit 0

@@ -23,6 +23,14 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
+{% for i in salt['pillar.get']('zentyal:languages', []) %}
+install_zentyal_language_{{ i }}:
+  pkg.installed:
+    - name: language-pack-zentyal-{{ i }}
+
+{% endfor %}
+
+
 zentyal_first_backup:
   cmd.run:
     - name: /usr/share/zentyal/make-backup

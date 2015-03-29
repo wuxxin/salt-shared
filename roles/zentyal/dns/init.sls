@@ -49,7 +49,7 @@ zentyal-dns:
 
 {% if pillar.zentyal.dns.zones_samba|d(False) != False %}
 
-/opt/samba4/private/dns_update_list.template:
+/var/lib/samba/private/dns_update_list.template:
   file.managed:
     - source: salt://roles/zentyal/dns/dns_update_list
     - mode: 644
@@ -64,7 +64,7 @@ zentyal-dns:
     - name: {{ t }}
     - mode: 644
     - require:
-      - file: /opt/samba4/private/dns_update_list.template
+      - file: /var/lib/samba/private/dns_update_list.template
     - require_in:
       - cmd: update_dynamic_list
     - require:
@@ -73,9 +73,9 @@ zentyal-dns:
 
 update_dynamic_list:
   cmd.run:
-    - name: cat /opt/samba4/private/dns_update_list.template {% for n,d in pillar.zentyal.dns.zones_samba.iteritems() %}{% set s,t=d %}{{ t }} {% endfor %} > /opt/samba4/private/dns_update_list
+    - name: cat /var/lib/samba/private/dns_update_list.template {% for n,d in pillar.zentyal.dns.zones_samba.iteritems() %}{% set s,t=d %}{{ t }} {% endfor %} > /var/lib/samba/private/dns_update_list
     - require: 
-      - file: /opt/samba4/private/dns_update_list.template
+      - file: /var/lib/samba/private/dns_update_list.template
 
 {% endif %}
 
