@@ -38,4 +38,6 @@ cat /etc/nsswitch.conf |
   ssub 'sudoers:.+files.*' 'sudoers:        files' > /etc/nsswitch.conf.new
 rm /etc/nsswitch.conf; mv /etc/nsswitch.conf.new /etc/nsswitch.conf
 
+cat /var/lib/samba/private/dns_update_list.template /var/lib/samba/private/dns_update_list.d/*.include > /var/lib/samba/private/dns_update_list
+
 exit 0
