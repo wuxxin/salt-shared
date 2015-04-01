@@ -42,7 +42,7 @@ Example:
 ```
   relocate:
     /var/cache/apt-cacher-ng:
-      destination: /mnt/cache/apt-cacher-ng
+      destination: /mnt/cache
       copy_content: false
       watch_in: "service: apt-cacher-ng"
 ```

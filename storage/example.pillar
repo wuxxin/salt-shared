@@ -99,7 +99,7 @@ storage:
       onlyif: mountpoint -q /mnt/images
 
   relocate:
-    /var/lib/libvirt/images:
-      destination: /mnt/images/default
+    /var/lib/libvirt:
+      destination: /mnt/images
       copy_content: True
       watch_in: "service: apt-cacher-ng"
