@@ -1,0 +1,58 @@
+#!/bin/sh
+# Generate an example source package from the template, by uncommenting all
+# examples.
+#
+# Author: Martin Pitt <martin.pitt@ubuntu.com>
+# Copyright: (C) 2011 Canonical Ltd.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+top_srcdir=$(dirname $(dirname $(readlink -f $0)))
+# support running from source tree
+if [ -e "$top_srcdir/template/depends.txt" ]; then
+    export UBUNTU_DEFAULTS_TEMPLATE_DIR="$top_srcdir/template"
+    export DH_AUTOSCRIPTDIR="$top_srcdir/debhelper-scripts"
+    "$top_srcdir"/bin/ubuntu-defaults-template defaults-builder-test
+else
+    ubuntu-defaults-template defaults-builder-test
+fi
+
+cd defaults-builder-test
+
+# uncomment all examples
+find -name '*.txt' | xargs sed -i '/^# Example:/,$ { /^# Example/d; s/^# // }'
+
+# install example desktop files
+for f in `find desktop -name '*.example'`; do 
+    mv $f ${f%.example}
+    echo `basename ${f%.desktop.example}` >> unity/launchers.txt
+done
+
+# stick in background and icon
+if [ -e "$top_srcdir/test/test.jpg" ]; then
+    cp "$top_srcdir/test/test.jpg" desktop/background.jpg
+    cp "$top_srcdir/test/test.jpg" icons/scalable/apps/myapp.jpg
+else
+    cp "$(dirname $(readlink -f $0))/test.jpg" desktop/background.jpg
+    cp "$(dirname $(readlink -f $0))/test.jpg" icons/scalable/apps/myapp.jpg
+fi
+
+# add an example chroot hook
+echo 'echo "Running defaults-builder-test chroot hook"' >> hooks/chroot
+echo 'touch /chroot_hook_was_run' >> hooks/chroot
+
+# build package
+PATH="$top_srcdir/bin:$PATH" dpkg-buildpackage -d -us -uc

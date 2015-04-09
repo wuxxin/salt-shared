@@ -1,0 +1,18 @@
+Source: defaults-builder-test
+Section: metapackages
+Priority: optional
+Maintainer: wuxxin <wuxxin@petit>
+Build-Depends: debhelper (>= 7.0.50~),
+ ubuntu-defaults-builder
+Standards-Version: 3.9.5
+
+Package: defaults-builder-test
+Architecture: all
+Depends: ${misc:Depends},
+ ${ubuntudefaults:Depends}
+Recommends: ${ubuntudefaults:Recommends}
+Provides: ubuntu-default-settings
+Conflicts: ubuntu-default-settings
+Description: Default settings for Ubuntu customizations
+ This package contains customized default settings.
+

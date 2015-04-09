@@ -1,0 +1,9 @@
+[Desktop Entry]
+# Example .desktop file for a web launcher
+Version=1.0
+Name=Google Mail
+Comment=http://googlemail.com
+Exec=/usr/bin/xdg-open http://googlemail.com
+Type=Application
+Icon=applications-mail
+Categories=GNOME;GTK;Application;

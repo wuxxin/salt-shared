@@ -1,0 +1,8 @@
+# The following bookmarks will be appended to the default bookmark folders in the menu
+# For now only Firefox is supported.
+#
+# Format: arbitrarily many lines with
+# URL Name
+#
+http://www.ubuntu.de	Deutsches Ubuntu-Forum
+http://www.heise.de	heise Computer-Nachrichten
