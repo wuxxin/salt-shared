@@ -17,5 +17,13 @@ if test ! -f ./known_hosts.initramfs; then
     ssh_opts="$ssh_opts -o StrictHostKeyChecking=no"
 fi
 
-ssh -o "UserKnownHostsFile=./known_hosts.initramfs" -e none $ssh_opts root@$ssh_target "echo -ne \"$(cat ./diskpassword.crypted | gpg --decrypt)\" >/lib/cryptsetup/passfifo"
+if test "$1" = "--cryptsetup"; then
+  shift
+  pass_target="| cryptsetup luksOpen /dev/md/luks_{{ hostname }} luks_{{ hostname }}_luks; vgchange -a y {{ hostname }}"
+else
+  pass_target="> /lib/cryptsetup/passfifo"
+fi
+
+ssh -o "UserKnownHostsFile=./known_hosts.initramfs" -e none $ssh_opts root@$ssh_target \
+    "echo -ne \"$(cat ./diskpassword.crypted | gpg --decrypt)\" $pass_target"
 

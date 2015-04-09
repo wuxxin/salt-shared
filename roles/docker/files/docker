@@ -14,32 +14,36 @@
 
 {%- set docker_opts=[] %}
 
-{%- if docker.network.dns.server is defined %}
-{%- for s in docker.network.dns.server %}
-{%- do docker_opts.append('--dns='+ s) %}
-{%- endfor %}
-{%- endif %}
+{%- if docker.network is defined %}
 
-{%- if docker.network.dns.search is defined  %}
-{%- do docker_opts.append('--dns-search='+ docker.network.dns.search) %}
-{%- endif %}
+  {%- if docker.network.dns.server is defined %}
+    {%- for s in docker.network.dns.server %}
+      {%- do docker_opts.append('--dns='+ s) %}
+    {%- endfor %}
+  {%- endif %}
 
-{%- if docker.network.bridge is defined %}
-{%- do docker_opts.append('--bridge='+ docker.network.bridge) %}
+  {%- if docker.network.dns.search is defined  %}
+    {%- do docker_opts.append('--dns-search='+ docker.network.dns.search) %}
+  {%- endif %}
+
+  {%- if docker.network.bridge is defined %}
+    {%- do docker_opts.append('--bridge='+ docker.network.bridge) %}
+  {%- endif %}
+
 {%- endif %}
 
 {%- if docker.storage.driver is defined %}
-{%- do docker_opts.append('--storage-driver='+ docker.storage.driver) %}
+  {%- do docker_opts.append('--storage-driver='+ docker.storage.driver) %}
 {%- endif %}
 
 {%- if docker.storage.dm is defined %}
-{%- for o,d in docker.storage.dm.iteritems() %}
-{%- do docker_opts.append('--storage-opt dm.'+ o+ '='+ d) %}
-{%- endfor %}
+  {%- for o,d in docker.storage.dm.iteritems() %}
+    {%- do docker_opts.append('--storage-opt dm.'+ o+ '='+ d) %}
+  {%- endfor %}
 {%- endif %}
 
 {%- if docker.extra is defined %}
-{%- do docker_opts.append(docker.extra) %}
+  {%- do docker_opts.append(docker.extra) %}
 {%- endif %}
 
 DOCKER_OPTS="{{ docker_opts|join(' ') }}"
