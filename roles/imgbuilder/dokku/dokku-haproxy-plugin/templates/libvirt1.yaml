@@ -1,0 +1,102 @@
+domain:
+  @type: kvm
+  clock:
+    @offset: utc
+  currentMemory:
+    #text: 1048576
+    @unit: KiB
+  devices:
+    console:
+      @type: pty
+      target:
+        @port: 0
+        @type: serial
+    disk:
+      @device: disk
+      @type: file
+      address:
+        @bus: 0x00
+        @domain: 0x0000
+        @function: 0x0
+        @slot: 0x03
+        @type: pci
+      driver:
+        @cache: none
+        @name: qemu
+        @type: qcow2
+      source:
+        @file: /mnt/images/libvirt/images/fedora_default.img
+      target:
+        @bus: virtio
+        @dev: vda
+    emulator: /usr/bin/kvm-spice
+    graphics:
+      @autoport: yes
+      @keymap: en-us
+      @listen: 127.0.0.1
+      @type: spice
+      listen:
+        @address: 127.0.0.1
+        @type: address
+    input:
+      @bus: ps2
+      @type: mouse
+    interface:
+      @type: network
+      address:
+        @bus: 0x00
+        @domain: 0x0000
+        @function: 0x0
+        @slot: 0x05
+        @type: pci
+      mac:
+        @address: 52:54:00:6e:a5:a8
+      model:
+        @type: virtio
+      source:
+        @network: vagrant-libvirt
+    memballoon:
+      @model: virtio
+      address:
+        @bus: 0x00
+        @domain: 0x0000
+        @function: 0x0
+        @slot: 0x04
+        @type: pci
+    serial:
+      @type: pty
+      target:
+        @port: 0
+    video:
+      address:
+        @bus: 0x00
+        @domain: 0x0000
+        @function: 0x0
+        @slot: 0x02
+        @type: pci
+      model:
+        @heads: 1
+        @type: vmvga
+        @vram: 9216
+  features:
+    acpi: null
+    apic: null
+    pae: null
+  memory:
+    #text: 1048576
+    @unit: KiB
+  name: fedora_default
+  on_crash: destroy
+  on_poweroff: destroy
+  on_reboot: restart
+  os:
+    boot:
+      @dev: hd
+    type:
+      #text: hvm
+      @arch: x86_64
+      @machine: pc-i440fx-trusty
+  uuid: 06be0589-5d61-43eb-a480-c3c6649c0509
+  vcpu:
+    #text: 2
+    @placement: static

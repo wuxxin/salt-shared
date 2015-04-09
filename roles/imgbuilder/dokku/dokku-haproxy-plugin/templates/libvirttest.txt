@@ -1,0 +1,10 @@
+
+%domain{type:"kvm"}
+  %name fedora_default
+  %uuid 123-123-123
+  %currentMemory{unit:"KiB"} 12345
+  
+  %devices
+    %disk{type:"file", device:"disk"}
+      %driver{name:"qemu", type:"qcow"}
+      %source{file:"={filename}" }
