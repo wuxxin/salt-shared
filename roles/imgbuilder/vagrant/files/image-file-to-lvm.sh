@@ -8,37 +8,83 @@ prog=`echo $(cd $(dirname "$0") && pwd -L)/$(basename "$0")`
 dir=`dirname $prog`
 name=`basename $dir`
 
-if test "$3" == ""; then
-  echo "usage: $0 xmlfile lvmgroup fqdn"
+if test "$2" == ""; then
+  cat <<EOF
+usage: $0 id lvmgroup [disksize]
+
+takes every (file type) disk of libvirt machine, 
+create a lvm volume of same maximal size,
+copies data to target volume
+unlink old, link new volume to libvirt machine
+
+throttles write to 10MB per second.
+optional parameter disksize (WIP): manual set a new size
+(can not be smaller than qcow2 max size
+
+EOF
   exit 1
 fi
 
-xmlfile=$1
+libvirt_id=$1
+libvirt_name=`virsh dumpxml $libvirt_id --migratable | xmlstarlet sel -t -v "domain/name"`
 lvm_group=$2
-fqdn=$3
-disk_size=$4
-our_pid=$!
-throttle_bytes="10485760" # 10 MB
+disk_size=$3
+our_pid=$$
 
-mkdir /sys/fs/cgroup/blkio/10mbwritepersecond
-echo $our_pid > /sys/fs/cgroup/blkio/10mbpersecond/tasks
+# create a blkio group, write our pid as affected into it
+throttle_bytes="8192" #"10485760" # 10 MB
+throttle_group="move_image_to_lvm"
+mkdir /sys/fs/cgroup/blkio/$throttle_group
+#echo $our_pid > /sys/fs/cgroup/blkio/$throttle_group/tasks
 
-for disk in `cat $xmlfile | xmlstarlet sel -I -t -m "domain//disk[@type='file']" -v "source/@file"  -o ":" -v "target/@dev" -n`; do
-  disk_file="${disk##:*}"
-  disk_dev="${disk%%*:}"
-  lvm_volume=$fqdn.$disk_dev
+echo "l_id: $libvirt_id , l_name: $libvirt_name , lvm_group: $lvm_group , our_pid: $our_pid"
+echo "`virsh dumpxml $libvirt_id --migratable`"
+read answer
 
+# for each of the configured disks in the libvirt xml file
+for disk in `virsh dumpxml $libvirt_id --migratable | xmlstarlet sel -I -t -m "domain//disk[@type='file']" -v "source/@file"  -o ":" -v "target/@dev" -n`; do
+  disk_file="${disk%%:*}"
+  disk_dev="${disk##*:}"
+  lvm_volume=${libvirt_name}.${disk_dev}
+  # calculate needed disk size
   disk_size_response=`qemu-img info "$disk_file" | grep virtual.size`
   disk_size=`echo "$disk_size_response" | sed -re "s/virtual.size:.[0-9.]+[KMGT].\(([0-9]+).bytes\)/\\1/g"`
 
-  lvcreate --name $lvm_volume --size ${disk_size}b $lvm_group
-  #virsh vol-create-as poolname newvol 10G
-  echo "/dev/mapper/${lvm_volume}-${lvm_volume} $throttle_bytes" > /sys/fs/cgroup/blkio/10mbwritepersecond/blkio.throttle.write_bps_device
+  echo "d_file: $disk_file , d_dev: $disk_dev , lvm_volume: $lvm_volume , d_size_r: $disk_size_response , d_size: $disk_size"
+  read answer
 
-  qemu-img convert -f qcow2 -O raw $disk_file /dev/mapper/${lvm_volume}-${lvm_volume}
+  # create lvm volume
+  # virsh vol-create-as poolname newvol 10G
+  lvcreate --name $lvm_volume --size ${disk_size}b $lvm_group
+  vmm_resp=$(stat -c '%t:%T' `readlink -e /dev/mapper/${lvm_group}-${lvm_volume} `)
+  vol_maj_min=$(printf "%d:%d\n" 0x${vmm_resp%%:*} 0x${vmm_resp##*:})
+
+  # start write throtteling to created lvm device
+  echo "vmm_resp: $vmm_resp , vol_maj_min: $vol_maj_min , throttle_bytes: $throttle_bytes"
+  read answer
+  echo "$vol_maj_min  $throttle_bytes" >> /sys/fs/cgroup/blkio/$throttle_group/blkio.throttle.write_bps_device
+  
+  # detach original disk from domain
+  virsh detach-disk --domain $libvirt_id --target $disk_file --config
+
+  # copy/convert disk to lvm volume
+  cgexec -g blkio:$throttle_group qemu-img convert -f qcow2 -O raw $disk_file /dev/mapper/${lvm_group}-${lvm_volume}
+  err=$?
 
   # remove throtteling
-  # remove old disk_file
+  #echo $our_pid > /sys/fs/cgroup/blkio/tasks
+  rm -r /sys/fs/cgroup/blkio/$throttle_group
+
+  if test -z $err; then
+
+    echo "next is attach"
+    read answer
+
+    # atach new disk to domain
+    virsh attach-disk --domain $libvirt_id --source /dev/mapper/${lvm_group}-${lvm_volume} --target $disk_dev
+    
+    # remove from storage
+    #virsh vol-remove
+  fi
 done
 
-# remove old file_harddisks from xml and add new lvm_harddisks to xml

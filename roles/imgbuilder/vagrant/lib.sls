@@ -3,22 +3,27 @@
 
 {% from roles.imgbuilder.defaults.jinja import settings as s %}
 {% if user == None %}{% set user= s.user %}{% endif %}
-{% set libvirt_xml_file= vagrantdir+ "/libvirt.xml" %}
+{% set libvirt_file= vagrantdir+ "/libvirt.xml" %}
 {% set id_file= vagrantdir+ "/id" %}
 
 {{ vagrant_up(vagrantdir, user) }}
-{% if saltify == True %}{{ vagrant_saltify_running(vagrantdir, user, fqdn) }}{% endif %}
+{% if saltify == True %}
+  {{ vagrant_saltify_running(vagrantdir, user, fqdn) }}
+{% endif %}
 {{ vagrant_network_cleanup(vagrantdir, user) }}
 {{ vagrant_halt(vagrantdir, user) }}
 {{ vagrant_detach(vagrantdir, user, id_file) }}
 
 {{ vm_memsize_cpus(id_file, memsize, cpus) }}
 
-{{ vm_dump_xml(vagrantdir, user, id_file, libvirt_xml_file) }}
-{% if spicify == True %}{{ vm_spicify(libvirt_xml_file) }}{% endif %}
-{# vm_move_network(libvirt_xml_file, s.libvirt.final_deploy_bridge) #}
-{{ vm_copy_resize(libvirt_xml_file, fqdn, s.libvirt.final_deploy_lvm, disksize) }}
-{{ vm_update(libvirt_xml_file, user, start=true, autostart=true) }}
+{{ vm_dump_xml(vagrantdir, user, id_file, libvirt_file) }}
+{% if spicify == True %}{{ vm_spicify(libvirt_file) }}{% endif %}
+{{ vm_rename(libvirt_file, fqdn) }}
+{{ vm_move_network(libvirt_file, s.libvirt.final_deploy_bridge) }}
+{{ vm_update(libvirt_file, user) }}
+
+{{ vm_disk_transfer(id_file, s.libvirt.final_deploy_lvm, disksize) }}
+{{ vm_start(id_file, autostart=true) }}
 
 {% endmacro %}
 
@@ -132,14 +137,14 @@ change_cpus_{{ idfile }}:
 {% endmacro %}
 
 
-{% macro vm_dump_xml(target, user, id_file, libvirt_xml_file) %}
+{% macro vm_dump_xml(target, user, id_file, xml_file) %}
 
 {{ target }}-dump_xml:
   cmd.run:
-    - name: virsh dumpxml `cat {{ id_file }}` --migratable > {{ libvirt_xml_file }}
-    - creates: {{ libvirt_xml_file }}
+    - name: virsh dumpxml `cat {{ id_file }}` --migratable > {{ xml_file }}
+    - creates: {{ xml_file }}
   file.managed:
-    - name: {{ libvirt_xml_file }}
+    - name: {{ xml_file }}
     - file_mode: 0660
     - user: {{ user }}
     - require:
@@ -148,16 +153,25 @@ change_cpus_{{ idfile }}:
 {% endmacro %}
 
 
-{% macro vm_spicify(xmlfile) %}
+{% macro vm_update(xml_file)
+
+{{ xml_file }}-vm-update:
+  cmd.run:
+    - name: virsh define {{ xml_file }}
+
+{% endmacro %}
+
+
+{% macro vm_spicify(xml_file) %}
 {% for i, ms,me,co in [
 (0, "<video>", "</video>", "<video><model type=\"qxl\"/></video>"),
 (1, "<channel type=.spicevmc", "</channel>", ""),
 (2, "<graphics type", "</channel>", "<graphics type=\"spice\" autoport=\"yes\" /><channel type=\"spicevmc\"><target type=\"virtio\" name=\"com.redhat.spice.0\"/></channel>"),
 ] %}
 
-{{ xmlfile }}-spicify-{{ i }}:
+{{ xml_file }}-spicify-{{ i }}:
   file.blockreplace:
-    - name: {{ xmlfile }}
+    - name: {{ xml_file }}
     - marker_start: {{ ms }}
     - marker_end: {{ me }}
     - content: {{ co }}
@@ -166,12 +180,12 @@ change_cpus_{{ idfile }}:
 {% endmacro %}
 
 
-{% macro vm_move_network(xmlfile, target_network) %}
+{% macro vm_move_network(xml_file, target_network) %}
 
 {% if target_network != 'default' %}
-{{ xmlfile }}-vm_move_network:
+{{ xml_file }}-vm_move_network:
   file.replace:
-    - name: {{ xmlfile }}
+    - name: {{ xml_file }}
     - pattern: |
         <interface type=.+<mac address=.([0-9a-f:]+).+</interface>
     - repl: |
@@ -184,7 +198,16 @@ change_cpus_{{ idfile }}:
 {% endmacro %}
 
 
-{% macro vm_copy_resize(xmlfile, fqdn, s.libvirt.final_deploy_lvm, disksize) %}
+{% macro vm_update(xml_file)
+
+{{ xml_file }}-vm-update:
+  cmd.run:
+    - name: virsh define {{ xml_file }}
+
+{% endmacro %}
+
+
+{% macro vm_disk_transfer(id_file, lvm_group, disksize) %}
 
 "{{ target }}/image-file-to-lvm.sh":
   file.managed:
@@ -192,32 +215,25 @@ change_cpus_{{ idfile }}:
     - source:  salt://roles/imgbuilder/vagrant/files/image-file-to-lvm.sh
     - mode: 755
   cmd.run:
-    - name: '{{ target }}/image-file-to-lvm.sh {{ xmlfile }} {{ fqdn }} s.libvirt.final_deploy_lvm {{ disksize }}'
+    - name: '{{ target }}/image-file-to-lvm.sh $(cat {{ id_file }}) {{ lvm_group }} {{ disksize }}'
 
 {% endmacro %}
 
 
-
-{% macro vm_update(xmlfile, idfile, user, start=true, autostart=true) %}
-
-{{ xmlfile }}-vm-update:
-  cmd.run:
-    - name: virsh define {{ xmlfile }}
+{% macro vm_start(id_file, autostart=true) %}
 
 {% set auto_state='on' if autostart else 'off' %}
-change_autostart_{{ idfile }}:
+change_autostart_{{ id_file }}:
   module.run:
     - name: virt.set_autostart
-    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ id_file) }}
     - state: {{ auto_state }}
-    - require:
-      - cmd: {{ xmlfile }}-vm-update
 
-start_{{ idfile }}:
+start_{{ id_file }}:
   module.run:
     - name: virt.start
-    - vm_: {{ salt['cmd.run_stdout']('cat '+ idfile) }}
+    - vm_: {{ salt['cmd.run_stdout']('cat '+ id_file) }}
     - require:
-      - module: change_autostart_{{ idfile }}
+      - module: change_autostart_{{ id_file }}
 
 {% endmacro %}
