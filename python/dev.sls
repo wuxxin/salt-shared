@@ -1,7 +1,7 @@
 include:
   - .init
 
-python-dev
+python-dev:
   pkg.installed:
     - pkgs:
       - python-dev

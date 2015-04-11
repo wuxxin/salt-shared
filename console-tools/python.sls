@@ -1,5 +1,28 @@
+{% load_yaml as names %}
+- percol
+{% endload %}
 
-python-tools:
-  pip.installed:
-    - pkgs:
-      - percol
+{% load_yaml as devnames %}
+- cgroup-utils
+{% endload %}
+
+include:
+{% if devnames %}
+  - python.dev
+{% else %}
+  - python
+{% endif %}
+
+{% for n in names %}
+{{ n }}:
+  pip:
+    - installed
+{% endfor %}
+
+{% for n in devnames %}
+{{ n }}:
+  pip:
+    - installed
+    - require:
+      - pkg: python-dev
+{% endfor %}
