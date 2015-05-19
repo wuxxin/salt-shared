@@ -1,5 +1,5 @@
 include:
-  - roles.imgbuilder.local-ruby
+  - .local-ruby
   - .dirs
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
@@ -12,6 +12,8 @@ vagrant_plugin_deps:
       - zlib1g-dev
       - libvirt-dev
       - qemu-utils
+      - qemu-kvm
+      - libguestfs-tools
     - require:
       - pkg: vagrant
 

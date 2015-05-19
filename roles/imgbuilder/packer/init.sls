@@ -23,22 +23,24 @@ packer:
 
 {% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
+{% set version="0.7.5" %}
+
 packer_binary:
   file.directory:
-    - name: /usr/local/src/packer-v0.7.2-linux-amd64
+    - name: /usr/local/src/packer-v{{ version }}-linux-amd64
     - makedirs: true
   archive.extracted:
-    - name: /usr/local/src/packer-v0.7.2-linux-amd64
-    - source: https://dl.bintray.com/mitchellh/packer/packer_0.7.2_linux_amd64.zip
-    - source_hash: sha256=2e0a7971d0df81996ae1db0fe04291fb39a706cc9e8a2a98e9fe735c7289379f
+    - name: /usr/local/src/packer-v{{ version }}-linux-amd64
+    - source: https://dl.bintray.com/mitchellh/packer/packer_{{ version }}_linux_amd64.zip
+    - source_hash: sha256=8fab291c8cc988bd0004195677924ab6846aee5800b6c8696d71d33456701ef6
     - archive_format: zip
-    - if_missing: /usr/local/src/packer-v0.7.2-linux-amd64/packer
+    - if_missing: /usr/local/src/packer-v{{ version }}-linux-amd64/packer
     - require:
       - file: packer_binary
   cmd.run:
     - name: |
-        for n in `ls /usr/local/src/packer-v0.7.2-linux-amd64`; do
-            ln -s -f -T /usr/local/src/packer-v0.7.2-linux-amd64/$n /usr/local/bin/$n 
+        for n in `ls /usr/local/src/packer-v{{ version }}-linux-amd64`; do
+            ln -s -f -T /usr/local/src/packer-v{{ version }}-linux-amd64/$n /usr/local/bin/$n 
         done
     - require:
       - archive: packer_binary

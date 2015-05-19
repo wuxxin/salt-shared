@@ -1,3 +1,5 @@
+include:
+  - roles.imgbuilder.user
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
