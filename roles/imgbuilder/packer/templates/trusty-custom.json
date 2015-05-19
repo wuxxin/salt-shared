@@ -16,7 +16,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-custom-http.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{ .Name }} ",
       "fb=false debconf/frontend=noninteractive ",
@@ -44,7 +44,7 @@
     "boot_command": [
       "<esc><esc><enter><wait>",
       "/install/vmlinuz noapic fb=false ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed.cfg ",
+      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/./preseed-custom-http.cfg ",
       "auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 ",
       "hostname={{ .Name }} ",
       "initrd=/install/initrd.gz -- <enter>"

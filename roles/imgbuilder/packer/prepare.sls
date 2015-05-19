@@ -32,7 +32,7 @@ box_add_script:
   'username': 'vagrant',
   'password': 'vagrant',
   'hostname': 'trusty',
-  'default_preseed': 'preseed-custom-http.cfg',
+  'default_preseed': 'preseed-simple-http.cfg',
 }) %}
 
 {#
@@ -44,6 +44,7 @@ box_add_script:
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
 {{ add_preseed_files(ps_s, ps_s.target) }}
 
+{#
 {% for name in ['trusty','fedora'] %}
 
 build_{{ name }}:
@@ -53,3 +54,4 @@ build_{{ name }}:
     - group: {{ s.user }}
 
 {% endfor %}
+#}
