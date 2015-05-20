@@ -21,6 +21,30 @@ packer:
       - user: imgbuilder
       - pkg: packer
 
+{{ s.image_base }}/tmp/packer_cache:
+  file.directory:
+    - user: {{ s.user }}
+    - group: libvirtd
+    - mode: 775
+    - makedirs: True
+    - require:
+      - user: imgbuilder
+
+profile_packer_create:
+  file.managed:
+    - name: /home/{{ s.user }}/.profile
+    - user: {{ s.user }}
+    - group: {{ s.user }}
+
+profile_packer_settings:
+  file.append:
+    - name: /home/{{ s.user }}/.profile
+    - text: |
+        export PACKER_CACHE_DIR={{ s.image_base }}/tmp/packer_cache
+    - require:
+      - file: profile_packer_create
+      - file: {{ s.image_base }}/tmp/packer_cache
+
 {% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
 {% set version="0.7.5" %}
@@ -61,6 +85,7 @@ build:
 
 {% endif %}
 
+
 {% load_yaml as config %}
 user: {{ s.user }}
 source:
@@ -74,6 +99,7 @@ build:
 {{ go_build_from_git(config) }}
 
 
+
 packer_templates:
   file.recurse:
     - source: salt://roles/imgbuilder/packer/templates
@@ -83,7 +109,6 @@ packer_templates:
     - file_mode: 664
     - dir_mode: 775
     - include_empty: True
-    #- template: jinja
 
 box_add_script:
   file.managed:
@@ -91,3 +116,4 @@ box_add_script:
     - mode: 775
     - require:
       - file: packer_templates
+
