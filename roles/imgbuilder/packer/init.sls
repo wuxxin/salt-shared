@@ -96,7 +96,7 @@ build:
   check: 'packer-provisioner-host-command'
   bin_files: ['packer-provisioner-host-command']
 {% endload %}
-{{ go_build_from_git(config) }}
+{# disabled: { go_build_from_git(config) #}
 
 
 
