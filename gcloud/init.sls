@@ -1,4 +1,5 @@
 
+# fixme: make user default, and woraround hash by downloading manual
 gcetools:
   archive.extracted:
     - source: https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz

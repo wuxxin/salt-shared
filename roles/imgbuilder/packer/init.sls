@@ -21,7 +21,8 @@ packer:
       - user: imgbuilder
       - pkg: packer
 
-{{ s.image_base }}/tmp/packer_cache:
+{% for dir in ['tmp/packer_cache', 'build'] %}
+{{ s.image_base }}/{{ dir }}:
   file.directory:
     - user: {{ s.user }}
     - group: libvirtd
@@ -29,6 +30,7 @@ packer:
     - makedirs: True
     - require:
       - user: imgbuilder
+{% endfor %}
 
 profile_packer_create:
   file.managed:
