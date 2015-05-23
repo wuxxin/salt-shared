@@ -8,6 +8,7 @@ base-deps:
       - zip
       - cabextract
       - ncdu
+      - tree
       - pwgen
       - command-not-found
       - htop
