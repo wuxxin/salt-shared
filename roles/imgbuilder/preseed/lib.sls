@@ -89,11 +89,11 @@ add-preseed-{{ k }}:
         username: {{ cs.username|d(" ") }}
         hostname: {{ cs.hostname|d(" ") }}
         domainname: {{ cs.domainname|d(" ") }}
-        password: {{ cs.password|d(" ") }}
-        diskpassword: {{ cs.diskpassword|d(" ") }}
+        password: {{ cs.password|d("''") }}
+        diskpassword: {{ cs.diskpassword|d("''") }}
         netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
-        apt_proxy_mirror: {{ cs.apt_proxy_mirror|d(" ") }}
+        apt_proxy_mirror: {{ cs.apt_proxy_mirror|d("''") }}
 
 {% endfor %}
 {% endfor %}
