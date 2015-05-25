@@ -50,6 +50,7 @@ Installs and configures features you usually want to have in a working desktop
     * revision control systems (mercurial and git and subversion)
     * android: installes and configures android sdk & ndk
       * optional IDEA and ECLIPSE plugin installation
+    * gcloud: installs google cloud SDK
     * buildozer installation (kivy - python-for-android - android-sdk, android-ndk buildchain)
     * ide: eclipse and idea
     * emulator:

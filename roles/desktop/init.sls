@@ -16,6 +16,7 @@ include:
   - .voice
 
 {% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
+  - .gcloud
   - .android
   - .eclipse
   - .arduino
