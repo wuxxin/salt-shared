@@ -6,6 +6,7 @@
 {% set tmp_destfile= "/tmp/"+ gcloud_archive %}
 {% set final_destdir= user_home %}
 {% set gcloud_destdir= final_destdir+ "/"+ gcloud_dirname %}
+
 gcloud_download:
   module.run:
     - name: cp.get_url
@@ -35,8 +36,8 @@ gcloud-create-user-bashrc:
     - user: {{ user }}
     - name: {{ user_home }}/.bashrc
 
-gloucd-modify-path-user-bashrc:
-  file.blockreplace
+gloucd-modify-path-user-bashrc_1:
+  file.blockreplace:
     - name: {{ user_home }}/.bashrc
     - marker_start: "# The next line updates PATH for the Google Cloud SDK."
     - marker_end: "source '{{ gcloud_destdir }}/path.bash.inc'"
@@ -46,8 +47,8 @@ gloucd-modify-path-user-bashrc:
     - require:
       - file: gcloud-create-user-bashrc
 
-gloucd-modify-path-user-bashrc:
-  file.blockreplace
+gloucd-modify-path-user-bashrc_2:
+  file.blockreplace:
     - name: {{ user_home }}/.bashrc
     - marker_start: "# The next line enables bash completion for gcloud."
     - marker_end: "source '{{ gcloud_destdir }}/completion.bash.inc'"
