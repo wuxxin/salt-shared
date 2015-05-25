@@ -81,9 +81,9 @@ add-preseed-{{ k }}:
     - name: {{ tmp_target }}/{{ k }}
     - makedirs: true
     - sources:
-{% for t in d %}
+{%- for t in d %}
         - {{ cs.templates }}/{{ t }}
-{% endfor %}
+{%- endfor %}
     - template: jinja
     - context:
         username: {{ cs.username|d("''") }}
