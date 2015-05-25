@@ -45,7 +45,7 @@ additional_layers:
 {% if proxy_address != false %}
 apt_proxy_mirror: {{ proxy_address }}
 {% else %}
-apt_proxy_mirror: ""
+apt_proxy_mirror: "''"
 {% endif %}
 
 custom_files: {}
