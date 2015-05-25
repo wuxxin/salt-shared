@@ -86,9 +86,9 @@ add-preseed-{{ k }}:
 {% endfor %}
     - template: jinja
     - context:
-        username: {{ cs.username|d(" ") }}
-        hostname: {{ cs.hostname|d(" ") }}
-        domainname: {{ cs.domainname|d(" ") }}
+        username: {{ cs.username|d("''") }}
+        hostname: {{ cs.hostname|d("''") }}
+        domainname: {{ cs.domainname|d("''") }}
         password: {{ cs.password|d("''") }}
         diskpassword: {{ cs.diskpassword|d("''") }}
         netcfg: {{ cs.netcfg }}
@@ -246,16 +246,16 @@ preseed-lib-copy-{{ f }}:
     - context:
         target: {{ cs.target }}
         cmdline: {{ cs.cmdline }}
-        custom_ssh_identity: {{ cs.custom_ssh_identity|d("") }}
-        username: {{ cs.username|d(" ") }}
-        hostname: {{ cs.hostname|d(" ") }}
-        domainname: {{ cs.domainname|d(" ") }}
+        custom_ssh_identity: {{ cs.custom_ssh_identity|d("''") }}
+        username: {{ cs.username|d("''") }}
+        hostname: {{ cs.hostname|d("''") }}
+        domainname: {{ cs.domainname|d("''") }}
         netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
-        apt_proxy_mirror: {{ cs.apt_proxy_mirror|d(" ") }}
-        diskpassword_receiver_id: {{ cs.diskpassword_receiver_id|d("") }}
-        diskpassword_receiver_key: {{ cs.diskpassword_receiver_key|d("") }}
-        diskpassword_creation: {{ cs.diskpassword_creation|d("") }}
+        apt_proxy_mirror: {{ cs.apt_proxy_mirror|d("''") }}
+        diskpassword_receiver_id: {{ cs.diskpassword_receiver_id|d("''") }}
+        diskpassword_receiver_key: {{ cs.diskpassword_receiver_key|d("''") }}
+        diskpassword_creation: {{ cs.diskpassword_creation|d("''") }}
 {% endfor %}
 
 {% endmacro %}
