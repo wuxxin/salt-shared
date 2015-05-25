@@ -2,7 +2,7 @@
 include:
   - repo.ubuntu
 
-{% set zentyal_version = salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"') %}
+{% set zentyal_version = salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"', python_shell=True) %}
 {% if zentyal_version == "3.2" %}
 zentyal_main_ubuntu:
   pkgrepo.managed:

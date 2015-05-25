@@ -30,7 +30,7 @@ transfer_backupvm_config:
 
 {% set client_disks= salt['cmd.run_stdout'](
 'virsh dumpxml --inactive {{ client }} |
- xmlstarlet sel -I -t -m "domain//disk[@type='block']" -v "source/@dev" -o ":" -n -o "  " -v "target/@dev" -n')|load_yaml %}
+ xmlstarlet sel -I -t -m "domain//disk[@type='block']" -v "source/@dev" -o ":" -n -o "  " -v "target/@dev" -n', python_shell=True)|load_yaml %}
 
 config-pre_snapshot-{{ client }}:
   salt.function:

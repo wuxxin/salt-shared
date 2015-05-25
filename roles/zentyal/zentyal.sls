@@ -19,7 +19,7 @@ set_zentyal_version:
   module.run:
     - name: grains.setval
       key: zentyal_version
-      val: {{ salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"') }}
+      val: {{ salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"', python_shell=True) }}
     - require:
       - pkg: zentyal
 
