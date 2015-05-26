@@ -35,7 +35,7 @@ user_varsfile_{{ name }}:
   file.managed:
     - name: {{ targetdir }}/{{ name }}_vars.json
     - contents: |
-{{ varsfile|dump_yaml|indent(8, True) }}
+{{ varsfile|yaml(False)|indent(8, True) }}
     - user: {{ s.user }}
     - group: libvirtd
     - require:
