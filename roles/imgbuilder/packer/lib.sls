@@ -1,7 +1,7 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
 
-{% macro prepare(name, template, targetdir, varsfilecontent="", cmdvars={}, cmdextra="-only=qemu ") %}
+{% macro prepare(name, template, targetdir, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
 
 packer_templates_{{ name }}:
   file.recurse:
@@ -35,7 +35,7 @@ user_varsfile_{{ name }}:
   file.managed:
     - name: {{ targetdir }}/{{ name }}_vars.json
     - contents: |
-{{ varsfilecontent|indent(8, True) }}
+{{ varsfile|dump_yaml|indent(8, True) }}
     - user: {{ s.user }}
     - group: libvirtd
     - require:
@@ -62,11 +62,15 @@ user_varsfile_{{ name }}:
 {% endmacro %}
 
 
-{% macro build(name, template, targetdir, varsfilecontent="", cmdvars={}, cmdextra="-only=qemu ") %}
+{% macro build(name, template, targetdir, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
+{% set varsstr="" %}
+{% for n, d in varscmd.iteritems() %}
+{% set varstr=varstr+ '-var "'+ n+ '='+ d+ '"' %}
+{% endfor %}
 
 build_{{ name }}:
   cmd.run:
-    - name: cd {{ targetdir }}; if test -d output-qemu; then rm -r output-qemu; fi; packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ cmdextra }} {{ name }}.json
+    - name: cd {{ targetdir }}; if test -d output-qemu; then rm -r output-qemu; fi; packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ varstr }} {{ cmdextra }} {{ name }}.json
     - user: {{ s.user }}
     - group: {{ s.user }}
 

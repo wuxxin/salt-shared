@@ -167,6 +167,7 @@ add-custom-files-{{ s }}:
 {% endif %}
 
 # make /custom/custom.lst 
+# fixme: does not work the first time, because of line now +5 (for n in salt ...)
 make-custom-list:
   file.managed:
     - name: {{ tmp_target }}/custom.lst
