@@ -63,14 +63,15 @@ user_varsfile_{{ name }}:
 
 
 {% macro build(name, template, targetdir, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
-{% set varsstr="" %}
+{% set vars=[] %}
 {% for n, d in varscmd.iteritems() %}
-{% set varstr=varstr+ '-var "'+ n+ '='+ d+ '"' %}
+{% do vars.append([' -var "', n, '=', d, '"']|join('')) %}
 {% endfor %}
 
 build_{{ name }}:
   cmd.run:
-    - name: cd {{ targetdir }}; if test -d output-qemu; then rm -r output-qemu; fi; packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ varstr }} {{ cmdextra }} {{ name }}.json
+    - name: if test -d output-qemu; then rm -r output-qemu; fi; packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
+    - cwd: {{ targetdir }}
     - user: {{ s.user }}
     - group: {{ s.user }}
 
