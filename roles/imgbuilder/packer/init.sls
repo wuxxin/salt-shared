@@ -66,6 +66,7 @@ packer_binary:
   cmd.run:
     - name: |
         for n in `ls /usr/local/src/packer-v{{ version }}-linux-amd64`; do
+            chmod +x /usr/local/src/packer-v{{ version }}-linux-amd64/$n
             ln -s -f -T /usr/local/src/packer-v{{ version }}-linux-amd64/$n /usr/local/bin/$n 
         done
     - require:
