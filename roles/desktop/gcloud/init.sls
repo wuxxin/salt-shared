@@ -36,18 +36,24 @@ gcloud-create-user-bashrc:
     - user: {{ user }}
     - name: {{ user_home }}/.bashrc
 
-gloucd-modify-path-user-bashrc_1:
+gcloud-create-user-profile:
+  file:
+    - touch
+    - user: {{ user }}
+    - name: {{ user_home }}/.profile
+
+gloucd-modify-path-user-profile:
   file.blockreplace:
-    - name: {{ user_home }}/.bashrc
+    - name: {{ user_home }}/.profile
     - marker_start: "# The next line updates PATH for the Google Cloud SDK."
     - marker_end: "source '{{ gcloud_destdir }}/path.bash.inc'"
     - content: ""
     - append_if_not_found: True
     - user: {{ user }}
     - require:
-      - file: gcloud-create-user-bashrc
+      - file: gcloud-create-user-profile
 
-gloucd-modify-path-user-bashrc_2:
+gloucd-modify-completion-user-bashrc:
   file.blockreplace:
     - name: {{ user_home }}/.bashrc
     - marker_start: "# The next line enables bash completion for gcloud."
