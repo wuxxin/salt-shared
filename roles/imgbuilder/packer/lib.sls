@@ -1,7 +1,7 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
 
-{% macro prepare(name, template, targetdir, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
+{% macro prepare(name, template, targetdir, custom_files={'custom_files': {}}, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
 
 packer_templates_{{ name }}:
   file.recurse:
@@ -50,10 +50,12 @@ user_varsfile_{{ name }}:
   'default_preseed': 'preseed-simple-http.cfg',
 }) %}
 
-{#
-  'custom_files': {
-    '/.ssh/authorized_keys': 'salt://roles/imgbuilder/preseed/files/vagrant.pub',
-    },
+{% do ps_s.update(custom_files) %}
+
+{# example:
+  load_yaml as custom_files
+  custom_files:
+    '/.ssh/authorized_keys': 'salt://roles/imgbuilder/preseed/files/vagrant.pub'
 #}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
@@ -62,7 +64,7 @@ user_varsfile_{{ name }}:
 {% endmacro %}
 
 
-{% macro build(name, template, targetdir, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
+{% macro build(name, template, targetdir, custom_files={'custom_files': {}}, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
 {% set vars=[] %}
 {% for n, d in varscmd.iteritems() %}
 {% do vars.append([' -var "', n, '=', d, '"']|join('')) %}
