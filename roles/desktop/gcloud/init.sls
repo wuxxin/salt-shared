@@ -31,14 +31,12 @@ gcloud_install:
       - cmd: gcloud_download
 
 gcloud-create-user-bashrc:
-  file:
-    - touch
+  file.managed:
     - user: {{ user }}
     - name: {{ user_home }}/.bashrc
 
 gcloud-create-user-profile:
-  file:
-    - touch
+  file.managed:
     - user: {{ user }}
     - name: {{ user_home }}/.profile
 
