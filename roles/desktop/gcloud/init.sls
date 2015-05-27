@@ -49,7 +49,6 @@ gloucd-modify-path-user-profile:
     - marker_end: "source '{{ gcloud_destdir }}/path.bash.inc'"
     - content: ""
     - append_if_not_found: True
-    - user: {{ user }}
     - require:
       - file: gcloud-create-user-profile
 
@@ -60,6 +59,5 @@ gloucd-modify-completion-user-bashrc:
     - marker_end: "source '{{ gcloud_destdir }}/completion.bash.inc'"
     - content: ""
     - append_if_not_found: True
-    - user: {{ user }}
     - require:
       - file: gcloud-create-user-bashrc
