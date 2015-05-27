@@ -169,16 +169,18 @@ add-custom-files-{{ s }}:
 # make /custom/custom.lst 
 # fixme: does not work the first time, because of line now +5 (for n in salt ...)
 make-custom-list:
-  file.managed:
+  cmd.run:
+    - name: find custom -type f > {{ tmp_target }}/custom.lst
+    - cwd: {{ tmp_target }}
+{%- if cs.custom_files %}
+  file.append:
     - name: {{ tmp_target }}/custom.lst
     - contents: |
-{%- for n in salt['cmd.run']('cd '+ tmp_target+ '; ls custom/*').split() %}
-{{ n|indent(8, true) }}
-{%- endfor %}
-{%- if cs.custom_files %}
 {%- for d,s in cs.custom_files.iteritems() %}
 {{ d|indent(8, true) }}
 {%- endfor %}
+    - require:
+      - cmd: make-custom-list
 {%- endif %}
 
 
