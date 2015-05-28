@@ -5,8 +5,8 @@ adminkeys_present:
   ssh_auth.present:
     - user: {{ user }}
     - names:
-{% for adminkey in adminkeys_present'] %}
-      - "{{adminkey}}"
+{% for adminkey in adminkeys_present %}
+      - "{{ adminkey }}"
 {% endfor %}
 {% endif %}
 
