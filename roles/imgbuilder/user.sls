@@ -32,3 +32,5 @@ imgbuilder:
     - require:
       - user: imgbuilder
 
+{% from "ssh/lib.sls" import ssh_keys_update %}
+{{ ssh_keys_update(s.user, salt['pillar.get'](adminkeys_present, False), salt['pillar.get'](adminkeys_absent, False)) }}
