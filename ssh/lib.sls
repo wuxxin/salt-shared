@@ -1,7 +1,7 @@
 {% macro ssh_keys_update(user, adminkeys_present, adminkeys_absent) %}
 
 {% if adminkeys_present|d(False) %}
-adminkeys_present:
+{{ user }}_adminkeys_present:
   ssh_auth.present:
     - user: {{ user }}
     - names:
@@ -11,7 +11,7 @@ adminkeys_present:
 {% endif %}
 
 {% if adminkeys_absent|d(False) %}
-adminkeys_absent:
+{{ user }}_adminkeys_absent:
   ssh_auth.absent:
     - user: {{ user }}
     - names:

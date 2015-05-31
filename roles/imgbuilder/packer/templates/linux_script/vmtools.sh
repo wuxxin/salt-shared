@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if test $PACKER_BUILDER_TYPE == 'virtualbox' ; then
+if test $PACKER_BUILDER_TYPE = 'virtualbox' ; then
     if type apt-get >/dev/null 2>&1; then
         echo "Installing VirtualBox guest additions (debian)"
 

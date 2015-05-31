@@ -73,7 +73,7 @@ endload
 
 build_{{ name }}:
   cmd.run:
-    - name: if test -d output-qemu; then rm -r output-qemu; fi; packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
+    - name: if test -d output-qemu; then rm -r output-qemu; fi; PACKER_LOG=1 packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
     - cwd: {{ targetdir }}
     - user: {{ s.user }}
     - group: {{ s.user }}

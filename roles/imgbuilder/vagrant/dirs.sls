@@ -36,9 +36,7 @@ default_provider_create:
     - name: /home/{{ s.user }}/.profile
     - user: {{ s.user }}
     - group: {{ s.user }}
-    - require: 
-      - cmd: vagrant_plugin_vagrant-libvirt
-
+    
 default_provider:
   file.append:
     - name: /home/{{ s.user }}/.profile
