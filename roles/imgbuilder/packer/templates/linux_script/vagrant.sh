@@ -15,15 +15,19 @@ fi
 echo "Set up sudo for vagrant"
 echo "${VAGRANT_USER}        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 
-echo "Install vagrant keys (if not already a .ssh/authorized_keys file present)"
+echo "reCreate Homedir and .ssh dir"
 mkdir $VAGRANT_HOME/.ssh
 chmod 700 $VAGRANT_HOME/.ssh
 cd $VAGRANT_HOME/.ssh
 
 if test -f authorized_keys; then
-    echo "aborted, there is already a authorized_keys file with content:"
+    echo "authorized ssh keys already there, nothing to do"
     cat authorized_keys
+elif test -f /root/.ssh/authorized_keys; then
+    echo "authorized ssh keys are available for /root, copy them from there"
+    cp /root/.ssh/authorized_keys $VAGRANT_HOME/.ssh/authorized_keys
 else
+    echo "Install public! vagrant keys for user vagrant"
     wget --no-check-certificate "${VAGRANT_KEY_URL}" -O authorized_keys
 fi
 

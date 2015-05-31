@@ -28,7 +28,7 @@ user_template_{{ name }}:
     - name: {{ targetdir }}/{{ name }}.json
     - user: {{ s.user }}
     - group: libvirtd
-    - require: 
+    - require:
       - file: box_add_script_{{ name }}
 
 user_varsfile_{{ name }}:
