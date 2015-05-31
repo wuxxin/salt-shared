@@ -1,5 +1,3 @@
 base:
   "*":
-      - extra.extra
-
-
+    - extra.extra

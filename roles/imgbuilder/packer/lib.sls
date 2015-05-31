@@ -35,7 +35,7 @@ user_varsfile_{{ name }}:
   file.managed:
     - name: {{ targetdir }}/{{ name }}_vars.json
     - contents: |
-{{ varsfile|yaml(False)|indent(8, True) }}
+{{ varsfile|json(False)|indent(8, True) }}
     - user: {{ s.user }}
     - group: libvirtd
     - require:
@@ -53,9 +53,10 @@ user_varsfile_{{ name }}:
 {% do ps_s.update(custom_files) %}
 
 {# example:
-  load_yaml as custom_files
-  custom_files:
-    '/.ssh/authorized_keys': 'salt://roles/imgbuilder/preseed/files/vagrant.pub'
+load_yaml as custom_files
+custom_files:
+  '/.ssh/authorized_keys': 'salt://roles/imgbuilder/preseed/files/vagrant.pub'
+endload
 #}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
