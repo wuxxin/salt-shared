@@ -1,15 +1,14 @@
 {% load_yaml as defaults %}
 
 {% set architecture= "amd64" %}
-{% set hash= "md5=35f591c65c83b19220bdf41d9c26e5da" %}
 {% set suite= "trusty" %}
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
 suite: {{ suite }}
 architecture: {{ architecture }}
 
-source: http://archive.ubuntu.com/ubuntu/dists/{{ suite }}/main/installer-{{ architecture }}/current/images/netboot/netboot.tar.gz
-source_hash: {{ hash }}
+source: http://archive.ubuntu.com/ubuntu/dists/{{ suite }}/main/installer-{{ architecture }}/20101020ubuntu318.17/images/netboot/netboot.tar.gz
+source_hash: "sha256=bb75b36a603d915a5d35632f6be89063d4a4b9deef4d04f16d48b38509f801f2"
 initrd: ubuntu-installer/{{ architecture }}/initrd.gz
 kernel: ubuntu-installer/{{ architecture }}/linux
 
@@ -28,7 +27,7 @@ username: vagrant
 hostname: {{ suite }}-default
 domainname: me.local
 password: {{ salt['cmd.run']('pwgen -s 13 1') }}
-netcfg: 
+netcfg:
   ip: ''
   netmask: ''
   gateway: ''
@@ -36,7 +35,7 @@ netcfg:
   pointopoint: ''
 
 additional_udeb:
-  # - 
+  # -
 
 additional_layers:
   - "salt://roles/imgbuilder/preseed/files/overlay.tar.gz"
@@ -54,7 +53,7 @@ custom_files: {}
 default_preseed: preseed-custom.cfg
 
 preseed_list:
-{% set p_default=('base.cfg', 
+{% set p_default=('base.cfg',
     'user.cfg', 'locale.cfg', 'package-setup.cfg', 'network.cfg',
     'tasks_minimal.cfg', 'apt-mirror.cfg', 'partman-base.cfg') %}
 
