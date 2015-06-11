@@ -1,9 +1,16 @@
 include:
+  - .ppa
   - java.browser
 
 firefox:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs: 
+      - firefox
+      - firefox-dev
+{% if grains['os'] == 'Ubuntu' %}
+    - require:
+      - pkgrepo: firefox-dev_ppa
+{% endif %}
 
 chromium-browser:
   pkg.installed:
