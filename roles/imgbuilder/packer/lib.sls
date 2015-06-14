@@ -50,7 +50,7 @@
 
 # our updates
 {% do ps_s.update({
-  'target': targetdir,
+  'target': targetdir+ "/http",
   'username': 'vagrant',
   'password': 'vagrant',
   'hostname': name,
