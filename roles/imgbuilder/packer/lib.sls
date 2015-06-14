@@ -3,7 +3,7 @@
 
 {% macro prepare_template(template, name, targetdir, varsfile={}) %}
 
-packer_templates_{{ name }}:
+"packer_templates_{{ targetdir }}":
   file.recurse:
     - source: salt://roles/imgbuilder/packer/templates
     - name: {{ targetdir }}
@@ -13,25 +13,25 @@ packer_templates_{{ name }}:
     - dir_mode: 775
     - include_empty: True
 
-box_add_script_{{ name }}:
+"box_add_script_{{ targetdir }}":
   file.managed:
     - name: {{ targetdir }}/vagrant-box-add.sh
     - user: {{ s.user }}
     - group: libvirtd
     - mode: 775
     - require:
-      - file: packer_templates_{{ name }}
+      - file: "packer_templates_{{ targetdir }}"
 
-user_template_{{ name }}:
+"user_template_{{ targetdir }}":
   file.managed:
     - source: {{ template }}
     - name: {{ targetdir }}/{{ name }}.json
     - user: {{ s.user }}
     - group: libvirtd
     - require:
-      - file: box_add_script_{{ name }}
+      - file: "box_add_script_{{ targetdir }}"
 
-user_varsfile_{{ name }}:
+"user_varsfile_{{ targetdir }}":
   file.managed:
     - name: {{ targetdir }}/{{ name }}_vars.json
     - contents: |
@@ -39,7 +39,7 @@ user_varsfile_{{ name }}:
     - user: {{ s.user }}
     - group: libvirtd
     - require:
-      - file: user_template_{{ name }}
+      - file: "user_template_{{ targetdir }}"
 
 {% endmacro %}
 
@@ -73,7 +73,7 @@ user_varsfile_{{ name }}:
 {% do vars.append([' -var "', n, '=', d, '"']|join('')) %}
 {% endfor %}
 
-build_{{ name }}:
+build_{{ targetdir }}":
   cmd.run:
     - name: if test -d output-qemu; then rm -r output-qemu; fi; PACKER_LOG=1 packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
     - cwd: {{ targetdir }}
