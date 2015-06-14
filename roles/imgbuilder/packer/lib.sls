@@ -41,6 +41,8 @@ user_varsfile_{{ name }}:
     - require:
       - file: user_template_{{ name }}
 
+{% endmacro %}
+
 
 {% macro prepare_preseed(name, targetdir, custom_settings= {}) %}
 
