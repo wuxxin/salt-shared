@@ -7,8 +7,8 @@
 suite: {{ suite }}
 architecture: {{ architecture }}
 
-source: http://archive.ubuntu.com/ubuntu/dists/{{ suite }}/main/installer-{{ architecture }}/20101020ubuntu318/images/netboot/netboot.tar.gz
-source_hash: "sha256=cad0f44d6a93be1fc6e78d47df431c05daf2687a4f9621e9b4195d06320e58af"
+source: http://archive.ubuntu.com/ubuntu/dists/{{ suite }}-updates/main/installer-{{ architecture }}/20101020ubuntu318.20/images/netboot/netboot.tar.gz
+source_hash: "sha256=c41794a990d6093e32e7809b1c0cafc82cc5dfb45ef537b72c31833b2404d12f"
 initrd: ubuntu-installer/{{ architecture }}/initrd.gz
 kernel: ubuntu-installer/{{ architecture }}/linux
 
