@@ -46,14 +46,16 @@ user_varsfile_{{ name }}:
 
 {% from "roles/imgbuilder/preseed/defaults.jinja" import defaults as ps_s with context %}
 
+# our updates
 {% do ps_s.update({
-  'target': targetdir+ '/http',
+  'target': targetdir,
   'username': 'vagrant',
   'password': 'vagrant',
   'hostname': name,
   'default_preseed': 'preseed-simple-http.cfg',
 }) %}
 
+# updates from caller
 {% do ps_s.update(custom_settings) %}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
