@@ -1,9 +1,3 @@
-iso-env:
-  pkg.installed:
-    - pkgs:
-      - syslinux
-      - genisoimage
-
 
 {% macro mk_install_iso(cs) %}
 

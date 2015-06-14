@@ -8,4 +8,8 @@ preseed_pkgs:
       - pwgen
       - whois {# whois needed for mkpasswd #}
 
-
+iso-env:
+  pkg.installed:
+    - pkgs:
+      - syslinux
+      - genisoimage
