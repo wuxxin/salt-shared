@@ -9,8 +9,8 @@ import salt.utils.validate.net as nw_validate
 def __virtual__():
     return True
 
-format_choice = ['net_addr', 'net_addr_mask', 'net_short', 'net_addr_cidr', 
-    'net_broadcast', 'net_reverse', 'net_reverse_short', 
+format_choice = ['net_addr', 'net_addr_mask', 'net_short', 'net_addr_cidr',
+    'net_broadcast', 'net_reverse', 'net_reverse_short',
     'net_calc', 'interface_ip']
 
 
@@ -51,7 +51,10 @@ def combine_net_mask(net, mask):
 def net_interface_addr(combined):
     addr, netmask = _net_mask(combined)
     return addr
-    
+
+def net_interface_netmask(combined):
+    addr, netmask = _net_mask(combined)
+    return netmask
 
 def cidr_from_net(combined):
     addr, netmask = _net_mask(combined)
@@ -121,7 +124,7 @@ def calc_ip_from_net(combined, offset):
 def net_list(format, interface_list, interfaces, kwargs={}):
     if format not in format_choice:
         raise TypeError('not a valid format choice (not one of {0}): {1}'.format(format_choice, format))
-    
+
     result = []
 
     for i in interface_list:
@@ -268,4 +271,3 @@ class TestSequenceFunctions(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
