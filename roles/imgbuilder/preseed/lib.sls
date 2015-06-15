@@ -159,7 +159,7 @@ include:
 {% if cs.custom_files %}
 {% for d,s in cs.custom_files.iteritems()  %}
 "add-custom-files-{{ s }}-{{ tmp_target }}":
-  file.managed:
+  file.copy:
     - name: {{ tmp_target }}/{{ d }}
     - source: {{ s }}
     - makedirs: true
@@ -167,14 +167,21 @@ include:
 {% endif %}
 
 # make /custom/custom.lst
+"create.custom-list-{{ tmp_target }}":
+  file.touch:
+    - name: {{ tmp_target }}/custom.lst
+    - makedirs: true
+
 "make-custom-list-{{ tmp_target }}":
   cmd.run:
-    - name: find custom -type f > {{ tmp_target }}/custom.lst
+    - name: if test -d custom; then find custom -type f > {{ tmp_target }}/custom.lst; fi
     - cwd: {{ tmp_target }}
+    - require:
+      - file: "create.custom-list-{{ tmp_target }}"
 {%- if cs.custom_files %}
   file.append:
     - name: {{ tmp_target }}/custom.lst
-    - contents: |
+    - text: |
 {%- for d,s in cs.custom_files.iteritems() %}
 {{ d|indent(8, true) }}
 {%- endfor %}
