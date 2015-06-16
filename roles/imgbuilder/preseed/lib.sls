@@ -94,6 +94,7 @@ include:
         netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
         apt_proxy_mirror: {{ cs.apt_proxy_mirror|d("''") }}
+        kernel_image: {{ cs.kernel_image|d("''") }}
 
 {% endfor %}
 {% endfor %}
@@ -262,6 +263,7 @@ include:
         netcfg: {{ cs.netcfg }}
         disks: {{ cs.disks|d("/dev/vda") }}
         apt_proxy_mirror: {{ cs.apt_proxy_mirror|d("''") }}
+        kernel_image: {{ cs.kernel_image|d("''") }}
         diskpassword_receiver_id: {{ cs.diskpassword_receiver_id|d("''") }}
         diskpassword_receiver_key: {{ cs.diskpassword_receiver_key|d("''") }}
         diskpassword_creation: {{ cs.diskpassword_creation|d("''") }}
