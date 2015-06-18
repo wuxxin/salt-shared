@@ -8,6 +8,7 @@ include:
 whatsapp_ppa:
   pkgrepo.managed:
     - ppa: whatsapp-purple/ppa
+    - file: /etc/apt/sources.list.d/whatsapp-purple.list
 
 pidgin_gnome_keyring_ppa:
   pkgrepo.managed:
