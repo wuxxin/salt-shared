@@ -1,9 +1,9 @@
-{% if pillar.get('extra_packages', False) or pillar.get('extra_states', False) %}
+{% if salt['pillar.get']('extra_packages', False) or salt['pillar.get']('extra_states', False) %}
 include:
-{% for s in pillar.get('extra_states', []) %}
+{% for s in salt['pillar.get']('extra_states', []) %}
   - {{ s }}
 {% endfor %}
-{% if pillar.get('extra_packages', False) %}
+{% if salt['pillar.get']('extra_packages', False) %}
   - .extra_packages
 {% endif %}
 {% endif %}

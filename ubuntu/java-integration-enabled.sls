@@ -1,3 +1,5 @@
+{% if (grains['os'] == 'Ubuntu') %}
+
 include:
   - .ppa
   - java
@@ -9,3 +11,4 @@ jayatana:
       - cmd: jayatana-ppa
       - pkg: default-jre
 
+{% endif %}

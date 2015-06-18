@@ -16,6 +16,7 @@ video-packages:
 install-css:
   cmd.run:
     - name: /usr/share/doc/libdvdread4/install-css.sh
+    - unless: dpkg-query -s libdvdcss2
     - require:
       - pkg: video-packages
 

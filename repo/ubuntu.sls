@@ -13,7 +13,7 @@ ppa_ubuntu_installer:
 {% if grains['os'] == 'Mint' %}
   cmd.run:
     - name: apt-add-repository -y ppa:{{ ppaname }}
-    - unless: test -f /etc/apt/sources.list.d/{{ salt['extutils.re_replace']("/","*", ppaname) }}-trusty.list
+    - unless: test -f /etc/apt/sources.list.d/{{ salt['extutils.re_replace']("[/.]","*", ppaname) }}-trusty.list
     - require:
       - pkg: ppa_ubuntu_installer
 {% else %}
