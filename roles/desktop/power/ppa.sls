@@ -8,5 +8,5 @@ include:
 tlp-ppa:
   pkgrepo.managed:
     - ppa: linrunner/tlp
-
+    - file: /etc/apt/sources.list.d/linrunnner-tlp.list
 {% endif %} 

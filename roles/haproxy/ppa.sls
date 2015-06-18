@@ -8,5 +8,6 @@ include:
 haproxy-ppa:
   pkgrepo.managed:
     - ppa: "vbernat/haproxy-1.5"
+    - file: /etc/apt/sources.list.d/vbernat-haproxy.list
 
 {% endif %} 

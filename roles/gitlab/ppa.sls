@@ -8,5 +8,6 @@ include:
 git-core-ppa:
   pkgrepo.managed:
     - ppa: git-core/ppa
+    - file: /etc/apt/sources.list.d/git-core.list
 
 {% endif %} 

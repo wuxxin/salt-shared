@@ -17,6 +17,7 @@ salt_ppa:
 salt_ppa:
   pkgrepo.managed:
     - ppa: saltstack/salt
+    - file: /etc/apt/sources.list.d/saltstack.list
     - require:
       - pkg: ppa_ubuntu_installer
 {% endif %}

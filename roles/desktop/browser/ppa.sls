@@ -9,5 +9,6 @@ include:
 firefox-dev_ppa:
   pkgrepo.managed:
     - ppa: ubuntu-mozilla-daily/firefox-aurora
+    - file: /etc/apt/sources.list.d/ubuntu-mozilla-daily.list
 
 {% endif %} 

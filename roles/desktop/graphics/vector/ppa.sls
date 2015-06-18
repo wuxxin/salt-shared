@@ -8,5 +8,5 @@ include:
 inkscape-ppa:
   pkgrepo.managed:
     - ppa: inkscape.dev/stable
-
+    - file: /etc/apt/sources.list.d/inkscape.dev.list
 {% endif %} 

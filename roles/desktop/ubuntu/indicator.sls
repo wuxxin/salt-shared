@@ -1,10 +1,11 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
 atareao_ppa:
   pkgrepo.managed:
     - ppa: atareao/atareao
+    - file: /etc/apt/sources.list.d/atareao.list
 
 "my-weather-indicator":
   pkg:
@@ -12,9 +13,8 @@ atareao_ppa:
     - require:
       - pkgrepo: atareao_ppa
 
-{% endif %}
-
 indicator-multiload:
   pkg:
     - installed
 
+{% endif %}

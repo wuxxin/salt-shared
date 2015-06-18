@@ -8,5 +8,6 @@ include:
 x265-ppa:
   pkgrepo.managed:
     - ppa: strukturag/libde265
+    - file: /etc/apt/sources.list.d/strukturag-libde265.list
 
 {% endif %} 

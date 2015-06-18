@@ -8,5 +8,5 @@ include:
 kivy-ppa:
   pkgrepo.managed:
     - ppa: kivy-team/kivy
-
+    - file: /etc/apt/sources.list.d/kivy-team.list
 {% endif %} 

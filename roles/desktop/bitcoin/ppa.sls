@@ -8,5 +8,6 @@ include:
 bitcoin-ppa:
   pkgrepo.managed:
     - ppa: bitcoin/bitcoin
+    - file: /etc/apt/sources.list.d/bitcoin.list
 
 {% endif %} 

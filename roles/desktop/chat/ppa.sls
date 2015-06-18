@@ -12,4 +12,6 @@ whatsapp_ppa:
 pidgin_gnome_keyring_ppa:
   pkgrepo.managed:
     - ppa: pidgin-gnome-keyring/ppa
+    - file: /etc/apt/sources.list.d/pidgin-gnome-keyring.list
+
 {% endif %} 

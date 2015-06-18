@@ -5,6 +5,7 @@ include:
 cogscinl_ppa:
   pkgrepo.managed:
     - ppa: smathot/cogscinl
+    - file: /etc/apt/sources.list.d/smathot-cogscinl.list
     - require:
       - pkg: ppa_ubuntu_installer
 {% endif %}

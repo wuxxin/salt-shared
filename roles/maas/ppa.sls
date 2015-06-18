@@ -8,5 +8,6 @@ include:
 maas-ppa:
   pkgrepo.managed:
     - ppa: maas-maintainers/stable
+    - file: /etc/apt/sources.list.d/maas-maintainers.list
 
 {% endif %} 

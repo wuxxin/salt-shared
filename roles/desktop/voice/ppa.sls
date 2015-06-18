@@ -8,6 +8,7 @@ include:
 mumble-ppa:
   pkgrepo.managed:
     - ppa: mumble/release
+    - file: /etc/apt/sources.list.d/mumble.list
 
 jitsi-ppa:
   pkgrepo.managed:
