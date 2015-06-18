@@ -4,32 +4,35 @@ include:
   - .browser
   - .chat
   - .chipcard
-  - .email
   - .ftp
   - .graphics
   - .network
-  - .power
   - .security
   - .terminal
   - .ubuntu
   - .video
   - .voice
+#  - .email
+#  - .power
 
 {% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
   - .gcloud
+  - .atom
+  - .emulation
+  - .python
+  - .vcs
+{% endif %}
+
+{#
+  - .kivy
+  - .tmbundles
+  - .openwrt
+  - .idea
+  - .etckeeper
   - .android
   - .eclipse
   - .arduino
-  - .atom
-  - .emulation
-  - .etckeeper
-  - .idea
-  - .kivy
-  - .openwrt
-  - .python
-  - .vcs
-  - .tmbundles
-{% endif %}
+#}
 
 {% if pillar.get('desktop.games.status', 'absent') == 'present' %}
   - .emulation.games
@@ -39,9 +42,6 @@ include:
   - .bitcoin
 {% endif %}
 
-cdargs:
-  pkg:
-    - installed
 
 #sysdig:
 #  pkg:

@@ -9,7 +9,3 @@ unity-tweaks:
       - unity-tweak-tool
       - compizconfig-settings-manager
 
-indicator-multiload:
-  pkg:
-    - installed
-
