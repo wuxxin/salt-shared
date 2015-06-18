@@ -1,13 +1,8 @@
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
-{% endif %} 
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
-
-jayatana-ppa:
-  pkgrepo.managed:
-    - ppa: danjaredg/jayatana
-    - file: /etc/apt/sources.list.d/jayatana.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("jayatana-ppa", "danjaredg/jayatana") }}
 
 {% endif %} 

@@ -12,8 +12,6 @@ include:
   - .ubuntu
   - .video
   - .voice
-#  - .email
-#  - .power
 
 {% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
   - .gcloud
@@ -22,17 +20,6 @@ include:
   - .python
   - .vcs
 {% endif %}
-
-{#
-  - .kivy
-  - .tmbundles
-  - .openwrt
-  - .idea
-  - .etckeeper
-  - .android
-  - .eclipse
-  - .arduino
-#}
 
 {% if pillar.get('desktop.games.status', 'absent') == 'present' %}
   - .emulation.games
@@ -43,6 +30,22 @@ include:
 {% endif %}
 
 
+{#
+  include:
+#  - .email
+#  - .power
+
+developer:
+
+  - .kivy
+  - .tmbundles
+  - .openwrt
+  - .idea
+  - .etckeeper
+  - .android
+  - .eclipse
+  - .arduino
+
 #sysdig:
 #  pkg:
 #    - installed
@@ -50,4 +53,6 @@ include:
 #minidlna:
 #  pkg:
 #    - installed
+
+#}
 

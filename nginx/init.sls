@@ -6,6 +6,6 @@ nginx:
     - installed
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: nginx_ppa
+      - cmd: nginx_ppa
 {% endif %}
 

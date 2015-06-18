@@ -7,7 +7,7 @@ tlp:
       - tlp
       - tlp-rdw
     - require:
-      - pkgrepo: tlp-ppa
+      - cmd: tlp-ppa
 
 psensor:
   pkg:

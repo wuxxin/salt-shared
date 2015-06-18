@@ -8,6 +8,6 @@ vector:
       - librsvg2-bin
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: inkscape-ppa
+      - cmd: inkscape-ppa
 {% endif %}
 

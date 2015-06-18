@@ -5,9 +5,7 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-x265-ppa:
-  pkgrepo.managed:
-    - ppa: strukturag/libde265
-    - file: /etc/apt/sources.list.d/strukturag-libde265.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("x265-ppa", "strukturag/libde265") }}
 
 {% endif %} 

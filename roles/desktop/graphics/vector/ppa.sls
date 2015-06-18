@@ -5,8 +5,7 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-inkscape-ppa:
-  pkgrepo.managed:
-    - ppa: inkscape.dev/stable
-    - file: /etc/apt/sources.list.d/inkscape.dev.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("inkscape-ppa", "inkscape.dev/stable") }}
+
 {% endif %} 

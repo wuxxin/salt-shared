@@ -7,7 +7,7 @@ bitcoin:
       - bitcoin-qt
       - bitcoind
     - require:
-      - pkgrepo: bitcoin-ppa
+      - cmd: bitcoin-ppa
 
 #  secret sharing splitter/combiner
 ssss:

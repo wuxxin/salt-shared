@@ -18,7 +18,7 @@ dokku:
     - name: dokku-alt-beta
     - require:
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-      - pkgrepo: dokku-alt_ppa
+      - cmd: dokku-alt_ppa
 {% endif %}
       - pkg: docker
       - pkg: nginx

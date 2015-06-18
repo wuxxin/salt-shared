@@ -25,4 +25,4 @@ x256-packages:
       - gstreamer1.0-libde265
       - vlc-plugin-libde265
     - require:
-      - pkgrepo: x265-ppa
+      - cmd: x265-ppa

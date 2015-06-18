@@ -6,6 +6,6 @@ jayatana:
   pkg:
     - installed
     - require:
-      - pkgrepo: jayatana-ppa
+      - cmd: jayatana-ppa
       - pkg: default-jre
 

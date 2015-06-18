@@ -17,5 +17,5 @@ chat:
       - pidgin-whatsapp
       - bitlbee
     - require:
-      - pkgrepo: whatsapp_ppa
-      - pkgrepo: pidgin_gnome_keyring_ppa
+      - cmd: whatsapp_ppa
+      - cmd: pidgin_gnome_keyring_ppa

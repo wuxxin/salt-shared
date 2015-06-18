@@ -5,9 +5,7 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-bitcoin-ppa:
-  pkgrepo.managed:
-    - ppa: bitcoin/bitcoin
-    - file: /etc/apt/sources.list.d/bitcoin.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("bitcoin-ppa", "bitcoin/bitcoin") }}
 
 {% endif %} 

@@ -11,5 +11,9 @@ dokku-alt_ppa:
     - file: /etc/apt/sources.list.d/dokku-alt.list
     - keyid: EAD883AF
     - keyserver: keys.gnupg.net
+  cmd.run:
+    - name: true
+    - require:
+      - cmd: dokku-alt_ppa
 
 {% endif %} 

@@ -9,10 +9,10 @@ pcsx2:
     - installed
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: pcsx2
-  pkgrepo.managed:
-    - ppa: gregory-hainaut/pcsx2.official.ppa
-    - file: /etc/apt/sources.list.d/gregory-hainaut-pcsx2.list
+      - cmd: pcsx2_ppa
+
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("pcsx2_ppa", "gregory-hainaut/pcsx2.official.ppa") }}
 
 {% endif %}
 
@@ -22,14 +22,15 @@ mupen64plus:
     - installed
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("retroarch-ppa", "libretro/stable") }}
+
 retroarch:
-  pkgrepo.managed:
-    - ppa: libretro/stable
-    - file: /etc/apt/sources.list.d/libretro.list
   pkg:
     - installed
     - require:
-      - pkgrepo: retroarch
+      - cmd: retroarch-ppa
 
 {% endif %}
 

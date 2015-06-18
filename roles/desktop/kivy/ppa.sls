@@ -5,8 +5,7 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-kivy-ppa:
-  pkgrepo.managed:
-    - ppa: kivy-team/kivy
-    - file: /etc/apt/sources.list.d/kivy-team.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("kivy-ppa", "kivy-team/kivy") }}
+
 {% endif %} 

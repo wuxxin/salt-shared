@@ -5,9 +5,7 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-git-core-ppa:
-  pkgrepo.managed:
-    - ppa: git-core/ppa
-    - file: /etc/apt/sources.list.d/git-core.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("git-core-ppa", "git-core/ppa") }}
 
 {% endif %} 

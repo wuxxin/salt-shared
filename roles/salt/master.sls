@@ -35,7 +35,7 @@ salt-master:
   pkg.installed:
 {% endif %}
     - require:
-      - pkgrepo: salt_ppa
+      - cmd: salt_ppa
       - pip: salt-master-dependencies
 {% if s.master.gitcrypt.status=="present" %}
       - cmd: git-crypt

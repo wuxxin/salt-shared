@@ -11,5 +11,10 @@ owncloudclient_ppa:
     - name: deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_14.04/ /
     - file: /etc/apt/sources.list.d/owncloudclient.list
     - key_url: http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_14.04/Release.key
+  ćmd.run:
+    - name: true
+    - require:
+      - cmd: owncloudclient_ppa
+
 {% endif %}
 

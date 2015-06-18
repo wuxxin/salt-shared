@@ -44,7 +44,7 @@ gitlab-prereq-git:
   pkg.latest:
     - name: git-core
     - require:
-      - pkgrepo: git-core-ppa
+      - cmd: git-core-ppa
 
 gitlab-all-prereq:
   cmd.run:

@@ -8,12 +8,12 @@ include:
 mumble:
   pkg.installed:
     - require:
-      - pkgrepo: mumble-ppa
+      - cmd: mumble-ppa
 
 jitsi:
   pkg.installed:
     - require:
-      - pkgrepo: jitsi-ppa
+      - cmd: jitsi-ppa
 
 linphone:
   pkg:

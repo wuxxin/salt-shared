@@ -21,7 +21,7 @@ include:
 haproxy:
   pkg.installed:
     - require:
-      - pkgrepo: haproxy-ppa
+      - cmd: haproxy-ppa
   service.running:
     - enable: true
     - require:

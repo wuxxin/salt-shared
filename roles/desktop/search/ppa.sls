@@ -5,9 +5,9 @@ include:
 
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-recoll_ppa:
-  pkgrepo.managed:
-    - ppa: recoll-backports/recoll-1.15-on
-    - file: /etc/apt/sources.list.d/recoll-backports.list
+
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("recoll_ppa", "recoll-backports/recoll-1.15-on") }}
+
 {% endif %}
 

@@ -3,6 +3,6 @@ include:
 
 owncloud-client:
   pkg.installed:
-      - pkgrepo: owncloudclient_ppa
+      - cmd: owncloudclient_ppa
 
 

@@ -7,7 +7,7 @@ nodejs:
   pkg.installed:
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: nodejs_ppa
+      - cmd: nodejs_ppa
 {% endif %}
 
 npm:

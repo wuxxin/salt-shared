@@ -20,7 +20,7 @@ include:
 salt-minion:
   pkg.installed:
     - require:
-      - pkgrepo: salt_ppa
+      - cmd: salt_ppa
   service.running:
     - enable: true
     - require:

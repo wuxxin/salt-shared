@@ -5,14 +5,8 @@ include:
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-whatsapp_ppa:
-  pkgrepo.managed:
-    - ppa: whatsapp-purple/ppa
-    - file: /etc/apt/sources.list.d/whatsapp-purple.list
-
-pidgin_gnome_keyring_ppa:
-  pkgrepo.managed:
-    - ppa: pidgin-gnome-keyring/ppa
-    - file: /etc/apt/sources.list.d/pidgin-gnome-keyring.list
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("whatsapp_ppa", "whatsapp-purple/ppa") }}
+{{ apt_add_repository("pidgin_gnome_keyring_ppa", "pidgin-gnome-keyring/ppa") }}
 
 {% endif %} 

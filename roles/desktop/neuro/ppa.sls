@@ -2,11 +2,8 @@
 include:
   - repo.ubuntu
 
-cogscinl_ppa:
-  pkgrepo.managed:
-    - ppa: smathot/cogscinl
-    - file: /etc/apt/sources.list.d/smathot-cogscinl.list
-    - require:
-      - pkg: ppa_ubuntu_installer
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("cogscinl_ppa", "smathot/cogscinl") }}
+
 {% endif %}
 

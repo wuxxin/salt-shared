@@ -21,7 +21,7 @@ virt-tools:
       - spice-client
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: getdeb_ppa
+      - cmd: getdeb_ppa
 {% endif %}
 
 # xserver-xspice
@@ -33,7 +33,7 @@ virt-manager:
     - require:
       - pkg: virt-tools
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-      - pkgrepo: getdeb_ppa
+      - cmd: getdeb_ppa
 {% endif %}
 
 

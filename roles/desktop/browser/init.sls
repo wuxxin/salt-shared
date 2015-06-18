@@ -9,7 +9,7 @@ firefox:
       - firefox-dev
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: firefox-dev_ppa
+      - cmd: firefox-dev_ppa
 {% endif %}
 
 chromium-browser:

@@ -5,9 +5,8 @@ include:
 
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-zfs_ppa:
-  pkgrepo.managed:
-    - ppa: zfs-native/stable
-    - require:
-      - pkg: ppa_ubuntu_installer
+
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("zfs_ppa", "zfs-native/stable") }}
+
 {% endif %}
