@@ -1,6 +1,6 @@
 include:
   - .ppa
-{% if salt['pillar.get']('desktop.commercial.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:commercial:status', 'absent') == 'present' %}
   - .skype
 {% endif %}
 

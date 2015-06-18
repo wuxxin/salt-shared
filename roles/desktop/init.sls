@@ -13,7 +13,7 @@ include:
   - .video
   - .voice
 
-{% if salt['pillar.get']('desktop.developer.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
   - .gcloud
   - .atom
   - .emulation
@@ -21,11 +21,11 @@ include:
   - .vcs
 {% endif %}
 
-{% if salt['pillar.get']('desktop.games.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
   - .emulation.games
 {% endif %}
 
-{% if salt['pillar.get']('desktop.bitcoin.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:bitcoin:status', 'absent') == 'present' %}
   - .bitcoin
 {% endif %}
 
