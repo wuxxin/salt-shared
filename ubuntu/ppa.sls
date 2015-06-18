@@ -8,5 +8,6 @@ include:
 jayatana-ppa:
   pkgrepo.managed:
     - ppa: danjaredg/jayatana
+    - file: /etc/apt/sources.list.d/jayatana.list
 
 {% endif %} 
