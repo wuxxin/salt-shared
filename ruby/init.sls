@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' and grains['osrelease'] >= '14.04' :%}
+{% if (grains['os'] == 'Ubuntu' and grains['osrelease'] >= '14.04') or (grains['os'] == 'Mint') %}
 
 ruby:
   pkg.installed:

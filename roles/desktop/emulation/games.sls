@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %} 
@@ -7,7 +7,7 @@ include:
 pcsx2:
   pkg:
     - installed
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
       - pkgrepo: pcsx2
   pkgrepo.managed:
@@ -19,7 +19,7 @@ mupen64plus:
   pkg:
     - installed
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 retroarch:
   pkg:
     - installed

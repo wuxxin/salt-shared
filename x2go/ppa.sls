@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %}
@@ -14,10 +14,10 @@ x2go_ppa:
     - keyserver: keys.gnupg.net
 {% endif %}
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 x2go_ppa:
   pkgrepo.managed:
-    - name: deb http://ppa.launchpad.net/x2go/stable/ubuntu {{ grains['lsb_distrib_codename'] }} main
+    - name: deb http://ppa.launchpad.net/x2go/stable/ubuntu {{ grains['lsb_distrib_codename'] if grains['os'] != 'Mint' else 'trusty' }} main
     - humanname: "Ubuntu X2go Repository"
     - file: /etc/apt/sources.list.d/x2go.list
     - keyid: a7d8d681b1c07fe41499323d7cde3a860a53f9fd

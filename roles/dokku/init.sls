@@ -17,7 +17,7 @@ dokku:
   pkg.installed:
     - name: dokku-alt-beta
     - require:
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - pkgrepo: dokku-alt_ppa
 {% endif %}
       - pkg: docker

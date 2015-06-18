@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %}
@@ -13,7 +13,7 @@ salt_ppa:
     - key_url: http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key
 {% endif %}
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 salt_ppa:
   pkgrepo.managed:
     - ppa: saltstack/salt

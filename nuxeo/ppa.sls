@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %} 
@@ -8,13 +8,13 @@ include:
 
 nuxeo_ppa:
   pkgrepo.managed:
-    - name: deb http://apt.nuxeo.org/ {{ grains['lsb_distrib_codename'] }} fasttracks
+    - name: deb http://apt.nuxeo.org/ {{ grains['lsb_distrib_codename'] if grains['os'] != 'Mint' else 'trusty' }} fasttracks
     - key_url: salt://nuxeo/nuxeo.key
 
 {% endif %} 
 
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 
 ffmpeg_ppa:
   pkgrepo.managed:

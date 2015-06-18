@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %}
@@ -11,7 +11,7 @@ aptly_ppa:
     - file: /etc/apt/sources.list.d/aptly-main-trusty.list
     - keyid: E083A3782A194991
     - keyserver: keys.gnupg.net
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
       - pkg: ppa_ubuntu_installer
 {% endif %}

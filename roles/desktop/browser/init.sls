@@ -7,7 +7,7 @@ firefox:
     - pkgs: 
       - firefox
       - firefox-dev
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
       - pkgrepo: firefox-dev_ppa
 {% endif %}
