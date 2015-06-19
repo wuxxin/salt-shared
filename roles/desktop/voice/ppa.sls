@@ -9,7 +9,7 @@ jitsi_ppa:
   pkgrepo.managed:
     - name: deb https://download.jitsi.org/deb unstable/
     - key_url: salt://roles/desktop/voice/sip-communicator-keyring.gpg
-    - file: /etc/apt/sources.list.d/jitsi-trusty.list
+    - file: /etc/apt/sources.list.d/jitsi.list
     - require:
       - pkg: ppa_ubuntu_installer
 

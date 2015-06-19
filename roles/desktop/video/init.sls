@@ -27,3 +27,8 @@ x256-packages:
       - vlc-plugin-libde265
     - require:
       - cmd: x265-ppa
+
+minitube:
+  pkg.installed:
+    - require:
+      - cmd: minitube-ppa
