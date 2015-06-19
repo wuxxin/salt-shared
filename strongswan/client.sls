@@ -1,8 +1,7 @@
 include:
   - .init
 
-NetworkManager-strongswan:
+network-manager-strongswan:
   pkg.installed:
     - require:
       - pkg: strongswan
-      
