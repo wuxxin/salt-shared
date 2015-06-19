@@ -12,3 +12,5 @@ themes-extra:
       - elementary-icon-theme
       - gtk-theme-config
       - gtk-theme-switch
+      - themecolorizer
+      - gnome-tweak-tool
