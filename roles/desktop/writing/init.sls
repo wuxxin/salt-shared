@@ -1,3 +1,4 @@
 include:
   - .zotero
   - .doconce
+  - .sphinx

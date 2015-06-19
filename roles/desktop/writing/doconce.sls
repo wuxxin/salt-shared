@@ -3,6 +3,7 @@ include:
   - git
   - subversion
   - python
+  - latex
 
 prereq_doconce:
   pkg.installed:
@@ -10,14 +11,6 @@ prereq_doconce:
       - idle
       - ipython
       - python-pdftools
-      - texinfo
-      - texlive
-      - texlive-extra-utils
-      - texlive-latex-extra
-      - texlive-math-extra
-      - texlive-font-utils
-      - latexdiff
-      - auctex
       - imagemagick
       - netpbm
       - mjpegtools
@@ -37,6 +30,7 @@ prereq_doconce:
       - pkg: git
       - pkg: subversion
       - pkg: python
+      - pkg: latex
 
 {% load_yaml as pip_list %}
  - "sphinx"
