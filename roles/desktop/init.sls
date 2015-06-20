@@ -19,6 +19,7 @@ include:
   - .emulation
   - .python
   - .vcs
+  - .writing
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}

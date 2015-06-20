@@ -6,4 +6,4 @@ include:
 
 sphinx:
   pkg.installed:
-    pkg: python-sphinx
+    - pkg: python-sphinx
