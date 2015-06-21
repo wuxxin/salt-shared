@@ -24,7 +24,7 @@ ppa_ubuntu_installer:
     - require:
       - pkg: ppa_ubuntu_installer
   cmd.run:
-    - name: true
+    - name: "true"
     - require:
       - pkgrepo: {{ statename }}
 {% endif %}

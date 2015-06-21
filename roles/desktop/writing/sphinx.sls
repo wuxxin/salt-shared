@@ -6,4 +6,15 @@ include:
 
 sphinx:
   pkg.installed:
-    - pkg: python-sphinx
+    - pkgs:
+      - python-sphinx
+      - python-sphinxcontrib.actdiag
+      - python-sphinxcontrib.blockdiag
+      - python-sphinxcontrib.nwdiag
+      - python-sphinxcontrib.seqdiag
+      - python-sphinxcontrib-httpdomain
+      - python-sphinxcontrib-programoutput
+      - python-sphinxcontrib.issuetracker
+      - python-sphinxcontrib.spelling
+      - python-imaging
+      - zip
