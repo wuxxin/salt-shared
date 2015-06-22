@@ -14,11 +14,11 @@ include:
   - .voice
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
+  - .vcs
+  - .python
   - .gcloud
   - .atom
   - .emulation
-  - .python
-  - .vcs
   - .writing
 {% endif %}
 
@@ -30,14 +30,12 @@ include:
   - .bitcoin
 {% endif %}
 
-
 {#
-  include:
-#  - .email
-#  - .power
+general:
+  - .email
+  - .power
 
 developer:
-
   - .kivy
   - .tmbundles
   - .openwrt
@@ -50,7 +48,6 @@ developer:
 #sysdig:
 #  pkg:
 #    - installed
-
 #minidlna:
 #  pkg:
 #    - installed
