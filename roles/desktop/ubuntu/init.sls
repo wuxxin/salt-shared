@@ -3,6 +3,10 @@ include:
   - .restricted
   - .user
 
+gconf-editor:
+  pkg:
+    - installed
+    
 themes-extra:
   pkg.installed:
     - pkgs:

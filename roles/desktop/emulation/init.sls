@@ -45,3 +45,5 @@ remmina:
       - remmina
       - remmina-plugin-vnc
       - remmina-plugin-gnome
+      - remmina-plugin-rdp
+

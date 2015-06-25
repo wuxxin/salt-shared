@@ -1,16 +1,16 @@
 {% from 'roles/desktop/user/lib.sls' import user, user_home, user_download with context %}
 
-{% set bundle_version = '4.5.1' %}
+{% set bundle_version = '4.5.2' %}
 {% set bundle_locale = 'de' %}{# en-US #}
 {% set bundle_base = user_home+ '/.local' %}
 {% set bundle_root = bundle_base+ '/tor-browser_'+ bundle_locale %}
 {% set bits = '64' if grains['osarch'][-2:] == '64' else '32' %}
 {% set bundle_name = 'tor-browser-linux'+ bits+ '-'+ bundle_version+ '_'+ bundle_locale+ '.tar.xz' %}
 {% set bundle_signature = bundle_name+ ".asc" %}
-{% set bundle_hash = "sha256=7dfcd7df5eb2dec72f475bb80e00e0561578b5cb028faa006a8bf175cbc9fe62" %}
+{% set bundle_hash = "sha256=9faa9a7b5212707f27a4c6007a61dba4fd46f79ac39739113d3a8111d5aac789" %}
 
 {#
-# Verify Download 
+# Verify Download
 
 https://www.torproject.org/dist/torbrowser/{{ bundle_version }}/{{ signature }}
 gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys 0x4E2C6E8793298290
