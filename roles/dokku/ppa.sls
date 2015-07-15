@@ -1,15 +1,15 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
-{% endif %} 
+{% endif %}
 
-{% if grains['os'] == 'Ubuntu' %} 
+{% if grains['os'] == 'Ubuntu' %}
 
-dokku-alt_ppa:
+dokku_ppa:
   pkgrepo.managed:
-    - name: deb http://dokku-alt.github.io/dokku-alt /
+    - name: https://packagecloud.io/dokku/dokku/ubuntu/ trusty main
     - file: /etc/apt/sources.list.d/dokku-trusty.list
     - keyid: EAD883AF
     - keyserver: keys.gnupg.net
 
-{% endif %} 
+{% endif %}

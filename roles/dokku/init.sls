@@ -15,10 +15,10 @@ ruby-sinatra:
 
 dokku:
   pkg.installed:
-    - name: dokku-alt-beta
+    - name: dokku
     - require:
 {% if grains['os'] == 'Ubuntu' %}
-      - pkgrepo: dokku-alt_ppa
+      - pkgrepo: dokku_ppa
 {% endif %}
       - pkg: docker
       - pkg: nginx
@@ -46,7 +46,7 @@ create_dokkurc:
         export DOKKU_VERBOSE_DATABASE_ENV=1
         export DOKKU_EXPOSED_PORTS="5000 8080 8000 80"
     - user: dokku
-    - require: 
+    - require:
       - file: create_dokkurc
     - watch_in:
       - service: dokku
@@ -84,7 +84,7 @@ dokku_access_add_{{ adminkey }}:
 install_dokku_plugin_{{ n }}:
   git.latest:
     - name: {{ p }}
-    - target: /var/lib/dokku-alt/plugins/{{ n }}
+    - target: /var/lib/dokku/plugins/{{ n }}
 
 {% endfor %}
 
