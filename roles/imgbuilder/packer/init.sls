@@ -49,7 +49,7 @@ profile_packer_settings:
 
 {% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
-{% set version="0.7.5" %}
+{% set version="0.8.3" %}
 
 packer_binary:
   file.directory:
@@ -67,7 +67,7 @@ packer_binary:
     - name: |
         for n in `ls /usr/local/src/packer-v{{ version }}-linux-amd64`; do
             chmod +x /usr/local/src/packer-v{{ version }}-linux-amd64/$n
-            ln -s -f -T /usr/local/src/packer-v{{ version }}-linux-amd64/$n /usr/local/bin/$n 
+            ln -s -f -T /usr/local/src/packer-v{{ version }}-linux-amd64/$n /usr/local/bin/$n
         done
     - require:
       - archive: packer_binary
@@ -79,7 +79,7 @@ user: {{ s.user }}
 source:
   repo: 'https://github.com/mitchellh/packer.git'
 build:
-  rev: 'v0.8~1'
+  rev: ''
   make: 'go get -u github.com/mitchellh/gox && cd $GOPATH/src/github.com/mitchellh/packer && make updatedeps && make dev'
   check: 'packer'
   bin_files: ['packer', 'builder-*', 'command-*', 'packer-*', 'post-processor-*', 'provisioner-*']
@@ -119,4 +119,3 @@ box_add_script:
     - mode: 775
     - require:
       - file: packer_templates
-
