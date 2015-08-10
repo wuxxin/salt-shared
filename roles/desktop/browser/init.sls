@@ -4,7 +4,7 @@ include:
 
 firefox:
   pkg.installed:
-    - pkgs: 
+    - pkgs:
       - firefox
       - firefox-dev
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
@@ -17,3 +17,13 @@ chromium-browser:
     - pkgs:
       - chromium-browser
 
+other-browser:
+  pkg.installed:
+    - pkgs:
+      - midori
+      - qupzilla
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+    - require:
+      - cmd: midori_ppa
+      - cmd: qupzilla_ppa
+{% endif %}
