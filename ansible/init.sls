@@ -4,9 +4,9 @@ include:
 ansible:
   pkg:
     - installed
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: ansible_ppa
+      - cmd: ansible_ppa
 {% endif %}
 
 librarian-ansible:

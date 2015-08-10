@@ -1,9 +1,3 @@
-iso-env:
-  pkg.installed:
-    - pkgs:
-      - syslinux
-      - genisoimage
-
 
 {% macro mk_install_iso(cs) %}
 
@@ -85,5 +79,9 @@ iso-clean-tmp_target_finish:
     - require:
       - cmd: iso-hybrid-image
 
+iso-checksum-image:
+  cmd.run:
+    - name: sha256sum -b {{ cs.target }}/preseed.iso | sed -re "s/([^ ]+) .*/\1/g" >  {{ cs.target }}/preseed.iso.sha256
+    - onlyif: test ! -f  {{ cs.target }}/preseed.iso.sha256
 
 {% endmacro %}

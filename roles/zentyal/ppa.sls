@@ -1,4 +1,4 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 
@@ -22,7 +22,7 @@ zentyal_extra_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
-      - pkgrepo: zentyal_main_ubuntu
+      - cmd: zentyal_main_ubuntu
 
 {% elif zentyal_version == "3.3" %}
 zentyal_main_ubuntu:
@@ -42,7 +42,7 @@ zentyal_extra_ubuntu:
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
-      - pkgrepo: zentyal_main_ubuntu
+      - cmd: zentyal_main_ubuntu
 {% else %}
 
 zentyal_main_ubuntu:

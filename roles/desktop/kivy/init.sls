@@ -4,4 +4,4 @@ include:
 kivy:
   pkg.installed:
     - require:
-      - pkgrepo: kivy-ppa
+      - cmd: kivy-ppa

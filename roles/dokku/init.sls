@@ -13,12 +13,12 @@ ruby-sinatra:
 {{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
 {% endif %}
 
-dokku:
+dokku:    
   pkg.installed:
     - name: dokku
     - require:
-{% if grains['os'] == 'Ubuntu' %}
-      - pkgrepo: dokku_ppa
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+      - cmd: dokku_ppa
 {% endif %}
       - pkg: docker
       - pkg: nginx

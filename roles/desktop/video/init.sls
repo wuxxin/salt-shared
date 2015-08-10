@@ -16,6 +16,7 @@ video-packages:
 install-css:
   cmd.run:
     - name: /usr/share/doc/libdvdread4/install-css.sh
+    - unless: dpkg-query -s libdvdcss2
     - require:
       - pkg: video-packages
 
@@ -25,4 +26,9 @@ x256-packages:
       - gstreamer1.0-libde265
       - vlc-plugin-libde265
     - require:
-      - pkgrepo: x265-ppa
+      - cmd: x265-ppa
+
+minitube:
+  pkg.installed:
+    - require:
+      - cmd: minitube-ppa

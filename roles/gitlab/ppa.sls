@@ -1,12 +1,11 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %} 
 
-{% if grains['os'] == 'Ubuntu' %} 
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-git-core-ppa:
-  pkgrepo.managed:
-    - ppa: git-core/ppa
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("git-core-ppa", "git-core/ppa") }}
 
 {% endif %} 

@@ -1,12 +1,11 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %} 
 
-{% if grains['os'] == 'Ubuntu' %} 
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-yorba-ppa:
-  pkgrepo.managed:
-    - ppa: yorba/ppa
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("yorba-ppa", "yorba/ppa") }}
 
 {% endif %} 

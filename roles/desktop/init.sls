@@ -4,50 +4,53 @@ include:
   - .browser
   - .chat
   - .chipcard
-  - .email
   - .ftp
   - .graphics
   - .network
-  - .power
   - .security
   - .terminal
   - .ubuntu
   - .video
   - .voice
 
-{% if pillar.get('desktop.developer.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
+  - .vcs
+  - .python
   - .gcloud
-  - .android
-  - .eclipse
-  - .arduino
   - .atom
   - .emulation
-  - .etckeeper
-  - .idea
-  - .kivy
-  - .openwrt
-  - .python
-  - .vcs
-  - .tmbundles
+  - .writing
 {% endif %}
 
-{% if pillar.get('desktop.games.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
   - .emulation.games
 {% endif %}
 
-{% if pillar.get('desktop.bitcoin.status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:bitcoin:status', 'absent') == 'present' %}
   - .bitcoin
 {% endif %}
 
-cdargs:
-  pkg:
-    - installed
+{#
+general:
+  - .email
+  - .power
+
+developer:
+  - .kivy
+  - .tmbundles
+  - .openwrt
+  - .idea
+  - .etckeeper
+  - .android
+  - .eclipse
+  - .arduino
 
 #sysdig:
 #  pkg:
 #    - installed
-
 #minidlna:
 #  pkg:
 #    - installed
+
+#}
 

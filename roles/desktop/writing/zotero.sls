@@ -4,8 +4,8 @@ include:
 zotero:
   pkg.installed:
     - pkg: zotero-standalone
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - pkgrepo: cogscinl_ppa
+      - cmd: cogscinl_ppa
 {% endif %}
 

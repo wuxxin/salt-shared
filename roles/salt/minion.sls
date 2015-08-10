@@ -20,13 +20,13 @@ include:
 salt-minion:
   pkg.installed:
     - require:
-      - pkgrepo: salt_ppa
+      - cmd: salt_ppa
   service.running:
     - enable: true
     - require:
       - pkg: salt-minion
       - pkg: psmisc
-{%- if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+{%- if grains['os'] == 'Debian' or (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - pkg: debconf-utils
 {%- endif %}
   cmd.wait:
@@ -34,7 +34,7 @@ salt-minion:
     - watch:
       - pkg: salt-minion
 
-{% if grains['os'] == 'Debian' or grains['os'] == 'Ubuntu' %}
+{% if grains['os'] == 'Debian' or (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 debconf-utils:
   pkg:
     - installed

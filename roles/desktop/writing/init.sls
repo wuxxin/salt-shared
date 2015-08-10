@@ -1,3 +1,6 @@
 include:
+  - .sphinx
+{#
   - .zotero
   - .doconce
+#}

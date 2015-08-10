@@ -19,7 +19,7 @@ virt-tools:
       - virt-viewer
       - spice-client-gtk
       - spice-client
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
       - pkgrepo: getdeb_ppa
 {% endif %}
@@ -32,8 +32,18 @@ virt-manager:
       - virt-manager
     - require:
       - pkg: virt-tools
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - pkgrepo: getdeb_ppa
 {% endif %}
 
+
+# vnc , rdp, ssh
+
+remmina:
+  pkg.installed:
+    - pkgs:
+      - remmina
+      - remmina-plugin-vnc
+      - remmina-plugin-gnome
+      - remmina-plugin-rdp
 

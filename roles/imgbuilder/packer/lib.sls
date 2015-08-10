@@ -1,9 +1,9 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 
 
-{% macro prepare(name, template, targetdir, custom_files={'custom_files': {}}, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
+{% macro prepare_template(template, name, targetdir, varsfile={}) %}
 
-packer_templates_{{ name }}:
+"packer_templates_{{ targetdir }}":
   file.recurse:
     - source: salt://roles/imgbuilder/packer/templates
     - name: {{ targetdir }}
@@ -13,25 +13,25 @@ packer_templates_{{ name }}:
     - dir_mode: 775
     - include_empty: True
 
-box_add_script_{{ name }}:
+"box_add_script_{{ targetdir }}":
   file.managed:
     - name: {{ targetdir }}/vagrant-box-add.sh
     - user: {{ s.user }}
     - group: libvirtd
     - mode: 775
     - require:
-      - file: packer_templates_{{ name }}
+      - file: "packer_templates_{{ targetdir }}"
 
-user_template_{{ name }}:
+"user_template_{{ targetdir }}":
   file.managed:
     - source: {{ template }}
     - name: {{ targetdir }}/{{ name }}.json
     - user: {{ s.user }}
     - group: libvirtd
     - require:
-      - file: box_add_script_{{ name }}
+      - file: "box_add_script_{{ targetdir }}"
 
-user_varsfile_{{ name }}:
+"user_varsfile_{{ targetdir }}":
   file.managed:
     - name: {{ targetdir }}/{{ name }}_vars.json
     - contents: |
@@ -39,25 +39,26 @@ user_varsfile_{{ name }}:
     - user: {{ s.user }}
     - group: libvirtd
     - require:
-      - file: user_template_{{ name }}
+      - file: "user_template_{{ targetdir }}"
+
+{% endmacro %}
+
+
+{% macro prepare_preseed(name, targetdir, custom_settings= {}) %}
 
 {% from "roles/imgbuilder/preseed/defaults.jinja" import defaults as ps_s with context %}
+
+# our updates
 {% do ps_s.update({
-  'target': targetdir+ '/http',
+  'target': targetdir+ "/http",
   'username': 'vagrant',
   'password': 'vagrant',
   'hostname': name,
   'default_preseed': 'preseed-simple-http.cfg',
 }) %}
 
-{% do ps_s.update(custom_files) %}
-
-{# example:
-load_yaml as custom_files
-custom_files:
-  '/.ssh/authorized_keys': 'salt://roles/imgbuilder/preseed/files/vagrant.pub'
-endload
-#}
+# updates from caller
+{% do ps_s.update(custom_settings) %}
 
 {% from 'roles/imgbuilder/preseed/lib.sls' import add_preseed_files with context %}
 {{ add_preseed_files(ps_s, ps_s.target) }}
@@ -65,13 +66,14 @@ endload
 {% endmacro %}
 
 
-{% macro build(name, template, targetdir, custom_files={'custom_files': {}}, varsfile={}, varscmd={}, cmdextra="-only=qemu ") %}
+{% macro build_machine(name, targetdir, varscmd={}, cmdextra="-only=qemu ") %}
+
 {% set vars=[] %}
 {% for n, d in varscmd.iteritems() %}
 {% do vars.append([' -var "', n, '=', d, '"']|join('')) %}
 {% endfor %}
 
-build_{{ name }}:
+build_{{ targetdir }}":
   cmd.run:
     - name: if test -d output-qemu; then rm -r output-qemu; fi; PACKER_LOG=1 packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
     - cwd: {{ targetdir }}

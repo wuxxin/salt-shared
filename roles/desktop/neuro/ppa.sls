@@ -1,11 +1,9 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 
-cogscinl_ppa:
-  pkgrepo.managed:
-    - ppa: smathot/cogscinl
-    - require:
-      - pkg: ppa_ubuntu_installer
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("cogscinl_ppa", "smathot/cogscinl") }}
+
 {% endif %}
 

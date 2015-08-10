@@ -1,6 +1,6 @@
 include:
   - .ppa
-{% if pillar['desktop.commercial.status']|d('false') == 'present' %}
+{% if salt['pillar.get']('desktop:commercial:status', 'absent') == 'present' %}
   - .skype
 {% endif %}
 
@@ -8,12 +8,12 @@ include:
 mumble:
   pkg.installed:
     - require:
-      - pkgrepo: mumble-ppa
+      - cmd: mumble_ppa
 
 jitsi:
   pkg.installed:
     - require:
-      - pkgrepo: jitsi-ppa
+      - pkgrepo: jitsi_ppa
 
 linphone:
   pkg:

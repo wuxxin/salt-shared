@@ -32,6 +32,10 @@ logger -t custom_late.sh "make passwordless sudo"
 sed -i 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/' /target/etc/sudoers
 
 if test -f /.ssh/authorized_keys; then
-    logger -t custom_late.sh "disable (passwd -d -l) first user password (in favor of ssh authorized_keys)"
-    in-target passwd -d -l $username
+    if test ! -f /.ssh/do-not-disable-password; then
+      logger -t custom_late.sh "disable (passwd -d -l) first user password (in favor of ssh authorized_keys)"
+      in-target passwd -d -l $username
+    else
+      logger -t custom_late.sh "do not disable (passwd -d -l) first user password (in favor of ssh authorized_keys) because you said so (/.ssh/do-not-disable-password is existing)"
+    fi
 fi

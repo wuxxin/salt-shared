@@ -30,7 +30,7 @@ update-mine:
 /etc/apt-cacher-ng/acng.conf:
   file.replace:
     - pattern: "^.*BindAddress:.*$"
-{% if pillar.get('apt-cacher-ng:server:bindaddress') != '' %}
+{% if salt['pillar.get']('apt-cacher-ng:server:bindaddress') != '' %}
     - repl: "BindAddress: localhost {{ salt['pillar.get']('apt-cacher-ng:server:bindaddress') }}"
 {% else %}
     - repl: "#BindAddress: "

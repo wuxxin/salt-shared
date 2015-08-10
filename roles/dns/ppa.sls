@@ -1,12 +1,11 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %} 
 
-{% if grains['os'] == 'Ubuntu' %} 
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %} 
 
-knot-ppa:
-  pkgrepo.managed:
-    - ppa: cz.nic-labs/knot-dns
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
 
 {% endif %} 

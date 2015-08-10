@@ -1,9 +1,9 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 {% endif %}
 
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 
 dokku_ppa:
   pkgrepo.managed:
@@ -11,5 +11,9 @@ dokku_ppa:
     - file: /etc/apt/sources.list.d/dokku-trusty.list
     - keyid: EAD883AF
     - keyserver: keys.gnupg.net
+  cmd.run:
+    - name: true
+    - require:
+      - cmd: dokku_ppa
 
 {% endif %}

@@ -1,11 +1,10 @@
-{% if grains['os'] == 'Ubuntu' %}
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
 
-ansible_ppa:
-  pkgrepo.managed:
-    - ppa: ansible/ansible
-    - require:
-      - pkg: ppa_ubuntu_installer
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+
+{{ apt_add_repository("ansible_ppa", "ansible/ansible") }}
+
 {% endif %}
 

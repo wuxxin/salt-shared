@@ -4,7 +4,7 @@ include:
 knot:
   pkg.installed:
     - require:
-      - pkgrepo: knot-ppa
+      - cmd: knot-ppa
   service.running:
     - require:
       - pkg: knot
