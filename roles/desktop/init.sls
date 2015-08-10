@@ -20,6 +20,8 @@ include:
   - .atom
   - .emulation
   - .writing
+  - .time
+  - .paste
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
@@ -53,4 +55,3 @@ developer:
 #    - installed
 
 #}
-
