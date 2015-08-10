@@ -58,7 +58,7 @@ packer_binary:
   archive.extracted:
     - name: /usr/local/src/packer-v{{ version }}-linux-amd64
     - source: https://dl.bintray.com/mitchellh/packer/packer_{{ version }}_linux_amd64.zip
-    - source_hash: sha256=8fab291c8cc988bd0004195677924ab6846aee5800b6c8696d71d33456701ef6
+    - source_hash: sha256=38d3260beafa465fce7d11e6959ee241d987d090aad371ab55f545280cac44cb
     - archive_format: zip
     - if_missing: /usr/local/src/packer-v{{ version }}-linux-amd64/packer
     - require:
