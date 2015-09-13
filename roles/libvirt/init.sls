@@ -39,7 +39,7 @@ qemu_conf_{{ a }}:
     - name: /etc/libvirt/qemu.conf
     - pattern: '.*{{ a }}.*=.*'
     - repl: "{{ a }} = 1"
-    - require: 
+    - require:
       - pkg: libvirt
     - watch_in:
       - service: libvirt
@@ -51,7 +51,7 @@ symlinks_{{ a }}:
   file.symlink:
     - name: {{ a }}
     - source: /etc/pki/libvirt
-    - require: 
+    - require:
       - libvirt: default_libvirt_keys
     - watch_in:
       - service: libvirt
@@ -80,15 +80,28 @@ libvirt:
       - multipath-tools
       - bridge-utils
       - vlan
-  service:
-    - running
+  files.managed:
+    - name: /etc/default/qemu-kvm
+    - content: |
+        # To disable qemu-kvm's page merging feature, set KSM_ENABLED=0 and
+        # sudo restart qemu-kvm
+        KSM_ENABLED=1
+        SLEEP_MILLISECS=200
+        # To load the vhost_net module, which in some cases can speed up
+        # network performance, set VHOST_NET_ENABLED to 1.
+        VHOST_NET_ENABLED=1
+
+        # Set this to 1 if you want hugepages to be available to kvm under
+        # /run/hugepages/kvm
+        KVM_HUGEPAGES=1
+  service.running:
     - name: libvirt-bin
     - enable: True
     - require:
       - pkg: libvirt
+      - file: libvirt
       - libvirt: default_libvirt_keys
       - sls: roles.libvirt.storage
       - sls: roles.libvirt.network
       - sls: roles.libvirt.kernel
       - sls: roles.libvirt.grub
-
