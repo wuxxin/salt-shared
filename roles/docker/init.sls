@@ -19,7 +19,7 @@ docker:
       - lxc-docker
 {% if grains['os_family'] == 'Debian' %}
     - require:
-      - pkgrepo: docker_ppa
+      - cmd: docker_ppa
 {% endif %}
 
   file.managed:
@@ -36,4 +36,3 @@ docker:
       - sls: roles.docker.grub
     - watch:
       - file: docker
-

@@ -6,12 +6,8 @@ include:
 
 {% if s.dev_version == true %}
 
-docker_ppa:
-  pkgrepo.managed:
-    - ppa: docker-maint/testing
-    - file: /etc/apt/sources.list.d/docker-trusty.list
-    - require:
-      - pkg: ppa_ubuntu_installer
+{% from "repo/ubuntu.sls" import apt_add_repository %}
+{{ apt_add_repository("docker_ppa", "docker-maint/testing") }}
 
 {% else %}
 
@@ -24,6 +20,10 @@ docker_ppa:
     - keyserver: keyserver.ubuntu.com
     - require:
       - pkg: ppa_ubuntu_installer
+  cmd.run:
+    - name: true
+    - require:
+      - pkgrepo: docker_ppa
 
 {% endif %}
 
