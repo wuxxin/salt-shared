@@ -3,6 +3,7 @@ include:
   - git
   - subversion
   - python
+  - python.ipython
   - latex
 
 prereq_doconce:

@@ -8,4 +8,3 @@ opensesam:
     - require:
       - cmd: cogscinl_ppa
 {% endif %}
-
