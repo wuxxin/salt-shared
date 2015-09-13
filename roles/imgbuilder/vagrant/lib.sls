@@ -1,5 +1,5 @@
 
-{% macro deploy_vagrant_vm(vagrantdir, fqdn, saltify=False, spicify=False, disksize=None, memsize=None, cpus=None, user=None) %}
+{% macro deploy_vagrant(vagrantdir, fqdn, saltify=False, spicify=False, disksize=None, memsize=None, cpus=None, user=None) %}
 
 {% from roles.imgbuilder.defaults.jinja import settings as s %}
 {% if user == None %}{% set user= s.user %}{% endif %}
@@ -82,7 +82,7 @@ transfer_and_bootstrap_{{ fqdn }}:
     - require:
       - file: download_bootstrap_salt_{{ fqdn }}
 {% endmacro %}
-  
+
 
 {% macro vagrant_network_cleanup(target, user) %}
 "{{ target }}/network-cleanup.sh":
