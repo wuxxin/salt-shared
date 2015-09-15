@@ -31,7 +31,8 @@ default_libvirt_keys:
     - require:
       - pkg: libvirt
 
-{#for a in ['vnc_tls', 'vnc_tls_x509_verify', 'spice_tls',] %}
+{#
+for a in ['vnc_tls', 'vnc_tls_x509_verify', 'spice_tls',] %}
 disabled for now
 
 qemu_conf_{{ a }}:
@@ -55,7 +56,8 @@ symlinks_{{ a }}:
       - libvirt: default_libvirt_keys
     - watch_in:
       - service: libvirt
-{% endfor #}
+{% endfor
+#}
 
 libvirt:
   pkg.installed:
@@ -99,9 +101,10 @@ libvirt:
     - enable: True
     - require:
       - pkg: libvirt
-      - file: libvirt
       - libvirt: default_libvirt_keys
       - sls: roles.libvirt.storage
       - sls: roles.libvirt.network
       - sls: roles.libvirt.kernel
       - sls: roles.libvirt.grub
+    - watch:
+      - file: libvirt
