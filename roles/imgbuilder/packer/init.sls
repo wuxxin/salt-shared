@@ -49,7 +49,7 @@ profile_packer_settings:
 
 {% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
-{% set version="0.8.3" %}
+{% set version="0.8.6" %}
 
 packer_binary:
   file.directory:
