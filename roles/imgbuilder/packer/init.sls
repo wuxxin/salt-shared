@@ -50,6 +50,7 @@ profile_packer_settings:
 {% if s.precompiled_packer is defined and s.precompiled_packer == true %}
 
 {% set version="0.8.6" %}
+{% set source_hash="2f1ca794e51de831ace30792ab0886aca516bf6b407f6027e816ba7ca79703b5" %}
 
 packer_binary:
   file.directory:
@@ -58,7 +59,7 @@ packer_binary:
   archive.extracted:
     - name: /usr/local/src/packer-v{{ version }}-linux-amd64
     - source: https://dl.bintray.com/mitchellh/packer/packer_{{ version }}_linux_amd64.zip
-    - source_hash: sha256=38d3260beafa465fce7d11e6959ee241d987d090aad371ab55f545280cac44cb
+    - source_hash: sha256={{ source_hash }}
     - archive_format: zip
     - if_missing: /usr/local/src/packer-v{{ version }}-linux-amd64/packer
     - require:
