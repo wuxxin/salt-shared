@@ -1,6 +1,5 @@
-precise_big:
+ubuntu_big:
   provider: my-cheap-cloud
-  image: precise-default
+  image: trusty_default
   region: default
-  size: 2g4cpu30g
-
+  size: 2g4cpu

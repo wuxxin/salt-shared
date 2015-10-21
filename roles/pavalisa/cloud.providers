@@ -1,5 +1,5 @@
 my-cheap-cloud:
-  provider: packer-vagrant-libvirt
+  provider: vagrant-libvirt
   boxes: /mnt/images/templates/packer/
   images: /mnt/images/templates/vagrant/
   mem-size: 512M
@@ -11,7 +11,7 @@ my-cheap-cloud:
       network:
         type: linux-bridge
         resource:  br0
-      storage: 
+      storage:
         type: lvm
         resource: resident
       filter:
@@ -33,5 +33,3 @@ my-cheap-cloud:
       cpu: 4
       disk0: 15G
       disk1: 100G
-
-    

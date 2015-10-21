@@ -1,7 +1,5 @@
-precise_big:
+ubuntu_big:
   - lab.in.ep3.at:
     grains:
       roles.gitlab: present
     pillar:
-
-
