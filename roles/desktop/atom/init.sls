@@ -1,7 +1,7 @@
 include:
   - .python
 
-{% set atomversion= "1.0.0"%}
+{% set atomversion= "1.0.19"%}
 {% set actversion= salt['pkg.version']('atom') %}
 {% if actversion == "" %}
   {% set newer_or_equal= 1 %}
