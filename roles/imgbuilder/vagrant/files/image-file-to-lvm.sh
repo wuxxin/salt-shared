@@ -10,18 +10,17 @@ name=`basename $dir`
 
 if test "$2" == ""; then
   cat <<EOF
-usage: $0 id lvmgroup [--qcow2] [disksize]
+usage: $0 machineid lvmgroup [--qcow2] [disksize]
 
-takes every file type disk of libvirt machine,
+for every filetype disk of a libvirt machine,
 create a lvm volume of same maximal size,
-copies data to target volume
+copies data to target volume while throttling write to 10MB per second,
 unlink old, link new volume to libvirt machine
 
-throttles write to 10MB per second.
 optional parameter qcow2 makes the lvm volume type of "QCOW2" instead of "RAW"
 optional parameter disksize (WIP): manual set a new size
 (can not be smaller than qcow2 max size)
-optional parameter 
+
 
 EOF
   exit 1
@@ -31,7 +30,7 @@ libvirt_id=$1
 libvirt_name=`virsh dumpxml $libvirt_id --migratable | xmlstarlet sel -t -v "domain/name"`
 lvm_group=$2
 output_type=raw
-if test "$3" == "--qcow2"; then 
+if test "$3" == "--qcow2"; then
   shift
   output_type=qcow2
 fi
@@ -88,7 +87,7 @@ for disk in `virsh dumpxml $libvirt_id --migratable | xmlstarlet sel -I -t -m "d
 
     # atach new disk to domain
     virsh attach-disk --domain $libvirt_id --source /dev/mapper/${lvm_group}-${lvm_volume} --target $disk_dev
-    
+
     # remove from storage
     #virsh vol-remove
   fi
