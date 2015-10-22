@@ -1,6 +1,7 @@
 include:
   - java
   - .user
+  - .android
   - .browser
   - .chat
   - .chipcard
@@ -19,9 +20,11 @@ include:
   - .gcloud
   - .atom
   - .emulation
+  - .homeshick
   - .writing
   - .time
   - .paste
+  - .scipy
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
@@ -43,7 +46,8 @@ developer:
   - .openwrt
   - .idea
   - .etckeeper
-  - .android
+  - .android.sdk
+  - .android.user
   - .eclipse
   - .arduino
 
