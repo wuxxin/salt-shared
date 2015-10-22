@@ -25,6 +25,6 @@ heimdall:
   pkg.installed:
     - pkgs:
       - heimdall
-    require:
+    - require:
       - cmd: heimdall-ppa
 {% endif %}
