@@ -16,7 +16,7 @@ docker:
       - ca-certificates
       - lxc
       - cgroup-bin
-      - lxc-docker
+      - docker-engine
 {% if grains['os_family'] == 'Debian' %}
     - require:
       - cmd: docker_ppa

@@ -4,27 +4,18 @@ include:
 
 {% from "roles/docker/defaults.jinja" import settings as s with context %}
 
-{% if s.dev_version == true %}
-
-{% from "repo/ubuntu.sls" import apt_add_repository %}
-{{ apt_add_repository("docker_ppa", "docker-maint/testing") }}
-
-{% else %}
-
 docker_ppa:
   pkgrepo.managed:
-    - repo: 'deb http://get.docker.io/ubuntu docker main'
+    - repo: 'deb https://apt.dockerproject.org/repo ubuntu-trusty {{ "experimental" if s.dev_version else "main" }}'
     - humanname: "Ubuntu docker Repository"
     - file: /etc/apt/sources.list.d/docker-trusty.list
-    - keyid: 36A1D7869245C8950F966E92D8576A8BA88D21E9
-    - keyserver: keyserver.ubuntu.com
+    - keyid: 58118E89F3A912897C070ADBF76221572C52609D
+    - keyserver: pgp.mit.edu
     - require:
       - pkg: ppa_ubuntu_installer
   cmd.run:
     - name: true
     - require:
       - pkgrepo: docker_ppa
-
-{% endif %}
 
 {% endif %}
