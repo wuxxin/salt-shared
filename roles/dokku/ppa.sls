@@ -9,11 +9,10 @@ dokku_ppa:
   pkgrepo.managed:
     - name: https://packagecloud.io/dokku/dokku/ubuntu/ trusty main
     - file: /etc/apt/sources.list.d/dokku-trusty.list
-    - keyid: EAD883AF
-    - keyserver: keys.gnupg.net
+    - key_url: salt://roles/dokku/packagecloud.gpg.key
   cmd.run:
     - name: true
     - require:
-      - cmd: dokku_ppa
+      - pkgrepo: dokku_ppa
 
 {% endif %}
