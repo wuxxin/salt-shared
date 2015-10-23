@@ -1,3 +1,5 @@
+{# disabled ppa of strongswan because no updates and not all modules
+
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 include:
   - repo.ubuntu
@@ -13,9 +15,15 @@ strongswan:
       - cmd: strongswan_ppa
 
 {% else %}
+{% endif %}
+
+#}
 
 strongswan:
-  pkg:
-    - installed
-
-{% endif %}
+  pkg.installed:
+    pkgs:
+      - strongswan
+      - strongswan-ike
+      - strongswan-plugin-eap-tls
+      - strongswan-plugin-openssl
+      
