@@ -5,6 +5,7 @@ ppa_ubuntu_installer:
 {% if grains['osrelease'] >= '12.10' %}
       - software-properties-common
 {% endif %}
+      - apt-transport-https
     - order: 1
 
 {% macro apt_add_repository(statename, ppaname) %}
