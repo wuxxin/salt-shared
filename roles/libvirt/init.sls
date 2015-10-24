@@ -82,7 +82,7 @@ libvirt:
       - multipath-tools
       - bridge-utils
       - vlan
-  files.managed:
+  file.managed:
     - name: /etc/default/qemu-kvm
     - content: |
         # To disable qemu-kvm's page merging feature, set KSM_ENABLED=0 and
