@@ -14,7 +14,7 @@ docker_ppa:
     - require:
       - pkg: ppa_ubuntu_installer
   cmd.run:
-    - name: true
+    - name: "true"
     - require:
       - pkgrepo: docker_ppa
 
