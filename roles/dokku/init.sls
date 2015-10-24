@@ -59,7 +59,6 @@ dokku_access_add_{{ adminkey }}:
 {% endif %}
 
 {% set plugin_list=[
-
 ('dokku-couchdb','https://github.com/dokku/dokku-couchdb.git'),
 ('dokku-elasticsearch','https://github.com/dokku/dokku-elasticsearch.git'),
 ('dokku-mariadb','https://github.com/dokku/dokku-mariadb.git'),
@@ -67,23 +66,21 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-mongo','https://github.com/dokku/dokku-mongo.git'),
 ('dokku-postgres','https://github.com/dokku/dokku-postgres.git'),
 ('dokku-rabbitmq','https://github.com/dokku/dokku-rabbitmq.git'),
-('dokku-redis','https://github.com/dokku/dokku-redis.git'),
-('dokku-rethinkdb','https://github.com/dokku/dokku-rethinkdb.git'),
-('dokku-maintenance','https://github.com/dokku/dokku-maintenance.git'),
-('dokku-http-auth','https://github.com/dokku/dokku-http-auth.git'),
-('dokku-redirect','https://github.com/dokku/dokku-redirect.git'),
-
+('dokku-redis', 'https://github.com/dokku/dokku-redis.git'),
+('dokku-rethinkdb', 'https://github.com/dokku/dokku-rethinkdb.git'),
+('dokku-maintenance', 'https://github.com/dokku/dokku-maintenance.git'),
+('dokku-http-auth', 'https://github.com/dokku/dokku-http-auth.git'),
+('dokku-redirect', 'https://github.com/dokku/dokku-redirect.git'),
 ('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),
 ('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),
 ('dokku-secure-apps', 'https://github.com/matto1990/dokku-secure-apps.git'),
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
 ('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
-('dokku-docker-auto-volumes','https://github.com/Flink/dokku-docker-auto-volumes.git'),
+('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
-('dokku-forego','https://github.com/Flink/dokku-forego.git'),
-
-('dokku-named-containers','https://github.com/Flink/dokku-named-containers.git'),
-('dokku-logspout','https://github.com/michaelshobbs/dokku-logspout.git'),
+('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
+('dokku-named-containers', 'https://github.com/Flink/dokku-named-containers.git'),
+('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 ] %}
 
 {#
