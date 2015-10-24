@@ -11,7 +11,7 @@ dokku_ppa:
     - file: /etc/apt/sources.list.d/dokku-trusty.list
     - key_url: salt://roles/dokku/packagecloud.gpg.key
   cmd.run:
-    - name: true
+    - name: "true"
     - require:
       - pkgrepo: dokku_ppa
 
