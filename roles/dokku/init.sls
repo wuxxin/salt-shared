@@ -8,20 +8,24 @@ include:
 {{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
 {% endif %}
 
+{% from "roles/dokku/defaults.jinja" import settings as s with context %}
+
 dokku:
+  debconf.set:
+    - name: dokku
+    - data:
+        'dokku/web_config': { 'type': 'boolean', 'value': 'false' }
+        'dokku/vhost_enable': { 'type': 'boolean', 'value': 'true' }
+        'dokku/hostname': {'type': 'string', 'value': '{{ s.hostname }}' }
   pkg.installed:
     - name: dokku
     - require:
+      - debconf: dokku
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - cmd: dokku_ppa
 {% endif %}
       - pkg: docker
       - pkg: nginx
-
-  service.running:
-    - name: dokku-daemon
-    - require:
-      - pkg: dokku
 
 create_dokkurc:
   file.touch:
@@ -40,8 +44,7 @@ create_dokkurc:
     - user: dokku
     - require:
       - file: create_dokkurc
-    - watch_in:
-      - service: dokku
+
 {#
 /home/dokku/VHOST:
 /home/dokku/HOSTNAME:
@@ -57,7 +60,7 @@ dokku_access_add_{{ adminkey }}:
 
 {% set plugin_list=[
 
-('dokku-couchdb-multi-containers','https://github.com/Flink/dokku-couchdb-multi-containers.git'),
+('dokku-couchdb','https://github.com/dokku/dokku-couchdb.git'),
 ('dokku-elasticsearch','https://github.com/dokku/dokku-elasticsearch.git'),
 ('dokku-mariadb','https://github.com/dokku/dokku-mariadb.git'),
 ('dokku-memcached','https://github.com/dokku/dokku-memcached.git'),
@@ -66,14 +69,21 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-rabbitmq','https://github.com/dokku/dokku-rabbitmq.git'),
 ('dokku-redis','https://github.com/dokku/dokku-redis.git'),
 ('dokku-rethinkdb','https://github.com/dokku/dokku-rethinkdb.git'),
+('dokku-maintenance','https://github.com/dokku/dokku-maintenance.git'),
+('dokku-http-auth','https://github.com/dokku/dokku-http-auth.git'),
+('dokku-redirect','https://github.com/dokku/dokku-redirect.git'),
 
-('dokku-http-auth','https://github.com/Flink/dokku-http-auth.git'),
-('dokku-named-containers','https://github.com/Flink/dokku-named-containers.git'),
-('dokku-forego','https://github.com/Flink/dokku-forego.git'),
+('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),
+('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),
+('dokku-secure-apps', 'https://github.com/matto1990/dokku-secure-apps.git'),
+('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
+('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
 ('dokku-docker-auto-volumes','https://github.com/Flink/dokku-docker-auto-volumes.git'),
-('dokku-airbrake-deploy','https://github.com/Flink/dokku-airbrake-deploy.git'),
+('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
+('dokku-forego','https://github.com/Flink/dokku-forego.git'),
+
+('dokku-named-containers','https://github.com/Flink/dokku-named-containers.git'),
 ('dokku-logspout','https://github.com/michaelshobbs/dokku-logspout.git'),
-('dokku-maintenance','https://github.com/Flink/dokku-maintenance.git'),
 ] %}
 
 {#
@@ -83,16 +93,8 @@ dokku_access_add_{{ adminkey }}:
 
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
-  git.latest:
-    - name: {{ p }}
-    - target: /var/lib/dokku/plugins/{{ n }}
-    - require_in:
-      - cmd: dokku_plugins_install
-{% endfor %}
-
-
-dokku_plugins_install:
   cmd.run:
-    - name: dokku plugins-install-dependencies && dokku plugins-install
+    - name dokku plugin:install {{ p }}
     - require:
-      - service: dokku
+      - pkg: dokku
+{% endfor %}
