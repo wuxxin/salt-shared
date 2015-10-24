@@ -91,7 +91,7 @@ dokku_access_add_{{ adminkey }}:
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
   cmd.run:
-    - name dokku plugin:install {{ p }}
+    - name: dokku plugin:install {{ p }}
     - require:
       - pkg: dokku
 {% endfor %}
