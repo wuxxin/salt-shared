@@ -7,7 +7,7 @@ include:
 
 dokku_ppa:
   pkgrepo.managed:
-    - name: deb https://packagecloud.io/dokku/dokku/ubuntu/ trusty main
+    - name: deb http://packagecloud.io/dokku/dokku/ubuntu/ trusty main
     - file: /etc/apt/sources.list.d/dokku-trusty.list
     - key_url: salt://roles/dokku/packagecloud.gpg.key
   cmd.run:

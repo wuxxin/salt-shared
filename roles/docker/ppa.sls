@@ -6,7 +6,7 @@ include:
 
 docker_ppa:
   pkgrepo.managed:
-    - repo: 'deb https://apt.dockerproject.org/repo ubuntu-trusty {{ "experimental" if s.dev_version else "main" }}'
+    - repo: 'deb http://apt.dockerproject.org/repo ubuntu-trusty {{ "experimental" if s.dev_version else "main" }}'
     - humanname: "Ubuntu docker Repository"
     - file: /etc/apt/sources.list.d/docker-trusty.list
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D
