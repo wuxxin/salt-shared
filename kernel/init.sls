@@ -1,20 +1,5 @@
 linux-image:
   pkg.installed:
     - pkgs:
-      - linux-image-generic
-      - linux-image-generic-lts-vivid
-      - linux-image-extra-virtual
-      - linux-image-extra-virtual-lts-vivid
-
-{#
-
-linux-image-latest:
-  pkg.installed:
-    - sources:
-      - "linux-headers-4.0.0-040000rc5_4.0.0-040000rc5.201503230035_all.deb": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.0-rc5-vivid/linux-headers-4.0.0-040000rc5_4.0.0-040000rc5.201503230035_all.deb"
-      - "linux-headers-4.0.0-040000rc5-generic_4.0.0-040000rc5.201503230035_amd64.deb": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.0-rc5-vivid/linux-headers-4.0.0-040000rc5-generic_4.0.0-040000rc5.201503230035_amd64.deb"
-      - "linux-image-4.0.0-040000rc5-generic_4.0.0-040000rc5.201503230035_amd64.deb": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.0-rc5-vivid/linux-image-4.0.0-040000rc5-generic_4.0.0-040000rc5.201503230035_amd64.deb"
-      - "linux-headers-3.19.1-031901": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.19.1-vivid/linux-headers-3.19.1-031901_3.19.1-031901.201503080052_all.deb"
-      - "linux-headers-3.19.1-031901-generic": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.19.1-vivid/linux-headers-3.19.1-031901-generic_3.19.1-031901.201503080052_amd64.deb"
-      - "linux-image-3.19.1-031901-generic": "http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.19.1-vivid/linux-image-3.19.1-031901-generic_3.19.1-031901.201503080052_amd64.deb"
-#}
+      - linux-generic-lts-vivid
+      - linux-virtual-lts-vivid
