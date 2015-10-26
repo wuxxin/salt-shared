@@ -79,13 +79,10 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
-('dokku-named-containers', 'https://github.com/Flink/dokku-named-containers.git'),
-('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 ] %}
 
 {#
-('','https://github.com/cjblomqvist/dokku-git-rev.git'),
-
+('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 #}
 
 {% for (n,p) in plugin_list %}
