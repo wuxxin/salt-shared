@@ -5,6 +5,10 @@ import struct
 import salt.utils.network as nw
 import salt.utils.validate.net as nw_validate
 
+try:
+    from salt.utils.network import calculate_subnet as calc_net
+except ImportError:
+    from salt.utils.network import calc_net as calc_net
 
 def __virtual__():
     return True
@@ -79,7 +83,7 @@ def start_and_mask_from_net(combined, prefix='', middle=': ', postfix=''):
 
 def netcidr_from_net(combined):
     addr, netmask = _net_mask(combined)
-    return nw.calculate_subnet(addr, netmask)
+    return calc_net(addr, netmask)
 
 
 def short_from_net(combined):
