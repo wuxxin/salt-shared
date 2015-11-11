@@ -1,4 +1,4 @@
-{% load_yaml as defaults %} 
+{% load_yaml as defaults %}
 master:
   status: absent
 
@@ -43,11 +43,12 @@ master_d:
         cmd: hostname -f
 
 install:
-  type: normal
+  type: stable
+  rev: 2015.8
   # type: git
-  # rev: 2014.7
-  bootstrap: 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/v2015.01.12/bootstrap-salt.sh'
-  bootstrap_hash: 'sha256=a96e679287430213203adcbbc4bf5e27cdb79c0a50aafed0f4a2553f347477ed'
+  # rev: latest
+  bootstrap: 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/v2015.11.09/bootstrap-salt.sh'
+  bootstrap_hash: 'sha256=a7fe13eb8896ac578cb1e98a22d1c5b1f6f6ba1a5da46cc3680cc8318358b5e5'
 
 {% endload %}
 

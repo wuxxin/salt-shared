@@ -15,23 +15,12 @@ touch {{ targetdir }}/bootstrap.run
 cd {{ targetdir }}
 tar xaf /root/saltmaster@{{ hostname }}_config.tar.xz
 
-if test "{{ install.type }}" == "git"; then
-  if test ! -f {{ targetdir }}/bootstrap-salt.sh; then
-    curl -L {{ install.bootstrap }} -o {{ targetdir }}/bootstrap-salt.sh
-    chmod +x {{ targetdir }}/bootstrap-salt.sh
-  fi
-  {{ targetdir }}/bootstrap-salt.sh -M -X git {{ install.rev }}
-  # install salt-minion and salt-master, but do not start daemon
-else
-  # install custom ppa (and requisites for it), install salt masterless
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get -y update
-  apt-get -y install python-software-properties software-properties-common mercurial git-core
-  apt-add-repository -y ppa:saltstack/salt
-  apt-get -y update
-  apt-get -y install salt-common
-  # only install salt-call
+if test ! -f {{ targetdir }}/bootstrap-salt.sh; then
+  curl -L {{ install.bootstrap }} -o {{ targetdir }}/bootstrap-salt.sh
+  chmod +x {{ targetdir }}/bootstrap-salt.sh
 fi
+{{ targetdir }}/bootstrap-salt.sh -M -P -X {{ install.type }} {{ install.rev }}
+# install salt-minion and salt-master, but do not start daemon
 
 # generates minion config in /targetdir for a masterless setup
 cat > {{ targetdir }}/minion << EOF
@@ -72,7 +61,7 @@ salt-call --local --config-dir={{ targetdir }} saltutil.sync_all
 
 # install git-crypt, checkout and unlocks git paths with git-unlock
 salt-call --local --config-dir={{ targetdir }} state.sls git-crypt
-for a in `find {{ targetdir }} -name .git-crypt -type d`; do 
+for a in `find {{ targetdir }} -name .git-crypt -type d`; do
   cd $a/..
   git-crypt unlock
 done
@@ -81,7 +70,7 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# local call state.sls haveged,network, roles.salt.master 
+# local call state.sls haveged,network, roles.salt.master
 # (entropy daemon, network, re/install salt.master, add dnscache)
 salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master,roles.tinydns
 

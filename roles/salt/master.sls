@@ -38,7 +38,7 @@ salt-master:
       - cmd: salt_ppa
       - pip: salt-master-dependencies
 {% if s.master.gitcrypt.status=="present" %}
-      - cmd: git-crypt
+      - pkg: git-crypt
       - pkg: gnupg
 {% endif %}
   service.running:
