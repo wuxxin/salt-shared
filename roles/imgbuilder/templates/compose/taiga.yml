@@ -1,0 +1,38 @@
+data:
+  image: tianon/true
+  volumes:
+    - /var/lib/postgresql/data
+    - /usr/local/taiga/media
+    - /usr/local/taiga/static
+    - /usr/local/taiga/logs
+db:
+  image: postgres
+  environment:
+    POSTGRES_USER: taiga
+    POSTGRES_PASSWORD: password
+  volumes_from:
+    - data
+taigaback:
+  image: htdvisser/taiga-back
+  hostname: taiga.omoikane.ep3.at
+  environment:
+    SECRET_KEY: examplesecretkey
+    EMAIL_USE_TLS: True
+    EMAIL_HOST: smtp.gmail.com
+    EMAIL_PORT: 587
+    EMAIL_HOST_USER: youremail@gmail.com
+    EMAIL_HOST_PASSWORD: yourpassword
+  links:
+    - db:postgres
+  volumes_from:
+    - data
+taigafront:
+  image: htdvisser/taiga-front-dist
+  hostname: taiga.omoikane.ep3.at
+  links:
+    - taigaback
+  volumes_from:
+    - data
+  expose:
+    - 80
+    - 443
