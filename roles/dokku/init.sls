@@ -1,18 +1,18 @@
+{% from "roles/dokku/defaults.jinja" import settings as s with context %}
 include:
   - .ppa
   - nginx
   - roles.docker
 
 {# fixme: dokku storage relocate makes quirks #}
+{# fixme: dokku installer gets stuck as process on install #}
+{# fixme: plugin install fails on second install #}
 
 {% if salt['pillar.get']('dokku:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
 {{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
 {% endif %}
 
-{% from "roles/dokku/defaults.jinja" import settings as s with context %}
-
-{# fixme: dokku installer gets stuck as process on install #}
 dokku:
   debconf.set:
     - name: dokku
@@ -27,8 +27,8 @@ dokku:
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - cmd: dokku_ppa
 {% endif %}
-      - pkg: docker
-      - pkg: nginx
+      - sls: docker
+      - sls: nginx
 
 dokku_core_dependencies:
   cmd.run:
@@ -36,27 +36,15 @@ dokku_core_dependencies:
     - require:
       - pkg: dokku
 
-{#
-
-create_dokkurc:
-  file.touch:
-    - name: /home/dokku/dokkurc
+"dokku_makedir_{{ s.templates }}"":
+  file.directory:
+    - name: {{ s.templates }}
+    - user: {{ s.user }}
+    - group: {{ s.user }}
+    - mode: 775
+    - makedirs: True
     - require:
       - pkg: dokku
-
-/home/dokku/dokkurc:
-  file.blockreplace:
-    - marker_start: "# SALT - automatic config - begin"
-    - marker_end: "# SALT - automatic config - end"
-    - append_if_not_found: True
-    - content: |
-        export DOKKU_VERBOSE_DATABASE_ENV=1
-        export DOKKU_EXPOSED_PORTS="5000 8080 8000 80"
-    - user: dokku
-    - require:
-      - file: create_dokkurc
-
-#}
 
 {% if pillar['adminkeys_present']|d(False) %}
 {% for adminkey in pillar['adminkeys_present'] %}
@@ -96,11 +84,18 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 #}
 
-{# fixme: plugin install fails on second install #}
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
   cmd.run:
     - name: dokku plugin:update {{ p }}
     - require:
       - cmd: dokku_core_dependencies
+    - require_in:
+      - cmd: dokku_plugin_prepare
 {% endfor %}
+
+dokku_plugin_prepare:
+  cmd.run:
+    - name: dokku plugin:install
+    - require:
+      - cmd: dokku_core_dependencies

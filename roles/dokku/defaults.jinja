@@ -2,7 +2,9 @@
 
 hostname: {{ salt['cmd.run_stdout']('hostname -f') }}
 behind_loadbalancer: false
-
+frontend_ip: "0.0.0.0"
+persistent_data: /var/lib/dokku/volumes
+templates: /home/dokku/templates
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

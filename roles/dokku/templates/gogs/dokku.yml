@@ -10,7 +10,7 @@ certs:
   certificate: selfsigned
 hostname: gogs.omoikane.ep3.at
 env:
-  DOKKU_DOCKERFILE_PORT: 3000
+  DOKKU_DOCKERFILE_PORT: "3000"
   domain: gogs.omoikane.ep3.at
 
 #files:

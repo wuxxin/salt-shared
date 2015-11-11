@@ -1,5 +1,4 @@
-{% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
-{% set base= s.image_base+ "/templates/dokku" %}
+{% from "roles/dokku/defaults.jinja" import settings as s with context %}
 
 
 {% macro dokku(command, param1, param2=None) %}
@@ -30,7 +29,7 @@ source:
 {{ name }}_checkout:
   git.latest:
     - name: {{ data['source']['url'] }}
-    - target: {{ base }}/{{ name }}
+    - target: {{ s.templates }}/{{ name }}
 {% if data['source']['rev'] is defined %}
     - rev: {{ data ['source']['rev'] }}
 {% endif %}
@@ -92,6 +91,9 @@ stdout: |
   security
   {{ hostname }}
   admin@ep3.at
+
+  {{ "" }}
+
 {% endload %}
 {{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
   {% else %}
@@ -118,15 +120,23 @@ env:
 
 
 {% macro dokku_volumes(name, data) %}
-{% if data['volume'] is defined or data['volumes'] is defined %}
+{% if data['volumes'] is defined %}
 {#
-volume[s]:
+volumes:
   data_container_name: /mount_point/1
 
 #}
-  {% for cname, cpaths in data['volume'].iteritems(), data['volumes'].iteritems()  %}
-{{ dokku("volume:create", cname, cpaths|join(',')) }}
-{{ dokku("volume:link", name, cname) }}
+  {% for vname, vpath in data['volumes'].iteritems()  %}
+  {% set datadir= sd.persistent_data+ "/"+ vname+ "/"+ vpath %}
+"makedir_{{ datadir }}":
+  file.directory:
+    - user: dokku
+    - group: dokku
+    - dir_mode: 755
+    - file_mode: 644
+    - makedirs: true
+
+{{ dokku("docker-options:add", name, "deploy,run '-v "+ datadir+ ":"+ vpath+ "'") }}
   {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -150,12 +160,10 @@ database:
       {% if dbname is string %}
 {{ dokku(dbtype+ ":create", dbname) }}
 {{ dokku(dbtype+ ":link", dbname, name) }}
-{{ dokku(dbtype+ ":promote", dbname, name) }}
       {% else %}
         {% for singledb in dbname %}
 {{ dokku(dbtype+ ":create", singledb) }}
 {{ dokku(dbtype+ ":link", singledb, name) }}
-{{ dokku(dbtype+ ":promote", singledb, name) }}
         {% endfor %}
       {% endif %}
     {% endif %}
@@ -188,9 +196,9 @@ files:
 {% if data['files']['content'] is defined %}
   {% for fname, fcontent in data['files']['content'].iteritems() %}
   {% do files_touched.append(fname) %}
-content_{{ base }}/{{ name }}/{{ fname }}:
+content_{{ s.templates }}/{{ name }}/{{ fname }}:
   file.managed:
-    - name: {{ base }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - contents: |
 {{ fcontent|indent(8, true) }}
     - user: {{ s.user }}
@@ -200,9 +208,9 @@ content_{{ base }}/{{ name }}/{{ fname }}:
 {% if data['files']['append'] is defined %}
   {% for fname, fappend in data['files']['append'].iteritems() %}
   {% do files_touched.append(fname) %}
-append_{{ base }}/{{ name }}/{{ fname }}:
+append_{{ s.templates }}/{{ name }}/{{ fname }}:
   file.append:
-    - name: {{ base }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - text: |
 {{ fappend|indent(8, true) }}
     - user: {{ s.user }}
@@ -213,9 +221,9 @@ append_{{ base }}/{{ name }}/{{ fname }}:
   {% for fname, freplace in data['files']['replace'].iteritems() %}
     {% do files_touched.append(fname) %}
     {% for pname, pdata in freplace.iteritems() %}
-replace_{{ base }}/{{ name }}/{{ fname }}_{{ pname }}:
+replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.replace:
-    - name: {{ base }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - pattern: |
 {{ pdata['pattern']|indent(8, true) }}
     - repl: |
@@ -229,9 +237,9 @@ replace_{{ base }}/{{ name }}/{{ fname }}_{{ pname }}:
   {% if data['files'][a] is defined %}
     {% for fname, fregex in data['files'][a].iteritems() %}
     {% do files_touched.append(fname) %}
-{{ a }}_{{ base }}/{{ name }}/{{ fname }}:
+{{ a }}_{{ s.templates }}/{{ name }}/{{ fname }}:
   file.{{ a }}:
-    - name: {{ base }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
     - user: {{ s.user }}
     - backup: false
@@ -242,9 +250,9 @@ replace_{{ base }}/{{ name }}/{{ fname }}_{{ pname }}:
 {% if data['files']['templates'] is defined %}
   {% for fname, fsource in data['files']['templates'].iteritems() %}
   {% do files_touched.append(fname) %}
-managed_{{ base }}/{{ name }}/{{ fname }}:
+managed_{{ s.templates }}/{{ name }}/{{ fname }}:
   file.managed:
-    - name: {{ base }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
     - user: {{ s.user }}
   {% endfor %}
@@ -260,7 +268,7 @@ managed_{{ base }}/{{ name }}/{{ fname }}:
   {% for fname in data['pre_commit'] %}
 pre_commit_{{ fname }}:
   cmd.run:
-    - cwd: {{ base }}/{{ name }}
+    - cwd: {{ s.templates }}/{{ name }}
     - name: {{ fname }}
     - user: {{ s.user }}
   {% endfor %}
@@ -273,14 +281,14 @@ pre_commit_{{ fname }}:
 
 git_add_user_{{ name }}:
   cmd.run:
-    - cwd: {{ base }}/{{ name }}
+    - cwd: {{ s.templates }}/{{ name }}
     - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
     - user: {{ s.user }}
 
 {% if files_touched != [] %}
 git_add_and_commit_{{ name }}:
   cmd.run:
-    - cwd: {{ base }}/{{ name }}
+    - cwd: {{ s.templates }}/{{ name }}
     - name: git add {{ files_touched|join(' ') }} && git commit -a -m "{{ commitlog }}"
     - user: {{ s.user }}
 {% endif %}
@@ -293,13 +301,13 @@ git_add_and_commit_{{ name }}:
 
 git_add_remote_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ base }}/{{ name }}
+    - cwd: {{ s.templates }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
     - user: {{ s.user }}
 
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ base }}/{{ name }}
+    - cwd: {{ s.templates }}/{{ name }}
     - name: git push dokku {{ ourbranch }}:master
 
 {% endmacro %}
@@ -329,7 +337,7 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {% set files_touched=[] %}
 
 {{ dokku_checkout(name, data) }}
-{{ dokku("create", name) }}
+{{ dokku("apps:create", name) }}
 {{ dokku_hostname(name, data) }}
 {{ dokku_docker_opts(name, data) }}
 {{ dokku_volumes(name, data) }}
@@ -339,6 +347,7 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_files(name, data, files_touched) }}
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
+{{ dokku("config", name) }}
 {{ dokku_git_push(name, data) }}
 {{ dokku_post_commit(name, data) }}
 
@@ -357,9 +366,9 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku("disable", name) }}
 
 {% if data['volumes'] is defined %}
-  {% for cname, cpaths in data['volumes'].iteritems() %}
-{{ dokku("volume:unlink", name, cname) }}
-{{ dokku("volume:delete", cname) }}
+  {% for vname, vpath in data['volumes'].iteritems() %}
+    {% set datadir= sd.persistent_data+ "/"+ vname+ "/"+ vpath %}
+    {{ dokku("docker-options:remove", name, "deploy,run '-v "+ datadir+ ":"+ vpath+ "'") }}
   {% endfor %}
 {% endif %}
 
@@ -368,21 +377,21 @@ orgdata: loaded yml dict or filenamestring to import_yaml
     {% if dbtype in ['couchdb', 'elasticsearch', 'mariadb', 'memcached', 'mongo', 'postgres', 'rabbitmq', 'redis', 'rethinkdb' ] %}
       {% if dbname is string %}
 {{ dokku(dbtype+ ":unlink", name, dbname) }}
-{{ dokku(dbtype+ ":destroy", dbname) }}
+{{ dokku_pipe(dbname, dbtype+ ":destroy", dbname) }}
       {% else %}
         {% for singledb in dbname %}
 {{ dokku(dbtype+ ":unlink", name, singledb) }}
-{{ dokku(dbtype+ ":destroy", singledb) }}
+{{ dokku_pipe(singledb, dbtype+ ":destroy", singledb) }}
         {% endfor %}
       {% endif %}
     {% endif %}
   {% endfor %}
 {% endif %}
 
-{{ dokku("delete", name) }}
+{{ dokku_pipe(name, "apps:destroy", name) }}
 
 {{ name }}_delete:
   file.absent:
-    - name: {{ base }}/{{ name }}
+    - name: {{ s.templates }}/{{ name }}
 
 {% endmacro %}
