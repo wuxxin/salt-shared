@@ -27,6 +27,14 @@ dokku:
       - pkg: docker
       - pkg: nginx
 
+dokku_core_dependencies:
+  cmd.run:
+    - name: dokku plugin:install-dependencies --core
+    - require:
+      - pkg: dokku
+
+{#
+
 create_dokkurc:
   file.touch:
     - name: /home/dokku/dokkurc
@@ -45,16 +53,15 @@ create_dokkurc:
     - require:
       - file: create_dokkurc
 
-{#
-/home/dokku/VHOST:
-/home/dokku/HOSTNAME:
 #}
 
 {% if pillar['adminkeys_present']|d(False) %}
 {% for adminkey in pillar['adminkeys_present'] %}
 dokku_access_add_{{ adminkey }}:
   cmd.run:
-    - name: echo "{{ adminkey }}" | dokku access:add
+    - name: echo "{{ adminkey }}" | sshcommand acl-add dokku admin
+    - require:
+      - cmd: dokku_core_dependencies
 {% endfor %}
 {% endif %}
 
@@ -68,27 +75,28 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-rabbitmq','https://github.com/dokku/dokku-rabbitmq.git'),
 ('dokku-redis', 'https://github.com/dokku/dokku-redis.git'),
 ('dokku-rethinkdb', 'https://github.com/dokku/dokku-rethinkdb.git'),
-('dokku-maintenance', 'https://github.com/dokku/dokku-maintenance.git'),
 ('dokku-http-auth', 'https://github.com/dokku/dokku-http-auth.git'),
+('dokku-maintenance', 'https://github.com/dokku/dokku-maintenance.git'),
 ('dokku-redirect', 'https://github.com/dokku/dokku-redirect.git'),
-('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),
+
 ('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),
 ('dokku-secure-apps', 'https://github.com/matto1990/dokku-secure-apps.git'),
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
-('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
 ('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
 ] %}
 
 {#
+('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
+('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),
 ('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 #}
 
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
   cmd.run:
-    - name: dokku plugin:install {{ p }}
+    - name: dokku plugin:update {{ p }}
     - require:
-      - pkg: dokku
+      - cmd: dokku_core_dependencies
 {% endfor %}
