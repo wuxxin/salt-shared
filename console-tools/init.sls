@@ -24,6 +24,7 @@ base-deps:
       - socat
       - netcat
       - nethogs
+      - rsync
       - trickle
       - curl
       - elinks
