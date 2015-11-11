@@ -1,11 +1,10 @@
 source:
   url: https://github.com/TracksApp/tracks.git
-volume:
-  tracks_data:
-    - /app/public/uploads
+volumes:
+  tracks_data: /app/public/uploads
 database:
-  postgresql: tracks
-ssl:
+  postgres: tracks
+certs:
   certificate: selfsigned
 env:
   BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"

@@ -2,14 +2,14 @@ source:
   url: https://github.com/adelton/docker-freeipa.git
   #rev: fedora-22
 
-volume:
-  freeipa_data:
-    - /home/freeipa
+volumes:
+  freeipa_data: /home/freeipa
+
 #database:
-ssl:
+certs:
   certificate: selfsigned
+
 hostname: freeipa.omoikane.ep3.at
 #env:
-
 
 #files:

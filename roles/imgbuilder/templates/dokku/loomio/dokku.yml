@@ -1,12 +1,13 @@
 source:
   url: https://github.com/loomio/loomio.git
-volume:
+volumes:
   loomio_data:
     - /uploads
 database:
   postgresql: loomio
   memcached: loomio
-ssl:
+hostname: loomio.omoikane.ep3.at
+certs:
   certificate: selfsigned
 env:
   RACK_ENV: production
@@ -15,7 +16,6 @@ env:
   SECRET_COOKIE_TOKEN: `openssl rand -base64 48`
   CANONICAL_HOST: loomio.omoikane.ep3.at
   TLD_LENGTH: 3
-hostname: loomio.omoikane.ep3.at
 
 files:
   content:

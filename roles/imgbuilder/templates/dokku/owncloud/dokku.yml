@@ -1,9 +1,8 @@
 source:
   url: https://github.com/owncloud/core.git
   rev: stable8
-volume:
-  owncloud_data:
-    - /app/data
+volumes:
+  owncloud_data: /app/data
 database:
   postgresql: owncloud
 env:
@@ -11,7 +10,7 @@ env:
   DB_HOST: postgresql
   DATA_DIR: /app/data
   TIMEZONE: "{{ salt['pillar.get']('timezone', 'UTC') }}"
-ssl:
+certs:
   certificate: selfsigned
 hostname: owncloud.omoikane.ep3.at
 files:

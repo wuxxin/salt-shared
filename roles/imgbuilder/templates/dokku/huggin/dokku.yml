@@ -1,15 +1,13 @@
 source:
   url: https://github.com/cantino/huginn.git
-volume:
-  huggin_data:
-    - /app/public/uploads
+volumes:
+  huggin_data: /app/public/uploads
 database:
   postgresql: huggin
 env:
   BUNDLE_WITHOUT: "development:test:selenium:mysql:sqlite"
   APP_SECRET_TOKEN: {{ salt['cmd.run_stdout']('openssl rand 64 -hex') }}
-ssl:
+certs:
   certificate: selfsigned
 #docker-opts:
 #files:
-

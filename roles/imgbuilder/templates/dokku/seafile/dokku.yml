@@ -1,24 +1,24 @@
 source:
   url: https://github.com/bretif/docker-seafile.git
-volume:
-  seafile_data:
-    - /opt/seafile
+volumes:
+  seafile_data: /opt/seafile
 database:
-  mariadb: 
+  mariadb:
     - seafile
     - ccnet
     - seahub
-http:
-  hostname: seafile.omoikane.ep3.at
-  ssl:
-    certificate: selfsigned
-  proxy:
+hostname: seafile.omoikane.ep3.at
+certs:
+  certificate: selfsigned
+
+proxy:
   - port: 8002
     match: path_beg
     pattern: /seafhttp
     target: /
   - port: 8000
-    target: / 
+    target: /
+
 env:
   ## DOKKU_ENABLE_HTTP_HOST=1
   ## DOKKU_ENABLE_HSTS=1

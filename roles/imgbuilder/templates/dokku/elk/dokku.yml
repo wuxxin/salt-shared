@@ -1,4 +1,5 @@
 source:
   url: https://github.com/pblittle/docker-logstash
 
-docker-opts: "-v=/var/run/docker.sock:/tmp/docker.sock"
+docker-opts:
+  - "deploy,run": "-v=/var/run/docker.sock:/tmp/docker.sock"

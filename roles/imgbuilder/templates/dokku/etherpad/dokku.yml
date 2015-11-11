@@ -1,10 +1,9 @@
 source:
   url: https://github.com/talexand/etherpad-lite-heroku.git
 database:
-  postgresql: etherpad
-ssl:
+  postgres: etherpad
+certs:
   certificate: selfsigned
 files:
   templates:
     settings.json: salt://roles/imgbuilder/templates/dokku/etherpad/settings.json.template
-

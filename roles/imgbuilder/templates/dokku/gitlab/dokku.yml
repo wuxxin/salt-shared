@@ -1,15 +1,12 @@
 source:
   url: https://github.com/sameersbn/docker-gitlab.git
-volume:
-  gitlab_data:
-    - /home/git/data
-    - /var/log/gitlab
+volumes:
+  gitlab_data: /home/git/data
 database:
-  postgresql: gitlab
-  redis: true
+  postgres: gitlab
+  redis: gitlab
 ssl:
   certificate: selfsigned
-  key: none
 env:
   DB_TYPE: postgres
   DB_HOST: postgresql
@@ -17,7 +14,7 @@ env:
   REDIS_HOST: redis
 
 #  GITLAB_TIMEZONE: "{{ salt['pillar.get']('timezone', 'UTC') }}"
-#  REDMINE_URL: 
+#  REDMINE_URL:
 
 #docker-opts:
 #files:
