@@ -1,6 +1,7 @@
 include:
   - .ppa
   - .grub
+  - python
 
 {% if salt['pillar.get']('docker:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
@@ -34,5 +35,11 @@ docker:
     - require:
       - pkg: docker
       - sls: roles.docker.grub
+      - pip: docker-compose
     - watch:
       - file: docker
+
+docker-compose:
+  pip.installed:
+    - require:
+      - pkg: python

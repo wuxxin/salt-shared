@@ -1,8 +1,8 @@
-{% load_yaml as defaults %} 
+{% load_yaml as defaults %}
 
 dev_version: false
 kernel:
-  version: 4.0.0-040000rc5
+  version: 4.2
   patches:
     - https://launchpadlibrarian.net/149319334/overlayfs_inotify.patch
 
@@ -10,4 +10,3 @@ kernel:
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('docker', {})) %}
-
