@@ -18,7 +18,7 @@ zentyal-mail:
     - require:
       - pkg: zentyal-mail
 
-{% for filename, pillaritem in 
+{% for filename, pillaritem in
   ('tls_policy', 'zentyal:mail:tls_policy'),
   ('generic_outgoing', 'zentyal:mail:rewrite'),
   ('recipient_bcc', 'zentyal:mail:incoming_bcc'),
@@ -65,7 +65,7 @@ zentyal-mail:
 
 # todo:
 
-# create mailboxes 
+# create mailboxes
 # doveadm mailbox create public.incoming.2012 -u postmaster@spitzauer.at
 # doveadm mailbox create public.sent.2012 -u postmaster@spitzauer.at
 
@@ -81,10 +81,12 @@ zentyal-mail:
 # ### fetchmail
 
 /etc/default/fetchmail:
-  file.sed:
-    - before: '^START_DAEMON=no'
-    - after: 'START_DAEMON=yes'
-    - backup: ''
+  file.replace:
+    - pattern: |
+        ^.*START_DAEMON=.*
+    - repl: START_DAEMON=yes
+    - append_if_not_found: true
+    - backup: false
     - require:
       - pkg: zentyal-mail
 

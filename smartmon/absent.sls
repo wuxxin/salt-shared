@@ -9,9 +9,8 @@ smartmontools:
       - file: /etc/default/smartmontools
 
 /etc/default/smartmontools:
-  file.sed:
-    - before: ^start_smartd=yes
-    - after: "#start_smartd=yes"
+  file.comment:
+    - regex: start_smartd=yes
+    - backup: false
     - require:
       - pkg: smartmontools
-

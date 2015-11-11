@@ -11,16 +11,17 @@ apcupsd:
       - file: /etc/apcupsd/apcupsd.conf
 
 /etc/default/apcupsd:
-  file.sed:
-    - before: ^ISCONFIGURED=no
-    - after: ISCONFIGURED=yes 
+  file.replace:
+    - pattern: "^.*ISCONFIGURED=.*"
+    - repl: ISCONFIGURED=yes
+    - backup: false
     - require:
       - pkg: apcupsd
 
 /etc/apcupsd/apcupsd.conf:
-  file.sed:
-    - before: ^DEVICE /dev/ttyS0
-    - after: DEVICE
+  file.replace:
+    - pattern: "^.*DEVICE /dev/ttyS0"
+    - repl: DEVICE
+    - backup: false
     - require:
       - pkg: apcupsd
-

@@ -34,10 +34,9 @@ modify_service:
       - pkg: openvpn
 
 /etc/openvpn/easy-rsa/pkitool:
-  file.sed:
-    - before: '"" ;;'
-    - after: '"-passout pass:$2"; shift ;;'
-    - limit: '--pass[ ]+\) NODES_REQ='
+  file.managed:
+    - source: salt://roles/openvpn/pkitool
+    - mode: 0775
     - require:
       - archive: /etc/openvpn/easy-rsa
 

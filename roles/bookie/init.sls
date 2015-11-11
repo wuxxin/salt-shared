@@ -78,7 +78,7 @@ css_js_setup:
     - group: bookie
     - name: . ./bin/activate; make chrome_css js
     - require:
-      - file: config_bookie_ini 
+      - file: config_bookie_ini
       - pip: bookie
     - watch:
       - git: bookie
@@ -90,7 +90,7 @@ database_setup:
     - group: bookie
     - name: . ./bin/activate; bin/alembic upgrade head
     - require:
-      - file: config_bookie_ini 
+      - file: config_bookie_ini
       - pip: bookie
       - cmd: postgresql_createdb bookie
     - watch:
@@ -103,12 +103,3 @@ create_bookie_ini:
     - unless: test -f bookie.ini
     - require:
       - git: bookie
-
-config_bookie_ini:
-  file.sed:
-    - name: 
-    - before:
-    - after:
-    - limit:
-    - require:
-      - cmd: create_bookie_ini

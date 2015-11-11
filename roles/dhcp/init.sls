@@ -19,11 +19,11 @@ dhcp-server:
       - service: dhcp-server
 
 /etc/default/isc-dhcp-server:
-  file.sed:
-    - before: '^INTERFACES=""'
-    - after: 'INTERFACES="{{ pillar.dhcp_server.interfaces }}"'
+  file.replace:
+    - pattern: '^INTERFACES=".*"'
+    - repl: 'INTERFACES="{{ pillar.dhcp_server.interfaces }}"'
+    - backup: false
     - require:
       - pkg: dhcp-server
     - watch_in:
       - service: dhcp-server
-

@@ -50,10 +50,10 @@ veewee:
       - git: veewee
 
 /home/veewee/veewee/.rvmrc:
-  file.sed:
-    - before: ruby-1.9.2@veewee --create
-    - after: ruby-1.9.3@veewee --create
-    - limit: ^rvm use
+  file.replace:
+    - pattern: |
+        ruby-1.9.2@veewee --create
+    - repl: ruby-1.9.3@veewee --create
     - watch:
       - git: veewee
 
@@ -63,5 +63,3 @@ disable_log4r:
     - regex: ^[ ]+require 'log4r'
     - watch:
       - git: veewee
-
- 
