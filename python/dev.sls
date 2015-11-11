@@ -6,4 +6,4 @@ python-dev:
     - pkgs:
       - python-dev
     - require:
-      - pkg: python
+      - sls: python

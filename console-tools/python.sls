@@ -24,5 +24,5 @@ include:
   pip:
     - installed
     - require:
-      - pkg: python-dev
+      - sls: python-dev
 {% endfor %}

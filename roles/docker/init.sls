@@ -42,4 +42,4 @@ docker:
 docker-compose:
   pip.installed:
     - require:
-      - pkg: python
+      - sls: python

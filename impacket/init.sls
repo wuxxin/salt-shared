@@ -12,6 +12,5 @@ impacket:
  {# "svn+http://impacket.googlecode.com/svn/tags/impacket_0_9_12/" #}
     - require:
       - pkg: subversion
-      - pkg: python
+      - sls: python
       - pkg: python-pyasn1
-

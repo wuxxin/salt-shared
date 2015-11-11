@@ -6,7 +6,7 @@ include:
 {{ i }}:
   pip.installed:
     - require:
-      - pkg: python
+      - sls: python
       - pkg: atom
 
 {% endfor %}

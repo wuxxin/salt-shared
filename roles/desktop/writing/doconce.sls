@@ -30,7 +30,7 @@ prereq_doconce:
       - pkg: mercurial
       - pkg: git
       - pkg: subversion
-      - pkg: python
+      - sls: python
       - pkg: latex
 
 {% load_yaml as pip_list %}
@@ -54,7 +54,7 @@ prereq_doconce:
     - installed
     - name: "{{ p }}"
     - require:
-      - pkg: python
+      - sls: python
     - require_in:
       - cmd: doconce
 {% endfor %}

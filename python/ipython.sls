@@ -5,5 +5,5 @@ include:
 {{ a }}:
   pip.installed:
     - require:
-      - pkg: python
+      - sls: python
 {% endfor %}

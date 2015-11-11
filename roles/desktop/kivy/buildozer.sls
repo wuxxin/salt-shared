@@ -25,12 +25,12 @@ buildozer:
     - cwd: {{ user_home }}/.buildozer
     - require:
       - file: buildozer
-      - pkg: python
+      - sls: python
   pip.installed:
     - bin_env: {{ user_home }}/.buildozer/env
     - name: git+https://github.com/kivy/buildozer.git#egg=buildozer
     - user: {{ user }}
-    - require: 
+    - require:
       - virtualenv: buildozer
 
 link-sdk:

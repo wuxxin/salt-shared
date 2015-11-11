@@ -14,7 +14,7 @@ scipy:
       - python-nose
       - python-skimage
     - require:
-      - pkg: python
+      - sls: python
       - pip: ipython
       - pip: jupyter
       - pkgrepo: neurodebian_ppa
