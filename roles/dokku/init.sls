@@ -3,6 +3,8 @@ include:
   - nginx
   - roles.docker
 
+{# fixme: dokku storage relocate makes quirks #}
+
 {% if salt['pillar.get']('dokku:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
 {{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
@@ -10,6 +12,7 @@ include:
 
 {% from "roles/dokku/defaults.jinja" import settings as s with context %}
 
+{# fixme: dokku installer gets stuck as process on install #}
 dokku:
   debconf.set:
     - name: dokku
@@ -93,6 +96,7 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),
 #}
 
+{# fixme: plugin install fails on second install #}
 {% for (n,p) in plugin_list %}
 install_dokku_plugin_{{ n }}:
   cmd.run:

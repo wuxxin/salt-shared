@@ -1,6 +1,7 @@
 {% load_yaml as defaults %}
 
 hostname: {{ salt['cmd.run_stdout']('hostname -f') }}
+behind_loadbalancer: false
 
 {% endload %}
 
