@@ -37,7 +37,7 @@ source:
 {% if data['source']['submodules'] is defined %}
     - submodules: {{ data ['source']['submodules'] }}
 {% endif %}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
 {% endmacro %}
 
 
@@ -46,7 +46,7 @@ source:
 {#
 hostname: 'host.domain.com'
 #}
-  {{ dokku("docker-options:add", name, "-h "+ data['hostname']) }}
+  {{ dokku("docker-options:add deploy,run", name, "-h "+ data['hostname']) }}
 {% endif %}
 {% endmacro %}
 
@@ -54,22 +54,30 @@ hostname: 'host.domain.com'
 {% macro dokku_docker_opts(name, data) %}
 {% if data['docker-opts'] is defined %}
 {#
-docker-opts: '-h host.domain.com'
+docker-opts:
+  - "deploy,run": '-h host.domain.com'
+
 #}
-  {{ dokku("docker-options:add", name, data['docker-opts']) }}
+{% for optline in data['docker-opts'] %}
+  {% for phase, opts in optline.iteritems() %}
+    {{ dokku("docker-options:add", name, phase+ " "+ opts) }}
+  {% endfor %}
+{% endfor %}
+
 {% endif %}
 {% endmacro %}
 
 
-{% macro dokku_ssl(name, data) %}
-{% if data['ssl'] is defined %}
+{% macro dokku_certs(name, data) %}
+{% if data['certs'] is defined %}
 {#
-ssl:
+certs:
   certificate: selfsigned
   key: none
 [hostname: x.y.z]
+
 #}
-  {% if data['ssl']['certificate'] == 'selfsigned' %}
+  {% if data['certs']['certificate'] == 'selfsigned' %}
     {% if data['hostname'] is defined %}
         {% set hostname= data['hostname'] %}
     {% else %}
@@ -85,10 +93,9 @@ stdout: |
   {{ hostname }}
   admin@ep3.at
 {% endload %}
-{{ dokku_pipe(cert_input.stdout, "ssl:selfsigned", name) }}
+{{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
   {% else %}
-{{ dokku_pipe(data['ssl']['certificate'], "ssl:certificate", name) }}
-{{ dokku_pipe(data['ssl']['key'], "ssl:key", name) }}
+{{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
   {% endif %}
 {% endif %}
 {% endmacro %}
@@ -110,15 +117,14 @@ env:
 {% endmacro %}
 
 
-{% macro dokku_volume(name, data) %}
-{% if data['volume'] is defined %}
+{% macro dokku_volumes(name, data) %}
+{% if data['volume'] is defined or data['volumes'] is defined %}
 {#
-volume:
-  data_container_name:
-    - /mount_point/1
-    - /opt/mount_point/2
+volume[s]:
+  data_container_name: /mount_point/1
+
 #}
-  {% for cname, cpaths in data['volume'].iteritems() %}
+  {% for cname, cpaths in data['volume'].iteritems(), data['volumes'].iteritems()  %}
 {{ dokku("volume:create", cname, cpaths|join(',')) }}
 {{ dokku("volume:link", name, cname) }}
   {% endfor %}
@@ -138,22 +144,20 @@ database:
   [postgresql:]
     - first_database
     - second_database
-  redis: true
 #}
   {% for dbtype, dbname in data['database'].iteritems() %}
-    {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch', 'memcached' ] %}
+    {% if dbtype in ['couchdb', 'elasticsearch', 'mariadb', 'memcached', 'mongo', 'postgres', 'rabbitmq', 'redis', 'rethinkdb' ] %}
       {% if dbname is string %}
 {{ dokku(dbtype+ ":create", dbname) }}
-{{ dokku(dbtype+ ":link", name, dbname) }}
+{{ dokku(dbtype+ ":link", dbname, name) }}
+{{ dokku(dbtype+ ":promote", dbname, name) }}
       {% else %}
         {% for singledb in dbname %}
 {{ dokku(dbtype+ ":create", singledb) }}
-{{ dokku(dbtype+ ":link", name, singledb) }}
+{{ dokku(dbtype+ ":link", singledb, name) }}
+{{ dokku(dbtype+ ":promote", singledb, name) }}
         {% endfor %}
       {% endif %}
-    {% endif %}
-    {% if dbtype in ['redis'] %}
-{{ dokku(dbtype+ ":create", name) }}
     {% endif %}
   {% endfor %}
 {% endif %}
@@ -189,7 +193,7 @@ content_{{ base }}/{{ name }}/{{ fname }}:
     - name: {{ base }}/{{ name }}/{{ fname }}
     - contents: |
 {{ fcontent|indent(8, true) }}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
   {% endfor %}
 {% endif %}
 
@@ -201,7 +205,7 @@ append_{{ base }}/{{ name }}/{{ fname }}:
     - name: {{ base }}/{{ name }}/{{ fname }}
     - text: |
 {{ fappend|indent(8, true) }}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
   {% endfor %}
 {% endif %}
 
@@ -229,7 +233,7 @@ replace_{{ base }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.{{ a }}:
     - name: {{ base }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
     - backup: false
     {% endfor %}
   {% endif %}
@@ -242,7 +246,7 @@ managed_{{ base }}/{{ name }}/{{ fname }}:
   file.managed:
     - name: {{ base }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
   {% endfor %}
 {% endif %}
 
@@ -271,14 +275,14 @@ git_add_user_{{ name }}:
   cmd.run:
     - cwd: {{ base }}/{{ name }}
     - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
 
 {% if files_touched != [] %}
 git_add_and_commit_{{ name }}:
   cmd.run:
     - cwd: {{ base }}/{{ name }}
     - name: git add {{ files_touched|join(' ') }} && git commit -a -m "{{ commitlog }}"
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
 {% endif %}
 
 {% endmacro %}
@@ -291,7 +295,7 @@ git_add_remote_{{ name }}_{{ ourbranch }}:
   cmd.run:
     - cwd: {{ base }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
-    - user: {{ s.user }} 
+    - user: {{ s.user }}
 
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
@@ -313,7 +317,7 @@ push_{{ name }}_{{ ourbranch }}:
 {% macro create_container(name, orgdata) %}
 {#
 name: name of container
-orgdata: loaded yml dict or filenamestring to import_yaml 
+orgdata: loaded yml dict or filenamestring to import_yaml
 #}
 
 {% if orgdata is string %}
@@ -328,10 +332,10 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku("create", name) }}
 {{ dokku_hostname(name, data) }}
 {{ dokku_docker_opts(name, data) }}
-{{ dokku_volume(name, data) }}
+{{ dokku_volumes(name, data) }}
 {{ dokku_database(name, data) }}
 {{ dokku_env(name, data) }}
-{{ dokku_ssl(name, data) }}
+{{ dokku_certs(name, data) }}
 {{ dokku_files(name, data, files_touched) }}
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
@@ -352,8 +356,8 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 
 {{ dokku("disable", name) }}
 
-{% if data['volume'] is defined %}
-  {% for cname, cpaths in data['volume'].iteritems() %}
+{% if data['volumes'] is defined %}
+  {% for cname, cpaths in data['volumes'].iteritems() %}
 {{ dokku("volume:unlink", name, cname) }}
 {{ dokku("volume:delete", cname) }}
   {% endfor %}
@@ -361,19 +365,16 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 
 {% if data['database'] is defined %}
   {% for dbtype, dbname in data['database'].iteritems() %}
-    {% if dbtype in ['postgresql', 'mariadb', 'mongodb', 'elasticsearch', 'memcached' ] %}
+    {% if dbtype in ['couchdb', 'elasticsearch', 'mariadb', 'memcached', 'mongo', 'postgres', 'rabbitmq', 'redis', 'rethinkdb' ] %}
       {% if dbname is string %}
 {{ dokku(dbtype+ ":unlink", name, dbname) }}
-{{ dokku(dbtype+ ":delete", dbname) }}
+{{ dokku(dbtype+ ":destroy", dbname) }}
       {% else %}
         {% for singledb in dbname %}
 {{ dokku(dbtype+ ":unlink", name, singledb) }}
-{{ dokku(dbtype+ ":delete", singledb) }}
+{{ dokku(dbtype+ ":destroy", singledb) }}
         {% endfor %}
       {% endif %}
-    {% endif %}
-    {% if dbtype in ['redis'] %}
-{{ dokku(dbtype+ ":delete", name) }}
     {% endif %}
   {% endfor %}
 {% endif %}
@@ -385,4 +386,3 @@ orgdata: loaded yml dict or filenamestring to import_yaml
     - name: {{ base }}/{{ name }}
 
 {% endmacro %}
-
