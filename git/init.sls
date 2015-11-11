@@ -1,3 +1,5 @@
 git:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs:
+      - git
+      - git-flow

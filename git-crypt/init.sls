@@ -1,12 +1,35 @@
 include:
   - git
   - openssl
+{% if grains['lsb_distrib_codename'] in ['Mint', 'trusty'] %}
+  - repo.ubuntu
 
+  {% from "repo/ubuntu.sls" import apt_add_repository %}
+
+  {{ apt_add_repository("outsideopen_git_crypt_ppa", "outsideopen/git-crypt") }}
+
+git-crypt:
+  pkg.installed:
+    - require:
+      - cmd: outsideopen_git_crypt_ppa
+
+{% else %}
+
+git-crypt:
+  pkg:
+    - installed
+
+{% endif %}
+
+
+{#
+
+# disabled
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
 {% set workdir= tempdir+ '/git-crypt' %}
 
 
-# TODO: make a debian package out of it and install it to a personal archive
+# TODO:: is disabled, we take a backport of git-crypt from a ppa for trusty and therelike
 {% if salt['cmd.run_stdout']('which git-crypt') == "" %}
 git-crypt:
   pkg.installed:
@@ -46,3 +69,5 @@ git-crypt:
     - name: "which git-crypt"
 
 {% endif %}
+
+#}
