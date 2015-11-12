@@ -1,9 +1,23 @@
 source:
-  url: https://github.com/talexand/etherpad-lite-heroku.git
+  url: https://github.com/wuxxin/etherpad-lite-heroku.git
 database:
   postgres: etherpad
 certs:
   certificate: selfsigned
+env:
+  ETHERPAD_SETTINGS: etherpad.settings.json
 files:
   templates:
-    settings.json: salt://roles/dokku/templates/etherpad/settings.json.template
+    etherpad.settings.json:
+      source: "salt://roles/dokku/templates/etherpad/settings.json.template"
+      context:
+        title: 'etherpad'
+        defaultPadText: ''
+        editOnly: "true"
+        requireSession: "true"
+        requireAuthentication: "true"
+        requireAuthorization: "false"
+        trustProxy: "true"
+        sessionkey: "{{ salt['cmd.run_stdout']('openssl rand -base64 18') }}"
+        adminuser: "admin"
+        adminpassword: "{{ salt['cmd.run_stdout']('openssl rand -base64 12') }}"

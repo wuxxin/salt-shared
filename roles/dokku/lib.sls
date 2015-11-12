@@ -45,13 +45,13 @@ source:
 {#
 hostname: 'host.domain.com'
 #}
-  {{ dokku("docker-options:add deploy,run", name, "-h "+ data['hostname']) }}
+  {{ dokku("docker-options:add", name, "deploy,run '-h "+ data['hostname']+ "'") }}
 {% endif %}
 {% endmacro %}
 
 
 {% macro dokku_docker_opts(name, data) %}
-{% if data['docker-opts'] is defined %}
+{% if data[''] is defined %}
 {#
 docker-opts:
   - "deploy,run": '-h host.domain.com'
@@ -59,7 +59,7 @@ docker-opts:
 #}
 {% for optline in data['docker-opts'] %}
   {% for phase, opts in optline.iteritems() %}
-    {{ dokku("docker-options:add", name, phase+ " "+ opts) }}
+    {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
   {% endfor %}
 {% endfor %}
 
@@ -92,10 +92,11 @@ stdout: |
   {{ hostname }}
   admin@ep3.at
 
-  {{ "" }}
+
+  .
 
 {% endload %}
-{{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
+{{ dokku_pipe(cert_input.stdout+ "\n\n", "certs:generate", name+ " "+ hostname) }}
   {% else %}
 {{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
   {% endif %}
@@ -127,9 +128,10 @@ volumes:
 
 #}
   {% for vname, vpath in data['volumes'].iteritems()  %}
-  {% set datadir= sd.persistent_data+ "/"+ vname+ "/"+ vpath %}
+    {% set datadir= salt['file.normpath'](s.persistent_data+ "/"+ vname+ "/"+ vpath) %}
 "makedir_{{ datadir }}":
   file.directory:
+    - name: {{ datadir }}
     - user: dokku
     - group: dokku
     - dir_mode: 755
@@ -157,15 +159,14 @@ database:
 #}
   {% for dbtype, dbname in data['database'].iteritems() %}
     {% if dbtype in ['couchdb', 'elasticsearch', 'mariadb', 'memcached', 'mongo', 'postgres', 'rabbitmq', 'redis', 'rethinkdb' ] %}
-      {% if dbname is string %}
-{{ dokku(dbtype+ ":create", dbname) }}
-{{ dokku(dbtype+ ":link", dbname, name) }}
-      {% else %}
-        {% for singledb in dbname %}
+      {% set dblist=[dbname,] if dbname is string else dbname %}
+      {% for singledb in dblist %}
+        {% set dbservice= "dokku."+ dbtype+ "."+ singledb %}
+        {% set dbalias= salt['cmd.run_stdout']('echo "'+ dbservice+ '" | tr ._ -', python_shell=True) %}
 {{ dokku(dbtype+ ":create", singledb) }}
 {{ dokku(dbtype+ ":link", singledb, name) }}
-        {% endfor %}
-      {% endif %}
+{{ dokku("docker-options:remove", name, "build '--link "+ dbservice+ ":"+ dbalias+ "'") }}
+      {% endfor %}
     {% endif %}
   {% endfor %}
 {% endif %}
@@ -248,13 +249,20 @@ replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
 {% endfor %}
 
 {% if data['files']['templates'] is defined %}
-  {% for fname, fsource in data['files']['templates'].iteritems() %}
-  {% do files_touched.append(fname) %}
+  {% for fname, fdata in data['files']['templates'].iteritems() %}
+    {% set fsource= fdata['source'] %}
+    {% do files_touched.append(fname) %}
 managed_{{ s.templates }}/{{ name }}/{{ fname }}:
   file.managed:
     - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
     - user: {{ s.user }}
+    - template: jinja
+    {% if fdata['context'] is defined %}
+    - context:
+{% for c, d in fdata['context'].iteritems() %}        {{ c }}: {{ d }}
+{% endfor %}
+    {% endif %}
   {% endfor %}
 {% endif %}
 
@@ -348,6 +356,7 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
 {{ dokku("config", name) }}
+{{ dokku("docker-options", name) }}
 {{ dokku_git_push(name, data) }}
 {{ dokku_post_commit(name, data) }}
 
@@ -367,7 +376,7 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 
 {% if data['volumes'] is defined %}
   {% for vname, vpath in data['volumes'].iteritems() %}
-    {% set datadir= sd.persistent_data+ "/"+ vname+ "/"+ vpath %}
+    {% set datadir= s.persistent_data+ "/"+ vname+ "/"+ vpath %}
     {{ dokku("docker-options:remove", name, "deploy,run '-v "+ datadir+ ":"+ vpath+ "'") }}
   {% endfor %}
 {% endif %}

@@ -27,16 +27,16 @@ dokku:
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
       - cmd: dokku_ppa
 {% endif %}
-      - sls: docker
+      - sls: roles.docker
       - sls: nginx
 
 dokku_core_dependencies:
-  cmd.run:
+  cmd.wait:
     - name: dokku plugin:install-dependencies --core
-    - require:
+    - watch:
       - pkg: dokku
 
-"dokku_makedir_{{ s.templates }}"":
+"dokku_makedir_{{ s.templates }}":
   file.directory:
     - name: {{ s.templates }}
     - user: {{ s.user }}
@@ -48,7 +48,7 @@ dokku_core_dependencies:
 
 {% if pillar['adminkeys_present']|d(False) %}
 {% for adminkey in pillar['adminkeys_present'] %}
-dokku_access_add_{{ adminkey }}:
+"dokku_access_add_{{ adminkey }}":
   cmd.run:
     - name: echo "{{ adminkey }}" | sshcommand acl-add dokku admin
     - require:
@@ -73,12 +73,12 @@ dokku_access_add_{{ adminkey }}:
 ('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),
 ('dokku-secure-apps', 'https://github.com/matto1990/dokku-secure-apps.git'),
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
-('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
 ] %}
 
 {#
+('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
 ('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),
 ('dokku-logspout', 'https://github.com/michaelshobbs/dokku-logspout.git'),

@@ -31,5 +31,3 @@ files:
   append:
     Gemfile: |
         gem "rails_12factor", group: :production
-  templates:
-    config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"

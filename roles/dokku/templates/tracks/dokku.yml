@@ -26,4 +26,5 @@ files:
   comment:
     .gitignore: ^(config/site.yml)|(config/database.yml)
   templates:
-    config/site.yml: "salt://roles/dokku/templates/tracks/site.yml"
+    config/site.yml:
+      source: "salt://roles/dokku/templates/tracks/site.yml"
