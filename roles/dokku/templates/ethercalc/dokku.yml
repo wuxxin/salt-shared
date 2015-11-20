@@ -1,6 +1,0 @@
-source:
-  url: https://github.com/audreyt/ethercalc.git
-database:
-  redis: ethercalc
-certs:
-  certificate: selfsigned

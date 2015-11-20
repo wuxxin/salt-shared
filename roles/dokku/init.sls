@@ -75,6 +75,7 @@ dokku_core_dependencies:
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
+('dokku-webhooks', 'https://github.com/nickstenning/dokku-webhooks.git'),
 ] %}
 
 {#

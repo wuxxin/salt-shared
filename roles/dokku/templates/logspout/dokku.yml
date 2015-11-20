@@ -1,5 +1,0 @@
-source:
-  url: https://github.com/gliderlabs/logspout.git
-  rev: release
-docker-opts:
-  - "deploy,run": "-v=/var/run/docker.sock:/tmp/docker.sock"

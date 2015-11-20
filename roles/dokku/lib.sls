@@ -23,7 +23,7 @@
 {#
 source:
   url:
-  rev: branchname
+  rev: tag or commit id
   submodules: true/false
 #}
 {{ name }}_checkout:
@@ -51,16 +51,24 @@ hostname: 'host.domain.com'
 
 
 {% macro dokku_docker_opts(name, data) %}
-{% if data[''] is defined %}
+{% if data['docker-opts'] is defined %}
 {#
 docker-opts:
-  - "deploy,run": '-h host.domain.com'
+  [-] "deploy,run": '-h host.domain.com'
 
 #}
 {% for optline in data['docker-opts'] %}
-  {% for phase, opts in optline.iteritems() %}
-    {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
-  {% endfor %}
+  {% if optline is sequence %}
+    {% for s in optline %}
+      {% for phase, opts in s.iteritems() %}
+        {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
+      {% endfor %}
+    {% endfor %}
+  {% else %}
+    {% for phase, opts in optline.iteritems() %}
+      {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
+    {% endfor %}
+  {% endif %}
 {% endfor %}
 
 {% endif %}
@@ -71,7 +79,7 @@ docker-opts:
 {% if data['certs'] is defined %}
 {#
 certs:
-  certificate: selfsigned
+  certificate: ["selfsigned", "letsencrypt", certificate-data]
   key: none
 [hostname: x.y.z]
 
@@ -96,7 +104,9 @@ stdout: |
   .
 
 {% endload %}
-{{ dokku_pipe(cert_input.stdout+ "\n\n", "certs:generate", name+ " "+ hostname) }}
+{{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
+  {% elif data['certs']['certificate'] == 'letsencrypt' %}
+    docker run
   {% else %}
 {{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
   {% endif %}
@@ -109,7 +119,7 @@ stdout: |
 {#
 env:
   envname: setting
-  DOKKU_VERBOSE_DATABASE_ENV: "true"
+
 #}
   {% set newenv=[] %}
   {% for ename, edata in data['env'].iteritems() %}
@@ -127,8 +137,13 @@ volumes:
   data_container_name: /mount_point/1
 
 #}
-  {% for vname, vpath in data['volumes'].iteritems()  %}
-    {% set datadir= salt['file.normpath'](s.persistent_data+ "/"+ vname+ "/"+ vpath) %}
+  {% for vname, vdata in data['volumes'].iteritems()  %}
+    {% set vpathlist=[vdata,] if vdata is string else vdata %}
+    {% for vpath in vpathlist %}
+      {% set vreal=vpath|list|first if vpath is mapping else vpath %}
+      {% set datadir= salt['file.normpath'](s.persistent_data+ "/"+ vname+ "/"+ vreal) %}
+      {% set vopt= ":"+ vpath['options'] if vpath['options'] is defined else '' %}
+
 "makedir_{{ datadir }}":
   file.directory:
     - name: {{ datadir }}
@@ -138,7 +153,8 @@ volumes:
     - file_mode: 644
     - makedirs: true
 
-{{ dokku("docker-options:add", name, "deploy,run '-v "+ datadir+ ":"+ vpath+ "'") }}
+{{ dokku("docker-options:add", name, "deploy,run '-v "+ datadir+ ":"+ vreal+ vopt+  "'") }}
+    {% endfor %}
   {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -203,6 +219,7 @@ content_{{ s.templates }}/{{ name }}/{{ fname }}:
     - contents: |
 {{ fcontent|indent(8, true) }}
     - user: {{ s.user }}
+    - makedirs: true
   {% endfor %}
 {% endif %}
 
@@ -214,7 +231,6 @@ append_{{ s.templates }}/{{ name }}/{{ fname }}:
     - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - text: |
 {{ fappend|indent(8, true) }}
-    - user: {{ s.user }}
   {% endfor %}
 {% endif %}
 
@@ -225,11 +241,11 @@ append_{{ s.templates }}/{{ name }}/{{ fname }}:
 replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.replace:
     - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - backup: false
     - pattern: |
 {{ pdata['pattern']|indent(8, true) }}
     - repl: |
 {{ pdata['repl']|indent(8, true) }}
-    - user: {{ s.user }}
     {% endfor %}
   {% endfor %}
 {% endif %}
@@ -242,8 +258,7 @@ replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.{{ a }}:
     - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
-    - user: {{ s.user }}
-    - backup: false
+    - backup: ''
     {% endfor %}
   {% endif %}
 {% endfor %}
@@ -257,10 +272,11 @@ managed_{{ s.templates }}/{{ name }}/{{ fname }}:
     - name: {{ s.templates }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
     - user: {{ s.user }}
+    - makedirs: true
     - template: jinja
     {% if fdata['context'] is defined %}
     - context:
-{% for c, d in fdata['context'].iteritems() %}        {{ c }}: {{ d }}
+{% for c, d in fdata['context'].iteritems() %}        {{ c }}: "{{ d }}"
 {% endfor %}
     {% endif %}
   {% endfor %}
@@ -285,7 +301,6 @@ pre_commit_{{ fname }}:
 
 
 {% macro dokku_git_commit(name, data, files_touched) %}
-{% set commitlog=data['commit_log']|d('modified by salt') %}
 
 git_add_user_{{ name }}:
   cmd.run:
@@ -297,7 +312,7 @@ git_add_user_{{ name }}:
 git_add_and_commit_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates }}/{{ name }}
-    - name: git add {{ files_touched|join(' ') }} && git commit -a -m "{{ commitlog }}"
+    - name: r=`git show --pretty=oneline` && git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt, based on rev {{ data['rev']|d('master') }}, commit $r"
     - user: {{ s.user }}
 {% endif %}
 
@@ -375,9 +390,15 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku("disable", name) }}
 
 {% if data['volumes'] is defined %}
-  {% for vname, vpath in data['volumes'].iteritems() %}
-    {% set datadir= s.persistent_data+ "/"+ vname+ "/"+ vpath %}
-    {{ dokku("docker-options:remove", name, "deploy,run '-v "+ datadir+ ":"+ vpath+ "'") }}
+  {% for vname, vdata in data['volumes'].iteritems()  %}
+    {% set vpathlist=[vdata,] if vdata is string else vdata %}
+    {% for vpath in vpathlist %}
+      {% set vreal=vpath|list|first if vpath is mapping else vpath %}
+      {% set datadir= salt['file.normpath'](s.persistent_data+ "/"+ vname+ "/"+ vreal) %}
+      {% set vopt= ":"+ vpath['options'] if vpath['options'] is defined else '' %}
+{{ dokku("docker-options:remove", name, "deploy,run '-v "+ datadir+ ":"+ vreal+ vopt+ "'") }}
+{# do not destroy data, just unlink from container #}
+    {% endfor %}
   {% endfor %}
 {% endif %}
 
@@ -386,11 +407,15 @@ orgdata: loaded yml dict or filenamestring to import_yaml
     {% if dbtype in ['couchdb', 'elasticsearch', 'mariadb', 'memcached', 'mongo', 'postgres', 'rabbitmq', 'redis', 'rethinkdb' ] %}
       {% if dbname is string %}
 {{ dokku(dbtype+ ":unlink", name, dbname) }}
-{{ dokku_pipe(dbname, dbtype+ ":destroy", dbname) }}
+{# do not destroy database container, just unlink
+  {{ dokku_pipe(dbname, dbtype+ ":destroy", dbname) }}
+#}
       {% else %}
         {% for singledb in dbname %}
 {{ dokku(dbtype+ ":unlink", name, singledb) }}
-{{ dokku_pipe(singledb, dbtype+ ":destroy", singledb) }}
+{# do not destroy database container, just unlink
+  {{ dokku_pipe(singledb, dbtype+ ":destroy", singledb) }}
+#}
         {% endfor %}
       {% endif %}
     {% endif %}
