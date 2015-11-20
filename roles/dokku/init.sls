@@ -36,9 +36,9 @@ dokku_core_dependencies:
     - watch:
       - pkg: dokku
 
-"dokku_makedir_{{ s.templates }}":
+"dokku_makedir_{{ s.templates.target }}":
   file.directory:
-    - name: {{ s.templates }}
+    - name: {{ s.templates.target }}
     - user: {{ s.user }}
     - group: {{ s.user }}
     - mode: 775

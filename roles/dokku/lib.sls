@@ -29,7 +29,7 @@ source:
 {{ name }}_checkout:
   git.latest:
     - name: {{ data['source']['url'] }}
-    - target: {{ s.templates }}/{{ name }}
+    - target: {{ s.templates.target }}/{{ name }}
 {% if data['source']['rev'] is defined %}
     - rev: {{ data ['source']['rev'] }}
 {% endif %}
@@ -59,8 +59,8 @@ docker-opts:
 #}
 {% for optline in data['docker-opts'] %}
   {% if optline is sequence %}
-    {% for s in optline %}
-      {% for phase, opts in s.iteritems() %}
+    {% for i in optline %}
+      {% for phase, opts in i.iteritems() %}
         {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
       {% endfor %}
     {% endfor %}
@@ -213,9 +213,9 @@ files:
 {% if data['files']['content'] is defined %}
   {% for fname, fcontent in data['files']['content'].iteritems() %}
   {% do files_touched.append(fname) %}
-content_{{ s.templates }}/{{ name }}/{{ fname }}:
+content_{{ s.templates.target }}/{{ name }}/{{ fname }}:
   file.managed:
-    - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - contents: |
 {{ fcontent|indent(8, true) }}
     - user: {{ s.user }}
@@ -226,9 +226,9 @@ content_{{ s.templates }}/{{ name }}/{{ fname }}:
 {% if data['files']['append'] is defined %}
   {% for fname, fappend in data['files']['append'].iteritems() %}
   {% do files_touched.append(fname) %}
-append_{{ s.templates }}/{{ name }}/{{ fname }}:
+append_{{ s.templates.target }}/{{ name }}/{{ fname }}:
   file.append:
-    - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - text: |
 {{ fappend|indent(8, true) }}
   {% endfor %}
@@ -238,9 +238,9 @@ append_{{ s.templates }}/{{ name }}/{{ fname }}:
   {% for fname, freplace in data['files']['replace'].iteritems() %}
     {% do files_touched.append(fname) %}
     {% for pname, pdata in freplace.iteritems() %}
-replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
+replace_{{ s.templates.target }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.replace:
-    - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - backup: false
     - pattern: |
 {{ pdata['pattern']|indent(8, true) }}
@@ -254,9 +254,9 @@ replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
   {% if data['files'][a] is defined %}
     {% for fname, fregex in data['files'][a].iteritems() %}
     {% do files_touched.append(fname) %}
-{{ a }}_{{ s.templates }}/{{ name }}/{{ fname }}:
+{{ a }}_{{ s.templates.target }}/{{ name }}/{{ fname }}:
   file.{{ a }}:
-    - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - regex: {{ fregex }}
     - backup: ''
     {% endfor %}
@@ -267,9 +267,9 @@ replace_{{ s.templates }}/{{ name }}/{{ fname }}_{{ pname }}:
   {% for fname, fdata in data['files']['templates'].iteritems() %}
     {% set fsource= fdata['source'] %}
     {% do files_touched.append(fname) %}
-managed_{{ s.templates }}/{{ name }}/{{ fname }}:
+managed_{{ s.templates.target }}/{{ name }}/{{ fname }}:
   file.managed:
-    - name: {{ s.templates }}/{{ name }}/{{ fname }}
+    - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - source: {{ fsource }}
     - user: {{ s.user }}
     - makedirs: true
@@ -292,7 +292,7 @@ managed_{{ s.templates }}/{{ name }}/{{ fname }}:
   {% for fname in data['pre_commit'] %}
 pre_commit_{{ fname }}:
   cmd.run:
-    - cwd: {{ s.templates }}/{{ name }}
+    - cwd: {{ s.templates.target }}/{{ name }}
     - name: {{ fname }}
     - user: {{ s.user }}
   {% endfor %}
@@ -304,14 +304,14 @@ pre_commit_{{ fname }}:
 
 git_add_user_{{ name }}:
   cmd.run:
-    - cwd: {{ s.templates }}/{{ name }}
+    - cwd: {{ s.templates.target }}/{{ name }}
     - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
     - user: {{ s.user }}
 
 {% if files_touched != [] %}
 git_add_and_commit_{{ name }}:
   cmd.run:
-    - cwd: {{ s.templates }}/{{ name }}
+    - cwd: {{ s.templates.target }}/{{ name }}
     - name: r=`git show --pretty=oneline` && git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt, based on rev {{ data['rev']|d('master') }}, commit $r"
     - user: {{ s.user }}
 {% endif %}
@@ -324,13 +324,13 @@ git_add_and_commit_{{ name }}:
 
 git_add_remote_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ s.templates }}/{{ name }}
+    - cwd: {{ s.templates.target }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
     - user: {{ s.user }}
 
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
-    - cwd: {{ s.templates }}/{{ name }}
+    - cwd: {{ s.templates.target }}/{{ name }}
     - name: git push dokku {{ ourbranch }}:master
 
 {% endmacro %}
@@ -426,6 +426,6 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 
 {{ name }}_delete:
   file.absent:
-    - name: {{ s.templates }}/{{ name }}
+    - name: {{ s.templates.target }}/{{ name }}
 
 {% endmacro %}
