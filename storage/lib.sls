@@ -184,14 +184,14 @@
     - name: lvm2
 
 {%- set lvtarget='/dev/'+ data['vgname']+ '/' + item %}
-{%- if "size" in data and "expand" in data and data['expand'] == True and 
+{%- if "size" in data and "expand" in data and data['expand'] == True and
 salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 {%- set req_size=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', data['size']) %}
 {%- set nomination=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\2', data['size']) %}
 {%- set current=salt['cmd.run']('lvdisplay -C --noheadings --units '+ nomination+ ' -o size '+ lvtarget) %}
-{%- set curr_size=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', current) %}
+{%- set curr_size=salt['extutils.re_replace']('[ ]*([0-9]+).*', '\\1', current) %}
 
-{%- if req_size > curr_size %}
+{%- if req_size|int > curr_size|int %}
   cmd.run:
     - name: lvresize -L {{ data['size'] }} {{ lvtarget }}
     - require:
@@ -205,6 +205,9 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
       - cmd: "lvm-lv-{{ item }}"
 {%- endif %}
 {%- endif %}
+"lvm-lv-test":
+  cmd.run:
+    - name: echo "{{ req_size }} , {{ curr_size }} {{ salt.cmd.run_stdout('blkid -p -s TYPE -o value '+ lvtarget) in (['ext2', 'ext3', 'ext4']) }}"
 
 {%- else %}
   lvm.lv_present:
