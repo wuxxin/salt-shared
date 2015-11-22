@@ -57,19 +57,17 @@ docker-opts:
   [-] "deploy,run": '-h host.domain.com'
 
 #}
-{% for optline in data['docker-opts'] %}
-  {% if optline is sequence %}
-    {% for i in optline %}
-      {% for phase, opts in i.iteritems() %}
+  {% if data['docker-opts'] is mapping %}
+    {% for phase, opts in data['docker-opts'].iteritems() %}
+      {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
+    {% endfor %}
+  {% else %}
+    {% for optline in data['docker-opts'] %}
+      {% for phase, opts in optline.iteritems() %}
         {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
       {% endfor %}
     {% endfor %}
-  {% else %}
-    {% for phase, opts in optline.iteritems() %}
-      {{ dokku("docker-options:add", name, phase+ " '"+ opts+ "'") }}
-    {% endfor %}
   {% endif %}
-{% endfor %}
 
 {% endif %}
 {% endmacro %}
@@ -372,8 +370,10 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_git_commit(name, data, files_touched) }}
 {{ dokku("config", name) }}
 {{ dokku("docker-options", name) }}
+
 {{ dokku_git_push(name, data) }}
 {{ dokku_post_commit(name, data) }}
+
 
 {% endmacro %}
 
