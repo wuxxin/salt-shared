@@ -1,5 +1,5 @@
 include:
-  - .python
+  - roles.desktop.text
 
 {% set atomversion= "1.1.0"%}
 {% set actversion= salt['pkg.version']('atom') %}
