@@ -12,6 +12,9 @@ video-packages:
       - libav-tools
       - libavcodec-extra
       - libdvdread4
+      - smtube
+    - require:
+      cmd: rvm_smplayer_ppa
 
 install-css:
   cmd.run:

@@ -10,4 +10,7 @@ include:
 
 {{ apt_add_repository("minitube-ppa", "noobslab/apps") }}
 
+{{ apt_add_repository("rvm_smplayer_ppa", "rvm/smplayer") }}
+
+
 {% endif %}
