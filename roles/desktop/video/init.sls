@@ -14,7 +14,7 @@ video-packages:
       - libdvdread4
       - smtube
     - require:
-      cmd: rvm_smplayer_ppa
+      - cmd: rvm_smplayer_ppa
 
 install-css:
   cmd.run:

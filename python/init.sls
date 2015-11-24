@@ -24,6 +24,7 @@ easy_install_pip:
     - unless: which pip
     - require:
       - pkg: remove_faulty_pip
+{#  - reload_modules: true #}
 
 {% endif %}
 
