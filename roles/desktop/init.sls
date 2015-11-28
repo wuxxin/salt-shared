@@ -2,6 +2,7 @@ include:
   - java
   - .user
   - .android
+  - .audio
   - .browser
   - .chat
   - .chipcard
@@ -13,6 +14,7 @@ include:
   - .ubuntu
   - .video
   - .voice
+
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
   - .vcs
