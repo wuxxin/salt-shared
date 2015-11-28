@@ -9,9 +9,9 @@ base-deps:
       - cabextract
       - ncdu
       - tree
-      - pwgen
       - command-not-found
       - htop
+      - atop
       - iftop
       - iotop
       - blktrace
@@ -19,6 +19,8 @@ base-deps:
       - cpu-checker
       - iperf
       - glances
+      - linux-tools-common {# used to get perf #}
+      - procps {# used for free #}
       - pciutils
       - pv
       - socat
