@@ -76,10 +76,18 @@ dokku_core_dependencies:
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
-('dokku-webhooks', 'https://github.com/nickstenning/dokku-webhooks.git'),
 ] %}
 
-{#
+{# for testing, not tested so far
+https://github.com/dokku/dokku-nats
+https://github.com/dokku/dokku-redirect
+https://github.com/sgulseth/dokku-letsencrypt
+https://github.com/ignlg/dokku-builders-plugin
+https://github.com/Flink/dokku-docker-auto-volumes
+https://github.com/dokku/dokku-graphite-grafana
+#}
+{# tested but not working, or not right for us
+('dokku-webhooks', 'https://github.com/nickstenning/dokku-webhooks.git'),
 ('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-registry', 'https://github.com/agco/dokku-registry.git'),
 ('dokku-hostname', 'https://github.com/michaelshobbs/dokku-hostname.git'),

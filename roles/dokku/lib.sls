@@ -240,6 +240,9 @@ replace_{{ s.templates.target }}/{{ name }}/{{ fname }}_{{ pname }}:
   file.replace:
     - name: {{ s.templates.target }}/{{ name }}/{{ fname }}
     - backup: false
+{%- if pdata['flags'] is defined %}
+    - flags: {{ pdata['flags'] }}
+{%- endif %}
     - pattern: |
 {{ pdata['pattern']|indent(8, true) }}
     - repl: |
@@ -343,7 +346,7 @@ push_{{ name }}_{{ ourbranch }}:
 {% endmacro %}
 
 
-{% macro create_container(name, orgdata) %}
+{% macro create_container(name, orgdata, only_prepare=False) %}
 {#
 name: name of container
 orgdata: loaded yml dict or filenamestring to import_yaml
@@ -370,10 +373,10 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_git_commit(name, data, files_touched) }}
 {{ dokku("config", name) }}
 {{ dokku("docker-options", name) }}
-
-{{ dokku_git_push(name, data) }}
-{{ dokku_post_commit(name, data) }}
-
+{% if not only_prepare %}
+  {{ dokku_git_push(name, data) }}
+  {{ dokku_post_commit(name, data) }}
+{% endif %}
 
 {% endmacro %}
 
