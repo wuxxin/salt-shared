@@ -1,6 +1,14 @@
+{% from "kernel/defaults.jinja" import settings as s with context %}
+
+{% if grains['lsb_distrib_codename'] in ['trusty', 'rafaela', 'romeo'] %}
+
 linux-image:
   pkg.installed:
     - pkgs:
-      - linux-generic-lts-wily
-      - linux-virtual-lts-wily
-      - linux-tools-generic-lts-wily
+{%- if grains['virtual'] == "physical" %}
+      - {{ s.hardware }}
+{%- endif %}
+      - {{ s.virtual }}
+      - {{ s.tools }}
+
+{% endif %}
