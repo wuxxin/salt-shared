@@ -66,7 +66,6 @@ dokku_core_dependencies:
 ('dokku-rabbitmq','https://github.com/dokku/dokku-rabbitmq.git'),
 ('dokku-redis', 'https://github.com/dokku/dokku-redis.git'),
 ('dokku-rethinkdb', 'https://github.com/dokku/dokku-rethinkdb.git'),
-('dokku-http-auth', 'https://github.com/dokku/dokku-http-auth.git'),
 ('dokku-maintenance', 'https://github.com/dokku/dokku-maintenance.git'),
 ('dokku-redirect', 'https://github.com/dokku/dokku-redirect.git'),
 
@@ -76,6 +75,7 @@ dokku_core_dependencies:
 ('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
+
 ] %}
 
 {# for testing, not tested so far
@@ -87,6 +87,7 @@ https://github.com/Flink/dokku-docker-auto-volumes
 https://github.com/dokku/dokku-graphite-grafana
 #}
 {# tested but not working, or not right for us
+('dokku-http-auth', 'https://github.com/dokku/dokku-http-auth.git'),
 ('dokku-webhooks', 'https://github.com/nickstenning/dokku-webhooks.git'),
 ('dokku-docker-auto-volumes', 'https://github.com/Flink/dokku-docker-auto-volumes.git'),
 ('dokku-registry', 'https://github.com/agco/dokku-registry.git'),

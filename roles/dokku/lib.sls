@@ -145,10 +145,10 @@ volumes:
 "makedir_{{ datadir }}":
   file.directory:
     - name: {{ datadir }}
-    - user: dokku
-    - group: dokku
-    - dir_mode: 755
-    - file_mode: 644
+    - user: 1000
+    - group: 1000
+    - dir_mode: 775
+    - file_mode: 664
     - makedirs: true
 
 {{ dokku("docker-options:add", name, "deploy,run '-v "+ datadir+ ":"+ vreal+ vopt+  "'") }}
@@ -320,14 +320,19 @@ git_add_and_commit_{{ name }}:
 {% endmacro %}
 
 
-{% macro dokku_git_push(name, data) %}
-{% set ourbranch=data['branch']|d('master') %}
+{% macro dokku_git_add_remote(name) %}
 
-git_add_remote_{{ name }}_{{ ourbranch }}:
+git_add_remote_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
     - user: {{ s.user }}
+
+{% endmacro %}
+
+
+{% macro dokku_git_push(name, data) %}
+{% set ourbranch=data['branch']|d('master') %}
 
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
@@ -349,7 +354,7 @@ push_{{ name }}_{{ ourbranch }}:
 {% macro create_container(name, orgdata, only_prepare=False) %}
 {#
 name: name of container
-orgdata: loaded yml dict or filenamestring to import_yaml
+orgdata: loaded yml dict or filenamestring to
 #}
 
 {% if orgdata is string %}
@@ -371,8 +376,10 @@ orgdata: loaded yml dict or filenamestring to import_yaml
 {{ dokku_files(name, data, files_touched) }}
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
+{{ dokku_git_add_remote(name) }}
 {{ dokku("config", name) }}
 {{ dokku("docker-options", name) }}
+
 {% if not only_prepare %}
   {{ dokku_git_push(name, data) }}
   {{ dokku_post_commit(name, data) }}
