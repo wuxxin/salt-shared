@@ -17,7 +17,7 @@ vagrant_plugin_deps:
     - require:
       - pkg: vagrant
 
-{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", "vagrant-triggers", "vagrant-libvirt"] %} 
+{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", "vagrant-triggers", "vagrant-libvirt", "vagrant-reload"] %}
 {# ,"gusteau", "vagrant-bindfs", #}
 
 {% set git_plugins = [] %}
@@ -59,7 +59,7 @@ vagrant_plugin_{{ t }}:
 
 vagrant_plugin_{{ t }}:
   cmd.run:
-    - name: vagrant plugin install {{ t }} 
+    - name: vagrant plugin install {{ t }}
     - user: {{ s.user }}
     - unless: vagrant plugin list | grep -q {{ t }}
     - require:
@@ -67,4 +67,3 @@ vagrant_plugin_{{ t }}:
       - pkg: vagrant_plugin_deps
 
 {% endfor %}
-
