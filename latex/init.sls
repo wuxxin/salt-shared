@@ -10,6 +10,7 @@ latex:
       - texlive-fonts-recommended
       - texlive-font-utils
       - texlive-extra-utils
+      - lmodern
       - latexdiff
       - auctex
       - imagemagick
