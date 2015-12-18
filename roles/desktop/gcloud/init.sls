@@ -23,11 +23,11 @@ gcloud_download:
 
 gcloud_install:
   cmd.run:
-    - name: env CLOUDSDK_REINSTALL_COMPONENTS=pkg-core,pkg-python ./google-cloud-sdk/install.sh
+    - name: env CLOUDSDK_CORE_DISABLE_PROMPTS=1 ./google-cloud-sdk/install.sh
     - user: {{ user }}
     - cwd: {{ final_destdir }}
     - unless: test -f {{ user_home }}/.config/gcloud/.metricsUUID
-    - require: 
+    - require:
       - cmd: gcloud_download
 
 gcloud-create-user-bashrc:
