@@ -6,8 +6,10 @@ websockify:
     - installed
 
 xpra:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs:
+      - xpra
+      - websockify
+      - python-gst-1.0
   require:
-    - pkg: websockify
     - pkgrepo: xpra_ppa
