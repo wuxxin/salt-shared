@@ -14,8 +14,11 @@ clone_{{ name }}:
 build_{{ name }}:
   cmd.run:
     - cwd: {{ base }}/{{ name }}
-    - name: gbp buildpackage --git-pbuilder 
+    - name: gbp buildpackage --git-pbuilder
     - user: {{ s.user }}
     - group: {{ s.user }}
 
+    - cowbuilder
+
+    
 {% endmacro %}
