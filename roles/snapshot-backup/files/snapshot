@@ -33,7 +33,7 @@ verifymount() {
     # Args: $1=Shotmount
     # Verify the Mount Point exists, if not, create it
     if ! test -d "$1" ; then
-        mkdir $1
+        mkdir -p $1
         # Verify the Mount Point was created, if not exit
         if ! test -d "$1" ; then
             echo "ERROR: Could not create the mountpoint directory ($1)"
@@ -47,7 +47,7 @@ issafeimage() {
     echo "Testing snapshot device $1 for compatibility"
     ourlvm="vg0"
     echo "ERROR: not yet implemented!"
-    
+
 }
 
 
@@ -66,7 +66,7 @@ snapshotmount() {
     iserr=$?
 
     if test 0 -eq $iserr ; then
-        echo "Snapshot partition mounted" 
+        echo "Snapshot partition mounted"
     else
         echo "ERROR: Error mounting snapshot partition, mount exited with $iserr"
         exit $iserr
@@ -93,7 +93,7 @@ fi
 if test "$command" != "start" -a "$command" != "stop" -a "$command" != "info"; then
     echo "Error: Wrong usage." 1>&2
     cat << EOF
-Usage: $0 
+Usage: $0
   status snapshotname
   info  volumegroup volumename snapshotname
   start volumegroup volumename snapshotname [([-]"disk")|([-](partition-number)|(logical-volume-name))*]
@@ -101,8 +101,8 @@ Usage: $0
 
 "disk":
   whole volume is a filesystem, no partitions are used
-"-" before partition-number, logical-volume-name or "disk": 
-  do not mount/unmount, 
+"-" before partition-number, logical-volume-name or "disk":
+  do not mount/unmount,
   remove from device-mapper before stopping snapshot if a recursive logical-volume
 EOF
     exit 1
@@ -127,10 +127,10 @@ fi
 if test "$command" = "start"; then
     echo "startsnapshot at `date`"
 
-    for a in $SNAPPART; do 
+    for a in $SNAPPART; do
         verifymount ${MOUNTBASE}/${SNAPVOL}_${a}
     done
-  
+
     snapshotcreate ${LVMVG}/${ORGVOL} ${SNAPVOL} ${SHOTSIZE}
     if test "$SNAPPART" = "disk"; then
       snapshotmount /dev/mapper/${LVMVG}-${SNAPVOL} ${MOUNTBASE}/${SNAPVOL}_${SNAPPART}
@@ -142,7 +142,7 @@ if test "$command" = "start"; then
       sleep 1
 
       for a in $SNAPPART; do
-        
+
         if test "${a:0:1}" != "-";  then # if "-"as first character do not mount
           # test if there is a "-" inside a
           b=${a//[^-]/}
@@ -169,17 +169,17 @@ if test "$command" = "stop"; then
         else
           snapshotunmount ${MOUNTBASE}/${SNAPVOL}_${a}
         fi
-        # test if there is a "-" inside a, its a recursive logical volume 
+        # test if there is a "-" inside a, its a recursive logical volume
         b=${a//[^-]/}
         if test "${b:0:1}" = "-"; then
           dmsetup remove /dev/mapper/${a}
         fi
-        
+
       done
 
       echo "remove partitions of /dev/${LVMVG}/${SNAPVOL}"
       /sbin/kpartx -d /dev/mapper/${LVMVG}-${SNAPVOL}
     fi
-    
+
     snapshotremove ${LVMVG}/${SNAPVOL}
 fi

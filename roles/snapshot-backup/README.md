@@ -1,19 +1,16 @@
 virtual machine based lvm snapshot backup and recovery using duplicity for backup
 =================================================================================
 
- snapshot-backup.target.openwrt:
-   * openwrt router software deployment with usb attached harddisk, listens on tor
-   * so we can transport the backup back to a location 
+ duplicity/borg need lots of temp space so put /tmp and /usr/tmp to the backup_config_cache
 
- duplicity need lots of temp space so put /tmp and /usr/tmp to the backup_config_cache
  make patch duplicity to add paramiko proxy command support:
    http://stackoverflow.com/questions/17681031/python-ssh-using-tor-proxy
 
 
-Creates and spawns a backup vm that get LVM snapshots of other vm's by the hypervisor host, 
+Creates and spawns a backup vm that get LVM snapshots of other vm's by the hypervisor host,
 (automatically) attaches them as disks connected to vm,
 so the vm can backup these lvm snapshots according to the desires of the original vm,
-using duplicity to a target space (eg. ftp, ssh+sftp, s3)
+using duplicity/borg to a target space (eg. ftp, ssh+sftp, s3)
 
 In addition it can
   - backup the host system using lvm snapshots
@@ -30,7 +27,7 @@ Setup:
   - for every minion(may be configured on the saltmaster in master.d/):
     -  returner.smtp_return must be configured for every minion targeted
   - on salt master: pillar item salt.reactor.includes must include "- roles.snapshot-backup"
-  - on hypervisor host: pillar item 
+  - on hypervisor host: pillar item
     - schedule.snapshot-backup
     - snapshot-backup.host
   - for every minion that wants to be backuped: pillar item snapshot-backup.client must be configured
@@ -58,7 +55,7 @@ Workflow:
     - for every config in /srv/snapshot-backup/client
       - pre snapshot work
       - salt "backup.minion_id" state.sls onlyonce=true roles.snapshot-backup.backupvm.mount_and_backup target_minion.id
-        pillar: snapshot-backup:run:config 
+        pillar: snapshot-backup:run:config
       - post snapshot work
     - return the findings and work results via returner.smtp_return
 
@@ -143,7 +140,7 @@ snapshot-backup:
             blu
 
 client pillar for hypervisor host itself: type="host_lvm", add host_device and target_device
---- 
+---
 snapshot-backup:
   client:
     status: "present"
@@ -156,26 +153,30 @@ snapshot-backup:
         source: "/"
         exclude:
 
-client pillar for the backup vm itself: type="plain", omit "mount" 
---- 
+client pillar for the backup vm itself: type="plain", omit "mount"
+---
 snapshot-backup:
   client:
     status: "present"
     config:
       type: "plain" {# do not use libvirt for vm management, ignore lvm, just execute duply from local source #}
-      backup: 
+      backup:
         source: "/mnt/backup_config_cache/config"
         exclude:
- 
+
 reactor-snapshot-backup-client-update pillar:
 ---
 snapshot-backup:
   update:
     minion: {{ data.id }}
-    config: 
+    config:
       # normal client config comes here
 
 
+
+      snapshot-backup.target.openwrt:
+        * openwrt router software deployment with usb attached harddisk, listens on tor
+        * so we can transport the backup back to a location
 
 Implementation Design
 ---------------------
@@ -197,7 +198,7 @@ cloud.start backup_vm minion_id recovery
   * update duply config from salt
   * run duply restore
 runn config.end_recovery
-unmount everything 
+unmount everything
 shutdown
 
 detach all lvm volumes of minion_id from backup_vm
