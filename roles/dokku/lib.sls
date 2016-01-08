@@ -351,7 +351,7 @@ push_{{ name }}_{{ ourbranch }}:
 {% endmacro %}
 
 
-{% macro create_container(name, orgdata, only_prepare=False) %}
+{% macro create_container(name, orgdata, only_prepare=False, only_update=False) %}
 {#
 name: name of container
 orgdata: loaded yml dict or filenamestring to
