@@ -1,7 +1,7 @@
 include:
   - roles.desktop.text
 
-{% set atomversion= "1.1.0"%}
+{% set atomversion= "1.4.0-beta3"%}
 {% set actversion= salt['pkg.version']('atom') %}
 {% if actversion == "" %}
   {% set newer_or_equal= 1 %}
