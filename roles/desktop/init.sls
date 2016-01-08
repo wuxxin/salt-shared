@@ -14,6 +14,7 @@ include:
   - .ubuntu
   - .video
   - .voice
+  - .sonic-pi
 
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
