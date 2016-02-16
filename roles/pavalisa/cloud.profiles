@@ -1,5 +1,0 @@
-ubuntu_big:
-  provider: my-cheap-cloud
-  image: trusty_default
-  region: default
-  size: 2g4cpu
