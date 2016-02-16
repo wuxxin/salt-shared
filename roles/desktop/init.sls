@@ -8,13 +8,13 @@ include:
   - .chipcard
   - .ftp
   - .graphics
+  - .music
   - .network
   - .security
   - .terminal
   - .ubuntu
   - .video
   - .voice
-  - .sonic-pi
 
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}

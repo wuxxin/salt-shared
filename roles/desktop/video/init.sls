@@ -13,8 +13,16 @@ video-packages:
       - libavcodec-extra
       - libdvdread4
       - smtube
+      - ffmpeg
+      - webcamstudio
+      - v4l2loopback-dkms
+      - webcamstudio-dkms
+      - obs-studio
     - require:
       - cmd: rvm_smplayer_ppa
+      - cmd: webcamstudio_ppa
+      - cmd: ffmpeg_ppa
+      - cmd: obs-studio_ppa
 
 install-css:
   cmd.run:
