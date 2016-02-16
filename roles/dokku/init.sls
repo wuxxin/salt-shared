@@ -19,7 +19,7 @@ dokku:
     - data:
         'dokku/web_config': { 'type': 'boolean', 'value': 'false' }
         'dokku/vhost_enable': { 'type': 'boolean', 'value': 'true' }
-        'dokku/hostname': {'type': 'string', 'value': '{{ s.hostname }}' }
+        'dokku/hostname': {'type': 'string', 'value': '{{ s.vhost }}' }
   pkg.installed:
     - name: dokku
     - require:
@@ -68,6 +68,7 @@ dokku_core_dependencies:
 ('dokku-rethinkdb', 'https://github.com/dokku/dokku-rethinkdb.git'),
 ('dokku-maintenance', 'https://github.com/dokku/dokku-maintenance.git'),
 ('dokku-redirect', 'https://github.com/dokku/dokku-redirect.git'),
+('dokku-letsencrypt', 'https://github.com/dokku/dokku-letsencrypt.git'),
 
 ('dokku-apt', 'https://github.com/F4-Group/dokku-apt'),
 ('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),

@@ -2,7 +2,10 @@
 user: dokku
 group: dokku
 
-hostname: {{ salt['cmd.run_stdout']('hostname -f') }}
+vhost: {{ salt['cmd.run_stdout']('hostname -f') }}
+letsencrypt:
+  email: 'unset@localhost'
+  target: 'staging'
 behind_loadbalancer: false
 frontend_ip: "0.0.0.0"
 persistent_data: /var/lib/dokku/volumes

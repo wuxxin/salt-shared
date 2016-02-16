@@ -26,6 +26,21 @@ source:
   rev: tag or commit id
   submodules: true/false
 #}
+{% if data['source']['url'][:1] == "." %}
+{{ name }}_dir:
+  file.directory:
+    - name: {{ s.templates.target }}/{{ name }}
+{{ name }}_checkout:
+  file.recurse:
+    - user: {{ s.user }}
+    - name: {{ s.templates.target }}/{{ name }}
+    - source: salt://templates/dokku/{{ name }}/{{ data['source']['url'][2:] }}
+    - user: {{ s.user }}
+  cmd.run:
+    - cwd: {{ s.templates.target }}/{{ name }}
+    - name: git init; git add .; git commit -a -m "initial commit"
+    - user: {{ s.user }}
+{% else %}
 {{ name }}_checkout:
   git.latest:
     - name: {{ data['source']['url'] }}
@@ -37,6 +52,8 @@ source:
     - submodules: {{ data ['source']['submodules'] }}
 {% endif %}
     - user: {{ s.user }}
+{% endif %}
+
 {% endmacro %}
 
 
@@ -79,24 +96,24 @@ docker-opts:
 certs:
   certificate: ["selfsigned", "letsencrypt", certificate-data]
   key: none
-[hostname: x.y.z]
+[vhost: x.y.z]
 
 #}
   {% if data['certs']['certificate'] == 'selfsigned' %}
-    {% if data['hostname'] is defined %}
-        {% set hostname= data['hostname'] %}
+    {% if data['vhost'] is defined %}
+        {% set hostname= data['vhost'] %}
     {% else %}
-        {% set hostname= name+"."+ salt['cmd.run']('cat /home/dokku/VHOST') %}
+        {% set hostname= name+"."+ s.vhost %}
     {% endif %}
 {% load_yaml as cert_input %}
 stdout: |
   AT
-  Vienna
-  Vienna
-  ep3.at
+  {{ salt['pillar.get']('timezone_short') }}
+  {{ salt['pillar.get']('timezone_short') }}
+  {{ salt['pillar.get']('extdomain') }}
   security
   {{ hostname }}
-  admin@ep3.at
+  {{ s.letsencrypt.email }}
 
 
   .
@@ -104,7 +121,14 @@ stdout: |
 {% endload %}
 {{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
   {% elif data['certs']['certificate'] == 'letsencrypt' %}
-    docker run
+    dokku_create_urls_{{ name }}:
+      cmd.run:
+        - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
+        - unless: test -f /home/dokku/{{ name }}/URLS
+
+    {{ dokku("letsencrypt:server", name, s.letsencrypt.target ) }}
+    {{ dokku("letsencrypt:email", name, s.letsencrypt.email) }}
+    {{ dokku("letsencrypt", name) }}
   {% else %}
 {{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
   {% endif %}
@@ -337,7 +361,7 @@ git_add_remote_{{ name }}:
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
-    - name: git push dokku {{ ourbranch }}:master
+    - name: git push --set-upstream dokku {{ ourbranch }}:master
 
 {% endmacro %}
 
