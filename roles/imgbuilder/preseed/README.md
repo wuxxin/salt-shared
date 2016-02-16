@@ -18,17 +18,17 @@ Debian/Ubuntu Preseed and Initrd Generator
        which means /dev/sda so your harddisk setup will fail if you do not remove stick
 
  * Warning:
-   This scripts only try to protect the permanent storage, aka. the harddisks, 
-   and tries to safeguard the key material from accidently written to temporary storage
+   This script tries to protect data at rest, aka. the harddisks,
+   and to safeguard the key material from accidental write to storage
 
    If a attacker can snapshot the memory of the machine somehow, eg. pysically by
    "shuting off the machine while cooling memory chips before replugging them in a memory reader"
    he/she can then derive the encryption keys from the memory snapshot.
 
-   This is also true for almost all types of hypervisors that are running a virtual machine.
+   This is also true for almost all types of hypervisors that are running one or more virtual machines.
    Eg. Your instance in the cloud.
 
-   Therefore the only way to asure you can safely process encryption data is when you do the virtualization yourself,
+   Therefore the only way to assure you can safely process encryption data is when you do the virtualization yourself,
    and you are not emulated while doing so.
 
 Features:
@@ -46,7 +46,7 @@ Features:
  * uses an apt-proxy for package download if present
  * ssh authorized_keys option
    * to activate include a custom_file "/.ssh/authorized_keys" into the setup
-   * this enables both root and main user access via ssh authorized_keys, 
+   * this enables both root and main user access via ssh authorized_keys,
      but deletes & locks the mainuser password
      and sudo is configured to sudo from main user without password
  * a optional watcher that reset the machine after a certain amount of time (in case automated install goes wrong)
@@ -101,7 +101,7 @@ Prepare and install machine:
    * press CTRL-C twice fast
    * continue with step "generate and crypt diskpassword"
    * after setup finishes and the machine reboots:
-     * shutoff machine, 
+     * shutoff machine,
      * remove kernel/initrd/cmdline boot parameter from libvirt entry
      * reboot
 
@@ -149,11 +149,10 @@ further possible extensions:
 ----------------------------
 
    * add haveged also in initramfs of target boot
-   * pwgen in initrd and seed debconf with it, use gpg to crypt for receiver and 
+   * pwgen in initrd and seed debconf with it, use gpg to crypt for receiver and
       *) needs gpg in the in-target setup
       1.) transfer file via scp to a target host before reboot
       2.) wait before reboot until file is marked as transfered
    * add qemu/kvm into initrd, start qemu/kvm with nested virtualization start a virtual machine inside the virtual machine
     * measure: tsc times on bare metal, 1level virtualization, 2ndlevel virtualization, make sanity checks,
       * mark system as "tainted" , change ssh setup to accept only recovery.key and has a different host key.
-
