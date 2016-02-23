@@ -22,9 +22,10 @@
 {% macro dokku_checkout(name, data) %}
 {#
 source:
-  url:
+  url: url or ./local-non-git-directory
   rev: tag or commit id
   submodules: true/false
+  identity: filepath/to/identity (needs to be owned by root)
 #}
 {% if data['source']['url'][:1] == "." %}
 {{ name }}_dir:
@@ -32,7 +33,6 @@ source:
     - name: {{ s.templates.target }}/{{ name }}
 {{ name }}_checkout:
   file.recurse:
-    - user: {{ s.user }}
     - name: {{ s.templates.target }}/{{ name }}
     - source: salt://templates/dokku/{{ name }}/{{ data['source']['url'][2:] }}
     - user: {{ s.user }}
@@ -45,13 +45,27 @@ source:
   git.latest:
     - name: {{ data['source']['url'] }}
     - target: {{ s.templates.target }}/{{ name }}
-{% if data['source']['rev'] is defined %}
+{%- if data['source']['rev'] is defined %}
     - rev: {{ data ['source']['rev'] }}
-{% endif %}
-{% if data['source']['submodules'] is defined %}
+{%- endif %}
+{%- if data['source']['branch'] is defined %}
+    - branch: {{ data ['source']['branch'] }}
+{%- endif %}
+{%- if data['source']['submodules'] is defined %}
     - submodules: {{ data ['source']['submodules'] }}
-{% endif %}
+{%- endif %}
+{%- if data['source']['identity'] is defined %}
+    - identity: {{ data ['source']['identity'] }}
+
+{{ name }}_checkout_correct_user:
+  cmd.run:
+    - name: chown -R {{ s.user }} {{ s.templates.target }}/{{ name }}
+    - require:
+      - git: {{ name }}_checkout
+
+{%- else %}
     - user: {{ s.user }}
+{%- endif %}
 {% endif %}
 
 {% endmacro %}
@@ -121,12 +135,16 @@ stdout: |
 {% endload %}
 {{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
   {% elif data['certs']['certificate'] == 'letsencrypt' %}
-    dokku_create_urls_{{ name }}:
-      cmd.run:
-        - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
-        - unless: test -f /home/dokku/{{ name }}/URLS
-
-    {{ dokku("letsencrypt:server", name, s.letsencrypt.target ) }}
+dokku_create_urls_{{ name }}:
+  cmd.run:
+    - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
+    - unless: test -f /home/dokku/{{ name }}/URLS
+    - user: {{ s.user }}
+    {% if data['certs']['target'] is defined %}
+      {{ dokku("letsencrypt:server", name, data['certs']['target']) }}
+    {% else %}
+      {{ dokku("letsencrypt:server", name, s.letsencrypt.target) }}
+    {% endif %}
     {{ dokku("letsencrypt:email", name, s.letsencrypt.email) }}
     {{ dokku("letsencrypt", name) }}
   {% else %}
@@ -356,7 +374,7 @@ git_add_remote_{{ name }}:
 
 
 {% macro dokku_git_push(name, data) %}
-{% set ourbranch=data['branch']|d('master') %}
+{% set ourbranch=data['source']['branch']|d('master') %}
 
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
