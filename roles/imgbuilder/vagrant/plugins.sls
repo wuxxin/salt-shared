@@ -1,5 +1,13 @@
+{% set gem_plugins = ["vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", "vagrant-triggers", "vagrant-libvirt", "vagrant-reload", "vagrant-proxyconf"] %}
+{# FIXME: workaround for vagrant-libvirt at bottom of file #}
+
+{% set git_plugins = [] %}
+{# set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] #}
+
 include:
+{%- if git_plugins %}
   - .local-ruby
+{%- endif %}
   - .dirs
 
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
@@ -16,12 +24,6 @@ vagrant_plugin_deps:
       - libguestfs-tools
     - require:
       - pkg: vagrant
-
-{% set gem_plugins = ["sahara", "vagrant-cachier", "vagrant-omnibus", "vagrant-mutate", "vagrant-triggers", "vagrant-libvirt", "vagrant-reload"] %}
-{# ,"gusteau", "vagrant-bindfs", #}
-
-{% set git_plugins = [] %}
-{# set git_plugins = [("vagrant-libvirt", "https://github.com/pradels/vagrant-libvirt.git"),] #}
 
 {% for t,src in git_plugins %}
 
@@ -67,3 +69,12 @@ vagrant_plugin_{{ t }}:
       - pkg: vagrant_plugin_deps
 
 {% endfor %}
+
+vagrant_plugin_fog_libvirt:
+  cmd.run:
+    - name: vagrant plugin install --plugin-version 0.0.3 fog-libvirt
+    - user: {{ s.user }}
+    - unless: vagrant plugin list | grep -q fog-libvirt
+    - require:
+      - pkg: vagrant
+      - pkg: vagrant_plugin_deps
