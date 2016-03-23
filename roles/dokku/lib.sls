@@ -38,7 +38,7 @@ source:
     - user: {{ s.user }}
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
-    - name: git init; git add .; git commit -a -m "initial commit"
+    - name: git init; git add .; git config user.email "saltmaster@localhost"; git config user.name "Salt Master"; git commit -a -m "initial commit"
     - user: {{ s.user }}
 {% else %}
 {{ name }}_checkout:
@@ -379,7 +379,7 @@ git_add_remote_{{ name }}:
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
-    - name: git push --set-upstream dokku {{ ourbranch }}:master
+    - name: git push -f --set-upstream dokku {{ ourbranch }}:master
 
 {% endmacro %}
 
