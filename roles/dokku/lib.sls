@@ -45,16 +45,16 @@ source:
   git.latest:
     - name: {{ data['source']['url'] }}
     - target: {{ s.templates.target }}/{{ name }}
-{%- if data['source']['rev'] is defined %}
+  {%- if data['source']['rev'] is defined %}
     - rev: {{ data ['source']['rev'] }}
-{%- endif %}
-{%- if data['source']['branch'] is defined %}
+  {%- endif %}
+  {%- if data['source']['branch'] is defined %}
     - branch: {{ data ['source']['branch'] }}
-{%- endif %}
-{%- if data['source']['submodules'] is defined %}
+  {%- endif %}
+  {%- if data['source']['submodules'] is defined %}
     - submodules: {{ data ['source']['submodules'] }}
-{%- endif %}
-{%- if data['source']['identity'] is defined %}
+  {%- endif %}
+  {%- if data['source']['identity'] is defined %}
     - identity: {{ data ['source']['identity'] }}
 
 {{ name }}_checkout_correct_user:
@@ -63,9 +63,9 @@ source:
     - require:
       - git: {{ name }}_checkout
 
-{%- else %}
+  {%- else %}
     - user: {{ s.user }}
-{%- endif %}
+  {%- endif %}
 {% endif %}
 
 {% endmacro %}
@@ -393,7 +393,7 @@ push_{{ name }}_{{ ourbranch }}:
 {% endmacro %}
 
 
-{% macro create_container(name, orgdata, only_prepare=False, only_update=False) %}
+{% macro create_container(name, orgdata, only_prepare=False) %}
 {#
 name: name of container
 orgdata: loaded yml dict or filenamestring to
