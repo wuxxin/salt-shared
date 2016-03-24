@@ -45,6 +45,9 @@ source:
   git.latest:
     - name: {{ data['source']['url'] }}
     - target: {{ s.templates.target }}/{{ name }}
+    - force_checkout: True
+    - force_fetch: True
+    - force_reset: True
   {%- if data['source']['rev'] is defined %}
     - rev: {{ data ['source']['rev'] }}
   {%- endif %}
