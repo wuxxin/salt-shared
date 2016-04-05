@@ -73,7 +73,7 @@ dokku_core_dependencies:
 ('dokku-apt', 'https://github.com/F4-Group/dokku-apt'),
 ('dokku-app-predeploy-tasks', 'https://github.com/michaelshobbs/dokku-app-predeploy-tasks.git'),
 ('dokku-secure-apps', 'https://github.com/matto1990/dokku-secure-apps.git'),
-('dokku-git-rev', 'https://github.com/cjblomqvist/dokku-git-rev.git'),
+('dokku-git-rev', 'https://github.com/despawnerer/dokku-git-rev.git'),
 ('dokku-acl','https://github.com/mlebkowski/dokku-acl.git'),
 ('dokku-forego', 'https://github.com/Flink/dokku-forego.git'),
 
