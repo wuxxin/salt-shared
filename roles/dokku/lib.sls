@@ -143,12 +143,17 @@ dokku_create_urls_{{ name }}:
     - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
     - unless: test -f /home/dokku/{{ name }}/URLS
     - user: {{ s.user }}
-    {% if data['certs']['target'] is defined %}
-      {{ dokku("letsencrypt:server", name, data['certs']['target']) }}
-    {% else %}
-      {{ dokku("letsencrypt:server", name, s.letsencrypt.target) }}
-    {% endif %}
-    {{ dokku("letsencrypt:email", name, s.letsencrypt.email) }}
+
+dokku_set_{{ name }}_LETSENCRYPT_EMAIL:
+  cmd.run:
+    - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_EMAIL={{ s.letsencrypt.email }}
+    - unless: dokku config {{ name }} | grep -q DOKKU_LETSENCRYPT_EMAIL
+
+dokku_set_{{ name }}_LETSENCRYPT_SERVER:
+  cmd.run:
+    - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_SERVER={{ s.letsencrypt.target }}
+    - unless: dokku config {{ name }} | grep -q DOKKU_LETSENCRYPT_SERVER
+
     {{ dokku("letsencrypt", name) }}
   {% else %}
 {{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
@@ -168,7 +173,7 @@ env:
   {% for ename, edata in data['env'].iteritems() %}
     {% do newenv.append(ename+'='+edata) %}
   {% endfor %}
-  {{ dokku("config:set", name, newenv|join(' ')) }}
+  {{ dokku("config:set --no-restart", name, newenv|join(' ')) }}
 {% endif %}
 {% endmacro %}
 
