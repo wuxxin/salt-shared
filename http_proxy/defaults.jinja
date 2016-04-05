@@ -1,0 +1,14 @@
+{% load_yaml as defaults %}
+
+bindaddress: "127.0.0.1"
+bindport: 8123
+
+cacheIsShared: "true"
+disableIndexing: "false"
+disableServersList: "false"
+diskCacheRoot: /var/cache/polipo/
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('polipo:server', {})) %}
