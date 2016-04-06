@@ -1,10 +1,20 @@
 {% load_yaml as defaults %}
-
 dev_version: false
-kernel:
-  version: 4.2
-  patches:
-    - https://launchpadlibrarian.net/149319334/overlayfs_inotify.patch
+
+{% endload %}
+
+{% load_yaml as example %}
+status: present
+extra: '-D'
+network:
+  dns:
+    server:
+      - 10.1.2.3.4
+    search: local.internal
+  bridge: docbr0
+  ipmasq: "true"
+storage:
+  driver: overlay
 
 {% endload %}
 

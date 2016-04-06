@@ -28,7 +28,7 @@ docker:
     - template: jinja
     - source: salt://roles/docker/files/docker
     - context:
-      docker: {{ pillar.docker|d({}) }}
+      docker: {{ s|d({}) }}
 
   service.running:
     - enable: true
