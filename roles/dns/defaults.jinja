@@ -1,0 +1,33 @@
+{% load_yaml as defaults %}
+cache:
+  redirect_host_dns: true
+  query_localhost: true
+
+{% endload %}
+
+{% load_yaml as example %}
+cache:
+  listen:
+    - 127.0.0.1
+  answer:
+    - 127.0.0.1
+  follow:
+    unsigned:
+      "internal": "127.0.1.1"
+      "0.0.127.in.addr.arpa": "127.0.1.1"
+server:
+  - private:
+    listen:
+      - 127.0.1.1
+    key:
+      - id: update_key
+        action: update
+        secret: {# create_or_read_single_secret('high') #}
+    zone:
+      - domain: internal
+        template: default
+        file: "salt://roles/dns/defaults-internal.yml"
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('dns', {})) %}
