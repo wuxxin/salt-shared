@@ -26,10 +26,10 @@ populate_etc_sv:
     - name: /etc/sv
     - source: salt://roles/tinydns/sv
     - template: jinja
-    - defaults: 
+    - defaults:
         dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
 {% if pillar.tinydns_server.cache_dns %}
-    - context: 
+    - context:
         dnscache_ip: {{ pillar.tinydns_server.cache_dns }}
 {% endif %}
     - require:
@@ -74,7 +74,7 @@ compiled_data:
     - cwd: /etc/sv/tinydns/root
     - watch:
       - file: /etc/sv/tinydns/root/data
-    - watch_in: 
+    - watch_in:
       - cmd: dnscache_service
       - cmd: tinydns_service
       - cmd: axfrdns_service
@@ -102,7 +102,7 @@ compiled_tcp:
     - cwd: /etc/sv/axfrdns
     - watch:
       - file: /etc/sv/axfrdns/tcp
-    - watch_in: 
+    - watch_in:
       - cmd: axfrdns_service
     - require:
       - cmd: compiled_data
@@ -137,7 +137,7 @@ axfrdns_export:
     - require:
       - file: populate_etc_sv
       - file: /etc/sv/dnscache/root/ip
-    - require_in: 
+    - require_in:
       - cmd: dnscache_service
     - watch_in:
       - cmd: dnscache_service
@@ -152,29 +152,58 @@ axfrdns_export:
         ip: {{ "%s" % s if s != '' else '127.0.0.1' }}
     - require:
       - file: populate_etc_sv
-    - require_in: 
+    - require_in:
       - cmd: dnscache_service
     - watch_in:
       - cmd: dnscache_service
 {% endfor %}
 
-{% for u in ("dnscache", "tinydns", "axfrdns") %}
-{{ u }}_install:
+{% macro install_and_start(name) %}
+{{ name }}_install:
   cmd.run:
-    - name: update-service --add /etc/sv/{{ u }}
-    - unless: test -e /etc/service/{{ u }}
+    - name: update-service --add /etc/sv/{{ name }}
+    - unless: test -e /etc/service/{{ name }}
     - require:
       - pkg: djbdns
       - file: populate_etc_sv
-      - file: /var/log/{{ u }}
+      - file: /var/log/{{ name }}
 
-{{ u }}_service:
+{{ name }}_service:
    cmd.run:
-    - name: svc -t -u /etc/service/{{ u }}
-    - onlyif: test -e /etc/service/{{ u }}
+    - name: svc -t -u /etc/service/{{ name }}
+    - onlyif: test -e /etc/service/{{ name }}
     - require:
-      - cmd: {{ u }}_install
-{% endfor %}
+      - cmd: {{ name }}_install
+{% endmacro %}
+
+{% macro stop_and_remove(name) %}
+{{ name }}_service:
+   cmd.run:
+    - name: svc -d /etc/service/{{ name }}
+    - onlyif: test -e /etc/service/{{ name }}
+
+{{ name }}_remove:
+  cmd.run:
+    - name: update-service --remove /etc/sv/{{ name }}
+    - onlyif: test -e /etc/service/{{ name }}
+    - require:
+      - cmd: {{ name }}_service
+{% endmacro %}
+
+
+{% if salt['pillar.get']('tinydns_server:cache:status', false) == "present" %}
+{{ install_and_start("dnscache") }}
+{% else %}
+{{ stop_and_remove("dnscache") }}
+{% endif %}
+
+{% if salt['pillar.get']('tinydns_server:internal:status', false) == "present" %}
+{{ install_and_start("tinydns") }}
+{{ install_and_start("axfrdns") }}
+{% else %}
+{{ stop_and_remove("tinydns") }}
+{{ stop_and_remove("axfrdns") }}
+{% endif %}
 
 {% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
 
@@ -183,4 +212,3 @@ axfrdns_export:
 {{ change_dns('eth0', oldconfig, pillar.tinydns_server.cache_dns) }}
 
 {% endif %}
-
