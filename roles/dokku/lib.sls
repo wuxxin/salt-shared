@@ -363,7 +363,7 @@ git_add_user_{{ name }}:
 git_add_and_commit_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
-    - name: r=`git show --pretty=oneline` && git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt, based on rev {{ data['rev']|d('master') }}, commit $r"
+    - name: git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt, based on rev {{ data['rev']|d('master') }}"
     - user: {{ s.user }}
 {% endif %}
 
