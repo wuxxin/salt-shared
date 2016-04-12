@@ -1,5 +1,9 @@
 {% from "http_proxy/defaults.jinja" import settings as s with context %}
 
+include:
+  - .ppa
+
+
 polipo:
   pkg:
     - installed
@@ -8,6 +12,9 @@ polipo:
     - enable: True
     - require:
       - pkg: polipo
+{%- if (grains['lsb_distrib_codename'] == "trusty") %}
+      - cmd: polipo_ppa
+{% endif %}
     - watch:
       - file: /etc/polipo/config
 
