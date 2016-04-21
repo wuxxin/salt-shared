@@ -29,6 +29,7 @@ polipo:
         disableIndexing = {{ s.disableIndexing }}
         disableServersList = {{ s.disableServersList }}
         diskCacheRoot = {{ s.diskCacheRoot }}
+        maxDiskCacheEntrySize = {{ s.maxDiskCacheEntrySize }}
 
     - require:
       - pkg: polipo
