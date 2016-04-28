@@ -337,6 +337,40 @@ managed_{{ s.templates.target }}/{{ name }}/{{ fname }}:
 {% endmacro %}
 
 
+{% macro dokku_nginx(name, data) %}
+{#
+nginx:
+  upload.conf: |
+      client_max_body_size 50M;
+#}
+{% if data['nginx'] is defined %}
+  {% for fname, fcontent in data['nginx'].iteritems() %}
+/home/{{ s.user }}/{{ name }}/nginx.conf.d/{{ fname }}:
+  file.managed:
+    - contents: |
+{{ fcontent|indent(8, true) }}
+    - user: {{ s.user }}
+    - makedirs: true
+  {% endfor %}
+{% endif %}
+{% endmacro %}
+
+
+{% macro dokku_scale(name, data) %}
+{#
+scale:
+  web: 1
+  worker: 1
+#}
+{% if data['scale'] is defined %}
+  {% set newscale=[] %}
+  {% for proc, count in data['scale'].iteritems() %}
+      {% do newscale.append(proc+ '='+ count|string) %}
+  {% endfor %}
+  {{ dokku("ps:scale", name, newscale|join(' ')) }}
+{% endif %}
+{% endmacro %}
+
 
 {% macro dokku_pre_commit(name, data) %}
 {% if data['pre_commit'] is defined %}
@@ -427,6 +461,8 @@ orgdata: loaded yml dict or filenamestring to
 {{ dokku_pre_commit(name, data) }}
 {{ dokku_git_commit(name, data, files_touched) }}
 {{ dokku_git_add_remote(name) }}
+{{ dokku_nginx(name, data) }}
+{{ dokku_scale(name, data) }}
 {{ dokku("config", name) }}
 {{ dokku("docker-options", name) }}
 
