@@ -23,9 +23,9 @@
 {#
 source:
   url: url or ./local-non-git-directory
-  rev: tag or commit id
-  submodules: true/false
-  identity: filepath/to/identity (needs to be owned by root)
+  branch: branch name (default=master)
+  submodules: *true/false
+  identity: filepath/to/identity
 #}
 {% if data['source']['url'][:1] == "." %}
 {{ name }}_dir:
@@ -41,34 +41,57 @@ source:
     - name: git init; git add .; git config user.email "saltmaster@localhost"; git config user.name "Salt Master"; git commit -a -m "initial commit"
     - user: {{ s.user }}
 {% else %}
-{{ name }}_checkout:
-  git.latest:
-    - name: {{ data['source']['url'] }}
-    - target: {{ s.templates.target }}/{{ name }}
-    - force_checkout: True
-    - force_fetch: True
-    - force_reset: True
-  {%- if data['source']['rev'] is defined %}
-    - rev: {{ data ['source']['rev'] }}
-  {%- endif %}
-  {%- if data['source']['branch'] is defined %}
-    - branch: {{ data ['source']['branch'] }}
-  {%- endif %}
-  {%- if data['source']['submodules'] is defined %}
-    - submodules: {{ data ['source']['submodules'] }}
-  {%- endif %}
-  {%- if data['source']['identity'] is defined %}
-    - identity: {{ data ['source']['identity'] }}
 
-{{ name }}_checkout_correct_user:
-  cmd.run:
-    - name: chown -R {{ s.user }} {{ s.templates.target }}/{{ name }}
-    - require:
-      - git: {{ name }}_checkout
-
-  {%- else %}
+  {% if data['source']['identity'] is defined %}
+{{ name }}_ssh_command:
+  file.managed:
+    - name: {{ s.templates.target }}/{{ name }}-sshcommand
+    - mode: '0755'
     - user: {{ s.user }}
-  {%- endif %}
+    - contents: |
+        #!/bin/bash
+        ssh -i {{ s.templates.target }}/{{ name }}.identity.secret "$@"
+
+{{ name }}_copy_identity:
+  file.copy:
+    - source: {{ data['source']['identity'] }}
+    - name: {{ s.templates.target }}/{{ name }}.identity.secret
+    - user: {{ s.user }}
+    - mode: '0600'
+    - force: true
+
+    {% set git_ssh='GIT_SSH="'+ s.templates.target+ '/'+name+ '-sshcommand"' %}
+  {% else %}
+    {% set git_ssh='' %}
+  {% endif %}
+  {% set br_requested = data ['source']['branch']|d('master') %}
+
+{{ name }}_checkout:
+  cmd.run:
+    - name: {{ git_ssh }} git clone {{ data['source']['url'] }} {{ s.templates.target }}/{{ name }}
+    - unless: test -d {{ s.templates.target }}/{{ name }}
+    - user: {{ s.user }}
+
+{{ name }}_fetch_all:
+  cmd.run:
+    - name: {{ git_ssh }} git fetch origin --prune
+    - cwd: {{ s.templates.target }}/{{ name }}
+    - user: {{ s.user }}
+
+{{ name }}_update_to_latest:
+  cmd.run:
+    - name: git checkout -f {{ br_requested }} && git reset --hard origin/{{ br_requested }}
+    - cwd: {{ s.templates.target }}/{{ name }}
+    - user: {{ s.user }}
+
+  {% if data['source']['submodules']|d(false) %}
+{{ name }}_submodules_update:
+  cmd.run:
+    - name: {{ git_ssh }} git submodule update --init --recursive
+    - cwd: {{ s.templates.target }}/{{ name }}
+    - user: {{ s.user }}
+  {% endif %}
+
 {% endif %}
 
 {% endmacro %}
@@ -115,8 +138,10 @@ certs:
   key: none
 [vhost: x.y.z]
 
+# we generate a selfsigned certificate first (even if set to letsencrypt)
+# so we fool dokku for SSL_IN_USE
 #}
-  {% if data['certs']['certificate'] == 'selfsigned' %}
+  {% if data['certs']['certificate'] in ('selfsigned', 'letsencrypt') %}
     {% if data['vhost'] is defined %}
         {% set hostname= data['vhost'] %}
     {% else %}
@@ -137,7 +162,14 @@ stdout: |
 
 {% endload %}
 {{ dokku_pipe(cert_input.stdout, "certs:generate", name+ " "+ hostname) }}
-  {% elif data['certs']['certificate'] == 'letsencrypt' %}
+    {% if data['certs']['certificate'] == 'letsencrypt' %}
+
+dokku_delete_nginx_conf_{{ name }}:
+  file.absent:
+    - name: /home/{{ s.user }}/{{ name }}/nginx.conf
+
+{{ dokku("nginx:build-config", name) }}
+
 dokku_create_urls_{{ name }}:
   cmd.run:
     - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
@@ -155,6 +187,7 @@ dokku_set_{{ name }}_LETSENCRYPT_SERVER:
     - unless: dokku config {{ name }} | grep -q DOKKU_LETSENCRYPT_SERVER
 
     {{ dokku("letsencrypt", name) }}
+    {% endif %}
   {% else %}
 {{ dokku_pipe(data['certs']['certificate']+ "\n"+ data['certs']['key'], "certs:add", name) }}
   {% endif %}
@@ -363,11 +396,15 @@ scale:
   worker: 1
 #}
 {% if data['scale'] is defined %}
-  {% set newscale=[] %}
+  {% set t=[] %}
   {% for proc, count in data['scale'].iteritems() %}
-      {% do newscale.append(proc+ '='+ count|string) %}
+      {% do t.append(proc+ '='+ count|string) %}
   {% endfor %}
-  {{ dokku("ps:scale", name, newscale|join(' ')) }}
+  {% set newscale= t|sort %}
+  {% set oldscale= salt['cmd.run_stdout']('dokku ps:scale nextecs | grep -E ".*[0-9]+" | sed -re "s/[> \t-]+([^\t ]+)[\t ]+([0-9]+).*/\\1=\\2/g"', python_shell=true).split()|sort %}
+  {% if newscale != oldscale %}
+    {{ dokku("ps:scale", name, newscale|join(' ')) }}
+  {% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -421,7 +458,7 @@ git_add_remote_{{ name }}:
 push_{{ name }}_{{ ourbranch }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
-    - name: git push -f --set-upstream dokku {{ ourbranch }}:master
+    - name: git push -f --set-upstream dokku {{ ourbranch }}:{{ ourbranch }}
 
 {% endmacro %}
 
@@ -463,6 +500,7 @@ orgdata: loaded yml dict or filenamestring to
 {{ dokku_git_add_remote(name) }}
 {{ dokku_nginx(name, data) }}
 {{ dokku_scale(name, data) }}
+
 {{ dokku("config", name) }}
 {{ dokku("docker-options", name) }}
 
