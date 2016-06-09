@@ -1,1 +1,1 @@
-pff-tools # tools to expor PAB,PST and OST files (MS Outlook)
+pff-tools # tools to export PAB,PST and OST files (MS Outlook)
