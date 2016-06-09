@@ -5,7 +5,7 @@ mydir=`dirname $myprog`
 name=`basename $mydir`
 
 size_parsed=`echo "$name" | grep -E -o -- "^.+-[0-9]+[gG]{1}$"`
-image_size=13g
+image_size=10g
 
 if test "$size_parsed" != ""; then
   image_size=`echo "$name" | sed -re "s/^.+-([0-9]+[gG])$/\\1/g"`
