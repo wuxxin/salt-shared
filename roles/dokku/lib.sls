@@ -179,12 +179,12 @@ dokku_create_urls_{{ name }}:
 dokku_set_{{ name }}_LETSENCRYPT_EMAIL:
   cmd.run:
     - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_EMAIL={{ s.letsencrypt.email }}
-    - unless: dokku config {{ name }} | grep -q DOKKU_LETSENCRYPT_EMAIL
+    - unless: dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_EMAIL: {{ s.letsencrypt.email }}"
 
 dokku_set_{{ name }}_LETSENCRYPT_SERVER:
   cmd.run:
     - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_SERVER={{ s.letsencrypt.target }}
-    - unless: dokku config {{ name }} | grep -q DOKKU_LETSENCRYPT_SERVER
+    - unless: dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_SERVER: {{ s.letsencrypt.target }}"
 
     {{ dokku("letsencrypt", name) }}
     {% endif %}
