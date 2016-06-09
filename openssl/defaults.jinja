@@ -1,0 +1,22 @@
+{% load_yaml as defaults %}
+
+secret:
+  generate: |
+      openssl rand 8 | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()).lower())" | tr -d =
+  describe: 8*8= 64 Bit expected entropy, 13 chars lowercase alphanumeric
+  human;
+    generate: passgen.py
+    describe: 11^21+5^5 combinations ~ 56 Bits Entropy, 16 chars lowercase alphanumeric
+  high:
+    generate: |
+        openssl rand 10 | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()).lower())" | tr -d =
+    describe: 10*8= 80 Bit expected entropy, 16 chars lowercase alphanumeric
+  120bit:
+    generate: |
+        openssl rand 15 | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()).lower())" | tr -d =
+    describe: 15*8= 120 Bit expected entropy, 24 chars lowercase alphanumeric
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('openssl', {})) %}
