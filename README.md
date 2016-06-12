@@ -1,6 +1,6 @@
 ##salt-shared - useful Salt states
 
-This is a collection of saltstack states 
+This is a collection of saltstack states
 as a result of me learning saltstack.
 Both quality and style differ from state to state,
 most states are working, some not.
@@ -11,20 +11,25 @@ but it lacks documentation beside a few README.md .
 
 ###What can you do with it:
 
- * Target Platform: Ubuntu Trusty - 14.04 
-   * many states also work with older ubuntu and other debian based distros.
+ * Target Platform: Ubuntu Trusty - 14.04
+   * many states also work with older/newer ubuntu and other debian based distros.
    * some states may work with other linux distros
    * Windows Platform: there is some support for windows and windows packages (using chocolatey as pkg manager)
 
  * Features to look at:
+   * storage:
+     * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
+   * network:
+     * setup network, calculate network adresses netmasks a.o.
+   * http_proxy:
+     * .server: install polipo
+     * .client: setup http_proxy, HTTP_PROXY for: apt, docker, profile.d, sudoers.d, dokku
+   * roles.dns: caching (unbound) and authorative dns (knot) server
+   * roles.dokku: dokku PAAS
    * roles.imgbuilder:
      * .packer: use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
      * .preseed: make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
      * .vagrant: deploy these easy to setup vagrant machines as production machines and control them via saltstack
-   * roles.snapshot_backup (alpha)
-     * make lvm snapshots of the running vm's (with interfacing to the vm's) on the host, 
-       use libvirt, packer, vagrant to create a virtual backup machine on the fly which
-       connects to the snapshot and backups this snapshot with duplicity
    * roles.desktop:
      * everything needed from a desktop base installation for developing (ubuntu 14.04)
      * look at roles/desktop/readme.md for details
@@ -48,7 +53,7 @@ but it lacks documentation beside a few README.md .
  * /.*      : Low level salt states
  * /roles/* : High level salt states
  * /roles/desktop/*
-            : High level salt states used for desktop setups 
+            : High level salt states used for desktop setups
 
  * /repo/*  : distribution specific repository setup
  * /win/*   : Windows specific salt states
