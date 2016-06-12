@@ -1,5 +1,5 @@
 include:
-  - roles.desktop.text
+  - code
   - .ppa
 
 atom:
