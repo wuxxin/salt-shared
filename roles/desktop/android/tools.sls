@@ -14,7 +14,8 @@ tools:
 python-adb:
   pip.installed:
     - name: git+https://github.com/google/python-adb
-
+    - require:
+      - sls: python
 
 {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 
