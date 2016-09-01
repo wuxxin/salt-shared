@@ -60,14 +60,6 @@ base:
     - match: pillar
     - roles.zentyal
 
-  'zentyal_sogo:status:present':
-    - match: pillar
-    - roles.zentyal_sogo
-
-  'G@gitlab_status:present or I@gitlab:status:present':
-    - match: compound
-    - roles.gitlab
-
   'desktop:status:present':
     - match: pillar
     - roles.desktop
