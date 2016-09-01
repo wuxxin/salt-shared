@@ -13,10 +13,10 @@ modify_tmux_conf:
   file.append:
     - name: /root/.tmux.conf
     - text: |
-      set -g terminal-overrides 'xterm*:smcup@:rmcup@'
-      set -g terminal-overrides "*rxvt*:smcup@:rmcup@"
-      set-window-option -g mode-mouse on
-      set-option -g history-limit 10000
+        set -g terminal-overrides 'xterm*:smcup@:rmcup@'
+        set -g terminal-overrides '*rxvt*:smcup@:rmcup@'
+        set-window-option -g mode-mouse on
+        set-option -g history-limit 10000
     - require:
       - file: create_tmux_conf
 
