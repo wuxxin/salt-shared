@@ -4,7 +4,6 @@ include:
   - .android
   - .audio
   - .browser
-  - .chat
   - .chipcard
   - .ftp
   - .graphics
@@ -13,7 +12,6 @@ include:
   - .security
   - .terminal
   - .ubuntu
-  - .video
   - .voice
 
 
@@ -40,6 +38,8 @@ include:
 
 {#
 general:
+  - .video
+  - .chat
   - .email
   - .power
 
