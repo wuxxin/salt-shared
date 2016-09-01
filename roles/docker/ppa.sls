@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
@@ -6,9 +6,9 @@ include:
 
 docker_ppa:
   pkgrepo.managed:
-    - repo: 'deb http://apt.dockerproject.org/repo ubuntu-trusty {{ "experimental" if s.dev_version else "main" }}'
+    - name: 'deb http://apt.dockerproject.org/repo ubuntu-{{ grains['lsb_distrib_codename'] }} {{ "experimental" if s.dev_version else "main" }}'
     - humanname: "Ubuntu docker Repository"
-    - file: /etc/apt/sources.list.d/docker-trusty.list
+    - file: /etc/apt/sources.list.d/docker-{{ grains['lsb_distrib_codename'] }}.list
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D
     - keyserver: pgp.mit.edu
     - require:
