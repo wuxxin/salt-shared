@@ -43,15 +43,8 @@ cat /etc/postfix/master.cf |
 
 cat >> /etc/postfix/master.cf.new << EOF
 dovedrop        unix    -       n       n       -       -       pipe
-  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
+  flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda  -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
 # -m \${extension}
-
-ddropyear    unix    -       n       n       -       -       pipe
-  flags=DRhu user=ebox:ebox argv=/usr/local/lib/dovecot-lda-year-append -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
-# -m \${extension}
-
-droperror    unix    -       n       n       -       -       pipe
-  flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda -f \${sender} -d postmaster@spitzauer.at -m public/diagnostic
 
 EOF
 rm /etc/postfix/master.cf; mv /etc/postfix/master.cf.new /etc/postfix/master.cf
@@ -65,6 +58,6 @@ cat /etc/dovecot/dovecot.conf |
  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile\n \2}\n' > /etc/dovecot/dovecot.conf.new
 rm /etc/dovecot/dovecot.conf; mv /etc/dovecot/dovecot.conf.new /etc/dovecot/dovecot.conf
 
-#  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile:/etc/dovecot/acl\n \2}\n' 
+#  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile:/etc/dovecot/acl\n \2}\n'
 
 exit 0

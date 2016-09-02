@@ -1,4 +1,5 @@
-# ### package installation
+include:
+  - .ppa
 
 zentyal:
   pkg.installed:

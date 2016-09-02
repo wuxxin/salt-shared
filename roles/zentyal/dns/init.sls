@@ -20,9 +20,9 @@ zentyal-dns:
     - require:
       - pkg: zentyal-dns
 
-{% if pillar.zentyal.dns.zones_new|d(False) != False %}
-{% for n,d in pillar.zentyal.dns.zones_new.iteritems() %}
-{% set s,t=d %}
+  {% if pillar.zentyal.dns.zones_new|d(False) != False %}
+    {% for n,d in pillar.zentyal.dns.zones_new.iteritems() %}
+      {% set s,t=d %}
 {{ n }}_file:
   file.managed:
     - source: {{ s }}
@@ -30,12 +30,12 @@ zentyal-dns:
     - mode: 644
     - require:
       - pkg: zentyal-dns
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
 
-{% if pillar.zentyal.dns.zones_append|d(False) != False %}
-{% for n,d in pillar.zentyal.dns.zones_append.iteritems() %}
-{% set s,i,t=d %}
+  {% if pillar.zentyal.dns.zones_append|d(False) != False %}
+    {% for n,d in pillar.zentyal.dns.zones_append.iteritems() %}
+      {% set s,i,t=d %}
 {{ n }}_file:
   file.managed:
     - source: {{ s }}
@@ -43,8 +43,8 @@ zentyal-dns:
     - mode: 644
     - require:
       - pkg: zentyal-dns
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
 
 
 {% endif %}

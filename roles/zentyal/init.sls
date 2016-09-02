@@ -1,5 +1,4 @@
 include:
-  - .ppa
   - .zentyal
   - .mail
   - .samba

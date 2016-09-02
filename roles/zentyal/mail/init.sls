@@ -1,5 +1,3 @@
-# ### postfix
-
 {% if salt['pillar.get']('zentyal:mail:status', "absent") == "present" %}
 
 zentyal-mail:
@@ -11,6 +9,9 @@ zentyal-mail:
     - require:
       - pkg: zentyal
 
+
+# ### postfix
+
 /etc/zentyal/hooks/mail.postsetconf:
   file.managed:
     - source: salt://roles/zentyal/mail/mail.postsetconf
@@ -18,12 +19,12 @@ zentyal-mail:
     - require:
       - pkg: zentyal-mail
 
-{% for filename, pillaritem in
-  ('tls_policy', 'zentyal:mail:tls_policy'),
-  ('generic_outgoing', 'zentyal:mail:rewrite'),
-  ('recipient_bcc', 'zentyal:mail:incoming_bcc'),
-  ('sender_bcc', 'zentyal:mail:outgoing_bcc'),
-  ('custom_transport', 'zentyal:mail:transport') %}
+  {% for filename, pillaritem in
+    ('tls_policy', 'zentyal:mail:tls_policy'),
+    ('generic_outgoing', 'zentyal:mail:rewrite'),
+    ('recipient_bcc', 'zentyal:mail:incoming_bcc'),
+    ('sender_bcc', 'zentyal:mail:outgoing_bcc'),
+    ('custom_transport', 'zentyal:mail:transport') %}
 
 /etc/postfix/{{ filename }}:
   file.managed:
@@ -38,44 +39,16 @@ zentyal-mail:
     - watch:
        - file: /etc/postfix/{{ filename }}
 
-{% endfor %}
+  {% endfor %}
 
 
 # ### dovecot
 
-/usr/local/lib/dovecot-lda-year-append:
-  file.managed:
-    - source: salt://roles/zentyal/mail/dovecot-lda-year-append
-    - mode: 755
-    - require:
-      - pkg: zentyal-mail
-
-/usr/local/lib/dovecot-lda:
-  file.managed:
-    - source: salt://roles/zentyal/mail/dovecot-lda
-    - mode: 755
-    - require:
-      - pkg: zentyal-mail
-
 /etc/dovecot/extra.conf:
   file.managed:
-    - source: salt://roles/zentyal/mail/extra.conf
+    - source: salt://roles/zentyal/mail/dovecot-extra.conf
     - require:
       - pkg: zentyal-mail
-
-# todo:
-
-# create mailboxes
-# doveadm mailbox create public.incoming.2012 -u postmaster@spitzauer.at
-# doveadm mailbox create public.sent.2012 -u postmaster@spitzauer.at
-
-# create sieve of postmaster@spitzauer.at
-## rule:[delete_from_to_same]
-#if allof (not header :contains "To" "postmaster_public/incoming@spitzauer.at", not header :contains "To" "postmaster_public/sent@spitzauer.at", header :contains "To" "spitzauer.at", header :contains "From" "spitzauer.at")
-#{
-#        discard;
-#        stop;
-#}
 
 
 # ### fetchmail
@@ -108,9 +81,5 @@ fetchmail:
        - file: /etc/fetchmailrc
     - require:
        - file: /etc/default/fetchmail
-
-
-# service generation
-
 
 {% endif %}

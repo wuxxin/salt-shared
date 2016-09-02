@@ -2,7 +2,7 @@
 
 /usr/local/sbin/create_zentyal_user.pl:
   file.managed:
-    - source: salt://roles/zentyal/create_zentyal_user.pl
+    - source: salt://roles/zentyal/tools/create_zentyal_user.pl
     - mode: 755
     - require:
       - pkg: zentyal
@@ -20,5 +20,3 @@ create_zentyal_user_{{ n }}:
 
   {% endfor %}
 {% endif %}
-
-

@@ -1,6 +1,6 @@
 # ### samba
 
-{% if salt['pillar.get']('zentyal:samba:status', "absent") == "present" %} 
+{% if salt['pillar.get']('zentyal:samba:status', "absent") == "present" %}
 
 zentyal-samba:
   pkg.installed:
@@ -38,9 +38,9 @@ zentyal-samba:
       - pkg: zentyal-samba
       - file: /var/lib/samba/private/dns_update_list.template
       - file: /var/lib/samba/private/dns_update_list.d
-    
-{% if pillar.zentyal.samba.homezone_include|d(False) != False %}
-{% for targetname,source in pillar.zentyal.samba.homezone_include.iteritems() %}
+
+  {% if pillar.zentyal.samba.homezone_include|d(False) != False %}
+    {% for targetname,source in pillar.zentyal.samba.homezone_include.iteritems() %}
 {{ targetname }}_zone_include:
   file.managed:
     - source: {{ source }}
@@ -51,8 +51,8 @@ zentyal-samba:
       - file: /var/lib/samba/private/dns_update_list.d
     - watch_in:
       - cmd: restart_samba
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
 
 restart_samba:
   cmd.wait:
@@ -61,4 +61,3 @@ restart_samba:
       - file: /etc/zentyal/hooks/samba.postsetconf
 
 {% endif %}
-
