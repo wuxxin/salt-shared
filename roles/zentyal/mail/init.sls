@@ -46,7 +46,23 @@ zentyal-mail:
 
 /etc/dovecot/extra.conf:
   file.managed:
-    - source: salt://roles/zentyal/mail/dovecot-extra.conf
+    - contents: |
+        namespace {
+          type = private
+          separator = /
+          prefix =
+          #location defaults to mail_location.
+          inbox = yes
+        }
+
+        namespace {
+          type = public
+          separator = /
+          prefix = public/
+          location = maildir:/var/vmail/public
+          subscriptions = yes
+          #list = children
+        }
     - require:
       - pkg: zentyal-mail
 
@@ -81,5 +97,36 @@ fetchmail:
        - file: /etc/fetchmailrc
     - require:
        - file: /etc/default/fetchmail
+
+
+# ## imap mail migration
+
+  {% if pillar.zentyal.mail.sync.config|d(false) %}
+
+offlineimap:
+ pkg:
+   - installed
+
+/home/{{ pillar.zentyal.admin.user }}/.offlineimaprc:
+ file.managed:
+   - source: {{ pillar.zentyal.mail.sync.config }}
+   - template: jinja
+   - user: {{ pillar.zentyal.admin.user }}
+   - context:
+       sync_sets: {{ pillar.zentyal.mail.sync.set }}
+       admin_user: {{ pillar.zentyal.admin.user }}
+   - require:
+     - pkg: offlineimap
+
+
+/home/{{ pillar.zentyal.admin.user }}/.offlineimap/helpers.py:
+ file.managed:
+   - source: {{ pillar.zentyal.mail.sync.helpers }}
+   - template: jinja
+   - user: {{ pillar.zentyal.admin.user }}
+   - require:
+     - pkg: offlineimap
+
+  {% endif %}
 
 {% endif %}
