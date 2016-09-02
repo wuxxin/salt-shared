@@ -1,9 +1,3 @@
-remove_unused_config:
-  cmd.run:
-    - name: dpkg -l | grep '^rc' | awk '{print $2}' | xargs dpkg --purge
-    - require:
-      - remove_zentyal_desktop
-
 remove_zentyal_desktop:
   pkg.purged:
     - pkgs:
@@ -19,3 +13,8 @@ remove_zentyal_desktop:
       - xscreensaver
       - zenbuntu-desktop
 
+remove_unused_config:
+  cmd.run:
+    - name: dpkg -l | grep '^rc' | awk '{print $2}' | xargs dpkg --purge
+    - require:
+      - remove_zentyal_desktop
