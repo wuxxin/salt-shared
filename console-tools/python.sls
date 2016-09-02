@@ -17,6 +17,8 @@ include:
 {{ n }}:
   pip:
     - installed
+    - require:
+      - sls: python
 {% endfor %}
 
 {% for n in devnames %}
