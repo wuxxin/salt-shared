@@ -1,6 +1,6 @@
 {% from "roles/imgbuilder/defaults.jinja" import settings as s with context %}
 {% set hostname="backup" %}
-{% set fqdn="backup.in.spitzauer.at" %}
+{% set fqdn="backup.in.domain" %}
 
 {{ hostname }}_{{ s.user }}_directories:
   file.directory:
