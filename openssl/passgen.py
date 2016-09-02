@@ -8,7 +8,7 @@ human friendly passwort generator:
 
   Final Product:
     Password Size: 16 Character lowercase alphabet
-    Expected Entropy: 54-58 Bits: 4,25×11+2,25×5 
+    Expected Entropy: 54-58 Bits: 4,25x11+2,25x5
     Vowels Placing: 2,5,8,11,14
 
   schema:
@@ -29,10 +29,10 @@ human friendly passwort generator:
     memorize: ++ (i can pronounce and hear the sound of it, no numbers, only lowercase)
     convinience: general: - (16 Chars) mobile: + (only lowercase alphabet)
     security: + (58Bit if analyze and implementation is correct)
-    target area: disk encryption key, ssh secret key pass, keychain key pass, gpg key pass
+    target area: disk encryption password, ssh secret key password, keychain key password, gpg key password
     target hardware: touchscreen, mobile, keyboard
     not applicable: any password that can be stored in a manager with a master password,
-       use complete random 64 to 120 Bit Entropy 13-24 Chars base32 output instead
+       you should use complete random 64 to 120 Bit Entropy 13-24 Chars base32 output instead
 
 """
 
