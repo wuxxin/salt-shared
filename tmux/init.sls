@@ -3,8 +3,7 @@ tmux:
     - installed
 
 create_tmux_conf:
-  file:
-    - touch
+  file.managed:
     - name: /root/.tmux.conf
     - require:
       - pkg: tmux
