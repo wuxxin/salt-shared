@@ -31,6 +31,17 @@ install_zentyal_language_{{ i }}:
 
 {% endfor %}
 
+# sss is producing error messages to root if listed on sudoers
+/etc/nsswitch.conf:
+  file.replace:
+    - pattern: |
+        ^sudoers:.+sss.*
+    - repl: |
+        sudoers:        files
+    - backup: False
+    - append_if_not_found: True
+    - require:
+      - pkg: zentyal
 
 zentyal_first_backup:
   cmd.run:

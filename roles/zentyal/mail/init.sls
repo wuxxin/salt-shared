@@ -9,9 +9,7 @@ zentyal-mail:
     - require:
       - pkg: zentyal
 
-
 # ### postfix
-
 /etc/zentyal/hooks/mail.postsetconf:
   file.managed:
     - source: salt://roles/zentyal/mail/mail.postsetconf
@@ -26,12 +24,14 @@ zentyal-mail:
     ('sender_bcc', 'zentyal:mail:outgoing_bcc'),
     ('custom_transport', 'zentyal:mail:transport') %}
 
+    {% if salt['pillar.get'](pillaritem, None) %}
+
 /etc/postfix/{{ filename }}:
   file.managed:
     - source: salt://roles/zentyal/mail/key_seperator_value.jinja
     - template: jinja
     - context:
-        dataset: {{ salt['pillar.get'](pillaritem, ' ') }}
+        dataset: {{ salt['pillar.get'](pillaritem, None) }}
     - require:
       - pkg: zentyal-mail
   cmd.run:
@@ -39,11 +39,10 @@ zentyal-mail:
     - watch:
        - file: /etc/postfix/{{ filename }}
 
+    {% endif %}
   {% endfor %}
 
-
 # ### dovecot
-
 /etc/dovecot/extra.conf:
   file.managed:
     - contents: |
@@ -66,8 +65,16 @@ zentyal-mail:
     - require:
       - pkg: zentyal-mail
 
-
 # ### fetchmail
+fetchmail:
+  pkg:
+    - installed
+  service.running:
+    - enable: True
+    - watch:
+       - file: /etc/fetchmailrc
+    - require:
+       - file: /etc/default/fetchmail
 
 /etc/default/fetchmail:
   file.replace:
@@ -77,6 +84,7 @@ zentyal-mail:
     - append_if_not_found: true
     - backup: false
     - require:
+      - pkg: fetchmail
       - pkg: zentyal-mail
 
 /etc/fetchmailrc:
@@ -90,34 +98,24 @@ zentyal-mail:
     - require:
       - pkg: zentyal-mail
 
-fetchmail:
-  service.running:
-    - enable: True
-    - watch:
-       - file: /etc/fetchmailrc
-    - require:
-       - file: /etc/default/fetchmail
-
-
-# ## imap mail migration
 
   {% if pillar.zentyal.mail.sync.config|d(false) %}
-
+# ### imap mail migration
 offlineimap:
  pkg:
    - installed
 
 /home/{{ pillar.zentyal.admin.user }}/.offlineimaprc:
- file.managed:
-   - source: {{ pillar.zentyal.mail.sync.config }}
-   - template: jinja
-   - user: {{ pillar.zentyal.admin.user }}
-   - context:
-       sync_sets: {{ pillar.zentyal.mail.sync.set }}
-       admin_user: {{ pillar.zentyal.admin.user }}
-   - require:
-     - pkg: offlineimap
-
+  file.managed:
+    - source: {{ pillar.zentyal.mail.sync.config }}
+    - template: jinja
+    - user: {{ pillar.zentyal.admin.user }}
+    - context:
+        sync_sets: {{ pillar.zentyal.mail.sync.set }}
+        admin_user: {{ pillar.zentyal.admin.user }}
+    - require:
+      - pkg: offlineimap
+      - pkg: zentyal-mail
 
 /home/{{ pillar.zentyal.admin.user }}/.offlineimap/helpers.py:
  file.managed:
@@ -126,6 +124,7 @@ offlineimap:
    - user: {{ pillar.zentyal.admin.user }}
    - require:
      - pkg: offlineimap
+     - pkg: zentyal-mail
 
   {% endif %}
 
