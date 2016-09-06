@@ -9,14 +9,18 @@ zentyal-mail:
     - require:
       - pkg: zentyal
 
-# ### postfix
-/etc/zentyal/hooks/mail.postsetconf:
+# ### hooks
+  {% for n in ['mail', 'openchange'] %}
+/etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
-    - source: salt://roles/zentyal/mail/mail.postsetconf
+    - source: salt://roles/zentyal/mail/{{ n }}.postsetconf
+    - template: jinja
     - mode: 755
     - require:
       - pkg: zentyal-mail
+  {% endfor %}
 
+# ### postfix
   {% for filename, pillaritem in
     ('tls_policy', 'zentyal:mail:tls_policy'),
     ('generic_outgoing', 'zentyal:mail:rewrite'),

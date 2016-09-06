@@ -24,7 +24,7 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
-{% for i in salt['pillar.get']('zentyal:languages', []) %}
+{% for i in salt['pillar.get']('zentyal:languages', ['en']) %}
 install_zentyal_language_{{ i }}:
   pkg.installed:
     - name: language-pack-zentyal-{{ i }}

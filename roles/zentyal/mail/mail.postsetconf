@@ -19,11 +19,15 @@ ssub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
 }
 
-# postfix modifications
+# postfix main.cf modifications
 cat /etc/postfix/main.cf | \
-  ssub '.*smtp_tls_security_level.*' 'smtp_tls_security_level = may' | \
-  ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /etc/ssl/private/ /etc/postfix/sasl/postfix.pem
-' > /etc/postfix/main.cf.new
+{%- if salt['pillar.get']("letsencrypt:enabled", false) %}
+  ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /etc/ssl/private/ /etc/postfix/sasl/postfix.pem' |
+  ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /etc/ssl/private/ /etc/postfix/sasl/postfix.pem' |
+{%- endif %}
+  ssub '.*smtp_tls_security_level.*' 'smtp_tls_security_level = may' > /etc/postfix/main.cf.new
+
+# postfix main.cf additions
 cat >> /etc/postfix/main.cf.new << EOF
 delay_warning_time = 2h
 smtp_tls_mandatory_ciphers = high
@@ -38,12 +42,14 @@ droperror_destination_recipient_limit = 1
 EOF
 rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
 
+# postfix master.cf modifications
 cat /etc/postfix/master.cf |
  ssub '(smtp[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
  ssub '(relay[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
  ssub '(smtp-amavis[ ]+unix.*)' '\1 -o receive_override_options=no_address_mappings' |
  ssub '(127.0.0.1:10025[ ]+inet.*)-o receive_override_options=no_milters' '\1 -o receive_override_options=no_milters,no_address_mappings' > /etc/postfix/master.cf.new
 
+# postfix master.cf additions
 cat >> /etc/postfix/master.cf.new << EOF
 dovedrop        unix    -       n       n       -       -       pipe
   flags=DRhu user=ebox:ebox argv=/usr/lib/dovecot-lda  -f \${sender} -d \${user}@\${nexthop} -o lda_mailbox_autocreate=yes -m
@@ -53,12 +59,17 @@ EOF
 rm /etc/postfix/master.cf; mv /etc/postfix/master.cf.new /etc/postfix/master.cf
 
 
-# dovecot modifications (look at extra.conf for additional included modifications)
+# dovecot modifications (look at extra.conf for additions)
 cat /etc/dovecot/dovecot.conf |
- msub '^(protocol imap {)([^}]+)}$' '\1\n  mail_plugins = acl imap_acl quota imap_quota autocreate\n}\n' |
- msub '^(protocol pop3 {)([^}]+)}$' '\1\n  mail_plugins = acl quota\n}\n' |
- msub '^(protocol lda {)([^}]+)mail_plugins = ([^}]+)}$' '\1\n\2mail_plugins = acl \3\n}\n' |
- msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile\n \2}\n' > /etc/dovecot/dovecot.conf.new
+{%- if salt['pillar.get']("letsencrypt:enabled", false) %}
+  ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< ' |
+  ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< ' |
+{%- endif %}
+  msub '^(protocol imap {)([^}]+)}$' '\1\n  mail_plugins = acl imap_acl quota imap_quota autocreate\n}\n' |
+  msub '^(protocol pop3 {)([^}]+)}$' '\1\n  mail_plugins = acl quota\n}\n' |
+  msub '^(protocol lda {)([^}]+)mail_plugins = ([^}]+)}$' '\1\n\2mail_plugins = acl \3\n}\n' |
+  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile\n \2}\n' > /etc/dovecot/dovecot.conf.new
+
 rm /etc/dovecot/dovecot.conf; mv /etc/dovecot/dovecot.conf.new /etc/dovecot/dovecot.conf
 
 #  msub '^(plugin {)([^}]+)}$' '\1\n  acl = vfile:/etc/dovecot/acl\n \2}\n'
