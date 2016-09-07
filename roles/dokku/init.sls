@@ -7,7 +7,7 @@ include:
 {# fixme: dokku storage relocate makes quirks #}
 {# fixme: dokku installer gets stuck as process on install #}
 {# fixme: plugin update/install fails sometimes #}
-{# fixme: migrate storage option to new dokku storage}
+{# fixme: migrate storage option to new dokku storage #}
 
 {% if salt['pillar.get']('dokku:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
