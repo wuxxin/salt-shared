@@ -2,15 +2,6 @@
 
 # This is a postsetconf script for zentyal
 
-# postsetconf scripts are run after the configuration for a given module is
-# written. The module will check if an executable file called
-# <module>.postsetconf exists in /etc/zentyal/hooks and will try to run it
-
-# Copy this file or create a script with the appropriate name if you want
-# to run some customization script after a module writes its configuration
-
-# Hook scripts need to be executable by root (note that examples are not).
-
 msub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
 }
@@ -20,10 +11,11 @@ ssub() {
 }
 
 {%- if salt['pillar.get']("letsencrypt:enabled", false) %}
+{% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
 configfile=$("ls /etc/apache2/conf-available/100-zentyal-ocsmanager*.conf")
 if test -f "$configfile"; then
   cat $configfile | \
-  ssub '.*SSLCertificateFile .*' 'SSLCertificateFile /etc/ocsmanager/ep3.at.pem' > ${configfile}.new
+  ssub '.*SSLCertificateFile .*' 'SSLCertificateFile /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem' > ${configfile}.new
   rm ${configfile}; mv ${configfile}.new ${configfile}
 fi
 {% endif %}

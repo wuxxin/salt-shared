@@ -2,15 +2,6 @@
 
 # This is a postsetconf script for zentyal
 
-# postsetconf scripts are run after the configuration for a given module is
-# written. The module will check if an executable file called
-# <module>.postsetconf exists in /etc/zentyal/hooks and will try to run it
-
-# Copy this file or create a script with the appropriate name if you want
-# to run some customization script after a module writes its configuration
-
-# Hook scripts need to be executable by root (note that examples are not).
-
 msub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
 }
@@ -21,9 +12,10 @@ ssub() {
 
 # postfix main.cf modifications
 cat /etc/postfix/main.cf | \
-{%- if salt['pillar.get']("letsencrypt:enabled", false) %}
-  ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /etc/ssl/private/ /etc/postfix/sasl/postfix.pem' |
-  ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /etc/ssl/private/ /etc/postfix/sasl/postfix.pem' |
+{%- if salt['pillar.get']('letsencrypt:enabled', false) %}
+{% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+  ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/privkey.pem' |
+  ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem' |
 {%- endif %}
   ssub '.*smtp_tls_security_level.*' 'smtp_tls_security_level = may' > /etc/postfix/main.cf.new
 
@@ -62,8 +54,9 @@ rm /etc/postfix/master.cf; mv /etc/postfix/master.cf.new /etc/postfix/master.cf
 # dovecot modifications (look at extra.conf for additions)
 cat /etc/dovecot/dovecot.conf |
 {%- if salt['pillar.get']("letsencrypt:enabled", false) %}
-  ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< ' |
-  ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< ' |
+{% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+  ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem' |
+  ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/privkey.pem' |
 {%- endif %}
   msub '^(protocol imap {)([^}]+)}$' '\1\n  mail_plugins = acl imap_acl quota imap_quota autocreate\n}\n' |
   msub '^(protocol pop3 {)([^}]+)}$' '\1\n  mail_plugins = acl quota\n}\n' |

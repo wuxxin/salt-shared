@@ -28,7 +28,6 @@ set_zentyal_version:
 install_zentyal_language_{{ i }}:
   pkg.installed:
     - name: language-pack-zentyal-{{ i }}
-
 {% endfor %}
 
 # sss is producing error messages to root if listed on sudoers

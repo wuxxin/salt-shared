@@ -15,7 +15,7 @@ zentyal-mail:
   file.managed:
     - source: salt://roles/zentyal/mail/{{ n }}.postsetconf
     - template: jinja
-    - mode: 755
+    - mode: "755"
     - require:
       - pkg: zentyal-mail
   {% endfor %}
