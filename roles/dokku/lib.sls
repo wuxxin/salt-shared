@@ -18,6 +18,15 @@
 {{ pipedata|indent(8, True) }}
 {% endmacro %}
 
+{% macro dokku_build_static(name, data) %}
+{#
+source:
+  build_static:
+    dockerfile:
+    url:
+    mount: "-v $(pwd):/go/"
+#}
+{% endmacro %}
 
 {% macro dokku_checkout(name, data) %}
 {#
@@ -178,13 +187,13 @@ dokku_create_urls_{{ name }}:
 
 dokku_set_{{ name }}_LETSENCRYPT_EMAIL:
   cmd.run:
-    - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_EMAIL={{ s.letsencrypt.email }}
-    - unless: dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_EMAIL: {{ s.letsencrypt.email }}"
+    - name: 'dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_EMAIL={{ s.letsencrypt.email }}'
+    - unless: 'dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_EMAIL: {{ s.letsencrypt.email }}"'
 
 dokku_set_{{ name }}_LETSENCRYPT_SERVER:
   cmd.run:
-    - name: dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_SERVER={{ s.letsencrypt.target }}
-    - unless: dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_SERVER: {{ s.letsencrypt.target }}"
+    - name: 'dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_SERVER={{ s.letsencrypt.target }}'
+    - unless: 'dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_SERVER: {{ s.letsencrypt.target }}"'
 
     {{ dokku("letsencrypt", name) }}
     {% endif %}
