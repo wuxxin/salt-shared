@@ -3,6 +3,13 @@
 /usr/local/bin/letsencrypt.sh:
   file.managed:
     - source: salt://letsencrypt/letsencrypt.sh
+    - mode: "0775"
+
+{% for i in ['acme-challenge', 'certs'] %}
+/usr/local/etc/letsencrypt.sh/{{ i }}:
+  file.directory:
+    - makedirs: true
+{% endfor %}
 
 /usr/local/etc/letsencrypt.sh/config:
   file.managed:
@@ -10,22 +17,16 @@
         {% if salt['pillar.get']('letsencrypt:ca', false) %}
         CA="{{ pillar['letsencrypt:ca'] }}"
         {% endif %}
-        BASEDIR="/usr/local/etc/letsencrypt.sh/base"
+        BASEDIR="/usr/local/etc/letsencrypt.sh"
         WELLKNOWN="/usr/local/etc/letsencrypt.sh/acme-challenge"
         CONTACT_EMAIL="{{ pillar['letsencrypt:contact_email'] }}"
-    - makedirs: true
 
-/usr/local/etc/letsencrypt.sh/acme-challenge:
-  file.directory:
-    - makedirs: true
-
-/usr/local/etc/letsencrypt.sh/base/domains.txt:
+/usr/local/etc/letsencrypt.sh/domains.txt:
   file.managed:
     - contents: |
         {%- for i in salt['pillar.get']('letsencrypt:domains', {}) %}
         {{ i }}
         {%- endfor %}
-    - makedirs: true
 
   {% if salt['pillar.get']('letsencrypt:config:apache', true) %}
 /etc/apache2/conf-available/10-wellknown-acme.conf:
