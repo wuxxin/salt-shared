@@ -1,7 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import subprocess
-from bitstring import BitStream
+
+try:
+  from bitstring import BitStream
+except ImportError as e:
+  print("error: you need to install python package bitstring")
+  raise
 
 """
 human friendly passwort generator:
