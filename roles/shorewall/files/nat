@@ -1,0 +1,5 @@
+#EXTERNAL       INTERFACE         INTERNAL      ALL INTERFACES     LOCAL
+
+{% for nat in shorewall.nat %}
+{{ nat }}
+{% endfor %}

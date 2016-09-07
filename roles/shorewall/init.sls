@@ -1,5 +1,5 @@
 
-{% set shorewall_parts = ["interfaces", "policy", "tunnels", "rules", "masq", "zones"] %}
+{% set shorewall_parts = ["interfaces", "policy", "tunnels", "rules", "masq", "nat", "zones"] %}
 {% set shorewall_scripts = ["init", "stop", "start"] %}
 
 shorewall:
