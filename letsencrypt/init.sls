@@ -40,13 +40,6 @@
     - target: /etc/apache2/conf-available/10-wellknown-acme.conf
     - makedirs: true
 
-wellknown-acme-apache-reload:
-  service.running:
-    - name: apache2
-    - enable: True
-    - watch:
-      - file: /etc/apache2/conf-enabled/10-wellknown-acme.conf
-
   {% endif %}
 
 
