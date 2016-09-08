@@ -24,7 +24,7 @@ zentyal-letsencrypt-hook:
     - source: salt://roles.zentyal.mail.zentyal-letsencrypt-hook.sh
     - mode: "0755"
     - require:
-      sls: letsencrypt
+      - sls: letsencrypt
 
 initial-cert-creation:
   cmd.run:
@@ -66,7 +66,7 @@ initial-cert-creation:
   cmd.run:
     - name: postmap /etc/postfix/{{ filename }}
     - watch:
-       - file: /etc/postfix/{{ filename }}
+      - file: /etc/postfix/{{ filename }}
 
     {% endif %}
   {% endfor %}
@@ -101,9 +101,9 @@ fetchmail:
   service.running:
     - enable: True
     - watch:
-       - file: /etc/fetchmailrc
+      - file: /etc/fetchmailrc
     - require:
-       - file: /etc/default/fetchmail
+      - file: /etc/default/fetchmail
 
 /etc/default/fetchmail:
   file.replace:
@@ -131,8 +131,8 @@ fetchmail:
   {% if pillar.zentyal.mail.sync.config|d(false) %}
 # ### imap mail migration
 offlineimap:
- pkg:
-   - installed
+  pkg:
+    - installed
 
 /home/{{ pillar.zentyal.admin.user }}/.offlineimaprc:
   file.managed:
@@ -147,13 +147,14 @@ offlineimap:
       - pkg: zentyal-mail
 
 /home/{{ pillar.zentyal.admin.user }}/.offlineimap/helpers.py:
- file.managed:
-   - source: {{ pillar.zentyal.mail.sync.helpers }}
-   - template: jinja
-   - user: {{ pillar.zentyal.admin.user }}
-   - require:
-     - pkg: offlineimap
-     - pkg: zentyal-mail
+  file.managed:
+    - source: {{ pillar.zentyal.mail.sync.helpers }}
+    - template: jinja
+    - user: {{ pillar.zentyal.admin.user }}
+    - require:
+      - pkg: offlineimap
+      - pkg: zentyal-mail
+      - user: zentyal-admin-user
 
   {% endif %}
 

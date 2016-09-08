@@ -3,7 +3,7 @@ include:
 
 {% if (salt['pkg.version']('samba-libs') != "") and
   (salt['pkg.version_cmp'](salt['pkg.version']('samba-libs'), '4:4.3.4-zentyal1') < 0) %}
-# update samba libs before zentyal gets installed 
+# update samba libs before zentyal gets installed
 update_old_samba_libs:
   pkg.latest:
     - name: samba-libs
@@ -17,6 +17,7 @@ zentyal:
   pkg.installed:
     - pkgs:
       - zentyal
+      - zentyal-samba
     - require:
       - pkgrepo: zentyal_main_ubuntu
 
@@ -36,11 +37,12 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
-{% for i in salt['pillar.get']('zentyal:languages', ['en']) %}
-install_zentyal_language_{{ i }}:
+install_zentyal_languages:
   pkg.installed:
-    - name: language-pack-zentyal-{{ i }}
-{% endfor %}
+    - pkgs:
+      {%- for i in salt['pillar.get']('zentyal:languages', ['en']) %}
+      - language-pack-zentyal-{{ i }}
+      {%- endfor %}
 
 # sss is producing error messages to root if listed on sudoers
 /etc/nsswitch.conf:
@@ -53,6 +55,15 @@ install_zentyal_language_{{ i }}:
     - append_if_not_found: True
     - require:
       - pkg: zentyal
+
+zentyal-admin-user:
+  user.present:
+    - name: {{ pillar.zentyal.admin.user }}
+    - groups:
+      - adm
+      - sudo
+    - remove_groups: False
+    - password: {{ salt.shadow.gen_password(pillar.zentyal.admin.password) }}
 
 zentyal_first_backup:
   cmd.run:

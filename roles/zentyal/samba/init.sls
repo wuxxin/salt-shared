@@ -5,7 +5,6 @@
 zentyal-samba:
   pkg.installed:
     - pkgs:
-      - zentyal-samba
       - zentyal-antivirus
     - require:
       - pkg: zentyal
