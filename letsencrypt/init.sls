@@ -14,12 +14,13 @@
 /usr/local/etc/letsencrypt.sh/config:
   file.managed:
     - contents: |
-        {% if salt['pillar.get']('letsencrypt:ca', false) %}
-        CA="{{ pillar['letsencrypt:ca'] }}"
-        {% endif %}
         BASEDIR="/usr/local/etc/letsencrypt.sh"
         WELLKNOWN="/usr/local/etc/letsencrypt.sh/acme-challenge"
-        CONTACT_EMAIL="{{ pillar['letsencrypt:contact_email'] }}"
+        {%- for i, d in salt['pillar.get'](letsencrypt).iteritems() %}
+          {%- if i not in ['domains', 'enable', 'config'] %}
+        {{ i|upper }}="{{ d }}"
+          {%- endif %}
+        {%- endfor %}
 
 /usr/local/etc/letsencrypt.sh/domains.txt:
   file.managed:
@@ -38,6 +39,14 @@
   file.symlink:
     - target: /etc/apache2/conf-available/10-wellknown-acme.conf
     - makedirs: true
+
+wellknown-acme-apache-reload:
+  service.running:
+    - name: apache2
+    - enable: True
+    - watch:
+      - file: /etc/apache2/conf-enabled/10-wellknown-acme.conf
+
   {% endif %}
 
 
