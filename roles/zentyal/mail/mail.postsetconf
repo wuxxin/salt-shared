@@ -24,22 +24,11 @@ cat >> /etc/postfix/main.cf.new << EOF
 delay_warning_time = 2h
 smtp_tls_mandatory_ciphers = high
 smtp_tls_policy_maps = hash:/etc/postfix/tls_policy
-sender_bcc_maps = hash:/etc/postfix/sender_bcc
-recipient_bcc_maps = hash:/etc/postfix/recipient_bcc
 transport_maps = hash:/etc/postfix/custom_transport
-ddropyear_destination_recipient_limit = 1
 dovedrop_destination_recipient_limit = 1
-droperror_destination_recipient_limit = 1
-
 EOF
-rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
 
-# postfix master.cf modifications
-cat /etc/postfix/master.cf |
- ssub '(smtp[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
- ssub '(relay[ ]+unix[ -]+smtp)' '\1 -o smtp_generic_maps=hash:/etc/postfix/generic_outgoing' |
- ssub '(smtp-amavis[ ]+unix.*)' '\1 -o receive_override_options=no_address_mappings' |
- ssub '(127.0.0.1:10025[ ]+inet.*)-o receive_override_options=no_milters' '\1 -o receive_override_options=no_milters,no_address_mappings' > /etc/postfix/master.cf.new
+rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
 
 # postfix master.cf additions
 cat >> /etc/postfix/master.cf.new << EOF

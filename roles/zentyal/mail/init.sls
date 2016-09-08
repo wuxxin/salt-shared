@@ -1,4 +1,9 @@
 {% if salt['pillar.get']('zentyal:mail:status', "absent") == "present" %}
+  {% if salt['pillar.get']('letsencrypt:enabled', false) %}
+include:
+  - letsencrypt
+  {% endif %}
+
 
 zentyal-mail:
   pkg.installed:
@@ -8,6 +13,26 @@ zentyal-mail:
       - zentyal-openchange
     - require:
       - pkg: zentyal
+
+
+# ### letsencrypt preperation
+  {% if salt['pillar.get']('letsencrypt:enabled', false) %}
+    {% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+zentyal-letsencrypt-hook:
+  file.managed:
+    - name: /usr/local/etc/letsencrypt.sh/zentyal-letsencrypt-hook.sh
+    - source: salt://roles.zentyal.mail.zentyal-letsencrypt-hook.sh
+    - mode: "0755"
+    - require:
+      sls: letsencrypt
+
+initial-cert-creation:
+  cmd.run:
+    - name: /usr/local/bin/letsencrypt.sh -c
+    - unless: test -e /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem
+
+  {% endif %}
+
 
 # ### hooks
   {% for n in ['mail', 'openchange'] %}
