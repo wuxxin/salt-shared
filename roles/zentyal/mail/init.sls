@@ -18,10 +18,20 @@ zentyal-mail:
 # ### letsencrypt preperation
   {% if salt['pillar.get']('letsencrypt:enabled', false) %}
     {% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+
+zentyal-apache-reload:
+  service.running:
+    - name: apache2
+    - enable: True
+    - watch:
+      - file: /etc/apache2/conf-enabled/10-wellknown-acme.conf
+    - require:
+      - sls: letsencrypt
+
 zentyal-letsencrypt-hook:
   file.managed:
     - name: /usr/local/etc/letsencrypt.sh/zentyal-letsencrypt-hook.sh
-    - source: salt://roles.zentyal.mail.zentyal-letsencrypt-hook.sh
+    - source: salt://roles/zentyal/mail/zentyal-letsencrypt-hook.sh
     - mode: "0755"
     - require:
       - sls: letsencrypt
@@ -30,6 +40,9 @@ initial-cert-creation:
   cmd.run:
     - name: /usr/local/bin/letsencrypt.sh -c
     - unless: test -e /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem
+    - require:
+      - service: zentyal-apache-reload
+      - file: zentyal-letsencrypt-hook
 
   {% endif %}
 
@@ -151,6 +164,7 @@ offlineimap:
     - source: {{ pillar.zentyal.mail.sync.helpers }}
     - template: jinja
     - user: {{ pillar.zentyal.admin.user }}
+    - makedirs: true
     - require:
       - pkg: offlineimap
       - pkg: zentyal-mail

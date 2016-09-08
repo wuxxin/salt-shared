@@ -18,6 +18,9 @@ zentyal:
     - pkgs:
       - zentyal
       - zentyal-samba
+{%- for i in salt['pillar.get']('zentyal:languages', []) %}
+      - language-pack-zentyal-{{ i }}
+{%- endfor %}
     - require:
       - pkgrepo: zentyal_main_ubuntu
 
@@ -36,13 +39,6 @@ set_zentyal_version:
       val: {{ salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"', python_shell=True) }}
     - require:
       - pkg: zentyal
-
-install_zentyal_languages:
-  pkg.installed:
-    - pkgs:
-      {%- for i in salt['pillar.get']('zentyal:languages', ['en']) %}
-      - language-pack-zentyal-{{ i }}
-      {%- endfor %}
 
 # sss is producing error messages to root if listed on sudoers
 /etc/nsswitch.conf:
