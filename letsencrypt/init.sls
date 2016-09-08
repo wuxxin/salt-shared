@@ -16,7 +16,7 @@
     - contents: |
         BASEDIR="/usr/local/etc/letsencrypt.sh"
         WELLKNOWN="/usr/local/etc/letsencrypt.sh/acme-challenge"
-        {%- for i, d in salt['pillar.get'](letsencrypt).iteritems() %}
+        {%- for i, d in salt['pillar.get']('letsencrypt').iteritems() %}
           {%- if i not in ['domains', 'enable', 'config'] %}
         {{ i|upper }}="{{ d }}"
           {%- endif %}
