@@ -1,6 +1,18 @@
 include:
   - .ppa
 
+{% if (salt['pkg.version']('samba-libs') != "") and
+  (salt['pkg.version_cmp'](salt['pkg.version']('samba-libs'), '4:4.3.4-zentyal1') < 0) %}
+# update samba libs before zentyal gets installed 
+update_old_samba_libs:
+  pkg.latest:
+    - name: samba-libs
+    - require:
+      - pkgrepo: zentyal_main_ubuntu
+    - require_in:
+      - pkg: zentyal
+{% endif %}
+
 zentyal:
   pkg.installed:
     - pkgs:
