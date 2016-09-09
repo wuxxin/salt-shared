@@ -9,9 +9,11 @@ include:
   - .graphics
   - .music
   - .network
+  - .power
   - .security
   - .terminal
   - .ubuntu
+  - .video
   - .voice
 
 
@@ -38,10 +40,7 @@ include:
 
 {#
 general:
-  - .video
   - .chat
-  - .email
-  - .power
 
 developer:
   - .kivy

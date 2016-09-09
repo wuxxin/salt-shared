@@ -3,7 +3,7 @@
 # in addition to the macros you want
 {% set sys_network = salt['pillar.get']('network:system', {}) %}
 {% set interfaces = salt['pillar.get']('network:interfaces', {}) %}
-{% set routes = salt['pillar.get']('network:routes', {}) %} 
+{% set routes = salt['pillar.get']('network:routes', {}) %}
 
 # configuring macros
 {% macro config_system(sys_network) %}
@@ -55,7 +55,7 @@ network-route-{{ interface }}:
     - pattern: "^iface {{ interface }} inet ([a-z0-9]+)[ ]*$(^[ ]+(up)|(down) ip route .+$)?"
     - repl: "iface {{ interface }} inet \\1\\n{% for ipaddr, subdata in data.iteritems() %}    up  ip route add {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n    down ip route del {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n{% endfor %}"
     - require_in:
-      - file: /etc/init/networking.override
+      - file: config_routes_override
   cmd.run:
     - name: "ifup --force {{ interface }}"
     - require:
@@ -105,7 +105,7 @@ update_library:
 
 
 
-# ip and network addresses filtering 
+# ip and network addresses filtering
 {%- macro net_addr(interface) %}
 {{- salt['extip.start_from_net'](salt['extip.combine_net_mask'](interface.ipaddr, interface.netmask)) }}
 {%- endmacro %}
@@ -170,4 +170,3 @@ update_library:
 {%- endif %}
 {{- salt['extip.net_list'](format, groups[group], interfaces, kwargs) }}
 {%- endmacro %}
-

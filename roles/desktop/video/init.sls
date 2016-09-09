@@ -24,12 +24,22 @@ video-packages:
       - cmd: ffmpeg_ppa
       - cmd: obs-studio_ppa
 
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 install-css:
+  {% if grains['lsb_distrib_codename'] == 'trusty' %}
   cmd.run:
     - name: /usr/share/doc/libdvdread4/install-css.sh
     - unless: dpkg-query -s libdvdcss2
     - require:
       - pkg: video-packages
+  {% else %}
+  pkg.installed:
+    - name: libdvd-pkg
+    - require:
+      - pkg: video-packages
+  {% endif %}
+{% endif %}
+
 
 x256-packages:
   pkg.installed:
@@ -38,8 +48,3 @@ x256-packages:
       - vlc-plugin-libde265
     - require:
       - cmd: x265-ppa
-
-minitube:
-  pkg.installed:
-    - require:
-      - cmd: minitube-ppa

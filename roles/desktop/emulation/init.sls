@@ -19,7 +19,7 @@ virt-tools:
       - virt-viewer
       - spice-client-gtk
       - spice-client
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
     - require:
       - pkgrepo: getdeb_ppa
 {% endif %}
@@ -32,7 +32,7 @@ virt-manager:
       - virt-manager
     - require:
       - pkg: virt-tools
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
       - pkgrepo: getdeb_ppa
 {% endif %}
 
@@ -46,4 +46,3 @@ remmina:
       - remmina-plugin-vnc
       - remmina-plugin-gnome
       - remmina-plugin-rdp
-

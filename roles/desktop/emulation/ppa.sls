@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
 include:
   - repo.ubuntu
 
@@ -9,4 +9,3 @@ getdeb_ppa:
     - key_url: http://archive.getdeb.net/getdeb-archive.key
 
 {% endif %}
-

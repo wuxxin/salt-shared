@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu') %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
 
 include:
   - .ppa
