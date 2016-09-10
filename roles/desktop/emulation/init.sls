@@ -18,8 +18,8 @@ virt-tools:
       - ssh-askpass
       - virt-viewer
       - spice-client-gtk
-      - spice-client
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
+      - spice-client
     - require:
       - pkgrepo: getdeb_ppa
 {% endif %}

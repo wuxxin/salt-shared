@@ -17,7 +17,7 @@ python-adb:
     - require:
       - sls: python
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
 
 {% from "repo/ubuntu.sls" import apt_add_repository %}
 {{ apt_add_repository("heimdall-ppa", "modycz/heimdall") }}

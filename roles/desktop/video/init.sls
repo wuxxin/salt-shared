@@ -1,3 +1,5 @@
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+
 include:
   - .ppa
 
@@ -8,39 +10,43 @@ video-packages:
       - vlc
       - vlc-nox
       - mplayer2
-      - smplayer
       - libav-tools
       - libavcodec-extra
       - libdvdread4
+      - smplayer
       - smtube
-      - ffmpeg
+      - smplayer-themes
+      - smplayer-skins
+      - youtube-dl
       - webcamstudio
       - v4l2loopback-dkms
       - webcamstudio-dkms
       - obs-studio
+      - ffmpeg
     - require:
       - cmd: rvm_smplayer_ppa
       - cmd: webcamstudio_ppa
-      - cmd: ffmpeg_ppa
-      - cmd: obs-studio_ppa
-
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-install-css:
+      - cmd: obsstudio_ppa
   {% if grains['lsb_distrib_codename'] == 'trusty' %}
+      - cmd: ffmpeg_ppa
+  {% endif %}
+
+  {% if grains['lsb_distrib_codename'] == 'trusty' %}
+install-css:
   cmd.run:
     - name: /usr/share/doc/libdvdread4/install-css.sh
     - unless: dpkg-query -s libdvdcss2
     - require:
       - pkg: video-packages
   {% else %}
+install-css:
   pkg.installed:
     - name: libdvd-pkg
     - require:
       - pkg: video-packages
   {% endif %}
-{% endif %}
 
-
+  {% if grains['lsb_distrib_codename'] == 'trusty' %}
 x256-packages:
   pkg.installed:
     - pkgs:
@@ -48,3 +54,5 @@ x256-packages:
       - vlc-plugin-libde265
     - require:
       - cmd: x265-ppa
+  {% endif %}
+{% endif %}

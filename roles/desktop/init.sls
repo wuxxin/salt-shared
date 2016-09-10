@@ -26,7 +26,6 @@ include:
   - .homeshick
   - .writing
   - .time
-  - .paste
   - .scipy
 {% endif %}
 
