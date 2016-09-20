@@ -11,7 +11,7 @@ but it lacks documentation beside a few README.md .
 
 ###What can you do with it:
 
- * Target Platform: Ubuntu Trusty - 14.04
+ * Target Platform: Ubuntu LTS (16.04), 14.04
    * many states also work with older/newer ubuntu and other debian based distros.
    * some states may work with other linux distros
    * Windows Platform: there is some support for windows and windows packages (using chocolatey as pkg manager)
@@ -31,7 +31,7 @@ but it lacks documentation beside a few README.md .
      * .preseed: make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
      * .vagrant: deploy these easy to setup vagrant machines as production machines and control them via saltstack
    * roles.desktop:
-     * everything needed from a desktop base installation for developing (ubuntu 14.04)
+     * everything needed from a desktop base installation for developing (ubuntu 16.04+14.04)
      * look at roles/desktop/readme.md for details
 
 ###How to start:
