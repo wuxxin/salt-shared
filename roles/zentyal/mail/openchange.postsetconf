@@ -15,7 +15,7 @@ ssub() {
 configfile=$("ls /etc/apache2/conf-available/100-zentyal-ocsmanager*.conf")
 if test -f "$configfile"; then
   cat $configfile | \
-  msub '^[\t ]*SSLEngine [Oo]n.*ProxyAddHeaders [Oo]n$' '   SSLEngine on\n    SSLCertificateKeyFile /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/privkey.pem\n     SSLCertificateFile /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem\n    ProxyAddHeaders on\n' |
+  msub '^[\t ]*SSLEngine [Oo]n.*ProxyAddHeaders [Oo]n$' '   SSLEngine on\n    SSLCertificateKeyFile /usr/local/etc/dehydrated/certs/{{ domain }}/privkey.pem\n     SSLCertificateFile /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem\n    ProxyAddHeaders on\n' |
   ssub 'ServerName .*' 'ServerName {{ domain }}' > ${configfile}.new
   rm ${configfile}; mv ${configfile}.new ${configfile}
 fi

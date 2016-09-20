@@ -38,21 +38,21 @@ zentyal-apache-reload:
     - require:
       - sls: letsencrypt
 
-zentyal-letsencrypt-hook:
+zentyal-dehydrated-hook:
   file.managed:
-    - name: /usr/local/etc/letsencrypt.sh/zentyal-letsencrypt-hook.sh
-    - source: salt://roles/zentyal/mail/zentyal-letsencrypt-hook.sh
+    - name: /usr/local/etc/dehydrated/zentyal-dehydrated-hook.sh
+    - source: salt://roles/zentyal/mail/zentyal-dehydrated-hook.sh
     - mode: "0755"
     - require:
       - sls: letsencrypt
 
 initial-cert-creation:
   cmd.run:
-    - name: /usr/local/bin/letsencrypt.sh -c
-    - unless: test -e /usr/local/etc/letsencrypt.sh/certs/{{ domain }}/fullchain.pem
+    - name: /usr/local/bin/dehydrated -c
+    - unless: test -e /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem
     - require:
       - service: zentyal-apache-reload
-      - file: zentyal-letsencrypt-hook
+      - file: zentyal-dehydrated-hook
 
   {% endif %}
 
