@@ -14,17 +14,17 @@ include:
 {% endif %}
 
 {% for n in names %}
-{{ n }}:
-  pip:
-    - installed
+pip-{{ n }}:
+  pip.installed:
+    - name: {{ n }}
     - require:
       - sls: python
 {% endfor %}
 
 {% for n in devnames %}
-{{ n }}:
-  pip:
-    - installed
+pip-{{ n }}:
+  pip.installed:
+    - name: {{ n }}
     - require:
       - sls: python-dev
 {% endfor %}
