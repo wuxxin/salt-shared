@@ -14,6 +14,16 @@ zentyal-mail:
     - require:
       - pkg: zentyal
 
+sogo-tmpreaper:
+    file.replace:
+      - name: /etc/tmpreaper.conf
+      - pattern: |
+          ^.*SHOWWARNING=.*
+      - repl: SHOWWARNING=false
+      - append_if_not_found: true
+      - backup: false
+      - require:
+        - pkg: zentyal-mail
 
 # ### letsencrypt preperation
   {% if salt['pillar.get']('letsencrypt:enabled', false) %}
