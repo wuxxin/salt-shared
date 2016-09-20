@@ -1,28 +1,28 @@
 {% if salt['pillar.get']('letsencrypt:enabled', false) %}
 
-/usr/local/bin/letsencrypt.sh:
+/usr/local/bin/dehydrated:
   file.managed:
-    - source: salt://letsencrypt/letsencrypt.sh
+    - source: salt://letsencrypt/dehydrated
     - mode: "0775"
 
 {% for i in ['acme-challenge', 'certs'] %}
-/usr/local/etc/letsencrypt.sh/{{ i }}:
+/usr/local/etc/dehydrated/{{ i }}:
   file.directory:
     - makedirs: true
 {% endfor %}
 
-/usr/local/etc/letsencrypt.sh/config:
+/usr/local/etc/dehydrated/config:
   file.managed:
     - contents: |
-        BASEDIR="/usr/local/etc/letsencrypt.sh"
-        WELLKNOWN="/usr/local/etc/letsencrypt.sh/acme-challenge"
+        BASEDIR="/usr/local/etc/dehydrated"
+        WELLKNOWN="/usr/local/etc/dehydrated/acme-challenge"
         {%- for i, d in salt['pillar.get']('letsencrypt').iteritems() %}
           {%- if i not in ['domains', 'enable', 'config'] %}
         {{ i|upper }}="{{ d }}"
           {%- endif %}
         {%- endfor %}
 
-/usr/local/etc/letsencrypt.sh/domains.txt:
+/usr/local/etc/dehydrated/domains.txt:
   file.managed:
     - contents: |
         {%- for i in salt['pillar.get']('letsencrypt:domains', {}) %}
