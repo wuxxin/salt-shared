@@ -34,7 +34,7 @@ zentyal-apache-reload:
     - name: apache2
     - enable: True
     - watch:
-      - file: /etc/apache2/conf-enabled/10-wellknown-acme.conf
+      - file: /etc/apache2/conf-available/10-wellknown-acme.conf
     - require:
       - sls: letsencrypt
 

@@ -12,7 +12,7 @@ ssub() {
 
 {%- if salt['pillar.get']("letsencrypt:enabled", false) %}
 {% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
-configfile=$("ls /etc/apache2/conf-available/100-zentyal-ocsmanager*.conf")
+configfile=$(ls /etc/apache2/conf-available/100-zentyal-ocsmanager*.conf)
 if test -f "$configfile"; then
   cat $configfile | \
   msub '^[\t ]*SSLEngine [Oo]n.*ProxyAddHeaders [Oo]n$' '   SSLEngine on\n    SSLCertificateKeyFile /usr/local/etc/dehydrated/certs/{{ domain }}/privkey.pem\n     SSLCertificateFile /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem\n    ProxyAddHeaders on\n' |
