@@ -211,14 +211,16 @@ env:
   envname: setting
 
 #}
-  {% set newenv=[] %}
   {% for ename, edata in data['env'].iteritems() %}
-    {% do newenv.append(ename+'='+edata) %}
+dokku_config_set_{{ name }}_{{ ename }}:
+  cmd.run:
+    - name: |
+        dokku config:set --no-restart {{ name }} {{ ename }}={{ salt['extutils.quote'](edata)|indent(8, True) }}
+
   {% endfor %}
-  {{ dokku("config:set --no-restart", name, newenv|join(' ')) }}
+
 {% endif %}
 {% endmacro %}
-
 
 {% macro dokku_volumes(name, data) %}
 {% if data['volumes'] is defined %}
