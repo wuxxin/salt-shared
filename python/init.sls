@@ -2,6 +2,8 @@ python:
   pkg.installed:
     - pkgs:
       - python
+      - python2.7
+      - python3
 {% if grains['lsb_distrib_codename'] not in ['trusty', 'xenial'] %}
       - python-pip
       - python-virtualenv
