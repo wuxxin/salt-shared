@@ -193,6 +193,11 @@ axfrdns_export:
 
 {% if salt['pillar.get']('tinydns_server:cache:status', false) == "present" %}
 {{ install_and_start("dnscache") }}
+  {% if pillar.tinydns_server.redirect_host_dns %}
+    {% from "network/lib.sls" import change_dns with context %}
+    {% set oldconfig = salt['pillar.get']('network:interfaces:eth0', {}) %}
+{{ change_dns('eth0', oldconfig, pillar.tinydns_server.cache_dns) }}
+  {% endif %}
 {% else %}
 {{ stop_and_remove("dnscache") }}
 {% endif %}
@@ -203,12 +208,4 @@ axfrdns_export:
 {% else %}
 {{ stop_and_remove("tinydns") }}
 {{ stop_and_remove("axfrdns") }}
-{% endif %}
-
-{% if pillar.tinydns_server.cache_dns and pillar.tinydns_server.redirect_host_dns %}
-
-{% from "network/lib.sls" import change_dns with context %}
-{% set oldconfig = salt['pillar.get']('network:interfaces:eth0', {}) %}
-{{ change_dns('eth0', oldconfig, pillar.tinydns_server.cache_dns) }}
-
 {% endif %}

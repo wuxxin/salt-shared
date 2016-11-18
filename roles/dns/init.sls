@@ -40,7 +40,7 @@ unbound:
       - pkg: unbound
     - watch:
       - file: unbound
-      - file: default_unbound
+      - file: /etc/default/unbound
   file.managed:
     - name: /etc/unbound/unbound.conf.d/unbound.conf
     - source: salt://roles/dns/server/unbound.conf
@@ -48,7 +48,7 @@ unbound:
     - context:
         cache: {{ s.cache }}
 
-default_unbound:
+default_unbound_resolvconf:
   file.replace:
     - name: /etc/default/unbound
     - pattern: |
@@ -58,10 +58,15 @@ default_unbound:
     - require:
       - pkg: unbound
 
-  {% if s.cache.redirect_host_dns|d(false) %}
-    {% from "network/lib.sls" import change_dns with context %}
-    {% set oldconfig = salt['pillar.get']('network:interfaces:eth0', {}) %}
-{{ change_dns('eth0', oldconfig, s.cache.listen[0]) }}
-  {% endif %}
+default_unbound_RESOLVCONF_FORWARDERS:
+  file.replace:
+    - name: /etc/default/unbound
+    - pattern: |
+        ^#?[ \t]*RESOLVCONF_FORWARDERS=.*
+    - repl: |
+        RESOLVCONF_FORWARDERS=false
+    - require:
+      - pkg: unbound
+
 
 {% endif %}
