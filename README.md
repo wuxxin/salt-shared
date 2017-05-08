@@ -21,18 +21,17 @@ but it lacks documentation beside a few README.md .
      * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
    * [`network`](network):
      * setup network, calculate network adresses netmasks a.o.
-   * `http_proxy`:
-     * [`.server`](http_proxy.server): install polipo
-     * [`.client`](http_proxy.client): setup http_proxy, HTTP_PROXY for: apt, docker, profile.d, sudoers.d, dokku
-   * [`roles.dns`](roles.dns): caching (unbound) and authorative dns (knot) server
-   * [`roles.dokku`](roles.dokku): dokku PAAS
-   * `roles.imgbuilder`:
-     * [`.packer`](roles.imgbuilder.packer): use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
-     * [`.preseed`](roles.imgbuilder.preseed): make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
-     * [`.vagrant`](roles.imgbuilder.vagrant): deploy these easy to setup vagrant machines as production machines and control them via saltstack
-   * `roles.desktop`:
+   * [`http_proxy`](http_proxy):
+     * [`.server`](http_proxy/server.sls): install polipo
+     * [`.client_use_proxy`](http_proxy/client_use_proxy.sls), [`.client_no_proxy`](http_proxy/client_no_proxy.sls),: setup http_proxy, HTTP_PROXY for: apt, docker, profile.d, sudoers.d, dokku
+   * [`roles.dns`](roles/dns/): caching (unbound) and authorative dns (knot) server
+   * [`roles.dokku`](roles/dokku/): dokku PAAS
+   * [`roles.imgbuilder`](/roles/imgbuilder):
+     * [`.packer`](roles/imgbuilder/packer/): use packer on qemu/kvm and vagrant on libvirt/kvm to setup virtual machines from scratch on a KVM enabled kernel
+     * [`.preseed`](roles/imgbuilder/preseed/): make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
+     * [`.vagrant`](roles/imgbuilder/vagrant): deploy these easy to setup vagrant machines as production machines and control them via saltstack
+   * [`roles.desktop`](roles/desktop):
      * everything needed from a desktop base installation for developing (ubuntu 16.04+14.04)
-     * look at [`roles/desktop/readme.md`](roles/desktop/readme.md) for details
 
 ### How to start:
 
