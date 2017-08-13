@@ -193,7 +193,7 @@ dokku_set_{{ name }}_LETSENCRYPT_EMAIL:
 dokku_set_{{ name }}_LETSENCRYPT_SERVER:
   cmd.run:
     - name: 'dokku config:set --no-restart {{ name }} DOKKU_LETSENCRYPT_SERVER={{ s.letsencrypt.target }}'
-    - unless: 'dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_SERVER: {{ s.letsencrypt.target }}"'
+    - unless: 'dokku config {{ name }} | grep -q "DOKKU_LETSENCRYPT_SERVER:"'
 
     {{ dokku("letsencrypt", name) }}
     {% endif %}
@@ -215,7 +215,7 @@ env:
 dokku_config_set_{{ name }}_{{ ename }}:
   cmd.run:
     - name: |
-        dokku config:set --no-restart {{ name }} {{ ename }}={{ salt['extutils.quote'](edata)|indent(8, True) }}
+        dokku config:set --no-restart {{ name }} {{ ename }}={{ salt['extutils.quote'](edata)|indent(8, False) }}
 
   {% endfor %}
 
