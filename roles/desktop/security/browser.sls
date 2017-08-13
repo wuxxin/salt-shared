@@ -1,0 +1,3 @@
+torbrowser-launcher:
+  pkg:
+    - installed

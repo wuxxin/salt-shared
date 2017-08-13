@@ -11,6 +11,7 @@ include:
   - .network
   - .power
   - .security
+  - .spellcheck
   - .terminal
   - .ubuntu
   - .video

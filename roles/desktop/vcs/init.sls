@@ -4,8 +4,3 @@ include:
   - git-crypt
   - bzr
   - subversion
-
-
-keyringer:
-  pkg:
-    - installed

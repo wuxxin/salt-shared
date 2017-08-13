@@ -5,7 +5,4 @@ keyring:
       - python-keyring
       - mercurial-keyring
       - network-manager-openvpn-gnome
-
-
-
-
+      - keyringer

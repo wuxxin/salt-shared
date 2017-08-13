@@ -4,7 +4,7 @@
 {% set gcloud_archive= "google-cloud-sdk.tar.gz" %}
 {% set gcloud_dirname= "google-cloud-sdk" %}
 {% set tmp_destfile= "/tmp/"+ gcloud_archive %}
-{% set final_destdir= user_home %}
+{% set final_destdir= "/opt" %}
 {% set gcloud_destdir= final_destdir+ "/"+ gcloud_dirname %}
 
 gcloud_download:
