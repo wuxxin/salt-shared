@@ -1,41 +1,50 @@
+include:
+  - .python
 
 {% if grains['os_family'] == 'Debian' %}
-base-deps:
+base-tools:
   pkg.installed:
     - pkgs:
-      - mc
       - unzip
       - zip
       - cabextract
+      {# admin convinience #}
+      - mc
       - ncdu
       - tree
       - command-not-found
+      {# top,perf like #}
       - htop
       - atop
       - iftop
       - iotop
+      - nethogs {# Net top tool grouping bandwidth per process #}
       - blktrace
       - dstat
       - cpu-checker
       - iperf
-      - glances
       - linux-tools-common {# used to get perf #}
       - procps {# used for free #}
       - pciutils
-      - pv
-      - socat
+      {# other network #}
+      - pv {# monitor the progress of data through a pipe #}
+      - socat 
       - netcat
-      - nethogs
+      - trickle {# a lightweight userspace bandwidth shaper #}
       - rsync
-      - trickle
+      - httpie
       - curl
-      - elinks
-      - links
+      - lynx
       - jupp
+      - etherwake
+      {# xml, html #}
       - sox
       - xmlstarlet
       - html-xml-utils
-      - etherwake
-      - httpie
-
+      {# forensic #}
+      - ext4magic
+      - volatility
+      {# conversion #}
+      - pff-tools {# export PAB,PST and OST files (MS Outlook) #}
+      
 {% endif %}
