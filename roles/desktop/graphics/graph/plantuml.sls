@@ -2,8 +2,8 @@
 plantuml:
   file.managed:
     - name: /usr/local/lib/plantuml.jar
-    - source: http://tenet.dl.sourceforge.net/project/plantuml/plantuml.8042.jar
-    - hash: sha256=0d7119e965d0502d7a743c84412aee7b1050db0471b3ebb8e1b0c5c48064e680
+    - source: https://netix.dl.sourceforge.net/project/plantuml/1.2017.15/plantuml.1.2017.15.jar
+    - hash: sha256=c0bf0f8fcfa68de6cb12e8c5c67ec61efffdbfb7ea32974cb8be4a38df94a415
     - require:
       - file: plantuml_sh
 
@@ -12,5 +12,5 @@ plantuml_sh:
     - name: /usr/local/bin/plantuml
     - mode: "0755"
     - contents: |
-        #!/bin/bash
+        #!/bin/sh
         java -jar /usr/local/lib/plantuml.jar $@

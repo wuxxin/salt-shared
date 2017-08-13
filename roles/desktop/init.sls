@@ -4,6 +4,7 @@ include:
   - .android
   - .audio
   - .browser
+{#  - .chat #}
   - .chipcard
   - .ftp
   - .graphics
@@ -20,6 +21,7 @@ include:
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
   - .vcs
+  - .code
   - .python
   - .gcloud
   - .atom
@@ -28,6 +30,13 @@ include:
   - .writing
   - .time
   - .scipy
+{#
+  - .android.sdk
+  - .android.user
+  - .openwrt
+  - .arduino
+  - .kivy
+#}
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
@@ -39,25 +48,10 @@ include:
 {% endif %}
 
 {#
-general:
-  - .chat
-
-developer:
-  - .kivy
-  - .tmbundles
-  - .openwrt
-  - .idea
-  - .etckeeper
-  - .android.sdk
-  - .android.user
-  - .eclipse
-  - .arduino
-
-#sysdig:
-#  pkg:
-#    - installed
-#minidlna:
-#  pkg:
-#    - installed
-
+sysdig:
+  pkg:
+    - installed
+minidlna:
+  pkg:
+    - installed
 #}

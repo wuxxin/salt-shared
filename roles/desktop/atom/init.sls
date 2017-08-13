@@ -1,5 +1,5 @@
 include:
-  - code
+  - .code
   - .ppa
   - .spellcheck
 

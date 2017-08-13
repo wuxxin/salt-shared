@@ -11,3 +11,7 @@ vector:
       - cmd: inkscape-ppa
 {% endif %}
 
+pixel_vector:
+  pkg.installed:
+    - pkgs:
+      - pencil
