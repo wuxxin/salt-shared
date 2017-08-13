@@ -4,6 +4,6 @@ Connection: close
 Content-Type: text/html
 
 <html><body><h1>503 Service Name Unavailable</h1>
-No server name is available to handle this request.
+Service Name requested is not known.
 </body></html>
 

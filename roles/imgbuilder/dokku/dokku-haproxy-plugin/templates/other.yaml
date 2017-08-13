@@ -1,6 +1,6 @@
 haproxy:
 
-  http_ssl_to_http:
+  httpssl_to_http:
     beta.omoikane.ep3.at:
       - ip: 10.9.140.62
         port: 5000
@@ -13,13 +13,22 @@ haproxy:
         port: 8002
       - ip:  10.9.140.38
         port: 8000
-  http_ssl_to_http_ssl:
+  httpssl_to_httpssl:
     hungwise.omoikane.ep3.at:
       ip: 10.9.140.40
       port: 1443
+    on.ep3.at:
+      ip: 10.9.140.1
+      port: 443
+      match: end
+    k8.ep3.at:
+      ip: 1.2.3.4
+      port: 443
+      match: end
+    
   http_to_http:
     gamma.omoikane.ep3.at:
       ip: 10.9.140.191
       port: 5000
-  redirect_to_http_ssl:
+  redirect_to_httpssl:
     - other.omoikane.ep3.at
