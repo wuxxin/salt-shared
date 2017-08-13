@@ -1,16 +1,7 @@
 include:
   - .ppa
-
-{% if (salt['pkg.version']('samba-libs') != "") and
-  (salt['pkg.version_cmp'](salt['pkg.version']('samba-libs'), '4:4.3.4-zentyal1') < 0) %}
-# update samba libs before zentyal gets installed
-update_old_samba_libs:
-  pkg.latest:
-    - name: samba-libs
-    - require:
-      - pkgrepo: zentyal_main_ubuntu
-    - require_in:
-      - pkg: zentyal
+{%- if salt['pillar.get']('letsencrypt:enabled', false) %}
+  - letsencrypt
 {% endif %}
 
 zentyal:
@@ -18,6 +9,9 @@ zentyal:
     - pkgs:
       - zentyal
       - zentyal-samba
+      - zentyal-mail
+      - zentyal-mailfilter
+      - zentyal-openchange
 {%- for i in salt['pillar.get']('zentyal:languages', []) %}
       - language-pack-zentyal-{{ i }}
 {%- endfor %}
@@ -40,18 +34,6 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
-# sss is producing error messages to root if listed on sudoers
-/etc/nsswitch.conf:
-  file.replace:
-    - pattern: |
-        ^sudoers:.+sss.*
-    - repl: |
-        sudoers:        files
-    - backup: False
-    - append_if_not_found: True
-    - require:
-      - pkg: zentyal
-
 zentyal-admin-user:
   user.present:
     - name: {{ pillar.zentyal.admin.user }}
@@ -61,8 +43,47 @@ zentyal-admin-user:
     - remove_groups: False
     - password: {{ salt.shadow.gen_password(pillar.zentyal.admin.password) }}
 
-zentyal_first_backup:
-  cmd.run:
-    - name: /usr/share/zentyal/make-backup
+# sss is producing error messages to root if listed on sudoers
+/etc/nsswitch.conf:
+  file.replace:
+    - pattern: |
+        ^sudoers:.+sss.*
+    - repl: |
+        sudoers:        files
+    - backup: False
+    - append_if_not_found: false
     - require:
       - pkg: zentyal
+
+# ### letsencrypt preperation
+{% if salt['pillar.get']('letsencrypt:enabled', false) %}
+    {% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+
+zentyal-dehydrated-hook:
+  file.managed:
+    - name: /usr/local/etc/dehydrated/zentyal-dehydrated-hook.sh
+    - source: salt://roles/zentyal/files/zentyal-dehydrated-hook.sh
+    - mode: "0755"
+    - require:
+      - sls: letsencrypt
+
+zentyal-apache-reload:
+  service.running:
+    - name: apache2
+    - enable: True
+    - watch:
+      - file: /etc/apache2/conf-available/10-wellknown-acme.conf
+    - require:
+      - sls: letsencrypt
+      - pkg: zentyal
+
+initial-cert-creation:
+  cmd.run:
+    - name: /usr/local/bin/dehydrated -c
+    - unless: test -e /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem
+    - require:
+      - file: zentyal-dehydrated-hook
+      - service: zentyal-apache-reload
+      - sls: letsencrypt
+          
+{% endif %}

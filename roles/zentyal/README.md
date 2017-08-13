@@ -1,11 +1,14 @@
 
-lightning:
-  file.managed:
-    - source: 'https://addons.mozilla.org/thunderbird/downloads/file/146488/lightning-1.2.3-tb+sm-windows.xpi?src=version-history'
+## Thunderbird
 
-sogo_integrator:
-  file.managed:
-    - source: salt://roles/sogo-zentyal/sogo-integrator-10.0.6-sogo.xpi
++ install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
+
++ install sogo connector or sogo integrator
+  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
+  + 
+https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
+
+## other
 
 fix_mailfilter:
   cmd.run:
@@ -14,9 +17,6 @@ fix_mailfilter:
 generate_new_mail_config:
   cmd.run:
     - name: /etc/init.d/zentyal mail restart
-
-update all and reroll:
-  on target machine:
 
 salt-call state.sls roles.zentyal; /etc/init.d/zentyal mail restart; /etc/init.d/postfix restart
 
