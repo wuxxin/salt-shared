@@ -15,7 +15,6 @@ build:
   make: default: 'go build' + config.build.dir
   check: 
   bin_files: []
-  cleanup: false
 target:
   versiondir: /usr/local/src
   symlinkdir: /usr/local/bin
