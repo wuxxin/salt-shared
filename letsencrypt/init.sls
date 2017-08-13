@@ -25,11 +25,9 @@
 /usr/local/etc/dehydrated/domains.txt:
   file.managed:
     - contents: |
-        {%- for i in salt['pillar.get']('letsencrypt:domains', {}) %}
-        {{ i }}
-        {%- endfor %}
+        {{ salt['pillar.get']('letsencrypt:domains', {})[0] }}{% for i in salt['pillar.get']('letsencrypt:domains', {}) %} {{ i }}{% endfor %}
 
-  {% if salt['pillar.get']('letsencrypt:config:apache', true) %}
+  {% if salt['pillar.get']('letsencrypt:config:apache', false) %}
 /etc/apache2/conf-available/10-wellknown-acme.conf:
   file.managed:
     - source: salt://letsencrypt/apache.conf
