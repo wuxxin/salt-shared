@@ -1,0 +1,14 @@
+{% load_yaml as defaults %}
+trusty:
+  hardware: linux-generic-lts-xenial
+  virtual: linux-virtual-lts-xenial
+  tools: linux-tools-generic-lts-xenial
+xenial:
+  hardware: linux-generic-hwe-16.04
+  virtual: linux-virtual-hwe-16.04
+  tools: linux-tools-generic-hwe-16.04
+{% endload %}
+
+{% set settings = salt['grains.filter_by'](defaults, 
+  grain= 'lsb_distrib_codename', default= 'trusty',
+  merge= salt['pillar.get']('kernel:image', {})) %}

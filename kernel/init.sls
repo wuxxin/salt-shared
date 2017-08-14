@@ -1,14 +1,11 @@
-{% from "kernel/defaults.jinja" import settings as s with context %}
-
-{% if grains['lsb_distrib_codename'] in ['trusty', 'rafaela', 'romeo'] %}
+{% from "kernel/settings.jinja" import settings with context %}
 
 linux-image:
   pkg.installed:
     - pkgs:
 {%- if grains['virtual'] == "physical" %}
-      - {{ s.hardware }}
+      - {{ settings.hardware }}
+{%- else %}
+      - {{ settings.virtual }}
 {%- endif %}
-      - {{ s.virtual }}
-      - {{ s.tools }}
-
-{% endif %}
+      - {{ settings.tools }}
