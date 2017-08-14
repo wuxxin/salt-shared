@@ -1,4 +1,18 @@
-{% if (grains['os'] == 'Ubuntu' and grains['osrelease'] >= '14.04') or (grains['os'] == 'Mint') %}
+{% if (grains['os'] == 'Ubuntu' and grains['oscodename'] == 'trusty') %}
+
+include:
+  - rbenv
+
+{% from "rbenv/lib.sls" import default_local_ruby with context %}
+{{ default_local_ruby('root','') }}
+
+default-ruby:
+  cmd.run:
+    - name: "echo 'ok, default-ruby via default-local-ruby-root'"
+    - require:
+      - cmd: default-local-ruby-root
+
+{% else %}
 
 ruby:
   pkg.installed:
@@ -47,19 +61,5 @@ default-ruby:
     - name: "echo 'ok, default-ruby'"
     - require:
       - pkg: ruby-bundler
-
-{% else %}
-
-include:
-  - rbenv
-
-{% from "rbenv/lib.sls" import default_local_ruby with context %}
-{{ default_local_ruby('root','') }}
-
-default-ruby:
-  cmd.run:
-    - name: "echo 'ok, default-ruby via default-local-ruby-root'"
-    - require:
-      - cmd: default-local-ruby-root
 
 {% endif %} 
