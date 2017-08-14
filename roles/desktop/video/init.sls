@@ -1,36 +1,55 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 
 include:
-  - .ppa
+  - roles.desktop.video.ppa
 
 video-packages:
   pkg.installed:
     - pkgs:
+      - gstreamer1.0-pulseaudio
+      - gstreamer1.0-alsa
+      - gstreamer1.0-plugins-base
+      - gstreamer1.0-plugins-good
+      - gstreamer1.0-plugins-bad
+      - gstreamer1.0-plugins-ugly
+      
       - lame
-      - vlc
-      - vlc-nox
-      - mplayer2
       - libav-tools
       - libavcodec-extra
       - libdvdread4
+      - frei0r-plugins
+      - v4l2loopback-dkms
+      {# ffmpeg needs ppa for trusty #}
+      - ffmpeg
+      
+      - vlc
+      - vlc-nox
+      - vlc-plugin-vlsub
+      - mplayer
+      
+      {# obs-studio is available in zesty upwards, but newer in ppa #}
+      - obs-studio
+      
+      {# smplayer, smtube, youtube-dl is available in trusty upwards, but newer in ppa #}
       - smplayer
-      - smtube
       - smplayer-themes
       - smplayer-skins
+      - smtube
       - youtube-dl
-      - webcamstudio
-      - v4l2loopback-dkms
-      - webcamstudio-dkms
-      - obs-studio
-      - ffmpeg
+      
     - require:
-      - cmd: rvm_smplayer_ppa
-      - cmd: webcamstudio_ppa
-      - cmd: obsstudio_ppa
-  {% if grains['lsb_distrib_codename'] == 'trusty' %}
-      - cmd: ffmpeg_ppa
-  {% endif %}
+      - sls: roles.desktop.video.ppa
 
+  {% if grains['osmajorrelease']|int <= 16 and 
+        grains['osrelease'] != '16.10' %}
+  {# webcamstudio is available up to xenial and need ppa #}  
+webcamstudio:
+  pkg.installed:
+    - pkgs:
+      - webcamstudio
+      - webcamstudio-dkms
+  {% endif %}  
+      
   {% if grains['lsb_distrib_codename'] == 'trusty' %}
 install-css:
   cmd.run:
@@ -53,6 +72,7 @@ x256-packages:
       - gstreamer1.0-libde265
       - vlc-plugin-libde265
     - require:
-      - cmd: x265-ppa
+      - sls: roles.desktop.video.ppa
   {% endif %}
+
 {% endif %}
