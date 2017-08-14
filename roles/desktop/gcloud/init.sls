@@ -15,7 +15,7 @@ gcloud_download:
     - unless: test -d {{ gcloud_destdir }}
   cmd.run:
     - name: tar xzf {{ tmp_destfile }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - cwd: {{ final_destdir }}
     - unless: test -d {{ gcloud_destdir }}
     - require:
@@ -24,7 +24,7 @@ gcloud_download:
 gcloud_install:
   cmd.run:
     - name: env CLOUDSDK_CORE_DISABLE_PROMPTS=1 ./google-cloud-sdk/install.sh
-    - user: {{ user }}
+    - runas: {{ user }}
     - cwd: {{ final_destdir }}
     - unless: test -f {{ user_home }}/.config/gcloud/.metricsUUID
     - require:

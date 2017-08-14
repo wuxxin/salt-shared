@@ -78,7 +78,6 @@ modify_service:
 /etc/openvpn/easy-rsa/keys/{{ n }}:
   cmd.run:
     - unless: test -f /etc/openvpn/easy-rsa/keys/{{ n }}
-    - user: root
     - cwd: /etc/openvpn/easy-rsa
     - name: . ./vars; {{ c }}
     - require:

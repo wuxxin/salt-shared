@@ -29,8 +29,7 @@ dokku-vm:
       - file: /mnt/images/templates/imgbuilder
   cmd.wait:
     - name: cd /mnt/images/templates/imgbuilder/dokku-vm
-    - user: imgbuilder
-    - group: imgbuilder
+    - runas: imgbuilder
     - watch:
       - git: dokku-vm
     - require:

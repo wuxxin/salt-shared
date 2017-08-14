@@ -13,8 +13,7 @@ bookie-vm:
       - file: /mnt/images/templates/imgbuilder
   cmd.wait:
     - name: cd /mnt/images/templates/imgbuilder/bookie-vm
-    - user: imgbuilder
-    - group: imgbuilder
+    - runas: imgbuilder
     - require:
       - file: bookie-vm
       - pkg: vagrant

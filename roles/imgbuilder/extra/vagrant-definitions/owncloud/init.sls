@@ -30,7 +30,7 @@ owncloud-vm:
       - git: owncloud-vm
   cmd.wait:
     - name: cd /mnt/images/templates/imgbuilder/owncloud-vm; bundle install
-    - user: imgbuilder
+    - runas: imgbuilder
     - group: imgbuilder
     - watch:
       - git: owncloud-vm

@@ -60,8 +60,7 @@ buildozer-init:
   cmd.run:
     - name: . {{ user_home }}/.buildozer/env/bin/activate; buildozer init
     - cwd: {{ user_home }}/.buildozer
-    - user: {{ user }}
-    - group: {{ user }}
+    - runas: {{ user }}
     - require:
       - pkg: default-jdk
       - git: python-for-android

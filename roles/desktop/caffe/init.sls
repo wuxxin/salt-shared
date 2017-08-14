@@ -66,6 +66,6 @@ compile_caffe:
   cmd.run:
     - name: make all -j 4 && make pycaffe
     - cwd: {{ workdir }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - require:
       - file: modify_Makefile

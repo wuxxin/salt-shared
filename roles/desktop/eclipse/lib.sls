@@ -8,8 +8,7 @@
     - source_hash: {{ hash }}
   cmd.run:
     - name: keytool -import -noprompt -file /tmp/{{ name }}-eclipse-cert
-    - user: {{ user }}
-    - group: {{ user }}
+    - runas: {{ user }}
     - cwd: {{ user_home }}
     - require:
       - file: /tmp/{{ name }}-eclipse-cert
@@ -19,8 +18,7 @@
 {{ name }}-eclipse-plugin:
   cmd.run:
     - name: eclipse -nosplash -application {{ inst_app }} -repository {{ main_url }},{{ url }} -installIU {{ group }}
-    - user: {{ user }}
-    - group: {{ user }}
+    - runas: {{ user }}
     - cwd: {{ salt['user.info'](user)['home'] }}
 {% endmacro %}
 

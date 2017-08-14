@@ -23,8 +23,7 @@
 generate-{{ a }}:
   cmd.run:
     - name: cd {{ s.image_base }}/templates/{{ a }}; chmod +x ./vagrant-box-add.sh; ./vagrant-box-add.sh
-    - user: {{ s.user }}
-    - group: libvirtd
+    - runas: {{ s.user }}
     - require:
       - file: {{ a }}-Vagrantfile
 

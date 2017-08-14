@@ -26,7 +26,7 @@ p4a:
   cmd.run:
     - name: ./distribute.sh -m "openssl pil kivy"
     - cwd: {{ user_home }}/p4a
-    - user: {{ user }}
+    - runas: {{ user }}
     - unless: test -e {{ user_home }}/p4a/dist/default
     - require:
       - git: p4a

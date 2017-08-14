@@ -9,7 +9,6 @@ zip:
   cmd.run:
     - unless: test -f /etc/openvpn/easy-rsa/keys/{{ client }}.key
     - cwd: /etc/openvpn/easy-rsa
-    - user: root
     - name: . ./vars; export KEY_CN={{ client }}; ./pkitool --pass {{ keyword }} {{ client }}
     - require:
       - file: /etc/openvpn/server.conf

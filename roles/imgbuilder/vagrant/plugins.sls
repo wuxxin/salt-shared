@@ -42,7 +42,7 @@ vagrant_compile_plugin_{{ t }}:
       - cmd: default-local-ruby-imgbuilder
   cmd.run:
     - name: . .profile; cd {{ build_dir }}; bundle install; rake build; touch {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
     - unless: test -f {{ build_dir }}/cmd.run.vagrant_compile_plugin_{{ t }}
     - require:
       - git: vagrant_compile_plugin_{{ t }}
@@ -50,7 +50,7 @@ vagrant_compile_plugin_{{ t }}:
 vagrant_plugin_{{ t }}:
   cmd.run:
     - name: vagrant plugin install {{ build_dir }}/pkg/{{ t }}*.gem
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
     - unless: vagrant plugin list | grep -q {{ t }}
     - require:
       - cmd: vagrant_compile_plugin_{{ t }}
@@ -62,7 +62,7 @@ vagrant_plugin_{{ t }}:
 vagrant_plugin_{{ t }}:
   cmd.run:
     - name: vagrant plugin install {{ t }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
     - unless: vagrant plugin list | grep -q {{ t }}
     - require:
       - pkg: vagrant
@@ -73,7 +73,7 @@ vagrant_plugin_{{ t }}:
 vagrant_plugin_fog_libvirt:
   cmd.run:
     - name: vagrant plugin install --plugin-version 0.0.3 fog-libvirt
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
     - unless: vagrant plugin list | grep -q fog-libvirt
     - require:
       - pkg: vagrant

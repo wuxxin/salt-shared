@@ -29,8 +29,7 @@ ttrss-vm:
       - git: ttrss-vm
   cmd.run:
     - name: cd /mnt/images/templates/imgbuilder/ttrss-vm; bundle
-    - user: imgbuilder
-    - group: imgbuilder
+    - runas: imgbuilder
     - watch:
       - git: ttrss-vm
     - require:

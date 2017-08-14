@@ -45,8 +45,7 @@ redmine-vm:
       - git: redmine-vm  
   cmd.wait:
     - name: cd /mnt/images/templates/imgbuilder/redmine-vm; librarian-chef install
-    - user: imgbuilder
-    - group: imgbuilder
+    - runas: imgbuilder
     - watch:
       - git: redmine-vm
     - require:

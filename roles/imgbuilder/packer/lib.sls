@@ -77,7 +77,6 @@ build_{{ targetdir }}":
   cmd.run:
     - name: if test -d output-qemu; then rm -r output-qemu; fi; PACKER_LOG=1 packer build -var-file {{ targetdir }}/{{ name }}_vars.json {{ vars|join("") }} {{ cmdextra }} {{ name }}.json
     - cwd: {{ targetdir }}
-    - user: {{ s.user }}
-    - group: {{ s.user }}
-
+    - runas: {{ s.user }}
+    
 {% endmacro %}

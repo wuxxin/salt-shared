@@ -81,8 +81,7 @@ android-sdk-update{{ a }}:
         }
         '
     - cwd: {{ ANDROIDSDK }}
-    - user: {{ user }}
-    - group: users
+    - runas: {{ user }}
     - require:
       - file: android-sdk
       - pkg: default-jdk

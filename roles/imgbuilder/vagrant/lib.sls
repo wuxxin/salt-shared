@@ -32,7 +32,7 @@
 {{ target }}-vm-up:
   cmd.run:
     - cwd: {{ target }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - name: vagrant up
 {% endmacro %}
 
@@ -41,7 +41,7 @@
 {{ target }}-vm-halt:
   cmd.run:
     - cwd: {{ target }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - name: vagrant halt
 {% endmacro %}
 
@@ -77,7 +77,7 @@ download_bootstrap_salt_{{ fqdn }}:
 transfer_and_bootstrap_{{ fqdn }}:
   cmd.run:
     - cwd: {{ target }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - name: 'vagrant rsync && vagrant ssh -c "/bin/bash" -- -c "cd /vagrant/salt && sudo ./bootstrap-salt.sh -X"'
     - require:
       - file: download_bootstrap_salt_{{ fqdn }}
@@ -92,7 +92,7 @@ transfer_and_bootstrap_{{ fqdn }}:
     - mode: 755
   cmd.run:
     - cwd: {{ target }}
-    - user: {{ user }}
+    - runas: {{ user }}
     - name: 'vagrant rsync && vagrant ssh -c "/bin/bash" -- -c "cd /vagrant && sudo ./network-cleanup.sh"'
     - require:
       - file: "{{ target }}/network-cleanup.sh"

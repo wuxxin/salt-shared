@@ -48,7 +48,7 @@ source:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: git init; git add .; git config user.email "saltmaster@localhost"; git config user.name "Salt Master"; git commit -a -m "initial commit"
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 {% else %}
 
   {% if data['source']['identity'] is defined %}
@@ -79,26 +79,26 @@ source:
   cmd.run:
     - name: {{ git_ssh }} git clone {{ data['source']['url'] }} {{ s.templates.target }}/{{ name }}
     - unless: test -d {{ s.templates.target }}/{{ name }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
 {{ name }}_fetch_all:
   cmd.run:
     - name: {{ git_ssh }} git fetch origin --prune
     - cwd: {{ s.templates.target }}/{{ name }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
 {{ name }}_update_to_latest:
   cmd.run:
     - name: git checkout -f {{ br_requested }} && git reset --hard origin/{{ br_requested }}
     - cwd: {{ s.templates.target }}/{{ name }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
   {% if data['source']['submodules']|d(false) %}
 {{ name }}_submodules_update:
   cmd.run:
     - name: {{ git_ssh }} git submodule update --init --recursive
     - cwd: {{ s.templates.target }}/{{ name }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
   {% endif %}
 
 {% endif %}
@@ -183,7 +183,7 @@ dokku_create_urls_{{ name }}:
   cmd.run:
     - name: echo "https://{{ name }}.{{ s.vhost }}" > /home/dokku/{{ name }}/URLS
     - unless: test -f /home/dokku/{{ name }}/URLS
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
 dokku_set_{{ name }}_LETSENCRYPT_EMAIL:
   cmd.run:
@@ -427,7 +427,7 @@ pre_commit_{{ fname }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: {{ fname }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
   {% endfor %}
 {% endif %}
 {% endmacro %}
@@ -439,14 +439,14 @@ git_add_user_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: git config user.email "saltmaster@localhost" && git config user.name "Salt Master"
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
 {% if files_touched != [] %}
 git_add_and_commit_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: git add {{ files_touched|join(' ') }} && git commit -a -m "modified by salt, based on rev {{ data['rev']|d('master') }}"
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 {% endif %}
 
 {% endmacro %}
@@ -458,7 +458,7 @@ git_add_remote_{{ name }}:
   cmd.run:
     - cwd: {{ s.templates.target }}/{{ name }}
     - name: git remote add dokku dokku@omoikane.ep3.at:{{ name }}
-    - user: {{ s.user }}
+    - runas: {{ s.user }}
 
 {% endmacro %}
 
