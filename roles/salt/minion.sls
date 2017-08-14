@@ -1,8 +1,8 @@
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
 {% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt-call') %}
-{% set leave_alone= true %}{# we do not intervene if salt is installed from git #}
+  {% set leave_alone= true %}{# we do not intervene if salt is installed from git #}
 {% else %}
-{% set leave_alone= false %}
+  {% set leave_alone= false %}
 {% endif %}
 
 {% if leave_alone %}
@@ -17,6 +17,18 @@ include:
   - .ppa
   - at
 
+  {% if grains['os_family'] == 'Debian' %}
+debconf-utils:
+  pkg:
+    - installed
+    - order: 1
+  {% endif %}
+
+psmisc:
+  pkg:
+    - installed
+    - order: 2
+
 salt-minion:
   pkg.installed:
     - require:
@@ -26,35 +38,19 @@ salt-minion:
     - require:
       - pkg: salt-minion
       - pkg: psmisc
-{%- if grains['os'] == 'Debian' or (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+  {%- if grains['os_family'] == 'Debian' %}
       - pkg: debconf-utils
-{%- endif %}
+  {%- endif %}
   cmd.wait:
     - name: echo service salt-minion restart | at now + 1 minute
     - watch:
       - pkg: salt-minion
-
-{% if grains['os'] == 'Debian' or (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
-debconf-utils:
-  pkg:
-    - installed
-    - order: 1
 {% endif %}
-
-psmisc:
-  pkg:
-    - installed
-    - order: 2
-
-{% endif %}
-
 
 {% for source in ['update-salt-from-git.sh',] %}
-
 create_usr_local_{{ source }}:
   file.managed:
     - name: /usr/local/sbin/{{ source }}
     - source: salt://roles/salt/files/{{ source }}
     - mode: 700
-
 {% endfor %}

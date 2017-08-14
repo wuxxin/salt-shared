@@ -1,6 +1,6 @@
 {% from "roles/salt/defaults.jinja" import settings as s with context %}
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 {% endif %}
@@ -17,14 +17,11 @@ salt_ppa:
     - require:
       - pkgrepo: salt_ppa
 
-{% elif (grains['os'] == 'Ubuntu' and grains['osrelease_info'][0] in [12,14] ) or grains['os'] == 'Mint' %}
-
-{% set os_major= grains['osrelease_info'][0] if grains['os'] == 'Ubuntu' else '14' %}
-{% set os_codename= grains['lsb_distrib_codename'] if grains['os'] == 'Ubuntu' else 'trusty' %}
+{% elif grains['os'] == 'Ubuntu' %}
 
 salt_ppa:
   pkgrepo.managed:
-    - name: deb http://repo.saltstack.com/apt/ubuntu/ubuntu{{ os_major }}/{{ s.install.rev }} {{ os_codename }} main
+    - name: deb http://repo.saltstack.com/apt/ubuntu/ubuntu{{ grains['osrelease'] }}/{{ s.install.rev }} {{ grains['oscodename'] }} main
     - file: /etc/apt/sources.list.d/salt_ppa.list
     - key_url: salt://roles/salt/files/SALTSTACK-GPG-KEY.pub
   cmd.run:
@@ -33,3 +30,7 @@ salt_ppa:
       - pkgrepo: salt_ppa
 
 {% endif %}
+
+salt_nop:
+  test:
+    - nop
