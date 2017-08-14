@@ -15,6 +15,5 @@ scipy:
       - python-skimage
     - require:
       - sls: python
-      - pip: ipython
-      - pip: jupyter
+      - sls: python.ipython
       - pkgrepo: neurodebian_ppa

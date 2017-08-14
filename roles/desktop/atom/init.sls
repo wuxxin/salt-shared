@@ -1,10 +1,11 @@
 include:
-  - .code
-  - .ppa
-  - .spellcheck
+  - roles.desktop.atom.ppa
+  - roles.desktop.code
+  - roles.desktop.spellcheck
 
 atom:
   pkg.latest:
     - require:
-      - cmd: webupd8team_atom
-      - sls: .spellcheck
+      - sls: roles.desktop.atom.ppa
+      - sls: roles.desktop.code
+      - sls: roles.desktop.spellcheck

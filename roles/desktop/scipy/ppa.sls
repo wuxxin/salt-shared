@@ -11,8 +11,8 @@ neurodebian_ppa:
     - file: /etc/apt/sources.list.d/neurodebian-{{ grains['lsb_distrib_codename'] if grains['os'] != 'Mint' else 'trusty' }}.list
     - keyid: A5D32F012649A5A9
     - keyserver: pgp.mit.edu
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+  {% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
       - pkg: ppa_ubuntu_installer
-{% endif %}
+  {% endif %}
 {% endif %}

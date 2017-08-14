@@ -1,7 +1,7 @@
 include:
   - kernel
   - cgroup
-  - .ppa
+  - lxd.ppa
 
 lxd:
   pkg.installed:
@@ -12,4 +12,4 @@ lxd:
       - bridge-utils
     - require:
       - sls: cgroup
-      - sls: .ppa
+      - sls: lxd.ppa

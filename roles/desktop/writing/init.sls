@@ -1,5 +1,5 @@
 include:
-  - roles/desktop/spellcheck
+  - roles.desktop.spellcheck
   - .sphinx
 {#
   - .zotero

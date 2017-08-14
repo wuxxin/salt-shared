@@ -1,7 +1,7 @@
 include:
   - cgroup
   - libvirt
-  - .ppa
+  - roles.desktop.emulation.ppa
 
 qemu:
   pkg.installed:
@@ -27,7 +27,7 @@ virt-manager:
       - virt-manager
     - require:
       - pkg: virt-tools
-      - sls: .ppa
+      - sls: roles.desktop.emulation.ppa
 
 # vnc , rdp, ssh
 remmina:

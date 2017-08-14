@@ -10,5 +10,6 @@ python-dev:
     - require:
       - sls: python
 
-pip2_install(pudb)
-pip3_install(pudb)
+{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{{ pip2_install('pudb') }}
+{{ pip3_install('pudb') }}
