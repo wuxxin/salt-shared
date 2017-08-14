@@ -28,7 +28,6 @@ include:
   - .emulation
   - .homeshick
   - .writing
-  - .time
   - .scipy
 {#
   - .android.sdk
