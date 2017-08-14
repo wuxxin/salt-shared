@@ -6,10 +6,12 @@ firefox:
   pkg.installed:
     - pkgs:
       - firefox
-      - firefox-dev
 {% if grains['os'] == 'Ubuntu' %}
+      - firefox-dev
+      - firefox-esr
     - require:
       - cmd: firefox-dev_ppa
+      - cmd: firefox-esr_ppa
 {% endif %}
 
 chromium-browser:
