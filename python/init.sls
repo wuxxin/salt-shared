@@ -3,40 +3,53 @@ python:
     - pkgs:
       - python
       - python2.7
-      - python3
-{% if grains['lsb_distrib_codename'] not in ['trusty', 'xenial'] %}
-      - python-pip
-      - python-virtualenv
-{% else %}
-
-{# refresh old "faulty" pip with version from pypi, as workaround for saltstack and probably others #}
-
-remove_faulty_pip:
-  pkg.removed:
-    - pkgs:
+      - python-setuptools
       - python-pip
       - python-pip-whl
-    - require:
-      - pkg: python
+      - python3
+      - python3-pip
+      - python3-setuptools
 
-  {% for i in ['', '3'] %}
+{# XXX pip and virtualenv is broken on xenial, update from pypi #}
+{# https://github.com/pypa/pip/issues/3282 #}
 
-easy_install{{ i }}_pip:
+pip2-upgrade:
   cmd.run:
-    - name: easy_install{{ i }} pip
-    - unless: which pip{{ i }}
-    - require:
-      - pkg: remove_faulty_pip
-{#  - reload_modules: true #}
+    - name:  easy_install -U pip virtualenv
+    - onlyif: test "$(which pip2)" = "/usr/bin/pip2"
 
-  {% endfor %}
+pip3-upgrade:
+  cmd.run:
+    - name: easy_install3 -U pip virtualenv
+    - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
-{% endif %}
 
-pudb:
+{% macro pip_install(package_or_packagelist, version="") %}
+python{{ version }}-{{ package_or_packagelist }}:
   pip.installed:
+  {%- if package_or_packagelist is iterable and package_or_packagelist is not string %}
+    - pkgs: {{ package_or_packagelist}}
+  {%- else %}
+    - name: {{ package_or_packagelist }}
+  {%- endif %}
+  {%- if version %}
+    - bin_env: {{ '/usr/local/bin/pip'+ version }}
+  {%- endif %}
     - require:
       - pkg: python
-{% if grains['lsb_distrib_codename'] in ['trusty', 'xenial'] %}
-      - cmd: easy_install_pip
-{% endif %}
+      - cmd: pip2-upgrade
+      - cmd: pip3-upgrade
+  {%- if kwargs is defined %}
+    {%- for k,d in kwargs.iteritems() %}
+    - {{ k }}: {{ d }}
+    {%- endfor %}
+  {%- endif %}
+{% endmacro %}
+
+{% macro pip3_install(package_or_packagelist) %}
+{{ pip_install(package_or_packagelist, '3') }}
+{% endmacro %}
+
+{% macro pip2_install(package_or_packagelist) %}
+{{ pip_install(package_or_packagelist, '2') }}
+{% endmacro %}
