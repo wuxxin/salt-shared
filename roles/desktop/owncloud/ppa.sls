@@ -1,11 +1,11 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 {% endif %} 
 
 {# FIXME: remove hardcoded path #}
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 owncloudclient_ppa:
   pkgrepo.managed:
     - name: deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_14.04/ /
@@ -18,3 +18,6 @@ owncloudclient_ppa:
 
 {% endif %}
 
+owncloud_nop:
+  test:
+    - nop

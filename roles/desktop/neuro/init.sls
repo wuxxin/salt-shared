@@ -4,7 +4,7 @@ include:
 opensesam:
   pkg:
     - installed
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
     - require:
       - cmd: cogscinl_ppa
 {% endif %}

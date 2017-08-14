@@ -1,6 +1,6 @@
 include:
   - python
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
   - repo.ubuntu
 {% endif %}
 

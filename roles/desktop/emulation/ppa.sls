@@ -9,3 +9,7 @@ getdeb_ppa:
     - key_url: http://archive.getdeb.net/getdeb-archive.key
 
 {% endif %}
+
+getdeb_nop:
+  test:
+    - nop

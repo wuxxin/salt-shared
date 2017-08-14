@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
@@ -7,3 +7,6 @@ include:
 
 {% endif %}
 
+cogscinl_nop:
+  test:
+    - nop

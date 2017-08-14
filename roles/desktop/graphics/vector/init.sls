@@ -6,7 +6,7 @@ vector:
     - pkgs:
       - inkscape
       - librsvg2-bin
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
     - require:
       - cmd: inkscape-ppa
 {% endif %}

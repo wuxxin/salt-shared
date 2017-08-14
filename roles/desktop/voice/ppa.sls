@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
@@ -14,3 +14,7 @@ jitsi_ppa:
       - pkg: ppa_ubuntu_installer
 
 {% endif %}
+
+voice_nop:
+  test:
+    - nop
