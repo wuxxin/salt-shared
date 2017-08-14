@@ -1,13 +1,14 @@
 include:
+  - cgroup
+  - libvirt
   - .ppa
 
 qemu:
   pkg.installed:
     - pkgs:
       - qemu
-      - qemu-system
-      - qemu-user
-      - qemu-utils
+    - require:
+      - sls: cgroup
 
 virt-tools:
   pkg.installed:
@@ -18,27 +19,17 @@ virt-tools:
       - ssh-askpass
       - virt-viewer
       - spice-client-gtk
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-      - spice-client
-    - require:
-      - pkgrepo: getdeb_ppa
-{% endif %}
 
 # xserver-xspice
-
 virt-manager:
   pkg.installed:
     - pkgs:
       - virt-manager
     - require:
       - pkg: virt-tools
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-      - pkgrepo: getdeb_ppa
-{% endif %}
-
+      - sls: .ppa
 
 # vnc , rdp, ssh
-
 remmina:
   pkg.installed:
     - pkgs:
