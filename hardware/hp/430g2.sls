@@ -1,7 +1,7 @@
 
 # for uefi boot see http://askubuntu.com/questions/554690/hp-uefi-doesnt-boot-ubuntu-automatically
 
-# hp probook 430 g2 fixes for ubuntu 14.04
+# hp probook 430 g2 fixes for ubuntu 14.04, 16.04
 
 # if salt['cmd.run_stdout']('which systool') != "" 
 
