@@ -1,13 +1,10 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
-{% endif %}
 
-
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
 xpra_ppa:
   pkgrepo.managed:
-    - name: deb https://www.xpra.org/ {{ grains['lsb_distrib_codename'] if grains['os'] != 'Mint' else 'trusty' }} main
+    - name: deb https://www.xpra.org/ {{ grains['lsb_distrib_codename'] }} main
     - file: /etc/apt/sources.list.d/xpra.list
     - key_url: "salt://xpra/gpg.asc"
     - require:
@@ -22,3 +19,7 @@ xpra_ppa:
         Acquire::https::proxy::www.xpra.org "DIRECT";
 
 {% endif %}
+
+xpra_nop:
+  test:
+    - nop

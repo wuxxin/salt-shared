@@ -4,7 +4,7 @@ include:
 nginx:
   pkg:
     - installed
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
     - require:
       - cmd: nginx_ppa
 {% endif %}

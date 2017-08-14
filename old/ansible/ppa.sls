@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
@@ -8,3 +8,6 @@ include:
 
 {% endif %}
 
+ansible_nop:
+  test:
+    - nop

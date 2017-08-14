@@ -4,10 +4,8 @@ include:
 ansible:
   pkg:
     - installed
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
     - require:
-      - cmd: ansible_ppa
-{% endif %}
+      - test: ansible_nop
 
 librarian-ansible:
   gem:

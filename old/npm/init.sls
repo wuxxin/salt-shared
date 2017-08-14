@@ -1,11 +1,11 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - .ppa
 {% endif %}
 
 nodejs:
   pkg.installed:
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
     - require:
       - cmd: nodejs_ppa
 {% endif %}
