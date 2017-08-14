@@ -1,4 +1,4 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 
@@ -6,3 +6,7 @@ include:
 {{ apt_add_repository("jayatana-ppa", "danjaredg/jayatana") }}
 
 {% endif %} 
+
+jayatana_nop:
+  test:
+    - nop

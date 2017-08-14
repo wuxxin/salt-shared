@@ -6,3 +6,7 @@ include:
 {{ apt_add_repository("lxd_stable_ppa", "ubuntu-lxc/lxd-stable ") }}
 
 {% endif %}
+
+lxd_nop:
+  test:
+    - nop

@@ -25,7 +25,7 @@ dokku:
     - name: dokku
     - require:
       - debconf: dokku
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
       - cmd: dokku_ppa
 {% endif %}
       - sls: roles.docker

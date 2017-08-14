@@ -1,9 +1,9 @@
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 include:
   - repo.ubuntu
 {% endif %}
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 
 dokku_ppa:
   pkgrepo.managed:
@@ -16,3 +16,7 @@ dokku_ppa:
       - pkgrepo: dokku_ppa
 
 {% endif %}
+
+dokku_nop:
+  test:
+    - nop

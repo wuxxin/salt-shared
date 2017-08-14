@@ -29,7 +29,7 @@ shorewall:
     - append_if_not_found: true
     - backup: false
 
-{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% if grains['os'] == 'Ubuntu' %}
 /etc/shorewall/shorewall.conf:
   file.replace:
     - pattern: "^#?[\t ]*LOGFILE=.*"

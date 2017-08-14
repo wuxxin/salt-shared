@@ -19,3 +19,7 @@ docker_ppa:
       - pkgrepo: docker_ppa
 
 {% endif %}
+
+docker_nop:
+  test:
+    - nop

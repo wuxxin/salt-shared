@@ -11,3 +11,7 @@ include:
 {% endif %}
 
 {% endif %}
+
+unison_nop:
+  test:
+    - nop

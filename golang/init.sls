@@ -3,7 +3,7 @@ include:
   - mercurial
   - bzr
 
-{% if (grains['os'] in ['Ubuntu', 'Mint'] and grains['osrelease'] == '14.04') %}
+{% if (grains['os'] == 'Ubuntu' and grains['osrelease'] == '14.04') %}
 {% set golang='golang-1.6' %}
 {% else %}
 {% set golang='golang' %}

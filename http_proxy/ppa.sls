@@ -7,3 +7,7 @@ include:
 {{ apt_add_repository("polipo_ppa", "phraktle/backports") }}
 
 {% endif %}
+
+polipo_nop:
+  test:
+    - nop
