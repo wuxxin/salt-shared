@@ -1,3 +1,9 @@
+include:
+  - python
+{% if devnames %}
+  - python.dev
+{% endif %}
+
 {% load_yaml as names %}
 - percol
 {% endload %}
@@ -6,25 +12,10 @@
 - cgroup-utils
 {% endload %}
 
-include:
-{% if devnames %}
-  - python.dev
-{% else %}
-  - python
-{% endif %}
-
 {% for n in names %}
-pip-{{ n }}:
-  pip.installed:
-    - name: {{ n }}
-    - require:
-      - sls: python
+pip2_install(n)
 {% endfor %}
 
 {% for n in devnames %}
-pip-{{ n }}:
-  pip.installed:
-    - name: {{ n }}
-    - require:
-      - sls: python-dev
+pip2_install(n, requires= ['sls: python.dev'])
 {% endfor %}
