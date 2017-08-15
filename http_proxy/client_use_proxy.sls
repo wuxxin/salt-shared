@@ -8,6 +8,30 @@
     - order: 5
   {% endif %}
 
+/etc/profile.d/proxy.sh:
+  file.managed:
+    - makedirs: True
+    - contents: |
+        http_proxy="{{ salt['pillar.get']('http_proxy') }}"
+        HTTP_PROXY="$http_proxy"
+        no_proxy="{{ salt['pillar.get']('no_proxy')|d(
+          'localhost,127.0.0.1,169.254.169.254,metadata.google.internal') }}"
+        NO_PROXY="$no_proxy"
+        export http_proxy
+        export HTTP_PROXY
+        export NO_PROXY
+        export no_proxy
+    - order: 5
+
+/etc/sudoers.d/proxy:
+  file.managed:
+    - makedirs: True
+    - mode: "0440"
+    - contents: |
+        Defaults env_keep += "HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY"
+        Defaults env_keep += "http_proxy https_proxy ftp_proxy no_proxy"
+    - order: 5
+
   {% if salt['file.file_exists']('/etc/default/docker') %}
     {% for a in ['http_proxy', 'HTTP_PROXY'] %}
 docker_{{ a }}:
@@ -22,25 +46,6 @@ docker_{{ a }}:
     - order: 5
     {% endfor %}
   {% endif %}
-
-/etc/profile.d/proxy.sh:
-  file.managed:
-    - makedirs: True
-    - contents: |
-        http_proxy="{{ salt['pillar.get']('http_proxy') }}"
-        HTTP_PROXY="{{ salt['pillar.get']('http_proxy') }}"
-        export http_proxy
-        export HTTP_PROXY
-    - order: 5
-
-/etc/sudoers.d/proxy:
-  file.managed:
-    - makedirs: True
-    - mode: "0440"
-    - contents: |
-        Defaults env_keep += "HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY"
-        Defaults env_keep += "http_proxy https_proxy ftp_proxy no_proxy"
-    - order: 5
 
 {# inactiv
 
