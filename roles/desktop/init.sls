@@ -20,8 +20,9 @@ include:
 
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
   - python.dev
+  - vcs
+  - git-crypt
   - .homeshick
-  - .vcs
   - .code
   - .scipy
   - .atom
