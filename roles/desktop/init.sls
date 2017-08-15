@@ -18,18 +18,18 @@ include:
   - .video
   - .voice
 
-
 {% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
+  - python.dev
+  - .homeshick
   - .vcs
   - .code
-  - .python
-  - .gcloud
+  - .scipy
   - .atom
   - .emulation
-  - .homeshick
   - .writing
-  - .scipy
+  - .gcloud
 {#
+  - java.jdk
   - .android.sdk
   - .android.user
   - .openwrt
