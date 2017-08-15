@@ -1,0 +1,26 @@
+#!/bin/bash
+
+kernel_cmdline="{{ cmdline }}"
+
+hostname="{{ hostname }}"
+domainname="{{ domainname }}"
+
+diskpassword_creation="{{ diskpassword_creation }}"
+diskpassword_receiver_id="{{ diskpassword_receiver_id }}"
+diskpassword_crypted="$self_path/diskpassword.crypted"
+diskpassword_receiver_keyfile="$self_path/${diskpassword_receiver_id}.key.asc"
+diskpassword_receiver_secretfile="$self_path/${diskpassword_receiver_id}.secret.asc"
+
+ssh_target="{{ netcfg.ip|d('') }}"
+ssh_identity="{{ custom_ssh_identity|d('') }}"
+ssh_opts=""
+
+if test "$ssh_target" = ""; then
+  ssh_target="${hostname}.${domainname}"
+fi
+if test "$ssh_identity" != "" -a "$ssh_identity" != "None"; then
+  ssh_opts="-i $ssh_identity"
+fi
+if test ! -f "$ssh_known_hosts"; then
+  ssh_opts="$ssh_opts -o StrictHostKeyChecking=no"
+fi

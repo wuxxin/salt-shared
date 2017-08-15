@@ -1,0 +1,23 @@
+#!/bin/sh
+
+logger -t custom_early.sh "In the custom_early.02.partman hook"
+
+# workaround: fix: somehow /media gets mounted with a partition on the host disk
+# (d-i installer searching for install media ?)
+#umount /media
+
+# if you want to destroy disks first, uncomment the following:
+# logger -t custom_early.sh Destroying disks!
+# /tmp/custom_part.sh destroy
+# sgdisk -Z /dev/vda
+# sgdisk -Z /dev/vdb
+
+method="$(debconf-get partman-auto/method)"
+
+if test -z "$method" -o "$method" = "custom"; then
+    # run custom partitioning
+    /tmp/custom_part.sh partman
+else
+    # or run default partman
+    partman
+fi

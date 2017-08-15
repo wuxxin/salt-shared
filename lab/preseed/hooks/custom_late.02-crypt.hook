@@ -1,0 +1,144 @@
+#!/bin/sh
+
+. /usr/share/debconf/confmodule
+
+logger -t custom_late.sh "in the custom_late.02 hook, modify and update initramfs to make ssh unlock work (also with static ip)"
+
+if test -f /tmp/custom_part.env; then
+    logger -t custom_late.sh "read /tmp/custom_part.env into environment"
+  . /tmp/custom_part.env
+fi
+
+if test -f /tmp/custom.env; then
+    logger -t custom_late.sh "read /tmp/custom.env into environment"
+  . /tmp/custom.env
+fi
+
+need_crypt="false"
+method="$(debconf-get partman-auto/method)"
+if test "$method" = "crypto"; then need_crypt="true"; fi
+if test "$DISKPASSWORD" != ""; then need_crypt="true"; fi
+
+if test "$need_crypt" = "false"; then
+    logger -t custom_late.sh "aborted. partitioning method was not crypto or custom with diskpassword, so we do not do this hook. exit"
+    exit 0
+fi
+
+mkdir -p /target/etc/initramfs-tools/hooks
+
+cat > /target/etc/initramfs-tools/hooks/cryptroot_patch << "ENDOFFILE"
+#!/bin/sh -e
+
+PREREQS="cryptroot"
+
+prereqs() { echo "$PREREQS"; }
+
+case "$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+patch $DESTDIR/scripts/local-top/cryptroot << "EOF"
+--- old-local-top/cryptroot	2014-09-17 23:49:36.836097471 +0200
++++ local-top/cryptroot	2014-09-17 23:46:12.072081752 +0200
+@@ -247,20 +247,25 @@
+ 			/bin/sleep 3
+ 		fi
+ 
++		cryptkeyaskpass="Unlocking the disk $cryptsource ($crypttarget)\nEnter passphrase: "
+ 		if [ -z "$cryptkeyscript" ]; then
+-			cryptkey="Unlocking the disk $cryptsource ($crypttarget)\nEnter passphrase: "
++			cryptkey="$(printf "$cryptkeyaskpass")"
++			cryptkeyaskpass=""
+ 			if [ -x /bin/plymouth ] && plymouth --ping; then
+ 				cryptkeyscript="plymouth ask-for-password --prompt"
+-				cryptkey=$(printf "$cryptkey")
+-			else
+-				cryptkeyscript="/lib/cryptsetup/askpass"
+ 			fi
+ 		fi
+ 
+-
+ 		if [ ! -e "$NEWROOT" ]; then
+-			if ! crypttarget="$crypttarget" cryptsource="$cryptsource" \
+-			     $cryptkeyscript "$cryptkey" | $cryptcreate --key-file=- ; then
++			if [ -n "$cryptkeyscript" ] ; then
++				mkdir -m 0600 -p /lib/cryptsetup
++				mkfifo -m 0600 /lib/cryptsetup/passfifo
++				( ( res=`crypttarget="$crypttarget" cryptsource="$cryptsource" \
++					$cryptkeyscript "$cryptkey"` ;\
++					echo -ne "${res}" > /lib/cryptsetup/passfifo ) & )
++			fi
++			if ! crypttarget="$crypttarget" cryptsource="$cryptsource"\
++				/lib/cryptsetup/askpass "$cryptkeyaskpass" | $cryptcreate --key-file=- ; then
+ 				message "cryptsetup: cryptsetup failed, bad password or options?"
+ 				continue
+ 			fi
+EOF
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/hooks/cryptroot_patch
+
+username="$(debconf-get passwd/username)"
+cat > /target/etc/initramfs-tools/hooks/dropbear_patch << ENDOFFILE
+#!/bin/sh -e
+
+PREREQS="dropbear"
+
+prereqs() { echo "\$PREREQS"; }
+
+case "\$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+# add the username as virtual user in the initrd to make vagrant happy
+echo "$username:x:0:0:$username:/root:/bin/sh" >> "\${DESTDIR}/etc/passwd"
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/hooks/dropbear_patch
+
+
+mkdir -p /target/etc/initramfs-tools/scripts/init-bottom
+cat > /target/etc/initramfs-tools/scripts/init-bottom/ipconfig.fixup << "ENDOFFILE"
+#!/bin/sh
+PREREQ=""
+prereqs() {
+        echo "$PREREQ"
+}
+case "$1" in
+        prereqs)
+                prereqs
+                exit 0
+        ;;
+esac
+. /scripts/functions
+
+# Shutdown initramfs networing before passing control to regular Ubuntu scripts
+# Without this, network setup causes minutes of delay plus errors on bootup.
+ifconfig eth0 0.0.0.0 down
+ip address flush dev eth0
+
+ENDOFFILE
+chmod +x /target/etc/initramfs-tools/scripts/init-bottom/ipconfig.fixup
+
+logger -t custom_late.sh "install dropbear and patch, copy /.ssh/authorized_keys, update-initramfs in target"
+
+apt-install cryptsetup dropbear patch
+cp /.ssh/authorized_keys /target/etc/initramfs-tools/root/.ssh/authorized_keys
+
+if test "$(debconf-get netcfg/disable_autoconfig)" = "true"; then
+    logger -t custom_late.sh "netcfg is using manual config, modify initramfs-tools setup"
+    netcfg="$(debconf-get netcfg/get_ipaddress)::$(debconf-get netcfg/get_gateway):$(debconf-get netcfg/get_netmask):$(debconf-get netcfg/get_hostname)::off"
+    echo "export IP=$netcfg" > /target/etc/initramfs-tools/conf.d/staticip
+fi
+
+in-target update-initramfs -k all -c
