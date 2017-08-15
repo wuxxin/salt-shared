@@ -1,6 +1,6 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
 {% from "roles/docker/defaults.jinja" import settings as s with context %}
 

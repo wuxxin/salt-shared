@@ -1,5 +1,5 @@
 include:
-  - repo.ubuntu
+  - ubuntu
   
 opennebula_ppa:
   pkgrepo.managed:

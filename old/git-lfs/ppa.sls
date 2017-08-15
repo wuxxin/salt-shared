@@ -1,6 +1,6 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
 git-lfs_ppa:
   pkgrepo.managed:

@@ -1,5 +1,5 @@
 include:
-  - repo.ubuntu
+  - ubuntu
 
 zentyal_main_ubuntu:
   pkgrepo.managed:

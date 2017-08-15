@@ -1,6 +1,6 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - repo.ubuntu
+  - ubuntu
 {% endif %} 
 
 
@@ -11,7 +11,7 @@ pcsx2:
     - require:
       - cmd: pcsx2_ppa
 
-{% from "repo/ubuntu.sls" import apt_add_repository %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("pcsx2_ppa", "gregory-hainaut/pcsx2.official.ppa") }}
 
 {% endif %}
@@ -23,7 +23,7 @@ mupen64plus:
 
 {% if grains['os'] == 'Ubuntu' %}
 
-{% from "repo/ubuntu.sls" import apt_add_repository %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("retroarch-ppa", "libretro/stable") }}
 
 retroarch:

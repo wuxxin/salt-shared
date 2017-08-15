@@ -1,6 +1,6 @@
 {% if grains['lsb_distrib_codename'] in ['trusty', 'xenial'] %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
 getdeb_ppa:
   pkgrepo.managed:

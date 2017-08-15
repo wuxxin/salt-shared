@@ -1,6 +1,6 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
 atareao_ppa:
   pkgrepo.managed:

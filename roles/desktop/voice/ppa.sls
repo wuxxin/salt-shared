@@ -1,8 +1,8 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
-{% from "repo/ubuntu.sls" import apt_add_repository %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("mumble_ppa", "mumble/release") }}
 
 jitsi_ppa:

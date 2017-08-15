@@ -1,7 +1,7 @@
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
 
 include:
-  - repo.ubuntu
+  - ubuntu
 
 trusty-backports:
   pkgrepo.managed:

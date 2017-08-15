@@ -1,10 +1,10 @@
 include:
-  - repo.ubuntu
+  - ubuntu
 
 
 {% if salt['pillar.get']('knot', false) %}
 
-{% from "repo/ubuntu.sls" import apt_add_repository %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
 
 knot:

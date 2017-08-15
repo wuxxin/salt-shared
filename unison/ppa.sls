@@ -1,8 +1,8 @@
 {% if (grains['os'] == 'Ubuntu') %}
 include:
-  - repo.ubuntu
+  - ubuntu
 
-{% from "repo/ubuntu.sls" import apt_add_repository %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
 
 {% if grains['lsb_distrib_codename'] in ['wily', 'xenial'] %}
   {{ apt_add_repository("john_freeman_unison_ppa", "john-freeman/unison ") }}
