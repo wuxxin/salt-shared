@@ -1,11 +1,20 @@
 include:
   - ubuntu.desktop
-  - .restricted
   - .user
+
+restricted-extras:
+  pkg.installed:
+    - pkgs:
+      - ttf-mscorefonts-installer
 
 gconf-editor:
   pkg:
     - installed
+
+compiz-tweaks:
+  pkg.installed:
+    - pkgs:
+      - compizconfig-settings-manager
 
 themes-extra:
   pkg.installed:
