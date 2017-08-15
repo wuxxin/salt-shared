@@ -6,5 +6,5 @@ browser-java:
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
     - name: icedtea-7-plugin
 {% else %}
-    - name: icedtea-8-plugin
+    - name: default-java-plugin
 {% endif %}
