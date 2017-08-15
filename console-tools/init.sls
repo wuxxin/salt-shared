@@ -7,8 +7,9 @@ base-tools:
     - pkgs:
       - unzip
       - zip
+      - bzip2
       - cabextract
-      {# admin convinience #}
+      {# user tools #}
       - mc
       - ncdu
       - tree
