@@ -1,0 +1,41 @@
+knot:
+  - id: public
+    active: true
+    listen:
+      - 1.2.3.4
+    key:
+      - id: transfer_key
+        action: transfer
+        secret: secret
+      - id: update_key
+        action: update
+        secret: secret
+      - id: notify_key
+        action: notify
+        secret: secret
+    zone:
+      - domain: domain.in.sub.domain
+        file: "salt://hosts/host/knot/domain.in.sub.domain.yml"
+
+  - id: private
+    active: false
+    listen:
+      - 10.9.8.10
+    answer:
+      - 10.9.8.1
+      - 192.168.0.1
+    key:
+      - id: update_key
+        action: update
+        from:
+          - 10.9.8.1
+        secret: secret
+    zone:
+      - domain: in.something.internal
+        template: signed
+        notify: 
+          - 10.9.8.1
+        reverse_dns: 
+          - 10.9.8.0/24
+          - 192.168.0/24
+        file: "salt://hosts/host/knot/domain.yml"
