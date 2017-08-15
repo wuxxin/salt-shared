@@ -1,4 +1,4 @@
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
   - roles.docker
@@ -18,8 +18,8 @@ syncthing_container:
       - 8384:8384
       - 22000:22000
     - environment:
-      - UID={{ salt.pw_user.info(user)['uid'] }}
-      - GID={{ salt.pw_user.info(user)['gid'] }}
+      - UID={{ user_info['uid'] }}
+      - GID={{ user_info['gid'] }}
     - binds:
 {% for i in pillar.get('syncthing:binds') %}
       - {{ i }}
