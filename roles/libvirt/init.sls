@@ -1,7 +1,6 @@
 #!jinja|yaml
 
 include:
-  - remotefs
   - .kernel
   - .grub
   - .storage

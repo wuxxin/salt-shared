@@ -13,7 +13,6 @@ base: # try to sort from wider to narrow
     - acpi
     - ssh
     - ssh.server
-    - remotefs.clients
 
   # any ubuntu
   'os:Ubuntu':
