@@ -2,9 +2,7 @@ ppa_ubuntu_installer:
   pkg.installed:
     - pkgs:
       - python-software-properties
-{% if grains['osrelease'] >= '12.10' %}
       - software-properties-common
-{% endif %}
       - apt-transport-https
 
 {% macro apt_add_repository(statename, ppaname) %}
