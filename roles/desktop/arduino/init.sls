@@ -1,9 +1,7 @@
-
+include:
+  - java
+  
 {% set arduino_user = pillar['arduino_user']|default('arduino') %}
-
-default-jre:
-  pkg:
-    - installed
 
 arduino:
   archive:
