@@ -11,11 +11,10 @@ but it lacks documentation beside a few README.md .
 
 ### What can you do with it:
 
- * Target Platform: Ubuntu LTS (16.04), 14.04
-   * many states also work with older/newer ubuntu and other debian based distros.
-   * some states may work with other linux distros
-   * Windows Platform: there is some support for windows and windows packages (using chocolatey as pkg manager)
-
+ * Target Platform: Ubuntu LTS 16.04 (xenial), 14.04 (trusty)
+   * many non-gui states also work with older/newer ubuntu and other debian based distros.
+   * most gui states work with xenial
+   
  * Features to look at:
    * [`storage`](storage):
      * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
@@ -31,7 +30,7 @@ but it lacks documentation beside a few README.md .
      * [`.preseed`](roles/imgbuilder/preseed/): make customized preseed installations that have mdadm/luks/lvm in an ssh headless setup
      * [`.vagrant`](roles/imgbuilder/vagrant): deploy these easy to setup vagrant machines as production machines and control them via saltstack
    * [`roles.desktop`](roles/desktop):
-     * everything needed from a desktop base installation for developing (ubuntu 16.04+14.04)
+     * everything needed from a desktop base installation for developing (ubuntu 16.04)
 
 ### How to start:
 
@@ -53,6 +52,3 @@ but it lacks documentation beside a few README.md .
  * [`/roles/*`](/roles/) : High level salt states
  * [`/roles/desktop/*`](/roles/desktop/)
             : High level salt states used for desktop setups
-
- * [`/repo/*`](/repo/)  : distribution specific repository setup
- * [`/win/*`](/win/)   : Windows specific salt states
