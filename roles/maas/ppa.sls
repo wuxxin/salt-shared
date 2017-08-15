@@ -9,3 +9,7 @@ include:
 {{ apt_add_repository("maas-ppa", "maas-maintainers/stable") }}
 
 {% endif %} 
+
+maas_nop:
+  test:
+    - nop

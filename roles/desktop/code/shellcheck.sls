@@ -2,16 +2,12 @@
 
 include:
   - ubuntu
-
-trusty-backports:
-  pkgrepo.managed:
-    - repo: 'deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse'
-    - file: /etc/apt/sources.list.d/trusty-backports.list
+  - ubuntu.backports
 
 shellcheck:
   pkg.installed:
     - require:
-      - pkgrepo: trusty-backports
+      - sls: ubuntu.backports
 
 {% else %}
 
