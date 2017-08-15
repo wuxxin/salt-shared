@@ -1,6 +1,5 @@
 include:
-  - python
-  - python.ipython
+  - python.dev
   - .ppa
 
 scipy:
