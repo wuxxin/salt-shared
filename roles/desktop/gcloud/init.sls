@@ -1,4 +1,4 @@
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {% set gcloud_source= "https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz" %}
 {% set gcloud_archive= "google-cloud-sdk.tar.gz" %}

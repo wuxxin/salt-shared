@@ -1,6 +1,8 @@
-{% if (grains['lsb_distrib_codename'] in ['trusty', 'rafaela', 'romeo']) %}
+{% if grains['lsb_distrib_codename'] == 'trusty' %}
+
 include:
   - repo.ubuntu
+
 trusty-backports:
   pkgrepo.managed:
     - repo: 'deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse'

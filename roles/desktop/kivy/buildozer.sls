@@ -4,7 +4,7 @@ include:
   - java.jdk
   - roles.desktop.android.user
 
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 buildozer:
   pkg.installed:

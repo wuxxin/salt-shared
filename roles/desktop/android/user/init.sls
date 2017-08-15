@@ -1,7 +1,7 @@
 include:
   - roles.desktop.android.sdk
 
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 android-create-user-profile:
   file:
