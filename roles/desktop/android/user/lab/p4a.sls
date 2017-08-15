@@ -1,5 +1,5 @@
 include:
-  - git
+  - vcs.git
   - java.jdk
   - .init
 

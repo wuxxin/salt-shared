@@ -1,9 +1,7 @@
 include:
-  - mercurial
-  - git
+  - vcs
   - git-crypt
-  - bzr
-  - subversion
+
 keyringer:
   pkg:
     - installed

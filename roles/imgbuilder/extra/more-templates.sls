@@ -1,6 +1,6 @@
 include:
   - packer
-  - git
+  - vcs.git
 
 
 basebox-packer:

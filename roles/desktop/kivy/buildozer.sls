@@ -1,6 +1,6 @@
 include:
   - python
-  - git
+  - vcs.git
   - java.jdk
   - roles.desktop.android.user
 

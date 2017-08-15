@@ -1,7 +1,5 @@
 include:
-  - mercurial
-  - git
-  - subversion
+  - vcs
   - python
   - python.ipython
   - latex
@@ -27,11 +25,9 @@ prereq_doconce:
       - curl
       - a2ps
     - require:
-      - pkg: mercurial
-      - pkg: git
-      - pkg: subversion
+      - sls: vcs
       - sls: python
-      - pkg: latex
+      - sls: latex
 
 {% load_yaml as pip_list %}
  - "sphinx"

@@ -1,5 +1,5 @@
 include:
-  - git
+  - vcs.git
   - openssl
 {% if grains['lsb_distrib_codename']  == 'trusty' %}
   - repo.ubuntu

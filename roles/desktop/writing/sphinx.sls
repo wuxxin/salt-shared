@@ -1,6 +1,5 @@
 include:
-  - mercurial
-  - git
+  - vcs
   - python
   - latex
 

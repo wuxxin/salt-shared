@@ -1,5 +1,5 @@
 include:
-  - git
+  - vcs.git
   - vagrant
   - rbenv
   - imgbuilder

@@ -1,5 +1,5 @@
 include:
-  - git
+  - vcs.git
 
 {% set tempdir= salt['cmd.run_stdout']('mktemp -d -q') %}
 {% set workdir= tempdir+ '/bind-to-tinydns' %}
