@@ -11,11 +11,8 @@ tools:
       - android-tools-adbd
       - android-tools-fastboot
 
-python-adb:
-  pip.installed:
-    - name: git+https://github.com/google/python-adb
-    - require:
-      - sls: python
+{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{{ pip2_install('git+https://github.com/google/python-adb') }}
 
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
 

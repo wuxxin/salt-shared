@@ -3,7 +3,7 @@ include:
   - java.jdk
   - .init
 
-{% from 'roles/desktop/user/lib.sls' import user, user_home with context %}
+{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 
 p4a:
