@@ -1,6 +1,7 @@
 include:
   - java
   - .user
+  
   - .android
   - .audio
   - .browser
@@ -22,13 +23,14 @@ include:
   - python.dev
   - vcs
   - git-crypt
-  - .homeshick
-  - .code
-  - .scipy
+  - .asciinema
   - .atom
+  - .code
   - .emulation
-  - .writing
+  - .homeshick
   - .gcloud
+  - .scipy
+  - .writing
 {#
   - java.jdk
   - .android.sdk
@@ -36,6 +38,8 @@ include:
   - .openwrt
   - .arduino
   - .kivy
+  - .caffee
+  - .neuro
 #}
 {% endif %}
 
