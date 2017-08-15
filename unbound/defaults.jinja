@@ -1,0 +1,21 @@
+{% load_yaml as defaults %}
+unbound:
+  redirect_host_dns: true
+  query_localhost: true
+
+{% endload %}
+
+{% load_yaml as example %}
+unbound:
+  listen:
+    - 127.0.0.1
+  answer:
+    - 127.0.0.1
+  follow:
+    unsigned:
+      "internal": "127.0.1.1"
+      "0.0.127.in.addr.arpa": "127.0.1.1"
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('unbound', {})) %}
