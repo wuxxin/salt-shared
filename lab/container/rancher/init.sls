@@ -22,7 +22,7 @@ rancher-server-container:
     - binds:
       - /data/mysql/rancher-server:/var/lib/mysql
     - port_bindings:
-      - {{ rahcner.server.ip }}:{{ rancher.server.port }}:8080
+      - {{ rancher.server.ip }}:{{ rancher.server.port }}:8080
     - restart_policy: always
     - require:
       - dockerng: rancher-server-image
