@@ -3,7 +3,7 @@ include:
   - cgroup
   - lxd.ppa
 {% if grains['osname'] == 'trusty' %}
-  {# need newer (2.0.x) version of libxc1 in trusty backports #}
+  {# lxd needs newer (2.0.x) libxc1, trusty has it in backports #}
   - ubuntu.backports
 {% endif %}
 
