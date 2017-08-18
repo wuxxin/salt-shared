@@ -1,77 +1,61 @@
 server:
-{% for l in dns.listen %}
+{%- for l in dns.listen %}
   - listen: {{ l }}
-{% endfor %}
+{%- endfor %}
 
 log:
   - target: syslog
     any: info
 
 key:
-{% for k in dns.key %}
+{%- for k in dns.key %}
   - id: {{ k.id }}
   - algorithm: {{ k.algorithm|d('hmac-md5') }}
   - secret: {{ k.secret }}
-{% endfor %}
+{%- endfor %}
 
 acl:
-{% for k in dns.key %}
+{%- for k in dns.key %}
   - id: {{ k.id }}
 {%- if k.from is defined %}
     address: {{ k.from }}
 {%- endif %}
     key: {{ k.id }}
     action: {{ k.action }}
-{% endfor %}
+{%- endfor %}
+
+{%- if dns.remote is defined %}
+remote:
+{%- for k in dns.remote %}
+  - id: {{ k.id }}
+{%- if k.address is defined %}
+    address: {{ k.address }}
+{%- endif %}
+    key: {{ k.key }}
 
 template:
   - id: unsigned
-    storage: /var/lib/knot/unsigned/{{ dns.id }}
+    storage: /var/lib/knot/{{ dns.id }}/unsigned
     semantic-checks: on
     acl: [{% for k in dns.key %}{{ k.id }},{% endfor %}]
-
   - id: signed
-    storage: /var/lib/knot/signed/{{ dns.id }}
+    storage: /var/lib/knot/{{ dns.id }}/signed
     dnssec-signing: on
     semantic-checks: on
     kasp-db: kasp
     acl: [{% for k in dns.key %}{{ k.id }},{% endfor %}]
-
   - id: slave
-    storage: /var/lib/knot/slave/{{ dns.id }}
+    storage: /var/lib/knot/{{ dns.id }}/slave
 
 zone:
-{%- for z in dns.zones %}
+{%- for z in dns.zone %}
   - domain: {{ z.domain }}
     template: {{ z.template|d('unsigned') }}
-    file: {{ z.file_extracted }}
   {%- if z.notify is defined %}
     notify:
     {%- for addr in z.notify %}
       - {{ addr }}
     {%- endfor %}
   {%- endif %}
-  {%- if z.reverse_dns is defined %}
-    {%- for net in z.reverse_dns %}
-  - domain: {{ net.reverse_domain }}
-    module: mod-synth-record/int_{{ net.little_name }}
-    notify:
-      {%- for addr in z.notify %}
-      - {{ addr }}
-      {%- endfor %}
-    {%- endfor %}
-  {%- endif %}
 {%- endfor %}
 
-mod-synth-record:
-{%- for z in dns.zones %}
-  {%- if z.reverse_dns is defined %}
-    {%- for net in z.reverse_dns %}
-  - id: int_{{ net.little_name }}
-    type: reverse
-    prefix: dyn-
-    origin: {{ z.domain }}
-    network: {{ net.network_and_mask }}
-    {%- endfor %}
-  {%- endif %}
-{%- endfor %}

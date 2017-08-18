@@ -16,6 +16,16 @@ knot:
     zone:
       - domain: domain.in.sub.domain
         file: "salt://hosts/host/knot/domain.in.sub.domain.yml"
+    remote:
+      - id: slave1
+        address: 192.168.2.1@53
+        key: transfer_key
+    common:
+      ttl: 7200         {# 2 hours #}
+      refresh: 14400    {# 4 hours #}
+      retry: 1800       {# 30 min #}
+      expire: 1814400   {# 3 weeks #}
+      nxdomain: 14400   {# 4 hours #}
 
   - id: private
     active: false
@@ -35,7 +45,4 @@ knot:
         template: signed
         notify: 
           - 10.9.8.1
-        reverse_dns: 
-          - 10.9.8.0/24
-          - 192.168.0/24
         file: "salt://hosts/host/knot/domain.yml"
