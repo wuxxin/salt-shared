@@ -22,7 +22,26 @@ knot:
       - pkgrepo: knot-ppa
 
   {%- for server in salt['pillar.get']('knot') %}
-    {%- if server.active|d(None) == true %}
+    {%- if server.active|d(false) == false %}
+
+knot-config-{{ server.id }}:
+  file.absent:
+    - name: /etc/knot/knot-{{ server.id }}.conf
+knot-{{ server.id }}.service:
+      {%- if grains['osrelease_info'][0] < 16 %}
+  service.dead:
+    - name: knot-{{ server.id }}
+  file.absent:
+    - name: /etc/init.d/knot-{{ server.id }}
+      {%- else %}
+  service.dead:
+    - name: knot-{{ server.id }}.service
+  file.absent:
+    - name: /etc/systemd/knot-{{ server.id }}.service
+      {%- endif %}
+
+    {%- else %}
+
 knot-config-{{ server.id }}:
   file.managed:
     - name: /etc/knot/knot-{{ server.id }}.conf
@@ -50,36 +69,45 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
     - context:
         dns: {{ server }}
         common: {{ server.common|d(defaults) }}
-
       {%- endfor %}
 
+/etc/default/knot-{{ server.id }}:
+  file.managed:
+    - contents: |
+        KNOTD_ARGS="-c /etc/knot/knot-{{ server.id }}.conf"
+        #
+        
+  
 knot-{{ server.id }}.service:
   file.managed:
-{% if grains['osmajorrelease'] < 16 %}
+      {%- if grains['osrelease_info'][0] < 16 %}
     - name: /etc/init.d/knot-{{ server.id }}
     - source: salt://knot/knot.init.d
     - mode: "0755"
-{% else %}
+
+      {%- else %}
     - name: /etc/systemd/knot-{{ server.id }}.service
     - source: salt://knot/knot.service
-{% endif %}
+      {%- endif %}
+      
     - template: jinja
     - context:
         identity: {{ server.id }}
+      
   service.running:
-{% if grains['osmajorrelease'] < 16 %}
+      {%- if grains['osrelease_info'][0] < 16 %}
     - name: knot-{{ server.id }}
-{% else %}
+      {%- else %}
     - name: knot-{{ server.id }}.service
-{% endif %}
+      {%- endif %}
+    - enable: true
     - require:
       - pkg: knot
     - watch:
         - file: knot-config-{{ server.id }}
         - file: knot-{{ server.id }}.service
-
+    
     {%- endif %}
   {%- endfor %}
-  
-{% endif %}
+{%- endif %}
 
