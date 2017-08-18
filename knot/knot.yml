@@ -8,73 +8,80 @@ log:
     any: info
 
 key:
-{%- for k in dns.key %}
+{%- if dns.key is defined %}
+  {%- for k in dns.key %}
   - id: {{ k.id }}
-  - algorithm: {{ k.algorithm|d('hmac-sha256') }}
-  - secret: {{ k.secret }}
-{%- endfor %}
+    algorithm: {{ k.algorithm|d('hmac-sha256') }}
+    secret: {{ k.secret }}
+  {%- endfor %}
+{%- endif %}
 
 acl:
-{%- for a in dns.acl %}
+{%- if dns.acl is defined %}
+  {%- for a in dns.acl %}
   - id: {{ a.id }}
-  {%- if a.address is defined %}
+    {%- if a.address is defined %}
     address: {{ a.address }}
-  {%- endif %}
-  {%- if a.action is defined %}
+    {%- endif %}
+    {%- if a.action is defined %}
     action: {{ a.action }}
-  {%- endif %}
-  {%- if a.action is defined or a.key is defined %}
+    {%- endif %}
+    {%- if a.action is defined or a.key is defined or a.address is not defined %}
     key: {{ a.key }}
-  {%- endif %}
-{%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
 
 remote:
-{%- for r in dns.remote %}
+{%- if dns.remote is defined %}
+  {%- for r in dns.remote %}
   - id: {{ r.id }}
     key: {{ r.key }}
+    {%- if r.address is defined %}
     address: {{ r.address }}
-  {%- if r.via is defined}
+    {%- endif %}
+    {%- if r.via is defined %}
     via: {{ r.via }}
-  {%- endif %}
+    {%- endif %}
+  {%- endfor %}
 {%- endif %}
 
 template:
   - id: unsigned
     storage: /var/lib/knot/{{ dns.id }}/unsigned
     semantic-checks: on
-    acl: [{% for k in dns.key %}{{ k.id }},{% endfor %}]
     
   - id: signed
     storage: /var/lib/knot/{{ dns.id }}/signed
     dnssec-signing: on
     semantic-checks: on
     kasp-db: kasp
-    acl: [{% for k in dns.key %}{{ k.id }},{% endfor %}]
     
   - id: slave
     storage: /var/lib/knot/{{ dns.id }}/slave
 
 zone:
-{%- for z in dns.zone %}
+{%- if dns.zone is defined %}
+  {%- for z in dns.zone %}
   - domain: {{ z.domain }}
     template: {{ z.template|d('unsigned') }}
-  {%- if z.master is defined %}
+    {%- if z.master is defined %}
     master:
-    {%- for entry in z.master %}
+      {%- for entry in z.master %}
       - {{ entry }}
-    {%- endfor %}
-  {%- endif %}
-  {%- if z.notify is defined %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if z.notify is defined %}
     notify:
-    {%- for entry in z.notify %}
+      {%- for entry in z.notify %}
       - {{ entry }}
-    {%- endfor %}
-  {%- endif %}
-  {%- if z.acl is defined %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if z.acl is defined %}
     acl:
-    {%- for entry in z.acl %}
+      {%- for entry in z.acl %}
       - {{ entry }}
-    {%- endfor %}
-  {%- endif %}
-{%- endfor %}
-
+      {%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}

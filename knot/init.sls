@@ -57,6 +57,14 @@ knot-config-{{ server.id }}:
       {%- for zone in server.zone %}
 knot-{{ server.id }}-zone-{{ zone.domain }}:
         {%- set targetfile = '/var/lib/knot/' + server.id+ '/'+ zone.template|d('unsigned')+ '/'+ zone.domain+ '.zone' %}
+        {%- if zone.file is not defined %}
+  file.present:
+    - name: {{ targetfile }}
+    - makedirs: true
+    - user: knot
+    - group: knot
+    - mode: "0640"
+        {%- else %}
   file.managed:
     - name: {{ targetfile }}
     - template: jinja
@@ -69,6 +77,7 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
     - context:
         dns: {{ server }}
         common: {{ server.common|d(defaults) }}
+        {%- endif %}
       {%- endfor %}
 
 /etc/default/knot-{{ server.id }}:
@@ -77,7 +86,7 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
         KNOTD_ARGS="-c /etc/knot/knot-{{ server.id }}.conf"
         #
         
-  
+
 knot-{{ server.id }}.service:
   file.managed:
       {%- if grains['osrelease_info'][0] < 16 %}
@@ -93,7 +102,7 @@ knot-{{ server.id }}.service:
     - template: jinja
     - context:
         identity: {{ server.id }}
-      
+{#      
   service.running:
       {%- if grains['osrelease_info'][0] < 16 %}
     - name: knot-{{ server.id }}
@@ -106,7 +115,7 @@ knot-{{ server.id }}.service:
     - watch:
         - file: knot-config-{{ server.id }}
         - file: knot-{{ server.id }}.service
-    
+#}    
     {%- endif %}
   {%- endfor %}
 {%- endif %}
