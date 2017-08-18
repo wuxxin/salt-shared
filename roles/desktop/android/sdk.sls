@@ -1,6 +1,7 @@
 include:
   - .tools
   - java.jdk
+  - .user
 
 {% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
 
