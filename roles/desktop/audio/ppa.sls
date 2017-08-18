@@ -2,7 +2,7 @@
 include:
   - ubuntu
 
-  {% if grains['osmajorrelease']|int <= 17 and 
+  {% if grains['osrelease_info'][0]|int <= 17 and 
     grains['osrelease'] != '17.10' %}
 
   {% from "ubuntu/init.sls" import apt_add_repository %}

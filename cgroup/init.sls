@@ -3,7 +3,7 @@ cgroup:
     - pkgs:
       - cgroup-lite
       {% if grains['osfullname'] == 'ubuntu' and 
-        grains['osmajorrelease']|int < 16 %}
+        grains['osrelease_info'][0] < 16 %}
       - cgroup-bin
       {% else %}
       - cgroup-tools

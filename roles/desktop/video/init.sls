@@ -41,7 +41,7 @@ video-packages:
     - require:
       - sls: roles.desktop.video.ppa
 
-  {% if grains['osmajorrelease']|int <= 16 and 
+  {% if grains['osrelease_info'][0]|int <= 16 and 
         grains['osrelease'] != '16.10' %}
   {# webcamstudio is available up to xenial and need ppa #}  
 webcamstudio:
