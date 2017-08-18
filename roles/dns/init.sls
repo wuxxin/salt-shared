@@ -2,7 +2,7 @@
 
 include:
   - .ppa
-
+{#
 {% if s.server is defined %}
 knot:
   pkg.installed:
@@ -28,7 +28,7 @@ knot_{{ server.id }}:
     {% endif %}
   {% endfor %}
 {% endif %}
-
+#}
 
 {% if s.cache.status|d(None) == "present" %}
 unbound:
