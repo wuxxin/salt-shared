@@ -2,66 +2,46 @@ include:
   - ubuntu
 
 {% if salt['pillar.get']('knot', false) %}
-  {% from "knot/defaults.jinja" import settings with context %}
+  {% from "knot/defaults.jinja" import config with context %}
   {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
 
-knot:
+  {% if grains['osrelease_info'][0] < 16 %}
+    {%- set service_name = 'knot' %}
+  {%- else %}
+    {%- set service_name = 'knot.service' %}
+  {%- endif %}
+
+knot-package:
   pkg.installed:
     - names:
       - knot
     - require:
       - pkgrepo: knot-ppa
 
-/usr/sbin/knot-config-check:
+knot-config-check:
   file.managed:
+    - name: /usr/sbin/knot-config-check
     - contents: |
         #!/bin/sh
         /usr/sbin/knotc -c $1 conf-check
         exit $?
     - mode: "0755"
     - require:
-      - pkg: knot
+      - pkg: knot-package
 
-  {%- for server in settings.instance|d([]) %}
-    
-    {%- set common_name = 'knot' if server.id == 'default' else 'knot-'+ server.id %}
-    {%- if grains['osrelease_info'][0] < 16 %}
-      {% load_yaml as service %}
-name: {{ common_name }}
-file: /etc/init.d/{{ common_name }}
-mode: "0755"
-source: salt://knot/knot.init.d
-conf: /etc/knot/{{ common_name }}.conf
-      {% endload %}
-    {%- else %}
-      {% load_yaml as service %}
-name: {{ common_name }}.service
-file: /etc/systemd/{{ common_name }}.service
-mode: "0644"
-source: salt://knot/knot.service
-conf: /etc/knot/{{ common_name }}.conf
-      {% endload %}
-    {%- endif %}  
-    
-    {%- if server.active|d(false) %}
-/etc/tmpfiles.d/{{ common_name }}.conf:
+  {%- if config.active|d(false) %}
+
+/etc/default/knot:
   file.managed:
-    - makedirs: true
+    - name: /etc/default/knot
     - contents: |
-        #Type Path        Mode UID      GID      Age Argument
-        d /run/knot/{{ common_name }}   0755 knot     knot     -   -
-        #
-default-knot-{{ server.id }}:
-  file.managed:
-    - name: /etc/default/{{ common_name }}
-    - contents: |
-        KNOTD_ARGS="-c {{ service.conf }}"
+        KNOTD_ARGS="-c /etc/knot/knot.conf"
         #
 
-knot-config-{{ server.id }}:
+/etc/knot/knot.conf:
   file.managed:
-    - name: {{ service.conf }}
+    - name: 
     - source: salt://knot/knot.jinja
     - template: jinja
     - makedirs: true
@@ -69,42 +49,22 @@ knot-config-{{ server.id }}:
     - group: knot
     - mode: "0640"
     - context:
-        server: {{ server }}
+        server: {{ config }}
     - check_cmd: /usr/sbin/knot-config-check
-
-knot-{{ server.id }}.service:
-  service.running:
-    - name: {{ service.name }}
-    - enable: true
     - require:
-      - pkg: knot
-    - watch:
-      - file: default-knot-{{ server.id }}
-      - file: knot-config-{{ server.id }}
-      {%- if server.id != 'default' %}
-      - file: knot-{{ server.id }}.service
-    - require:
-      - file: knot-{{ server.id }}.service  
-  file.managed:
-    - name: {{ service.file }}
-    - source: {{ service.source }}
-    - mode: "{{ service.mode }}"
-    - template: jinja
-    - context:
-        identity: {{ common_name }}
-      {%- endif %}
+      - file: knot-config-check
 
-      {%- for zone in server.zone %}
-knot-{{ server.id }}-zone-{{ zone.domain }}:
-        {%- set targetfile = '/var/lib/knot/' + server.id+ '/'+ zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
-        {%- if zone.source is not defined %}
+    {%- for zone in config.zone %}
+knot-zone-{{ zone.domain }}:
+      {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
+      {%- if zone.source is not defined %}
   file.present:
     - name: {{ targetfile }}
     - makedirs: true
     - user: knot
     - group: knot
     - mode: "0640"
-        {%- else %}
+      {%- else %}
   file.managed:
     - name: {{ targetfile }}
     - template: jinja
@@ -113,25 +73,30 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
     - user: knot
     - group: knot
     - mode: "0640"
-    - watch_in: knot-{{ server.id }}.service
+    - watch_in: knot.service
     - context:
-        common: {{ settings.common }}
-        {%- endif %}
-      {%- endfor %}
-
-    {%- else %}
-knot-{{ server.id }}.service:
-  service.dead:
-    - name: {{ service.name }}
-      {%- if server.id != 'default' %}
-  file.absent:
-    - name: {{ service.file }}
+        common: {{ config.common }}
       {%- endif %}
+    {%- endfor %}
+  
+knot:
+  service.running:
+    - name: {{ service_name }}
+    - enable: true
+    - require:
+      - pkg: knot-package
+    - watch:
+      - file: /etc/default/knot
+      - file: /etc/knot/knot.conf
 
-knot-config-{{ server.id }}:
-  file.absent:
-    - name: {{ service.conf }}    
-    {%- endif %}
-    
-  {%- endfor %}
+  {%- else %}
+knot:
+  service.dead:
+    - name: {{ service_name }}
+
+/etc/knot/knot.conf:
+  file:
+    - absent
+
+  {%- endif %}
 {%- endif %}

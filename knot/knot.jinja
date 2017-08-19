@@ -1,6 +1,6 @@
 {%- set template_default = {
     'id': 'default',
-    'storage': '/var/lib/knot/'+ server.id+ '/default'
+    'storage': '/var/lib/knot/default'
     }
 %}
 {%- set dns = server %}
@@ -16,12 +16,7 @@
     {%- set dummy = dns.__setitem__('template', template) %}
   {%- endif %}
 {%- endif %}
-{%- if not dns.server.rundir|d(false) %}
-  {%- set dummy = dns.server.__setitem__('rundir', '/run/knot/'+ server.id) %}
-{%- endif %}
-{%- for a in ['id', 'active',] %}
-  {%- set dummy = dns.__delitem__(a) %}
-{%- endfor %}
+{%- set dummy = dns.__delitem__('active') %}
 {%- for z in range(dns.zone|length) %}
   {%- if dns.zone[z].source is defined %}
     {%- set dummy = dns.zone[z].__delitem__('source') %}

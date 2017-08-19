@@ -1,70 +1,48 @@
 knot:
-  instance:
-  - id: default
-    active: false
-
-  - id: public
-    active: true
-    server:
-      listen:
-      - 1.2.3.4
-    key:
-    - id: transfer_key
-      secret: secret
-    - id: update_key
-      secret: secret
-    - id: notify_key
-      secret: secret
+  active: true
+  server:
+    listen:
+    - 1.2.3.4
+  common:
+    ttl: 3600
+  key:
+  - id: transfer_key
+    secret: secret
+  - id: update_key
+    secret: secret
+  - id: notify_key
+    secret: secret
+  acl:
+  - id: slave1_transfer
+    key: transfer_key
+    action: transfer
+    address: 192.168.2.1
+  - id: master1_notify
+    key: notify_key
+    action: notify
+  - id: updater1_update
+    key: update_key
+    action: update
+  remote:
+  - id: slave1
+    address: 192.168.2.1
+    key: transfer_key
+  - id: master1
+    address: 192.168.3.1
+    key: notify_key
+  - id: updater1
+    address: 192.168.4.1
+    key: update_key
+  zone:
+  - domain: domain.in.sub.domain
+    source: "salt://hosts/host/knot/domain.in.sub.domain.yml"
+    notify:
+    - slave1
     acl:
-    - id: slave1_transfer
-      key: transfer_key
-      action: transfer
-      address: 192.168.2.1
-    - id: master1_notify
-      key: notify_key
-      action: notify
-    - id: updater1_update
-      key: update_key
-      action: update
-    remote:
-    - id: slave1
-      address: 192.168.2.1
-      key: transfer_key
-    - id: master1
-      address: 192.168.3.1
-      key: notify_key
-    - id: updater1
-      address: 192.168.4.1
-      key: update_key
-    zone:
-    - domain: domain.in.sub.domain
-      source: "salt://hosts/host/knot/domain.in.sub.domain.yml"
-      notify:
-      - slave1
-      acl:
-      - slave1_transfer
-      - update1_update
-    - domain: slave.in.other.domain
-      master: master1
-      acl:
-      - master1_notify
+    - slave1_transfer
+    - update1_update
+  - domain: slave.in.other.domain
+    master: master1
+    acl:
+    - master1_notify
   
-  - id: private
-    active: false
-    server:
-      listen:
-      - 10.9.8.10
-    key:
-    - id: update_key
-      secret: secret
-    acl:
-    - id: updater2_update
-      key: update_key
-      action: update
-      address: 10.9.8.1
-    zone:
-    - domain: in.something.internal
-      template: signed
-      notify: 
-      - 10.9.8.1
-      source: "salt://hosts/host/knot/domain.yml"
