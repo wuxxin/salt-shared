@@ -15,6 +15,16 @@ knot:
     - require:
       - pkgrepo: knot-ppa
 
+/usr/sbin/knot-config-check:
+  file.managed:
+    - contents: |
+        #!/bin/sh
+        /usr/sbin/knotc -c $1 conf-check
+        exit $?
+    - mode: "0755"
+    - require:
+      - pkg: knot
+
   {%- for server in settings.instance|d([]) %}
     
     {%- set common_name = 'knot' if server.id == 'default' else 'knot-'+ server.id %}
@@ -57,6 +67,7 @@ knot-config-{{ server.id }}:
     - mode: "0640"
     - context:
         server: {{ server }}
+    - check_cmd: /usr/sbin/knot-config-check
 
 knot-{{ server.id }}.service:
   service.running:
