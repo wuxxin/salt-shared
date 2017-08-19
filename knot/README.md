@@ -14,3 +14,9 @@
         + you can use jinja templating within
 
 + drawbacks: currently there is no module config support (mod-modulename section)
+
++ TODO:
+  + check zone files before udpate
+  + warning: cannot open persistent timers DB (not exists)
+  + error: [121.168.192.in-addr.arpa] DNSSEC, failed to initialize (not found)
+  + error: [121.168.192.in-addr.arpa] failed to store changes into journal (not found)

@@ -4,14 +4,6 @@
     }
 %}
 {%- set dns = server %}
-{%- for a in ['id', 'active',] %}
-  {%- set dummy = dns.__delitem__(a) %}
-{%- endfor %}
-{%- for z in range(dns.zone|length) %}
-  {%- if dns.zone[z].source is defined %}
-    {%- set dummy = dns.zone[z].__delitem__('source') %}
-  {%- endif %}
-{%- endfor %}
 {%- if dns.log is not defined %}
   {%- from "knot/defaults.jinja" import log_default %}
   {%- set dummy = dns.__setitem__('log', log_default) %}
@@ -24,6 +16,17 @@
     {%- set dummy = dns.__setitem__('template', template) %}
   {%- endif %}
 {%- endif %}
+{%- if not dns.server.rundir|d(false) %}
+  {%- set dummy = dns.server.__setitem__('rundir', '/run/knot/'+ server.id) %}
+{%- endif %}
+{%- for a in ['id', 'active',] %}
+  {%- set dummy = dns.__delitem__(a) %}
+{%- endfor %}
+{%- for z in range(dns.zone|length) %}
+  {%- if dns.zone[z].source is defined %}
+    {%- set dummy = dns.zone[z].__delitem__('source') %}
+  {%- endif %}
+{%- endfor %}
 {%- macro iter_first(data, section, keyname) %}
 {%- if data[section] is defined %}
 {{ section }}:

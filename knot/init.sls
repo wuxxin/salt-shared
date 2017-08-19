@@ -2,11 +2,9 @@ include:
   - ubuntu
 
 {% if salt['pillar.get']('knot', false) %}
-
-{% from "ubuntu/init.sls" import apt_add_repository %}
+  {% from "knot/defaults.jinja" import settings with context %}
+  {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
-
-{% from "knot/defaults.jinja" import settings with context %}
 
 knot:
   pkg.installed:
@@ -28,7 +26,6 @@ knot:
   {%- for server in settings.instance|d([]) %}
     
     {%- set common_name = 'knot' if server.id == 'default' else 'knot-'+ server.id %}
-    
     {%- if grains['osrelease_info'][0] < 16 %}
       {% load_yaml as service %}
 name: {{ common_name }}
@@ -48,14 +45,20 @@ conf: /etc/knot/{{ common_name }}.conf
     {%- endif %}  
     
     {%- if server.active|d(false) %}
-
+/etc/tmpfiles.d/{{ common_name }}.conf:
+  file.managed:
+    - makedirs: true
+    - contents: |
+        #Type Path        Mode UID      GID      Age Argument
+        d /run/knot/{{ common_name }}   0755 knot     knot     -   -
+        #
 default-knot-{{ server.id }}:
   file.managed:
     - name: /etc/default/{{ common_name }}
     - contents: |
         KNOTD_ARGS="-c {{ service.conf }}"
         #
-          
+
 knot-config-{{ server.id }}:
   file.managed:
     - name: {{ service.conf }}
@@ -117,10 +120,6 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
       {%- endfor %}
 
     {%- else %}
-knot-config-{{ server.id }}:
-  file.absent:
-    - name: {{ service.conf }}
-
 knot-{{ server.id }}.service:
   service.dead:
     - name: {{ service.name }}
@@ -128,9 +127,11 @@ knot-{{ server.id }}.service:
   file.absent:
     - name: {{ service.file }}
       {%- endif %}
-    
+
+knot-config-{{ server.id }}:
+  file.absent:
+    - name: {{ service.conf }}    
     {%- endif %}
     
   {%- endfor %}
 {%- endif %}
-

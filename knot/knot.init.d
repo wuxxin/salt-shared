@@ -16,7 +16,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Knot DNS server {{ identity }}" # Introduce a short description here
 NAME=knotd             # Introduce the short server's name here
 DAEMON=/usr/sbin/$NAME # Introduce the server's location here
-PIDFILE=/run/knot/{{ identity }}.pid
+PIDFILE=/run/knot/{{ identity }}/knot.pid
 SCRIPTNAME=/etc/init.d/{{ identity }}
 KNOTC=/usr/sbin/knotc
 
@@ -110,7 +110,7 @@ do_tmpfiles() {
 
 case "$1" in
     start)
-	do_tmpfiles /usr/lib/tmpfiles.d/knot.conf
+	do_tmpfiles /etc/tmpfiles.d/{{ identity }}.conf
 	log_daemon_msg "Starting $DESC " "$NAME"
 	do_start
 	case "$?" in
