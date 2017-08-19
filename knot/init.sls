@@ -6,13 +6,7 @@ include:
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
 
-{% load_yaml as defaults %}
-ttl: 7200         {# 2 hours #}
-refresh: 14400    {# 4 hours #}
-retry: 1800       {# 30 min #}
-expire: 1814400   {# 3 weeks #}
-nxdomain: 14400   {# 4 hours #}
-{% endload %}
+{% from "knot/defaults.jinja" import settings with context %}
 
 knot:
   pkg.installed:
@@ -21,7 +15,7 @@ knot:
     - require:
       - pkgrepo: knot-ppa
 
-  {%- for server in salt['pillar.get']('knot') %}
+  {%- for server in settings.instance|d([]) %}
     {%- if server.active|d(false) == false %}
 
 knot-config-{{ server.id }}:
@@ -41,23 +35,22 @@ knot-{{ server.id }}.service:
       {%- endif %}
 
     {%- else %}
-
 knot-config-{{ server.id }}:
   file.managed:
     - name: /etc/knot/knot-{{ server.id }}.conf
+    - source: salt://knot/knot.jinja
     - template: jinja
-    - source: salt://knot/knot.yml
     - makedirs: true
     - user: knot
     - group: knot
     - mode: "0640"
     - context:
-        dns: {{ server }}
+        server: {{ server }}
 
       {%- for zone in server.zone %}
 knot-{{ server.id }}-zone-{{ zone.domain }}:
         {%- set targetfile = '/var/lib/knot/' + server.id+ '/'+ zone.template|d('unsigned')+ '/'+ zone.domain+ '.zone' %}
-        {%- if zone.file is not defined %}
+        {%- if zone.source is not defined %}
   file.present:
     - name: {{ targetfile }}
     - makedirs: true
@@ -68,15 +61,14 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
   file.managed:
     - name: {{ targetfile }}
     - template: jinja
-    - source: {{ zone.file }}
+    - source: {{ zone.source }}
     - makedirs: true
     - user: knot
     - group: knot
     - mode: "0640"
     - watch_in: knot-{{ server.id }}.service
     - context:
-        dns: {{ server }}
-        common: {{ server.common|d(defaults) }}
+        common: {{ settings.common }}
         {%- endif %}
       {%- endfor %}
 

@@ -1,68 +1,65 @@
 knot:
+  instance:
   - id: public
     active: true
-    common:
-      ttl: 7200         {# 2 hours #}
-      refresh: 14400    {# 4 hours #}
-      retry: 1800       {# 30 min #}
-      expire: 1814400   {# 3 weeks #}
-      nxdomain: 14400   {# 4 hours #}
-    listen:
+    server:
+      listen:
       - 1.2.3.4
     key:
-      - id: transfer_key
-        secret: secret
-      - id: update_key
-        secret: secret
-      - id: notify_key
-        secret: secret
+    - id: transfer_key
+      secret: secret
+    - id: update_key
+      secret: secret
+    - id: notify_key
+      secret: secret
     acl:
-      - id: slave1_transfer
-        key: transfer_key
-        action: transfer
-        address: 192.168.2.1
-      - id: master1_notify
-        key: notify_key
-        action: notify
-      - id: updater1_update
-        key: update_key
-        action: update
+    - id: slave1_transfer
+      key: transfer_key
+      action: transfer
+      address: 192.168.2.1
+    - id: master1_notify
+      key: notify_key
+      action: notify
+    - id: updater1_update
+      key: update_key
+      action: update
     remote:
-      - id: slave1
-        address: 192.168.2.1
-        key: transfer_key
-      - id: master1
-        address: 192.168.3.1
-        key: notify_key
-      - id: updater1
-        address: 192.168.4.1
-        key: update_key
+    - id: slave1
+      address: 192.168.2.1
+      key: transfer_key
+    - id: master1
+      address: 192.168.3.1
+      key: notify_key
+    - id: updater1
+      address: 192.168.4.1
+      key: update_key
     zone:
-      - domain: domain.in.sub.domain
-        file: "salt://hosts/host/knot/domain.in.sub.domain.yml"
-        notify:
-          - slave1
-        acl:
-          - slave1_transfer
-          - update1_update
-      - domain: slave.in.other.domain
-        master: master1
-        acl:
-          - master1_notify
-    
+    - domain: domain.in.sub.domain
+      source: "salt://hosts/host/knot/domain.in.sub.domain.yml"
+      notify:
+      - slave1
+      acl:
+      - slave1_transfer
+      - update1_update
+    - domain: slave.in.other.domain
+      master: master1
+      acl:
+      - master1_notify
+  
   - id: private
     active: false
-    listen:
+    server:
+      listen:
       - 10.9.8.10
     key:
-      - id: update_key
-        action: update
-        from:
-          - 10.9.8.1
-        secret: secret
+    - id: update_key
+      action: update
+      from:
+      - 10.9.8.1
+      secret: secret
     zone:
-      - domain: in.something.internal
-        template: signed
-        notify: 
-          - 10.9.8.1
-        file: "salt://hosts/host/knot/domain.yml"
+    - domain: in.something.internal
+      template: signed
+      notify: 
+      - 10.9.8.1
+      source: "salt://hosts/host/knot/domain.yml"

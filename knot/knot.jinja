@@ -1,0 +1,15 @@
+{%- set dns=server %}
+{%- for a in ['id', 'active',] %}
+  {%- set dummy=dns.__delitem__(a) %}
+{%- endfor %}
+{%- for z in range(server.zone|length) %}
+  {%- if dns.zone[z].source is defined %}
+    {%- set dummy=dns.zone[z].__delitem__('source') %}
+  {%- endif %}
+{%- endfor %}
+{%- if dns.log is not defined %}
+  {%- from "knot/defaults.jinja" import log_default %}
+  {%- set dummy=dns.__setitem__('log', log_default) %}
+{%- endif %}
+{{ dns|yaml(False) }}
+
