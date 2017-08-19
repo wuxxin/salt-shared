@@ -16,28 +16,39 @@ knot:
       - pkgrepo: knot-ppa
 
   {%- for server in settings.instance|d([]) %}
-    {%- if server.active|d(false) == false %}
-
-knot-config-{{ server.id }}:
-  file.absent:
-    - name: /etc/knot/knot-{{ server.id }}.conf
-knot-{{ server.id }}.service:
-      {%- if grains['osrelease_info'][0] < 16 %}
-  service.dead:
-    - name: knot-{{ server.id }}
-  file.absent:
-    - name: /etc/init.d/knot-{{ server.id }}
-      {%- else %}
-  service.dead:
-    - name: knot-{{ server.id }}.service
-  file.absent:
-    - name: /etc/systemd/knot-{{ server.id }}.service
-      {%- endif %}
-
+    
+    {%- set common_name = 'knot' if server.id == 'default' else 'knot-'+ server.id %}
+    
+    {%- if grains['osrelease_info'][0] < 16 %}
+      {% load_yaml as service %}
+name: {{ common_name }}
+file: /etc/init.d/{{ common_name }}
+mode: "0755"
+source: salt://knot/knot.init.d
+conf: /etc/knot/{{ common_name }}.conf
+      {% endload %}
     {%- else %}
+      {% load_yaml as service %}
+name: {{ common_name }}.service
+file: /etc/systemd/{{ common_name }}.service
+mode: "0644"
+source: salt://knot/knot.service
+conf: /etc/knot/{{ common_name }}.conf
+      {% endload %}
+    {%- endif %}  
+    
+    {%- if server.active|d(false) %}
+
+default-knot-{{ server.id }}:
+  file.managed:
+    - name: /etc/default/{{ common_name }}
+    - contents: |
+        KNOTD_ARGS="-c {{ service.conf }}"
+        #
+          
 knot-config-{{ server.id }}:
   file.managed:
-    - name: /etc/knot/knot-{{ server.id }}.conf
+    - name: {{ service.conf }}
     - source: salt://knot/knot.jinja
     - template: jinja
     - makedirs: true
@@ -47,9 +58,31 @@ knot-config-{{ server.id }}:
     - context:
         server: {{ server }}
 
+knot-{{ server.id }}.service:
+  service.running:
+    - name: {{ service.name }}
+    - enable: true
+    - require:
+      - pkg: knot
+    - watch:
+      - file: default-knot-{{ server.id }}
+      - file: knot-config-{{ server.id }}
+      {%- if server.id != 'default' %}
+      - file: knot-{{ server.id }}.service
+    - require:
+      - file: knot-{{ server.id }}.service  
+  file.managed:
+    - name: {{ service.file }}
+    - source: {{ service.source }}
+    - mode: "{{ service.mode }}"
+    - template: jinja
+    - context:
+        identity: {{ common_name }}
+      {%- endif %}
+
       {%- for zone in server.zone %}
 knot-{{ server.id }}-zone-{{ zone.domain }}:
-        {%- set targetfile = '/var/lib/knot/' + server.id+ '/'+ zone.template|d('unsigned')+ '/'+ zone.domain+ '.zone' %}
+        {%- set targetfile = '/var/lib/knot/' + server.id+ '/'+ zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
         {%- if zone.source is not defined %}
   file.present:
     - name: {{ targetfile }}
@@ -72,43 +105,21 @@ knot-{{ server.id }}-zone-{{ zone.domain }}:
         {%- endif %}
       {%- endfor %}
 
-/etc/default/knot-{{ server.id }}:
-  file.managed:
-    - contents: |
-        KNOTD_ARGS="-c /etc/knot/knot-{{ server.id }}.conf"
-        #
-        
+    {%- else %}
+knot-config-{{ server.id }}:
+  file.absent:
+    - name: {{ service.conf }}
 
 knot-{{ server.id }}.service:
-  file.managed:
-      {%- if grains['osrelease_info'][0] < 16 %}
-    - name: /etc/init.d/knot-{{ server.id }}
-    - source: salt://knot/knot.init.d
-    - mode: "0755"
-
-      {%- else %}
-    - name: /etc/systemd/knot-{{ server.id }}.service
-    - source: salt://knot/knot.service
+  service.dead:
+    - name: {{ service.name }}
+      {%- if server.id != 'default' %}
+  file.absent:
+    - name: {{ service.file }}
       {%- endif %}
-      
-    - template: jinja
-    - context:
-        identity: {{ server.id }}
-{#      
-  service.running:
-      {%- if grains['osrelease_info'][0] < 16 %}
-    - name: knot-{{ server.id }}
-      {%- else %}
-    - name: knot-{{ server.id }}.service
-      {%- endif %}
-    - enable: true
-    - require:
-      - pkg: knot
-    - watch:
-        - file: knot-config-{{ server.id }}
-        - file: knot-{{ server.id }}.service
-#}    
+    
     {%- endif %}
+    
   {%- endfor %}
 {%- endif %}
 

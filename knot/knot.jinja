@@ -1,15 +1,28 @@
-{%- set dns=server %}
+{%- set template_default = {
+    'id': 'default',
+    'storage': '/var/lib/knot/'+ server.id+ '/default'
+    }
+%}
+{%- set dns = server %}
 {%- for a in ['id', 'active',] %}
-  {%- set dummy=dns.__delitem__(a) %}
+  {%- set dummy = dns.__delitem__(a) %}
 {%- endfor %}
-{%- for z in range(server.zone|length) %}
+{%- for z in range(dns.zone|length) %}
   {%- if dns.zone[z].source is defined %}
-    {%- set dummy=dns.zone[z].__delitem__('source') %}
+    {%- set dummy = dns.zone[z].__delitem__('source') %}
   {%- endif %}
 {%- endfor %}
 {%- if dns.log is not defined %}
   {%- from "knot/defaults.jinja" import log_default %}
-  {%- set dummy=dns.__setitem__('log', log_default) %}
+  {%- set dummy = dns.__setitem__('log', log_default) %}
+{%- endif %}
+{%- if not dns.template['default']|d(false) %}
+  {%- if dns.template is not defined %}
+    {%- set dummy = dns.__setitem__('template', [template_default]) %}
+  {%- else %}
+    {%- set template = dns.template+ [template_default] %}
+    {%- set dummy = dns.__setitem__('template', template) %}
+  {%- endif %}
 {%- endif %}
 {{ dns|yaml(False) }}
 

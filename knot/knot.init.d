@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          knot-{{ identity }}
+# Provides:          {{ identity }}
 # Required-Start:    $network $local_fs $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
@@ -16,17 +16,17 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Knot DNS server {{ identity }}" # Introduce a short description here
 NAME=knotd             # Introduce the short server's name here
 DAEMON=/usr/sbin/$NAME # Introduce the server's location here
-PIDFILE=/run/knot/knot-{{ identity }}.pid
-SCRIPTNAME=/etc/init.d/knot-{{ identity }}
+PIDFILE=/run/knot/{{ identity }}.pid
+SCRIPTNAME=/etc/init.d/{{ identity }}
 KNOTC=/usr/sbin/knotc
 
 # Exit if the package is not installed
 [ -x $DAEMON ] || exit 0
 
-KNOTD_ARGS="-c /etc/knot/knot-{{ identity }}.conf"
+KNOTD_ARGS="-c /etc/knot/{{ identity }}.conf"
 
 # Read configuration variable file if it is present
-[ -r /etc/default/knot-{{ identity }} ] && . /etc/default/knot-{{ identity }}
+[ -r /etc/default/{{ identity }} ] && . /etc/default/{{ identity }}
 
 DAEMON_ARGS="-d $KNOTD_ARGS"
 

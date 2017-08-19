@@ -7,11 +7,11 @@ knot:
     expire: 1814400   {# 3 weeks #}
     nxdomain: 14400   {# 4 hours #}
 {% endload %}
+
 {% load_yaml as log_default %}
 - target: syslog
   any: info
 {% endload %}
-
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('knot', {})) %}

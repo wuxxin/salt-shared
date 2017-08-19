@@ -1,5 +1,11 @@
 knot:
   instance:
+  - id: default
+    active: true
+    server:
+      listen:
+      - 5.6.7.8
+  
   - id: public
     active: true
     server:
@@ -53,10 +59,12 @@ knot:
       - 10.9.8.10
     key:
     - id: update_key
-      action: update
-      from:
-      - 10.9.8.1
       secret: secret
+    acl:
+    - id: updater2_update
+      key: update_key
+      action: update
+      address: 10.9.8.1
     zone:
     - domain: in.something.internal
       template: signed
