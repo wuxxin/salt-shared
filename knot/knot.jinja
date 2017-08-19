@@ -24,5 +24,43 @@
     {%- set dummy = dns.__setitem__('template', template) %}
   {%- endif %}
 {%- endif %}
-{{ dns|yaml(False) }}
-
+{%- macro iter_first(data, section, keyname) %}
+{%- if data[section] is defined %}
+{{ section }}:
+{%- for i in data[section] %}
+- {{ keyname }}: {{ i[keyname] }}
+    {%- for v,d in i.iteritems() %}
+      {%- if v != keyname %}
+        {%- if d is iterable and d is not string and d|length > 1 %}
+  {{ v }}: [{%- for j in d %}{{ j }},{%- endfor %}]
+        {%- elif d is iterable and d is not string and d|length == 1 %}
+  {{ v }}: {{ d[0] }}
+        {%- else %}
+  {{ v }}: {{ d }}
+        {%- endif %}
+      {%- endif %}
+    {%- endfor %}
+{% endfor %}
+{%- endif %}
+{%- endmacro %}
+{%- if dns.server is defined %}
+server:
+{{ dns.server|yaml(False)|indent(2,True) }}
+{%- endif %}
+{%- if dns.control is defined %}
+control:
+{{ dns.control|yaml(False)|indent(2,True) }}
+{%- endif %}
+{%- if dns.statistics is defined %}
+statistics:
+{{ dns.statistics|yaml(False)|indent(2,True) }}
+{%- endif %}
+{{ iter_first (dns, 'module', 'id') }}
+{{ iter_first (dns, 'log', 'target') }}
+{{ iter_first (dns, 'keystore', 'id') }}
+{{ iter_first (dns, 'policy', 'id') }}
+{{ iter_first (dns, 'key', 'id') }}
+{{ iter_first (dns, 'remote', 'id') }}
+{{ iter_first (dns, 'acl', 'id') }}
+{{ iter_first (dns, 'template', 'id') }}
+{{ iter_first (dns, 'zone', 'domain') }}

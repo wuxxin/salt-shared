@@ -12,4 +12,5 @@
     + zone:
       + source: salt source file which gets copied to default file target for zone
         + you can use jinja templating within
-    
+
++ drawbacks: currently there is no module config support (mod-modulename section)

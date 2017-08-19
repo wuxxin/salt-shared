@@ -1,11 +1,8 @@
 knot:
   instance:
   - id: default
-    active: true
-    server:
-      listen:
-      - 5.6.7.8
-  
+    active: false
+
   - id: public
     active: true
     server:
