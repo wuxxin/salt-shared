@@ -32,21 +32,6 @@
         Defaults env_keep += "http_proxy https_proxy ftp_proxy no_proxy"
     - order: 5
 
-  {% if salt['file.file_exists']('/etc/default/docker') %}
-    {% for a in ['http_proxy', 'HTTP_PROXY'] %}
-docker_{{ a }}:
-  file.replace:
-    - name: /etc/default/docker
-    - pattern: |
-        ^#?export {{ a }}=.*"
-    - repl: |
-        export {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
-    - backup: False
-    - append_if_not_found: True
-    - order: 5
-    {% endfor %}
-  {% endif %}
-
 {# inactiv
 
 modify_dokku:
