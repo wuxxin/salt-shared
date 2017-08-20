@@ -21,7 +21,7 @@ salt_ppa:
 
 salt_ppa:
   pkgrepo.managed:
-    - name: deb http://repo.saltstack.com/apt/ubuntu/{{ grains['osrelease'] }}/{{ grains['osarch'] }}/{{ s.install.rev }} main
+    - name: deb http://repo.saltstack.com/apt/ubuntu/{{ grains['osrelease'] }}/{{ grains['osarch'] }}/{{ s.install.rev }} {{ grains['oscodename'] }} main
     - file: /etc/apt/sources.list.d/salt_ppa.list
     - key_url: salt://roles/salt/files/SALTSTACK-GPG-KEY.pub
   cmd.run:
