@@ -1,5 +1,7 @@
 include:
   - kernel
+  - kernel.sysctl.big
+  - kernel.limits.big
   - cgroup
   - python
 
