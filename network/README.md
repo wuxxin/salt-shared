@@ -4,10 +4,8 @@
 
 * activate extip.py (from _modules) to add additional functions
 * make a pillar (see example-pillar.sls)
-
-use "type: virtual" to make a interface not used for network.managed, but for other purposes (eg. net_list)
-
-use lib.sls for advanced network functions like: net_addr, net_calc, net_list 
+* use "type: virtual" to make a interface not used for network.managed, but for other purposes (eg. net_list)
+* use lib.sls for advanced network functions like: net_addr, net_calc, net_list 
 
 ## pillar usage
 
@@ -21,10 +19,11 @@ use lib.sls for advanced network functions like: net_addr, net_calc, net_list
 
 * Extended Usage:
 
-  * copy lib.sls to pillar/network/lib.sls to use functionality in pillar
+  * copy lib.sls to pillar/lib/network.sls to use functionality in pillar
+
 ```
 {% import_yaml "server/network.sls" as n with context %}
-{% from "network/lib.sls" import net_addr, net_calc, net_list with context %}
+{% from "lib/network.sls" import net_addr, net_calc, net_list with context %}
 
 vpn_net: {{ net_addr(n.network.interfaces['vpnnet']) }}
 vpn_mask: {{ n.network.interfaces['vpnnet'].netmask }}

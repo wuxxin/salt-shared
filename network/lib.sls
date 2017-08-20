@@ -55,7 +55,7 @@ network-route-{{ interface }}:
     - pattern: "^iface {{ interface }} inet ([a-z0-9]+)[ ]*$(^[ ]+(up)|(down) ip route .+$)?"
     - repl: "iface {{ interface }} inet \\1\\n{% for ipaddr, subdata in data.iteritems() %}    up  ip route add {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n    down ip route del {{ ipaddr }}/{{ subdata.netmask }} dev {{ interface }}\n{% endfor %}"
     - require_in:
-      - file: config_routes_override
+      - file: /etc/init/networking.override
   cmd.run:
     - name: "ifup --force {{ interface }}"
     - require:
