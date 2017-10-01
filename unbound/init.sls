@@ -5,9 +5,8 @@ include:
 
 {% if s.active|d(false) == true %}
 
-{% from "ubuntu/init.sls" import apt_add_repository %}
+  {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("nlnetlabs-ppa", "ondrej/pkg-nlnetlabs") }}
-
 
 unbound:
   pkg.installed:
@@ -24,7 +23,7 @@ unbound:
     - source: salt://dns/server/unbound.conf
     - template: jinja
     - context:
-        cache: {{ k.cache }}
+        settings: {{ s }}
 
 default_unbound_resolvconf:
   file.replace:
@@ -32,7 +31,7 @@ default_unbound_resolvconf:
     - pattern: |
         ^#?[ \t]*RESOLVCONF=.*
     - repl: |
-        RESOLVCONF={{ "true" if k.cache.redirect_host_dns == true else "false" }}
+        RESOLVCONF={{ "true" if s.redirect_host_dns == true else "false" }}
     - require:
       - pkg: unbound
 
@@ -45,6 +44,5 @@ default_unbound_RESOLVCONF_FORWARDERS:
         RESOLVCONF_FORWARDERS=false
     - require:
       - pkg: unbound
-
 
 {% endif %}
