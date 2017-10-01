@@ -2,7 +2,7 @@ include:
   - ubuntu
 
 {% if salt['pillar.get']('knot', false) %}
-  {% from "knot/defaults.jinja" import config with context %}
+  {% from "knot/defaults.jinja" import settings as s with context %}
   {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
 
@@ -30,7 +30,7 @@ knot-config-check:
     - require:
       - pkg: knot-package
 
-  {%- if config.active|d(false) %}
+  {%- if s.active|d(false) %}
 
 /etc/default/knot:
   file.managed:
@@ -54,7 +54,7 @@ knot-config-check:
     - require:
       - file: knot-config-check
 
-    {%- for zone in config.zone %}
+    {%- for zone in s.zone %}
 knot-zone-{{ zone.domain }}:
       {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
       {%- if zone.source is not defined %}
@@ -75,7 +75,7 @@ knot-zone-{{ zone.domain }}:
     - mode: "0640"
     - watch_in: knot.service
     - context:
-        common: {{ config.common }}
+        common: {{ s.common }}
       {%- endif %}
     {%- endfor %}
   
