@@ -1,0 +1,8 @@
+[Unit]
+Description=watch for /var/mail/root/new changes
+
+[Path]
+PathChanged=/var/mail/root/new
+
+[Install]
+WantedBy=prepare-appliance.service

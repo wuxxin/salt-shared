@@ -1,0 +1,20 @@
+[Unit]
+Description=Appliance Backup
+ConditionFileNotEmpty=/app/.gnupg/secring.gpg
+ConditionFileNotEmpty=/app/.duply/appliance-backup/conf
+After=network.target postgresql.service
+Requires=postgresql.service
+OnFailure=service-failed@%n.service
+
+[Service]
+Type=oneshot
+# max time for fullbackup is 5hours (equal 350GB using 20mb per Second)
+TimeoutStartSec=300min
+Environment=UNITNAME=%n
+Environment=ENV_YML=/run/active-env.yml
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
+    userdata_to_env appliance; \
+    exec /usr/local/share/appliance/appliance-backup.sh'
+
+[Install]
+WantedBy=default.target

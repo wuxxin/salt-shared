@@ -1,0 +1,22 @@
+[Unit]
+Description=Mail to Sentry Service
+ConditionFileNotEmpty=/run/active-env.yml
+After=network.target
+OnFailure=service-failed@%n.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=1min
+Environment=UNITNAME=%n
+Environment=ENV_YML=/run/active-env.yml
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
+    userdata_to_env appliance; \
+    if test -n "$APPLIANCE_SENTRY_DSN"; then \
+        SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/ravencat.py \
+            --release $(gosu app git -C /app/appliance rev-parse HEAD) \
+            --site "$APPLIANCE_DOMAIN" \
+            --level "warning" \
+            --maildir-message /var/mail/root; \
+    else \
+        echo "warning, new mail for root, but no sentry_dsn for forwarding is set"; \
+    fi'
