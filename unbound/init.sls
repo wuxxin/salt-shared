@@ -20,7 +20,7 @@ unbound:
       - file: /etc/default/unbound
   file.managed:
     - name: /etc/unbound/unbound.conf.d/unbound.conf
-    - source: salt://dns/server/unbound.conf
+    - source: salt://unbound/unbound.conf
     - template: jinja
     - context:
         settings: {{ s }}
@@ -28,6 +28,7 @@ unbound:
 default_unbound_resolvconf:
   file.replace:
     - name: /etc/default/unbound
+    - append_if_not_found: true
     - pattern: |
         ^#?[ \t]*RESOLVCONF=.*
     - repl: |
@@ -38,6 +39,7 @@ default_unbound_resolvconf:
 default_unbound_RESOLVCONF_FORWARDERS:
   file.replace:
     - name: /etc/default/unbound
+    - append_if_not_found: true
     - pattern: |
         ^#?[ \t]*RESOLVCONF_FORWARDERS=.*
     - repl: |
