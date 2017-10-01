@@ -9,3 +9,4 @@ linux-image:
       - {{ settings.virtual }}
 {%- endif %}
       - {{ settings.tools }}
+      - {{ settings.headers }}
