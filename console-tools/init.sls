@@ -5,13 +5,15 @@ include:
 base-tools:
   pkg.installed:
     - pkgs:
-      - unzip
-      - zip
-      - bzip2
-      - cabextract
+      {# system tools #}
+      - gosu
+      - git
+      - rsync
+      - curl
+      - wget
       {# user tools #}
       - mc    {#  #}
-      - jupp    {# user friendly full screen text editor #}
+      - jupp  {# user friendly full screen text editor #}
       - ncdu  {#  #}
       - tree  {#  #}
       - command-not-found {#  #}
@@ -29,7 +31,7 @@ base-tools:
       - nethogs     {# Net top tool grouping bandwidth per process #}
       - pciutils    {# Linux PCI utilities #}
       - usbutils    {# Linux USB utilities #}
-      {# other network #}
+      {# network #}
       - pv        {# monitor the progress of data through a pipe #}
       - socat     {# multipurpose relay for bidirectional data transfer #}
       - netcat    {# TCP/IP swiss army knife #}
@@ -37,15 +39,19 @@ base-tools:
       - etherwake {# tool to send magic Wake-on-LAN packets #}
       - httpie    {# CLI, cURL-like tool for humans #}
       - lynx      {# classic non-graphical (text-mode) web browser #}
-      - rsync
-      - curl
-      {# xml, html #}
-      - xmlstarlet      {# transform, query, validate, and edit XML #}
-      - html-xml-utils  {# manipulating and converting HTML and XML #}
+      - swaks     {# Swiss Army Knife SMTP, all-purpose smtp tester #}
       {# forensic #}
       - ext4magic
       - volatility
-      {# conversion #}
-      - pff-tools   {# export PAB,PST and OST files (MS Outlook) #}
+      {# packer/compressor #}
+      - bzip2
+      - cabextract
+      {# conversion/processor #}
+      - sqlite3         {# A command line interface for SQLite version 3 #}
+      - jq              {# Command-line JSON processor #}
+      - xmlstarlet      {# transform, query, validate, and edit XML #}
+      - html-xml-utils  {# manipulating and converting HTML and XML #}
+      - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
+
       
 {% endif %}
