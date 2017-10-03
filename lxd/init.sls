@@ -4,7 +4,7 @@ include:
   - kernel.limits.big
   - cgroup
   - lxd.ppa
-{% if grains['osname'] == 'trusty' %}
+{% if grains['oscodename'] == 'trusty' %}
   {# lxd needs newer (2.0.x) libxc1, trusty has it in backports #}
   - ubuntu.backports
 {% endif %}
@@ -15,11 +15,14 @@ lxd:
       - lxc
       - lxd
       - lxd-tools
+      - lvm2
+      - thin-provisioning-tools
+      - criu
       - bridge-utils
     - require:
       - sls: cgroup
       - sls: lxd.ppa
-{% if grains['osname'] == 'trusty' %}
+{% if grains['oscodename'] == 'trusty' %}
       - sls: ubuntu.backports
 {% endif %}
 
