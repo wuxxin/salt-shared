@@ -1,6 +1,7 @@
-
 {% set shorewall_parts = ["interfaces", "policy", "tunnels", "rules", "masq", "nat", "zones"] %}
 {% set shorewall_scripts = ["init", "stop", "start"] %}
+
+{% if salt['pillar.get']('shorewall:active')|d(false) == true %}
 
 shorewall:
   pkg:
@@ -11,14 +12,14 @@ shorewall:
     - require:
       - pkg: shorewall
     - watch:
-{%- for name in shorewall_parts %}
+  {%- for name in shorewall_parts %}
       - file: /etc/shorewall/{{ name }}
-{%- endfor %}
-{%- for name in shorewall_scripts %}
-{%- if salt['pillar.get']("shorewall:files:"+ name) is defined %}
+  {%- endfor %}
+  {%- for name in shorewall_scripts %}
+  {%- if salt['pillar.get']("shorewall:files:"+ name) is defined %}
       - file: /etc/shorewall/{{ name }}
-{%- endif %}
-{%- endfor %}
+  {%- endif %}
+  {%- endfor %}
       - file: /etc/default/shorewall
       - file: /etc/shorewall/shorewall.conf
 
@@ -29,29 +30,27 @@ shorewall:
     - append_if_not_found: true
     - backup: false
 
-{% if grains['os'] == 'Ubuntu' %}
+  {%- if grains['os'] == 'Ubuntu' %}
 /etc/shorewall/shorewall.conf:
   file.replace:
     - pattern: "^#?[\t ]*LOGFILE=.*"
     - repl: LOGFILE=/var/log/syslog
     - append_if_not_found: true
-{% endif %}
+  {%- endif %}
 
-{% for name in shorewall_parts %}
-
+  {%- for name in shorewall_parts %}
 /etc/shorewall/{{ name }}:
   file.managed:
-    - source: salt://roles/shorewall/files/{{ name }}
+    - source: salt://shorewall/files/{{ name }}
     - template: jinja
     - context:
       shorewall: {{ pillar.shorewall }}
   require:
     - pkg: shorewall
+  {%- endfor %}
 
-{% endfor %}
-
-{%- for name in shorewall_scripts %}
-{%- if salt['pillar.get']("shorewall:files:"+ name) is defined %}
+  {%- for name in shorewall_scripts %}
+    {%- if salt['pillar.get']("shorewall:files:"+ name) is defined %}
 /etc/shorewall/{{ name }}:
   file.managed:
     - contents: |
@@ -59,5 +58,7 @@ shorewall:
     - mode: "0755"
   require:
     - pkg: shorewall
+    {%- endif %}
+  {%- endfor %}
+
 {%- endif %}
-{%- endfor %}
