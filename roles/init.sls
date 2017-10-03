@@ -16,10 +16,6 @@ base:
     - match: pillar
     - roles.dhcp
 
-  'shorewall:status:present':
-    - match: pillar
-    - roles.shorewall
-
   'apt-cacher-ng:server:status:present':
     - match: pillar
     - roles.apt-cacher-ng
