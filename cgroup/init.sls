@@ -9,6 +9,8 @@ cgroup:
       - cgroup-tools
       {% endif %}
 
+{% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
+
 {# enable cgroup memory and swap accounting, needs kernel restart #}
 cgroup-grub-settings:
   file.managed:
@@ -20,3 +22,5 @@ cgroup-grub-settings:
     - name: update-grub
     - watch:
       - file: cgroup-grub-settings
+
+{% endif %}
