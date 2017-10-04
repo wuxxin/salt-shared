@@ -11,16 +11,18 @@ python3-ravencat-packages:
       - python3-chardet
     - require:
       - sls: python
-{{ pip3_install('raven') }}
 
 # python2 packages needed for saltstack raven (_returners/raven_return.py)
 python2-saltstack-raven-packages:
   pkg.installed:
     - pkgs:
       - python-requests
+
+# install both python raven versions
+{{ pip3_install('raven') }}
 {{ pip2_install('raven') }}
 
 /usr/local/bin/ravencat.py:
   file.managed:
-    - source: salt://console-tools/ravencat/ravencat.py
+    - source: salt://raven/ravencat.py
     - mode: "0755"

@@ -1,5 +1,10 @@
 include:
-  - .python
+  - python
+  - .flatyaml
+  - raven
+
+{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{{ pip2_install('percol') }}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
@@ -52,6 +57,5 @@ base-tools:
       - xmlstarlet      {# transform, query, validate, and edit XML #}
       - html-xml-utils  {# manipulating and converting HTML and XML #}
       - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
-
-      
+  
 {% endif %}
