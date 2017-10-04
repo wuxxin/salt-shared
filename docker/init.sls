@@ -1,3 +1,5 @@
+{% from "docker/defaults.jinja" import settings with context %}
+  
 include:
   - kernel
   - kernel.sysctl.big
@@ -11,14 +13,14 @@ include:
   file.managed:
     - contents: |
         Package: docker-engine
-        Pin: version 1.12.*
+        Pin: version {{ settings.version }}
         Pin-Priority: 900
 
 # add docker options from pillar to etc/default config, add http_proxy if set
 /etc/default/docker:
   file.managed:
     - contents: |
-        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
+        DOCKER_OPTIONS="{{ settings.options|d('') }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
   {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
         {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
@@ -40,8 +42,8 @@ docker-network:
     - enabled: true
     - ports: none
     - proto: static
-    - ipaddr: {{ salt['pillar.get']('docker:ip') }}
-    - netmask: {{ salt['pillar.get']('docker:netmask') }}
+    - ipaddr: {{ settings.ip }}
+    - netmask: {{ settings.netmask }}
     - stp: off
     - require:
       - pkg: docker-requisites

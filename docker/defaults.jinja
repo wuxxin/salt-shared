@@ -1,0 +1,10 @@
+{% load_yaml as defaults %}
+version: 1.12.*
+bridge: docker0
+ip: "172.17.0.1"
+netmask: "255.255.0.0"
+options: --storage-driver=overlay2 --bridge=docker0
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('docker', {})) %}
