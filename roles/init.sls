@@ -52,10 +52,6 @@ base:
     - match: pillar
     - roles.backupninja
 
-  'zentyal:status:present':
-    - match: pillar
-    - roles.zentyal
-
   'desktop:status:present':
     - match: pillar
     - roles.desktop
