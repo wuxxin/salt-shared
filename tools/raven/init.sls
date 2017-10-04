@@ -24,5 +24,5 @@ python2-saltstack-raven-packages:
 
 /usr/local/bin/ravencat.py:
   file.managed:
-    - source: salt://raven/ravencat.py
+    - source: salt://tools/raven/ravencat.py
     - mode: "0755"

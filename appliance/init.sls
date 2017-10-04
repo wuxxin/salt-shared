@@ -1,7 +1,6 @@
 include:
   - python
-  - console-tools
-  - console-tools.python
+  - tools
   - appliance.user
 
 {% for i in ['env.include', 'appliance.include',

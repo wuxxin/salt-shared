@@ -1,6 +1,6 @@
 include:
   - gnupg
-  - qrcode
+  - tools.qrcode
 
 preseed_pkgs:
   pkg.installed:

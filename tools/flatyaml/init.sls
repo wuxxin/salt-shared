@@ -10,5 +10,5 @@ flatyaml-common-packages:
 
 /usr/local/bin/flatyaml.py:
   file.managed:
-    - source: salt://console-tools/flatyaml/flatyaml.py
+    - source: salt://tools/flatyaml/flatyaml.py
     - mode: "0755"

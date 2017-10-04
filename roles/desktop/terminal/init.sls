@@ -1,5 +1,5 @@
 include:
-  - console-tools
+  - tools
   
 terminator:
   pkg:

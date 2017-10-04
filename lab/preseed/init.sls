@@ -1,5 +1,5 @@
 include:
-  - qrcode
+  - tools.qrcode
   - python
 
 {% from "python/init.sls" import pip2_install, pip3_install %}

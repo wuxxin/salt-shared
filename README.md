@@ -29,7 +29,7 @@ but it lacks documentation beside a few README.md .
      * caching recursive dns resolver
    * [knot](knot):
      * authoritative dnsec capable dns server
-   * [console-tools](console-tools):
+   * [tools](tools):
      * tools for administration
    * [`roles.desktop`](roles/desktop):
      * everything needed from a desktop base installation for developing (ubuntu 16.04)
