@@ -1,9 +1,9 @@
 {% if (grains['os'] == 'Ubuntu' and grains['oscodename'] == 'trusty') %}
 
 include:
-  - rbenv
+  - .rbenv
 
-{% from "rbenv/lib.sls" import default_local_ruby with context %}
+{% from "ruby/rbenv/lib.sls" import default_local_ruby with context %}
 {{ default_local_ruby('root','') }}
 
 default-ruby:
