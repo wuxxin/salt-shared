@@ -4,7 +4,7 @@ include:
   - kernel
   - kernel.sysctl.big
   - kernel.limits.big
-  - cgroup
+  - kernel.cgroup
   - python
   - systemd.reload
 
@@ -33,7 +33,7 @@ docker-requisites:
       - bridge-utils
       - ca-certificates
     - require:
-      - sls: cgroup
+      - sls: kernel.cgroup
       
 docker-network:
   network.managed:

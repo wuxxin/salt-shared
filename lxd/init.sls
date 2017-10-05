@@ -2,7 +2,7 @@ include:
   - kernel
   - kernel.sysctl.big
   - kernel.limits.big
-  - cgroup
+  - kernel.cgroup
   - lxd.ppa
 {% if grains['oscodename'] == 'trusty' %}
   {# lxd needs newer (2.0.x) libxc1, trusty has it in backports #}
@@ -20,7 +20,7 @@ lxd:
       - criu
       - bridge-utils
     - require:
-      - sls: cgroup
+      - slskernel.cgroup
       - sls: lxd.ppa
 {% if grains['oscodename'] == 'trusty' %}
       - sls: ubuntu.backports

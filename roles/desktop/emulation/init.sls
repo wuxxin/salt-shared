@@ -1,5 +1,5 @@
 include:
-  - cgroup
+  - kernel.cgroup
   - libvirt
   - roles.desktop.emulation.ppa
 
@@ -8,7 +8,7 @@ qemu:
     - pkgs:
       - qemu
     - require:
-      - sls: cgroup
+      - sls: kernel.cgroup
 
 virt-tools:
   pkg.installed:
