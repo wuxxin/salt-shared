@@ -1,4 +1,4 @@
-{% from "kernel/settings.jinja" import settings with context %}
+{% from "kernel/defaults.jinja" import settings with context %}
 
 linux-image:
   pkg.installed:
