@@ -22,11 +22,6 @@ prepare_metric() {
     else
         flag_and_service_disable "metric.gui" "grafana.service"
     fi
-    if is_truestr "$APPLIANCE_METRIC_PGHERO"; then
-        flag_and_service_enable "metric.pghero" "pghero-container.service"
-    else
-        flag_and_service_disable "metric.pghero" "pghero-container.service"
-    fi
 }
 
 mute_alerts() {
