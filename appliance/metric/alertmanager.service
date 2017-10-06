@@ -1,0 +1,29 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=docker.service
+ConditionPathExists=/volatile/alertmanager
+ConditionPathExists=/app/etc/flags/metric.server
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull prom/alertmanager
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    -p {{ salt['pillar.get']('docker:ip') }}:9093:9093 \
+    --net bridge \
+    -v /app/etc/alertmanager.yml:/etc/alertmanager.yml \
+    -v /app/alertmanager:/data \
+    prom/alertmanager \
+    -config.file=/etc/alertmanager.yml \
+    -storage.path=/data
+
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=5min
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+[Unit]
+Description=Prometheus exporter that mines /proc to report on selected processes
+After=docker.service postgresql.service
+Requires=docker.service
+ConditionPathExists=/app/etc/flags/metric.exporter
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker build -t process-exporter:latest https://github.com/ncabatoff/process-exporter.git
+
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net bridge \
+    -p {{ salt['pillar.get']('docker:ip') }}:9256:9256 \
+    -v /proc:/host/proc \
+    --privileged \
+    process-exporter \
+    -procfs /host/proc -procnames uwsgi,postgres,nginx,celery
+
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=10min
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

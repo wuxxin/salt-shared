@@ -1,0 +1,33 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=docker.service
+ConditionPathExists=/app/etc/flags/metric.exporter
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull prom/node-exporter
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net host \
+    -v /proc:/host/proc:ro \
+    -v /sys:/host/sys:ro \
+    -v /:/rootfs:ro \
+    -v /app/etc/metric_import:/host/metric_import \
+    prom/node-exporter \
+    -web.listen-address {{ salt['pillar.get']('docker:ip') }}:9100 \
+    -collector.textfile.directory /host/metric_import \
+    -collector.procfs /host/proc \
+    -collector.sysfs /host/sys \
+    -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)" \
+    -collectors.enabled  "diskstats,entropy,filefd,filesystem,hwmon,loadavg,mdadm,meminfo,netdev,netstat,stat,textfile,time,uname,vmstat"
+
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=5min
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

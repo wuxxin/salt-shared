@@ -1,0 +1,31 @@
+[Unit]
+Description=postgresql metrics exporter for prometheus
+After=docker.service
+ConditionPathExists=/app/etc/flags/metric.exporter
+ConditionPathExists=/app/etc/ecs/database_url.env
+Requires=docker.service postgresql.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull wrouesnel/postgres_exporter
+EnvironmentFile=/app/etc/ecs/database_url.env
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net bridge \
+    -p {{ salt['pillar.get']('docker:ip') }}:9187:9187 \
+    -e DATA_SOURCE_NAME=${DATABASE_URL} \
+    wrouesnel/postgres_exporter
+
+/bin/bash -c "set -o pipefail && journalctl -f | grok_exporter -config /app/etc/grok_exporter.yml"
+
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=5min
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+https://github.com/fstab/grok_exporter

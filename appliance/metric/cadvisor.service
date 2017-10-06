@@ -1,0 +1,29 @@
+[Unit]
+Description=Cadvisor
+After=docker.service
+ConditionPathExists=/app/etc/flags/metric.exporter
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull google/cadvisor
+ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net bridge \
+    -p {{ salt['pillar.get']('docker:ip') }}:5080:8080 \
+    -v /:/rootfs:ro \
+    -v /sys:/sys:ro \
+    -v /var/run:/var/run:ro \
+    -v $var_lib_docker:/var/lib/docker:ro \
+    google/cadvisor \
+    --housekeeping_interval=15s"
+
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=5min
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target
