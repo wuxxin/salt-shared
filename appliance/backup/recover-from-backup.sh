@@ -4,18 +4,13 @@
 
 usage(){
     cat << EOF
-Usage:  $0 [--only-restore] --yes-i-am-sure
+Usage:  $0 --yes-i-am-sure
 
 recovers database and files from backup.
 
 Requirements:
 + storage setup for target environment has already run
 + a valid environment with working backup config targeting the needed backup data
-+ /data/ecs-storage-vault directory, must exist and be empty
-+ /data/ecs-pgdump directory, must exist and be empty
-+ postgresql database ecs must not exist
-
-Option: --only-restore: do not import database dump after restore, do not restart appliance
 
 EOF
     exit 1
@@ -66,9 +61,9 @@ if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
 fi
 
 echo "restore files and database dump from backup"
-duply /root/.duply/appliance-backup restore /data/restore
+gosu app duply /app/.duply/appliance-backup restore /data/restore
 # add last backup config to cachedir, so we can detect if backup url has changed
-cp /root/.duply/appliance-backup/conf  /root/.cache/duplicity/duply_appliance-backup/conf
+cp /app/.duply/appliance-backup/conf  /app/.cache/duplicity/duply_appliance-backup/conf
 
 # test if appliance:backup:mount:type is set, unmount backup storage
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then

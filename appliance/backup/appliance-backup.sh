@@ -38,8 +38,8 @@ fi
 mv ${dbdump}.new ${dbdump}
 
 # check if we need to remove duplicity cache files, because backup url changed
-confdir=/root/.duply/appliance-backup
-cachedir=/root/.cache/duplicity/duply_appliance-backup
+confdir=/app/.duply/appliance-backup
+cachedir=/app/.cache/duplicity/duply_appliance-backup
 if test -e $cachedir/conf; then
     cururl=$(cat $confdir/conf   | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
     lasturl=$(cat $cachedir/conf | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
@@ -53,25 +53,25 @@ fi
 cp $confdir/conf $cachedir/conf
 
 # duplicity to thirdparty of /data/ecs-storage-vault, /data/ecs-pgdump
-/usr/bin/duply /root/.duply/appliance-backup cleanup --force
+gosu app /usr/bin/duply /app/.duply/appliance-backup cleanup --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply cleanup error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
-/usr/bin/duply /root/.duply/appliance-backup backup
+gosu app /usr/bin/duply /app/.duply/appliance-backup backup
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply backup error" "error" \
         "$(service_status appliance-backup.service)"
     exit 1
 fi
-/usr/bin/duply /root/.duply/appliance-backup purgefull --force
+gosu app /usr/bin/duply /app/.duply/appliance-backup purgefull --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
 # calculate used space; xxx not all volumes have max size, but the more data the less the error margin
 volumesizekb=$(( 25*1024))
-volumes=$(/usr/bin/duply /root/.duply/appliance-backup/ status | \
+volumes=$(/usr/bin/duply /app/.duply/appliance-backup/ status | \
     grep "Total number of contained volumes:" | \
     sed -r "s/[^:]+[^0-9]*([0-9]+)/\1/g" | \
     awk '{s+=$1} END {print s}')
