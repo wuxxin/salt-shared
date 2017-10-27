@@ -20,7 +20,7 @@ lxd:
       - criu
       - bridge-utils
     - require:
-      - slskernel.cgroup
+      - sls: kernel.cgroup
       - sls: lxd.ppa
 {% if grains['oscodename'] == 'trusty' %}
       - sls: ubuntu.backports
