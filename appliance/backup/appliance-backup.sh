@@ -1,77 +1,48 @@
 #!/bin/bash
-. /usr/local/share/appliance/appliance.include
-. /usr/local/share/appliance/prepare-backup.sh
-. /usr/local/share/appliance/prepare-metric.sh
+. /usr/local/share/appliance/appliance.functions.sh
+. /usr/local/share/appliance/backup.functions.sh
+. /usr/local/share/appliance/metric.functions.sh
 
 # remember start time
 start_epoch_seconds=$(date +%s)
+confdir=/app/.duply/appliance-backup
 
-# assure database exists
-gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw ecs
-if test $? -ne 0; then
-    sentry_entry "Appliance Backup" "backup abort: Database ECS does not exist"
-    exit 1
-fi
-
-# assure non empty ecs-storage-vault
-files_found=$(find /data/ecs-storage-vault -mindepth 1 -type f -exec echo true \; -quit)
-if test "$files_found" != "true"; then
-    sentry_entry "Appliance Backup" "backup abort: ecs-storage-vault is empty"
-    exit 1
-fi
-
-# test if appliance:backup:mount:type is set, if yes, mount backup storage
+backup_hook prefix_mount
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
     mount_backup_target
 fi
+backup_hook postfix_mount
 
-# pgdump to /data/ecs-pgdump
-dbdump=/data/ecs-pgdump/ecs.pgdump.gz
-gosu app /bin/bash -c "set -o pipefail &&  \
-    /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d ecs | \
-    /bin/gzip --rsyncable > ${dbdump}.new"
-if test "$?" -ne 0; then
-    sentry_entry "Appliance Backup" "backup error: could not create database dump" "error" \
-        "$(service_status appliance-backup.service)"
-    exit 1
-fi
-mv ${dbdump}.new ${dbdump}
+backup_hook prefix_config
+create_backup_config
+backup_hook postfix_config
 
-# check if we need to remove duplicity cache files, because backup url changed
-confdir=/app/.duply/appliance-backup
-cachedir=/app/.cache/duplicity/duply_appliance-backup
-if test -e $cachedir/conf; then
-    cururl=$(cat $confdir/conf   | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
-    lasturl=$(cat $cachedir/conf | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
-    if test "$cururl" != "$lasturl"; then
-        sentry_entry "Appliance Backup" "warning: different backup url, deleting backup cache directory"
-        rm -r $cachedir
-        mkdir -p $cachedir
-    fi
-fi
-# add last backup config to cachedir, so we can detect if backup url has changed
-cp $confdir/conf $cachedir/conf
-
-# duplicity to thirdparty of /data/ecs-storage-vault, /data/ecs-pgdump
-gosu app /usr/bin/duply /app/.duply/appliance-backup cleanup --force
+backup_hook prefix_cleanup
+# duplicity to thirdparty
+gosu app /usr/bin/duply $confdir cleanup --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply cleanup error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
-gosu app /usr/bin/duply /app/.duply/appliance-backup backup
+
+backup_hook prefix_backup
+gosu app /usr/bin/duply $confdir backup
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply backup error" "error" \
         "$(service_status appliance-backup.service)"
     exit 1
 fi
-gosu app /usr/bin/duply /app/.duply/appliance-backup purgefull --force
+
+backup_hook prefix_purge
+gosu app /usr/bin/duply $confdir purgefull --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
+
 # calculate used space; xxx not all volumes have max size, but the more data the less the error margin
 volumesizekb=$(( 25*1024))
-volumes=$(/usr/bin/duply /app/.duply/appliance-backup/ status | \
+volumes=$(/usr/bin/duply $confdir/ status | \
     grep "Total number of contained volumes:" | \
     sed -r "s/[^:]+[^0-9]*([0-9]+)/\1/g" | \
     awk '{s+=$1} END {print s}')
@@ -79,10 +50,11 @@ backupspacekb=$(( volumes * volumesizekb ))
 # sum the filesizes of the backuped directories
 backupdatasizekb=$(du --apparent-size --summarize --total -BK /data/ecs-storage-vault/ /data/ecs-pgdump/ | grep total | sed -r "s/([0-9]+).*/\1/")
 
-# test if appliance:backup:mount:type is set, unmount backup storage
+backup_hook prefix_unmount
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
     unmount_backup_target
 fi
+backup_hook postfix_unmount
 
 # calculate runtime
 end_epoch_seconds=$(date +%s)

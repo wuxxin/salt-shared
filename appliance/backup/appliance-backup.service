@@ -12,7 +12,7 @@ Type=oneshot
 TimeoutStartSec=300min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
-ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
     userdata_to_env appliance; \
     exec /usr/local/share/appliance/appliance-backup.sh'
 

@@ -1,6 +1,6 @@
 #!/bin/bash
-. /usr/local/share/appliance/env.include
-. /usr/local/share/appliance/appliance.include
+. /usr/local/share/appliance/env.functions.sh
+. /usr/local/share/appliance/appliance.functions.sh
 
 # ### environment setup, read userdata
 userdata_yaml=$(get_userdata)

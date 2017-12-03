@@ -1,5 +1,5 @@
 #!/bin/bash
-. /usr/local/share/appliance/env.include
+. /usr/local/share/appliance/env.functions.sh
 . /usr/local/share/appliance/prepare-backup.sh
 
 usage(){

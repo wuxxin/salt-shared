@@ -1,5 +1,5 @@
 # gpg encryption settings
-GPG_KEY='ECS_BACKUP'
+GPG_KEY='appliance_backup'
 GPG_PW=''
 GPG_OPTS='--trust-model always'
 

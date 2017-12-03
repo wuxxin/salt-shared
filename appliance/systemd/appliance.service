@@ -1,0 +1,24 @@
+[Unit]
+Description=Appliance
+ConditionPathExists=!/run/appliance-failed
+ConditionFileNotEmpty=/run/active-env.yml
+Requires=prepare-env.service prepare-appliance.service 
+After=prepare-appliance.service
+OnFailure=service-failed@%n.service
+# use `rm /run/appliance-failed; systemctl reset-failed` to recover from a failed state
+
+[Service]
+Type=simple
+Restart=always
+TimeoutStartSec=5min
+TimeoutStopSec=30s
+StartLimitInterval=5min
+StartLimitBurst=3
+Environment=UNITNAME=%n
+# XXX include env using env.functions.sh because systemd EnvironmentFile is missing multiline var support
+Environment=ENV_YML=/run/active-env.yml
+WorkingDirectory=/app
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; userdata_to_env appliance;
+
+[Install]
+WantedBy=multi-user.target

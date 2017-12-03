@@ -4,8 +4,16 @@ After=docker.service
 ConditionPathExists=/volatile/grafana
 ConditionPathExists=/app/etc/flags/metric.gui
 Requires=docker.service
+OnFailure=service-failed@%n.service
+StartLimitInterval=300
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=5min
+TimeoutStopSec=15
 ExecStartPre=-/usr/bin/docker kill %n.service
 ExecStartPre=-/usr/bin/docker rm %n.service
 ExecStartPre=/usr/bin/docker pull grafana/grafana
@@ -20,11 +28,6 @@ ExecStart=/usr/bin/docker run \
     --env GF_DASHBOARDS_JSON_ENABLED=false \
     --env GF_DASHBOARDS_JSON_PATH=/var/lib/grafana/dashboards \
     grafana/grafana
-
-Restart=on-failure
-RestartSec=30
-TimeoutStartSec=5min
-TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

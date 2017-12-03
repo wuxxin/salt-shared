@@ -9,7 +9,7 @@ Type=oneshot
 TimeoutStartSec=1min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
-ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
     userdata_to_env appliance; \
     if test -n "$APPLIANCE_SENTRY_DSN"; then \
         SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/ravencat.py \

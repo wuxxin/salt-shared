@@ -1,7 +1,7 @@
 
 /etc/opendkim.conf:
   file.managed:
-    - source: salt://appliance/postfix/opendkim.conf
+    - source: salt://appliance/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
         domain: {{ salt['pillar.get']('zentyal:domain') }}

@@ -1,6 +1,17 @@
 include:
-  - appliance.user
+  - appliance
   - systemd.reload
+
+/app/.duply/appliance-backup/conf.template:
+  file.managed:
+    - source: salt://appliance/backup/duply.conf.template
+    - makedirs: true
+    - require:
+      - sls: appliance
+
+/app/.duply/appliance-backup/exclude.template:
+  file.managed:
+    - source: salt://appliance/backup/exclude.template
 
 backup:
   pkg.installed:
@@ -16,7 +27,6 @@ backup:
   file.managed:
     - source: salt://appliance/backup/prepare-backup.sh
     - require:
-      - sls: appliance.user
 
 /usr/local/share/appliance/appliance-backup.sh:
   file.managed:
@@ -27,15 +37,6 @@ backup:
   file.managed:
     - source: salt://appliance/backup/recover-from-backup.sh
     - mode: "0755"
-
-/root/.duply/appliance-backup/conf.template:
-  file.managed:
-    - source: salt://appliance/backup/duply.conf.template
-    - makedirs: true
-
-/root/.duply/appliance-backup/exclude:
-  file.managed:
-    - source: salt://appliance/backup/duply.files
 
 /etc/systemd/system/appliance-backup.timer:
   file.managed:
@@ -58,8 +59,8 @@ enable-appliance-backup-service:
       - file: /etc/systemd/system/appliance-backup.service
       - file: /etc/systemd/system/appliance-backup.timer
       - file: /usr/local/share/appliance/appliance-backup.sh
-      - file: /root/.duply/appliance-backup/conf.template
-      - file: /root/.duply/appliance-backup/exclude
+      - file: /app/.duply/appliance-backup/conf.template
+      - file: /app/.duply/appliance-backup/exclude.template
     - watch:
       - file: /etc/systemd/system/appliance-backup.service
       - file: /etc/systemd/system/appliance-backup.timer

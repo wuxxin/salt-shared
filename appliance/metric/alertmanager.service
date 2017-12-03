@@ -4,11 +4,19 @@ After=docker.service
 ConditionPathExists=/volatile/alertmanager
 ConditionPathExists=/app/etc/flags/metric.server
 Requires=docker.service
+OnFailure=service-failed@%n.service
+StartLimitInterval=300
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=5min
+TimeoutStopSec=15
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull prom/alertmanager
+ExecStartPre=/usr/bin/docker pull prom/alertmanager:v0.9.1
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
@@ -16,14 +24,9 @@ ExecStart=/usr/bin/docker run \
     --net bridge \
     -v /app/etc/alertmanager.yml:/etc/alertmanager.yml \
     -v /app/alertmanager:/data \
-    prom/alertmanager \
+    prom/alertmanager:v0.9.1 \
     -config.file=/etc/alertmanager.yml \
     -storage.path=/data
-
-Restart=on-failure
-RestartSec=30
-TimeoutStartSec=5min
-TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

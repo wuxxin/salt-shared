@@ -1,5 +1,16 @@
 #!/bin/bash
 
+run_hook()
+{
+    for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
+        # execute $script
+        ENV_YML=/run/active-env.yml $script || (
+          sentry_entry "Appliance Hook" "hook error $1-$2-$script" "error" "$(service_status $1.service)"
+          exit 1
+        )
+    done
+}
+
 text2json(){
     python3 -c "import sys, json; \
     d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"

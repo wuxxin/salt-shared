@@ -10,13 +10,13 @@ Usage: . $0
 
 Examples:
     + read userdata yaml into variable x
-        `. env.include; x=$(get_userdata)`
+        `. env.functions.sh; x=$(get_userdata)`
 
     + read userdata yaml and make a bash "export x=y" list
-        `. env.include; x=$(userdata_to_list . --prefix export\ )`
+        `. env.functions.sh; x=$(userdata_to_list . --prefix export\ )`
 
     + read userdata from ENV_YML location, filter, convert, add to current env
-        `. env.include; ENV_YML=/run/active-env.yml userdata_to_env appliance`
+        `. env.functions.sh; ENV_YML=/run/active-env.yml userdata_to_env appliance`
 
 Locations searched (in order) for environment:
     + from salt-call pillar.items if environment variable ENV_YML=pillar

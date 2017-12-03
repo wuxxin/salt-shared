@@ -35,7 +35,7 @@ set_locale:
       - file: /etc/default/locale
 
       
-/etc/sudoers.d/ssh_auth:
+/etc/sudoers.d/ssh_auth_sock:
   file.managed:
     - makedirs: True
     - mode: "0440"

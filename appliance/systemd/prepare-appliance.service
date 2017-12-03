@@ -1,0 +1,19 @@
+[Unit]
+Description=Appliance Preparation
+ConditionPathExists=!/run/appliance-failed
+ConditionFileNotEmpty=/run/active-env.yml
+Requires=prepare-env.service
+Wants=postgresql.service nginx.service
+PartOf=appliance.service
+After=network.target postgresql.service nginx.service prepare-env.service
+ReloadPropagatedFrom=appliance.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=on
+TimeoutStartSec=30min
+Environment=UNITNAME=%n
+Environment=ENV_YML=/run/active-env.yml
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
+    userdata_to_env appliance; \
+    exec /usr/local/share/appliance/prepare-appliance.sh'
