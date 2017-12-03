@@ -5,7 +5,7 @@ include:
   - .qrcode
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('percol') }}
+{{ pip2_install('percol') }} {# interactive pipe filtering #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
