@@ -14,6 +14,9 @@ include:
   {{ apt_add_repository("webcamstudio_ppa", "webcamstudio/webcamstudio-dailybuilds") }}
   
   {{ apt_add_repository("obsstudio_ppa", "obsproject/obs-studio") }}
+  {{ apt_add_repository("openshot_ppa", "openshot.developers/ppa") }}
+  
+  
 {% endif %}
 
 video_nop:

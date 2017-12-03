@@ -27,6 +27,7 @@ video-packages:
       - vlc-nox
       - vlc-plugin-vlsub
       - mplayer
+      - openshot-qt
       
       {# obs-studio is available in zesty upwards, but newer in ppa #}
       - obs-studio
