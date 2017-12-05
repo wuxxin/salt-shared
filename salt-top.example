@@ -1,8 +1,4 @@
 # if you want to use this salt state top file, you should copy it to top.sls in one of your salt states root directories
-include:
-  - roles
-  - custom
-
 base: # try to sort from wider to narrow
 
   # any machine (not running Windows)

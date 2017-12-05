@@ -5,9 +5,7 @@ file: top.sls in pillar root
 base:
   '*':
     - timezone
-
-  'myminionid':
-    - myminionid
+    - custom
 
 ----
 
@@ -17,7 +15,7 @@ timezone: Europe/Vienna
 
 ----
 
-file: myminionid.sls in pillar root
+file: custom.sls in pillar root
 ----
 desktop:
   status: present
