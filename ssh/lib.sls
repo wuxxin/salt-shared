@@ -1,23 +1,33 @@
-{% macro ssh_keys_update(user, adminkeys_present, adminkeys_absent) %}
+{% macro ssh_keys_update(user, ssh_authorized_keys, ssh_deprecated_keys) %}
 
-{% if adminkeys_present|d(False) %}
-{{ user }}_adminkeys_present:
+  {% if ssh_authorized_keys|d(False) %}
+{{ user }}_ssh_authorized_keys:
   ssh_auth.present:
     - user: {{ user }}
     - names:
-{% for adminkey in adminkeys_present %}
+    {%- for adminkey in ssh_authorized_keys %}
       - "{{ adminkey }}"
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
 
-{% if adminkeys_absent|d(False) %}
-{{ user }}_adminkeys_absent:
+  {% if ssh_deprecated_keys|d(False) %}
+{{ user }}_ssh_deprecated_keys:
   ssh_auth.absent:
     - user: {{ user }}
     - names:
-{% for adminkey in adminkeys_absent %}
+    {%- for adminkey in ssh_deprecated_keys %}
       - "{{adminkey}}"
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
+
+{% endmacro %}
+
+{% macro remove_login_as_user_keys(user) %}
+{{ user }}_remove_keys_with_options:
+  file.replace:
+    - name: {{ salt['user.info'](user).home }}/.ssh/authorized_keys
+    - pattern: |
+        no.+,no.+,no.+,command=.echo..Please login as the user.+rather than the user.+;echo;sleep 10..
+    - repl: ""
 
 {% endmacro %}
