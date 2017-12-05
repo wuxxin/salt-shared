@@ -1,0 +1,15 @@
+[Unit]
+Description=Appliance Update
+ConditionPathExists=!/run/appliance-failed
+ConditionFileNotEmpty=/run/active-env.yml
+OnFailure=service-failed@%n.service
+After=network.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=60min
+Environment=UNITNAME=%n
+Environment=ENV_YML=/run/active-env.yml
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
+    userdata_to_env appliance; \
+    exec /usr/local/share/appliance/appliance-update.sh'

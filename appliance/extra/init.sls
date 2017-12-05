@@ -1,12 +1,12 @@
 include:
-  - appliance
+  - appliance.base
 
 /app/etc/hooks/prepare-appliance/start/extra.sh:
   file.managed:
     - source: salt://appliance/extra/prepare-appliance-start-extra.sh
     - filemode: "0755"
     - require:
-      - sls: appliance
+      - sls: appliance.base
 
 {# install additional packages from pillar #}
 {% if salt['pillar.get']('appliance:extra:packages', False) %}

@@ -7,7 +7,7 @@ include:
     - source: salt://appliance/backup/duply.conf.template
     - makedirs: true
     - require:
-      - sls: appliance
+      - sls: appliance.base
 
 /app/.duply/appliance-backup/exclude.template:
   file.managed:

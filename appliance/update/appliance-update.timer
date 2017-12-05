@@ -1,0 +1,9 @@
+[Unit]
+Description=Appliance Update Timer
+
+[Timer]
+# Everyday at 00:30(backup start) + 5(max backup run time) + 1 (possible daylight saving)= 06:30
+OnCalendar={{ salt['pillar.get']('appliance:update:oncalendar', '*-*-* 06:30:00') }}
+
+[Install]
+WantedBy=timers.target

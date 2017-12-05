@@ -6,4 +6,4 @@ include:
   file.managed:
     - source: salt://appliance/metric/prepare-metric.sh
     - require:
-      - sls: appliance
+      - sls: appliance.base
