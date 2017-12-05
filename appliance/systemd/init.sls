@@ -14,6 +14,8 @@ install_{{ n }}:
     - source: salt://appliance/systemd/{{ n }}
     - watch_in:
       - cmd: systemd_reload
+    - require:
+      - sls: appliance.base
 {% endfor %}
 
 

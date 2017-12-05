@@ -1,5 +1,5 @@
 include:
-  - appliance
+  - appliance.base
   - systemd.reload
 
 /app/.duply/appliance-backup/conf.template:

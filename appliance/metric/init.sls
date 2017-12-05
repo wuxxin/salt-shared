@@ -1,5 +1,5 @@
 include:
-  - appliance
+  - appliance.base
   - .prometheus
 
 /usr/local/share/appliance/prepare-metric.sh:

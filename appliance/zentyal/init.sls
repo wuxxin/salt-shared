@@ -10,3 +10,4 @@ zentyal_first_backup:
       - sls: .zentyal
       - sls: .mail
       - sls: .user
+      

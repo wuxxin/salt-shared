@@ -1,10 +1,12 @@
 include:
-  - python
-  - tools
+  - locale
+  - timezone
+  - ssh
   - acpi
   - haveged
-  - locale
-
+  - python
+  - tools
+  
 ca-certificates:
   pkg:
     - installed
