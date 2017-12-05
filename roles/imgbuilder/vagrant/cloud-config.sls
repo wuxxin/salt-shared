@@ -8,8 +8,8 @@
           - name: vagrant
             sudo: ['ALL=(ALL) NOPASSWD:ALL']
             ssh-authorized-keys:
-{%- if pillar['adminkeys_present']|d(False) %}
-  {%- for adminkey in pillar['adminkeys_present'] %}
+{%- if pillar['ssh_authorized_keys']|d(False) %}
+  {%- for adminkey in pillar['ssh_authorized_keys'] %}
               - "{{adminkey}}"
   {% endfor %}
 {%- endif %}

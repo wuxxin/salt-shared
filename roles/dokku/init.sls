@@ -47,8 +47,8 @@ dokku_core_dependencies:
     - require:
       - pkg: dokku
 
-{% if pillar['adminkeys_present']|d(False) %}
-{% for adminkey in pillar['adminkeys_present'] %}
+{% if pillar['ssh_authorized_keys']|d(False) %}
+{% for adminkey in pillar['ssh_authorized_keys'] %}
 "dokku_access_add_{{ adminkey }}":
   cmd.run:
     - name: echo "{{ adminkey }}" | sshcommand acl-add dokku admin
