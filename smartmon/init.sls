@@ -1,6 +1,8 @@
 smartmontools:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs:
+      - smartmontools
+      - hdparm
   service.running:
     - enable: true
     - require:
