@@ -1,13 +1,13 @@
 include:
-  - .zentyal
+  - .base
 
 # ### user creation
 /usr/local/sbin/create_zentyal_user.pl:
   file.managed:
-    - source: salt://roles/zentyal/files/create_zentyal_user.pl
-    - mode: 755
+    - source: salt://lab/zentyal/files/create_zentyal_user.pl
+    - mode: "0755"
     - require:
-      - sls: zentyal
+      - sls: base
 
 {% if pillar.zentyal.user|d(false) %}
   {% for n,v in pillar.zentyal.user.iteritems() %}

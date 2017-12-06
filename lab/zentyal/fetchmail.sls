@@ -21,7 +21,7 @@ fetchmail:
 
 /etc/fetchmailrc:
   file.managed:
-    - source: salt://roles/zentyal/files/fetchmailrc
+    - source: salt://lab/zentyal/files/fetchmailrc
     - mode: 600
     - user: fetchmail
     - template: jinja

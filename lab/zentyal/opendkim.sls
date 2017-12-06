@@ -1,10 +1,14 @@
-
+include:
+  - .base
+  
 /etc/opendkim.conf:
   file.managed:
-    - source: salt://appliance/zentyal/files/opendkim.conf
+    - source: salt://lab/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
         domain: {{ salt['pillar.get']('zentyal:domain') }}
+    - require:
+      - sls: .base
 
 /etc/default/opendkim:
   file.managed:

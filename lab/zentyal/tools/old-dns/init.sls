@@ -11,7 +11,7 @@ zentyal-dns:
 
 /etc/zentyal/hooks/dns.postsetconf:
   file.managed:
-    - source: salt://roles/zentyal/dns/dns.postsetconf
+    - source: salt://lab/zentyal/dns/dns.postsetconf
     - template: jinja
     - makedirs: true
     - context:
