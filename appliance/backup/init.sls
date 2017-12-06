@@ -23,10 +23,12 @@ backup:
       - cifs-utils
       # https://sourceforge.net/projects/pgbarman/
 
-/usr/local/share/appliance/prepare-backup.sh:
+/app/etc/hooks/prepare-appliance/start/backup.sh:
   file.managed:
-    - source: salt://appliance/backup/prepare-backup.sh
+    - source: salt://appliance/backup/prepare-appliance-start-backup.sh
+    - mode: "0755"
     - require:
+      - sls: appliance.base
 
 /usr/local/share/appliance/appliance-backup.sh:
   file.managed:

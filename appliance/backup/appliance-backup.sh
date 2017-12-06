@@ -13,10 +13,6 @@ if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
 fi
 backup_hook postfix_mount
 
-backup_hook prefix_config
-create_backup_config
-backup_hook postfix_config
-
 backup_hook prefix_cleanup
 # duplicity to thirdparty
 gosu app /usr/bin/duply $confdir cleanup --force

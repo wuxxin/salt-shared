@@ -1,3 +1,8 @@
+#!/bin/bash
+
+. /usr/local/share/appliance/env.functions.sh
+. /usr/local/share/appliance/appliance.functions.sh
+
 prepare_metric() {
     # set/clear flags and start/stop services connected to flags
     services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
@@ -24,3 +29,5 @@ prepare_metric() {
     fi
 }
 
+userdata_to_env appliance
+prepare_metric

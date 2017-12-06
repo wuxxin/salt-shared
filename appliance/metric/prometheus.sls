@@ -5,7 +5,7 @@ include:
 {% macro metric_install(name) %}
 /etc/systemd/system/{{ name }}.service:
   file.managed:
-    - source: salt://appliance/metric/{{ name }}.service
+    - source: salt://appliance/metric/service/{{ name }}.service
     - template: jinja
     - watch_in:
       - cmd: systemd_reload

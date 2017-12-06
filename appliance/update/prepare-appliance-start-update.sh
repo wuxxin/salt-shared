@@ -1,3 +1,7 @@
+#!/bin/bash
+
+. /usr/local/share/appliance/env.functions.sh
+
 prepare_update () {
     local oncalendar timertarget
     timertarget=/etc/systemd/system/appliance-update.timer
@@ -33,3 +37,7 @@ prepare_update () {
         fi
     fi
 }
+
+
+userdata_to_env appliance
+prepare_update

@@ -1,3 +1,7 @@
+#!/bin/bash
+
+. /usr/local/share/appliance/env.functions.sh
+
 prepare_extra_files () {
     # ### write out extra files from env
     if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
@@ -31,7 +35,6 @@ prepare_extra_packages () {
     fi
 }
 
-. /usr/local/share/appliance/env.functions.sh
 userdata_to_env appliance
 prepare_extra_files
 prepare_extra_packages
