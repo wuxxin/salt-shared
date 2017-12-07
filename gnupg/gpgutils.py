@@ -3,23 +3,73 @@
 """
 Encryption/Signing, Decryption/Verifying modul.
 
-- This module uses Gnu Privacy Guard for the actual encryption work
-
+- This module uses Gnu Privacy Guard 1/2 for the actual encryption work
   - The GNU Privacy Guard -- a free implementation of the OpenPGP standard as defined by RFC4880 
+
+- Environment
+  - set environment variable GPG_EXECUTABLE to use a custom existing gnupg binary 
 
 """
 
 import sys, os, subprocess, tempfile, re, inspect, pydoc
 
-GPG_EXECUTABLE = 'gpg'
 
-def _strbool(text):
-    ''' return either the boolean value (if isinstance(text,bool) or True if string is one of True or Yes (case insensitiv) or False'''
-    if isinstance(text,bool):
-        return text
+def _gpgname():
+    GPG_EXECUTABLE = 'gpg2'
+    if os.environ.get('GPG_EXECUTABLE'):
+        GPG_EXECUTABLE = os.environ['GPG_EXECUTABLE']
+    return GPG_EXECUTABLE
+
+
+def _gpg(args, batch_args=None):
+    call = [_gpgname()]+ args
+    stdin = subprocess.PIPE if batch_args else None
+    
+    try:
+        popen = subprocess.Popen(call,  
+          stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=stdin)
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            raise OSError('ERROR: gpg executable "{0}" not found'.format(_gpgname()))
+        else:
+            raise
+
+    if batch_args:
+        stdout, stderr = popen.communicate(batch_args)
+        popen.stdin.close()
     else:
-        text = text.upper()
-        return text in ['TRUE', 'YES']
+        stdout, stderr = popen.communicate()
+    
+    returncode = popen.returncode
+    if returncode != 0:
+        raise IOError('"{0}" returned error code: {1} , stdout was: {2}, stderr was: {3}'.format(call, returncode, stdout, stderr))
+      
+    return (returncode, stdout, stderr)
+
+
+def _gpgversion():
+    gpgversion = [0, 0, 0]
+    returncode, stdout, stderr = _gpg(['--version'])
+    vermatch = re.match(r'[^0-9]+([0-9]+)\.([0-9]+)\.([0-9]+)', 
+        stdout.decode('utf-8').splitlines()[0])
+    if vermatch is not None:
+        gpgversion = [int(vermatch.group(1)), int(vermatch.group(2)),
+            int(vermatch.group(3))]
+    return gpgversion
+  
+  
+def _isgpg2():
+    ''' returns True if gpg executable is gpg version 2 is detected '''
+    return _gpgversion()[0] == 2
+
+    
+def _strbool(data):
+    ''' return either the boolean value (if isinstance(text,bool) or True if string is one of True or Yes (case insensitiv) or False'''
+    if isinstance(data, bool):
+        return data
+    else:
+        return data.upper() in ['TRUE', 'YES']
+
 
 def reset_keystore(gpghome):
     ''' wipes out keystore under directory gpghome
@@ -33,37 +83,59 @@ def reset_keystore(gpghome):
         if os.path.isfile(path):
             os.remove(path)
 
-def gen_keypair(ownername, secretkey_filename, publickey_filename, keylength= 2560, ask_passphrase=False):
-    ''' writes a pair of ascii armored key files, first is secret key, second is publickey, minimum ownername length is five'''
+
+def gen_keypair(owneremail, secretkey_filename, publickey_filename, keylength= 2560, ask_passphrase=False):
+    ''' writes a pair of ascii armored key files, first is secret key, second is publickey, minimum owneremail length is five'''
     
     batch_args = "%echo Generating key\n"
     if _strbool(ask_passphrase):
         batch_args += "%ask-passphrase\n"
-
-    batch_args += "Key-Type: 1\nKey-Length: {0}\nExpire-Date: 0\nName-Real: {1}\n".format(keylength, ownername)
-    batch_args += "%secring {0}\n%pubring {1}\n".format(secretkey_filename, publickey_filename)
-
-    batch_args += "%commit\n%echo done\n"
-    
-    args = [GPG_EXECUTABLE, '--no-default-keyring', '--batch', '--armor', '--yes', '--gen-key']
-    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    stdout, empty = popen.communicate(batch_args)
-    popen.stdin.close()
-    returncode = popen.returncode
-    
-    if returncode != 0:
-        raise IOError('gpg --gen-key returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
     else:
-        print("gpg --gen-key ran successful, output was {0}".format(str(stdout)))
+        batch_args += "%no-protection\n"
+    if _isgpg2():
+        keytype = 'default'
+        gpgver = _gpgversion()
+        if gpgver[1] < 1 or gpgver[1] >= 1 and gpgver[2] < 15:
+            print('Warning: gpg version < 2.1.15 (your version={0}.{1}.{2}) has a known bug in secret key export if no passphrase is used, use gpg version 1 for gen_keypair or upgrade gpg2 to >= 2.1.15 '.format(*gpgver), file=sys.stderr)
+    else:
+        keytype = '1'
+        batch_args += "%secring {0}\n%pubring {1}\n".format(
+            secretkey_filename, publickey_filename)
+    
+    batch_args = "Key-Type: {0}\nKey-Length: {1}\n".format(keytype, keylength)
+    batch_args += "Name-Real: {0}\nName-Email: {0}\n".format(owneremail)
+    batch_args += "Expire-Date: 0\n"
+    batch_args += "%commit\n%echo done\n"
+    print(batch_args)
+    
+    if _isgpg2():
+        try:
+            gpghome = tempfile.mkdtemp()
+            reset_keystore(gpghome)
+            base_args = ['--homedir', gpghome, '--batch', '--yes' ]
+            args = baseargs + ['--gen-key']
+            returncode, stdout, stderr = _gpg(args, batch_args)
+            args = baseargs + ['--armor', '--export',
+                '--output', publickey_filename]
+            returncode, stdout, stderr = _gpg(args, batch_args)
+            args = baseargs + ['--armor', '--export-secret-keys',
+                '--output', publickey_filename]
+            returncode, stdout, stderr = _gpg(args, batch_args)
+        finally:
+            print(gpghome)
+            reset_keystore(gpghome)
+    else:
+        args = ['--no-default-keyring', '--armor', '--batch', '--yes', '--genkey']
+        returncode, stdout, stderr = _gpg(args, batch_args)
+        
+    return stdout
+    
 
 def import_key(keyfile, gpghome):
     ''' import a keyfile (generated by gen_keypair) into gpghome directory gpg keyring '''
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
-    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-    stdout, empty = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg --import returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
+    args = ['--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
+    returncode, stdout, stderr = _gpg(args)
+    return stdout
 
 def set_ownertrust(userid,  gpghome, trustlevel=5):
     ''' edit a already imported key and change the trustlevel (default 5=ultimate trust) '''
@@ -91,25 +163,19 @@ gpg --fingerprint --with-colons --list-keys |
 
 def publickey_list(gpghome):
     ''' returns a string listing all keys in keystore of gpghome '''
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
+    args = ['--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
         '--with-colons', '--list-keys', '--with-fingerprint', '--with-fingerprint']
-    popen = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    stdout, stderr = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg --import returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout+ stderr))
+    returncode, stdout, stderr = _gpg(args)
     return stdout
+
 
 def secretkey_list(gpghome):
     ''' returns a string listing all keys in keystore of gpghome '''
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
+    args = ['--homedir' , gpghome, '--batch', '--yes', '--fixed-list-mode',
         '--with-colons', '--list-secret-keys', '--with-fingerprint']
-    popen = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    stdout, stderr = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg --import returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout+ stderr))
+    returncode, stdout, stderr = _gpg(args)
     return stdout
+
 
 def encrypt_sign(sourcefile, destfile, gpghome, encrypt_owner, signer_owner=None):
     ''' read sourcefile, encrypt and optional sign and write destfile
@@ -119,19 +185,16 @@ def encrypt_sign(sourcefile, destfile, gpghome, encrypt_owner, signer_owner=None
     :param encrypt_owner: owner name of key for encryption using his/her public key 
     :param signer_owner: if not None: owner name of key for signing using his/her secret key 
     '''
-    args = [GPG_EXECUTABLE, '--homedir', gpghome, '--batch', '--yes', '--always-trust', 
+    args = ['--homedir', gpghome, '--batch', '--yes', '--always-trust', 
             '--recipient', encrypt_owner, '--output', destfile]
     if signer_owner:
         args += ['--local-user', signer_owner, '--sign']
     args += ['--encrypt', sourcefile]
-     
-    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-    stdout, empty = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg --encrypt returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
     
-
+    returncode, stdout, stderr = _gpg(args)
+    return stdout
+ 
+ 
 def decrypt_verify(sourcefile, destfile, gpghome, decrypt_owner, verify_owner=None):
     ''' read sourcefile, decrypt and optional verify if signer is verify_owner
     
@@ -140,20 +203,15 @@ def decrypt_verify(sourcefile, destfile, gpghome, decrypt_owner, verify_owner=No
     :raise IOError: on gnupg error, with detailed info
     :raise KeyError: if key owner could not be verified
     '''
-    args = [GPG_EXECUTABLE, '--homedir', gpghome, '--batch', '--yes', '--always-trust', 
+    args = ['--homedir', gpghome, '--batch', '--yes', '--always-trust', 
             '--recipient', decrypt_owner, 
             '--output', destfile, '--decrypt', sourcefile
             ] 
-    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-    stdout, empty = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg --decrypt returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
-    
+    returncode, stdout, stderr = _gpg(args)
     if verify_owner is not None:
         p = re.compile('gpg: Good signature from "'+ verify_owner+ '"')
         if p.match is None:
-            raise KeyError, 'could not verify that signer was keyowner: %s , cmd line was: %s , output was: %s' % (verify_owner, str(args), stdout)
+            raise KeyError, 'could not verify that signer was keyowner: %s , args: %s , stdout: %s , stderr: %s' % (verify_owner, str(args), stdout, stderr)
 
 
 def help(which=None):
@@ -163,6 +221,8 @@ def help(which=None):
         print (pydoc.render_doc(getattr(m, which)))
     else:
         print (pydoc.render_doc(m))
+    sys.exit(1)
+
 
 if __name__ == "__main__":
     args = sys.argv
@@ -170,9 +230,15 @@ if __name__ == "__main__":
     m = sys.modules[__name__]
     if not args:
         help()
-    else:
-        c = args.pop(0)
-        f = getattr(m, c)
-        r = f(*args)
-        if r:
-            print(r)
+    c = args.pop(0)
+    f = getattr(m, c, None)
+    if f is None:
+        print('ERROR: unknown command {0}'.format(c), file=sys.stderr)
+        help()
+    argspec=inspect.getargspec(f)
+    if len(argspec.args) - len(argspec.defaults) > len(args):
+        print('ERROR: wrong number of arguments for {0}'.format(c), file=sys.stderr)
+        help(c)
+    r = f(*args)
+    if r:
+        print(r)
