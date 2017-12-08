@@ -111,27 +111,3 @@ check_appliance_update(){
     $appliance_need_update
 }
 
-
-check_ecs_update() {
-    local current_source target last_running
-    local ecs_need_update=true
-    if test -e /app/ecs -a ! -e /app/bin/devupdate.sh; then
-        cd /app/ecs
-        current_source=$(gosu app git config --get remote.origin.url || echo "")
-        if test "$ECS_GIT_SOURCE" = "$current_source"; then
-            # fetch all updates from origin
-            gosu app git fetch -a -p
-            if test "$ECS_GIT_COMMITID" != ""; then
-                target="$ECS_GIT_COMMITID"
-            else
-                target=$(gosu app git -C /app/ecs rev-parse origin/$ECS_GIT_BRANCH)
-            fi
-            last_running=$(cat /app/etc/tags/last_running_ecs 2> /dev/null || echo "invalid")
-            if test "$last_running" = "$target"; then
-                ecs_need_update=false
-            fi
-        fi
-    fi
-    $ecs_need_update
-}
-

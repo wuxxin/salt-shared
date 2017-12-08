@@ -22,13 +22,22 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + metric.exporter
     + metric.server
     + metric.gui
-    + no.node-exporter
-    + no.cadvisor
-    + no.prometheus
-    + no.grafana
-    + no.process-exporter
+    
     + no.alertmanager
+    + no.cadvisor
+    + no.grafana
+    + no.node-exporter
     + no.postgres_exporter
+    + no.process-exporter
+    + no.prometheus
+
++ flags executed and deleted on update run
+    + force.update.appliance
+    + force.update.compose
+    + force.update.docker
+    + force.update.letsencrypt
+    + force.update.postgres
+    + force.update.system
 
 ## generate a new pillar env with secrets
 
