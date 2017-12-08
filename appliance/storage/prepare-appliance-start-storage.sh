@@ -1,6 +1,8 @@
 #!/bin/bash
 
 . /usr/local/share/appliance/env.functions.sh
+. /usr/local/share/appliance/appliance.functions.sh
+
 
 prepare_storage () {
     need_storage_setup=false

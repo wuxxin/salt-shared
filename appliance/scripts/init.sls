@@ -11,3 +11,9 @@ include:
       - sls: appliance.base
 {% endfor %}
 
+{% for i in ['env-create.sh', 'env-update.sh'] %}
+/usr/local/sbin/{{ i }}:
+  file.managed:
+    - source: salt://common/{{ i }}
+    - mode: "0755"
+{% endfor %}

@@ -3,6 +3,7 @@ include:
   - appliance.extra
   - appliance.scripts
   - appliance.systemd
+  - appliance.storage
   - appliance.update
   - appliance.backup
   - appliance.metric
@@ -21,6 +22,7 @@ appliance_nop:
       - sls: appliance.extra
       - sls: appliance.scripts
       - sls: appliance.systemd
+      - sls: appliance.storage
       - sls: appliance.update
       - sls: appliance.backup
       - sls: appliance.metric

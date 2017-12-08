@@ -4,7 +4,6 @@
   {%- set dummy=extra.__setitem__('appliance', {}) %}
 {%- endif %}
 {{ "{% from 'lib/keys.sls' import manage_secret %}" }}
-# add appliance:update:oncalendar to set a custom update schedule
 
 appliance:
   # # standby: default false, if set appliance will not activate
@@ -23,14 +22,16 @@ appliance:
   flags:
 {{ extra.appliance.flags|yaml(false)|indent(4,True) }}
 {%- else %}
-  # # flags: create all names as flags
-  # # you can disable a service by creating a flag named "no-"+ flagname
-  # # eg. no-postgres_exporter: true
+  # # flags: set or delete all entries
+  # # for a full list of available flags see appliance/README.md
+  # # eg. no-postgres_exporter
   # flags:
-  #   metric_exporter: false
-  #   metric_server: false
-  #   metric_gui: false
-  #   metric_pghero: false
+  #   enabled:
+  #   disabled:
+  #   - metric.exporter
+  #   - metric.server
+  #   - metric.gui
+  #   - metric.pghero
 {%- endif %}
 {%- if extra.appliance.git|d(false) %}
   git:

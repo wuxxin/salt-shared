@@ -1,6 +1,7 @@
 #!/bin/bash
 set -o pipefail
 . /usr/local/share/appliance/appliance.functions.sh
+flagdir=/app/etc/flags
 
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     # set hostname from env if different
@@ -8,10 +9,16 @@ if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     hostnamectl set-hostname $APPLIANCE_DOMAIN
 fi
 
-if test "$APPLIANCE_FLAGS_LEN" != ""; then
-    for i in $(seq 0 $(( $APPLIANCE_FLAGS_LEN -1 )) ); do
-        fieldname="APPLIANCE_FLAGS_${i}"; fname="${!fieldname}"
-        touch /app/etc/flags/$fname
+if test "$APPLIANCE_FLAGS_ENABLED_LEN" != ""; then
+    for i in $(seq 0 $(( $APPLIANCE_FLAGS_ENABLED_LEN -1 )) ); do
+        fname="APPLIANCE_FLAGS_ENABLED_${i}"; fvalue="${!fname}"
+        touch $flagdir/$fvalue
+    done
+fi
+if test "$APPLIANCE_FLAGS_DISABLED_LEN" != ""; then
+    for i in $(seq 0 $(( $APPLIANCE_FLAGS_DISABLED_LEN -1 )) ); do
+        fname="APPLIANCE_FLAGS_DISABLED_${i}"; fvalue="${!fname}"
+        if test -e $flagdir/$fvalue; then rm $flagdir/$fvalue; fi
     done
 fi
         

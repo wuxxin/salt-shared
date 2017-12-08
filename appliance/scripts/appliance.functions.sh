@@ -90,16 +90,6 @@ is_falsestr () {
     test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
 }
 
-flag_and_service_enable () {
-    touch /app/etc/flags/$1
-    systemctl start $2
-}
-
-flag_and_service_disable () {
-    if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
-    systemctl stop $2
-}
-
 default_route_interface_ip () {
     default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
     ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }'
