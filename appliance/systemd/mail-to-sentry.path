@@ -5,4 +5,4 @@ Description=watch for /var/mail/root/new changes
 PathChanged=/var/mail/root/new
 
 [Install]
-WantedBy=prepare-appliance.service
+WantedBy=appliance-prepare.service

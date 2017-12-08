@@ -1,4 +1,4 @@
-# setup storage on running appliance, this is called from prepare-appliance
+# setup storage on running appliance, this is called from appliance-prepare
 
 {% macro mount_setup(name) %}
 mount-{{ name }}:

@@ -9,4 +9,4 @@ Type=oneshot
 RemainAfterExit=on
 TimeoutStartSec=30
 Environment="UNITNAME=%n"
-ExecStart=/usr/local/share/appliance/prepare-env.sh
+ExecStart=/usr/local/share/appliance/env-prepare.sh

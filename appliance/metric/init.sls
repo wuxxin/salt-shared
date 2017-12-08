@@ -8,9 +8,9 @@ include:
     - require:
       - sls: appliance.base
 
-/app/etc/hooks/prepare-appliance/start/metric.sh:
+/app/etc/hooks/appliance-prepare/start/metric.sh:
   file.managed:
-    - source: salt://appliance/backup/prepare-appliance-start-metric.sh
+    - source: salt://appliance/backup/appliance-prepare-start-metric.sh
     - mode: "0755"
     - require:
       - sls: appliance.base

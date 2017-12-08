@@ -4,7 +4,7 @@ include:
 
 
 {% for n in [
-  'prepare-env.service', 'prepare-appliance.service', 
+  'env-prepare.service', 'appliance-prepare.service', 
   'service-failed@.service',
   'mail-to-sentry.service', 'mail-to-sentry.path',
   ] %}

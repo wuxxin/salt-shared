@@ -2,7 +2,7 @@ include:
   - appliance.base
   
 {% for i in ['env.functions.sh', 'appliance.functions.sh',
- 'prepare-env.sh', 'prepare-appliance.sh'] %}
+ 'env-prepare.sh', 'appliance-prepare.sh'] %}
 /usr/local/share/appliance/{{ i }}:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}

@@ -1,9 +1,9 @@
 include:
   - appliance.base
 
-/app/etc/hooks/prepare-appliance/start/extra.sh:
+/app/etc/hooks/appliance-prepare/start/extra.sh:
   file.managed:
-    - source: salt://appliance/extra/prepare-appliance-start-extra.sh
+    - source: salt://appliance/extra/appliance-prepare-start-extra.sh
     - filemode: "0755"
     - require:
       - sls: appliance.base

@@ -44,9 +44,9 @@ backup:
       - cifs-utils
       # https://sourceforge.net/projects/pgbarman/
 
-/app/etc/hooks/prepare-appliance/start/backup.sh:
+/app/etc/hooks/appliance-prepare/start/backup.sh:
   file.managed:
-    - source: salt://appliance/backup/prepare-appliance-start-backup.sh
+    - source: salt://appliance/backup/appliance-prepare-start-backup.sh
     - mode: "0755"
     - require:
       - sls: appliance.base

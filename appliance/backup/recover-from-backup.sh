@@ -53,7 +53,7 @@ rm /app/etc/tags/last_running_ecs
 systemctl disable appliance-backup
 
 echo "write backup access config"
-/etc/app/hooks/prepare-appliance/start/backup.sh
+/etc/app/hooks/appliance-prepare/start/backup.sh
 
 # test if appliance:backup:mount:type is set, mount backup storage
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then

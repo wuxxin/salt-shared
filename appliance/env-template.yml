@@ -18,12 +18,11 @@ appliance:
   #   dsn: 'https://url'
 {%- endif %}
 {%- if extra.appliance.flags|d(false) %}
-  # # flags: create all names as flags
+  # # flags: set or delete flags, for list see appliance/README.md
   flags:
 {{ extra.appliance.flags|yaml(false)|indent(4,True) }}
 {%- else %}
-  # # flags: set or delete all entries
-  # # for a full list of available flags see appliance/README.md
+  # # flags: set or delete flags, for list see appliance/README.md
   # # eg. no-postgres_exporter
   # flags:
   #   enabled:
@@ -31,7 +30,6 @@ appliance:
   #   - metric.exporter
   #   - metric.server
   #   - metric.gui
-  #   - metric.pghero
 {%- endif %}
 {%- if extra.appliance.git|d(false) %}
   git:
@@ -60,7 +58,7 @@ appliance:
   {%- endfor %}
 {%- else %}
   # extra:
-  #   # write out extra files on state.highstate and prepare-appliance
+  #   # write out extra files on state.highstate and appliance-prepare
   #   files:
   #     - path: /path/of/filename
   #       content: |
@@ -68,7 +66,7 @@ appliance:
   #       owner: user:group
   #       permissions: "0600"
 {%- endif %}
-  #   # include extra packages, will be installed on state.highstate and prepare-appliance
+  #   # include extra packages, will be installed on state.highstate and appliance-prepare
   #   packages:
   #     - qrcode
   #   # states: # string to be executed as a salststack sls at state.highstate

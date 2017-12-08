@@ -7,7 +7,7 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
 
 ### Available Hooks
 
-+ `/appliance-backup/`
++ `appliance-backup`
     + prefix_mount
     + postfix_mount
     + prefix_cleanup
@@ -16,9 +16,14 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + prefix_unmount
     + postfix_unmount
 
++ `appliance-prepare`
+    + start
+    + 
 ## flags
 
 + basedir: `/app/etc/flags/`
+
++ metric system flags
     + metric.exporter
     + metric.server
     + metric.gui
@@ -31,7 +36,7 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + no.process-exporter
     + no.prometheus
 
-+ flags executed and deleted on update run
++ update system flags, will be deleted after update execution
     + force.update.appliance
     + force.update.compose
     + force.update.docker
