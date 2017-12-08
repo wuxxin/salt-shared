@@ -2,6 +2,7 @@
 Description=Cadvisor
 After=docker.service
 ConditionPathExists=/app/etc/flags/metric.exporter
+ConditionPathExists=!/app/etc/flags/no-cadvisor
 Requires=docker.service
 OnFailure=service-failed@%n.service
 StartLimitInterval=300

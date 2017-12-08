@@ -3,6 +3,7 @@ Description=Prometheus Node Exporter
 After=docker.service
 ConditionPathExists=/volatile/alertmanager
 ConditionPathExists=/app/etc/flags/metric.server
+ConditionPathExists=!/app/etc/flags/no-alertmanager
 Requires=docker.service
 OnFailure=service-failed@%n.service
 StartLimitInterval=300

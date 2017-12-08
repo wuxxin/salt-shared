@@ -1,4 +1,5 @@
 include:
+  - appliance.base
   - systemd.reload
   - docker
 
