@@ -1,7 +1,7 @@
 [Unit]
 Description=Appliance Backup
-ConditionFileNotEmpty=/app/.gnupg/secring.gpg
-ConditionFileNotEmpty=/app/.duply/appliance-backup/conf
+ConditionFileNotEmpty=/var/spool/duplicity/.gnupg/secring.gpg
+ConditionFileNotEmpty=/var/spool/duplicity/.duply/appliance-backup/conf
 After=network.target postgresql.service
 Requires=postgresql.service
 OnFailure=service-failed@%n.service

@@ -5,7 +5,7 @@
 
 # remember start time
 start_epoch_seconds=$(date +%s)
-confdir=/app/.duply/appliance-backup
+confdir=/var/spool/duplicity/.duply/appliance-backup
 
 backup_hook prefix_mount
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
@@ -15,14 +15,14 @@ backup_hook postfix_mount
 
 backup_hook prefix_cleanup
 # duplicity to thirdparty
-gosu app /usr/bin/duply $confdir cleanup --force
+gosu duplicity /usr/bin/duply $confdir cleanup --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply cleanup error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
 
 backup_hook prefix_backup
-gosu app /usr/bin/duply $confdir backup
+gosu duplicity /usr/bin/duply $confdir backup
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply backup error" "error" \
         "$(service_status appliance-backup.service)"
@@ -30,7 +30,7 @@ if test "$?" -ne "0"; then
 fi
 
 backup_hook prefix_purge
-gosu app /usr/bin/duply $confdir purgefull --force
+gosu duplicity /usr/bin/duply $confdir purgefull --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"

@@ -1,6 +1,6 @@
 #!/bin/bash
 . /usr/local/share/appliance/env.functions.sh
-. /usr/local/share/appliance/prepare-backup.sh
+. /usr/local/share/appliance/backup.functions.sh
 
 usage(){
     cat << EOF
@@ -52,21 +52,23 @@ systemctl stop appliance
 rm /app/etc/tags/last_running_ecs
 systemctl disable appliance-backup
 
-echo "write duply config"
-prepare_backup
+echo "write backup access config"
+/etc/app/hooks/prepare-appliance/start/backup.sh
 
 # test if appliance:backup:mount:type is set, mount backup storage
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
+    echo "mount backup target"
     mount_backup_target
 fi
 
 echo "restore files and database dump from backup"
-gosu app duply /app/.duply/appliance-backup restore /data/restore
+gosu duplicity duply /var/spool/duplicity/.duply/appliance-backup restore /data/restore
 # add last backup config to cachedir, so we can detect if backup url has changed
-cp /app/.duply/appliance-backup/conf  /app/.cache/duplicity/duply_appliance-backup/conf
+cp /var/spool/duplicity/.duply/appliance-backup/conf  /var/spool/duplicity/.duply/appliance-backup/conf.last
 
 # test if appliance:backup:mount:type is set, unmount backup storage
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
+    echo "unmount backup target"
     unmount_backup_target
 fi
 
