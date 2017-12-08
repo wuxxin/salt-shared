@@ -67,17 +67,17 @@ postfix_relocate_{{ source }}:
 
 
 # ### custom Storage Setup
-{% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
-       not salt['file.file_exists']('/dev/disk/by-label/volatile')) or
-      (not salt['pillar.get']("appliance:storage:ignore:data", false) and
-       not salt['file.file_exists']('/dev/disk/by-label/data')) %}
+{% if (salt['pillar.get']("appliance:storage:mount:volatile", false) and
+      salt['file.file_exists']('/dev/disk/by-label/volatile')) or
+      (salt['pillar.get']("appliance:storage:mount:data", false) and
+       salt['file.file_exists']('/dev/disk/by-label/data')) %}
 
   {% from 'storage/lib.sls' import storage_setup with context %}
 {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
 
 # ### Volatile Setup
-{% if not salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
+{% if not salt['pillar.get']("appliance:storage:mount:volatile",false) %}
 {{ mount_setup('volatile') }}
 {% endif %}
 
@@ -89,7 +89,7 @@ postfix_relocate_{{ source }}:
   ('prometheus', 1000, ''),
   ('alertmanager', 1000, ''),
   ('grafana', 1000, ''),
-  ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
+  ], salt['pillar.get']("appliance:storage:mount:volatile",false)) }}
 
 {{ relocate_setup([
   ('/volatile/docker', '/var/lib/docker',

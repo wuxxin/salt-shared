@@ -19,3 +19,7 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + prefix_purge
     + prefix_unmount
 
+
+### generate a new pillar env with secrets
+
+scripts/env-create.sh
