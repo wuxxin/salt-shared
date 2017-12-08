@@ -26,5 +26,5 @@ fetchmail:
     - user: fetchmail
     - template: jinja
     - context:
-        dataset: {{ salt['pillar.get']('zentyal:mail:fetchmail', ' ') }}
+        dataset: {{ salt['pillar.get']('appliance:zentyal:mail:fetchmail', ' ') }}
   

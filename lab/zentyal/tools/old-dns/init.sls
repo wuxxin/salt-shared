@@ -1,6 +1,6 @@
 # ### bind
 
-{% if salt['pillar.get']('zentyal:dns:status', "absent") == "present" %}
+{% if salt['pillar.get']('appliance:zentyal:dns:status', "absent") == "present" %}
 
 zentyal-dns:
   pkg.installed:
@@ -15,13 +15,13 @@ zentyal-dns:
     - template: jinja
     - makedirs: true
     - context:
-      dns: {{ pillar.zentyal.dns }}
+      dns: {{ pillar.appliance.zentyal.dns }}
     - mode: 755
     - require:
       - pkg: zentyal-dns
 
-  {% if pillar.zentyal.dns.zones_new|d(False) != False %}
-    {% for n,d in pillar.zentyal.dns.zones_new.iteritems() %}
+  {% if pillar.appliance.zentyal.dns.zones_new|d(False) != False %}
+    {% for n,d in pillar.appliance.zentyal.dns.zones_new.iteritems() %}
       {% set s,t=d %}
 {{ n }}_file:
   file.managed:
@@ -33,8 +33,8 @@ zentyal-dns:
     {% endfor %}
   {% endif %}
 
-  {% if pillar.zentyal.dns.zones_append|d(False) != False %}
-    {% for n,d in pillar.zentyal.dns.zones_append.iteritems() %}
+  {% if pillar.appliance.zentyal.dns.zones_append|d(False) != False %}
+    {% for n,d in pillar.appliance.zentyal.dns.zones_append.iteritems() %}
       {% set s,i,t=d %}
 {{ n }}_file:
   file.managed:

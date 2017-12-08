@@ -1,14 +1,21 @@
 # Zentyal 5.x Mail server
 
 
+## additional pillar settings
+
+```
+dehydrated:
+  pillar: appliance:zentyal:letsencrypt
+
+```
+
 ## Thunderbird
 
 + install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
 
 + install sogo connector or sogo integrator
   + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
-  + 
-https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
+  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
 
 ## other
 

@@ -6,7 +6,7 @@ include:
     - source: salt://lab/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
-        domain: {{ salt['pillar.get']('zentyal:domain') }}
+        domain: {{ salt['pillar.get']('appliance:zentyal:domain') }}
     - require:
       - sls: .base
 
@@ -25,7 +25,7 @@ opendkim:
       - opendkim
       - opendkim-tools
 
-{%- set dkimkey= salt['pillar.get']('zentyal:mail:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
+{%- set dkimkey= salt['pillar.get']('appliance:zentyal:mail:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
 /etc/dkimkeys/dkim.key:
   file.managed:
     - user: opendkim

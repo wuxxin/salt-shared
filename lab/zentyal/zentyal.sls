@@ -14,11 +14,11 @@ include:
 
 # ### postfix
 {% for filename, pillaritem in
-    ('tls_policy_map', 'zentyal:mail:tls_policy'),
-    ('generic_outgoing', 'zentyal:mail:rewrite'),
-    ('recipient_bcc', 'zentyal:mail:incoming_bcc'),
-    ('sender_bcc', 'zentyal:mail:outgoing_bcc'),
-    ('transport_map', 'zentyal:mail:transport') %}
+    ('tls_policy_map', 'appliance:zentyal:mail:tls_policy'),
+    ('generic_outgoing', 'appliance:zentyal:mail:rewrite'),
+    ('recipient_bcc', 'appliance:zentyal:mail:incoming_bcc'),
+    ('sender_bcc', 'appliance:zentyal:mail:outgoing_bcc'),
+    ('transport_map', 'appliance:zentyal:mail:transport') %}
 
   {% if salt['pillar.get'](pillaritem, None) %}
 /etc/postfix/{{ filename }}:
@@ -69,29 +69,29 @@ sogo-tmpreaper:
       - require:
         - pkg: zentyal-mail
 
-{% if pillar.zentyal.mail.sync.config|d(false) %}
+{% if pillar.appliance.zentyal.mail.sync.config|d(false) %}
 # ### imap mail migration
 offlineimap:
   pkg:
     - installed
 
-/home/{{ pillar.zentyal.admin.user }}/.offlineimaprc:
+/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimaprc:
   file.managed:
-    - source: {{ pillar.zentyal.mail.sync.config }}
+    - source: {{ pillar.appliance.zentyal.mail.sync.config }}
     - template: jinja
-    - user: {{ pillar.zentyal.admin.user }}
+    - user: {{ pillar.appliance.zentyal.admin.user }}
     - context:
-        sync_sets: {{ pillar.zentyal.mail.sync.set }}
-        admin_user: {{ pillar.zentyal.admin.user }}
+        sync_sets: {{ pillar.appliance.zentyal.mail.sync.set }}
+        admin_user: {{ pillar.appliance.zentyal.admin.user }}
     - require:
       - pkg: offlineimap
       - pkg: zentyal-mail
 
-/home/{{ pillar.zentyal.admin.user }}/.offlineimap/helpers.py:
+/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/helpers.py:
   file.managed:
-    - source: {{ pillar.zentyal.mail.sync.helpers }}
+    - source: {{ pillar.appliance.zentyal.mail.sync.helpers }}
     - template: jinja
-    - user: {{ pillar.zentyal.admin.user }}
+    - user: {{ pillar.appliance.zentyal.admin.user }}
     - makedirs: true
     - require:
       - pkg: offlineimap

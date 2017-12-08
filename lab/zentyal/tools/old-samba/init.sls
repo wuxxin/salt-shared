@@ -1,6 +1,6 @@
 # ### samba
 
-{% if salt['pillar.get']('zentyal:samba:status', "absent") == "present" %}
+{% if salt['pillar.get']('appliance:zentyal:samba:status', "absent") == "present" %}
 
 zentyal-samba:
   pkg.installed:
@@ -31,15 +31,15 @@ zentyal-samba:
     - makedirs: true
     - template: jinja
     - context:
-        modify_smb: {{ salt['pillar.get']('zentyal:samba:modify_smb', []) }}
-        modify_shares: {{ salt['pillar.get']('zentyal:samba:modify_shares', []) }}
+        modify_smb: {{ salt['pillar.get']('appliance:zentyal:samba:modify_smb', []) }}
+        modify_shares: {{ salt['pillar.get']('appliance:zentyal:samba:modify_shares', []) }}
     - require:
       - pkg: zentyal-samba
       - file: /var/lib/samba/private/dns_update_list.template
       - file: /var/lib/samba/private/dns_update_list.d
 
-  {% if pillar.zentyal.samba.homezone_include|d(False) != False %}
-    {% for targetname,source in pillar.zentyal.samba.homezone_include.iteritems() %}
+  {% if pillar.appliance.zentyal.samba.homezone_include|d(False) != False %}
+    {% for targetname,source in pillar.appliance.zentyal.samba.homezone_include.iteritems() %}
 {{ targetname }}_zone_include:
   file.managed:
     - source: {{ source }}

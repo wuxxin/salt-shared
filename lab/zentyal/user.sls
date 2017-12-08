@@ -9,8 +9,8 @@ include:
     - require:
       - sls: base
 
-{% if pillar.zentyal.user|d(false) %}
-  {% for n,v in pillar.zentyal.user.iteritems() %}
+{% if pillar.appliance.zentyal.user|d(false) %}
+  {% for n,v in pillar.appliance.zentyal.user.iteritems() %}
 
 create_zentyal_user_{{ n }}:
   cmd.run:

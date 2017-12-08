@@ -10,7 +10,7 @@ zentyal:
       - zentyal-mail
       - zentyal-mailfilter
       - zentyal-openchange
-{%- for i in salt['pillar.get']('zentyal:languages', []) %}
+{%- for i in salt['pillar.get']('appliance:zentyal:languages', []) %}
       - language-pack-zentyal-{{ i }}
 {%- endfor %}
     - require:
@@ -35,12 +35,12 @@ set_zentyal_version:
 
 zentyal-admin-user:
   user.present:
-    - name: {{ pillar.zentyal.admin.user }}
+    - name: {{ pillar.appliance.zentyal.admin.user }}
     - groups:
       - adm
       - sudo
     - remove_groups: False
-    - password: {{ salt.shadow.gen_password(pillar.zentyal.admin.password) }}
+    - password: {{ salt.shadow.gen_password(pillar.appliance.zentyal.admin.password) }}
 
 # sss is producing error messages to root if listed on sudoers
 /etc/nsswitch.conf:

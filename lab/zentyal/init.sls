@@ -2,7 +2,7 @@ include:
   - .base
   - .zentyal
   - .opendkim
-{%- if salt['pillar.get']('letsencrypt:enabled', false) %}
+{%- if salt['pillar.get']('appliance:zentyal:letsencrypt:enabled', false) %}
   - .letsencrypt
 {% endif %}
   - .user

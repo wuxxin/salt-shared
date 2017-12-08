@@ -1,8 +1,8 @@
 include:
-  - letsencrypt
+  - dehydrated
   - .base
 
-{% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+{% set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
 
 zentyal-dehydrated-hook:
   file.managed:
@@ -10,7 +10,7 @@ zentyal-dehydrated-hook:
     - source: salt://lab/zentyal/files/zentyal-dehydrated-hook.sh
     - mode: "0755"
     - require:
-      - sls: letsencrypt
+      - sls: dehydrated
       - sls: .base
 
 {% for i in ['deploy-cert-as-root.sh', 'unchanged-cert-as-root.sh'] %}
@@ -35,7 +35,7 @@ zentyal-apache-reload:
     - watch:
       - file: /etc/apache2/conf-available/10-wellknown-acme.conf
     - require:
-      - sls: letsencrypt
+      - sls: dehydrated
       - pkg: zentyal
 
 dhparam-creation:
@@ -50,5 +50,5 @@ initial-cert-creation:
     - require:
       - file: zentyal-dehydrated-hook
       - service: zentyal-apache-reload
-      - sls: letsencrypt
+      - sls: dehydrated
       

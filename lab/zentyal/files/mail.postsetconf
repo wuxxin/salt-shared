@@ -16,7 +16,7 @@ cat /etc/postfix/main.cf | \
   ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /usr/local/etc/dehydrated/certs/{{ domain }}/privkey.pem' |
   ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem' |
 {%- else %}
-{%- set domain = pillar.zentyal.domain %}
+{%- set domain = pillar.appliance.zentyal.domain %}
 {%- endif %}
   ssub '^myhostname.*' '/myhostname = {{ domain }}' |
   ssub '^mydomain.*' '/mydomain = {{ domain }}' |
