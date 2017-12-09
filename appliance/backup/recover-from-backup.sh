@@ -1,4 +1,5 @@
 #!/bin/bash
+
 . /usr/local/share/appliance/env.functions.sh
 . /usr/local/share/appliance/backup.functions.sh
 
@@ -6,7 +7,7 @@ usage(){
     cat << EOF
 Usage:  $0 --yes-i-am-sure
 
-recovers database and files from backup.
+recovers files from backup.
 
 Requirements:
 + storage setup for target environment has already run
@@ -30,18 +31,6 @@ env-update.sh
 ENV_YML=/run/active-env.yml userdata_to_env appliance
 if test $? -ne 0; then echo "error: could not activate userdata environment"; usage; fi
 
-# check if existing and empty /data/ecs-storage-vault and /data/ecs-pgdump
-for d in /data/ecs-storage-vault /data/ecs-pgdump; do
-    if test ! -d $d; then
-        echo "error: directory $d does not exist. run storage setup first";
-        usage
-    fi
-    files_found=$(find $d -mindepth 1 -type f -exec echo true \; -quit)
-    if test "$files_found" = "true"; then
-        echo "error: directory $d is not empty. it must be empty"
-        usage
-    fi
-done
 
 # check if postgresql database ecs does not exist
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw ecs
@@ -49,7 +38,7 @@ if test $? -eq 0; then echo "error: database ecs exists."; usage; fi
 
 echo "stop appliance, disable backup run"
 systemctl stop appliance
-rm /app/etc/tags/last_running_ecs
+rm /app/etc/tags/last_running_appliance
 systemctl disable appliance-backup
 
 echo "write backup access config"

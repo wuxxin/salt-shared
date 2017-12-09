@@ -51,10 +51,12 @@ backup:
     - require:
       - sls: appliance.base
 
-/usr/local/share/appliance/appliance-backup.sh:
+{% for n in ['appliance-backup.sh', 'backup.functions.sh']}
+/usr/local/share/appliance/{{ n }}:
   file.managed:
-    - source: salt://appliance/backup/appliance-backup.sh
+    - source: salt://appliance/backup/{{ n }}
     - mode: "0755"
+{% endfor %}
 
 /usr/local/sbin/recover-from-backup.sh:
   file.managed:
@@ -82,6 +84,7 @@ enable-appliance-backup-service:
       - file: /etc/systemd/system/appliance-backup.service
       - file: /etc/systemd/system/appliance-backup.timer
       - file: /usr/local/share/appliance/appliance-backup.sh
+      - file: /usr/local/share/appliance/backup.functions.sh
       - file: /var/spool/duplicity/.duply/appliance-backup/conf.template
       - file: /var/spool/duplicity/.duply/appliance-backup/exclude.template
     - watch:
