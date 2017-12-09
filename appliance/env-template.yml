@@ -3,7 +3,7 @@
 {%- if not extra.appliance|d(false) %}
   {%- set dummy=extra.__setitem__('appliance', {}) %}
 {%- endif %}
-{{ "{% from 'lib/keys.sls' import manage_secret %}" }}
+{{ "{% from 'lib/minivault.sls' import manage_secret %}" }}
 
 appliance:
   # # standby: default false, if set appliance will not activate

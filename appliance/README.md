@@ -15,10 +15,15 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + prefix_purge
     + prefix_unmount
     + postfix_unmount
+    + create_backup_filelist | every plugin must return a globfile list on stdout
 
 + `appliance-prepare`
     + start
-    + 
+
++ `appliance-update`
+    + check                  | every plugin must return a update list on stdout
+    + update                 | only plugins listed on check get executed
+
 ## flags
 
 + basedir: `/app/etc/flags/`

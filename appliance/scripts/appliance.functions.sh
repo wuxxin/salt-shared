@@ -1,5 +1,24 @@
 #!/bin/bash
 
+default_branch(){ echo $(cat /app/etc/tags/APPLIANCE_GIT_BRANCH || echo "") }
+default_source(){ echo $(cat /app/etc/tags/APPLIANCE_GIT_SOURCE || echo "") }
+running_source(){ echo $(gosu app git config --get remote.origin.url || echo "") }
+
+if test $APPLIANCE_GIT_SOURCE = ""; then
+    if test "$(default_source)" = ""; then
+        APPLIANCE_GIT_SOURCE="$(running_source)"
+    else
+        APPLIANCE_GIT_SOURCE="$(default_source)"
+    fi
+fi
+if test $APPLIANCE_GIT_BRANCH = ""; then
+    if test "$(default_branch)" = ""; then
+        APPLIANCE_GIT_BRANCH="master"
+    else
+        APPLIANCE_GIT_BRANCH="$(default_BRANCH)"
+    fi
+fi
+
 run_hook()
 {
     for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
