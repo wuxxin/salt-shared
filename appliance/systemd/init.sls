@@ -5,7 +5,7 @@ include:
 
 {% for n in [
   'env-prepare.service', 'appliance-prepare.service', 
-  'service-failed@.service',
+  'service-failed@.service', 'appliance-failed@.service',
   'mail-to-sentry.service', 'mail-to-sentry.path',
   ] %}
 install_{{ n }}:
