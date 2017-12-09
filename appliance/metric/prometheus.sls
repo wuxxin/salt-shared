@@ -3,6 +3,8 @@ include:
   - systemd.reload
   - docker
 
+{% from "appliance/metric/defaults.jinja" import settings with context %}
+
 {% macro metric_install(name) %}
 /etc/systemd/system/{{ name }}.service:
   file.managed:
@@ -59,12 +61,9 @@ metric_service_{{ name }}:
     - user: 1000
     - group: 1000
 
-{{ metric_install('cadvisor') }}
-{{ metric_install('node-exporter') }}
-{{ metric_install('postgres_exporter') }}
-{{ metric_install('process-exporter') }}
-{{ metric_install('alertmanager') }}
-{{ metric_install('prometheus') }}
-{{ metric_install('grafana') }}
+{% for i in settings.metric_exporter|split(), 
+    settings.metric_server|split(), settings.metric_gui|split() %}
+{{ metric_install(i) }}
+{% endfor %}
 
 {% endif %}

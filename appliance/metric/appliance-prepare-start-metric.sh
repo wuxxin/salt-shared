@@ -5,14 +5,14 @@
 
 prepare_metric() {
     # start/stop services connected to flags
-    services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
+    services="$APPLIANCE_METRIC_METRIC_EXPORTER"
     if test -e /app/etc/flags/metric.exporter; then
         systemctl start $services
     else
         systemctl stop $services
     fi
     
-    services="prometheus.service alertmanager.service"
+    services="$APPLIANCE_METRIC_METRIC_SERVER"
     if test -e /app/etc/flags/metric.server; then
         systemctl start $services
         sed -ri.bak  's/([ \t]+site:).*/\1 "'${APPLIANCE_DOMAIN}'"/g' /app/etc/prometheus.yml
@@ -24,10 +24,11 @@ prepare_metric() {
       systemctl stop $services
     fi
     
+    services="$APPLIANCE_METRIC_METRIC_GUI"
     if test -e /app/etc/flags/metric.gui; then
-        systemctl start "grafana.service"
+        systemctl start $services
     else
-        systemctl stop "grafana.service"
+        systemctl stop $services
     fi
 }
 

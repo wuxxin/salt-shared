@@ -1,15 +1,12 @@
 [Unit]
-Description=postgresql metrics exporter for prometheus
-After=docker.service
+Description=grok metrics exporter for prometheus
 ConditionPathExists=/app/etc/flags/metric.exporter
-ConditionPathExists=/app/etc/ecs/database_url.env
-Requires=docker.service postgresql.service
+ConditionPathExists=!/app/etc/flags/no.grok_exporter
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull wrouesnel/postgres_exporter
-EnvironmentFile=/app/etc/ecs/database_url.env
+ExecStartPre=/usr/bin/docker pull grok_container !
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
