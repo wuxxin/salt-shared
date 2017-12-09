@@ -86,37 +86,15 @@ fi
 
     # check for available updates
     apt-get update -y
-    check_system_package_update
-    need_system_update=$(test $? -eq 0 -o \
-        -e /app/etc/flags/force.update.system && echo true || echo false)
-    check_docker_update
-    need_docker_update=$(test $? -eq 0 -o \
-        -e /app/etc/flags/force.update.docker && echo true || echo false)
-    check_compose_update
-    need_compose_update=$(test $? -eq 0 -o \
-        -e /app/ecs/flags/force.update.compose && echo true || echo false)
-    check_postgres_update
-    need_postgres_update=$(test $? -eq 0 -o \
-        -e /app/etc/flags/force.update.postgres && echo true || echo false)
-    check_letsencrypt_update
-    need_letsencrypt_update=$(test $? -eq 0 -o \
-        -e /app/etc/flags/force.update.letsencrypt && echo true || echo false)
-    check_ecs_update
-    need_ecs_update=$(test $? -eq 0 -o \
-        -e /app/etc/flags/force.update.ecs && echo true || echo false)
+    
+    update_list=$(run_hook appliance-update check)
+    
+    
     need_service_restart=$( ($need_docker_update || $need_compose_update ||
         $need_postgres_update || $need_letsencrypt_update ||
-        $need_appliance_update || $need_ecs_update) && echo true || echo false)
+        $need_appliance_update ) && echo true || echo false)
     echo "Information: Updates available for:"
-    echo "need_system_update=$need_system_update"
-    echo "need_docker_update=$need_docker_update"
-    echo "need_compose_update=$need_compose_update"
-    echo "need_postgres_update=$need_postgres_update"
-    echo "need_letsencrypt_update=$need_letsencrypt_update"
-    echo "need_appliance_update=$need_appliance_update"
-    echo "need_ecs_update=$need_ecs_update"
-    echo "need_service_restart=$need_service_restart"
-
+    
     if ($need_docker_update || $need_compose_update || $need_postgres_update); then
         appliance_status "Appliance Update" "Preparing for Update"
         echo "Info: shutting down appliance, because update of docker:$need_docker_update, compose:$need_compose_update or postgres:$need_postgres_update needs this"
