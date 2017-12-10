@@ -64,7 +64,7 @@ fi
                 # hard update source
                 gosu app git checkout -f $APPLIANCE_GIT_BRANCH
                 gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
-                # appliance code has updated, we need a rebuild of ecs container
+                # appliance code has updated
                 touch /app/etc/flags/force.update.ecs
                 # call saltstack state.highstate to update appliance
                 salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance

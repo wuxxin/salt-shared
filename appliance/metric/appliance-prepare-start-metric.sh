@@ -5,31 +5,41 @@
 
 prepare_metric() {
     # start/stop services connected to flags
-    services="$APPLIANCE_METRIC_METRIC_EXPORTER"
-    if test -e /app/etc/flags/metric.exporter; then
-        systemctl start $services
-    else
-        systemctl stop $services
-    fi
+    local services
+    local i
     
-    services="$APPLIANCE_METRIC_METRIC_SERVER"
-    if test -e /app/etc/flags/metric.server; then
-        systemctl start $services
-        sed -ri.bak  's/([ \t]+site:).*/\1 "'${APPLIANCE_DOMAIN}'"/g' /app/etc/prometheus.yml
-        if ! diff -q /app/etc/prometheus.yml /app/etc/prometheus.yml.bak; then
-            echo "info: changed prometheus external:site tag to ${APPLIANCE_DOMAIN}"
-            systemctl restart prometheus.service
+    services="$APPLIANCE_FLAGS_METRIC_EXPORTER"
+    for i in $services; do
+        if test -e /app/etc/flags/metric.exporter -a test ! -e /app/etc/flags/no.$i; then
+            systemctl start $i
+        else
+            systemctl stop $i
         fi
-    else
-      systemctl stop $services
-    fi
+    done
     
-    services="$APPLIANCE_METRIC_METRIC_GUI"
-    if test -e /app/etc/flags/metric.gui; then
-        systemctl start $services
-    else
-        systemctl stop $services
-    fi
+    services="$APPLIANCE_FLAGS_METRIC_SERVER"
+    for i in $services; do
+        if test -e /app/etc/flags/metric.server -a test ! -e /app/etc/flags/no.$i; then
+            systemctl start $i
+            
+            sed -ri.bak  's/([ \t]+site:).*/\1 "'${APPLIANCE_DOMAIN}'"/g' /app/etc/prometheus.yml
+            if ! diff -q /app/etc/prometheus.yml /app/etc/prometheus.yml.bak; then
+                echo "info: changed prometheus external:site tag to ${APPLIANCE_DOMAIN}"
+                systemctl restart prometheus.service
+            fi
+        else
+            systemctl stop $services
+        fi
+    done
+    
+    services="$APPLIANCE_FLAGS_METRIC_GUI"
+    for i in $services; do
+        if test -e /app/etc/flags/metric.gui -a test ! -e /app/etc/flags/no.$i; then
+            systemctl start $i
+        else
+            systemctl stop $i
+        fi
+    done
 }
 
 userdata_to_env appliance

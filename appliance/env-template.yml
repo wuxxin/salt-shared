@@ -31,13 +31,16 @@ appliance:
   #   - metric.server
   #   - metric.gui
 {%- endif %}
+  # # git: source, branch, secret for appliance sourcecode update 
+  # #      or source="saltmaster" if saltstack in master/minion mode is used
 {%- if extra.appliance.git|d(false) %}
   git:
 {{ extra.appliance.git|yaml(false)|indent(4,True) }}
 {%- else %}
   # git:
+  #   source: git_url | saltmaster 
   #   branch: master
-  #   source: git_url
+  #   secret: ssh key secret used for git access
 {%- endif %}
 {%- if extra.appliance.extra|d(false) and
     extra.appliance.extra.files|d(false) %}

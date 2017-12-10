@@ -1,5 +1,10 @@
 # appliance state
 
+
+## pillar/environment template
+
++ see env-template.sls
+
 ## hooks
 
 Every executable hook script will get executed in sorted order.

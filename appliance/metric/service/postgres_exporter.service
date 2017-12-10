@@ -10,7 +10,7 @@ Requires=docker.service postgresql.service
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=/usr/bin/docker pull wrouesnel/postgres_exporter:v0.1.2
-EnvironmentFile=/app/etc/ecs/database_url.env
+EnvironmentFile=/app/etc/database_url.env
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \

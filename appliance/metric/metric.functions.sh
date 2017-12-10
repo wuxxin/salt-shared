@@ -82,11 +82,9 @@ simple_metric() {
 see mk_metric for detailed usage
 
 example:
-simple_metric test_metric gauge "ecs and appliance version" 1 \
+simple_metric test_metric gauge "appliance version" 1 \
 "appliance_git_rev=\"$(gosu app git -C /app/appliance rev-parse HEAD)\",\
-appliance_git_branch=\"$(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD)\",\
-ecs_git_rev=\"$(gosu app git -C /app/ecs rev-parse HEAD)\",\
-ecs_git_branch=\"$(gosu app git -C /app/ecs rev-parse --abbrev-ref HEAD)\""
+appliance_git_branch=\"$(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD)\""
 EOF
         return
     fi

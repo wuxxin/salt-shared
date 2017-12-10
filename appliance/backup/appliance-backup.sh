@@ -44,7 +44,8 @@ volumes=$(/usr/bin/duply $confdir/ status | \
     awk '{s+=$1} END {print s}')
 backupspacekb=$(( volumes * volumesizekb ))
 # sum the filesizes of the backuped directories
-backupdatasizekb=$(du --apparent-size --summarize --total -BK /data/ecs-storage-vault/ /data/ecs-pgdump/ | grep total | sed -r "s/([0-9]+).*/\1/")
+backupfilelist=$(grep "^\+ " $confdir/exclude | sed -r "s/^\+ (.*)/\1/g")
+backupdatasizekb=$(du --apparent-size --summarize --total -BK $backupfilelist | grep total | sed -r "s/([0-9]+).*/\1/")
 
 backup_hook prefix_unmount
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
