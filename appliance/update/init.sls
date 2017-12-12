@@ -56,6 +56,16 @@ service_stop_{{ i }}:
     - source: salt://appliance/update/appliance-prepare-start-update.sh
     - mode: "0755"
 
+/app/etc/hooks/appliance-update/check/00-appliance.sh:
+  file.managed:
+    - source: salt://appliance/update/appliance-update-check-appliance.sh
+    - mode: "0755"
+
+/app/etc/hooks/appliance-update/update/appliance.sh:
+  file.managed:
+    - source: salt://appliance/update/appliance-update-update-appliance.sh
+    - mode: "0755"
+
 /usr/local/share/appliance/update.functions.sh:
   file.managed:
     - source: salt://appliance/update/update.functions.sh

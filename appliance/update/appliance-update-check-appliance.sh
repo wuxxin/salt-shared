@@ -6,8 +6,7 @@
 
 userdata_to_env appliance
 
-check_system_update
-check_letsencrypt_update
 check_compose_update
-check_postgres_update
 check_docker_update
+check_postgres_update
+check_system_update
