@@ -26,8 +26,12 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + start
 
 + `appliance-update`
-    + check                  | every plugin must return a update list on stdout
-    + update                 | only plugins listed on check get executed
+    + check   | every plugin must return a update list on stdout
+              | lines beginning with "#" are ignored
+              | syntax is: updatehookfile:updatename=[args]
+              | special "#%need_service_restart=true" restarts service after update
+    + update  | only plugins listed on check get executed
+              | and called using $0 update_function [args]
 
 ## flags
 
