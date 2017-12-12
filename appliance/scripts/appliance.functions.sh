@@ -1,27 +1,32 @@
 #!/bin/bash
 
-default_branch(){ echo $(cat /app/etc/tags/APPLIANCE_GIT_BRANCH || echo "") }
-default_source(){ echo $(cat /app/etc/tags/APPLIANCE_GIT_SOURCE || echo "") }
-running_source(){ echo $(gosu app git config --get remote.origin.url || echo "") }
-
-if test $APPLIANCE_GIT_SOURCE = ""; then
-    if test "$(default_source)" = ""; then
-        APPLIANCE_GIT_SOURCE="$(running_source)"
-    else
-        APPLIANCE_GIT_SOURCE="$(default_source)"
-    fi
-fi
-if test $APPLIANCE_GIT_BRANCH = ""; then
-    if test "$(default_branch)" = ""; then
-        APPLIANCE_GIT_BRANCH="master"
-    else
-        APPLIANCE_GIT_BRANCH="$(default_BRANCH)"
-    fi
-fi
+_run_simple_hook()
+{
+  local service=$1
+  local hook=$2
+  local name=$3
+  local hookfile=/app/etc/hooks/$service/$hook/$name
+  shift 3
+  if test -x $hookfile; then
+      ENV_YML=/run/active-env.yml $hookfile "$@" || (
+        sentry_entry "Appliance Hook" "hook error $service-$hook-$name" "error" "$(service_status $service.service)"
+        exit 1
+      )
+  else
+      sentry_entry "Appliance Hook" "hook $service:$hook:$name not found" "warning" 
+}
 
 run_hook()
 {
-    for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
+    local service=$1
+    local hook=$2
+    shift 2
+    if test "$1" != ""; then
+        local name=$1
+        shift
+        _run_simple_hook $service $hook $name $@
+    else
+        for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
         # execute $script
         ENV_YML=/run/active-env.yml $script || (
           sentry_entry "Appliance Hook" "hook error $1-$2-$script" "error" "$(service_status $1.service)"
@@ -62,12 +67,11 @@ sentry_entry () {
 }
 
 appliance_status () {
-    # call(Title, Text)
-    # or call("--disable")
+    # call(Title, Text) or call("--active") for active operation
     local templatefile=/app/etc/app-template.html
     local resultfile=/var/www/html/503.html
     local title text
-    if test "$1" = "--disable"; then
+    if test "$1" = "--active"; then
         if test -e $resultfile; then
             rm -f $resultfile
             sentry_entry "Appliance Running" "Appliance started" "info"
