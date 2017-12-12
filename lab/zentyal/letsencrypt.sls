@@ -13,6 +13,16 @@ zentyal-dehydrated-hook:
       - sls: dehydrated
       - sls: .base
 
+/app/etc/hooks/appliance-update/check/zentyal-letsencrypt.sh:
+  file.managed:
+    - source: salt://lab/zentyal/check-zentyal-letsencrypt.sh
+    - mode: "0755"
+
+/app/etc/hooks/appliance-update/update/zentyal-letsencrypt:
+  file.managed:
+    - source: salt://lab/zentyal/update-zentyal-letsencrypt.sh
+    - mode: "0755"
+
 {% for i in ['deploy-cert-as-root.sh', 'unchanged-cert-as-root.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
