@@ -51,7 +51,7 @@ backup:
     - require:
       - sls: appliance.base
 
-{% for n in ['appliance-backup.sh', 'backup.functions.sh']}
+{% for n in ['appliance-backup.sh', 'backup.functions.sh'] %}
 /usr/local/share/appliance/{{ n }}:
   file.managed:
     - source: salt://appliance/backup/{{ n }}

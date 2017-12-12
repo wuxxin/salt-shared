@@ -72,7 +72,7 @@ metric_service_{{ name }}:
     contents: |
 {{ settings[i]|indent(8,True) }}
 
-    {% for n in settings[i]|split() %}
+    {% for n in settings[i].split(" ") %}
 {{ metric_install(n) }}
     {% endfor %}
   {% endfor %}
