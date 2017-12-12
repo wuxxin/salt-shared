@@ -58,12 +58,12 @@ service_stop_{{ i }}:
 
 /app/etc/hooks/appliance-update/check/00-appliance.sh:
   file.managed:
-    - source: salt://appliance/update/appliance-update-check-appliance.sh
+    - source: salt://appliance/update/check-appliance.sh
     - mode: "0755"
 
-/app/etc/hooks/appliance-update/update/appliance.sh:
+/app/etc/hooks/appliance-update/update/appliance:
   file.managed:
-    - source: salt://appliance/update/appliance-update-update-appliance.sh
+    - source: salt://appliance/update/update-appliance.sh
     - mode: "0755"
 
 /usr/local/share/appliance/update.functions.sh:

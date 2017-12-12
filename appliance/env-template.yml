@@ -31,6 +31,12 @@ appliance:
   #   - metric.server
   #   - metric.gui
 {%- endif %}
+  # metric:
+  #   server:
+  #     list: "list of services"
+  #   alert:
+  #     rules: salt://some.where/x.y
+  #  
   # # git: source, branch, secret for appliance sourcecode update 
   # #      or source="saltmaster" if saltstack in master/minion mode is used
 {%- if extra.appliance.git|d(false) %}

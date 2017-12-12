@@ -52,7 +52,7 @@ proposed_branch()
             if test "$(bootstrap_branch)" = ""; then
                 echo "$(bootstrap_branch)"
             else
-                echo ="$(running_branch)"
+                echo "$(running_branch)"
             fi
         fi
     fi
@@ -63,11 +63,10 @@ check_appliance_update(){
     local current_source proposed_source current_branch proposed_branch
     local targetid lastid
     local appliance_need_update=false
-    local appliance_forced=false
     
     if test -e /app/etc/flags/force.update.appliance; then 
         appliance_need_update=true
-        appliance_forced=true
+        echo "# Information: appliance-update is forced"
     fi
     
     if test -e /app/appliance/.git; then
@@ -185,7 +184,7 @@ check_compose_update() {
 
     echo "appliance:do_compose_update=$($compose_need_update && echo true || echo false)"
     if $compose_need_update; then 
-        echo "# information compose update: $update_path"
+        echo "# information compose update: forced: $compose_forced, path: $update_path"
         echo "$restart_str"
     fi
 }
