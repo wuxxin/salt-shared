@@ -1,12 +1,12 @@
 include:
-  - roles.docker
+  - docker
 
 skype_container:
   cmd.run:
     - name: docker pull sameersbn/skype:latest
     - onlyif: test "$(docker images sameersbn/skype:latest)" = ""
     - require:
-      - sls: roles.docker
+      - sls: docker
 
 skype_wrapper:
   cmd.run:

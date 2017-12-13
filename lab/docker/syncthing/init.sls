@@ -1,12 +1,12 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - roles.docker
+  - docker
 
 syncthing/syncthing:latest:
   docker_image.present:
     - require:
-      - sls: roles.docker
+      - sls: docker
 
 syncthing_container:
   docker_container.running:
