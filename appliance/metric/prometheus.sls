@@ -68,7 +68,7 @@ metric_service_{{ name }}:
 
   {% for i in ['exporter_list', 'server_list', 'gui_list'] %}
 /app/etc/tags/{{ i }}:
-  file.manged:
+  file.managed:
     - contents: |
 {{ settings[i]|indent(8,True) }}
 
