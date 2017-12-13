@@ -1,5 +1,5 @@
 include:
-  - roles.desktop.idea
+  - desktop.idea
 
 {% from "desktop/idea/lib.sls" import idea-plugin with context %}
 {% from "desktop/user/lib.sls import user with context %}

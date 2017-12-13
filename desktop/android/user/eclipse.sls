@@ -1,5 +1,5 @@
 include:
-  - roles.desktop.eclipse
+  - desktop.eclipse
 
 {% from "desktop/eclipse/lib.sls" import eclipse-plugin with context %}
 {% from "desktop/user/lib.sls import user with context %}

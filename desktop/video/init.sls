@@ -1,7 +1,7 @@
 {% if grains['os'] == 'Ubuntu' %}
 
 include:
-  - roles.desktop.video.ppa
+  - desktop.video.ppa
 
 video-packages:
   pkg.installed:
@@ -40,7 +40,7 @@ video-packages:
       - youtube-dl
       
     - require:
-      - sls: roles.desktop.video.ppa
+      - sls: desktop.video.ppa
 
   {% if grains['osrelease_info'][0]|int <= 16 and 
         grains['osrelease'] != '16.10' %}
@@ -74,7 +74,7 @@ x256-packages:
       - gstreamer1.0-libde265
       - vlc-plugin-libde265
     - require:
-      - sls: roles.desktop.video.ppa
+      - sls: desktop.video.ppa
   {% endif %}
 
 {% endif %}

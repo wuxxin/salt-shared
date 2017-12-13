@@ -1,5 +1,5 @@
 include:
-  - roles.desktop.audio.ppa
+  - desktop.audio.ppa
   
 audio-packages:
   pkg.installed:
@@ -15,7 +15,7 @@ audio-packages:
       {# from ppa up to zesty #}
       - pulseaudio-dlna
     - require:
-      - sls: roles.desktop.audio.ppa
+      - sls: desktop.audio.ppa
 
 audio-player:
   pkg.installed:

@@ -3,7 +3,7 @@
 
 include:
   - python.dev
-  - roles.desktop.scipy
+  - desktop.scipy
 
 caffe_req:
   pkg.installed:
@@ -41,7 +41,7 @@ caffe:
     - user: {{ user }}
     - require:
       - sls: python.dev
-      - sls: roles.desktop.scipy
+      - sls: desktop.scipy
       - pkg: caffe_req
       - pkg: caffe_no_recommends_req
       - file: caffe_profile

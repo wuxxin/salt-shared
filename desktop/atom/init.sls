@@ -1,11 +1,11 @@
 include:
-  - roles.desktop.atom.ppa
-  - roles.desktop.code
-  - roles.desktop.spellcheck
+  - desktop.atom.ppa
+  - desktop.code
+  - desktop.spellcheck
 
 atom:
   pkg.latest:
     - require:
-      - sls: roles.desktop.atom.ppa
-      - sls: roles.desktop.code
-      - sls: roles.desktop.spellcheck
+      - sls: desktop.atom.ppa
+      - sls: desktop.code
+      - sls: desktop.spellcheck
