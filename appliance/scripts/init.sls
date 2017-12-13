@@ -14,6 +14,6 @@ include:
 {% for i in ['env-create.sh', 'env-update.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
-    - source: salt://common/{{ i }}
+    - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
 {% endfor %}

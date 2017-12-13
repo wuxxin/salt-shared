@@ -5,6 +5,7 @@ include:
   file.managed:
     - source: salt://appliance/extra/appliance-prepare-start-extra.sh
     - filemode: "0755"
+    - makedirs: true
     - require:
       - sls: appliance.base
 

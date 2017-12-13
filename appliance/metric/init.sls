@@ -12,5 +12,6 @@ include:
   file.managed:
     - source: salt://appliance/backup/appliance-prepare-start-metric.sh
     - mode: "0755"
+    - makedirs: true
     - require:
       - sls: appliance.base

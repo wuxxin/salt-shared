@@ -54,17 +54,20 @@ service_stop_{{ i }}:
 /app/etc/hooks/appliance-prepare/start/update.sh:
   file.managed:
     - source: salt://appliance/update/appliance-prepare-start-update.sh
+    - makedirs: true
     - mode: "0755"
 
 /app/etc/hooks/appliance-update/check/00-appliance.sh:
   file.managed:
     - source: salt://appliance/update/check-appliance.sh
     - mode: "0755"
+    - makedirs: true
 
 /app/etc/hooks/appliance-update/update/appliance:
   file.managed:
     - source: salt://appliance/update/update-appliance.sh
     - mode: "0755"
+    - makedirs: true
 
 /usr/local/share/appliance/update.functions.sh:
   file.managed:
