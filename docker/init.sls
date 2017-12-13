@@ -12,7 +12,7 @@ include:
 /etc/apt/preferences.d/docker-preferences:
   file.managed:
     - contents: |
-        Package: docker-engine
+        Package: {{ settings.pkgname }}
         Pin: version {{ settings.version }}
         Pin-Priority: 900
 
@@ -64,14 +64,15 @@ custom-docker-multi-user-symlink:
 
 docker:
   pkgrepo.managed:
-    - name: 'deb http://apt.dockerproject.org/repo {{ grains.os|lower }}-{{ grains.oscodename }} main'
+    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ grains.oscodename }} {{ settings.repositories }}'
     - humanname: "Docker Repository"
     - file: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
-    - keyid: 58118E89F3A912897C070ADBF76221572C52609D
-    - keyserver: pgp.mit.edu
+    - key_url: https://download.docker.com/linux/ubuntu/gpg
+    - require_in:
+      - pkg: docker
   pkg.installed:
     - pkgs:
-      - docker-engine
+      - {{ settings.pkgname }}
     - require:
       - pkgrepo: docker
       - pkg: docker-requisites
