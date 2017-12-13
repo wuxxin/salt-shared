@@ -7,7 +7,6 @@ audio-packages:
       - paman
       - paprefs
       - pavucontrol
-      - padevchooser
       - pavumeter
       - sox
       - libsox-fmt-pulse
@@ -21,3 +20,4 @@ audio-player:
   pkg.installed:
     - pkgs:
       - banshee
+      - rhythmbox
