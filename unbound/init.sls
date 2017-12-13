@@ -5,8 +5,9 @@ include:
 
 {% if s.active|d(false) == true %}
 
-  {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("nlnetlabs-ppa", "ondrej/pkg-nlnetlabs") }}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("nlnetlabs-ppa", "ondrej/pkg-nlnetlabs",
+  require_in = "pkg: unbound") }}
 
 unbound:
   pkg.installed:

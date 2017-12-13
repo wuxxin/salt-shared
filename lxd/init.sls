@@ -9,6 +9,10 @@ include:
   - ubuntu.backports
 {% endif %}
 
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("lxd_stable_ppa", "ubuntu-lxc/lxd-stable", 
+  require_in = "pkg: lxd") }}
+
 lxd:
   pkg.installed:
     - pkgs:
@@ -21,7 +25,7 @@ lxd:
       - bridge-utils
     - require:
       - sls: kernel.cgroup
-      - sls: lxd.ppa
+      - pkgrepo: lxd_stable_ppa
 {% if grains['oscodename'] == 'trusty' %}
       - sls: ubuntu.backports
 {% endif %}

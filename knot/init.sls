@@ -4,7 +4,8 @@ include:
 {% if salt['pillar.get']('knot', false) %}
   {% from "knot/defaults.jinja" import settings as s with context %}
   {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns") }}
+{{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns",
+  require_in = "pkg: knot-package") }}
 
   {% if grains['osrelease_info'][0] < 16 %}
     {%- set service_name = 'knot' %}
