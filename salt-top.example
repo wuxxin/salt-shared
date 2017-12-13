@@ -8,6 +8,10 @@ base: # try to sort from wider to narrow
     - tmux
     - acpi
     - ssh
+  
+  # any machine (including virtual) but not on lxc (is same kernel)
+  'not G@virtual:LXC':
+    - match: compound
     - haveged
 
   # any ubuntu
