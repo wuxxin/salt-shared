@@ -1,2 +1,2 @@
 include:
-  - .reporting-disabled
+  - .reporting.disabled

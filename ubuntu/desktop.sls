@@ -1,4 +1,4 @@
 include:
-  - .reporting-disabled
-  - .hibernate-enabled
+  - .reporting.disabled
+  - .hibernate
 

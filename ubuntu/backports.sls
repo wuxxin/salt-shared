@@ -9,7 +9,8 @@ backport_repository:
     - repl: |
         deb http://archive.ubuntu.com/ubuntu {{ grains['lsb_distrib_codename'] }}-backports main restricted universe multiverse
     - append_if_not_found: true
-  pkg.refresh_db:
+  module.run:
+    - name: pkg.refresh_db
     - onchanges_in:
       - file: /etc/apt/sources.list
 
