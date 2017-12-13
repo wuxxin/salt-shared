@@ -69,7 +69,7 @@ metric_service_{{ name }}:
   {% for i in ['exporter_list', 'server_list', 'gui_list'] %}
 /app/etc/tags/{{ i }}:
   file.manged:
-    contents: |
+    - contents: |
 {{ settings[i]|indent(8,True) }}
 
     {% for n in settings[i].split(" ") %}
