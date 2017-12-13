@@ -19,7 +19,7 @@ include:
   - .video
   - .voice
 
-{% if salt['pillar.get']('desktop:development:status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - python.dev
   - vcs
   - git-crypt
@@ -43,11 +43,11 @@ include:
 #}
 {% endif %}
 
-{% if salt['pillar.get']('desktop:games:status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:games:enabled', false) == true %}
   - .emulation.games
 {% endif %}
 
-{% if salt['pillar.get']('desktop:bitcoin:status', 'absent') == 'present' %}
+{% if salt['pillar.get']('desktop:bitcoin:enabled', false) == true %}
   - .bitcoin
 {% endif %}
 
