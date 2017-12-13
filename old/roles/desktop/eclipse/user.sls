@@ -1,8 +1,8 @@
 include:
-  - roles.desktop.eclipse
+  - desktop.eclipse
 
-{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
-{% from 'roles/desktop/eclipse/lib.sls' import eclipse_plugin, keytool_cert with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'desktop/eclipse/lib.sls' import eclipse_plugin, keytool_cert with context %}
 
 {% set plugins= [
     ('shelled bash editor', 'https://sourceforge.net/projects/shelled/files/shelled/update/', 'net.sourceforge.shelled.feature.group'),
@@ -28,7 +28,7 @@ include:
 
 eclipse-desktop-icon:
   file.managed:
-    - source: salt://roles/desktop/eclipse/eclipse.desktop
+    - source: salt://desktop/eclipse/eclipse.desktop
     - name: {{ user_home }}/.local/share/applications/eclipse.desktop
     - user:  {{ user }}
     - group: {{ user }}
