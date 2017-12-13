@@ -3,7 +3,7 @@ include:
   - java.jdk
   - .user
 
-{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {% set ANDROIDSDK="/opt/android-sdk-linux" %}
 {% set ANDROIDNDK="/opt/android-ndk-r10" %}

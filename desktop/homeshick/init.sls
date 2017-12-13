@@ -1,4 +1,4 @@
-{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% set workdir= user_home+ '/.homesick/repos/homeshick' %}
 
 homeshick:

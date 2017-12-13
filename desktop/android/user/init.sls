@@ -1,7 +1,7 @@
 include:
   - roles.desktop.android.sdk
 
-{% from 'roles/desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% set marker = "# saltstack android development automatic config" %}
 {% set start = marker+ " start" %}
 {% set end = marker+ " end" %}

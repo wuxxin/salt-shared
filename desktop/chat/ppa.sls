@@ -16,7 +16,7 @@ gajim_ppa:
   pkgrepo.managed:
     - repo: 'deb ftp://ftp.gajim.org/debian unstable main'
     - file: /etc/apt/sources.list.d/gajim.list
-    - key_url: salt://roles/desktop/chat/gajim_key.asc
+    - key_url: salt://desktop/chat/gajim_key.asc
 
 {% endif %}
 

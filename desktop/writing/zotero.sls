@@ -1,5 +1,5 @@
 include:
-  - roles/desktop/neuro.ppa
+  - desktop/neuro.ppa
 
 zotero:
   pkg.installed:

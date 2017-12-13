@@ -3,9 +3,8 @@
 Installs and configures features you usually want to have in a working desktop
 
 ## Todo
- * add supported languages packages install (one click at languages)
  * interesting stuff to look at:
-   * utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
+   * 
 
  * development:
    * openwrt: tiny linux distribution
