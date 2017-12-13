@@ -1,7 +1,7 @@
 Debian/Ubuntu Preseed and Initrd Generator
 ==========================================
 
- A post-snowden network only access server setup generation tool
+ A network only access server setup generation tool
  to remotely install a server with fulldisk encryption in a secure way.
 
  Secondary Target: a customized automated ubuntu/debian machine install with advanced features.
@@ -28,8 +28,7 @@ Debian/Ubuntu Preseed and Initrd Generator
    This is also true for almost all types of hypervisors that are running one or more virtual machines.
    Eg. Your instance in the cloud.
 
-   Therefore the only way to assure you can safely process encryption data is when you do the virtualization yourself,
-   and you are not emulated while doing so.
+   Unless some modern processor features for client memory encryption changes the situation,  the only way to assure you can safely process encryption data is when you do the virtualization yourself, and you are not emulated while doing so.
 
 Features:
 ---------
