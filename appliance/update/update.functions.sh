@@ -261,6 +261,7 @@ do_appliance_update() {
     fi
     
     if $do_update; then
+        simple_metric appliance_last_update counter "timestamp-epoch-seconds since last update to appliance" $start_epoch_seconds
         appliance_status "Appliance Update" "Updating appliance from $lastid to $targetid"
         if test -e /app/etc/flags/force.update.appliance; then
             rm /app/etc/flags/force.update.appliance
@@ -269,7 +270,7 @@ do_appliance_update() {
         gosu app git checkout -f $proposed_branch
         gosu app git reset --hard origin/$proposed_branch
         # call saltstack state.highstate to update appliance
-        salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance
+        salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return raven
         err=$?
         if test $err -ne 0; then
             appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"

@@ -28,7 +28,6 @@ fi
         mute_alerts # ignore job up alerts while update in progress
 
         if $need_appliance_update; then
-            simple_metric appliance_last_update counter "timestamp-epoch-seconds since last update to appliance" $start_epoch_seconds
             do_appliance_update
             # call new version of self with the original start time
             exec $0 --continue $start_epoch_seconds "$@"
