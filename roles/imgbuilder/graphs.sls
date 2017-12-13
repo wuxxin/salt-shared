@@ -1,5 +1,5 @@
 include:
-  - roles.desktop.graphics.graph
+  - desktop.graphics.graph
 
 render_box:
   cmd.run:

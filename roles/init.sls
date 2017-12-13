@@ -52,6 +52,3 @@ base:
     - match: pillar
     - roles.backupninja
 
-  'desktop:status:present':
-    - match: pillar
-    - roles.desktop

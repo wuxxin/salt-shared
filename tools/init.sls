@@ -7,6 +7,8 @@ include:
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
 {{ pip2_install('percol') }} {# interactive pipe filtering #}
 
+# utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
+
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
   pkg.installed:
