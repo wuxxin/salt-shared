@@ -52,7 +52,15 @@ application_skeleton_{{ i }}:
   file.directory:
     - user: app
     - group: app
+
+/var/www/html:
+  file.directory:
+    - makedirs: true
     
+/app/etc/app-template.html:
+  file.managed:
+    - source: salt://appliance/app-template.html
+
 {% for n in ['tags', 'flags', 'hooks'] %}
 create_app_etc_{{ n }}:
   file.directory:

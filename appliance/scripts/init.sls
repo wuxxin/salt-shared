@@ -17,3 +17,16 @@ include:
     - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
 {% endfor %}
+
+{% for flag in salt['pillar.get']('appliance:flags:enabled', []) %}
+flag_enable_{{ flag }}:
+  file.present:
+    - name: /app/etc/flags/{{ flag }}
+{% endfor %}
+
+{% for flag in salt['pillar.get']('appliance:flags:disabled', []) %}
+flag_disable_{{ flag_enable }}:
+  file.absent:
+    - name: /app/etc/flags/{{ flag }}
+{% endfor %}
+

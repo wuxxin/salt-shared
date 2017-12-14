@@ -270,13 +270,15 @@ do_appliance_update() {
         gosu app git checkout -f $proposed_branch
         gosu app git reset --hard origin/$proposed_branch
         # call saltstack state.highstate to update appliance
-        salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return raven
+        salt-call state.highstate --retcode-passthrough --return raven pillar='{"appliance": {"enabled": true}}' 
         err=$?
         if test $err -ne 0; then
             appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"
         fi
         # save executed commit
         printf "%s" "$targetid" > /app/etc/tags/last_running_appliance
+        # update posible new env
+        /usr/local/sbin/env-update.sh
     fi
 
     simple_metric appliance_version gauge "appliance_version" 1 \

@@ -7,7 +7,11 @@ else
     . /usr/local/share/appliance/env.functions.sh
 fi
 
-userdata_yaml=$(get_userdata)
+if test -e /app/etc/flags/env_from_pillar; then
+    userdata_yaml=$(ENV_YML=pillar get_userdata)
+else
+    userdata_yaml=$(get_userdata)
+fi
 if test $? -ne 0; then
     printf "Error reading userdata: %s\n" $(echo "$userdata_yaml"| grep USERDATA_ERR)
     exit 1
