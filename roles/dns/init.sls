@@ -9,8 +9,7 @@ knot:
     - names:
       - knot
     - require:
-      - cmd: knot-ppa
-
+      - pkgrepo: knot-ppa
   {% for server in s.server %}
     {% if server.status|d(None) == "present" %}
 knot_{{ server.id }}:
@@ -34,7 +33,7 @@ knot_{{ server.id }}:
 unbound:
   pkg.installed:
     - require:
-      - cmd: nlnetlabs-ppa
+      - pkgrepo: nlnetlabs-ppa
   service.running:
     - require:
       - pkg: unbound

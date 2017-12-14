@@ -20,7 +20,7 @@ docker:
       - docker-engine
 {% if grains['os_family'] == 'Debian' %}
     - require:
-      - cmd: docker_ppa
+      - pkgrepo: docker_ppa
 {% endif %}
 
   file.managed:

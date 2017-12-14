@@ -26,7 +26,7 @@ dokku:
     - require:
       - debconf: dokku
 {% if grains['os'] == 'Ubuntu' %}
-      - cmd: dokku_ppa
+      - pkgrepo: dokku_ppa
 {% endif %}
       - sls: roles.docker
       - sls: nginx

@@ -7,7 +7,7 @@ nodejs:
   pkg.installed:
 {% if grains['os'] == 'Ubuntu' %}
     - require:
-      - cmd: nodejs_ppa
+      - pkgrepo: nodejs_ppa
 {% endif %}
 
 npm:

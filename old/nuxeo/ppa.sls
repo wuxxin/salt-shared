@@ -9,10 +9,6 @@ nuxeo_ppa:
   pkgrepo.managed:
     - name: deb http://apt.nuxeo.org/ {{ grains['lsb_distrib_codename'] }} fasttracks
     - key_url: salt://nuxeo/nuxeo.key
-  cmd.run:
-    - name: true
-    - require:
-      - pkgrepo: nuxeo_ppa
 {% endif %} 
 
 {% if grains['os'] == 'Ubuntu' %}

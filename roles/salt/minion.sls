@@ -45,7 +45,7 @@ at:
 salt-minion:
   pkg.installed:
     - require:
-      - cmd: salt_ppa
+      - pkgrepo: salt_ppa
   service.running:
     - enable: true
     - require:

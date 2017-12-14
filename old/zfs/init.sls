@@ -6,5 +6,5 @@ zfs-on-linux:
     - pkgs:
       - ubuntu-zfs
     - require:
-      - cmd: zfs_ppa
+      - pkgrepo: zfs_ppa
 

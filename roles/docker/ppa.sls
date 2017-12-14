@@ -13,10 +13,6 @@ docker_ppa:
     - keyserver: pgp.mit.edu
     - require:
       - pkg: ppa_ubuntu_installer
-  cmd.run:
-    - name: "true"
-    - require:
-      - pkgrepo: docker_ppa
 
 {% endif %}
 

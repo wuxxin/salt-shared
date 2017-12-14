@@ -5,4 +5,4 @@ x2goserver:
   pkg:
     - installed
   require:
-    - cmd: x2go_ppa
+    - pkgrepo: x2go_ppa
