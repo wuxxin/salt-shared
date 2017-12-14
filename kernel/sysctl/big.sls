@@ -1,6 +1,6 @@
 include:
-  - .big-inotify
 {%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}  
+  - .big-inotify
   - .big-ipv4-arp-cache
 {%- endif %}
 
