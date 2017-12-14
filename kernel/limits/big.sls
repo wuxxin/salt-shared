@@ -1,6 +1,6 @@
 include:
   - .big-openfile
 
-limits_nop:
+limits_big_nop:
   test:
     - nop

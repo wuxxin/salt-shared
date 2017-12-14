@@ -1,6 +1,5 @@
 include:
-  - .big-inotify
-  - .big-ipv4-arp-cache
+  - .big
 
 sysctl_nop:
   test:
