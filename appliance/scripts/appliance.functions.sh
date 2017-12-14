@@ -14,6 +14,7 @@ _run_simple_hook()
       )
   else
       sentry_entry "Appliance Hook" "hook $service:$hook:$name not found" "warning" 
+  fi
 }
 
 run_hook()
@@ -27,12 +28,13 @@ run_hook()
         _run_simple_hook $service $hook $name $@
     else
         for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
-        # execute $script
-        ENV_YML=/run/active-env.yml $script || (
-          sentry_entry "Appliance Hook" "hook error $1-$2-$script" "error" "$(service_status $1.service)"
-          exit 1
-        )
-    done
+            # execute $script
+            ENV_YML=/run/active-env.yml $script || (
+              sentry_entry "Appliance Hook" "hook error $1-$2-$script" "error" "$(service_status $1.service)"
+              exit 1
+            )
+        done
+    fi
 }
 
 text2json(){
