@@ -1,6 +1,8 @@
 include:
   - locale
   - timezone
+  - ubuntu.server
+  - ubuntu.backports
   - ssh
   - python
   - tools
