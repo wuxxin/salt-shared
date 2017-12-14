@@ -2,13 +2,15 @@
 trusty:
   hardware: linux-generic-lts-xenial
   virtual: linux-virtual-lts-xenial
-  tools: linux-tools-generic-lts-xenial
   headers: linux-headers-generic-lts-xenial
+  tools: linux-tools-generic-lts-xenial
+  default_tools: linux-tools-generic-lts-xenial
 xenial:
   hardware: linux-generic-hwe-16.04-edge
   virtual: linux-virtual-hwe-16.04-edge
-  tools: linux-tools-generic-hwe-16.04-edge
   headers: linux-headers-generic-hwe-16.04-edge
+  tools: linux-tools-generic-hwe-16.04-edge
+  default_tools: linux-tools-generic-hwe-16.04-edge
 {% endload %}
 
 {% set settings = salt['grains.filter_by'](defaults, 
