@@ -10,7 +10,7 @@ include:
 
 /app/etc/hooks/appliance-prepare/start/metric.sh:
   file.managed:
-    - source: salt://appliance/backup/appliance-prepare-start-metric.sh
+    - source: salt://appliance/metric/appliance-prepare-start-metric.sh
     - mode: "0755"
     - makedirs: true
     - require:
