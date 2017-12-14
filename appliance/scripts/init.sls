@@ -20,8 +20,10 @@ include:
 
 {% for flag in salt['pillar.get']('appliance:flags:enabled', []) %}
 flag_enable_{{ flag }}:
-  file.present:
+  file.managed:
     - name: /app/etc/flags/{{ flag }}
+    - contents: ""
+    
 {% endfor %}
 
 {% for flag in salt['pillar.get']('appliance:flags:disabled', []) %}
