@@ -2,8 +2,6 @@ include:
   - locale
   - timezone
   - ssh
-  - acpi
-  - haveged
   - python
   - tools
   

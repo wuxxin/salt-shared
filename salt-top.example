@@ -1,24 +1,27 @@
 # if you want to use this salt state top file, you should copy it to top.sls in one of your salt states root directories
-base: # try to sort from wider to narrow
-
-  # any machine (not running Windows)
-  'os:[^(Windows)]':
-    - match: grain_pcre
-    - timezone
-    - tmux
-    - acpi
-    - ssh
-  
-  # any machine (including virtual) but not on lxc (is same kernel)
-  'not G@virtual:LXC':
-    - match: compound
-    - haveged
+base:
 
   # any ubuntu
   'os:Ubuntu':
     - match: grain
     - ubuntu
+    - ubuntu.backports
 
+  # any machine (not running Windows)
+  'os:[^(Windows)]':
+    - match: grain_pcre
+    - locale
+    - timezone
+    - tmux
+    - ssh
+  
+  # any machine (including virtual) but not on lxc (is same kernel)
+  'not G@virtual:LXC':
+    - match: compound
+    - acpi
+    - haveged
+    - kernel
+  
   # any physical machine and Debian Family:
   'G@os_family:Debian and G@virtual:physical':  
     - match: compound
