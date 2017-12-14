@@ -18,7 +18,7 @@ duplicity_user:
   '/var/spool/duplicity/.duply/appliance-backup/'] %}
 {{ i }}:
   file.directory:
-    - owner: duplicity
+    - user: duplicity
     - group: duplicity
     - makedirs: True
 {% endfor %}
