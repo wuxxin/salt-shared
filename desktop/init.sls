@@ -28,10 +28,10 @@ include:
   - .code
   - .emulation
   - .homeshick
-  - .gcloud
   - .scipy
   - .writing
 {#
+  - .gcloud
   - java.jdk
   - .android.sdk
   - .android.user
