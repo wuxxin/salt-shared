@@ -42,7 +42,7 @@ docker-network:
     - enabled: true
     - ports: none
     - proto: static
-    - ipaddr: {{ settings.ip }}
+    - ipaddr: {{ settings.ipaddr }}
     - netmask: {{ settings.netmask }}
     - stp: off
     - require:

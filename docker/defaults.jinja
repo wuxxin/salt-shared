@@ -1,9 +1,9 @@
 {% load_yaml as defaults %}
-version: 1.13.*
+version: 17.*
 repositories: stable
-pkgname: docker-engine
+pkgname: docker-ce
 bridge: docker0
-ip: "172.17.0.1"
+ipaddr: "172.17.0.1"
 netmask: "255.255.0.0"
 options: --storage-driver=overlay2 --bridge=docker0
 {% endload %}
