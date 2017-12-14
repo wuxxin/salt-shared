@@ -27,7 +27,6 @@ base-tools:
       - command-not-found {#  #}
       {# top,perf monitor like #}
       - htop  {#  #}
-      - atop  {#  #}
       - iftop {#  #}
       - iotop {#  #}
       - blktrace    {# block layer IO tracing mechanism #}
