@@ -1,5 +1,8 @@
-include:
-  - .ppa
+{% if (grains['os'] == 'Ubuntu' or grains['os'] == 'Mint') %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("haproxy-ppa", 
+  "vbernat/haproxy-1.5", require_in= "pkg: haproxy") }}
+{% endif %} 
 
 {% from "roles/haproxy/defaults.jinja" import template with context %}
 {% set haproxy=salt['grains.filter_by']({'none': template.haproxy }, 
@@ -19,9 +22,8 @@ include:
 # TODO: haproxy crt staple is: cert+privkey+intermediate+dhparam
 
 haproxy:
-  pkg.installed:
-    - require:
-      - cmd: haproxy-ppa
+  pkg:
+    - installed
   service.running:
     - enable: true
     - require:

@@ -16,4 +16,4 @@ recoll:
       - unrtf
       - untex
     - require:
-      - cmd: recoll_ppa
+      - pkgrepo: recoll_ppa
