@@ -15,13 +15,13 @@ include:
   "ubuntu-lxc/lxd-stable", require_in = "pkg: lxd") }}
 
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
-{% from "network/lib.sls" import net_reverse with context %}
+{% from "network/lib.sls" import net_reverse_short with context %}
 
 /etc/NetworkManager/dnsmasq.d/lxd:
   file.managed:
     - contents: |
         server=/lxd/{{ settings.ipaddr }}
-        server=/{{ net_reverse(settings) }}/{{ settings.ipaddr }}
+        server=/{{ net_reverse_short(settings) }}/{{ settings.ipaddr }}
 {% endif %}
 
 lxd:
