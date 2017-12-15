@@ -1,13 +1,15 @@
 include:
   - python
+  - gnupg
+  - openssl  
+  - unison
   - .flatyaml
   - .raven
   - .qrcode
+  - .passgen
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
 {{ pip2_install('percol') }} {# interactive pipe filtering #}
-
-# utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
@@ -58,6 +60,7 @@ base-tools:
       - jq              {# Command-line JSON processor #}
       - xmlstarlet      {# transform, query, validate, and edit XML #}
       - html-xml-utils  {# manipulating and converting HTML and XML #}
-      - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
-  
+      {# - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
 {% endif %}
+
+# utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
