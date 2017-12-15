@@ -50,33 +50,6 @@
 {% endmacro %}
 
 
-{%- macro format_indent(data, chars) -%}
-  {%- if data -%}
-    {%- if data is string -%}
-{{ "- "+ data|indent(chars, True) }}
-    {%- else -%}
-      {%- for i in data -%}
-        {%- if i is string -%}
-{{ "- "+ i|indent(chars, True) }}
-        {%- else -%}
-          {%- for n,v in i.iteritems() %}
-{{ "- "+ n+ ": "+ v|indent(chars, True) }}
-          {%- endfor -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endif -%}
-  {%- endif -%}
-{%- endmacro -%}
-  
-
-{%- macro name_format_indent(name, data, chars) -%}
-  {%- if data -%}
-{{ "- "+ name+ ":"|indent(chars, True) }}
-{{ format_indent(data, chars+ 2) }}
-  {%- endif -%}
-{%- endmacro -%}
-
-
 # parted
 #######
 {% macro storage_parted(input_data) %}
@@ -164,21 +137,21 @@ mdadm:
 "mdadm-raid-{{ item }}":
   pkg.installed:
     - name: mdadm
-  mdadm.present:
+  raid.present:
     - name: {{ item }}
     - level: {{ data['level'] }}
     - devices:
     {%- for device in data['devices'] %}
       - {{ device }}
     {%- endfor %}
-    {%- for sub, subvalue in data.iteritems() %}
-      {%- if sub not in ['level', 'devices', 'require'] %}
-{{ name_format_indent(sub, subvalue, 4)}}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['level', 'devices', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
     - require:
       - pkg: "mdadm-raid-{{ item }}"
-{{ format_indent(data['require']|d(false), 6) }}
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {% endfor %}
 
 {% endmacro %}
@@ -227,21 +200,21 @@ lvm:
       - /dev/vdb1
     # optional kwargs for lvm.pv_present
 #}
-
-  {% for item in input_data['devices'] %}
+  {% set data= input_data %}
+  {% for item in data['devices'] %}
 "lvm-pv-{{ item }}":
   pkg.installed:
     - name: lvm2
   lvm.pv_present:
     - name: {{ item }}
-    {%- for option, optvalue in input_data.iteritems() %}
-      {%- if option not in ['devices', 'require'] %}
-{{ name_format_indent(option, optvalue, 4) }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['devices', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
     - require:
       - pkg: "lvm-pv-{{ item }}"
-{{ format_indent(input_data['require']|d(false), 6) }}
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {%- endfor %}
     
 {% endmacro %}
@@ -270,14 +243,14 @@ lvm:
     {%- for device in data['devices'] %}
       - {{ device }}
     {%- endfor %}
-    {%- for option, optvalue in data.iteritems() %}
-      {%- if option not in ['devices', 'require'] %}
-{{ name_format_indent(option, optvalue, 4) }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['devices', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
     - require:
       - pkg: "lvm-vg-{{ item }}"
-{{ format_indent(data['require']|d(false), 6) }}
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {% endfor %}
 
 {% endmacro %}
@@ -313,14 +286,14 @@ lvm:
     
   lvm.lv_present:
     - name: {{ item }}
-      {%- for option, optvalue in data.iteritems() %}
-        {%- if option not in ['require'] %}
-  {{ name_format_indent(option, optvalue, 4) }}
+      {%- for opt, optvalue in data.iteritems() %}
+        {%- if opt not in ['require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
         {%- endif %}
       {%- endfor %}
     - require:
       - pkg: "lvm-lv-{{ item }}"
-  {{ format_indent(data['require']|d(false), 6) }}
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
     {%- endif %}
   {% endfor %}
 
@@ -380,9 +353,9 @@ format:
   cmd.run:
     - name: '{{ mkfs }} {%- for option in options %}{{ option }} {%- endfor %} {{ item }}'
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
-    {%- for option, optvalue in data.iteritems() %}
-      {%- if option not in ['fstype', 'options'] %}
-{{ name_format_indent(option, optvalue, 4) }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['fstype', 'options'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
   {% endfor %}
@@ -412,9 +385,9 @@ mount-{{ item }}:
     - mkmnt: {{ data.mkmnt|d(true) }}
     - fstype: {{ fstype }}
     - onlyif: test -b {{ data.device }} -a "$(blkid -p -s TYPE -o value {{ data.device }})" == "{{ fstype }}"
-    {%- for option, optvalue in data.iteritems() %}
-      {%- if option not in ['device', 'mkmnt', 'fstype'] %}
-{{ name_format_indent(option, optvalue, 4) }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['device', 'mkmnt', 'fstype'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
   {% endfor %}
@@ -464,9 +437,9 @@ directory:
       {%- if enforce_mountpoint %}
     - onlyif: mountpoint -q {{ item }}
       {%- endif %}
-      {%- for option, optvalue in entry.iteritems() %}
-        {%- if option not in ['name', 'makedirs',] %}
-{{ name_format_indent(option, optvalue, 4) }}
+      {%- for opt, optvalue in entry.iteritems() %}
+        {%- if opt not in ['name', 'makedirs',] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
         {%- endif %}
       {%- endfor %}
     {%- endfor %}
@@ -475,7 +448,7 @@ directory:
 {% endmacro %}
 
 
-{% macro relocate_setup(input_data) %}
+{% macro storage_relocate(input_data) %}
 
 {# example: relocate docker, relocate other dir 
 relocate:
