@@ -21,6 +21,7 @@ run_hook()
 {
     local service=$1
     local hook=$2
+    local script 
     shift 2
     if test "$1" != ""; then
         local name=$1

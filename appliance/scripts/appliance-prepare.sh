@@ -22,4 +22,4 @@ if test "$APPLIANCE_FLAGS_DISABLED_LEN" != ""; then
 fi
         
 appliance_status "Appliance Startup" "Starting up"
-run_hook appliance-prepare startup
+run_hook appliance-prepare start
