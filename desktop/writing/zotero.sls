@@ -1,11 +1,11 @@
 include:
-  - desktop/neuro.ppa
+  - desktop.neuro.ppa
 
 zotero:
   pkg.installed:
     - pkg: zotero-standalone
 {% if grains['os'] == 'Ubuntu' %}
     - require:
-      - cmd: cogscinl_ppa
+      - pkgrepo: cogscinl_ppa
 {% endif %}
 

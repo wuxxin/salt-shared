@@ -1,15 +1,14 @@
-include:
-  - .ppa
+{% if grains['os'] == 'Ubuntu' %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("inkscape-ppa", 
+  "inkscape.dev/stable", require_in= "pkg: vector") }}
+{% endif %} 
 
 vector:
   pkg.installed:
     - pkgs:
       - inkscape
       - librsvg2-bin
-{% if grains['os'] == 'Ubuntu' %}
-    - require:
-      - cmd: inkscape-ppa
-{% endif %}
 
 pixel_vector:
   pkg.installed:

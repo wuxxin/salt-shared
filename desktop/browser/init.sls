@@ -1,6 +1,13 @@
 include:
-  - .ppa
   - java.browser
+
+{% if grains['os'] == 'Ubuntu' %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("firefox-dev_ppa", 
+  "ubuntu-mozilla-daily/firefox-aurora", require_in= "pkg: firefox") }}
+{{ apt_add_repository("firefox-esr_ppa", 
+  "jonathonf/firefox-esr", require_in= "pkg: firefox") }}
+{% endif %}
 
 firefox:
   pkg.installed:
@@ -9,9 +16,6 @@ firefox:
 {% if grains['os'] == 'Ubuntu' %}
       - firefox-dev
       - firefox-esr
-    - require:
-      - cmd: firefox-dev_ppa
-      - cmd: firefox-esr_ppa
 {% endif %}
 
 chromium-browser:

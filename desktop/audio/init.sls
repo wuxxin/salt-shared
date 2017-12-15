@@ -1,5 +1,11 @@
-include:
-  - desktop.audio.ppa
+{% if grains['os'] == 'Ubuntu' %}
+  {% if grains['osrelease_info'][0]|int <= 17 and 
+    grains['osrelease'] != '17.10' %}
+  {% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("pulseaudio-dlna_ppa", "qos/pulseaudio-dlna",
+  require_in= "pkg: audio-packages") }}
+  {% endif %}
+{% endif %}
   
 audio-packages:
   pkg.installed:
@@ -13,8 +19,6 @@ audio-packages:
       - lame
       {# from ppa up to zesty #}
       - pulseaudio-dlna
-    - require:
-      - sls: desktop.audio.ppa
 
 audio-player:
   pkg.installed:

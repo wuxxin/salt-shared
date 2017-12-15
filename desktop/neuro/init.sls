@@ -1,10 +1,10 @@
 include:
-  - .ppa
+  - desktop.neuro.ppa
 
 opensesam:
   pkg:
     - installed
 {% if grains['os'] == 'Ubuntu' %}
     - require:
-      - cmd: cogscinl_ppa
+      - pkgrepo: cogscinl_ppa
 {% endif %}

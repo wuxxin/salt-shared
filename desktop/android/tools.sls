@@ -1,8 +1,5 @@
 include:
   - python
-{% if grains['os'] == 'Ubuntu' %}
-  - ubuntu
-{% endif %}
 
 tools:
   pkg.installed:
@@ -17,12 +14,11 @@ tools:
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("heimdall-ppa", "modycz/heimdall") }}
+{{ apt_add_repository("heimdall-ppa", "modycz/heimdall",
+  require_in= "pkg: heimdall") }}
 
 heimdall:
   pkg.installed:
     - pkgs:
       - heimdall
-    - require:
-      - cmd: heimdall-ppa
 {% endif %}
