@@ -93,7 +93,7 @@ get_userdata() {
     local ret=1
     local data
     if test "$ENV_YML" = "pillar"; then
-        data="$(salt-call --retcode-passthrough --out=yaml pillar.items )$(lfstrlf USERDATA_TYPE:\ pillar)"
+        data="$(salt-call --retcode-passthrough pillar.items --out yaml | tail -n +2 | sed -r 's/^  (.+)$/\1/g')$(lfstrlf USERDATA_TYPE:\ pillar)"
         ret=$?
     fi
     if test $ret -ne 0; then

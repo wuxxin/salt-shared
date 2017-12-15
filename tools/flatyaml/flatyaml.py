@@ -57,6 +57,7 @@ output sorted keys assigned with "=" to value on stdout as
     parser.add_argument('--postfix', default='')
     parser.add_argument('--combine', default='_')
     parser.add_argument('--assign', default='=')
+    parser.add_argument('--root', default='')
     parser.add_argument('--file', nargs='?',
         type=argparse.FileType('r'), default=sys.stdin,
         help='file to read or stdin if not defined')
@@ -67,6 +68,9 @@ output sorted keys assigned with "=" to value on stdout as
 
     with args.file as f:
         data = yaml.safe_load(f)
+
+    if args.root:
+        data = data[args.root]
 
     for i in args.key.split(','):
         keyroot = ''
