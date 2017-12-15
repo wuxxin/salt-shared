@@ -6,21 +6,25 @@
 
 prepare_storage () {
     need_storage_setup=false
+    if test ! -e /data; then mkdir /data; fi
+    if test ! -e /volatile; then mkdir /volatile; fi
+    
     for d in /data/etc /data/ca /data/pgdump /data/postgresql \
-        /volatile/docker /volatile/backup-test /volatile/prometheus \ /volatile/alertmanager /volatile/grafana /volatile/duplicity; do
+        /volatile/docker /volatile/backup-test /volatile/prometheus \
+        /volatile/alertmanager /volatile/grafana /volatile/duplicity; do
         if test ! -d $d ; then
             echo "Warning: could not find directory $d"
             need_storage_setup=true
         fi
     done
     if test "$(findmnt -S "LABEL=volatile" -f -l -n -o "TARGET")" = ""; then
-        if is_falsestr "$APPLIANCE_STORAGE_IGNORE_VOLATILE"; then
+        if is_truestr "$APPLIANCE_STORAGE_MOUNT_VOLATILE"; then
             echo "Warning: could not find mount for volatile filesystem"
             need_storage_setup=true
         fi
     fi
     if test "$(findmnt -S "LABEL=data" -f -l -n -o "TARGET")" = ""; then
-        if is_falsestr "$APPLIANCE_STORAGE_IGNORE_DATA"; then
+        if is_truestr "$APPLIANCE_STORAGE_MOUNT_DATA"; then
             echo "Warning: could not find mount for data filesystem"
             need_storage_setup=true
         fi
