@@ -1,8 +1,10 @@
 {% from "http_proxy/defaults.jinja" import settings as s with context %}
 
-include:
-  - .ppa
-
+{% if (grains['lsb_distrib_codename'] == "trusty") %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("polipo_ppa", 
+  "phraktle/backports", require_in= "pkg: polipo") }}
+{% endif %}
 
 polipo:
   pkg:
@@ -12,9 +14,6 @@ polipo:
     - enable: True
     - require:
       - pkg: polipo
-{%- if (grains['lsb_distrib_codename'] == "trusty") %}
-      - cmd: polipo_ppa
-{% endif %}
     - watch:
       - file: /etc/polipo/config
 
