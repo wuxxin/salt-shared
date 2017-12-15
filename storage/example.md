@@ -107,6 +107,22 @@ directory:
 {% endload %}
 ```
 
+## relocate
+
+example: move /var/lib/docker, while restarting docker, move duplicity dir
+
+```
+{% load_yaml as custom_storage %}
+relocate:
+  - source: /var/lib/docker
+    target: /mnnt/images/docker
+    prefix: docker kill $(docker ps -q); systemctl stop docker
+    postfix: systemctl start docker
+  - source: /app/.cache/duplicity
+    target: /mnt/images/duplicity
+```
+
+
 ## full 
 
 example (parted, madm, crypt, lvm:pv, lvm:vg, lvm:lv, format, mount, swap)
