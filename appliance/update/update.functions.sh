@@ -235,7 +235,7 @@ do_appliance_update() {
     fi
 
     if test "$proposed_source" = "saltmaster"; then
-        echo "Warning: using saltmaster as appliance update source"
+        echo "Information: using saltmaster as appliance update source"
         do_update=true
     else
         if test "$proposed_source" != "$current_source"; then
@@ -266,18 +266,21 @@ do_appliance_update() {
         if test -e /app/etc/flags/force.update.appliance; then
             rm /app/etc/flags/force.update.appliance
         fi
-        # hard update source
-        gosu app git checkout -f $proposed_branch
-        gosu app git reset --hard origin/$proposed_branch
-        # call saltstack state.highstate to update appliance
-        salt-call state.highstate --retcode-passthrough --return raven pillar='{"appliance": {"enabled": true}}' 
+        if test "$proposed_source" != "saltmaster"; then
+            # hard update source
+            gosu app git checkout -f $proposed_branch
+            gosu app git reset --hard origin/$proposed_branch
+            gosu app git submodule update --checkout --force --recursive
+        fi
+        # call state.highstate to update appliance
+        salt-call state.highstate --retcode-passthrough --return raven
         err=$?
         if test $err -ne 0; then
             appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"
         fi
         # save executed commit
         printf "%s" "$targetid" > /app/etc/tags/last_running_appliance
-        # update posible new env
+        # update to possible new env
         /usr/local/sbin/env-update.sh
     fi
 
