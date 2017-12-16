@@ -1,31 +1,27 @@
 # setup storage on running appliance, this is called from appliance-prepare
 {% from 'storage/lib.sls' import storage_setup with context %}
 
-# ### custom Storage Setup
+# call custom storage setup if mount should be setup, but disk is not present
 {% if (salt['pillar.get']("appliance:storage:mount:volatile", false) and
-      salt['file.file_exists']('/dev/disk/by-label/volatile')) or
+      not salt['file.file_exists']('/dev/disk/by-label/volatile')) or
       (salt['pillar.get']("appliance:storage:mount:data", false) and
-      salt['file.file_exists']('/dev/disk/by-label/data')) %}
+      not salt['file.file_exists']('/dev/disk/by-label/data')) %}
 {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
 
-# ### Mount/Base Directory Setup
+# create base directory, mount volume on request
 {% for dir in ['volatile', 'data'] %}
-  {% if salt['pillar.get']("appliance:storage:mount:"+ dir, false) %}
-{% load_yaml as custom_storage %}
-mount:
-  /{{ dir }}:
-    device: /dev/disk/by-label/{{ dir }}
-{% endload %}
-{{ storage_setup(custom_storage) }}
-  {% else %}
 create_{{ dir }}_directory:
   file.directory:
     - name: /{{ dir }}
-  {% endif %}
+  {% if salt['pillar.get']("appliance:storage:mount:"+ dir, false) %}
+mount_{{ dir }}_directory:
+  mount.mounted:
+    - name: /{{ dir }}
+    - device: /dev/disk/by-label/{{ dir }}
 {% endfor %}
 
-# ### Directory and Relocation Setup
+# make directories and relocate files
 {% load_yaml as custom_storage %}
 directory:
   /volatile:
@@ -64,6 +60,7 @@ relocate:
     target: /data/postgresql
     prefix: systemctl stop postgresql
     postfix: systemctl start postgresql
+    
   - source: /app/etc
     target: /data/etc
 {% endload %}
