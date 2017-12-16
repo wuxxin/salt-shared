@@ -44,8 +44,6 @@ See (example.md)[example.md] for detailed parameter usage.
 + format: passed to cmd.run
 + mount:  passed to mount.mounted
 + directory: passed to file.directory
-+ relocate: 
-
 
 in addition to optional kwargs for target state, 
 you can add standard salstack parameter like "watch_in/require_in/require/watch" 

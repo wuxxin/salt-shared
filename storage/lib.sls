@@ -462,8 +462,8 @@ relocate:
   {% for item in input_data %}
     {%- set source= item.source %}
     {%- set target= item.target %}
-    {%- set prefix= item.prefix|d(false) %}
-    {%- set postfix= item.postfix|d(false) %}
+    {%- set prefix= item.prefix|d("true") %}
+    {%- set postfix= item.postfix|d("true") %}
     {%- if prefix %}
 prefix_relocate_{{ source }}:
   cmd.run:
