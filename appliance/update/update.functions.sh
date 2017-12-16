@@ -2,26 +2,26 @@
 
 restart_str="#%need_service_restart=true"
 
-bootstrap_source() {
-    echo $(cat /app/etc/tags/APPLIANCE_GIT_BOOTSTRAP_SOURCE || echo "") 
+boot_source() {
+    echo $(cat /app/etc/tags/APPLIANCE_GIT_BOOTSTRAP_SOURCE 2>/dev/null || echo "") 
 }
-bootstrap_branch() { 
-    echo $(cat /app/etc/tags/APPLIANCE_GIT_BOOTSTRAP_BRANCH || echo "") 
+boot_branch() { 
+    echo $(cat /app/etc/tags/APPLIANCE_GIT_BOOTSTRAP_BRANCH 2>/dev/null || echo "") 
 }
-running_branch()  {
-    echo $(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD || echo "")
-}
-running_source() 
-{ 
-    echo $(gosu app git -C /app/appliance config --get remote.origin.url || echo "")
-}
-lastused_source()
+last_source()
 {
-    echo $(cat /app/etc/tags/APPLIANCE_GIT_LASTUSED_SOURCE || echo "") 
+    echo $(cat /app/etc/tags/APPLIANCE_GIT_LASTUSED_SOURCE 2>/dev/null || echo "") 
 }
-lastused_branch() 
+last_branch() 
 { 
-    echo $(cat /app/etc/tags/APPLIANCE_GIT_LASTUSED_BRANCH || echo "") 
+    echo $(cat /app/etc/tags/APPLIANCE_GIT_LASTUSED_BRANCH 2>/dev/null || echo "") 
+}
+run_source() 
+{ 
+    echo $(gosu app git -C /app/appliance config --get remote.origin.url 2>/dev/null || echo "")
+}
+run_branch()  {
+    echo $(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 }
 
 proposed_source()
@@ -29,13 +29,13 @@ proposed_source()
     if test "$APPLIANCE_GIT_SOURCE" != ""; then
         echo "$APPLIANCE_GIT_SOURCE"
     else
-        if test "$(lastused_source)" != ""; then
-            echo "$(lastused_source)"
+        if test "$(last_source)" != ""; then
+            echo "$(last_source)"
         else
-            if test "$(bootstrap_source)" != ""; then
-                echo "$(bootstrap_source)"
+            if test "$(boot_source)" != ""; then
+                echo "$(boot_source)"
             else
-                echo "$(running_source)"
+                echo "$(run_source)"
             fi
         fi
     fi
@@ -43,16 +43,16 @@ proposed_source()
 
 proposed_branch()
 {
-    if test $APPLIANCE_GIT_BRANCH != ""; then
+    if test "$APPLIANCE_GIT_BRANCH" != ""; then
         echo "$APPLIANCE_GIT_BRANCH"
     else
-        if test "$(lastused_branch)" != ""; then
-            echo "$(lastused_branch)"
+        if test "$(last_branch)" != ""; then
+            echo "$(last_branch)"
         else
-            if test "$(bootstrap_branch)" = ""; then
-                echo "$(bootstrap_branch)"
+            if test "$(boot_branch)" = ""; then
+                echo "$(boot_branch)"
             else
-                echo "$(running_branch)"
+                echo "$(run_branch)"
             fi
         fi
     fi
@@ -71,10 +71,10 @@ check_appliance_update(){
     
     if test -e /app/appliance/.git; then
         cd /app/appliance
-        current_source=$(current_source)
-        proposed_source=$(proposed_source)
-        current_branch=$(current_branch)
-        proposed_branch=$(proposed_branch)
+        current_source="$(run_source)"
+        current_branch="$(run_branch)"
+        proposed_source="$(proposed_source)"
+        proposed_branch="$(proposed_branch)"
         
         if test "$proposed_source" != "$current_source" -o test "$proposed_branch" != "$current_branch"; then
             appliance_need_update=true
