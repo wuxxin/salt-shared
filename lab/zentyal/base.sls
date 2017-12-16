@@ -1,8 +1,16 @@
 include:
   - appliance
-  - .ppa
+  - ubuntu
 
 zentyal:
+  pkgrepo.managed:
+    - name: deb http://archive.zentyal.org/zentyal 5.0 main
+    - key_url: http://keys.zentyal.org/zentyal-5.0-archive.asc
+    - require:
+      - pkg: ppa_ubuntu_installer
+    - require_in:
+      - pkg: zentyal
+
   pkg.installed:
     - pkgs:
       - zentyal
@@ -14,7 +22,6 @@ zentyal:
       - language-pack-zentyal-{{ i }}
 {%- endfor %}
     - require:
-      - pkgrepo: zentyal_main_ubuntu
       - sls: appliance
 
 set_os_extra:
