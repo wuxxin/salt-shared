@@ -19,6 +19,7 @@ mount_{{ dir }}_directory:
   mount.mounted:
     - name: /{{ dir }}
     - device: /dev/disk/by-label/{{ dir }}
+  {% endif %}
 {% endfor %}
 
 # make directories and relocate files
