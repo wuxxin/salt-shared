@@ -24,20 +24,18 @@ run_hook()
     if test "$1" = "--quiet"; then noisy="false"; shift; fi
     local service=$1
     local hook=$2
-    local script 
+    local hookfile
     shift 2
     if test "$1" != ""; then
         local name=$1
         shift
-        _run_simple_hook $service $hook $name $@
+        _run_simple_hook $(if test "$noisy" != "true"; then echo "--quiet"; fi) $service $hook $name $@
     else
-        if $noisy; then echo "# calling * in $1 / $2 hooks"; fi
-        for hookfile in $(find /app/etc/hooks/$1/$2 -executable -not -type d | sort ); do
-            if $noisy; then echo "# calling hook $hookfile (one of $1 / $2 hooks)"; fi
+        if $noisy; then echo "# calling * in $service / $hook hooks"; fi
+        for hookfile in $(find /app/etc/hooks/$service/$hook -executable -not -type d | sort ); do
+            if $noisy; then echo "# calling hook $hookfile (one of $service / $hook hooks)"; fi
             ENV_YML=/run/active-env.yml $hookfile || (
-              sentry_entry "Appliance Hook" "hook error $1-$2-$hookfile" "error" "$(service_status $1.service)"
-              exit 1
-            )
+              sentry_entry "Appliance Hook" "hook error $service-$hook-$hookfile" "error" "$(service_status $service.service)"; exit 1)
         done
     fi
 }
