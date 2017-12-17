@@ -456,7 +456,7 @@ relocate:
     {%- set postfix= item.postfix|d("true") %}
 "pre_rel_{{ source }}":
   cmd.run:
-    - name: {{ prefix }}
+    - name: "{{ prefix }}"
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
 "relocate_{{ source }}":
   file.rename:
@@ -475,7 +475,7 @@ relocate:
       - file: "relocate_{{ source }}"
 "post_rel_{{ source }}":
   cmd.run:
-    - name: {{ postfix }}
+    - name: "{{ postfix }}"
     - onchanges:
       - file: "relocate_{{ source }}"
   {% endfor %}
