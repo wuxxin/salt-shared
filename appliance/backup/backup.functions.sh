@@ -44,7 +44,7 @@ create_backup_config() {
     local confdir=/var/spool/duplicity/.duply/appliance-backup
     local cachedir=/var/cache/duplicity/duply_appliance-backup
     
-    install -g duplicity -o duplicity -d $gpgdir
+    install -g duplicity -o duplicity -m 700 -d $gpgdir
     find $gpgdir -mindepth 1 -name "*.gpg*" -delete
     echo "$APPLIANCE_BACKUP_ENCRYPT" | gosu duplicity gpg --homedir $gpgdir --batch --yes --import --
     
