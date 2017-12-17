@@ -49,7 +49,7 @@ create_backup_config() {
     echo "$APPLIANCE_BACKUP_ENCRYPT" | gosu duplicity gpg --homedir $gpgdir --batch --yes --import --
     
     # write out backup target and gpg_key to duply config
-    gpg_key_id=$(gosu duplicity gpg --keyid-format 0xshort --list-key appliance_backup | grep pub | sed -r "s/pub.+0x([0-9A-F]+).+/\1/g")
+    gpg_key_id=$(gosu duplicity gpg --keyid-format 0xshort --list-key appliance-backup | grep pub | sed -r "s/pub.+0x([0-9A-F]+).+/\1/g")
     cat $confdir/conf.template | \
         sed -r "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#;s#^GPG_KEY=.*#GPG_KEY=$gpg_key_id#;s#^CUSTOM_DUPL_PARAMS=.*#CUSTOM_DUPL_PARAMS=\"$APPLIANCE_BACKUP_OPTIONS\"#;" > \
         $confdir/conf
