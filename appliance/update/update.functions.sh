@@ -76,7 +76,7 @@ check_appliance_update(){
         proposed_source="$(proposed_source)"
         proposed_branch="$(proposed_branch)"
         
-        if test "$proposed_source" != "$current_source" -o test "$proposed_branch" != "$current_branch"; then
+        if test "$proposed_source" != "$current_source" -o "$proposed_branch" != "$current_branch"; then
             appliance_need_update=true
             echo "# Warning: source/branch changed; old: $current_source @$current_branch , new: $proposed_source @$proposed_branch"
         else

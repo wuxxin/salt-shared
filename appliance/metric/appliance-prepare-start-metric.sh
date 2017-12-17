@@ -15,7 +15,7 @@ prepare_metric() {
     
     services="${APPLIANCE_METRIC_EXPORTER_LIST:=$exporter_list}"
     for i in $services; do
-        if test -e /app/etc/flags/metric.exporter -a test ! -e /app/etc/flags/no.$i; then
+        if test -e /app/etc/flags/metric.exporter -a ! -e /app/etc/flags/no.$i; then
             systemctl start $i
         else
             systemctl stop $i
@@ -24,7 +24,7 @@ prepare_metric() {
     
     services="${APPLIANCE_METRIC_SERVER_LIST:=$server_list}"
     for i in $services; do
-        if test -e /app/etc/flags/metric.server -a test ! -e /app/etc/flags/no.$i; then
+        if test -e /app/etc/flags/metric.server -a ! -e /app/etc/flags/no.$i; then
             systemctl start $i
             
             sed -ri.bak  's/([ \t]+site:).*/\1 "'${APPLIANCE_DOMAIN}'"/g' /app/etc/prometheus.yml
@@ -39,7 +39,7 @@ prepare_metric() {
     
     services="${APPLIANCE_METRIC_GUI_LIST:=$gui_list}"
     for i in $services; do
-        if test -e /app/etc/flags/metric.gui -a test ! -e /app/etc/flags/no.$i; then
+        if test -e /app/etc/flags/metric.gui -a ! -e /app/etc/flags/no.$i; then
             systemctl start $i
         else
             systemctl stop $i
