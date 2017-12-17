@@ -454,7 +454,7 @@ relocate:
     {%- set target= item.target %}
     {%- set prefix= item.prefix|d("true") %}
     {%- set postfix= item.postfix|d("true") %}
-"prefix_relocate_{{ source }}":
+"pre_rel_{{ source }}":
   cmd.run:
     - name: {{ prefix }}
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
@@ -465,7 +465,7 @@ relocate:
     - force: true
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
     - require:
-      - cmd: "prefix_relocate_{{ source }}"
+      - cmd: "pre_rel_{{ source }}"
 "symlink_{{ source }}":
   file.symlink:
     - name: {{ source }}
@@ -473,7 +473,7 @@ relocate:
     - onlyif: test -d {{ target }} -a ! -L {{ source }}
     - require:
       - file: "relocate_{{ source }}"
-"postfix_relocate_{{ source }}":
+"post_rel_{{ source }}":
   cmd.run:
     - name: {{ postfix }}
     - onchanges:
