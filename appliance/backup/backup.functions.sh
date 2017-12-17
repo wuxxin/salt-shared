@@ -1,7 +1,12 @@
 #!/bin/bash
 
 backup_hook() {
-    run_hook appliance-backup $@
+    if test "$1" = "--quiet"; then
+        shift
+        run_hook --quiet appliance-backup $@
+    else
+        run_hook appliance-backup $@
+    fi
 }
   
 mount_backup_target() {

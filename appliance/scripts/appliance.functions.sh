@@ -35,7 +35,7 @@ run_hook()
         for hookfile in $(find /app/etc/hooks/$service/$hook -executable -not -type d | sort ); do
             if $noisy; then echo "# calling hook $hookfile (one of $service / $hook hooks)"; fi
             ENV_YML=/run/active-env.yml $hookfile || (
-              sentry_entry "Appliance Hook" "hook error $service-$hook-$hookfile" "error" "$(service_status $service.service)"; exit 1)
+              sentry_entry "Appliance Hook" "hook error $service-$hook-$(basename $hookfile)" "error" "$(service_status $service.service)"; exit 1)
         done
     fi
 }
