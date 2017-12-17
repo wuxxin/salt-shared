@@ -1,24 +1,27 @@
 #!/bin/bash
 
 _run_simple_hook()
-{
-  local service=$1
-  local hook=$2
-  local name=$3
-  local hookfile=/app/etc/hooks/$service/$hook/$name
-  shift 3
-  if test -x $hookfile; then
-      ENV_YML=/run/active-env.yml $hookfile "$@" || (
-        sentry_entry "Appliance Hook" "hook error $service-$hook-$name" "error" "$(service_status $service.service)"
-        exit 1
-      )
-  else
-      sentry_entry "Appliance Hook" "hook $service:$hook:$name not found" "warning" 
-  fi
+{ 
+    local noisy="true"
+    if test "$1" = "--quiet"; then noisy="false"; shift; fi
+    local service=$1
+    local hook=$2
+    local name=$3
+    local hookfile=/app/etc/hooks/$service/$hook/$name
+    shift 3
+    if test -x $hookfile; then
+        if $noisy; then echo "# calling hook $hookfile with parameter: $@"; fi
+        ENV_YML=/run/active-env.yml $hookfile "$@" || (
+            sentry_entry "Appliance Hook" "hook error $service-$hook-$name" "error" "$(service_status $service.service)"; exit 1)
+    else
+        sentry_entry "Appliance Hook" "hook $service:$hook:$name not found" "warning" 
+    fi
 }
 
 run_hook()
 {
+    local noisy="true"
+    if test "$1" = "--quiet"; then noisy="false"; shift; fi
     local service=$1
     local hook=$2
     local script 
@@ -28,10 +31,11 @@ run_hook()
         shift
         _run_simple_hook $service $hook $name $@
     else
-        for script in $(find /app/etc/hooks/$1/$2/* -type f -executable | sort ); do
-            # execute $script
-            ENV_YML=/run/active-env.yml $script || (
-              sentry_entry "Appliance Hook" "hook error $1-$2-$script" "error" "$(service_status $1.service)"
+        if $noisy; then echo "# calling * in $1 / $2 hooks"; fi
+        for hookfile in $(find /app/etc/hooks/$1/$2 -executable -not -type d | sort ); do
+            if $noisy; then echo "# calling hook $hookfile (one of $1 / $2 hooks)"; fi
+            ENV_YML=/run/active-env.yml $hookfile || (
+              sentry_entry "Appliance Hook" "hook error $1-$2-$hookfile" "error" "$(service_status $1.service)"
               exit 1
             )
         done
