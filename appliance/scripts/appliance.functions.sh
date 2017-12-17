@@ -10,7 +10,7 @@ _run_simple_hook()
     local hookfile=/app/etc/hooks/$service/$hook/$name
     shift 3
     if test -x $hookfile; then
-        if $noisy; then echo "# calling hook $hookfile with parameter: $@"; fi
+        if $noisy; then echo "# execute hook $hookfile ($@)"; fi
         ENV_YML=/run/active-env.yml $hookfile "$@" 
         res=$?
         if test "$res" -ne 0; then
