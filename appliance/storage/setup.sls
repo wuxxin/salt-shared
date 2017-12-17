@@ -42,9 +42,9 @@ directory:
   /data:
     mountpoint: {{ salt['pillar.get']("appliance:storage:mount:data",false) }}
     parts:
-      - name: postgresql
-        user: postgres
       - name: etc
+        user: app
+      - name: ca
         user: app
       - name: pgdump
         user: app

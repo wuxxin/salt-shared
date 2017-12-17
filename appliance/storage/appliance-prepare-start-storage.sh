@@ -9,7 +9,7 @@ prepare_storage () {
     if test ! -e /data; then mkdir /data; fi
     if test ! -e /volatile; then mkdir /volatile; fi
     
-    for d in /data/etc /data/ca /data/pgdump /data/postgresql \
+    for d in /data/etc /data/ca /data/pgdump \
         /volatile/docker /volatile/backup-test /volatile/prometheus \
         /volatile/alertmanager /volatile/grafana /volatile/duplicity; do
         if test ! -d $d ; then
@@ -40,5 +40,5 @@ prepare_storage () {
 }
 
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 prepare_storage
