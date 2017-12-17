@@ -11,8 +11,12 @@ _run_simple_hook()
     shift 3
     if test -x $hookfile; then
         if $noisy; then echo "# calling hook $hookfile with parameter: $@"; fi
-        ENV_YML=/run/active-env.yml $hookfile "$@" || (
-            sentry_entry "Appliance Hook" "hook error $service-$hook-$name" "error" "$(service_status $service.service)"; exit 1)
+        ENV_YML=/run/active-env.yml $hookfile "$@" 
+        res=$?
+        if test "$res" -ne 0; then
+            sentry_entry "Appliance Hook" "hook error $res on $service-$hook-$name" "error" "$(service_status $service.service)"
+            exit $res
+        fi
     else
         sentry_entry "Appliance Hook" "hook $service:$hook:$name not found" "warning" 
     fi
@@ -21,7 +25,8 @@ _run_simple_hook()
 run_hook()
 {
     local noisy="true"
-    if test "$1" = "--quiet"; then noisy="false"; shift; fi
+    local optparam=""
+    if test "$1" = "--quiet"; then noisy="false"; shift; optparam="--quiet"; fi
     local service=$1
     local hook=$2
     local hookfile
@@ -29,13 +34,12 @@ run_hook()
     if test "$1" != ""; then
         local name=$1
         shift
-        _run_simple_hook $(if test "$noisy" != "true"; then echo "--quiet"; fi) $service $hook $name $@
+        _run_simple_hook $optparam $service $hook $name $@
     else
         if $noisy; then echo "# calling * in $service / $hook hooks"; fi
-        for hookfile in $(find /app/etc/hooks/$service/$hook -executable -not -type d | sort ); do
-            if $noisy; then echo "# calling hook $hookfile (one of $service / $hook hooks)"; fi
-            ENV_YML=/run/active-env.yml $hookfile || (
-              sentry_entry "Appliance Hook" "hook error $service-$hook-$(basename $hookfile)" "error" "$(service_status $service.service)"; exit 1)
+        for hookfile in $(find /app/etc/hooks/$service/$hook -executable -not -type d 2>/dev/null | sort ); do
+            if $noisy; then echo "# calling hook $(basename $hookfile) (on of $service / $hook)"; fi
+            _run_simple_hook $optparam $service $hook $name $@
         done
     fi
 }
