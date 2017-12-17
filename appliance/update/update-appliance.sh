@@ -4,7 +4,7 @@
 . /usr/local/share/appliance/appliance.functions.sh
 . /usr/local/share/appliance/update.functions.sh
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 
 # call with target_function [optargs]
 

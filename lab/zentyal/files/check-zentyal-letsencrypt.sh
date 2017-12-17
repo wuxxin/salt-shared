@@ -3,7 +3,7 @@
 . /usr/local/share/appliance/env.functions.sh
 . /usr/local/share/appliance/metric.functions.sh
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 
 check_letsencrypt_update() {
     local domain RENEW_DAYS valid_until new_metric cert_metric

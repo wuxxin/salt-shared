@@ -15,5 +15,5 @@ TimeoutStartSec=30min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
-    userdata_to_env appliance; \
+    userdata_to_env appliance || exit $?; \
     exec /usr/local/share/appliance/appliance-prepare.sh'

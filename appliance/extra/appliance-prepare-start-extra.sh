@@ -35,6 +35,6 @@ prepare_extra_packages () {
     fi
 }
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 prepare_extra_files
 prepare_extra_packages

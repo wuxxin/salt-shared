@@ -39,5 +39,5 @@ prepare_update () {
 }
 
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 prepare_update

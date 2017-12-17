@@ -16,7 +16,7 @@ StartLimitBurst=3
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 WorkingDirectory=/app
-ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; userdata_to_env appliance'
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; userdata_to_env appliance || exit $?'
 
 [Install]
 WantedBy=multi-user.target

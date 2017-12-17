@@ -47,5 +47,5 @@ prepare_metric() {
     done
 }
 
-userdata_to_env appliance
+userdata_to_env appliance || exit $?
 prepare_metric

@@ -2,6 +2,7 @@
 Description=Appliance Backup
 ConditionFileNotEmpty=/var/spool/duplicity/.gnupg/secring.gpg
 ConditionFileNotEmpty=/var/spool/duplicity/.duply/appliance-backup/conf
+ConditionFileNotEmpty=/run/active-env.yml
 After=network.target postgresql.service
 Requires=postgresql.service
 OnFailure=service-failed@%n.service
@@ -13,7 +14,7 @@ TimeoutStartSec=300min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
-    userdata_to_env appliance; \
+    userdata_to_env appliance || exit $?; \
     exec /usr/local/share/appliance/appliance-backup.sh'
 
 [Install]
