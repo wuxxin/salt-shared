@@ -29,16 +29,18 @@ run_hook()
     if test "$1" = "--quiet"; then noisy="false"; shift; optparam="--quiet"; fi
     local service=$1
     local hook=$2
+    local name
     local hookfile
     shift 2
     if test "$1" != ""; then
-        local name=$1
+        name=$1
         shift
         _run_simple_hook $optparam $service $hook $name $@
     else
-        if $noisy; then echo "# calling * in $service / $hook hooks"; fi
-        for hookfile in $(find /app/etc/hooks/$service/$hook -executable -not -type d 2>/dev/null | sort ); do
-            if $noisy; then echo "# calling hook $(basename $hookfile) (on of $service / $hook)"; fi
+        if $noisy; then echo "# calling all hooks in $service/$hook"; fi
+        for hookfile in $(find /app/etc/hooks/$service/$hook -maxdepth 1 -executable -not -type d 2>/dev/null | sort ); do
+            name=$(basename $hookfile)
+            if $noisy; then echo "# calling hook ($service/$hook/$name)"; fi
             _run_simple_hook $optparam $service $hook $name $@
         done
     fi
