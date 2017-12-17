@@ -2,51 +2,41 @@
 ###############
 
 {% macro storage_setup(data) %}
-
-{% if data['parted'] is defined %}
+{%- if data['parted'] is defined %}
 {{ storage_parted(data.parted) }}
-{% endif %}
-
-{% if data['mdadm'] is defined %}
+{%- endif %}
+{%- if data['mdadm'] is defined %}
 {{ storage_mdadm(data.mdadm) }}
-{% endif %}
-
-{% if data['crypt'] is defined %}
+{%- endif %}
+{%- if data['crypt'] is defined %}
 {{ storage_crypt(data.crypt) }}
-{% endif %}
-
-{% if data['lvm'] is defined %}
-  {% if data['lvm']['pv'] is defined %}
+{%- endif %}
+{%- if data['lvm'] is defined %}
+  {%- if data['lvm']['pv'] is defined %}
 {{ storage_lvm_pv(data.lvm.pv) }}
-  {% endif %}
-  {% if data['lvm']['vg'] is defined %}
+  {%- endif %}
+  {%- if data['lvm']['vg'] is defined %}
 {{ storage_lvm_vg(data.lvm.vg) }}
-  {% endif %}
-  {% if data['lvm']['lv'] is defined %}
+  {%- endif %}
+  {%- if data['lvm']['lv'] is defined %}
 {{ storage_lvm_lv(data.lvm.lv) }}
-  {% endif %}
-{% endif %}
-
-{% if data['format'] is defined %}
+  {%- endif %}
+{%- endif %}
+{%- if data['format'] is defined %}
 {{ storage_format(data.format) }}
-{% endif %}
-
-{% if data['mount'] is defined %}
+{%- endif %}
+{%- if data['mount'] is defined %}
 {{ storage_mount(data.mount) }}
-{% endif %}
-
-{% if data['swap'] is defined %}
+{%- endif %}
+{%- if data['swap'] is defined %}
 {{ storage_swap(data.swap) }}
-{% endif %}
-
-{% if data['directory'] is defined %}
+{%- endif %}
+{%- if data['directory'] is defined %}
 {{ storage_directory(data.directory) }}
-{% endif %}
-
-{% if data['relocate'] is defined %}
+{%- endif %}
+{%- if data['relocate'] is defined %}
 {{ storage_relocate(data.relocate) }}
-{% endif %}
-
+{%- endif %}
 {% endmacro %}
 
 
@@ -431,7 +421,7 @@ directory:
   {% for item, data in input_data.iteritems() %}
     {%- set enforce_mountpoint= data['mountpoint']|d(false) %}
     {%- for entry in data.parts %}
-{{ item }}/{{ entry.name }}:
+"{{ item }}/{{ entry.name }}":
   file.directory:
     - makedirs: {{ entry.makedirs|d(True) }}
       {%- if enforce_mountpoint %}
@@ -464,37 +454,29 @@ relocate:
     {%- set target= item.target %}
     {%- set prefix= item.prefix|d("true") %}
     {%- set postfix= item.postfix|d("true") %}
-    {%- if prefix %}
-prefix_relocate_{{ source }}:
+"prefix_relocate_{{ source }}":
   cmd.run:
     - name: {{ prefix }}
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
-    {%- endif %}
-relocate_{{ source }}:
+"relocate_{{ source }}":
   file.rename:
     - name: {{ target }}
     - source: {{ source }}
     - force: true
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
-    {%- if prefix %}
     - require:
-      - cmd: prefix_relocate_{{ source }}
-    {%- endif %}
-symlink_{{ source }}:
+      - cmd: "prefix_relocate_{{ source }}"
+"symlink_{{ source }}":
   file.symlink:
     - name: {{ source }}
     - target: {{ target }}
     - onlyif: test -d {{ target }} -a ! -L {{ source }}
-    {%- if prefix %}
     - require:
-      - file: relocate_{{ source }}
-    {%- endif %}
-    {%- if postfix %}
-postfix_relocate_{{ source }}:
+      - file: "relocate_{{ source }}"
+"postfix_relocate_{{ source }}":
   cmd.run:
     - name: {{ postfix }}
     - onchanges:
-      - file: relocate_{{ source }}
-    {% endif %}
+      - file: "relocate_{{ source }}"
   {% endfor %}
 {% endmacro %}
