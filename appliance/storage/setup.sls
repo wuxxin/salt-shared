@@ -53,17 +53,14 @@ relocate:
     target: /volatile/docker
     prefix: docker kill $(docker ps -q); systemctl stop docker
     postfix: systemctl start docker
-  
   - source: /app/.cache/duplicity
     target: /volatile/duplicity
-  
+  - source: /app/etc
+    target: /data/etc
   - source: /var/lib/postgresql
     target: /data/postgresql
     prefix: systemctl stop postgresql
     postfix: systemctl start postgresql
-    
-  - source: /app/etc
-    target: /data/etc
 {% endload %}
 {{ storage_setup(custom_storage) }}
 
