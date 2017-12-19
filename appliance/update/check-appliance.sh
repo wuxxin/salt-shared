@@ -9,5 +9,4 @@ userdata_to_env appliance || exit $?
 
 check_compose_update
 check_docker_update
-check_postgres_update
 check_system_update

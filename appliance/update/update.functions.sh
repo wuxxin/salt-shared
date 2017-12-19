@@ -190,32 +190,6 @@ check_compose_update() {
 }
 
 
-check_postgres_update(){
-    local postgres_list postgres_old postgres_new
-    local postgres_need_update=false
-    local postgres_forced=false
-
-    if test -e /app/etc/flags/force.update.postgres; then 
-        postgres_need_update=true
-        postgres_forced=true
-    fi
-    
-    # XXX needs up to date package list for proper results
-    postgres_list=$(apt-cache policy postgresql-9.5 -q | grep -E "(Installed|Candidate)")
-    postgres_old=$(printf "%s" "$postgres_list" | grep "Installed" | sed -r "s/.*Installed: ([^ ]+).*/\1/")
-    postgres_new=$(printf "%s" "$postgres_list" | grep "Candidate" | sed -r "s/.*Candidate: ([^ ]+).*/\1/")
-    if test "$postgres_old" != "$postgres_new"; then
-        postgres_need_update=true
-    fi
-  
-    echo "appliance:do_postgres_update=$($postgres_need_update && echo true || echo false)"
-    if $postgres_need_update; then
-        echo "# information postgres update: forced: $postgres_forced , current: $postgres_old , new: $postgres_new"
-        echo "$restart_str"
-    fi
-}
-
-
 do_appliance_update() {
     local current_source proposed_source current_branch proposed_branch
     local targetid lastid
@@ -322,16 +296,5 @@ do_compose_update() {
         rm /app/etc/flags/force.update.compose
     fi
     pip2 install -U --upgrade-strategy only-if-needed docker-compose
-}
-
-
-do_postgres_update() {
-    if $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
-    simple_metric postgres_last_update counter "timestamp-epoch-seconds since last update to postgres" $start_epoch_seconds
-    if test -e /app/etc/flags/force.update.postgres; then
-        rm /app/etc/flags/force.update.postgres
-    fi
-    echo "Warning: prepare postgres update, kill all postgres connections to ecs except ourself"
-    gosu app psql ecs -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'ecs' AND pid <> pg_backend_pid();"
 }
 

@@ -9,7 +9,7 @@ userdata_to_env appliance || exit $?
 
 # call with target_function [optargs]
 
-if [[ "$1" =~ ^do_(appliance|compose|docker|postgres|system)_update$ ]]; then
+if [[ "$1" =~ ^do_(appliance|compose|docker|system)_update$ ]]; then
     target="$1"
     shift
     $target "$@"
