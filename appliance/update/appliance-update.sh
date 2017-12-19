@@ -49,11 +49,11 @@ fi
         sleep 2 # Wait a little to settle still open connections
     fi
         
-    for update_name in $(echo "$update_list" | grep -v "^#" | sed -r "s/([^:]+):([^=])=(.+)/\1/g"); do
+    for update_name in $(echo "$update_list" | grep -v "^#" | sed -r "s/([^:]+):([^=]+)=(.+)/\1/g"); do
         update_entry=$(echo "$update_list" | grep "^$update_name:")
-        update_func=$(echo "$update_entry" | sed -r "s/([^:]+):([^=])=(.+)/\2/g")
-        update_param=$(echo "$update_entry" | sed -r "s/([^:]+):([^=])=(.+)/\3/g")
-        run_hook appliance-update update $update_name $update_entry $update_param
+        update_func=$(echo "$update_entry" | sed -r "s/([^:]+):([^=]+)=(.+)/\2/g")
+        update_param=$(echo "$update_entry" | sed -r "s/([^:]+):([^=]+)=(.+)/\3/g")
+        run_hook appliance-update update $update_name $update_func $update_param
     done
     
     if test -e /var/run/reboot-required; then
