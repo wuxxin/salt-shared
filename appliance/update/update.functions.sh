@@ -201,7 +201,9 @@ do_appliance_update() {
     proposed_source=$(proposed_source)
     current_branch=$(current_branch)
     proposed_branch=$(proposed_branch)
-
+    echo "# Information: current_source/branch: $current_source/$current_branch"
+    echo "# Information: proposed_source/branch: $proposed_source/$proposed_branch"
+    
     # rewrite minion_id if different to env
     if test "$APPLIANCE_DOMAIN" != "$(cat /etc/salt/minion_id)"; then
         echo "setting minion_id to $APPLIANCE_DOMAIN"
@@ -214,7 +216,7 @@ do_appliance_update() {
     else
         if test "$proposed_source" != "$current_source"; then
             sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$proposed_source\"" warning
-            cd /; rm -r /app/appliance; install -g app -o app -d /app/appliance; cd /app/appliance
+            cd /; rm -rf /app/appliance; install -g app -o app -d /app/appliance; cd /app/appliance
             gosu app git clone --branch $proposed_branch $proposed_source /app/appliance
             gosu app git submodule update --init --recursive
             do_update=true
