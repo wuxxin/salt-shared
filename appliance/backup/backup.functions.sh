@@ -74,7 +74,7 @@ create_backup_config() {
     cp -a $confdir/conf $confdir/conf.last
 
     # generate backup file list
-    backup_hook --quiet create_backup_filelist | sort | uniq; cat - $confdir/exclude.template > $confdir/exclude
+    backup_hook --quiet create_backup_filelist | sort | uniq; cat $confdir/exclude.template - > $confdir/exclude
     chown duplicity:duplicity $confdir/exclude
     
     # write warning to sentry if changed from last version
