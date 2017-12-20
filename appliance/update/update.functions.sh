@@ -60,8 +60,7 @@ proposed_branch()
 
 
 check_appliance_update(){
-    local current_source proposed_source current_branch proposed_branch
-    local targetid lastid
+    local curr_source curr_branch prop_source prop_branch targetid lastid
     local appliance_need_update=false
     
     if test -e /app/etc/flags/force.update.appliance; then 
@@ -71,21 +70,21 @@ check_appliance_update(){
     
     if test -e /app/appliance/.git; then
         cd /app/appliance
-        current_source="$(run_source)"
-        current_branch="$(run_branch)"
-        proposed_source="$(proposed_source)"
-        proposed_branch="$(proposed_branch)"
+        curr_source="$(run_source)"
+        curr_branch="$(run_branch)"
+        prop_source="$(proposed_source)"
+        prop_branch="$(proposed_branch)"
         
-        if test "$proposed_source" != "$current_source" -o "$proposed_branch" != "$current_branch"; then
+        if test "$prop_source" != "$curr_source" -o "$prop_branch" != "$curr_branch"; then
             appliance_need_update=true
-            echo "# Warning: source/branch changed; old: $current_source @$current_branch , new: $proposed_source @$proposed_branch"
+            echo "# Warning: source/branch changed; old: $curr_source @$curr_branch , new: $prop_source @$prop_branch"
         else
             # fetch all updates from origin
             gosu app git fetch -a -p
             if test "$APPLIANCE_GIT_COMMITID" != ""; then
                 targetid="$APPLIANCE_GIT_COMMITID"
             else
-                targetid=$(gosu app git rev-parse origin/$proposed_branch)
+                targetid=$(gosu app git rev-parse origin/$prop_branch)
             fi
             lastid=$(gosu app git rev-parse HEAD)
             if test "$lastid" != "$targetid"; then
@@ -191,18 +190,17 @@ check_compose_update() {
 
 
 do_appliance_update() {
-    local current_source proposed_source current_branch proposed_branch
-    local targetid lastid
+    local curr_source curr_branch prop_source prop_branch targetid lastid
     local do_update=false
     
     if test ! -e /app/appliance; then install -g app -o app -d /app/appliance; fi
     cd /app/appliance
-    current_source=$(current_source)
-    proposed_source=$(proposed_source)
-    current_branch=$(current_branch)
-    proposed_branch=$(proposed_branch)
-    echo "# Information: current_source/branch: $current_source/$current_branch"
-    echo "# Information: proposed_source/branch: $proposed_source/$proposed_branch"
+    curr_source="$(run_source)"
+    curr_branch="$(run_branch)"
+    prop_source="$(proposed_source)"
+    prop_branch="$(proposed_branch)"
+    echo "# Information: current_source/branch: $curr_source/$curr_branch"
+    echo "# Information: proposed_source/branch: $prop_source/$prop_branch"
     
     # rewrite minion_id if different to env
     if test "$APPLIANCE_DOMAIN" != "$(cat /etc/salt/minion_id)"; then
@@ -210,14 +208,14 @@ do_appliance_update() {
         printf "%s" "$APPLIANCE_DOMAIN" > /etc/salt/minion_id
     fi
 
-    if test "$proposed_source" = "saltmaster"; then
+    if test "$prop_source" = "saltmaster"; then
         echo "Information: using saltmaster as appliance update source"
         do_update=true
     else
-        if test "$proposed_source" != "$current_source"; then
-            sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$proposed_source\"" warning
+        if test "$prop_source" != "$curr_source"; then
+            sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$curr_source\", new: \"$prop_source\"" warning
             cd /; rm -rf /app/appliance; install -g app -o app -d /app/appliance; cd /app/appliance
-            gosu app git clone --branch $proposed_branch $proposed_source /app/appliance
+            gosu app git clone --branch $prop_branch $prop_source /app/appliance
             gosu app git submodule update --init --recursive
             do_update=true
         fi
@@ -227,7 +225,7 @@ do_appliance_update() {
         if test "$APPLIANCE_GIT_COMMITID" != ""; then
             targetid="$APPLIANCE_GIT_COMMITID"
         else
-            targetid=$(gosu app git rev-parse origin/$proposed_branch)
+            targetid=$(gosu app git rev-parse origin/$prop_branch)
         fi
         lastid=$(gosu app git rev-parse HEAD)
         
@@ -242,10 +240,10 @@ do_appliance_update() {
         if test -e /app/etc/flags/force.update.appliance; then
             rm /app/etc/flags/force.update.appliance
         fi
-        if test "$proposed_source" != "saltmaster"; then
+        if test "$prop_source" != "saltmaster"; then
             # hard update source
-            gosu app git checkout -f $proposed_branch
-            gosu app git reset --hard origin/$proposed_branch
+            gosu app git checkout -f $prop_branch
+            gosu app git reset --hard origin/$prop_branch
             gosu app git submodule update --checkout --force --recursive
         fi
         # call state.highstate to update appliance
