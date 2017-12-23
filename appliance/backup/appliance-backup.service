@@ -17,5 +17,3 @@ ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.functions.sh; \
     userdata_to_env appliance || exit $?; \
     exec /usr/local/share/appliance/appliance-backup.sh'
 
-[Install]
-WantedBy=default.target
