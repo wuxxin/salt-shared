@@ -15,7 +15,7 @@ openssh-server:
 {% for p,r in [
   ("UseDNS", "UseDNS no"),
   ("PasswordAuthentication", "PasswordAuthentication no"),
-  ("PermitRootLogin", "PermitRootLogin yes"),
+  ("PermitRootLogin", "PermitRootLogin prohibit-password"),
   ] %}
 
 /etc/ssh/sshd_config_{{ p }}:
