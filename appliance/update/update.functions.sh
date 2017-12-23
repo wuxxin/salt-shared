@@ -245,7 +245,10 @@ do_appliance_update() {
             gosu app git checkout -f $prop_branch
             gosu app git reset --hard origin/$prop_branch
             gosu app git submodule update --checkout --force --recursive
+            echo "$(gosu app git -C /app/appliance rev-parse HEAD)" > /app/etc/tags/APPLIANCE_GIT_LASTUSED_REV
         fi
+        echo "$prop_source" > /app/etc/tags/APPLIANCE_GIT_LASTUSED_SOURCE
+        echo "$prop_branch" > /app/etc/tags/APPLIANCE_GIT_LASTUSED_BRANCH
         # call state.highstate to update appliance
         salt-call state.highstate --retcode-passthrough --return raven
         err=$?
@@ -265,7 +268,7 @@ do_appliance_update() {
 
 
 do_system_update() {
-    if $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
+    if test $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
     appliance_status "Appliance Update" "Unattended System Upgrades"
     simple_metric system_last_update counter "timestamp-epoch-seconds since last system package update" $start_epoch_seconds
     if test -e /app/etc/flags/force.update.system; then
@@ -280,7 +283,7 @@ do_system_update() {
 
 
 do_docker_update() {
-    if $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
+    if test $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
     simple_metric docker_last_update counter "timestamp-epoch-seconds since last update to docker" $start_epoch_seconds
     if test -e /app/etc/flags/force.update.docker; then
         rm /app/etc/flags/force.update.docker
@@ -290,7 +293,7 @@ do_docker_update() {
 
 
 do_compose_update() {
-    if $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
+    if test $1 != "true"; then echo "# Warning: skipping $0, because of param $1"; return; fi
     simple_metric compose_last_update counter "timestamp-epoch-seconds since last update to docker-compose" $start_epoch_seconds
     if test -e /app/etc/flags/force.update.compose; then
         rm /app/etc/flags/force.update.compose
