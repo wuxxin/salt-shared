@@ -1,5 +1,15 @@
 # appliance state
 
+## Features
+
++ unattended install
++ seperate build and configure
++ environment configuration from file via ENV_YML, pillar, /app/env.yml, cidata or config-2 labed drive, aws-ec2 or gce meta-data server
++ unattended update of salstack states, system, docker, compose, a.o.
++ unattended backup of important data
++ plugin support for extending appliance
++ optional metric support
++ optional alerting support (sentry)
 
 ## pillar/environment template
 
