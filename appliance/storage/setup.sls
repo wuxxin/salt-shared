@@ -51,7 +51,7 @@ directory:
 relocate:
   - source: /var/lib/docker
     target: /volatile/docker
-    prefix: docker kill $(docker ps -q); systemctl stop docker
+    prefix: if test "$(docker ps -q)" != ""; then docker kill $(docker ps -q); fi; systemctl stop docker
     postfix: systemctl start docker
   - source: /app/.cache/duplicity
     target: /volatile/duplicity
