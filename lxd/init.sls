@@ -5,14 +5,7 @@ include:
   - kernel.sysctl.big
   - kernel.limits.big
   - kernel.cgroup
-{% if grains['oscodename'] == 'trusty' %}
-  {# lxd needs newer (2.0.x) libxc1, trusty has it in backports #}
   - ubuntu.backports
-{% endif %}
-
-{% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("lxd_stable_ppa", 
-  "ubuntu-lxc/lxd-stable", require_in = "pkg: lxd") }}
 
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
 {% from "network/lib.sls" import net_reverse_short with context %}
@@ -36,10 +29,7 @@ lxd:
       - bridge-utils
     - require:
       - sls: kernel.cgroup
-      - pkgrepo: lxd_stable_ppa
-{% if grains['oscodename'] == 'trusty' %}
       - sls: ubuntu.backports
-{% endif %}
 
 {# modify kernel vars for production setup of lxd_ http://lxd.readthedocs.io/en/latest/production-setup/ #}
 
