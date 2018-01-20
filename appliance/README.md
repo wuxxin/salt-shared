@@ -3,7 +3,7 @@
 ## Features
 
 + unattended install
-+ seperate build and configure
++ build and configure are independent
 + environment configuration from file via ENV_YML, pillar, /app/env.yml, cidata or config-2 labed drive, aws-ec2 or gce meta-data server
 + unattended update of salstack states, system, docker, compose, a.o.
 + unattended backup of important data
