@@ -8,14 +8,10 @@ include:
     {{ apt_add_repository("x265-ppa", "strukturag/libde265") }}
     {{ apt_add_repository("ffmpeg_ppa", "kirillshkrogalev/ffmpeg-next") }}
   {% endif %}
-
-  {{ apt_add_repository("rvm_smplayer_ppa", "rvm/smplayer") }}
   
   {{ apt_add_repository("webcamstudio_ppa", "webcamstudio/webcamstudio-dailybuilds") }}
-  
   {{ apt_add_repository("obsstudio_ppa", "obsproject/obs-studio") }}
   {{ apt_add_repository("openshot_ppa", "openshot.developers/ppa") }}
-  
   
 {% endif %}
 

@@ -20,24 +20,14 @@ video-packages:
       - libdvdread4
       - frei0r-plugins
       - v4l2loopback-dkms
-      {# ffmpeg needs ppa for trusty #}
-      - ffmpeg
-      
+      - ffmpeg {# ffmpeg needs ppa for trusty #}
       - vlc
       - vlc-nox
       - vlc-plugin-vlsub
-      - mplayer
+      - mpv {# replaces mplayer #}
+      - youtube-dl 
       - openshot-qt
-      
-      {# obs-studio is available in zesty upwards, but newer in ppa #}
-      - obs-studio
-      
-      {# smplayer, smtube, youtube-dl is available in trusty upwards, but newer in ppa #}
-      - smplayer
-      - smplayer-themes
-      - smplayer-skins
-      - smtube
-      - youtube-dl
+      - obs-studio 
       
     - require:
       - sls: desktop.video.ppa
