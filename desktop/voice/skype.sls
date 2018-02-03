@@ -1,28 +1,15 @@
 include:
-  - docker
+  - ubuntu
 
-skype_container:
-  cmd.run:
-    - name: docker pull sameersbn/skype:latest
-    - onlyif: test "$(docker images sameersbn/skype:latest)" = ""
+skype:
+  pkgrepo.managed:
+    - name: deb [arch=amd64] https://repo.skype.com/deb stable main
+    - key_url: https://repo.skype.com/data/SKYPE-GPG-KEY
     - require:
-      - sls: docker
+      - pkg: ppa_ubuntu_installer
+    - require_in:
+      - pkg: skype
 
-skype_wrapper:
-  cmd.run:
-    - name: docker run -it --rm --volume /usr/local/bin/:/target sameersbn/skype:latest install
-    - unless: test -e /usr/local/bin/skype-wrapper
+  pkg.installed:
+    - name: skypeforlinux
 
-
-skype_desktop:
-  file.managed:
-    - name: /usr/share/applications/skype.desktop
-    - contents: |
-        [Desktop Entry]
-        Encoding=UTF-8
-        Type=Application
-        Name=Skype
-        Exec="/usr/local/bin/skype"
-        Terminal=true
-        Categories=Network;Application;
-        Comment=binary only Skype VOIP using docker for privacy

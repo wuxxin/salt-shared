@@ -1,7 +1,6 @@
 include:
   - java
   - .user
-  
   - .android
   - .audio
   - .browser
@@ -23,7 +22,6 @@ include:
   - python.dev
   - vcs
   - git-crypt
-  - .asciinema
   - .atom
   - .code
   - .emulation
@@ -31,6 +29,7 @@ include:
   - .scipy
   - .writing
 {#
+  - .asciinema
   - .gcloud
   - java.jdk
   - .android.sdk
