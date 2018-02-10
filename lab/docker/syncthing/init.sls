@@ -1,27 +1,16 @@
-{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
-
 include:
-  - docker
-
-syncthing/syncthing:latest:
-  docker_image.present:
+  - ubuntu
+  
+syncthing:
+  pkgrepo.managed:
+    - name: deb https://apt.syncthing.net/ syncthing stable
+    - file: /etc/apt/sources.list.d/syncthing.list
+    - key_url: https://syncthing.net/release-key.txt
+    - require_in:
+      - pkg: syncthing
     - require:
-      - sls: docker
-
-syncthing_container:
-  docker_container.running:
-    - image: syncthing/syncthing
-    - auto_remove: true
-    - detach: true
-    - restart_policy: unless-stopped
-    - port_bindings:
-      - 8384:8384
-      - 22000:22000
-    - environment:
-      - UID={{ user_info['uid'] }}
-      - GID={{ user_info['gid'] }}
-    - binds:
-{% for i in pillar.get('syncthing:binds') %}
-      - {{ i }}
-{% endfor %}
-
+      - sls: ubuntu
+  pkg.installed:
+    - pkgs:
+      - syncthing
+      - syncthing-inotify
