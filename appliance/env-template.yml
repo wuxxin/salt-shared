@@ -99,6 +99,24 @@ appliance:
   #   automatic: true
   #   oncalendar: Sun *-*-* 06:30:00
 {%- endif %}
+  database:
+    # postgres:
+    #   user:
+    #     - name: 'myuser'
+    #       password: 'xyz'
+    #   database:
+    #     - name: 'databasename'   
+    #       template: 'template0'
+    #       lc_ctype: 
+    #       lc_collate: 
+    #       extensions: 
+    #       owner: 'myuser'
+    # mysql:
+    #   user:
+    #     - name: 'myuser'
+    #   database:
+    #     - name: 'databasename'
+    #       
   storage:
     # mount: # default false, if true: will check and setup volume
     #   volatile: false
