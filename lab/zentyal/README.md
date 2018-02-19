@@ -1,5 +1,6 @@
 # Zentyal 5.x Mail server
 
+* !! Use rspamd instead of spamassassin
 
 ## additional pillar settings
 
