@@ -1,5 +1,6 @@
 include:
   - vcs.git
+  - vcs.git-crypt
   - vcs.mercurial
   - vcs.subversion
   - vcs.bzr
