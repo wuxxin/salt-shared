@@ -13,6 +13,7 @@ libvirt:
     - pkgs:
       - libvirt-bin
       - qemu-kvm
+      - ovmf
     - require:
       - sls: kernel.cgroup
 
