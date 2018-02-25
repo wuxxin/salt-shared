@@ -1,40 +1,3 @@
-include:
-  - python
-  - docker
-  
-rancher-prerequisites:
-  pkg.installed:
-    - pkgs:
-      - jq
-      - wget
-      - curl
-
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('rancher-agent-registration') }}
-
-rancher-server-volume:
-  docker_volume.present:
-    - name: rancher-server-volume
-    - driver: local
-    
-rancher-server-image:
-  dockerng.image_present:
-    - name: rancher/server:{{ rancher.server.tag }}
-    - require:
-      - sls: docker
-
-rancher-server.service:
-  
-  dockerng.running:
-    - name: rancher-server
-    - image: rancher/server:{{ rancher.server.tag }}
-    - binds:
-      - /data/mysql/rancher-server:/var/lib/mysql
-    - port_bindings:
-      - {{ rancher.server.ip }}:{{ rancher.server.port }}:8080
-    - restart_policy: always
-    - require:
-      - dockerng: rancher-server-image
 
 rancher-server-api_wait:
   cmd.run:
@@ -67,3 +30,32 @@ add_{{ env }}_environment:
              | grep -w '{{ rancher_env_name }}'
 {% endfor %}
 {% endif %}
+
+rancher-agent-api_wait:
+  cmd.run:
+    - name: |
+        wget --retry-connrefused --tries=30 -q --spider \
+             http://{{ settings.net[settings.iface]['inet'][0]['address'] }}:{{ settings.port }}/v1
+    - unless: curl -s --connect-timeout 1 http://{{ settings.net[settings.iface]['inet'][0]['address'] }}:{{ settings.port }}/v1
+    - require:
+      - sls: .server
+
+rancher-agent-container:
+  cmd.run:
+    - name: |
+        rancher-agent-registration --url http://{{ settings.net[settings.iface]['inet'][0]['address'] }}:{{ settings.port }} \
+        --key KEY --secret SECRET --environment {{ settings.environment }}
+    - unless: docker inspect rancher-agent
+    - require:
+      - cmd: rancher_server_api_wait
+      - pip: agent_registration_module
+
+    - name: rancher-agent
+    - image: rancher/agent:{{ rancher.agent_tag }}
+    - binds:
+      - /data/mysql/rancher-server:/var/lib/mysql
+    - port_bindings:
+      - {{ rahcner.server.ip }}:{{ rancher.server.port }}:8080
+    - restart_policy: always
+    - require:
+      - dockerng: rancher-agent-image

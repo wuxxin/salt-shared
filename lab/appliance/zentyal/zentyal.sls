@@ -5,7 +5,7 @@ include:
 {% for n in ['mail', 'openchange'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
-    - source: salt://lab/zentyal/files/{{ n }}.postsetconf
+    - source: salt://lab/appliance/zentyal/files/{{ n }}.postsetconf
     - template: jinja
     - mode: "755"
     - require:
@@ -23,7 +23,7 @@ include:
   {% if salt['pillar.get'](pillaritem, None) %}
 /etc/postfix/{{ filename }}:
   file.managed:
-    - source: salt://lab/zentyal/files/key_seperator_value.jinja
+    - source: salt://lab/appliance/zentyal/files/key_seperator_value.jinja
     - template: jinja
     - context:
         dataset: {{ salt['pillar.get'](pillaritem, None) }}

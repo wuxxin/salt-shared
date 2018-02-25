@@ -7,7 +7,7 @@ include:
 zentyal-dehydrated-hook:
   file.managed:
     - name: /usr/local/etc/dehydrated/zentyal-dehydrated-hook.sh
-    - source: salt://lab/zentyal/files/zentyal-dehydrated-hook.sh
+    - source: salt://lab/appliance/zentyal/files/zentyal-dehydrated-hook.sh
     - mode: "0755"
     - require:
       - sls: dehydrated
@@ -15,13 +15,13 @@ zentyal-dehydrated-hook:
 
 /app/etc/hooks/appliance-update/check/zentyal-letsencrypt.sh:
   file.managed:
-    - source: salt://lab/zentyal/files/check-zentyal-letsencrypt.sh
+    - source: salt://lab/appliance/zentyal/files/check-zentyal-letsencrypt.sh
     - makedirs: true
     - mode: "0755"
 
 /app/etc/hooks/appliance-update/update/zentyal-letsencrypt:
   file.managed:
-    - source: salt://lab/zentyal/files/update-zentyal-letsencrypt.sh
+    - source: salt://lab/appliance/zentyal/files/update-zentyal-letsencrypt.sh
     - makedirs: true
     - mode: "0755"
 
@@ -29,7 +29,7 @@ zentyal-dehydrated-hook:
 /usr/local/sbin/{{ i }}:
   file.managed:
     - mode: "0755"
-    - source: salt://lab/zentyal/files/{{ i }}
+    - source: salt://lab/appliance/zentyal/files/{{ i }}
 {% endfor %}
 
 /etc/sudoers.d/dehydrated_newcert:

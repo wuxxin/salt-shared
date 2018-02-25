@@ -11,7 +11,7 @@ zentyal-samba:
 
 /var/lib/samba/private/dns_update_list.template:
   file.managed:
-    - source: salt://lab/zentyal/samba/dns_update_list
+    - source: salt://lab/appliance/zentyal/samba/dns_update_list
     - mode: 644
     - require:
       - pkg: zentyal-samba
@@ -26,7 +26,7 @@ zentyal-samba:
 
 /etc/zentyal/hooks/samba.postsetconf:
   file.managed:
-    - source: salt://lab/zentyal/samba/samba.postsetconf
+    - source: salt://lab/appliance/zentyal/samba/samba.postsetconf
     - mode: 755
     - makedirs: true
     - template: jinja
