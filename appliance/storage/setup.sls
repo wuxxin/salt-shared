@@ -64,3 +64,8 @@ relocate:
 {% endload %}
 {{ storage_setup(custom_storage) }}
 
+{% for i in ['volatile', 'data'] %}
+create_{{ i }}_ready:
+  file.touch:
+    - name: /{{ i }}/storage.ready
+{% endfor %}

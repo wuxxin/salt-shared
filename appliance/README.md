@@ -35,6 +35,10 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
 + `appliance-prepare`
     + start
 
++ `prepare-storage`
+    + check
+    + setup
+  
 + `appliance-update`
     + check   | every plugin must return a update list on stdout
               | lines beginning with "#" are ignored
@@ -60,14 +64,23 @@ add hook scripts to: `/app/etc/hooks/{subsystem}/{hookname}/*`
     + no.process-exporter
     + no.prometheus
 
++ appliance-prepare flags, will be deleted after prepare execution
+    + force.prepare.postgres.createdb
+
 + update system flags, will be deleted after update execution
     + force.update.appliance
     + force.update.compose
     + force.update.docker
     + force.update.letsencrypt
-    + force.update.postgres
+    + force.update.postgresql
     + force.update.system
 
 ## generate a new pillar env with secrets
 
 scripts/env-create.sh
+
+## create databases after first startup of empty machine
+
+touch /app/etc/flags/force.prepare.postgres.createdb
+rm /run/appliance-failed
+systemct restart appliance

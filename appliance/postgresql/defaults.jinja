@@ -1,0 +1,27 @@
+{% load_yaml as config %}
+listen_adresses: 'localhost,{{ salt["pillar.get"]("docker:ip") }}'
+shared_preload_libraries: pg_stat_statements
+pg_stat_statements.track: all
+{% endload %}
+
+{% load_yaml as defaults %}
+trusty:
+  version: "9.3"
+  {{ config|dump_yaml }}
+xenial:
+  version: "9.5"
+  {{ config|dump_yaml }}
+zesty:
+  version: "9.6"
+  {{ config|dump_yaml }}
+artful:
+  version: "9.6"
+  {{ config|dump_yaml }}
+bionic:
+  version: "10"
+  {{ config|dump_yaml }}
+{% endload %}
+
+{% set settings = salt['grains.filter_by'](defaults, 
+  grain= 'lsb_distrib_codename', default= 'xenial',
+  merge= salt['pillar.get']('postgresql:version', {})) %}

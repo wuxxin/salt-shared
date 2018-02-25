@@ -100,22 +100,25 @@ appliance:
   #   oncalendar: Sun *-*-* 06:30:00
 {%- endif %}
   database:
-    # postgres:
+    # postgresql:
     #   user:
     #     - name: 'myuser'
     #       password: 'xyz'
     #   database:
     #     - name: 'databasename'   
-    #       template: 'template0'
-    #       lc_ctype: 
-    #       lc_collate: 
-    #       extensions: 
     #       owner: 'myuser'
-    # mysql:
+    #       template: 'template0'
+    #       locale: 'de_DE.utf8'
+    #       extensions: 'pg_stat_statements'
+    # mysql: 
+    # # is mariadb 10.2
     #   user:
     #     - name: 'myuser'
     #   database:
     #     - name: 'databasename'
+    #       character_set: 'utf8'
+    #       collate: 'utf8_general_ci'
+    #       owner: 'myuser'
     #       
   storage:
     # mount: # default false, if true: will check and setup volume

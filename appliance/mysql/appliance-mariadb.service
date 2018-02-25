@@ -1,0 +1,17 @@
+# appliance: start mariadb after network.target because we also listen to docker0
+
+[Unit]
+Description=Appliance Mariadb RDBMS
+ConditionPathExists=/etc/app/flags/use.mariadb
+After=network.target
+Before=mariadb@{{ settings.version }}-main.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=mariadb@{{ settings.version }}-main.service

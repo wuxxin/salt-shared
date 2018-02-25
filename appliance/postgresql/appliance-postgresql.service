@@ -1,0 +1,17 @@
+# appliance: start postgres after network.target because we also listen to docker0
+
+[Unit]
+Description=Appliance PostgreSQL RDBMS
+ConditionFileNotEmpty=/run/active-env.yml
+ConditionPathExists=/etc/app/flags/use.postgresql
+Before=postgresql@{{ settings.version }}-main.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=postgresql@{{ settings.version }}-main.service

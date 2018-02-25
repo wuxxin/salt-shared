@@ -17,6 +17,12 @@ prepare_storage () {
             need_storage_setup=true
         fi
     done
+    for d in /data/storage.ready /volatile/storage.ready; do
+        if test ! -e /data/storage.ready; then
+            echo "Warning: could not find file $d"
+            need_storage_setup=true
+        fi
+    done
     if test "$(findmnt -S "LABEL=volatile" -f -l -n -o "TARGET")" = ""; then
         if is_truestr "$APPLIANCE_STORAGE_MOUNT_VOLATILE"; then
             echo "Warning: could not find mount for volatile filesystem"
