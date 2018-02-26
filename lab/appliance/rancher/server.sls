@@ -10,6 +10,7 @@ rancher-prerequisites:
       - jq
       - wget
       - curl
+      - httpie
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
 {{ pip2_install('rancher-agent-registration') }}

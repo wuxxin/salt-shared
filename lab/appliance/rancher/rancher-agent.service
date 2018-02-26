@@ -15,29 +15,14 @@ TimeoutStartSec=5min
 TimeoutStopSec=15
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull prom/alertmanager:v0.9.1
-docker_container.running:
-  - name: rancher-server
-  - image: rancher/server:{{ rancher.server.tag }}
-  - port_bindings:
-    - {{ rancher.server.ip }}:{{ rancher.server.port }}:8080
-  - environment:
-    
-    --db-host --db-port --db-user --db-pass --db-name 
-  - restart_policy: always
-  - require:
-    - dockerng: rancher-server-image
-
+ExecStartPre=/usr/bin/docker pull rancher/agent:{{ settings.agent.tag }}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p {{ salt['pillar.get']('docker:ip') }}:9093:9093 \
-    --net bridge \
-    -v /app/etc/alertmanager.yml:/etc/alertmanager.yml \
+    -p {{ settings.server.ip }}:{{ settings.server.port }}:8080 \
     -v /app/alertmanager:/data \
-    prom/alertmanager:v0.9.1 \
-    -config.file=/etc/alertmanager.yml \
-    -storage.path=/data
+    rancher/agent:{{ settings.agent.tag }} \
+    --db-name {{ settings.db.name }}
 
 [Install]
 WantedBy=multi-user.target
