@@ -1,6 +1,8 @@
 include:
   - vcs
   - python
+  - desktop.spellcheck
+  - desktop.graphics.fonts
   - latex
 
 sphinx:
