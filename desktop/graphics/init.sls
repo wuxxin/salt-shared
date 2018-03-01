@@ -5,6 +5,5 @@ include:
   - .icons
   - .ocr
   - .pixel
-  - .publishing
   - .vector
 

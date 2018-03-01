@@ -9,4 +9,3 @@ graph:
       - python-actdiag
       - python-nwdiag
       - python-seqdiag
-      - plantuml

@@ -13,9 +13,13 @@ Installs and configures features you usually want to have in a working desktop
   * voice: mumble skype (if enabled)
   * video: vlc and mpv and codecs
   * graphics:
-    * installs Pixel Software: gimp, krita, darktable
-    * ocr software
-    * vector graphics software inkscape
+    * clipart, fonts, icons
+    * Pixel Software: gimp, krita, darktable
+    * Ocr software
+    * Vector graphics software: inkscape
+  * writing:
+    * libreoffice
+    * sphinx, latex
     * dtp software: scribus
 
   * Development:
@@ -27,6 +31,7 @@ Installs and configures features you usually want to have in a working desktop
     * emulator:
       * install all qemu variants, install virt-manager
 
+  
   * security:
     * install programms that have keychain support
     * install a metadata stripper (mat)

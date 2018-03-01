@@ -3,12 +3,12 @@ include:
   - python
   - python.ipython
   - latex
+  - desktop.writing.libreoffice
 
 prereq_doconce:
   pkg.installed:
     - pkgs:
       - idle
-      - ipython
       - python-pdftools
       - imagemagick
       - netpbm
@@ -19,7 +19,6 @@ prereq_doconce:
       - libav-tools
       - ispell
       - pandoc
-      - libreoffice
       - unoconv
       - libreoffice-dmaths
       - curl
@@ -28,6 +27,7 @@ prereq_doconce:
       - sls: vcs
       - sls: python
       - sls: latex
+      - sls: desktop.writing.libreoffice
 
 {% load_yaml as pip_list %}
  - "sphinx"

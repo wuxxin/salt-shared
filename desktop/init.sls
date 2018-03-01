@@ -17,6 +17,7 @@ include:
   - .ubuntu
   - .video
   - .voice
+  - .writing
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - python.dev
@@ -28,7 +29,6 @@ include:
   - .emulation
   - .homeshick
   - .scipy
-  - .writing
 {#
   - .asciinema
   - .gcloud
