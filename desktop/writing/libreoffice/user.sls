@@ -8,7 +8,8 @@ include:
 install_oxt_{{ user }}_{{ identifier }}:
   cmd.run:
     - name: unopkg add -s {{ url }}
-    - user: {{ user }}
+    - runas: {{ user }}
+    - cwd: {{ user_home }}
     - unless: unopkg list | grep -q "{{ identifier }}"
 
 {% endmacro %}
