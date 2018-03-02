@@ -1,15 +1,16 @@
 include:
   - ubuntu
-  - desktop.graphics.clipart
+  - desktop.graphics.clipart.big
   - desktop.spellcheck
 
-
+{#
 /etc/apt/preferences.d/libreoffice-preferences:
   file.managed:
     - contents: |
-        Package: libreoffice*
+        Package: libreoffice
         Pin: version 5.*
         Pin-Priority: 900
+#}
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("libreoffice-ppa", "libreoffice/libreoffice-6-0",
