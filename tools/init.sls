@@ -9,7 +9,9 @@ include:
   - .passgen
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
+
 {{ pip2_install('percol') }} {# interactive pipe filtering #}
+{{ pip3_install('jinja2-cli[yaml]') }} {# A CLI interface to Jinja2 , reads yaml as datasource #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
