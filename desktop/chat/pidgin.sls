@@ -2,8 +2,6 @@
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("whatsapp_ppa", 
   "whatsapp-purple/ppa", require_in= "pkg: pidgin") }}
-{{ apt_add_repository("pidgin_gnome_keyring_ppa", 
-  "pidgin-gnome-keyring/ppa", require_in= "pkg: pidgin") }}
 {% endif %}
 
 pidgin:
