@@ -4,7 +4,7 @@ include:
   - .android
   - .audio
   - .browser
-{#  - .chat #}
+  - .chat
   - .chipcard
   - .ftp
   - .graphics

@@ -20,6 +20,8 @@ libreoffice:
   pkg.latest:
     - pkgs:
       - libreoffice
+      - libreoffice-writer2xhtml
+      - libreoffice-writer2latex
       - fonts-noto-hinted
       - fonts-noto
       - imagemagick
