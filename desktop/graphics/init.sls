@@ -4,6 +4,7 @@ include:
   - .graph
   - .icons
   - .ocr
+  - .photo
   - .pixel
   - .vector
 
