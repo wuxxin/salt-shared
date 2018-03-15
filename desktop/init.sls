@@ -1,7 +1,6 @@
 include:
   - java
   - .user
-  - .android
   - .audio
   - .browser
   - .chat
@@ -23,12 +22,14 @@ include:
   - python.dev
   - vcs
   - vcs.git-bridge
+  - .homeshick
+  - .scipy
   - .atom
   - .code
   - .ubuntu.dev
   - .emulation
-  - .homeshick
-  - .scipy
+  - .android
+
 {#
   - .asciinema
   - .gcloud

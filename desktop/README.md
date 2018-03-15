@@ -2,7 +2,7 @@
 
 Installs and configures features you usually want to have for a working desktop
 
-## Features
+## Desktop Features
 
 * graphics:
     * clipart, fonts, icons
@@ -14,21 +14,13 @@ Installs and configures features you usually want to have for a working desktop
     * libreoffice
     * sphinx, latex
     * dtp software: scribus
+    * optional
+        * doconce
+        * zotero
 
 * voice: mumble, skype (if enabled)
 * chat: pidgin, signal, riot
 * video: vlc and mpv and codecs
-
-* Development:
-    * ide: atom
-    * revision control systems 
-    * android: installes and configures android sdk & ndk
-    
-    * gcloud: installs google cloud SDK
-    * buildozer (kivy - python-for-android - android-sdk, android-ndk buildchain)
-    * emulator:
-      * install all qemu variants, install virt-manager
-
 * security:
     * tor browser bundle
     * keychain/keyring support packages
@@ -45,8 +37,27 @@ Installs and configures features you usually want to have for a working desktop
     * user: disable shopping lenses
     * /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie, install ubuntu/unity tweaks program
 
-## Pillar-Example
+## Development Features
 
+(needs desktop:developer:enabled: true)
+
+* editor: atom
+* revision control systems & tools
+    * git-crypt, homeshick
+* python development 
+* python sci-py distribution
+* android: tools
+* emulator:
+  * install all qemu variants, install virt-manager
+* ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
+
+* optional
+    * android: sdk & ndk
+    * gcloud: installs google cloud SDK
+    * buildozer (kivy - python-for-android - android-sdk, android-ndk buildchain)
+    
+
+## Pillar-Example
 
 desktop:
   developer:enabled: true    # installs developer packages 
