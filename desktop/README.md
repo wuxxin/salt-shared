@@ -30,9 +30,10 @@ Installs and configures features you usually want to have for a working desktop
       * install all qemu variants, install virt-manager
 
 * security:
-    * install programms that have keychain support
-    * install a metadata stripper (mat)
-    * install a tor browser bundle
+    * tor browser bundle
+    * keychain/keyring support packages
+    * metadata stripper (mat)
+    * firejail restricted application jail
 
 * browser:
     * chromium browser, firefox-std/esr/dev, java plugin
