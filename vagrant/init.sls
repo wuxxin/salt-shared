@@ -16,11 +16,11 @@
 {% if grains.osarch == "amd64" %}
   {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_x86_64.deb" %}
   {% set localfile = "vagrant_"+ reqversion+ "_x86_64.deb" %}
-  {% set hash = settings.amd64.hash %}
+  {% set hash = settings.hash.amd64 %}
 {% elif grains.osarch == "i386" %}
   {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_i686.deb" %}
   {% set localfile = "vagrant_"+ reqversion+ "_i686.deb" %}
-  {% set hash = settings.i386.hash %}
+  {% set hash = settings.hash.i386 %}
 {% endif %}
 
 {% if actversion != "" and newer_or_equal >= 1 %}
