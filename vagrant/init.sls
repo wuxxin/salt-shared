@@ -23,7 +23,7 @@
   {% set hash = settings.hash.i386 %}
 {% endif %}
 
-{% if actversion != "" and newer_or_equal >= 1 %}
+{% if newer_or_equal >= 1 %}
 
 vagrant:
   file.managed:

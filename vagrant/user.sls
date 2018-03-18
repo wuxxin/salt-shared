@@ -11,7 +11,7 @@ vagrant_plugin_deps:
 {%- for p in settings.plugins %}
 {%- if p.dependencies is defined %}
 {%- for d in p.dependencies %}
-      - d
+      - {{ d }}
 {%- endfor %}
 {%- endif %}
 {%- endfor %}
