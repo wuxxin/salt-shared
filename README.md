@@ -11,31 +11,43 @@ it lacks documentation beside a few README.md.
 
 ### What can you do with it
 
- * Target Platform: Ubuntu LTS 16.04 (xenial)
-   * many non-gui states also work with older/newer ubuntu and other debian based distros.
-   * most gui states work with xenial
+* Target Platform: Ubuntu LTS 16.04 (xenial), LTS 18.04 (bionic)
+    * many non-gui states also work with older/newer ubuntu and other debian based distros.
+    * most gui states work with xenial
    
- * Features to look at:
-   * [desktop](desktop):
-     * everything needed from a desktop base installation for developing (ubuntu 16.04)
-   * [appliance](appliance):
-     * base for automatic updates, automatic backup, metric collection and error reporting
-   * [storage](storage):
-     * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
-   * [network](network):
-     * setup network, calculate network adresses netmasks a.o.
-   * [http_proxy](http_proxy):
-     * [.server](http_proxy/server.sls): install polipo
-     * [.client_use_proxy](http_proxy/client_use_proxy.sls)
-     * [.client_no_proxy](http_proxy/client_no_proxy.sls)
-     * setup http_proxy, HTTP_PROXY for: apt, profile.d, sudoers.d
-   * [unbound](unbound):
-     * caching recursive dns resolver
-   * [knot](knot):
-     * authoritative dnsec capable dns server
-   * [tools](tools):
-     * tools for administration
-   
+* Features to look at:
+    * [desktop](desktop):
+        * everything needed from a desktop base installation for developing (ubuntu 16.04)
+    * [appliance](appliance):
+        * base for automatic updates, automatic backup, metric collection and error reporting
+    * [storage](storage):
+        * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
+    * [network](network):
+        * setup network, calculate network adresses netmasks a.o.
+    * [http_proxy](http_proxy):
+        * [.server](http_proxy/server.sls): install polipo
+        * [.client_use_proxy](http_proxy/client_use_proxy.sls)
+        * [.client_no_proxy](http_proxy/client_no_proxy.sls)
+        * setup http_proxy, HTTP_PROXY for: apt, profile.d, sudoers.d
+    * [tools](tools):
+       * tools for administration
+ 
+* Other states to look at:
+    * [hardware](hardware)
+    * [kernel](kernel)
+    * [libvirt](libvirt)
+    * [docker](docker)
+    * [lxd](lxd)
+    
+    * [golang](golang)
+    * [python](python)
+    * [java](java)
+    
+    * [unbound](unbound): caching recursive dns resolver
+    * [knot](knot): authoritative dnsec capable dns server
+
+    * [lab](lab): Experimental Work
+
 ### How to start
 
  * [`/salt-top.example`](salt-top.example): Example states top file
