@@ -47,15 +47,15 @@ Installs and configures features you usually want to have for a working desktop
 * python development 
 * python sci-py distribution
 * android: tools
-* emulator:
-  * install all qemu variants, install virt-manager
+* emulation:
+  * all qemu/kvm variants, libvirt, virt-manager, lxd, vagrant, tools
 * ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
 
 * optional
     * android: sdk & ndk
     * gcloud: installs google cloud SDK
     * buildozer (kivy - python-for-android - android-sdk, android-ndk buildchain)
-    
+    * emulation:games: Arcade, PS2, Nintendo64 Emulator
 
 ## Pillar-Example
 

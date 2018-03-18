@@ -1,6 +1,9 @@
 include:
   - kernel.cgroup
   - libvirt
+  - lxd
+  - vagrant
+  - vagrant.user
   
 {% if grains['lsb_distrib_codename'] in ['trusty', 'xenial'] %}
 getdeb_ppa:
