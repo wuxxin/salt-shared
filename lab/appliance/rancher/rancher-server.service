@@ -21,12 +21,13 @@ ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
     -p {{ settings.server_ip }}:{{ settings.server_port }}:8080 \
-    -v /app/alertmanager:/data \
     -e DEFAULT_CATTLE_TELEMETRY_OPT="out" \
     -e DEFAULT_CATTLE_API_HOST="{{ settings.server_ip }}:{{ settings.server_port }}" \
-    rancher/server:{{ settings.server.tag }}
-    --db-host {{ settings.db.host }} --db-port {{ settings.db.port }} \
-    --db-user {{ settings.db.user }} --db-pass {{ settings.db.pass }} \
+    rancher/server:{{ settings.server.tag }} \
+    --db-host {{ settings.db.host }} \
+    --db-port {{ settings.db.port }} \
+    --db-user {{ settings.db.user }} \
+    --db-pass {{ settings.db.pass }} \
     --db-name {{ settings.db.name }}
 
 [Install]

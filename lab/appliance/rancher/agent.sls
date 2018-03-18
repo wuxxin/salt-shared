@@ -1,31 +1,38 @@
 include:
-  - docker
-  - appliance
-  - python
+  - .common
   - .server
+  
+{% from "lab/appliance/rancher/defaults.jinja" import settings with context %}
 
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('rancher-agent-registration') }}
+rancher-agent-setup:
+  file.managed:
+    - source: salt://lab/appliance/rancher/rancher-agent-setup.sh
+    - name: /usr/local/share/appliance/rancher-agent-setup.sh
 
-rancher-agent-image:
-  docker_image.present:
-    - name: rancher/agent:{{ settings.agent_tag }}
+  cmd.run:
+    - name: /usr/local/share/appliance/rancher-agent-setup.sh
+    - unless: test -e /app/etc/rancher-agent.env
     - require:
-      - sls: docker
-
-      
-/etc/systemd/system/rancher-agent.service:
+      - sls: .server
+  
+rancher-agent.service:
   file.managed:
     - source: salt://lab/appliance/rancher/rancher-agent.service
+    - name: /etc/systemd/system/rancher-agent.service
     - template: jinja
     - context:
       settings: {{ settings }}
     - watch_in:
       - cmd: systemd_reload
-
-rancher-agent.service:
-    service.running:
-      - enable: true
-      - watch:
-        - file: /etc/systemd/system/rancher-agent.service
+    - require:
+      - cmd: rancher-agent-setup
+      - sls: .common
+  
+  service.running:
+    - enable: true
+    - watch:
+      - file: rancher-agent.service
+    - require:
+      - file: rancher-agent.service
+      
 

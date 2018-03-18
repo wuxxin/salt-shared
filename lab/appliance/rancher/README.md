@@ -1,4 +1,4 @@
-# Rancher 1.6.x Server & Agent
+# Rancher 2.x Server & Agent
 
 ## 
 

@@ -2,6 +2,7 @@
 Description=Rancher Agent
 After=docker.service
 ConditionPathExists=!/app/etc/flags/no.rancher-agent
+ConditionPathExists=/app/etc/rancher-agent.env
 Requires=docker.service
 OnFailure=service-failed@%n.service
 StartLimitInterval=300
@@ -13,16 +14,20 @@ Restart=on-failure
 RestartSec=5
 TimeoutStartSec=5min
 TimeoutStopSec=15
+EnvironmentFile=/app/etc/rancher-agent.env
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull rancher/agent:{{ settings.agent.tag }}
+ExecStartPre=/usr/bin/docker pull $AGENTIMAGE
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p {{ settings.server.ip }}:{{ settings.server.port }}:8080 \
-    -v /app/alertmanager:/data \
-    rancher/agent:{{ settings.agent.tag }} \
-    --db-name {{ settings.db.name }}
+    --net= host \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    $AGENTIMAGE \
+    $ROLEFLAGS \
+    --server $RANCHERSERVER \
+    --token $AGENTTOKEN \
+    --ca-checksum $CACHECKSUM 
 
 [Install]
 WantedBy=multi-user.target

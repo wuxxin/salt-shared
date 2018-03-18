@@ -1,17 +1,17 @@
 {% load_yaml as defaults %}
 server:
-  tag: stable
-  port: 8080
-  ip: bla
+  tag: preview
+  http_port: 80
+  https_port: 443
+  ip: 1.2.3.4
   db:
-    name:
-    user:
-    password:
-  environments:
-    - name: Default
-    - name: Kubernets
-agent:
-  tag: stable
+    host:
+    port:
+    name: cattle
+    user: cattle
+    password: cattle
+  cluster:
+    - name: default
   
 {% endload %}
 

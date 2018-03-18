@@ -1,19 +1,7 @@
 include:
-  - docker
-  - appliance
+  - .common
   
 {% from "lab/appliance/rancher/defaults.jinja" import settings with context %}
-
-rancher-prerequisites:
-  pkg.installed:
-    - pkgs:
-      - jq
-      - wget
-      - curl
-      - httpie
-
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('rancher-agent-registration') }}
 
 rancher-server-volume:
   docker_volume.present:
@@ -24,20 +12,38 @@ rancher-server-volume:
        device: "/data/rancher/server"
        o: "bind"
     - require:
-      - sls: docker
+      - sls: .common
     
 rancher-server-image:
   docker_image.present:
     - name: rancher/server:{{ settings.server_tag }}
     - require:
-      - sls: docker
+      - sls: .common
 
-/etc/systemd/system/rancher-server.service:
+rancher-server.service:
   file.managed:
     - source: salt://lab/appliance/rancher/rancher-server.service
+    - name: /etc/systemd/system/rancher-server.service
     - template: jinja
     - context:
       settings: {{ settings }}
     - watch_in:
       - cmd: systemd_reload
+    - require:
+      - sls: .common
 
+  service.running:
+    - enable: true
+    - watch:
+      - file: rancher-server.service
+    - require:
+      - file: rancher-server.service
+      
+rancher-server-setup:
+  file.managed:
+    - source: salt://lab/appliance/rancher/rancher-server-setup
+  cmd.run:
+    - name: /usr/local/share/appliance/rancher-server-setup.sh
+    - unless: test -e /app/etc/rancher-server.env
+    - require:
+      - service: rancher-server.service
