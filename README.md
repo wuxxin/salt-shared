@@ -17,7 +17,7 @@ it lacks documentation beside a few README.md.
    
 * Features to look at:
     * [desktop](desktop):
-        * everything needed from a desktop base installation for developing (ubuntu 16.04)
+        * everything wanted for a desktop installation (ubuntu 16.04)
     * [appliance](appliance):
         * base for automatic updates, automatic backup, metric collection and error reporting
     * [storage](storage):
@@ -29,10 +29,9 @@ it lacks documentation beside a few README.md.
         * [.client_use_proxy](http_proxy/client_use_proxy.sls)
         * [.client_no_proxy](http_proxy/client_no_proxy.sls)
         * setup http_proxy, HTTP_PROXY for: apt, profile.d, sudoers.d
-    * [tools](tools):
-       * tools for administration
  
 * Other states to look at:
+    * [tools](tools): command line tools for administration
     * [hardware](hardware)
     * [kernel](kernel)
     * [libvirt](libvirt)
