@@ -29,6 +29,7 @@ include:
   - .ubuntu.dev
   - .emulation
   - .android
+  - .forensic
 
 {#
   - .asciinema
