@@ -28,3 +28,22 @@ vagrant_plugin_{{ p.name }}:
       - pkg: vagrant_plugin_deps
 
 {% endfor %}
+
+{% for p in settings.plugins %}
+  {% if p.name = "vagrant-lxd" %}
+create-lxd-ubuntu-box:
+  cmd.run:
+    - name: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh xenial
+    - unless: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh --check xenial
+    - require:
+      - cmd: vagrant_plugin_{{ p.name }}
+
+  {% elif p.name = "vagrant-libvirt" %}
+create-libvirt-ubuntu-box:
+  cmd.run:
+    - name: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh xenial
+    - unless: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh --check xenial
+    - require:
+      - cmd: vagrant_plugin_{{ p.name }}
+  {% endif %}
+{% endfor %}

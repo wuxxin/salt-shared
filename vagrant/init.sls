@@ -23,6 +23,35 @@
   {% set hash = settings.hash.i386 %}
 {% endif %}
 
+vagrant-prerequisites:
+  pkg.installed:
+    - pkgs:
+      - genisoimage
+      - openssl
+      - fakeroot
+      - gnupg
+      - xz-utils
+      - xmlstarlet
+      - qemu-utils
+      - libguestfs-tools
+    - require_in:
+      - pkg: vagrant
+
+/usr/local/share/vagrant/cloud-init-block.yaml:
+  file.managed:
+    - source: salt://vagrant/cloud-init-block.yaml
+
+{% for i in [
+  'vagrant-add-box-lxd-ubuntu.sh',
+  'vagrant-add-box-libvirt-ubuntu.sh',
+  'create-cidata-iso.sh'
+] %}
+{{ i }}:
+  file.managed:
+    - source: salt://vagrant/{{ i }}
+    - name: /usr/local/bin/{{ i }}
+{% endfor %}
+
 {% if newer_or_equal >= 1 %}
 
 vagrant:

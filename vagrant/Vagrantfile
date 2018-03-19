@@ -1,0 +1,122 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "fileutils"
+require "yaml"
+
+Vagrant.require_version ">= 1.6.0"
+
+VAGRANTFILE_API_VERSION = "2"
+DEFAULT_HOSTNAME = File.basename(File.expand_path(File.dirname(__FILE__)))
+DEFAULT_CONFIG = <<-HERE
+cpus: 2
+memory: 4096
+servername: #{DEFAULT_HOSTNAME}
+libvirt:
+  management:
+    network:
+      name = "vagrant-libvirt"
+      address = nil
+      mac = nil
+  machine:
+    virtual:
+      size: 10
+
+HERE
+
+custom_name = File.join(File.dirname(__FILE__), "vagrant.yml")
+config = DEFAULT_CONFIG
+
+if File.exist?(custom_name)
+  custom_config = YAML.load_file(custom_name)
+  config.merge!(custom_config)
+end
+
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+    config.ssh.forward_agent = true
+    config.vm.box = "ubuntu/xenial64"
+    config.vm.define "appliance"
+    config.vm.synced_folder ".", "/app/appliance", type: "rsync", create: true, rsync__exclude: "", rsync__auto: false, rsync__args: ["--verbose", "--archive", "--delete", "-z", "--links"]
+
+    if Vagrant.has_plugin?("vagrant-proxyconf")
+        if "#{ENV['http_proxy']}" != ""
+            config.proxy.http  = "#{ENV['http_proxy']}"
+        end
+    end
+
+    config.vm.provider "lxd" do |lxd|
+        lxd.limits.cpu = $config['cpus']
+        lxd.limits.memory = "#{$config['memory']}kb"
+        lxd.api_endpoint = "https://127.0.0.1:8443"
+        lxd.timeout = 10
+        lxd.name = nil
+        lxd.nesting = nil
+        lxd.privileged = nil
+        lxd.ephemeral = false
+        lxd.profiles = ["default"]
+    end
+
+    config.vm.provider "libvirt" do |lv|
+        lv.cpus = $config['cpus']
+        lv.memory = $config['memory']
+        lv.machine_virtual_size = $config['libvirt']['machine']['virtual']['size']
+        lv.management_network_name = $config['libvirt']['management']['network']['name']
+        if $config['libvirt']['management']['network']['address']
+            lv.management_network_address = $config['libvirt']['management']['network']['address']
+        end
+        if $config['libvirt']['management']['network']['mac']
+            lv.management_network_mac = $config['libvirt']['management']['network']['mac']
+        end
+        if File.exist?($clouddrive_path)
+            lv.storage :file, :device => :cdrom, :allow_existing => true, :path => $clouddrive_path
+        end
+    end
+
+    config.vm.provider "virtualbox" do |vb, override|
+        vb.cpus = $config['cpus']
+        vb.memory = $config['memory']
+        override.vm.box_url = "http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
+        if File.exist?($clouddrive_path)
+            vb.customize [
+                "storageattach", :id,
+                "--storagectl", "SCSI",
+                "--port", "1",
+                "--type", "dvddrive",
+                "--medium", $clouddrive_path
+            ]
+        end
+        # see https://github.com/tomkins/cloud-init-vagrant/blob/master/Vagrantfile
+        vb.customize [
+            "modifyvm", :id,
+            "--uartmode1", "disconnected"
+        ]
+    end
+
+    config.vm.provision "shell", privileged:true, inline: <<-SHELL
+        # https://github.com/mitchellh/vagrant/issues/5673
+        hostnamectl set-hostname #{$hostname}
+    SHELL
+
+    x=<<-DISABLED
+    
+    config.vm.provision :salt do |salt|
+        salt.masterless = true
+        salt.minion_config = "salt/minion"
+        salt.run_highstate = true
+        salt.log_level = "info"
+        # https://github.com/mitchellh/vagrant/issues/3754
+        salt.verbose = true
+        #salt.install_type = "git"
+        #salt.install_args = "v2015.5.1"
+        #salt.bootstrap_options = "-F -c /tmp/ -P"
+        salt.pillar({
+            "appliance" => {
+                "enabled" => true
+            }
+        })
+    end
+    
+    DISABLED
+    
+end
