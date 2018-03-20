@@ -8,7 +8,7 @@ require "yaml"
 Vagrant.require_version ">= 1.6.0"
 
 DEFAULT_HOSTNAME = File.basename(File.expand_path(File.dirname(__FILE__)))
-DEFAULT_CLOUDDRIVE = File.join(File.dirname(__FILE__), "cidata.iso")
+DEFAULT_CLOUDDRIVE = File.join(File.dirname(__FILE__), "cidata-vagrant.iso")
 DEFAULT_YAML_NAME = File.join(File.dirname(__FILE__), "vagrant.yml")
 DEFAULT_SETTINGS = <<-HERE
     cpus: 2

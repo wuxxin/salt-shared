@@ -3,18 +3,32 @@ version: "2.0.3"
 hash:
   amd64: "47ea8af7644616caf36d421ecf2e0aceb1f5095933a2bfc2d50b7b8bae35d93f"
   i386: "d2d06df033c66942e277d076903193f57b6d51d5230e0735f7686033455927f4"
+virtualbox: true
+{# virtualbox will only be installed if virtualbox: true and pillar:desktop.proprietary: true #}
 plugins:
-  - name: vagrant-gatling-rsync
-  - name: vagrant-env
-  - name: vagrant-proxyconf
-  - name: vagrant-triggers
-  - name: vagrant-libvirt
-    dependencies: 
-      - libxslt-dev
-      - libxml2-dev
-      - zlib1g-dev
-      - libvirt-dev
-  - name: vagrant-lxd
+  - vagrant-gatling-rsync
+  - vagrant-env
+  - vagrant-proxyconf
+  - vagrant-triggers
+  - vagrant-libvirt
+  - vagrant-lxd
+{% endload %}
+
+{% load_yaml as dependencies %}
+
+vagrant-libvirt:
+  pkgs: 
+    - libxslt-dev
+    - libxml2-dev
+    - zlib1g-dev
+    - libvirt-dev
+  sls:
+    - libvirt
+
+vagrant-lxd:
+  sls:
+    - lxd
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
