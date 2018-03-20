@@ -48,7 +48,8 @@ Installs and configures features you usually want to have for a working desktop
 * python sci-py distribution
 * android: tools
 * emulation:
-  * qemu/kvm variants, libvirt, virt-manager, lxd, vagrant, vagrant-libvirt, vagrant-lxd, tools
+  * qemu/kvm, libvirt, virt-manager
+  * lxd, vagrant, vagrant-libvirt, vagrant-lxd, tools
 * ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
 
 * optional
