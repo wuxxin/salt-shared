@@ -30,7 +30,7 @@ vagrant_plugin_{{ p.name }}:
 {% endfor %}
 
 {% for p in settings.plugins %}
-  {% if p.name = "vagrant-lxd" %}
+  {% if p.name == "vagrant-lxd" %}
 create-lxd-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh xenial
@@ -38,7 +38,7 @@ create-lxd-ubuntu-box:
     - require:
       - cmd: vagrant_plugin_{{ p.name }}
 
-  {% elif p.name = "vagrant-libvirt" %}
+  {% elif p.name == "vagrant-libvirt" %}
 create-libvirt-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh xenial

@@ -31,7 +31,8 @@ fi
 
 # check if box of type virtualbox is already there, download if not
 if test ! -e $virtualboxdir/metadata.json; then
-    vagrant box add --provider virtualbox ubuntu/xenial64
+    echo "adding vagrant virtualbox box ubuntu/${codename}64"
+    vagrant box add --provider virtualbox ubuntu/${codename}64
 fi
 test -e $virtualboxdir/metadata.json
 
@@ -53,6 +54,8 @@ Vagrant.configure("2") do |config|
 end
 EOF
 
+# XXX change hardcoded input file to xml parsing Envelope/References/File
+inputfile=$virtualboxdir/ubuntu-xenial-16.04-cloudimg.vmdk
 echo "converting image $inputfile to QCOW2 box.img"
 qemu-img convert -p -S 16k -O qcow2 $inputfile $libvirtdir/box.img
 

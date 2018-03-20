@@ -42,8 +42,8 @@ vagrant-prerequisites:
     - source: salt://vagrant/cloud-init-block.yaml
 
 {% for i in [
-  'vagrant-add-box-lxd-ubuntu.sh',
-  'vagrant-add-box-libvirt-ubuntu.sh',
+  'vagrant-box-add-lxd-ubuntu.sh',
+  'vagrant-box-add-libvirt-ubuntu.sh',
   'create-cidata-iso.sh'
 ] %}
 {{ i }}:
