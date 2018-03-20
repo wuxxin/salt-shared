@@ -48,7 +48,7 @@ Installs and configures features you usually want to have for a working desktop
 * python sci-py distribution
 * android: tools
 * emulation:
-  * all qemu/kvm variants, libvirt, virt-manager, lxd, vagrant, tools
+  * qemu/kvm variants, libvirt, virt-manager, lxd, vagrant, vagrant-libvirt, vagrant-lxd, tools
 * ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
 
 * optional
@@ -60,8 +60,10 @@ Installs and configures features you usually want to have for a working desktop
 ## Pillar-Example
 
 desktop:
-  developer:enabled: true    # installs developer packages 
-  commercial:enabled: true   # installs proprietary packages (currently skype)
+  developer:enabled: true    # installs developer packages
+  proprietary:enabled: true   # installs proprietary packages
+    # skype (if desktop)
+    # virtualbox (if desktop.developer and vagrant.virtualbox: true)
   games:enabled: true        # installs additional game emulators
   bitcoin:enabled: true      # installs bitcoind
   

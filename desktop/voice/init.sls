@@ -1,4 +1,4 @@
-{% if salt['pillar.get']('desktop:commercial:enabled', false) == true %}
+{% if salt['pillar.get']('desktop:proprietary:enabled', false) == true %}
 include:
   - .skype
 {% endif %}
