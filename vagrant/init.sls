@@ -40,6 +40,7 @@ vagrant-prerequisites:
 /usr/local/share/vagrant/cloud-init-block.yaml:
   file.managed:
     - source: salt://vagrant/cloud-init-block.yaml
+    - makedirs: true
 
 {% for i in [
   'vagrant-box-add-lxd-ubuntu.sh',
@@ -50,6 +51,7 @@ vagrant-prerequisites:
   file.managed:
     - source: salt://vagrant/{{ i }}
     - name: /usr/local/bin/{{ i }}
+    - mode: "0755"
 {% endfor %}
 
 {% if newer_or_equal >= 1 %}

@@ -60,7 +60,7 @@ create-lxd-ubuntu-box:
     - name: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh xenial
     - unless: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh --check xenial
     - require:
-      - cmd: vagrant_plugin_{{ p.name }}
+      - cmd: vagrant_plugin_{{ p }}
 
 {% elif p == "vagrant-libvirt" %}
 create-libvirt-ubuntu-box:
@@ -68,6 +68,6 @@ create-libvirt-ubuntu-box:
     - name: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh xenial
     - unless: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh --check xenial
     - require:
-      - cmd: vagrant_plugin_{{ p.name }}
+      - cmd: vagrant_plugin_{{ p }}
 {% endif %}
 {% endfor %}
