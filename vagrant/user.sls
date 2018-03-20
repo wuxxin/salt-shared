@@ -59,6 +59,7 @@ create-lxd-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh xenial
     - unless: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh --check xenial
+    - runas: {{ user }}
     - require:
       - cmd: vagrant_plugin_{{ p }}
 
@@ -67,6 +68,7 @@ create-libvirt-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh xenial
     - unless: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh --check xenial
+    - runas: {{ user }}
     - require:
       - cmd: vagrant_plugin_{{ p }}
 {% endif %}
