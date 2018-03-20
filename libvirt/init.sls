@@ -12,6 +12,7 @@ libvirt:
   pkg.installed:
     - pkgs:
       - libvirt-bin
+      - qemu
       - qemu-kvm
       - ovmf
     - require:
