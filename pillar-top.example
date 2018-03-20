@@ -18,12 +18,11 @@ timezone: Europe/Vienna
 file: custom.sls in pillar root
 ----
 desktop:
-  status: present
+  user: mainusernameonthemachine
+  development:
+    enabled: true
+  proprietary:
+    enabled: true
 
-  commercial:
-    binary:
-      status: present
-
-  user: mymainusernameonthemachine
 ----
 
