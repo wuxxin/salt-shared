@@ -5,7 +5,7 @@
 include:
   - vagrant
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies %}
+{%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
 {%- for slsfile in dependencies[plugin]['sls'] %}
   - {{ slsfile }}
 {%- endfor %}
@@ -23,7 +23,7 @@ vagrant_plugin_deps:
     - pkgs:
       - ruby-dev
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies %}
+{%- if plugin in dependencies and dependencies[plugin]['pkgs'] is defined %}
 {%- for pkg in dependencies[plugin]['pkgs'] %}
       - {{ pkg }}
 {%- endfor %}
@@ -32,7 +32,7 @@ vagrant_plugin_deps:
     - require:
       - sls: vagrant
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies %}
+{%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
 {%- for slsfile in dependencies[plugin]['sls'] %}
       - sls: {{ slsfile }}
 {%- endfor %}
