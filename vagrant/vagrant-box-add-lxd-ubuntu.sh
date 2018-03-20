@@ -14,8 +14,9 @@ if test "$1" = "--check"; then
 fi
 # construct a xenial lxd box as default
 codename=${1:-xenial}
+arch=amd64
 baseurl=https://cloud-images.ubuntu.com/$codename/current
-basename=$codename-server-cloudimg-amd64
+basename=$codename-server-cloudimg-${arch}
 baselist="$basename-lxd.tar.xz $basename-root.tar.xz"
 boxversion="$(http $baseurl/  | hxclean | hxselect -c title | grep -i "$codename" | sed -r 's/.*Build \[([0-9]+)\].*/\1/g').0.0"
 basedir=~/.vagrant.d/boxes/ubuntu-VAGRANTSLASH-${codename}64/${boxversion}
@@ -79,18 +80,42 @@ tar xf $basename-root.tar.xz -C temp/rootfs; \
 echo 'extract lxd metadata'; \
 tar xf $basename-lxd.tar.xz -C temp; \
 echo 'create lxc rootfs'; \
-tar czf lxc-rootfs.tar.gz -C temp rootfs; \
+tar czf lxc-rootfs.tar.gz --numeric-owner -C temp rootfs; \
 echo source_fingerprint:\ \$(sha256sum -b lxc-rootfs.tar.gz | sed -r 's/([^ ]+) .*/\1/g') >> temp/metadata.yaml; \
 cp temp/metadata.yaml .; \
 cp $cloudblock temp/templates/cloud-init-user.tpl
 chown 0:0 temp/templates/cloud-init-user.tpl
 echo 'create lxd rootfs'; \
-tar czf lxd-rootfs.tar.gz -C temp rootfs templates metadata.yaml; \
+tar czf lxd-rootfs.tar.gz --numeric-owner -C temp rootfs templates metadata.yaml; \
 rm -rf temp"
 
 mv lxc-rootfs.tar.gz $lxcdir/rootfs.tar.gz
 mv lxd-rootfs.tar.gz $lxddir/rootfs.tar.gz
 mv metadata.yaml $lxddir
+cat > $lxcdir/metadata.json << EOF
+{
+  "provider": "lxc",
+  "version":  "${boxversion}",
+  "built-on": "$(LC_ALL=posix date)",
+  "template-opts": {
+    "--arch":    "${arch}",
+    "--release": "${codename}"
+  }
+}
+EOF
+cat > $lxcdir/lxc-config << EOF
+# For additional config options, please look at lxc.container.conf(5)
 
-echo "information: done, new lxd box named ubuntu/${codename}64 version $boxversion"
+# Common configuration
+lxc.include = /usr/share/lxc/config/ubuntu.common.conf
+
+# settings for systemd with PID 1:
+lxc.kmsg = 0
+lxc.autodev = 1
+# allow unconfined and incomplete
+lxc.aa_profile = unconfined
+lxc.aa_allow_incomplete = 1
+EOF
+
+echo "information: done, new lxc/lxd box named ubuntu/${codename}64 version $boxversion"
 
