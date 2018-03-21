@@ -12,7 +12,7 @@ DEFAULT_CLOUDDRIVE = File.join(File.dirname(__FILE__), "cidata-vagrant.iso")
 DEFAULT_YAML_NAME = File.join(File.dirname(__FILE__), "vagrant.yml")
 DEFAULT_SETTINGS = <<-HERE
     cpus: 2
-    memory: 4096
+    memory: 1024
     servername: #{DEFAULT_HOSTNAME}
     clouddrive: #{DEFAULT_CLOUDDRIVE}
     libvirt:
@@ -78,8 +78,8 @@ Vagrant.configure("2") do |config|
     if File.exist?(settings['clouddrive'])
       vb.customize [
         "storageattach", :id,
-        "--storagectl", "SCSI",
-        "--port", "1",
+        "--storagectl", "SCSI Controller",
+        "--port", "6",
         "--type", "dvddrive",
         "--medium", settings['clouddrive']
       ]

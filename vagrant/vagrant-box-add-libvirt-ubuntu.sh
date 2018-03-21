@@ -50,6 +50,9 @@ Vagrant.configure("2") do |config|
         libvirt.nic_model_type = "virtio"
         libvirt.video_type = 'vmvga'
         libvirt.volume_cache = 'none'
+        # XXX qemu < 2.9.0 and cpu:mode=host-model dont always work
+        # xenial kernel modul raid6 hangs on mismatch between avx2 support flag and acutal availability of avx2
+        libvirt.cpu_feature :name => 'avx2', :policy => 'disable'
     end
 end
 EOF
