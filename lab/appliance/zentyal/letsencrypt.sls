@@ -2,7 +2,9 @@ include:
   - dehydrated
   - .base
 
-{% set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+{% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
+
+{% set firstdomain = letsencrypt.domains[0].split(' ')[0] %}
 
 zentyal-dehydrated-hook:
   file.managed:
@@ -58,7 +60,8 @@ dhparam-creation:
 initial-cert-creation:
   cmd.run:
     - name: /usr/local/bin/dehydrated -c
-    - unless: test -e /usr/local/etc/dehydrated/certs/{{ domain }}/fullchain.pem
+    - runas: dehydrated
+    - unless: test -e /usr/local/etc/dehydrated/certs/{{ firstdomain }}/fullchain.pem
     - require:
       - file: zentyal-dehydrated-hook
       - service: zentyal-apache-reload
