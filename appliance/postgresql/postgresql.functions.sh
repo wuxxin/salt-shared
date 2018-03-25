@@ -57,7 +57,7 @@ prepare_postgresql_database () {
             current_owner=$(gosu postgres psql -qtc "\l" |
                 grep "^[ \t]*${dname}" | sed -r "s/[^|]+\| +([^| ]+) +\|.*/\1/")
             if test "$current_owner" != "$downer"; then
-                gosu postgres psql -c "ALTER DATABASE ${dname} OWNER TO downer;"
+                gosu postgres psql -c "ALTER DATABASE ${dname} OWNER TO ${downer};"
             fi
             
             # extensions of database
