@@ -1,4 +1,9 @@
-dehydrated_user:
+include:
+  - openssl
+
+{% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
+        
+dehydrated-user:
   group.present:
     - name: dehydrated
   user.present:
@@ -23,6 +28,13 @@ dehydrated_user:
     - makedirs: true
 {% endfor %}
 
+/usr/local/etc/dehydrated/hook-empty.sh:
+  file.managed:
+    - user: dehydrated
+    - group: dehydrated
+    - name: salt://dehydrated/examples/hook.sh
+    - mode: "0755"
+
 /usr/local/etc/dehydrated/config:
   file.managed:
     - user: dehydrated
@@ -30,10 +42,18 @@ dehydrated_user:
     - contents: |
         BASEDIR="/usr/local/etc/dehydrated"
         WELLKNOWN="/usr/local/etc/dehydrated/acme-challenge"
-        {%- for i, d in salt['pillar.get']('letsencrypt').iteritems() %}
-          {%- if i not in ['domains', 'enable', 'config'] %}
+        {%- if letsencrypt.staging|d(true) %}
+        CA={{ settings.staging.ca }}
+        OLDCA={{ settings.staging.oldca }}
+        {%- else %}
+        CA={{ settings.production.ca }}
+        OLDCA={{ settings.production.oldca }}
+        {%- endif %}
+        CONTACT_EMAIL={{ letsencrypt.contact_email }}
+        HOOK={{ letsencrypt.hook }}
+        {%- set config=letsencrypt.config|d({}) %}
+        {%- for i, d in config.iteritems() %}
         {{ i|upper }}="{{ d }}"
-          {%- endif %}
         {%- endfor %}
 
 /usr/local/etc/dehydrated/domains.txt:
@@ -41,9 +61,11 @@ dehydrated_user:
     - user: dehydrated
     - group: dehydrated
     - contents: |
-        {{ salt['pillar.get']('letsencrypt:domains', {})[0] }}{% for i in salt['pillar.get']('letsencrypt:domains', {}) %} {{ i }}{% endfor %}
+        {%- for entry in letsencrypt.domains %}
+        {{ entry.split(' ')[0] }}{%- for sub in entry.split(' ') %} {{ sub }}{%- endfor %}
+        {%- endfor %}
 
-  {% if salt['pillar.get']('letsencrypt:config:apache', false) %}
+{% if letsencrypt.apache|d(false) %}
 /etc/apache2/conf-available/10-wellknown-acme.conf:
   file.managed:
     - source: salt://dehydrated/apache.conf
@@ -53,6 +75,7 @@ dehydrated_user:
   file.symlink:
     - target: /etc/apache2/conf-available/10-wellknown-acme.conf
     - makedirs: true
-
-  {% endif %}
+{% endif %}
+{% if letsencrypt.nginx|d(false) %}
+{% endif %}
 
