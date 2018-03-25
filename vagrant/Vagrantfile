@@ -7,8 +7,14 @@ require "yaml"
 
 Vagrant.require_version ">= 1.6.0"
 
+# XXX host locale environment variables are passed to guest. This may cause failures if the guest software do not support host locale.
+ENV["LANG"] = "en_US.UTF-8"
+ENV["LC_ALL"] = ENV["LANG"]
+ENV["LANGUAGE"] = "en_US:en"
+ENV["LC_MESSAGES"] = "POSIX"
+
 DEFAULT_HOSTNAME = File.basename(File.expand_path(File.dirname(__FILE__)))
-DEFAULT_CLOUDDRIVE = File.join(File.dirname(__FILE__), "cidata-vagrant.iso")
+DEFAULT_CLOUDDRIVE = File.join(File.dirname(__FILE__), "cidata.iso")
 DEFAULT_YAML_NAME = File.join(File.dirname(__FILE__), "vagrant.yml")
 DEFAULT_SETTINGS = <<-HERE
     cpus: 2
@@ -28,77 +34,92 @@ HERE
 
 settings = YAML.load(DEFAULT_SETTINGS)
 if File.exist?(DEFAULT_YAML_NAME)
-  custom_settings = YAML.load_file(DEFAULT_YAML_NAME)
-  settings.merge!(custom_settings)
+    custom_settings = YAML.load_file(DEFAULT_YAML_NAME)
+    settings.merge!(custom_settings)
 end
 
 Vagrant.configure("2") do |config|
-  config.ssh.forward_agent = true
-  config.vm.box = "ubuntu/xenial64"
-  config.vm.define "appliance"
-  
-  config.vm.synced_folder ".", "/app/appliance", type: "rsync", create: true, rsync__exclude: "", rsync__auto: false, rsync__args: ["--verbose", "--archive", "--delete", "-z", "--links"]
+    config.ssh.forward_agent = true
+    config.vm.box = "ubuntu/xenial64"
+    config.vm.define "appliance"
 
-  if Vagrant.has_plugin?("vagrant-proxyconf")
-    if "#{ENV['http_proxy']}" != ""
-      config.proxy.http  = "#{ENV['http_proxy']}"
-    end
-  end
+    config.vm.synced_folder ".", "/app/src", type: "rsync", create: true,
+        rsync__exclude: "", rsync__auto: false,
+        rsync__args: ["--verbose", "--archive", "--delete", "-z", "--links"]
 
-  config.vm.provider "lxd" do |lxd|
-    lxd.api_endpoint = "https://127.0.0.1:8443"
-    lxd.timeout = 10
-    lxd.name = nil
-    lxd.nesting = nil
-    lxd.privileged = nil
-    lxd.ephemeral = false
-    lxd.profiles = ["default"]
-  end
+    if Vagrant.has_plugin?("vagrant-proxyconf")
+        if "#{ENV['http_proxy']}" != ""
+            config.proxy.http  = "#{ENV['http_proxy']}"
+        end
+    end
 
-  config.vm.provider "libvirt" do |lv|
-    lv.cpus = settings['cpus']
-    lv.memory = settings['memory']
-    lv.machine_virtual_size = settings['libvirt']['machine']['virtual']['size']
-    lv.management_network_name = settings['libvirt']['management']['network']['name']
-    if settings['libvirt']['management']['network']['address']
-      lv.management_network_address = settings['libvirt']['management']['network']['address']
+    config.vm.provider "lxd" do |lxd|
+        lxd.api_endpoint = "https://127.0.0.1:8443"
+        lxd.timeout = 10
+        lxd.name = nil
+        lxd.nesting = nil
+        lxd.privileged = nil
+        lxd.ephemeral = false
+        lxd.profiles = ["default"]
     end
-    if settings['libvirt']['management']['network']['mac']
-      lv.management_network_mac = settings['libvirt']['management']['network']['mac']
-    end
-    if File.exist?(settings['clouddrive'])
-      lv.storage :file, :device => :cdrom, :allow_existing => true, :path => settings['clouddrive']
-    end
-  end
 
-  config.vm.provider "virtualbox" do |vb, override|
-    vb.cpus = settings['cpus']
-    vb.memory = settings['memory']
-    override.vm.box_url = "http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
-    if File.exist?(settings['clouddrive'])
-      vb.customize [
-        "storageattach", :id,
-        "--storagectl", "SCSI Controller",
-        "--port", "6",
-        "--type", "dvddrive",
-        "--medium", settings['clouddrive']
-      ]
+    config.vm.provider "libvirt" do |lv|
+        lv.cpus = settings['cpus']
+        lv.memory = settings['memory']
+        lv.machine_virtual_size = settings['libvirt']['machine']['virtual']['size']
+        lv.management_network_name = settings['libvirt']['management']['network']['name']
+        if settings['libvirt']['management']['network']['address']
+            lv.management_network_address = settings['libvirt']['management']['network']['address']
+        end
+        if settings['libvirt']['management']['network']['mac']
+            lv.management_network_mac = settings['libvirt']['management']['network']['mac']
+        end
+        if File.exist?(settings['clouddrive'])
+            lv.storage :file, :device => :cdrom, :allow_existing => true, :path => settings['clouddrive']
+        end
     end
-    # see https://github.com/tomkins/cloud-init-vagrant/blob/master/Vagrantfile
-    vb.customize [
-      "modifyvm", :id,
-      "--uartmode1", "disconnected"
-    ]
-  end
 
-  config.vm.provision "shell", privileged:true, inline: <<-SHELL
-      # https://github.com/mitchellh/vagrant/issues/5673
-      echo "test"
-  SHELL
-  
-  config.vm.provision "shell", privileged:true, inline: <<-SHELL
-      # keep minion from running, salt dpkg packages
-      for i in disable stop mask; do systemctl $i salt-minion; done
-  SHELL
-  
+    config.vm.provider "virtualbox" do |vb, override|
+        vb.cpus = settings['cpus']
+        vb.memory = settings['memory']
+        override.vm.box_url = "http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
+        if File.exist?(settings['clouddrive'])
+            vb.customize [
+                "storageattach", :id,
+                "--storagectl", "SCSI Controller",
+                "--port", "6",
+                "--type", "dvddrive",
+                "--medium", settings['clouddrive']
+            ]
+        end
+        # see https://github.com/tomkins/cloud-init-vagrant/blob/master/Vagrantfile
+        vb.customize [
+            "modifyvm", :id,
+            "--uartmode1", "disconnected"
+        ]
+    end
+
+    config.vm.provision "shell", privileged:true, inline: <<-SHELL
+        # TODO set hostname workarounnd, see https://github.com/mitchellh/vagrant/issues/5673
+        # keep update service from interfering while installing
+        for i in apt-daily.service apt-daily.timer unattended-upgrades.service \
+            apt-daily-upgrade.service apt-daily-upgrade.timer ; do
+            systemctl disable $i; systemctl stop $i
+        done
+        systemctl daemon-reload
+        timedatectl set-timezone "Europe/Vienna"
+        export DEBIAN_FRONTEND=noninteractive
+        export LC_ALL=#{ENV['LANG']}
+        printf "LANG=#{ENV['LANG']}\nLANGUAGE=#{ENV['LANGUAGE']}\nLC_MESSAGES=#{ENV['LC_MESSAGES']}\n" > /etc/default/locale
+        apt-get -y update
+        apt-get -y install software-properties-common locales git gosu curl rsync acpid
+        locale-gen en_US.UTF-8 && dpkg-reconfigure locales
+
+    SHELL
+
+    config.vm.provision "shell", privileged:true, inline: <<-SHELL
+        echo "finish provision $(date)"
+        
+    SHELL
+
 end
