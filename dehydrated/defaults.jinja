@@ -11,8 +11,9 @@ staging:
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('dehydrated', {})) %}
 
-{% load_yaml as letsencrypt %}
+{% load_yaml as defaults_letsencrypt %}
 enabled: false
+cron: false
 staging: false
 domains:
 apache: false
@@ -23,5 +24,5 @@ config:
 
 {% endload %}
 
-{% set letsencrypt=salt['grains.filter_by']({'none': defaults},
+{% set letsencrypt=salt['grains.filter_by']({'none': defaults_letsencrypt},
     grain='none', default= 'none', merge= salt['pillar.get'](settings.pillar, {})) %}

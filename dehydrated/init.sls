@@ -79,3 +79,10 @@ dehydrated-user:
 {% if letsencrypt.nginx|d(false) %}
 {% endif %}
 
+{% if letsencrypt.cron|d(false) %}
+/etc/cron.d/dehydrated:
+  file.managed:
+    - contents: |
+        # run dehydrated on a weekly bases
+        @weekly dehydrated /usr/bin/dehydrated --cron
+{% endif %}
