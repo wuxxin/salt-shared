@@ -10,8 +10,8 @@ ssub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
 }
 
-{%- if salt['pillar.get']("letsencrypt:enabled", false) %}
-{% set domain = salt['pillar.get']('letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+{%- if salt['pillar.get']("appliance:zentyal:letsencrypt:enabled", false) %}
+{% set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
 configfile=$(ls /etc/apache2/conf-available/100-zentyal-ocsmanager*.conf)
 if test -f "$configfile"; then
   cat $configfile | \

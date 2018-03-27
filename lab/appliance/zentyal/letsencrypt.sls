@@ -65,5 +65,6 @@ initial-cert-creation:
     - require:
       - file: zentyal-dehydrated-hook
       - service: zentyal-apache-reload
+      - cmd: dhparam-creation
       - sls: dehydrated
       
