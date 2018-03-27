@@ -35,7 +35,7 @@ See (example.md)[example.md] for detailed parameter usage.
 
 ## Additional Parameter
 
-### optional kwargs in mdadm, lvm:pg, lvm:vg, lvm:lv, format, mount, directory
+### optional kwargs in every state (except parted, crypt, swap)
 
 + mdadm:  passed to mdadm.raid_present
 + lvm pv: passed to lvm.pv_present
@@ -44,9 +44,10 @@ See (example.md)[example.md] for detailed parameter usage.
 + format: passed to cmd.run
 + mount:  passed to mount.mounted
 + directory: passed to file.directory
++ relocate: passed to prefix:cmd, relocate:file, symlink:file, postfix:cmd
 
 in addition to optional kwargs for target state, 
-you can add standard salstack parameter like "watch_in/require_in/require/watch" 
+you can add standard saltstack parameter like "watch_in/require_in/require/watch" 
 
 
 + state specific option example

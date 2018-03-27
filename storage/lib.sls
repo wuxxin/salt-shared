@@ -406,6 +406,8 @@ mount-{{ item }}:
 directory:
   /volatile:
     mountpoint: true  # defaults to false
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
     parts:
       - name: docker
       - name: backup-test
@@ -419,14 +421,22 @@ directory:
 #}
 
   {% for item, data in input_data.iteritems() %}
-    {%- set enforce_mountpoint= data['mountpoint']|d(false) %}
+"base_directory_{{ item }}":
+  file.directory:
+    - makedirs: {{ data['makedirs']|d(true) }}
+    {%- if data['mountpoint']|d(false) %}
+    - onlyif: mountpoint -q {{ item }}
+    {%- endif %}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['mountpoint', 'makedirs', 'parts'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
+    
     {%- for entry in data.parts %}
 "{{ item }}/{{ entry.name }}":
   file.directory:
-    - makedirs: {{ entry.makedirs|d(True) }}
-      {%- if enforce_mountpoint %}
-    - onlyif: mountpoint -q {{ item }}
-      {%- endif %}
+    - makedirs: {{ entry.makedirs|d(true) }}
       {%- for opt, optvalue in entry.iteritems() %}
         {%- if opt not in ['name', 'makedirs',] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
@@ -454,29 +464,55 @@ relocate:
     {%- set target= item.target %}
     {%- set prefix= item.prefix|d("true") %}
     {%- set postfix= item.postfix|d("true") %}
+
 "pre_rel_{{ source }}":
   cmd.run:
     - name: "{{ prefix }}"
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
+    {%- for opt, optvalue in item.iteritems() %}
+      {%- if opt not in ['source', 'target', 'prefix', 'postfix'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
+
 "relocate_{{ source }}":
   file.rename:
     - name: {{ target }}
     - source: {{ source }}
     - force: true
     - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
+    {%- for opt, optvalue in item.iteritems() %}
+      {%- if opt not in ['source', 'target', 'prefix', 'postfix', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
     - require:
       - cmd: "pre_rel_{{ source }}"
+{{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
+
 "symlink_{{ source }}":
   file.symlink:
     - name: {{ source }}
     - target: {{ target }}
     - onlyif: test -d {{ target }} -a ! -L {{ source }}
+    {%- for opt, optvalue in item.iteritems() %}
+      {%- if opt not in ['source', 'target', 'prefix', 'postfix', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
     - require:
       - file: "relocate_{{ source }}"
+{{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
+
 "post_rel_{{ source }}":
   cmd.run:
     - name: "{{ postfix }}"
     - onchanges:
       - file: "relocate_{{ source }}"
+    {%- for opt, optvalue in item.iteritems() %}
+      {%- if opt not in ['source', 'target', 'prefix', 'postfix'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
   {% endfor %}
 {% endmacro %}
