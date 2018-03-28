@@ -442,7 +442,7 @@ directory:
 #}
 
   {% for data in input_data %}
-"base_directory_{{ data.name }}":
+"directory_{{ data.name }}":
   file.directory:
     - makedirs: {{ data['makedirs']|d(true) }}
     {%- if data['mountpoint']|d(false) %}
