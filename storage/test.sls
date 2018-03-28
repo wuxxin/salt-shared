@@ -17,7 +17,7 @@ in_another:
 {% load_yaml as custom_storage %}
 parted:
 {% for a in ["/dev/vdb", "/dev/vdc"] %}
-  {{ a }}:
+  - device: {{ a }}
     type: gpt 
     parts:
       - name: bios_grub
@@ -42,7 +42,7 @@ parted:
 
 mdadm:
 {% for a,b in [(0, 2), (1, 4)] %}
-  "/dev/md{{ a }}":
+  - target: /dev/md{{ a }}
     level: 1
     devices:
       - /dev/vdb{{ b }}
@@ -57,7 +57,7 @@ mdadm:
 {% endfor %}
 
 crypt:
-  "/dev/md1":
+  - device: /dev/md1
     password: "my-useless-password"
     target: "cryptlvm"
 
@@ -67,12 +67,12 @@ lvm:
       - /dev/mapper/cryptlvm
     # optional kwargs passed to lvm.pv_present
   vg:
-    vg0:
+    - name: vg0
       devices:
         - /dev/mapper/cryptlvm
       # optional kwargs passed to lvm.vg_present
   lv:
-    host_root:
+    - name: host_root
       vgname: vg0
       size: 2g
       # optional kwargs passed to lvm.lv_present
@@ -81,56 +81,57 @@ lvm:
       require_in:
         - test: in_another
 
-    other_volume:
+    - name: other_volume
       vgname: vg0
       size: 30g
       expand: true 
       # no optional kwargs are passed, volume must exist, volume is resized
       
 format:
-  /dev/md0:
+  - device: /dev/md0
     fstype: ext3
-  /dev/mapper/vg0-host_root:
+  - device: /dev/mapper/vg0-host_root
     fstype: ext4
     options: {# passed to mkfs #}
       - "-L my_root"
-  /dev/mapper/vg0-host_swap:
+  - device: /dev/mapper/vg0-host_swap
     fstype: swap
-  /dev/mapper/vg0-images:
+  - device: /dev/mapper/vg0-images
     fstype: ext4
     options:
       - "-L images"
-  /dev/mapper/vg0-cache:
+  - device: /dev/mapper/vg0-cache
     fstype: ext4
 
 mount:
-  /mnt/images:
-    device: /dev/mapper/vg0-images
+  - device: /dev/mapper/vg0-images
+    target: /mnt/images
     fstype: ext4
     mkmnt: true {# additional args for mount.mounted #}
-  /mnt/cache:
-    device: /dev/mapper/vg0-cache
+  - device: /dev/mapper/vg0-cache
+    target: /mnt/cache
 
 swap:
   - /dev/mapper/vg0-host_swap
 
 directory:
-  /mnt/images:
+  - name: /mnt/images
     mountpoint: true  # defaults to false
-    parts:
-      - name: docker
-      - name: funnydir
-        # optional kwargs for file.directory
-        # defaults are makedirs:true
-        user: 1000
-        group: 1000
-        dir_mode: 755
-        file_mode: 644
-        require:
-          - test: test
-        require_in:
-          - test: in_test
-          - test: in_another
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+  - name: /mnt/images/docker
+  - name: /mnt/images/funnydir
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+    user: 1000
+    group: 1000
+    dir_mode: 755
+    file_mode: 644
+    require:
+      - test: test
+    require_in:
+      - test: in_test
+      - test: in_another
 
 relocate:
   - source: /var/lib/docker

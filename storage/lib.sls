@@ -44,9 +44,10 @@
 #######
 {% macro storage_parted(input_data) %}
 
-{# example: use whole disk for root partition
+{# 
+# example: use whole disk for root partition
 parted:
-  /dev/vda:
+  - device: /dev/vda
     type: mbr # can be mpr or gpt
     parts:
       - name root
@@ -57,25 +58,25 @@ parted:
           # flag list will be translated into parted flags
 #}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for data in input_data %}
     {% set part_type = 'msdos' if data.type|d('') == 'mbr' else data.type|d('') %}
     {% set blkid_type = 'dos' if part_type == 'msdos' else part_type %}
 
-"parted-{{ item }}":
+"parted-{{ data.device }}":
   pkg.installed:
     - name: parted
 
     {% if part_type != '' %}
   cmd.run:
-    - name: parted --script {{ item }} mklabel {{ part_type }}
-    - onlyif: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == ""'
+    - name: parted --script {{ data.device }} mklabel {{ part_type }}
+    - onlyif: 'test "$(blkid -p -s PTTYPE -o value {{ data.device }})" == ""'
     - require:
-      - pkg: "parted-{{ item }}"
+      - pkg: "parted-{{ data.device }}"
       {%- if data.parts|d('') %}
         {%- set x=1 %}
     - require_in:
         {%- for part in data.parts|d([]) %}
-      - cmd: "parted-{{ item }}-{{ x }}-{{ part.name }}"
+      - cmd: "parted-{{ data.device }}-{{ x }}-{{ part.name }}"
           {%- set x = x +1 %}
         {%- endfor %}
       {%- endif %}
@@ -92,12 +93,12 @@ parted:
           {% endfor %}
         {% endif %}
 
-"parted-{{ item }}-{{ x }}-{{ part.name }}":
+"parted-{{ data.device }}-{{ x }}-{{ part.name }}":
   cmd.run:
-    - name: parted --align optimal --script {{ item }} mkpart {{ part.name }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
-    - unless: 'test -b {{ item }}{{ x }}'
+    - name: parted --align optimal --script {{ data.device }} mkpart {{ part.name }} {{ part.start }} {{ part.end }} {{ flags|join(' ') }}
+    - unless: 'test -b {{ data.device }}{{ x }}'
     - require:
-      - cmd: "parted-{{ item }}"
+      - cmd: "parted-{{ data.device }}"
 
         {% set x = x +1 %}
       {% endfor %}
@@ -111,36 +112,37 @@ parted:
 #######
 {% macro storage_mdadm(input_data) %}
 
-{# example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
+{# 
+# example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
 mdadm:
   {% for a,b in [(0, 2), (1, 4)] %}
-  "/dev/md{{ a }}":
+  - target: /dev/md{{ a }}"
     level: 1
     devices:
       - /dev/vdb{{ b }}
       - /dev/vdc{{ b }}
-    # optional kwargs passed to mdadm.present
+    # optional kwargs passed to mdadm.raid_present
   {% endfor %}
 #}
 
-  {% for item, data in input_data.iteritems() %}
-"mdadm-raid-{{ item }}":
+  {% for data in input_data %}
+"mdadm-raid-{{ data.target }}":
   pkg.installed:
     - name: mdadm
   raid.present:
-    - name: {{ item }}
+    - name: {{ data.target }}
     - level: {{ data['level'] }}
     - devices:
     {%- for device in data['devices'] %}
       - {{ device }}
     {%- endfor %}
     {%- for opt, optvalue in data.iteritems() %}
-      {%- if opt not in ['level', 'devices', 'require'] %}
+      {%- if opt not in ['target', 'level', 'devices', 'require'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
     - require:
-      - pkg: "mdadm-raid-{{ item }}"
+      - pkg: "mdadm-raid-{{ data.target }}"
 {{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {% endfor %}
 
@@ -151,29 +153,43 @@ mdadm:
 #######
 {% macro storage_crypt(input_data) %}
 
-{# example: crypt device /dev/md1 and make it available under /dev/cryptlvm
+{#
+# example: crypt device /dev/md1 and make it available under /dev/cryptlvm
 crypt:
-  "/dev/md1":
+  - device: /dev/md1
+    name: "cryptlvm"
     password: "my-useless-password"
-    target: "cryptlvm"
+    # optional kwargs for cmd.run:cryptsetup luksFormat, cmr.run:cryptsetup open
 #}
 
-  {% for item, data in input_data.iteritems() %}
-{{ item }}-luks-format:
+  {% for data in input_data %}
+{{ data.device }}-luks-format:
   pkg.installed:
     - name: cryptsetup
   cmd.run:
-    - unless: cryptsetup luksUUID {{ item }}
-    - name: echo "{{ data['password'] }}" | cryptsetup luksFormat {{ item }}
+    - unless: cryptsetup luksUUID {{ data.device }}
+    - name: echo "{{ data['password'] }}" | cryptsetup luksFormat {{ data.device }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['device', 'name', 'password', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
     - require:
-      - pkg: {{ item }}-luks-format
+      - pkg: {{ data.device }}-luks-format
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
 
-{{ item }}-luks-open:
+{{ data.device }}-luks-open:
   cmd.run:
-    - unless: stat {{ data['target'] }}
-    - name: echo "{{ data['password'] }}" | cryptsetup luksOpen {{ item }} {{ data['target'] }}
+    - unless: stat /dev/mapper/{{ data['name'] }}
+    - name: echo "{{ data['password'] }}" | cryptsetup open --type luks {{ data.device }} {{ data['name'] }}
+    {%- for opt, optvalue in data.iteritems() %}
+      {%- if opt not in ['device', 'name', 'password', 'require'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
     - require:
-      - cmd: {{ item }}-luks-format
+      - cmd: {{ data.device }}-luks-format
+{{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {% endfor %}
 
 {% endmacro %}
@@ -183,7 +199,8 @@ crypt:
 #######
 {% macro storage_lvm_pv(input_data) %}
 
-{# example: format a device as physical lvm volume
+{# 
+# example: format a device as physical lvm volume
 lvm:
   pv:
     devices: 
@@ -214,32 +231,33 @@ lvm:
 #######
 {% macro storage_lvm_vg(input_data) %}
 
-{# example: use device vdb1 (which is formated as lvm:pg volume) as volume group
+{# 
+# example: use device vdb1 (which is formated as lvm:pg volume) as volume group
 lvm:
   vg:
-    vg0:
+    - name: vg0
       devices:
         - /dev/vdb1
       # optional kwargs passed to lvm.vg_present
 #}
 
-  {% for item, data in input_data.iteritems() %}
-"lvm-vg-{{ item }}":
+  {% for data in input_data %}
+"lvm-vg-{{ data.name }}":
   pkg.installed:
     - name: lvm2
   lvm.vg_present:
-    - name: {{ item }}
+    - name: {{ data.name }}
     - devices:
     {%- for device in data['devices'] %}
       - {{ device }}
     {%- endfor %}
     {%- for opt, optvalue in data.iteritems() %}
-      {%- if opt not in ['devices', 'require'] %}
+      {%- if opt not in ['name', 'devices', 'require'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
     - require:
-      - pkg: "lvm-vg-{{ item }}"
+      - pkg: "lvm-vg-{{ data.name }}"
 {{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
   {% endfor %}
 
@@ -253,36 +271,36 @@ lvm:
 {# example: create logical volume host_root on volume group vg0 with 100g size
 lvm:
   lv:
-    host_root:
+    - name: host_root
       vgname: vg0
       size: 100g
       # optional kwargs passed to lvm.lv_present
-    other_volume:
+    - name: other_volume
       size: 50g
       expand: true
       # no optional kwargs are passed, volume must exist, volume is resized
 #}
 
-  {% for item, data in input_data.iteritems() %}
-"lvm-lv-{{ item }}":
+  {% for data in input_data %}
+"lvm-lv-{{ data.name }}":
   pkg.installed:
     - name: lvm2
 
-    {%- set lvtarget='/dev/'+ data['vgname']+ '/' + item %}
+    {%- set lvtarget='/dev/'+ data['vgname']+ '/' + data.name %}
     {%- if "size" in data and "expand" in data and data['expand'] == True and
     salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
-{{ expand_lv(item, lvtarget, size) }}
+{{ expand_lv(data.name, lvtarget, size) }}
     {%- else %}
     
   lvm.lv_present:
-    - name: {{ item }}
+    - name: {{ data.name }}
       {%- for opt, optvalue in data.iteritems() %}
-        {%- if opt not in ['require'] %}
+        {%- if opt not in ['name', 'require'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
         {%- endif %}
       {%- endfor %}
     - require:
-      - pkg: "lvm-lv-{{ item }}"
+      - pkg: "lvm-lv-{{ data.name }}"
 {{ (data['require']|yaml(False))|indent(6, True) if data['require'] is defined else '' }}
     {%- endif %}
   {% endfor %}
@@ -329,22 +347,22 @@ lvm:
 
 {# 
 format:
-  /dev/mapper/vg0-host_root:
+  - device: /dev/mapper/vg0-host_root
     fstype: ext4
     options: # passed to mkfs
       - "-L my_root"
-    # optional kwargs passed to cmd.run
+    # optional kwargs passed to cmd.run:mkfs
 #}
-  {% for item, data in input_data.iteritems() %}
+  {% for data in input_data() %}
     {%- set fstype = data.fstype|d('ext4') %}
     {%- set mkfs = 'mkswap' if fstype == 'swap' else 'mkfs.'+ fstype %}
     {%- set options = data.options|d([]) %}
-"format-{{ item }}":
+"format-{{ data.device }}":
   cmd.run:
-    - name: '{{ mkfs }} {%- for option in options %}{{ option }} {%- endfor %} {{ item }}'
-    - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
+    - name: '{{ mkfs }} {%- for option in options %}{{ option }} {%- endfor %} {{ data.device }}'
+    - onlyif: 'test "$(blkid -p -s TYPE -o value {{ data.device }})" == ""'
     {%- for opt, optvalue in data.iteritems() %}
-      {%- if opt not in ['fstype', 'options'] %}
+      {%- if opt not in ['device', 'fstype', 'options'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
@@ -359,24 +377,24 @@ format:
 {% macro storage_mount(input_data) %}
 {# 
 mount:
-  /mnt/images:
-    device: /dev/mapper/vg0-images
+  - device: /dev/mapper/vg0-images
+    target: /mnt/images
     # optional kwargs for mount.mounted
     # defaults:
     #  fstype: ext4
     #  mkmnt: true 
 #}
-  {% for item, data in input_data.iteritems() %}
+  {% for data in input_data() %}
      {%- set fstype= data.fstype|d('ext4') %}
-mount-{{ item }}:
+mount-{{ data.target }}:
   mount.mounted:
-    - name: {{ item }}
+    - name: {{ data.target }}
     - device: {{ data.device }}
     - mkmnt: {{ data.mkmnt|d(true) }}
     - fstype: {{ fstype }}
     - onlyif: test -b {{ data.device }} -a "$(blkid -p -s TYPE -o value {{ data.device }})" == "{{ fstype }}"
     {%- for opt, optvalue in data.iteritems() %}
-      {%- if opt not in ['device', 'mkmnt', 'fstype'] %}
+      {%- if opt not in ['path', 'device', 'mkmnt', 'fstype'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
     {%- endfor %}
@@ -389,6 +407,10 @@ mount-{{ item }}:
 #######
 {% macro storage_swap(input_data) %}
 
+{#
+swap:
+  - /dev/mapper/vg0-host_swap
+#}
   {% for item in input_data %}
 "swap-{{ item }}":
   mount.swap:
@@ -403,45 +425,33 @@ mount-{{ item }}:
 {% macro storage_directory(input_data) %}
 
 {# 
+# example: make a directory structure under mountpoint /volatile
 directory:
-  /volatile:
+  - name: /volatile
     mountpoint: true  # defaults to false
     # optional kwargs for file.directory
     # defaults are makedirs:true
-    parts:
-      - name: docker
-      - name: backup-test
-      - name: alertmanager
-        # optional kwargs for file.directory
-        # defaults are makedirs:true
-        user: 1000
-        group: 1000
-        dir_mode: 755
-        file_mode: 644
+  - name: /volatile/docker
+  - name: /volatile/alertmanager
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+    user: 1000
+    group: 1000
+    dir_mode: 755
+    file_mode: 644
 #}
 
-  {% for item, data in input_data.iteritems() %}
-"base_directory_{{ item }}":
+  {% for data in input_data %}
+"base_directory_{{ data.name }}":
   file.directory:
     - makedirs: {{ data['makedirs']|d(true) }}
     {%- if data['mountpoint']|d(false) %}
-    - onlyif: mountpoint -q {{ item }}
+    - onlyif: mountpoint -q {{ data.name }}
     {%- endif %}
     {%- for opt, optvalue in data.iteritems() %}
       {%- if opt not in ['mountpoint', 'makedirs', 'parts'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
       {%- endif %}
-    {%- endfor %}
-    
-    {%- for entry in data.parts %}
-"{{ item }}/{{ entry.name }}":
-  file.directory:
-    - makedirs: {{ entry.makedirs|d(true) }}
-      {%- for opt, optvalue in entry.iteritems() %}
-        {%- if opt not in ['name', 'makedirs',] %}
-    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
-        {%- endif %}
-      {%- endfor %}
     {%- endfor %}
   {%- endfor %}
     
@@ -450,12 +460,14 @@ directory:
 
 {% macro storage_relocate(input_data) %}
 
-{# example: relocate docker, relocate other dir 
+{# 
+# example: relocate docker and other directory
 relocate:
   - source: /var/lib/docker
     target: /volatile/docker
     prefix: docker kill $(docker ps -q); systemctl stop docker
     postfix: systemctl start docker
+    # optional kwargs for cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
   - source: /app/.cache/duplicity
     target: /volatile/duplicity
 #}

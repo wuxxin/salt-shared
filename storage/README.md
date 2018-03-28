@@ -22,7 +22,7 @@ Features:
 {% load_yaml as data %}
 lvm:
   lv:
-    my_lvm_volume:
+    - name: my_lvm_volume
       vgname: vg0
       size: 2g
 {% endload %}
@@ -35,40 +35,51 @@ See (example.md)[example.md] for detailed parameter usage.
 
 ## Additional Parameter
 
-### optional kwargs in every state (except parted, crypt, swap)
 
-+ mdadm:  passed to mdadm.raid_present
-+ lvm pv: passed to lvm.pv_present
-+ lvm vg: passed to lvm.vg_present
-+ lvm lv: passed to lvm.lv_present
-+ format: passed to cmd.run
-+ mount:  passed to mount.mounted
-+ directory: passed to file.directory
-+ relocate: passed to prefix:cmd, relocate:file, symlink:file, postfix:cmd
+optional kwargs in every state (except parted, swap) are passed to:
 
-in addition to optional kwargs for target state, 
-you can add standard saltstack parameter like "watch_in/require_in/require/watch" 
+--- | ---
+mdadm  | mdadm.raid_present
+crypt  | cmd.run:cryptsetup luksFormat, cmd.run:cryptsetup open
+lvm pv | lvm.pv_present
+lvm vg | lvm.vg_present
+lvm lv | lvm.lv_present
+format | cmd.run:mkfs
+mount  | mount.mounted
+directory | file.directory
+relocate  | cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
 
 
-+ state specific option example
+### state generic parameter
+
+in addition to optional kwargs for target state, you can add standard saltstack state parameter like "watch_in/require_in/require/watch".
+
+generic salstack option example:
 
 ```
 lvm:
   lv:
-    test:
+    - name: host_cache
+      size: 10g
+      # generic salt state parameter
+      watch_in: 
+        - pkg: cache-setup
+```
+
+### state specific parameter
+
+example:
+
+```
+lvm:
+  lv:
+    - name: test
       vgname: vg0
       size: 10g
+      # optional parameter for lvm.lv_present
       wipesignatures: yes
 ```
 
-+ generic salstack option example
-
-```
-format:
-  /dev/mapper/vg0-host_cache:
-    watch_in: 
-      - pkg: cache-setup
-```
 
 ### parameter "options" in format:
 
@@ -78,7 +89,7 @@ Example:
 
 ```
 format:
-  /dev/mapper/vg0-host_root:
+  - device: /dev/mapper/vg0-host_root
     fstype: ext4
     options:
       - "-L my_root"
@@ -99,7 +110,7 @@ Example:
 ```
 lvm:
   lv:
-    cache:
+    - name: cache
       vgname: vg0
       size: 12g
       expand: true

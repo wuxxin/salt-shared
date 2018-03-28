@@ -16,13 +16,11 @@
 
 ## parted
 
-example: use whole disk for root partition
-
+#### example: use whole disk for root partition
 ```
-{% load_yaml as custom_storage %}
 parted:
-  /dev/vda:
-    type: mbr {# can be mpr or gpt #}
+  - device: /dev/vda
+    type: mbr # can be mpr or gpt
     parts:
       - name root
         start: 1024kiB
@@ -30,96 +28,132 @@ parted:
         flags:
           - boot
           # flag list will be translated into parted flags
-{% endload %}
 ```
 
 ## mdadm
 
-example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
-
+### example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
 ```
-{% load_yaml as custom_storage %}
 mdadm:
   {% for a,b in [(0, 2), (1, 4)] %}
-  "/dev/md{{ a }}":
+  - target: /dev/md{{ a }}"
     level: 1
     devices:
       - /dev/vdb{{ b }}
       - /dev/vdc{{ b }}
-    # optional kwargs passed to mdadm.present
+    # optional kwargs passed to mdadm.raid_present
   {% endfor %}
-{% endload %}
 ```
 
+## crypt
+### example: crypt device /dev/md1 and make it available under /dev/cryptlvm
+```
+crypt:
+  - device: /dev/md1
+    name: "cryptlvm"
+    password: "my-useless-password"
+    # optional kwargs for cmd.run:cryptsetup luksFormat, cmr.run:cryptsetup open
+```
+
+## lvm:pv
+### example: format a device as physical lvm volume
+```
+lvm:
+  pv:
+    devices: 
+      - /dev/vdb1
+    # optional kwargs for lvm.pv_present
+```
+
+## lvm:vg
+### example: use device vdb1 (which is formated as lvm:pg volume) as volume group
+```
+lvm:
+  vg:
+    - name: vg0
+      devices:
+        - /dev/vdb1
+      # optional kwargs passed to lvm.vg_present
+```
+
+## lvm:lv
+### example: create logical volume host_root on volume group vg0 with 100g size
+```
+lvm:
+  lv:
+    - name: host_root
+      vgname: vg0
+      size: 100g
+      # optional kwargs passed to lvm.lv_present
+```
+### example: expand already existing logical volume other_volume to 50g target size
+```
+lvm:
+  lv:
+    - name: other_volume
+      size: 50g
+      expand: true
+      # no optional kwargs are passed, volume must exist, volume is resized
+```
 
 ## format
-
-example: format vda1 as ext4 with label root
-
+### example: format logical volume host_root with type ext4 and label name my_root
 ```
-{% load_yaml as custom_storage %}
 format:
-  /dev/mapper/vg0-host_root:
+  - device: /dev/mapper/vg0-host_root
     fstype: ext4
     options: # passed to mkfs
-      - "-L root"
+      - "-L my_root"
     # optional kwargs passed to cmd.run
-{% endload %}
 ```
-
 
 ## mount
-
-example: mount /dev/mapper/vg0-images as /mnt/images if filesystem is ext4
-
+### example: mount logical volume images of volume group vg0 to /mnt/images
 ```
-{% load_yaml as custom_storage %}
 mount:
-  /mnt/images:
-    device: /dev/mapper/vg0-images
+  - device: /dev/mapper/vg0-images
+    target: /mnt/images
     # optional kwargs for mount.mounted
     # defaults:
     #  fstype: ext4
     #  mkmnt: true 
-{% endload %}
 ```
+
+## swap
+swap:
+  - /dev/mapper/vg0-host_swap
 
 
 ## directory
+# example: make a directory structure under mountpoint /volatile
 
-example: create directories under /volatile if /volatile is mountpoint.
-
-```
-{% load_yaml as custom_storage %}
 directory:
-  /volatile:
+  - name: /volatile
     mountpoint: true  # defaults to false
-    parts:
-      - name: docker
-      - name: backup-test
-      - name: alertmanager
-        # optional kwargs for file.directory
-        # defaults are makedirs:true
-        user: 1000
-        group: 1000
-        dir_mode: 755
-        file_mode: 644
-{% endload %}
-```
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+  - name: /volatile/docker
+  - name: /volatile/alertmanager
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+    user: 1000
+    group: 1000
+    dir_mode: 755
+    file_mode: 644
+
 
 ## relocate
 
-example: move /var/lib/docker, while restarting docker, move duplicity dir
-
+### example: relocate docker and other directory
 ```
-{% load_yaml as custom_storage %}
 relocate:
   - source: /var/lib/docker
-    target: /mnnt/images/docker
+    target: /volatile/docker
     prefix: docker kill $(docker ps -q); systemctl stop docker
     postfix: systemctl start docker
+    # optional kwargs for cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
   - source: /app/.cache/duplicity
-    target: /mnt/images/duplicity
+    target: /volatile/duplicity
 ```
 
 
@@ -131,7 +165,7 @@ example (parted, madm, crypt, lvm:pv, lvm:vg, lvm:lv, format, mount, swap)
 {% load_yaml as custom_storage %}
 parted:
 {% for a in ["/dev/vdb", "/dev/vdc"] %}
-  {{ a }}:
+  - device: {{ a }}
     type: gpt 
     parts:
       - name: bios_grub
@@ -156,7 +190,7 @@ parted:
 
 mdadm:
 {% for a,b in [(0, 2), (1, 4)] %}
-  "/dev/md{{ a }}":
+  - target: /dev/md{{ a }}
     level: 1
     devices:
       - /dev/vdb{{ b }}
@@ -165,9 +199,9 @@ mdadm:
 {% endfor %}
 
 crypt:
-  "/dev/md1":
+  - device: /dev/md1
     password: "my-useless-password"
-    target: "cryptlvm"
+    target: cryptlvm
 
 lvm:
   pv:
@@ -175,66 +209,68 @@ lvm:
       - /dev/mapper/cryptlvm
     # optional kwargs passed to lvm.pv_present
   vg:
-    vg0:
+    - name: vg0
       devices:
         - /dev/mapper/cryptlvm
       # optional kwargs passed to lvm.vg_present
   lv:
-    host_root:
+    - name: host_root
       vgname: vg0
       size: 2g
       # optional kwargs passed to lvm.lv_present
-    other_volume:
+    - name: other_volume
       vgname: vg0
       size: 30g
       expand: true 
       # no optional kwargs are passed, volume must exist, volume is resized
       
 format:
-  /dev/md0:
+  - device: /dev/md0
     fstype: ext3
-  /dev/mapper/vg0-host_root:
+  - device: /dev/mapper/vg0-host_root
     fstype: ext4
     options: {# passed to mkfs #}
       - "-L my_root"
-  /dev/mapper/vg0-host_swap:
+  - device: /dev/mapper/vg0-host_swap
     fstype: swap
-  /dev/mapper/vg0-images:
+  - device: /dev/mapper/vg0-images
     fstype: ext4
     options:
       - "-L images"
-  /dev/mapper/vg0-cache:
+  - device: /dev/mapper/vg0-cache
     fstype: ext4
 
 mount:
-  /mnt/images:
-    device: /dev/mapper/vg0-images
+  - device: /dev/mapper/vg0-images
+    target: /mnt/images
     fstype: ext4
     mkmnt: true {# additional args for mount.mounted #}
-  /mnt/cache:
-    device: /dev/mapper/vg0-cache
+  - device: /dev/mapper/vg0-cache
+    target: /mnt/cache
 
 swap:
   - /dev/mapper/vg0-host_swap
 
 directory:
-  /mnt/images:
+  - name: /mnt/images
     mountpoint: true  # defaults to false
-    parts:
-      - name: docker
-      - name: funnydir
-        # optional kwargs for file.directory
-        # defaults are makedirs:true
-        user: 1000
-        group: 1000
-        dir_mode: 755
-        file_mode: 644
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+  - name: /mnt/images/docker
+  - name: /mnt/images/funnydir
+    # optional kwargs for file.directory
+    # defaults are makedirs:true
+    user: 1000
+    group: 1000
+    dir_mode: 755
+    file_mode: 644
 
 relocate:
   - source: /var/lib/docker
-    target: /mnnt/images/docker
+    target: /mnt/images/docker
     prefix: docker kill $(docker ps -q); systemctl stop docker
     postfix: systemctl start docker
+    # optional kwargs for cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
   - source: /app/.cache/duplicity
     target: /mnt/images/duplicity
 
