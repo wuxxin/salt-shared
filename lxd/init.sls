@@ -10,14 +10,16 @@ include:
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
 
 {% from "network/lib.sls" import net_reverse_short with context %}
-{%- set ipcidr = settings.networks[0].config.ipv4.address %}
-{%- set ipaddr = salt['extip.net_interface_addr'](ipcidr) %}
+{%- set ipnet = settings.networks[0].config.ipv4.address %}
+{%- set ipaddr = salt['extip.net_interface_addr'](ipnet) %}
+{%- set ipmask = nw.get_net_size(salt['extip.net_interface_netmask'](ipnet)) %}
+{%- set interface = {'ipaddr': ipaddr, 'netmask': ipmask}
 
 /etc/NetworkManager/dnsmasq.d/lxd:
   file.managed:
     - contents: |
         server=/lxd/{{ ipaddr }}
-        server=/{{ net_reverse_short(ipcidr) }}/{{ ipaddr }}
+        server=/{{ net_reverse_short(interface) }}/{{ ipaddr }}
 {% endif %}
 
 {# modify kernel vars for production setup of lxd_ http://lxd.readthedocs.io/en/latest/production-setup/ #}
