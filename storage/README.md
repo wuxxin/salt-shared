@@ -30,7 +30,7 @@ lvm:
 {{ storage_setup(data) }}
 ```
 
-See (example.md)[example.md] for detailed parameter usage.
+See [example.md](example.md) for detailed parameter usage.
 
 
 ## Additional Parameter
@@ -38,23 +38,24 @@ See (example.md)[example.md] for detailed parameter usage.
 
 optional kwargs in every state (except parted, swap) are passed to:
 
+item | passed to state
 --- | ---
-mdadm  | mdadm.raid_present
-crypt  | cmd.run:cryptsetup luksFormat, cmd.run:cryptsetup open
-lvm pv | lvm.pv_present
-lvm vg | lvm.vg_present
-lvm lv | lvm.lv_present
+mdadm | mdadm.raid_present
+crypt | cmd.run:cryptsetup luksFormat, cmd.run:cryptsetup open
+lvm:pv | lvm.pv_present
+lvm:vg | lvm.vg_present
+lvm:lv | lvm.lv_present
 format | cmd.run:mkfs
-mount  | mount.mounted
+mount | mount.mounted
 directory | file.directory
-relocate  | cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
+relocate | cmd.run:prefix, file.rename, file.symlink, cmd.run:postfix
 
 
 ### state generic parameter
 
 in addition to optional kwargs for target state, you can add standard saltstack state parameter like "watch_in/require_in/require/watch".
 
-generic salstack option example:
+example:
 
 ```
 lvm:
@@ -83,7 +84,7 @@ lvm:
 
 ### parameter "options" in format:
 
-"options" parameter: list of options passed to mkfs
++ "options" parameter: list of options passed to mkfs
 
 Example:
 
@@ -96,6 +97,8 @@ format:
 ```
 
 ### parameter "expand" in lvm:lv:
+
++ "expand" parameter: true or false, default false
 
 if set to true and volume exists,
   it will expand the existing lv to the desired size,

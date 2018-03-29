@@ -32,7 +32,7 @@ parted:
 
 ## mdadm
 
-### example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
+#### example: make two raid1 devices md0=vdb2,vdc2, md1=vdb4,vdc4
 ```
 mdadm:
   {% for a,b in [(0, 2), (1, 4)] %}
@@ -46,7 +46,7 @@ mdadm:
 ```
 
 ## crypt
-### example: crypt device /dev/md1 and make it available under /dev/cryptlvm
+#### example: crypt device /dev/md1 and make it available under /dev/cryptlvm
 ```
 crypt:
   - device: /dev/md1
@@ -56,7 +56,7 @@ crypt:
 ```
 
 ## lvm:pv
-### example: format a device as physical lvm volume
+#### example: format a device as physical lvm volume
 ```
 lvm:
   pv:
@@ -66,7 +66,7 @@ lvm:
 ```
 
 ## lvm:vg
-### example: use device vdb1 (which is formated as lvm:pg volume) as volume group
+#### example: use device vdb1 (which is formated as lvm:pg volume) as volume group
 ```
 lvm:
   vg:
@@ -77,7 +77,7 @@ lvm:
 ```
 
 ## lvm:lv
-### example: create logical volume host_root on volume group vg0 with 100g size
+#### example: create logical volume host_root on volume group vg0 with 100g size
 ```
 lvm:
   lv:
@@ -86,7 +86,7 @@ lvm:
       size: 100g
       # optional kwargs passed to lvm.lv_present
 ```
-### example: expand already existing logical volume other_volume to 50g target size
+#### example: expand already existing logical volume other_volume to 50g target size
 ```
 lvm:
   lv:
@@ -97,7 +97,7 @@ lvm:
 ```
 
 ## format
-### example: format logical volume host_root with type ext4 and label name my_root
+#### example: format logical volume host_root with type ext4 and label name my_root
 ```
 format:
   - device: /dev/mapper/vg0-host_root
@@ -108,7 +108,7 @@ format:
 ```
 
 ## mount
-### example: mount logical volume images of volume group vg0 to /mnt/images
+#### example: mount logical volume images of volume group vg0 to /mnt/images
 ```
 mount:
   - device: /dev/mapper/vg0-images
@@ -120,13 +120,15 @@ mount:
 ```
 
 ## swap
+#### example: add logical volume host_swap in volume group vg0 as swap
+```
 swap:
   - /dev/mapper/vg0-host_swap
-
+```
 
 ## directory
-# example: make a directory structure under mountpoint /volatile
-
+#### example: make a directory structure under mountpoint /volatile
+```
 directory:
   - name: /volatile
     mountpoint: true  # defaults to false
@@ -140,7 +142,7 @@ directory:
     group: 1000
     dir_mode: 755
     file_mode: 644
-
+```
 
 ## relocate
 
