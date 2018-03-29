@@ -8,28 +8,17 @@ include:
   - ubuntu.backports
 
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
+
 {% from "network/lib.sls" import net_reverse_short with context %}
+{%- set ipcidr = settings.networks[0].config.ipv4.address %}
+{%- set ipaddr = salt['net_interface_addr'](ipcidr) %}
 
 /etc/NetworkManager/dnsmasq.d/lxd:
   file.managed:
     - contents: |
-        server=/lxd/{{ settings.ipaddr }}
-        server=/{{ net_reverse_short(settings) }}/{{ settings.ipaddr }}
+        server=/lxd/{{ ipaddr }}
+        server=/{{ net_reverse_short(ipcidr) }}/{{ ipaddr }}
 {% endif %}
-
-lxd:
-  pkg.installed:
-    - pkgs:
-      - lxc
-      - lxd
-      - lxd-tools
-      - lvm2
-      - thin-provisioning-tools
-      - criu
-      - bridge-utils
-    - require:
-      - sls: kernel.cgroup
-      - sls: ubuntu.backports
 
 {# modify kernel vars for production setup of lxd_ http://lxd.readthedocs.io/en/latest/production-setup/ #}
 
@@ -52,3 +41,28 @@ kernel.dmesg_restrict:
     - value: 1 {# 0 #}
 
 {%- endif %}
+
+
+lxd:
+  pkg.installed:
+    - pkgs:
+      - lxc
+      - lxd
+      - lxd-tools
+      - lvm2
+      - thin-provisioning-tools
+      - criu
+      - bridge-utils
+  service.running:
+    - enable: True
+    - require:
+      - pkg: lxd
+      - sls: kernel.cgroup
+      - sls: ubuntu.backports
+  module.run:
+    - cmd.run:
+      - name: name: lxd init --preseed
+      - stdin: |
+{{ settings|yaml(false)|indent(10,True) }}
+
+

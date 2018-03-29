@@ -1,8 +1,68 @@
+{% set ipaddr= "10.140.222.1" %}
+{% set netsize= "24"}
+{% set bridge= "lxdbr0" %}
+{% set pool= "default" %}
+{% from "omoikane/common.sls" import common with context %}
+
+
 {% load_yaml as defaults %}
-bridge: lxdbr0
-ipaddr: "10.140.222.1"
-netmask: "255.255.255.0"
+
+# Daemon settings
+config:
+  core.https_address: 127.0.0.1
+  images.auto_update_interval: 15
+
+# Storage pools
+storage_pools:
+  - name: {{ pool }}
+    description: LXD {{ pool }} pool
+    driver: dir
+    config:     
+      source: /var/lib/lxd/storage-pools/{{ pool }}
+
+# self managed Network devices
+networks:
+  - name: {{ bridge }}
+    type: bridge
+    config:
+      ipv4.address: {{ ipaddr }}/{{ netsize }}
+      ipv4.nat: true
+      ipv6.address: none
+
+# Profiles
+profiles:
+  - name: default
+    description: Default LXD profile
+    devices:
+      eth0:
+        nictype: bridged
+        parent: {{ bridge }}
+        type: nic
+      root:
+        path: /
+        pool: {{ pool }}
+        type: disk
+  - name: autostart
+    config:
+      boot.autostart: true
+      boot.autostart.delay: 2
+
+# Images
+images:
+  - name: xenial
+    public: true
+    auto_update: true
+    source:
+      name: xenial/amd64
+      remote: ubuntu
+  - name: xenial-daily
+    public: true
+    auto_update: true
+    source:
+      name: xenial/amd64
+      remote: ubuntu
 {% endload %}
+
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('lxd', {})) %}
