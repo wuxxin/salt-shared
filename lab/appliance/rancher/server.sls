@@ -41,7 +41,9 @@ rancher-server.service:
       
 rancher-server-setup:
   file.managed:
-    - source: salt://lab/appliance/rancher/rancher-server-setup
+    - source: salt://lab/appliance/rancher/rancher-server-setup.sh
+    - name: /usr/local/share/appliance/rancher-server-setup.sh
+    - mode: "0755"
   cmd.run:
     - name: /usr/local/share/appliance/rancher-server-setup.sh
     - unless: test -e /app/etc/rancher-server.env
