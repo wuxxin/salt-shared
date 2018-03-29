@@ -23,11 +23,9 @@ networks:
 - name: {{ bridge }}
   type: bridge
   config:
-    ipv4:
-      address: {{ ipaddr }}/{{ netsize }}
-      nat: true
-    ipv6:
-      address: none
+    ipv4.address: {{ ipaddr }}/{{ netsize }}
+    ipv4.nat: true
+    ipv6.address: none
 
 # Profiles
 profiles:
