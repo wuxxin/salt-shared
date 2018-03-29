@@ -63,10 +63,10 @@ lxd:
       - sls: ubuntu.backports
   module.run:
     - name: cmd.run
-    - m_name: lxd init --preseed
+    - cmd: lxd init --preseed
+    - stdin: |
+{{ settings|yaml(false)|indent(8,True) }}
     - require:
       - service: lxd
-    - stdin: |
-{{ settings|yaml(false)|indent(10,True) }}
 
 
