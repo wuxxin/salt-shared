@@ -62,9 +62,11 @@ lxd:
       - sls: kernel.cgroup
       - sls: ubuntu.backports
   module.run:
-    - cmd.run:
-      - name: lxd init --preseed
-      - stdin: |
+    - name: cmd.run
+    - m_name: lxd init --preseed
+    - require:
+      - service: lxd
+    - stdin: |
 {{ settings|yaml(false)|indent(10,True) }}
 
 

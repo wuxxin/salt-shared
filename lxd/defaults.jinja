@@ -12,55 +12,56 @@ config:
 
 # Storage pools
 storage_pools:
-  - name: {{ pool }}
-    description: LXD {{ pool }} pool
-    driver: dir
-    config:     
-      source: /var/lib/lxd/storage-pools/{{ pool }}
+- name: {{ pool }}
+  description: LXD {{ pool }} pool
+  driver: dir
+  config:     
+    source: /var/lib/lxd/storage-pools/{{ pool }}
 
 # self managed Network devices
 networks:
-  - name: {{ bridge }}
-    type: bridge
-    config:
-      ipv4:
-        address: {{ ipaddr }}/{{ netsize }}
-        nat: true
-      ipv6:
-        address: none
+- name: {{ bridge }}
+  type: bridge
+  config:
+    ipv4:
+      address: {{ ipaddr }}/{{ netsize }}
+      nat: true
+    ipv6:
+      address: none
 
 # Profiles
 profiles:
-  - name: default
-    description: Default LXD profile
-    devices:
-      eth0:
-        nictype: bridged
-        parent: {{ bridge }}
-        type: nic
-      root:
-        path: /
-        pool: {{ pool }}
-        type: disk
-  - name: autostart
-    config:
-      boot.autostart: true
-      boot.autostart.delay: 2
+- name: default
+  description: Default LXD profile
+  devices:
+    eth0:
+      nictype: bridged
+      parent: {{ bridge }}
+      type: nic
+    root:
+      path: /
+      pool: {{ pool }}
+      type: disk
+- name: autostart
+  config:
+    boot.autostart: true
+    boot.autostart.delay: 2
 
 # Images
 images:
-  - name: xenial
-    public: true
-    auto_update: true
-    source:
-      name: xenial/amd64
-      remote: ubuntu
-  - name: xenial-daily
-    public: true
-    auto_update: true
-    source:
-      name: xenial/amd64
-      remote: ubuntu
+- name: xenial
+  public: true
+  auto_update: true
+  source:
+    name: xenial/amd64
+    remote: ubuntu
+- name: xenial-daily
+  public: true
+  auto_update: true
+  source:
+    name: xenial/amd64
+    remote: ubuntu
+
 {% endload %}
 
 
