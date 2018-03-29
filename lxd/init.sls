@@ -11,7 +11,7 @@ include:
 
 {% from "network/lib.sls" import net_reverse_short with context %}
 {%- set ipcidr = settings.networks[0].config.ipv4.address %}
-{%- set ipaddr = salt['net_interface_addr'](ipcidr) %}
+{%- set ipaddr = salt['extip.net_interface_addr'](ipcidr) %}
 
 /etc/NetworkManager/dnsmasq.d/lxd:
   file.managed:
