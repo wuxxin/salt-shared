@@ -29,6 +29,7 @@ include:
     - contents: |
         *         soft    memlock   unlimited
         *         hard    memlock   unlimited
+        
 
 {%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}  
 
