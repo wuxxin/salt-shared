@@ -13,7 +13,7 @@ include:
 {%- set ipnet = settings.networks[0].config.ipv4.address %}
 {%- set ipaddr = salt['extip.net_interface_addr'](ipnet) %}
 {%- set ipmask = nw.get_net_size(salt['extip.net_interface_netmask'](ipnet)) %}
-{%- set interface = {'ipaddr': ipaddr, 'netmask': ipmask}
+{%- set interface = {'ipaddr': ipaddr, 'netmask': ipmask} %}
 
 /etc/NetworkManager/dnsmasq.d/lxd:
   file.managed:
