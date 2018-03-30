@@ -19,8 +19,6 @@ basedir=~/.vagrant.d/boxes/ubuntu-VAGRANTSLASH-${codename}64/${boxversion}
 virtualboxdir=$basedir/virtualbox
 libvirtdir=$basedir/libvirt
 
-mkdir -p $virtualboxdir
-mkdir -p $libvirtdir
 cd $basedir
 
 # only check for metadata.yaml if --check
@@ -36,6 +34,7 @@ if test ! -e $virtualboxdir/metadata.json; then
 fi
 test -e $virtualboxdir/metadata.json
 
+mkdir -p $libvirtdir
 cat > $libvirtdir/metadata.json << EOF
 {
   "provider"     : "libvirt",

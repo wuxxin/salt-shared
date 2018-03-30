@@ -7,7 +7,8 @@ require "yaml"
 
 Vagrant.require_version ">= 1.6.0"
 
-# XXX host locale environment variables are passed to guest. This may cause failures if the guest software do not support host locale.
+# XXX host locale environment variables are passed to guest.
+# This may cause failures if the guest software do not support host locale.
 ENV["LANG"] = "en_US.UTF-8"
 ENV["LC_ALL"] = ENV["LANG"]
 ENV["LANGUAGE"] = "en_US:en"
@@ -21,6 +22,11 @@ DEFAULT_SETTINGS = <<-HERE
     memory: 1024
     servername: #{DEFAULT_HOSTNAME}
     clouddrive: #{DEFAULT_CLOUDDRIVE}
+    lxd:
+      nesting: null
+      privileged: null
+      ephemeral: false
+      profiles: ["default"]    
     libvirt:
       management:
         network:
@@ -35,7 +41,9 @@ HERE
 settings = YAML.load(DEFAULT_SETTINGS)
 if File.exist?(DEFAULT_YAML_NAME)
     custom_settings = YAML.load_file(DEFAULT_YAML_NAME)
-    settings.merge!(custom_settings)
+    settings.deep_merge!(custom_settings)
+    puts "Project configuration merged from #{DEFAULT_YAML_NAME}"
+    puts YAML::dump(settings)
 end
 
 Vagrant.configure("2") do |config|
@@ -47,6 +55,9 @@ Vagrant.configure("2") do |config|
         rsync__exclude: "", rsync__auto: false,
         rsync__args: ["--verbose", "--archive", "--delete", "-z", "--links"]
 
+    if Vagrant.has_plugin?("vagrant-gatling-rsync")
+        config.gatling.rsync_on_startup = true
+    end
     if Vagrant.has_plugin?("vagrant-proxyconf")
         if "#{ENV['http_proxy']}" != ""
             config.proxy.http  = "#{ENV['http_proxy']}"
@@ -57,10 +68,10 @@ Vagrant.configure("2") do |config|
         lxd.api_endpoint = "https://127.0.0.1:8443"
         lxd.timeout = 10
         lxd.name = nil
-        lxd.nesting = nil
-        lxd.privileged = nil
-        lxd.ephemeral = false
-        lxd.profiles = ["default"]
+        lxd.nesting = settings['lxd']['nesting']
+        lxd.privileged = settings['lxd']['privileged']
+        lxd.ephemeral = settings['lxd']['ephemeral']
+        lxd.profiles = settings['lxd']['profiles']
     end
 
     config.vm.provider "libvirt" do |lv|
@@ -100,7 +111,7 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.provision "shell", privileged:true, inline: <<-SHELL
-        # TODO set hostname workarounnd, see https://github.com/mitchellh/vagrant/issues/5673
+        # TODO set hostname workaround, see https://github.com/mitchellh/vagrant/issues/5673
         # keep update service from interfering while installing
         for i in apt-daily.service apt-daily.timer unattended-upgrades.service \
             apt-daily-upgrade.service apt-daily-upgrade.timer ; do

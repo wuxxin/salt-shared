@@ -58,12 +58,15 @@ vagrant-prerequisites:
 
 vagrant:
   file.managed:
-    - name: /tmp/{{ localfile }}
+    - name: /var/cache/apt/archives/{{ localfile }}
     - source: {{ requrl }}
     - source_hash: sha256={{ hash }}
   pkg.installed:
     - sources:
-      - vagrant: /tmp/{{ localfile }}
+      - vagrant: /var/cache/apt/archives/{{ localfile }}
+    - require:
+      - file: vagrant
+
 {% else %}
 
 vagrant:
