@@ -32,7 +32,4 @@ base:
     - match: compound
     - smartmon
 
-  # any virtual machine and Windows: KVM Guest Tools
-  'G@os:Windows and G@manufacturer:Bochs':
-    - match: compound
-    - win.kvm.guest
+
