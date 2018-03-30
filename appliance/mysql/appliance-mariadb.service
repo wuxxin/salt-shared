@@ -2,7 +2,8 @@
 
 [Unit]
 Description=Appliance Mariadb RDBMS
-ConditionPathExists=/etc/app/flags/use.mariadb
+ConditionFileNotEmpty=/run/active-env.yml
+ConditionPathExists=!/etc/app/flags/no.mariadb
 After=network.target
 Before=mariadb@{{ settings.version }}-main.service
 

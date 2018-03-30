@@ -7,10 +7,10 @@ Type=simple
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env appliance; \
     . /usr/local/share/appliance/appliance.include; \
-    (cat /app/etc/tags/last_running_ecs || echo "invalid") > /app/etc/tags/last_failed_ecs; \
-    rm -f /app/etc/tags/last_running_ecs; \
+    (cat /app/etc/tags/last_running_appliance || echo "invalid") > /app/etc/tags/last_failed_appliance; \
+    rm -f /app/etc/tags/last_running_appliance; \
     touch /run/appliance-failed; \
-    extra=$((for i in prepare-env prepare-appliance appliance; do \
+    extra=$((for i in env-prepare appliance-prepare appliance; do \
         systemctl status -l -q --no-pager -n 10 $i.service; done) | text2json); \
     appliance_status "Appliance Error" "Appliance (%I) failed to start, system in standby"; \
     sentry_entry "Appliance Error" "Appliance (%I) failed to start, system in standby" critical "$extra"'

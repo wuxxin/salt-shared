@@ -1,8 +1,9 @@
 [Unit]
 Description=postgresql metrics exporter for prometheus
 After=docker.service
+ConditionPathExists=/app/etc/postgresql_url.env
 ConditionPathExists=/app/etc/flags/metric.exporter
-ConditionPathExists=/app/etc/database_url.env
+ConditionPathExists=!/app/etc/flags/no.postgresql
 ConditionPathExists=!/app/etc/flags/no.postgres_exporter
 Requires=docker.service postgresql.service
 

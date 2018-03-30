@@ -3,7 +3,8 @@
 [Unit]
 Description=Appliance PostgreSQL RDBMS
 ConditionFileNotEmpty=/run/active-env.yml
-ConditionPathExists=/etc/app/flags/use.postgresql
+ConditionPathExists=!/app/etc/flags/no.postgresql
+After=network.target
 Before=postgresql@{{ settings.version }}-main.service
 
 [Service]

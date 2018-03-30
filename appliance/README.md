@@ -8,7 +8,7 @@
 + unattended update of salstack states, system, docker, compose, a.o.
 + unattended backup of important data
 + plugin support for extending appliance
-+ optional metric support
++ optional metric support (prometheus)
 + optional alerting support (sentry)
 
 ## pillar/environment template
