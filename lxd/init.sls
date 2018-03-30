@@ -47,6 +47,10 @@ kernel.dmesg_restrict:
 
 
 lxd:
+  file.managed:
+    - name: /etc/lxd.yaml
+    - contents: |
+{{ settings|yaml(false)|indent(8,True) }}
   pkg.installed:
     - pkgs:
       - lxc
@@ -62,12 +66,9 @@ lxd:
       - pkg: lxd
       - sls: kernel.cgroup
       - sls: ubuntu.backports
-  module.run:
-    - name: cmd.run
-    - cmd: lxd init --preseed
-    - stdin: |
-{{ settings|yaml(false)|indent(8,True) }}
+  cmd.run:
+    - name: lxd init --preseed < /etc/lxd.yaml
+    - onchanges:
+      - file: lxd
     - require:
       - service: lxd
-
-
