@@ -3,7 +3,7 @@ include:
 
 {% from "unbound/defaults.jinja" import settings as s with context %}
 
-{% if s.active|d(false) == true %}
+{% if s.enabled|d(false) == true %}
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("nlnetlabs-ppa", "ondrej/pkg-nlnetlabs",
