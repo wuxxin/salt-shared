@@ -13,13 +13,8 @@
     - makedirs: True
     - contents: |
         http_proxy="{{ salt['pillar.get']('http_proxy') }}"
-        HTTP_PROXY="$http_proxy"
-        no_proxy="{{ salt['pillar.get']('no_proxy')|d(
-          'localhost,127.0.0.1,169.254.169.254,metadata.google.internal') }}"
-        NO_PROXY="$no_proxy"
+        no_proxy="{{ salt['pillar.get']('no_proxy', 'localhost,127.0.0.1,169.254.169.254,metadata.google.internal') }}"
         export http_proxy
-        export HTTP_PROXY
-        export NO_PROXY
         export no_proxy
     - order: 5
 
