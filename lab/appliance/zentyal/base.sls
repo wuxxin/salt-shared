@@ -14,11 +14,11 @@ zentyal:
   pkg.installed:
     - pkgs:
       - zentyal
-      - zentyal-samba
-      - zentyal-mail
-      - zentyal-mailfilter
-      - zentyal-openchange
       - zentyal-groupware
+      - zentyal-mail
+      - zentyal-sogo
+      - zentyal-antivirus
+      - zentyal-mailfilter
 {%- for i in salt['pillar.get']('appliance:zentyal:languages', []) %}
 {%- if i != 'en' %}
       - language-pack-zentyal-{{ i }}
