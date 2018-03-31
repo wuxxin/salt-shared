@@ -19,12 +19,6 @@ include:
         #
         SOCKET="inet:12345@localhost"
 
-opendkim:
-  pkg.installed:
-    - pkgs:
-      - opendkim
-      - opendkim-tools
-
 {%- set dkimkey= salt['pillar.get']('appliance:zentyal:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
 /etc/dkimkeys/dkim.key:
   file.managed:
@@ -36,6 +30,12 @@ opendkim:
 {{ dkimkey|indent(8,True) }}
     - require:
       - pkg: opendkim
+
+opendkim:
+  pkg.installed:
+    - pkgs:
+      - opendkim
+      - opendkim-tools
 
 opendkim.service:
   service.running:
