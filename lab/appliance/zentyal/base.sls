@@ -18,6 +18,7 @@ zentyal:
       - zentyal-mail
       - zentyal-mailfilter
       - zentyal-openchange
+      - zentyal-groupware
 {%- for i in salt['pillar.get']('appliance:zentyal:languages', []) %}
 {%- if i != 'en' %}
       - language-pack-zentyal-{{ i }}
