@@ -30,3 +30,17 @@ install_appliance.service:
     - order: last
     - watch:
       - file: install_appliance.service
+
+{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
+lxd-systemd-hostnamed-override:
+  file.managed:
+    - name: /etc/systemd/system/systemd-hostnamed.service.d/override.conf
+    - contents: |
+        [Service]
+        PrivateNetwork=no
+        
+  cmd.run:
+    - name: systemctl daemon-reload; systemctl restart systemd-hostnamed
+    - onchanges:
+      - file: lxd-systemd-hostnamed-override
+{%- endif %}
