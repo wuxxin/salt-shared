@@ -8,7 +8,7 @@ require "yaml"
 Vagrant.require_version ">= 1.6.0"
 
 # XXX host locale environment variables are passed to guest.
-# This may cause failures if the guest software do not support host locale.
+# This may cause failures if the guest software do not support the host locale.
 ENV["LANG"] = "en_US.UTF-8"
 ENV["LC_ALL"] = ENV["LANG"]
 ENV["LANGUAGE"] = "en_US:en"
@@ -150,8 +150,19 @@ Vagrant.configure("2") do |config|
             systemctl daemon-reload
             systemctl restart systemd-hostnamed
         fi
-        echo "set hostname to #{settings['servername']}"
-        hostnamectl set-hostname #{settings['servername']}
+        hostname="#{settings['servername']}"
+        shortname="${hostname%%.*}"
+        domainname="${hostname#*.}"
+        intip="127\.0\.1\.1"
+        
+        echo "INFO: set fqdn to $hostname"
+        if ! grep -E -q "^${intip}[[:space:]]+${hostname}[[:space:]]+${shortname}" /etc/hosts; then
+            grep -q "^${intip}" /etc/hosts && \
+            sed --in-place=.bak -r "s/^(${intip}[ \t]+).*/\1${hostname} ${shortname}/" /etc/hosts || \
+            sed --in-place=.bak -r "$ a${intip}\t${hostname} ${shortname}" /etc/hosts
+            echo "INFO: Modified /etc/hosts"
+        fi
+        hostnamectl set-hostname $shortname
         hostname -f || (echo "error $? on hostname -f"; exit 1)
         
     SHELL
