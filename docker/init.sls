@@ -32,6 +32,7 @@ docker-requisites:
     - pkgs:
       - bridge-utils
       - ca-certificates
+      - systemd-docker
     - require:
       - sls: kernel.cgroup
       
