@@ -4,16 +4,22 @@ set -o pipefail
 
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     # set hostname from env if different
-    echo "setting hostname to $APPLIANCE_DOMAIN"
-    hostnamectl set-hostname $APPLIANCE_DOMAIN
-    shortid=$(hostname -f | sed -r "s/^([^.]+)\..*/\1/")
+    hostname="$APPLIANCE_DOMAIN"
+    shortname="${hostname%%.*}"
+    domainname="${hostname#*.}"
     intip="127\.0\.1\.1"
-    if ! grep -E -q "^${intip}[[:space:]]+${APPLIANCE_DOMAIN}[[:space:]]+${shortid}" /etc/hosts; then
+    
+    echo "INFO: set fqdn and minion_id to $hostname"
+    if ! grep -E -q "^${intip}[[:space:]]+${hostname}[[:space:]]+${shortname}" /etc/hosts; then
         grep -q "^${intip}" /etc/hosts && \
-        sed --in-place=.bak -r "s/^(${intip}[ \t]+).*/\1${APPLIANCE_DOMAIN} ${shortid}/" /etc/hosts || \
-        sed --in-place=.bak -r "$ a${intip}\t${APPLIANCE_DOMAIN} ${shortid}" /etc/hosts
+        sed --in-place=.bak -r "s/^(${intip}[ \t]+).*/\1${hostname} ${shortname}/" /etc/hosts || \
+        sed --in-place=.bak -r "$ a${intip}\t${hostname} ${shortname}" /etc/hosts
+        echo "INFO: Modified /etc/hosts"
     fi
-    echo -n "${APPLIANCE_DOMAIN}" > /etc/salt/minion_id
+    hostnamectl set-hostname $shortname
+    hostname -f || (echo "error $? on hostname -f"; exit 1)
+    
+    echo -n "$hostname" > /etc/salt/minion_id
 fi
 
 if test "$APPLIANCE_FLAGS_ENABLED_LEN" != ""; then
