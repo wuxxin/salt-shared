@@ -30,9 +30,9 @@ dehydrated-user:
 
 /usr/local/etc/dehydrated/hook-empty.sh:
   file.managed:
+    - source: salt://dehydrated/examples/hook-empty.sh
     - user: dehydrated
     - group: dehydrated
-    - name: salt://dehydrated/examples/hook.sh
     - mode: "0755"
 
 /usr/local/etc/dehydrated/config:
@@ -52,9 +52,11 @@ dehydrated-user:
         CONTACT_EMAIL={{ letsencrypt.contact_email }}
         HOOK={{ letsencrypt.hook }}
         {%- set config=letsencrypt.config|d({}) %}
+        {%- if config %}
         {%- for i, d in config.iteritems() %}
         {{ i|upper }}="{{ d }}"
         {%- endfor %}
+        {%- endif %}
 
 /usr/local/etc/dehydrated/domains.txt:
   file.managed:
@@ -73,7 +75,7 @@ dehydrated-user:
 
 /etc/apache2/conf-enabled/10-wellknown-acme.conf:
   file.symlink:
-    - target: /etc/apache2/conf-available/10-wellknown-acme.conf
+    - target: ../conf-available/10-wellknown-acme.conf
     - makedirs: true
 {% endif %}
 {% if letsencrypt.nginx|d(false) %}
@@ -84,5 +86,5 @@ dehydrated-user:
   file.managed:
     - contents: |
         # run dehydrated on a weekly bases
-        @weekly dehydrated /usr/bin/dehydrated --cron
+        @weekly dehydrated /usr/bin/dehydrated --cron --accept-terms
 {% endif %}
