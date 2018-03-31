@@ -6,7 +6,10 @@ Zentyal 5.1 Mailserver with the following additions:
 + opendkim support
 + integrated in appliance state, with all benefits of it
 
-FIXME: 
+## FIXME
++ hostname is taken as hostname: a.ep3.at domain: ep3.at instead of hostname a, domain ep3.at 
++ pip install borked
++ dns resolution of saltmaster is broken once bind is installed
 + firewall or bind to localhost: smbd (445,139), nmbd (137,138)
 
 ## todo, integrate

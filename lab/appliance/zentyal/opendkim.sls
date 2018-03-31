@@ -28,14 +28,17 @@ include:
     - makedirs: true
     - contents: |
 {{ dkimkey|indent(8,True) }}
-    - require:
-      - pkg: opendkim
+
 
 opendkim:
   pkg.installed:
     - pkgs:
       - opendkim
       - opendkim-tools
+    - require:
+      - file: /etc/opendkim.conf
+      - file: /etc/default/opendkim
+      - file: /etc/dkimkeys/dkim.key
 
 opendkim.service:
   service.running:
