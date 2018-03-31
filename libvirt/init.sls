@@ -12,6 +12,7 @@ libvirt:
   pkg.installed:
     - pkgs:
       - libvirt-bin
+      - systemd-container
       - qemu
       - qemu-kvm
       - ovmf
