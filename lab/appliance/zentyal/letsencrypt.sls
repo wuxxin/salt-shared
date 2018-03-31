@@ -1,6 +1,6 @@
 include:
   - dehydrated
-  - .base
+  - lab.appliance.zentyal.base
 
 {% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
 
@@ -13,7 +13,7 @@ zentyal-dehydrated-hook:
     - mode: "0755"
     - require:
       - sls: dehydrated
-      - sls: .base
+      - sls: lab.appliance.zentyal.base
 
 /app/etc/hooks/appliance-update/check/zentyal-letsencrypt.sh:
   file.managed:
@@ -42,7 +42,7 @@ zentyal-dehydrated-hook:
         dehydrated ALL=(ALL) NOPASSWD: /usr/local/sbin/deploy-cert-as-root.sh
         dehydrated ALL=(ALL) NOPASSWD: /usr/local/sbin/unchanged-cert-as-root.sh
 
-zentyal-apache-reload:
+zentyal-apache-restart-wellknown:
   service.running:
     - name: apache2
     - enable: True
@@ -50,7 +50,7 @@ zentyal-apache-reload:
       - file: /etc/apache2/conf-available/10-wellknown-acme.conf
     - require:
       - sls: dehydrated
-      - pkg: zentyal
+      - sls: lab.appliance.zentyal.base
 
 dhparam-creation:
   cmd.run:
@@ -59,12 +59,12 @@ dhparam-creation:
 
 initial-cert-creation:
   cmd.run:
-    - name: /usr/local/bin/dehydrated -c
+    - name: /usr/local/bin/dehydrated -c --accept-terms
     - runas: dehydrated
     - unless: test -e /usr/local/etc/dehydrated/certs/{{ firstdomain }}/fullchain.pem
     - require:
       - file: zentyal-dehydrated-hook
-      - service: zentyal-apache-reload
+      - service: zentyal-apache-restart-wellknown
       - cmd: dhparam-creation
       - sls: dehydrated
       

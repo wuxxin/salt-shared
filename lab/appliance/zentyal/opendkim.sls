@@ -1,5 +1,5 @@
 include:
-  - .base
+  -  lab.appliance.zentyal.base
   
 /etc/opendkim.conf:
   file.managed:
@@ -8,7 +8,7 @@ include:
     - defaults:
         domain: {{ salt['pillar.get']('appliance:zentyal:domain') }}
     - require:
-      - sls: .base
+      - sls: lab.appliance.zentyal.base
 
 /etc/default/opendkim:
   file.managed:
@@ -25,7 +25,7 @@ opendkim:
       - opendkim
       - opendkim-tools
 
-{%- set dkimkey= salt['pillar.get']('appliance:zentyal:mail:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
+{%- set dkimkey= salt['pillar.get']('appliance:zentyal:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
 /etc/dkimkeys/dkim.key:
   file.managed:
     - user: opendkim

@@ -1,5 +1,5 @@
 include:
-  - .base
+  - lab.appliance.zentyal.base
     
 # ### hooks
 {% for n in ['mail', 'openchange'] %}
@@ -9,16 +9,16 @@ include:
     - template: jinja
     - mode: "755"
     - require:
-      - sls: .base
+      - sls: lab.appliance.zentyal.base
 {% endfor %}
 
 # ### postfix
 {% for filename, pillaritem in
-    ('tls_policy_map', 'appliance:zentyal:mail:tls_policy'),
-    ('generic_outgoing', 'appliance:zentyal:mail:rewrite'),
-    ('recipient_bcc', 'appliance:zentyal:mail:incoming_bcc'),
-    ('sender_bcc', 'appliance:zentyal:mail:outgoing_bcc'),
-    ('transport_map', 'appliance:zentyal:mail:transport') %}
+    ('tls_policy_map', 'appliance:zentyal:tls_policy'),
+    ('generic_outgoing', 'appliance:zentyal:rewrite'),
+    ('recipient_bcc', 'appliance:zentyal:incoming_bcc'),
+    ('sender_bcc', 'appliance:zentyal:outgoing_bcc'),
+    ('transport_map', 'appliance:zentyal:transport') %}
 
   {% if salt['pillar.get'](pillaritem, None) %}
 /etc/postfix/{{ filename }}:
@@ -28,7 +28,7 @@ include:
     - context:
         dataset: {{ salt['pillar.get'](pillaritem, None) }}
     - require:
-      - sls: .zentyal
+      - sls: lab.appliance.zentyal.base
   cmd.run:
     - name: postmap /etc/postfix/{{ filename }}
     - watch:
@@ -55,21 +55,24 @@ include:
           subscriptions = yes
           #list = children
         }
+  
     - require:
-      - sls: .zentyal
+      - sls: lab.appliance.zentyal.base
 
 sogo-tmpreaper:
     file.replace:
       - name: /etc/tmpreaper.conf
       - pattern: |
           ^.*SHOWWARNING=.*
-      - repl: SHOWWARNING=false
+      - repl: |
+          SHOWWARNING=false
+
       - append_if_not_found: true
       - backup: false
       - require:
-        - pkg: zentyal-mail
+        - pkg: zentyal
 
-{% if pillar.appliance.zentyal.mail.sync.config|d(false) %}
+{% if pillar.appliance.zentyal.sync|d(false) %}
 # ### imap mail migration
 offlineimap:
   pkg:
@@ -77,24 +80,24 @@ offlineimap:
 
 /home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimaprc:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.mail.sync.config }}
+    - source: {{ pillar.appliance.zentyal.sync.config }}
     - template: jinja
     - user: {{ pillar.appliance.zentyal.admin.user }}
     - context:
-        sync_sets: {{ pillar.appliance.zentyal.mail.sync.set }}
+        sync_sets: {{ pillar.appliance.zentyal.sync.set }}
         admin_user: {{ pillar.appliance.zentyal.admin.user }}
     - require:
       - pkg: offlineimap
-      - pkg: zentyal-mail
+      - pkg: zentyal
 
 /home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/helpers.py:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.mail.sync.helpers }}
+    - source: {{ pillar.appliance.zentyal.sync.helpers }}
     - template: jinja
     - user: {{ pillar.appliance.zentyal.admin.user }}
     - makedirs: true
     - require:
       - pkg: offlineimap
-      - pkg: zentyal-mail
+      - pkg: zentyal
       - user: zentyal-admin-user
 {% endif %}

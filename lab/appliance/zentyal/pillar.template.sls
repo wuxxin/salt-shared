@@ -5,7 +5,7 @@
 # change dns
 # @   IN  A     1.2.3.4
 # @   IN  MX    10  @
-# @   IN  TXT   "v=spf1 a mx ptr ~all"
+# @   IN  TXT   "v=spf1 a mx ptr -all"
 # default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; s=email; "
 #    "p={{ dkim_publickey[:250] }}"
 #    "{{ dkim_publickey[250:] }}")

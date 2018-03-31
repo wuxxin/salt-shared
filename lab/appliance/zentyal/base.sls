@@ -4,8 +4,8 @@ include:
 
 zentyal:
   pkgrepo.managed:
-    - name: deb http://archive.zentyal.org/zentyal 5.0 main
-    - key_url: http://keys.zentyal.org/zentyal-5.0-archive.asc
+    - name: deb http://archive.zentyal.org/zentyal 5.1 main
+    - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
@@ -19,7 +19,9 @@ zentyal:
       - zentyal-mailfilter
       - zentyal-openchange
 {%- for i in salt['pillar.get']('appliance:zentyal:languages', []) %}
+{%- if i != 'en' %}
       - language-pack-zentyal-{{ i }}
+{%- endif %}
 {%- endfor %}
     - require:
       - sls: appliance
@@ -49,14 +51,18 @@ zentyal-admin-user:
     - remove_groups: False
     - password: {{ salt.shadow.gen_password(pillar.appliance.zentyal.admin.password) }}
 
-# sss is producing error messages to root if listed on sudoers
-/etc/nsswitch.conf:
-  file.replace:
-    - pattern: |
-        ^sudoers:.+sss.*
-    - repl: |
-        sudoers:        files
-    - backup: False
-    - append_if_not_found: false
+{% for i in ['proxy.conf', 'proxy.load'] %}
+zentyal-apache-enable-{{ i }}:
+  file.symlink:
+    - name: /etc/apache2/mods-enabled/{{ i }}
+    - target: ../mods-available/{{ i }}
+    - watch_in:
+      - service: zentyal-apache-restart-proxymod
+{% endfor %}
+
+zentyal-apache-restart-proxymod:
+  service.running:
+    - name: apache2
+    - enable: True
     - require:
       - pkg: zentyal

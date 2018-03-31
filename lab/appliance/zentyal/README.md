@@ -1,6 +1,22 @@
 # Zentyal 5.x Mail server
 
-* !! Use rspamd instead of spamassassin
+Zentyal 5.1 Mailserver with the following additions:
+
++ support for automatic letsencrypt certificates
++ opendkim support
++ integrated in appliance state, with all benefits of it
+
+FIXME: 
++ qrcode needs ghostscript is big
++ something inside the list takes many dependencies
+    + gosu, xz-utils, curl, rsync, git, netcat, pciutils, bzip2, wget, usbutils, procps, command-not-found
+
++ firewall or bind to localhost: smbd (445,139), nmbd (137,138)
+
+## todo, integrate
++ Use rspamd instead of spamassassin
++ use wkd-hosting
++ use email autoconfig 
 
 ## additional pillar settings
 
