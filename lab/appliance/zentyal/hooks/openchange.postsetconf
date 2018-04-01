@@ -20,3 +20,4 @@ if test -f "$configfile"; then
   rm ${configfile}; mv ${configfile}.new ${configfile}
 fi
 {% endif %}
+

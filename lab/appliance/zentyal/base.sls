@@ -5,7 +5,7 @@ include:
 zentyal:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
-    - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
+    - key_url: salt://lab/appliance/zentyal/zentyal-5.1-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
@@ -15,6 +15,7 @@ zentyal:
     - pkgs:
       - zentyal
       - zentyal-groupware
+      - zentyal-samba
       - zentyal-mail
       - zentyal-sogo
       - zentyal-antivirus
@@ -50,57 +51,5 @@ set_zentyal_version:
     - name: grains.setval
       key: zentyal_version
       val: {{ salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"', python_shell=True) }}
-    - require:
-      - pkg: zentyal
-
-{# XXX workaround missing enabled proxy modul, zentyal setup expects this #}
-{% for i in ['proxy.conf', 'proxy.load'] %}
-zentyal-apache-enable-{{ i }}:
-  file.symlink:
-    - name: /etc/apache2/mods-enabled/{{ i }}
-    - target: ../mods-available/{{ i }}
-    - watch_in:
-      - service: zentyal-apache-restart-proxymod
-{% endfor %}
-
-zentyal-apache-restart-proxymod:
-  service.running:
-    - name: apache2
-    - enable: True
-    - require:
-      - pkg: zentyal
-
-{# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
-{% if grains['master'] != '' %}
-  {% set saltshort = grains['master'] %}
-  {% for domain in salt['grains.get']('dns:search') %}
-    {% set saltmaster = saltshort+ "."+ domain %}
-    {% set saltip = salt['dnsutil.A'](saltmaster) %}
-    {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
-adding-salt-master-to-hosts:
-  file.replace:
-    - name: /etc/hosts
-    - append_if_not_found: true
-    - pattern: |
-        ^.*{{ saltshort }}.*{{ saltshort }}.*
-  
-    - repl: |
-        {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
-  
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
-{# disable warning flooding logs #}
-sogo-tmpreaper:
-  file.replace:
-    - name: /etc/tmpreaper.conf
-    - pattern: |
-        ^.*SHOWWARNING=.*
-    - repl: |
-        SHOWWARNING=false
-
-    - append_if_not_found: true
-    - backup: false
     - require:
       - pkg: zentyal

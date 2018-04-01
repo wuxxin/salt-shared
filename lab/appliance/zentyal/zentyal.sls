@@ -1,67 +1,87 @@
 include:
   - lab.appliance.zentyal.base
-    
-# ### hooks
-{% for n in ['mail', 'openchange', 'samba'] %}
+
+{# XXX activate needed apache modules early in setup, so apache is config is valid, and service is available for letsencrypt #}
+{% for i in ['proxy', 'proxy_http', 'headers', 'ssl'] %}
+  {% for j in ['conf', 'load'] %}
+zentyal-apache-enable-{{ i }}:
+  file.symlink:
+    - name: /etc/apache2/mods-enabled/{{ i }}.{{ j }}
+    - target: ../mods-available/{{ i }}.{{ j }}
+    - watch_in:
+      - service: zentyal-apache-restart-module-config
+    - require:
+      - pkg: zentyal
+  {% endfor %}
+{% endfor %}
+
+zentyal-apache-restart-module-config:
+  service.running:
+    - name: apache2
+    - enable: True
+    - require:
+      - pkg: zentyal
+
+{# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
+{% if grains['master'] != '' %}
+  {% set saltshort = grains['master'] %}
+  {% for domain in salt['grains.get']('dns:search') %}
+    {% set saltmaster = saltshort+ "."+ domain %}
+    {% set saltip = salt['dnsutil.A'](saltmaster) %}
+    {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
+adding-salt-master-to-hosts:
+  file.replace:
+    - name: /etc/hosts
+    - append_if_not_found: true
+    - pattern: |
+        ^.*{{ saltshort }}.*{{ saltshort }}.*
+  
+    - repl: |
+        {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
+  
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{# disable warning flooding logs #}
+sogo-tmpreaper:
+  file.replace:
+    - name: /etc/tmpreaper.conf
+    - pattern: |
+        ^.*SHOWWARNING=.*
+    - repl: |
+        SHOWWARNING=false
+
+    - append_if_not_found: true
+    - backup: false
+    - require:
+      - pkg: zentyal
+
+
+{# ### templates #}
+{% for n in ['core/nginx.conf.mas', 'mail/main.cf.mas', 'mail/dovecot.conf.mas'] %}
+/etc/zentyal/stubs/{{ n }}:
+  file.managed:
+    - source: salt://lab/appliance/zentyal/stubs/{{ n }}
+    - require:
+      - sls: lab.appliance.zentyal.base
+{% endfor %}
+
+
+{# ### hooks #}
+{% for n in ['mail', 'samba'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/{{ n }}.postsetconf
+    - source: salt://lab/appliance/zentyal/hooks/{{ n }}.postsetconf
     - template: jinja
     - mode: "755"
     - require:
       - sls: lab.appliance.zentyal.base
 {% endfor %}
 
-# ### postfix
-{% for filename, pillaritem in
-    ('tls_policy_map', 'appliance:zentyal:tls_policy'),
-    ('generic_outgoing', 'appliance:zentyal:rewrite'),
-    ('recipient_bcc', 'appliance:zentyal:incoming_bcc'),
-    ('sender_bcc', 'appliance:zentyal:outgoing_bcc'),
-    ('transport_map', 'appliance:zentyal:transport') %}
-
-  {% if salt['pillar.get'](pillaritem, None) %}
-/etc/postfix/{{ filename }}:
-  file.managed:
-    - source: salt://lab/appliance/zentyal/files/key_seperator_value.jinja
-    - template: jinja
-    - context:
-        dataset: {{ salt['pillar.get'](pillaritem, None) }}
-    - require:
-      - sls: lab.appliance.zentyal.base
-  cmd.run:
-    - name: postmap /etc/postfix/{{ filename }}
-    - watch:
-      - file: /etc/postfix/{{ filename }}
-  {% endif %}
-{% endfor %}
-
-# ### dovecot
-/etc/dovecot/extra.conf:
-  file.managed:
-    - contents: |
-        namespace {
-          type = private
-          separator = /
-          prefix =
-          #location defaults to mail_location.
-          inbox = yes
-        }
-        namespace {
-          type = public
-          separator = /
-          prefix = public/
-          location = maildir:/var/vmail/public
-          subscriptions = yes
-          #list = children
-        }
-  
-    - require:
-      - sls: lab.appliance.zentyal.base
-
 
 {% if pillar.appliance.zentyal.sync|d(false) %}
-# ### imap mail migration
+{# ### imap mail migration #}
 offlineimap:
   pkg:
     - installed
