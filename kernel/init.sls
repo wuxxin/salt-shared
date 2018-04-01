@@ -43,11 +43,17 @@ linux-image-default-tools:
 linux-image:
   pkg.installed:
     - pkgs:
-  {%- if grains['virtual'] == "physical" %}
-      - {{ settings.hardware }}
+  {%- if grains['virtual'] == 'LXC' %}
+    {# take linux version from host kernel on lxc/lxd #}
+      - linux-tools-{{ grains['kernelrelease'] }}
+      - linux-headers-{{ grains['kernelrelease'] }}
   {%- else %}
+    {%- if grains['virtual'] == "physical" %}
+      - {{ settings.hardware }}
+    {%- else %}
       - {{ settings.virtual }}
+    {%- endif %}
+    - {{ settings.tools }}
+    - {{ settings.headers }}
   {%- endif %}
-      - {{ settings.tools }}
-      - {{ settings.headers }}
 {%- endif %}
