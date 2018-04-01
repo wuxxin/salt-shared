@@ -2,7 +2,7 @@ include:
   - lab.appliance.zentyal.base
     
 # ### hooks
-{% for n in ['mail', 'openchange'] %}
+{% for n in ['mail', 'openchange', 'samba'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/{{ n }}.postsetconf
@@ -59,18 +59,6 @@ include:
     - require:
       - sls: lab.appliance.zentyal.base
 
-sogo-tmpreaper:
-    file.replace:
-      - name: /etc/tmpreaper.conf
-      - pattern: |
-          ^.*SHOWWARNING=.*
-      - repl: |
-          SHOWWARNING=false
-
-      - append_if_not_found: true
-      - backup: false
-      - require:
-        - pkg: zentyal
 
 {% if pillar.appliance.zentyal.sync|d(false) %}
 # ### imap mail migration

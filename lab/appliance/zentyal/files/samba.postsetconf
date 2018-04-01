@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# This is a postsetconf script for zentyal
+
+msub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+}
+
+ssub() {
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
+}
+
+if grep -qa container=lxc /proc/1/environ; then    
+    # samba modifications
+    cat /etc/samba/smb.conf | 
+        msub '^\[global\]$.*workgroup =' '[global]\n    vfs objects = actl_tdb\n    workgroup =' |
+        cat > /etc/samba/smb.conf.new
+    rm /etc/samba/smb.conf; mv /etc/samba/smb.conf.new /etc/samba/smb.conf
+fi
+
+exit 0

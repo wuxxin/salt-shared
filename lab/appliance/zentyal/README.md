@@ -7,7 +7,11 @@ Zentyal 5.1 Mailserver with the following additions:
 + integrated in appliance state, with all benefits of it
 
 ## FIXME
-+ dns resolution of saltmaster is broken once bind is installed
+finish mail.postsetconf , rename and finish openchange.postsetconf
+/sbin/modprobe 8021q
+ntp not working in lxc ?
+testing: set_nt_acl: chown /var/lib/samba/sysvol
+
 + firewall or bind to localhost: smbd (445,139), nmbd (137,138)
 
 ## todo, integrate

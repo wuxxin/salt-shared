@@ -90,3 +90,17 @@ adding-salt-master-to-hosts:
     {% endif %}
   {% endfor %}
 {% endif %}
+
+{# disable warning flooding logs #}
+sogo-tmpreaper:
+  file.replace:
+    - name: /etc/tmpreaper.conf
+    - pattern: |
+        ^.*SHOWWARNING=.*
+    - repl: |
+        SHOWWARNING=false
+
+    - append_if_not_found: true
+    - backup: false
+    - require:
+      - pkg: zentyal
