@@ -27,6 +27,15 @@ zentyal:
     - require:
       - sls: appliance
 
+zentyal-admin-user:
+  user.present:
+    - name: {{ pillar.appliance.zentyal.admin.user }}
+    - groups:
+      - adm
+      - sudo
+    - remove_groups: False
+    - password: {{ salt.shadow.gen_password(pillar.appliance.zentyal.admin.password) }}
+
 set_os_extra:
   module.run:
     - name: grains.setval
@@ -44,15 +53,7 @@ set_zentyal_version:
     - require:
       - pkg: zentyal
 
-zentyal-admin-user:
-  user.present:
-    - name: {{ pillar.appliance.zentyal.admin.user }}
-    - groups:
-      - adm
-      - sudo
-    - remove_groups: False
-    - password: {{ salt.shadow.gen_password(pillar.appliance.zentyal.admin.password) }}
-
+{# XXX workaround missing enabled proxy modul, zentyal setup expects this #}
 {% for i in ['proxy.conf', 'proxy.load'] %}
 zentyal-apache-enable-{{ i }}:
   file.symlink:
@@ -68,3 +69,24 @@ zentyal-apache-restart-proxymod:
     - enable: True
     - require:
       - pkg: zentyal
+
+{# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
+{% if grains['master'] != '' %}
+  {% set saltshort = grains['master'] %}
+  {% for domain in salt['grains.get']('dns:search') %}
+    {% set saltmaster = saltshort+ "."+ domain %}
+    {% set saltip = salt['dnsutil.A'](saltmaster) %}
+    {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
+adding-salt-master-to-hosts:
+  file.replace:
+    - name: /etc/hosts
+    - append_if_not_found: true
+    - pattern: |
+        ^.*{{ saltshort }}.*{{ saltshort }}.*
+  
+    - repl: |
+        {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
+  
+    {% endif %}
+  {% endfor %}
+{% endif %}
