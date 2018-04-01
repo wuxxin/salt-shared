@@ -4,9 +4,10 @@ Zentyal 5.1 Mailserver with the following additions:
 
 + support for automatic letsencrypt certificates
 + opendkim support
-+ integrated in appliance state, with all benefits of it
++ integrated in appliance state
 
 ## FIXME
+
 finish mail.postsetconf , rename and finish openchange.postsetconf
 /sbin/modprobe 8021q
 ntp not working in lxc ?
@@ -14,21 +15,52 @@ testing: set_nt_acl: chown /var/lib/samba/sysvol
 
 + firewall or bind to localhost: smbd (445,139), nmbd (137,138)
 
-## todo, integrate
+## todo
 + use wkd-hosting: https://wiki.gnupg.org/WKDHosting
 + use rspamd instead of spamassassin
 + use email autoconfig 
 
-## additional pillar settings
+## pillar example
 
-look at pillar.template.sls
+```
+{%- from 'lib/minivault.sls' import manage_secret, rsa_public_from_secret %}
+{%- set dkim_secretkey= manage_secret('dkim_secretkey', 'rsa_secret') %}
+{%- set dkim_publickey= rsa_public_from_secret(dkim_secretkey) %}
 
-## Thunderbird
+# change dns
+# @   IN  A     1.2.3.4
+# @   IN  MX    10  @
+# @   IN  TXT   "v=spf1 a mx ptr -all"
+# default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; s=email; "
+#    "p={{ dkim_publickey[:250] }}"
+#    "{{ dkim_publickey[250:] }}")
+# for gui-dns: default.domainkey:v=DKIM1; k=rsa; s=email; p={{ dkim_publickey }}
+# 4.3.2.1.in-addr.arpa. IN  PTR  {{ domain }}.
 
-+ install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
-+ install sogo connector or sogo integrator
-  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
-  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
+dehydrated:
+  pillar: appliance:zentyal:letsencrypt
+
+appliance:
+  zentyal:
+    domain: {{ domain }}
+    letsencrypt:
+      enabled: true
+      domains:
+        - {{ domain }} 
+      apache: true
+      contact_email: {{ adminemail }}
+      hook: /usr/local/etc/dehydrated/zentyal-dehydrated-hook.sh
+    dkim:
+      key: |
+{{ dkim_secretkey|indent(10,True) }}
+      dns: |
+          default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; s=email; "
+            "p={{ dkim_publickey[:250] }}"
+            "{{ dkim_publickey[250:] }}")
+    admin:
+      user: admin
+      password: {{ manage_secret('zentyal_admin_password', hostname= common.id) }}
+```
 
 ## Toolbox
 
@@ -39,6 +71,11 @@ fix_mailfilter:
 generate_new_mail_config:
   cmd.run:
     - name: /etc/init.d/zentyal mail restart
+
++ install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
++ install sogo connector or sogo integrator
+  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
+  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
 
 salt-call state.sls roles.zentyal; /etc/init.d/zentyal mail restart; /etc/init.d/postfix restart
 
