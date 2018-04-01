@@ -93,14 +93,14 @@ offlineimap:
     - user: {{ pillar.appliance.zentyal.admin.user }}
     - context:
         sync_sets: {{ pillar.appliance.zentyal.sync.set }}
-        admin_user: {{ pillar.appliance.zentyal.admin.user }}
+        functions: {{ pillar.appliance.zentyal.sync.functions}}
     - require:
       - pkg: offlineimap
       - pkg: zentyal
 
-/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/helpers.py:
+/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/{{ pillar.appliance.zentyal.sync.functions.name }}:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.helpers }}
+    - source: {{ pillar.appliance.zentyal.sync.functions.name }}
     - template: jinja
     - user: {{ pillar.appliance.zentyal.admin.user }}
     - makedirs: true

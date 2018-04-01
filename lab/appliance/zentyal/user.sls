@@ -5,7 +5,7 @@ include:
 # ### user creation
 /usr/local/sbin/create_zentyal_user.pl:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/create_zentyal_user.pl
+    - source: salt://lab/appliance/zentyal/scripts/create_zentyal_user.pl
     - mode: "0755"
     - require:
       - sls: lab.appliance.zentyal.base

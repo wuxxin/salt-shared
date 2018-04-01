@@ -14,6 +14,7 @@ if grep -qa container=lxc /proc/1/environ; then
     # XXX do not use posix ext_acl for nt_acl, breaks on lxd
     cat /etc/samba/smb.conf | 
         msub '^\[global\]$.*workgroup =' '[global]\n    vfs objects = actl_tdb\n    workgroup =' |
+        
         cat > /etc/samba/smb.conf.new
     rm /etc/samba/smb.conf; mv /etc/samba/smb.conf.new /etc/samba/smb.conf
 fi
