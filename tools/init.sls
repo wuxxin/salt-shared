@@ -5,7 +5,6 @@ include:
   - unison      {# #}
   - .flatyaml   {# #}
   - .raven      {# #}
-  - .qrcode     {# #}
   - .passgen    {# #}
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}

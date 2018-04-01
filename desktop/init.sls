@@ -22,6 +22,7 @@ include:
   - python.dev
   - vcs
   - vcs.git-bridge
+  - tools.extra
   - .homeshick
   - .scipy
   - .atom
