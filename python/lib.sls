@@ -1,5 +1,5 @@
 include:
-  - .init
+  - python
 
 {% macro pip_install(package_or_packagelist, version="") %}
 python{{ version }}-{{ package_or_packagelist }}:
