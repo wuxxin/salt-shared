@@ -35,6 +35,7 @@ set_os_extra:
     - require:
       - pkg: zentyal
 
+{# XXX only works on next run, because jinja is evaluated before state run #}
 set_zentyal_version:
   module.run:
     - name: grains.setval
