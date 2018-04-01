@@ -43,7 +43,6 @@ base-tools:
       - htop        {#  #}
       - iftop       {#  #}
       - iotop       {#  #}
-      - blktrace    {# block layer IO tracing mechanism #}
       - dstat       {# versatile replacement for vmstat, iostat and ifstat #}
       - cpu-checker {# check cpu features NX/XD and VMX/SVM #}
       - iperf       {# Internet Protocol bandwidth measuring tool #}
