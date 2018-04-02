@@ -46,7 +46,6 @@ linux-image:
   {%- if grains['virtual'] == 'LXC' %}
     {# take linux version from host kernel on lxc/lxd #}
       - linux-tools-{{ grains['kernelrelease'] }}
-      - linux-headers-{{ grains['kernelrelease'] }}
   {%- else %}
     {%- if grains['virtual'] == "physical" %}
       - {{ settings.hardware }}
