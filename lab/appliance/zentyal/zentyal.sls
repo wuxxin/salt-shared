@@ -66,7 +66,9 @@ sogo-tmpreaper:
 
 
 {# ### templates #}
-{% for n in ['core/nginx.conf.mas', 'mail/main.cf.mas', 'mail/dovecot.conf.mas'] %}
+{% for n in ['core/nginx.conf.mas',
+  'mail/main.cf.mas', 'mail/dovecot.conf.mas',
+  'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
 /etc/zentyal/stubs/{{ n }}:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}

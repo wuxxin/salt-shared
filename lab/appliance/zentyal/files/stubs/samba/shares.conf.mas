@@ -1,0 +1,82 @@
+<%args>
+    @shares => ()
+    $unmanagedAcls => 0
+    $disableFullAudit => 0
+
+    $recycle => 0
+    $recycle_exceptions => {}
+    $recycle_config => {}
+
+    $prefix => 'Zentyal'
+    $backup_path => '/tmp'
+</%args>
+<%init>
+use EBox::Gettext;
+</%init>
+[homes]
+    comment = <% __('Home Directories') %>
+    path = /home/%S
+    read only = no
+    browseable = no
+    create mask = 0611
+    directory mask = 0711
+% my $rb = ($recycle xor defined($recycle_exceptions->{'users'}));
+% my $objects = 'acl_tdb';
+% unless ($disableFullAudit) {
+%   $objects .= ' full_audit';
+% }
+% if ($rb) {
+%   $objects .= ' recycle';
+% }
+    vfs objects = <% $objects %>
+    full_audit:success = connect opendir disconnect unlink mkdir rmdir open rename
+    full_audit:failure = connect opendir disconnect unlink mkdir rmdir open rename
+% if ($rb) {
+%   foreach my $key (keys %{$recycle_config}) {
+%       next unless $key;
+    recycle: <% $key %> = <% $recycle_config->{$key} %>
+%   }
+% }
+
+# <% @shares ? "Shares\n" : "No shares configured" %>
+% foreach my $share (@shares) {
+[<% $share->{share} %>]
+% if ($share->{comment}) {
+    comment = <% $share->{comment} %>
+% }
+    path = <% $share->{path} %>
+    browseable = yes
+    force create mode = 0660
+    force directory mode = 0660
+% if ($share->{guest}) {
+    guest ok = yes
+    read only = no
+% } elsif ($unmanagedAcls) {
+    read only = no
+% } else {
+    valid users = <% $share->{validUsers} %>
+    read list = <% $share->{readOnly} %>
+    write list = <% $share->{readWrite} %>
+    admin users = <% $share->{administrators} %>
+% }
+% my $rb = ($recycle xor defined($recycle_exceptions->{'share'}->{$share->{'share'}}));
+% my $objects = 'acl_tdb';
+% unless ($disableFullAudit) {
+%   $objects .= ' full_audit';
+% }
+% if ($rb) {
+%   $objects .= ' recycle';
+% }
+    vfs objects = <% $objects %>
+% if ($unmanagedAcls) {
+    acl_tdb:ignore system acls = yes
+% }
+    full_audit:failure = connect opendir disconnect unlink mkdir rmdir open rename
+% if ($rb) {
+%   foreach my $key (keys %{$recycle_config}) {
+%       next unless $key;
+    recycle: <% $key %> = <% $recycle_config->{$key} %>
+%   }
+% }
+
+% }

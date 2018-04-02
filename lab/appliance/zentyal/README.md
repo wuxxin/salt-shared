@@ -8,11 +8,11 @@ Zentyal 5.1 Mailserver with the following additions:
 
 ## FIXME
 
++ make stubs and postsetconf working
 + kernelmodules for firewall
     8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp 
     nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp 
     nf_conntrack_sip nf_nat_sip
-+ make stubs and postsetconf working
 + ntp not working in lxc ?
 + testing: set_nt_acl: chown /var/lib/samba/sysvol
 + samba bind to localhost: smbd (445,139), nmbd (137,138)
