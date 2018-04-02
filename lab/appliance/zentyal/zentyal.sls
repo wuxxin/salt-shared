@@ -1,6 +1,7 @@
 include:
   - lab.appliance.zentyal.base
-
+  - lab.appliance.zentyal.apache
+  
 {# XXX activate needed apache modules early in setup, so apache is config is valid, and service is available for letsencrypt #}
 {% for i in ['proxy', 'proxy_http', 'headers', 'ssl'] %}
   {% for j in ['conf', 'load'] %}
@@ -62,7 +63,7 @@ sogo-tmpreaper:
 {% for n in ['core/nginx.conf.mas', 'mail/main.cf.mas', 'mail/dovecot.conf.mas'] %}
 /etc/zentyal/stubs/{{ n }}:
   file.managed:
-    - source: salt://lab/appliance/zentyal/stubs/{{ n }}
+    - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}
     - require:
       - sls: lab.appliance.zentyal.base
 {% endfor %}
@@ -72,7 +73,7 @@ sogo-tmpreaper:
 {% for n in ['mail', 'samba'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
-    - source: salt://lab/appliance/zentyal/hooks/{{ n }}.postsetconf
+    - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
     - template: jinja
     - mode: "755"
     - require:

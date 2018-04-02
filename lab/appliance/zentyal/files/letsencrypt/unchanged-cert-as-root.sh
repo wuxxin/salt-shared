@@ -4,4 +4,6 @@ KEYFILE="$2"
 FULLCHAINFILE="$4"
 cp $KEYFILE /app/etc/server.key.pem
 cp $FULLCHAINFILE /app/etc/server.cert.pem
+chmod 400 /app/etc/server.key.pem
 printf "%s" "$(if test -e /app/etc/dhparam.pem; then cat /app/etc/dhparam.pem; fi)" | cat /app/etc/server.cert.pem - > /app/etc/server.cert.dhparam.pem
+chmod 400 /app/etc/server.cert.dhparam.pem

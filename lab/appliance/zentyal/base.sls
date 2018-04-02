@@ -5,7 +5,7 @@ include:
 zentyal:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
-    - key_url: salt://lab/appliance/zentyal/zentyal-5.1-archive.asc
+    - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
