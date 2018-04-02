@@ -2,6 +2,18 @@ include:
   - appliance
   - ubuntu
 
+{# ### templates #}
+{% for n in ['core/nginx.conf.mas',
+  'mail/main.cf.mas', 'mail/dovecot.conf.mas',
+  'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
+/etc/zentyal/stubs/{{ n }}:
+  file.managed:
+    - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}
+    - makedirs: true
+    - require_in:
+      - pkg: zentyal
+{% endfor %}
+
 zentyal:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
@@ -27,6 +39,17 @@ zentyal:
 {%- endfor %}
     - require:
       - sls: appliance
+
+{# XXX samba breaks on lxc/lxd because of xattr container limits #}
+patch-ntacls.py:
+  file.managed:
+    - name: /usr/lib/python2.7/dist-packages/samba/ntacls.py
+    - source: salt://lab/appliance/zentyal/files/ntacls.py
+    - makedirs: true
+  cmd.run:
+    - name: rm /usr/lib/python2.7/dist-packages/samba/ntacls.pyc; python2 -c "import compileall; compileall.compile_file('/usr/lib/python2.7/dist-packages/samba/ntacls.py')"
+    - onchanges:
+      - file: patch-ntacls.py
 
 zentyal-admin-user:
   user.present:

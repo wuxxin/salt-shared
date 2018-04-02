@@ -117,7 +117,8 @@ http {
         ssl on;
         ssl_certificate <% $zentyalconfdir %>ssl/ssl.pem;
         ssl_certificate_key <% $zentyalconfdir %>ssl/ssl.pem;
-        ssl_dhparam /app/etc/dhparam.pem;
+        # XXX ssl_dhparam will be set via core.postsetconf
+        # ssl_dhparam /app/etc/dhparam.pem;
 % if ($caFile) {
         ssl_client_certificate <% $caFile %>;
         ssl_verify_client optional;

@@ -8,6 +8,7 @@ Zentyal 5.1 Mailserver with the following additions:
 
 ## FIXME
 
++ /var/lib/zentyal/.first is flag
 + make stubs and postsetconf working
 + kernelmodules for firewall
     8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp 

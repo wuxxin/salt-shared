@@ -1,7 +1,6 @@
 include:
   - dehydrated
   - lab.appliance.zentyal.base
-  - lab.appliance.zentyal.zentyal
 
 {% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
 

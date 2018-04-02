@@ -28,6 +28,17 @@ zentyal-apache-restart-module-config:
     - require:
       - pkg: zentyal
 
+{# ### hooks #}
+{% for n in ['mail', 'samba', 'sogo'] %}
+/etc/zentyal/hooks/{{ n }}.postsetconf:
+  file.managed:
+    - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
+    - template: jinja
+    - mode: "755"
+    - makedirs: true
+    
+{% endfor %}
+
 {# ### nslookup for salt via /etc/hosts #}
 {# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
 {% if grains['master'] != '' %}
@@ -65,32 +76,6 @@ sogo-tmpreaper:
     - backup: false
     - require:
       - pkg: zentyal
-
-
-{# ### templates #}
-{% for n in ['core/nginx.conf.mas',
-  'mail/main.cf.mas', 'mail/dovecot.conf.mas',
-  'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
-/etc/zentyal/stubs/{{ n }}:
-  file.managed:
-    - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}
-    - makedirs: true
-    - require:
-      - sls: lab.appliance.zentyal.base
-{% endfor %}
-
-
-{# ### hooks #}
-{% for n in ['mail', 'samba', 'sogo'] %}
-/etc/zentyal/hooks/{{ n }}.postsetconf:
-  file.managed:
-    - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
-    - template: jinja
-    - mode: "755"
-    - makedirs: true
-    - require:
-      - sls: lab.appliance.zentyal.base
-{% endfor %}
 
 
 {% if pillar.appliance.zentyal.sync|d(false) %}
