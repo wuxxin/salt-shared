@@ -11,5 +11,7 @@ maxDiskCacheEntrySize: 1610612736 {# = 1.5GB #}
 
 {% endload %}
 
+{% set default_no_proxy = 'localhost,127.0.0.1,169.254.169.254,metadata.google.internal' %}
+
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('polipo:server', {})) %}

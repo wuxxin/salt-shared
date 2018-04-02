@@ -22,10 +22,9 @@ include:
     - contents: |
         DOCKER_OPTIONS="{{ settings.options|d('') }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
+{%- from "http_proxy/defaults.jinja" import default_no_proxy %}
         http_proxy="{{ salt['pillar.get']('http_proxy') }}"
-{%- endif %}
-{%- if salt['pillar.get']('no_proxy', '') != '' %}
-        no_proxy="{{ salt['pillar.get']('no_proxy') }}"
+        no_proxy="{{ salt['pillar.get']('no_proxy', default_no_proxy) }}"
 {%- endif %}
 
 docker-requisites:
