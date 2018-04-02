@@ -108,7 +108,7 @@ offlineimap:
 
 /home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/{{ pillar.appliance.zentyal.sync.functions.name }}:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.functions.name }}
+    - source: {{ pillar.appliance.zentyal.sync.functions.source }}
     - template: jinja
     - user: {{ pillar.appliance.zentyal.admin.user }}
     - makedirs: true
