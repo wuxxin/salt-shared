@@ -7,21 +7,20 @@ include:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/ssl.conf
     - require_in:
-      - file: zentyal-apache-enable-ssl-conf
+      - file: zentyal-apache-enable-ssl.conf
  
-{% for i in ['proxy', 'proxy_http', 'headers', 'ssl'] %}
-  {% for j in ['conf', 'load'] %}
-zentyal-apache-enable-{{ i }}-{{ j }}:
+{% for i in ['proxy.conf', 'proxy.load', 'proxy_http.load', 
+  'socache_shmcb.load', 'ssl.conf', 'ssl.load', 'headers.load'] %}
+zentyal-apache-enable-{{ i }}:
   file.symlink:
-    - name: /etc/apache2/mods-enabled/{{ i }}.{{ j }}
-    - target: ../mods-available/{{ i }}.{{ j }}
+    - name: /etc/apache2/mods-enabled/{{ i }}
+    - target: ../mods-available/{{ i }}
     - watch_in:
       - service: zentyal-apache-restart-module-config
     - require:
       - pkg: zentyal
-  {% endfor %}
 {% endfor %}
-    
+
 zentyal-apache-restart-module-config:
   service.running:
     - name: apache2
@@ -71,6 +70,7 @@ sogo-tmpreaper:
 /etc/zentyal/stubs/{{ n }}:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}
+    - makedirs: true
     - require:
       - sls: lab.appliance.zentyal.base
 {% endfor %}
@@ -83,6 +83,7 @@ sogo-tmpreaper:
     - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
     - template: jinja
     - mode: "755"
+    - makedirs: true
     - require:
       - sls: lab.appliance.zentyal.base
 {% endfor %}
