@@ -32,22 +32,24 @@ zentyal-apache-restart-module-config:
 {# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
 {% if grains['master'] != '' %}
   {% set saltshort = grains['master'] %}
-  {% for domain in salt['grains.get']('dns:search') %}
-    {% set saltmaster = saltshort+ "."+ domain %}
-    {% set saltip = salt['dnsutil.A'](saltmaster) %}
-    {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
-adding-salt-master-to-hosts:
-  file.replace:
-    - name: /etc/hosts
-    - append_if_not_found: true
-    - pattern: |
-        ^.*{{ saltshort }}.*{{ saltshort }}.*
-  
-    - repl: |
-        {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
-  
-    {% endif %}
-  {% endfor %}
+  {% if not salt['hosts.get_ip'](saltshort) %}
+    {% for domain in salt['grains.get']('dns:search') %}
+      {% set saltmaster = saltshort+ "."+ domain %}
+      {% set saltip = salt['dnsutil.A'](saltmaster) %}
+      {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
+  adding-salt-master-to-hosts:
+    file.replace:
+      - name: /etc/hosts
+      - append_if_not_found: true
+      - pattern: |
+          ^.*{{ saltshort }}.*{{ saltshort }}.*
+    
+      - repl: |
+          {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
+    
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 {% endif %}
 
 {# disable warning flooding logs #}
