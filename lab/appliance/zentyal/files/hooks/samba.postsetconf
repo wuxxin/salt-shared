@@ -12,10 +12,12 @@ ssub() {
 if grep -qa container=lxc /proc/1/environ; then    
     # XXX do not use posix ext_acl for nt_acl, breaks on lxd
     configfile=/etc/samba/smb.conf
-    cat $configfile | 
-        msub '^\[global\]$.*workgroup =' '[global]\n    vfs objects = acl_tdb\n    workgroup =' |
-        cat > $configfile.new
-    rm $configfile; mv $configfile.new $configfile
+    if test -f "$configfile"; then
+        cat $configfile | 
+          msub '^\[global\]$.*workgroup =' '[global]\n    vfs objects = acl_tdb\n    workgroup =' |
+          cat > $configfile.new
+        mv $configfile.new $configfile
+    fi
 fi
 
 exit 0

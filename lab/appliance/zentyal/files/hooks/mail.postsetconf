@@ -19,26 +19,30 @@ ssub() {
 
 # postfix domain, cert, key, dhparam
 configfile=/etc/postfix/main.cf
-cat $configfile | 
+if test -f "$configfile"; then
+    cat $configfile | 
 {%- if letsencrypt %}
-  ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /app/etc/server.cert.pem' |
-  ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /app/etc/server.key.pem' |
-  ssub '.*smtpd_tls_dh1024_param_file[\t ]*=.*' 'smtpd_tls_dh1024_param_file= /app/etc/dhparam.pem' |
+      ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /app/etc/server.cert.pem' |
+      ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /app/etc/server.key.pem' |
+      ssub '.*smtpd_tls_dh1024_param_file[\t ]*=.*' 'smtpd_tls_dh1024_param_file= /app/etc/dhparam.pem' |
 {%- endif %}
-  ssub '^myhostname.*' 'myhostname = {{ domain }}' |
-  cat > $configfile.new
-mv $configfile.new $configfile
+      ssub '^myhostname.*' 'myhostname = {{ domain }}' |
+      cat > $configfile.new
+    mv $configfile.new $configfile
+fi
 
 # dovecot domain, cert, key and dhparam
 configfile=/etc/dovecot/dovecot.conf
-cat $configfile |
 {%- if letsencrypt %}
-  ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /app/etc/server.cert.pem' |
-  ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< /app/etc/server.key.pem' |
-  ssub '.*ssl_dh[\t ]*=.*' 'ssl_dh = </app/etc/dhparam.pem' |
+if test -f "$configfile"; then
+    cat $configfile |
+      ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /app/etc/server.cert.pem' |
+      ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< /app/etc/server.key.pem' |
+      ssub '.*ssl_dh[\t ]*=.*' 'ssl_dh = </app/etc/dhparam.pem' |
+      cat > $configfile.new
+    mv $configfile.new $configfile
+fi
 {%- endif %}
-cat > $configfile.new
-mv $configfile.new $configfile
 
 # openkdim domain, dkim key
 restart_opendkim=false

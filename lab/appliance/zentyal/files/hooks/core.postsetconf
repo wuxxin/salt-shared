@@ -18,13 +18,14 @@ ssub() {
   {%- set domain = pillar.appliance.zentyal.domain %}
 {%- endif %}
 
-# apache2 cert+dhparam and key
-configfile=/etc/apache2/sites-available/default-ssl.conf
+# nginx cert, key and dhparam
+configfile=/var/lib/zentyal/conf/nginx.conf
 {%- if letsencrypt %}
 if test -f "$configfile"; then
     cat $configfile | 
-      ssub '^([\t ]*)#?[\t ]*(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |
-      ssub '^([\t ]*)#?[\t ]*(SSLCertificateKeyFile)[\t ]+/.+' '\1\2 /app/etc/server.key.pem' |
+      ssub '^([\t ]*)#?[\t ]*(ssl_certificate)[\t ]+/.+;' '\1\2 /app/etc/server.cert.pem;' |
+      ssub '^([\t ]*)#?[\t ]*(ssl_certificate_key)[\t ]+/.+;' '\1\2 /app/etc/server.key.pem;' |
+      ssub '^([\t ]*)#?[\t ]*(ssl_dhparam)[\t ]+/.+;' '\1\2 /app/etc/dhparam.pem;' |
       cat > ${configfile}.new
     mv ${configfile}.new ${configfile}
 fi
