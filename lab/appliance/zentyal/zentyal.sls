@@ -37,16 +37,16 @@ zentyal-apache-restart-module-config:
       {% set saltmaster = saltshort+ "."+ domain %}
       {% set saltip = salt['dnsutil.A'](saltmaster) %}
       {% if saltip is iterable and saltip is not string and saltip[0] != '' %}
-  adding-salt-master-to-hosts:
-    file.replace:
-      - name: /etc/hosts
-      - append_if_not_found: true
-      - pattern: |
-          ^.*{{ saltshort }}.*{{ saltshort }}.*
-    
-      - repl: |
-          {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
-    
+adding-salt-master-to-hosts:
+  file.replace:
+    - name: /etc/hosts
+    - append_if_not_found: true
+    - pattern: |
+        ^.*{{ saltshort }}.*{{ saltshort }}.*
+  
+    - repl: |
+        {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
+  
       {% endif %}
     {% endfor %}
   {% endif %}
