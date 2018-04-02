@@ -22,9 +22,10 @@ include:
     - contents: |
         DOCKER_OPTIONS="{{ settings.options|d('') }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
-  {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
-        {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
-  {%- endfor %}
+        http_proxy="{{ salt['pillar.get']('http_proxy') }}"
+{%- endif %}
+{%- if salt['pillar.get']('no_proxy', '') != '' %}
+        no_proxy="{{ salt['pillar.get']('no_proxy') }}"
 {%- endif %}
 
 docker-requisites:

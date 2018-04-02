@@ -1,15 +1,16 @@
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
-After=network.target docker.socket
+After=network-online.target docker.socket firewalld.service
+Wants=network-online.target
 Requires=docker.socket
 
 [Service]
+EnvironmentFile=-/etc/default/docker
 Type=notify
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
-EnvironmentFile=/etc/default/docker
 ExecStart=/usr/bin/dockerd -H fd:// $DOCKER_OPTIONS
 ExecReload=/bin/kill -s HUP $MAINPID
 # Having non-zero Limit*s causes performance problems due to accounting overhead
@@ -25,6 +26,10 @@ TimeoutStartSec=0
 Delegate=yes
 # kill only the docker process, not all processes in the cgroup
 KillMode=process
+# restart the docker process if it exits prematurely
+Restart=on-failure
+StartLimitBurst=3
+StartLimitInterval=60s
 
 [Install]
 WantedBy=multi-user.target
