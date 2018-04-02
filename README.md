@@ -32,11 +32,12 @@ it lacks documentation beside a few README.md.
  
 * Other states to look at:
     * [tools](tools): command line tools for administration
-    * [hardware](hardware)
-    * [kernel](kernel)
-    * [libvirt](libvirt)
-    * [docker](docker)
-    * [lxd](lxd)
+    * [hardware](hardware): custom hardware setup
+    * [kernel](kernel): kernel image,headers,tools
+    * [libvirt](libvirt): libvirt/qemu/kvm setup
+    * [docker](docker): docker production installation
+    * [lxd](lxd): lxd production installation
+    * [dehydrated](dehydrated): manage letsencrypt certificates
     
     * [golang](golang)
     * [python](python)
