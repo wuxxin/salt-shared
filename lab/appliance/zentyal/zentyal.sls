@@ -1,11 +1,17 @@
 include:
   - lab.appliance.zentyal.base
-  - lab.appliance.zentyal.apache
-  
+
+{# ### apache #}  
 {# XXX activate needed apache modules early in setup, so apache is config is valid, and service is available for letsencrypt #}
+/etc/apache2/mods-available/ssl.conf:
+  file.managed:
+    - source: salt://lab/appliance/zentyal/files/ssl.conf
+    - require_in:
+      - file: zentyal-apache-enable-ssl-conf
+ 
 {% for i in ['proxy', 'proxy_http', 'headers', 'ssl'] %}
   {% for j in ['conf', 'load'] %}
-zentyal-apache-enable-{{ i }}:
+zentyal-apache-enable-{{ i }}-{{ j }}:
   file.symlink:
     - name: /etc/apache2/mods-enabled/{{ i }}.{{ j }}
     - target: ../mods-available/{{ i }}.{{ j }}
@@ -15,7 +21,7 @@ zentyal-apache-enable-{{ i }}:
       - pkg: zentyal
   {% endfor %}
 {% endfor %}
-
+    
 zentyal-apache-restart-module-config:
   service.running:
     - name: apache2
@@ -23,6 +29,7 @@ zentyal-apache-restart-module-config:
     - require:
       - pkg: zentyal
 
+{# ### nslookup for salt via /etc/hosts #}
 {# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
 {% if grains['master'] != '' %}
   {% set saltshort = grains['master'] %}
@@ -70,7 +77,7 @@ sogo-tmpreaper:
 
 
 {# ### hooks #}
-{% for n in ['mail', 'samba'] %}
+{% for n in ['mail', 'samba', 'sogo'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf

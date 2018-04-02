@@ -1,6 +1,6 @@
 #!/bin/bash
-
 # This is a postsetconf script for zentyal
+
 msub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
 }
@@ -10,57 +10,59 @@ ssub() {
 }
 
 {%- if salt['pillar.get']('appliance:zentyal:letsencrypt:enabled', false) %}
-{%- set letsencrypt = true %}
-{%- set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
+  {%- set letsencrypt = true %}
+  {%- set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
 {%- else %}
-{%- set letsencrypt= false %}
-{%- set domain = pillar.appliance.zentyal.domain %}
+  {%- set letsencrypt= false %}
+  {%- set domain = pillar.appliance.zentyal.domain %}
 {%- endif %}
 
-
 # postfix domain, cert, key, dhparam
-cat /etc/postfix/main.cf | 
+configfile=/etc/postfix/main.cf
+cat $configfile | 
 {%- if letsencrypt %}
   ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /app/etc/server.cert.pem' |
   ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /app/etc/server.key.pem' |
   ssub '.*smtpd_tls_dh1024_param_file[\t ]*=.*' 'smtpd_tls_dh1024_param_file= /app/etc/dhparam.pem' |
 {%- endif %}
   ssub '^myhostname.*' 'myhostname = {{ domain }}' |
-  cat > /etc/postfix/main.cf.new
-rm /etc/postfix/main.cf; mv /etc/postfix/main.cf.new /etc/postfix/main.cf
-
+  cat > $configfile.new
+mv $configfile.new $configfile
 
 # dovecot domain, cert, key and dhparam
-cat /etc/dovecot/dovecot.conf |
+configfile=/etc/dovecot/dovecot.conf
+cat $configfile |
 {%- if letsencrypt %}
   ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /app/etc/server.cert.pem' |
   ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< /app/etc/server.key.pem' |
   ssub '.*ssl_dh[\t ]*=.*' 'ssl_dh = </app/etc/dhparam.pem' |
 {%- endif %}
-cat > /etc/dovecot/dovecot.conf.new
-rm /etc/dovecot/dovecot.conf; mv /etc/dovecot/dovecot.conf.new /etc/dovecot/dovecot.conf
+cat > $configfile.new
+mv $configfile.new $configfile
 
-
-# opendkim domain and dkim key
-local restart_opendkim=false
-sed -i.bak  "s/^Domain.*/Domain                 {{ domain }}/" /etc/opendkim.conf
-if ! diff -q /etc/opendkim.conf.bak /etc/opendkim.conf; then
+# openkdim domain, dkim key
+restart_opendkim=false
+# opendkim domain
+configfile=/etc/opendkim.conf
+sed -i.bak  "s/^Domain.*/Domain                 {{ domain }}/" $configfile
+if ! diff -q $configfile.bak $configfile; then
     echo "opendkim.conf changed"
-    diff -u /etc/opendkim.conf.bak /etc/opendkim.conf
+    diff -u $configfile.bak $configfile
     restart_opendkim=true
 fi
+# opendkim dkim key
 if test ! -d /etc/dkimkeys; then mkdir /etc/dkimkeys; fi
-echo "{{ salt['pillar.get']('appliance:zentyal:dkim:key') }}" > /etc/dkimkeys/dkim.key.new
-chown opendkim /etc/dkimkeys/dkim.key.new
-chmod "0600" /etc/dkimkeys/dkim.key.new
-if ! diff -q /etc/dkimkeys/dkim.key /etc/dkimkeys/dkim.key.new; then
-    echo "/etc/dkimkeys/dkim.key changed"
-    mv /etc/dkimkeys/dkim.key.new /etc/dkimkeys/dkim.key
+configfile=/etc/dkimkeys/dkim.key
+echo "{{ salt['pillar.get']('appliance:zentyal:dkim:key') }}" > $configfile.new
+chown opendkim $configfile.new
+chmod "0600" $configfile.new
+if ! diff -q $configfile $configfile.new; then
+    echo "$configfile changed"
+    mv $configfile.new $configfile
     restart_opendkim=true
 fi
 if $restart_opendkim; then
     systemctl restart opendkim
 fi
     
-
 exit 0
