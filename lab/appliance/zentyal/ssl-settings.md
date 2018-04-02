@@ -41,18 +41,19 @@ ssl_stapling on;
 ssl_stapling_verify on;
 ```
 
-## dovecot
+## dovecot 2.2.22
 
 ```
 # dovecot ssl setup
 ssl = yes
-ssl_cert =</app/etc/server.cert.pem
-ssl_key =</app/etc/server.key.pem
+ssl_cert = </etc/dovecot/private/dovecot.pem
+ssl_key = </etc/dovecot/private/dovecot.pem
 # DH parameters length to use.
 ssl_dh_parameters_length = 2048
-ssl_dh = </app/etc/dhparam.pem
+# XXX ssl_dh will be set in mail.postsetconf
+#ssl_dh = </app/etc/dhparam.pem
 # SSL protocols to use
-ssl_protocols = all -SSLv3 -SSLv2 -TLSv1
+ssl_protocols = TLSv1.2, TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 # SSL ciphers to use
 ssl_cipher_list = ALL:!LOW:!SSLv2:!SSLv3:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!3DES:!PSK
 # Prefer the server's order of ciphers over client's.
@@ -62,26 +63,42 @@ ssl_prefer_server_ciphers = yes
 ssl_options = no_compression
 ```
 
-## postfix
+## postfix 3.1.0-3ubuntu0.3
 
 ```
+# TLS/SSL
+# enforce the server cipher preference
+tls_preempt_cipherlist = yes
+
+# TLS/SSL Incoming
+smtpd_use_tls = yes
+smtpd_tls_key_file  = <% $keyFile  %>
+smtpd_tls_cert_file = <% $certFile %>
+# dhparam takes >= 1024bit (eg.2048) dhparam file
+# XXX smtpd_tls_dh1024 will be set in mail.postsetconf
+#smtpd_tls_dh1024_param_file = /app/etc/dhparam.pem
+
 smtpd_tls_eecdh_grade = strong
 smtpd_tls_security_level = may
-smtpd_tls_protocols = all -SSLv2 -SSLv3 -TLSv1
+smtpd_tls_protocols = TLSv1.2, TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 smtpd_tls_ciphers = medium
-smtpd_tls_mandatory_protocols = all -SSLv2 -SSLv3 -TLSv1
+smtpd_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, 3DES, PSK
+smtpd_tls_mandatory_protocols = TLSv1.2, !TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 smtpd_tls_mandatory_ciphers = high
 smtpd_tls_mandatory_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, 3DES, PSK
 smtpd_tls_received_header = yes
 smtpd_tls_loglevel = 1
 
+# TLS Outgoing
 smtp_use_tls=yes
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_security_level = may
-smtp_tls_protocols = all -SSLv2 -SSLv3 -TLSv1
+smtp_tls_protocols = TLSv1.2, TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 smtp_tls_ciphers = medium
-smtp_tls_mandatory_protocols = all -SSLv2 -SSLv3 -TLSv1
+smtp_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, 3DES, PSK
+smtp_tls_mandatory_protocols = TLSv1.2, !TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 smtp_tls_mandatory_ciphers = high
 smtp_tls_mandatory_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, 3DES, PSK
 smtp_tls_loglevel = 1
+
 ```

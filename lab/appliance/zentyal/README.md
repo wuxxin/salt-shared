@@ -23,6 +23,14 @@ Zentyal 5.1 Mailserver with the following additions:
 + use rspamd instead of spamassassin
 + use email autoconfig 
 
+## client
+
+imap: username: username@domainname
+smtp: username: username@domainname
+File:new calender: in the network: format: faldav, offline_support=true
+url: https://hostname/SOGo/dav/username@domainname/Calendar/personal
+file:new remote addressbook: https://hostname/SOGo/dav/username@domainname/Contacts/personal
+
 ## pillar example
 
 ```

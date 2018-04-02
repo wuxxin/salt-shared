@@ -102,7 +102,7 @@ ssl_dh_parameters_length = 2048
 # XXX ssl_dh will be set in mail.postsetconf
 #ssl_dh = </app/etc/dhparam.pem
 # SSL protocols to use
-ssl_protocols = all -SSLv3 -SSLv2 -TLSv1
+ssl_protocols = TLSv1.2, TLSv1.1, !TLSv1, !SSLv3, !SSLv2
 # SSL ciphers to use
 ssl_cipher_list = ALL:!LOW:!SSLv2:!SSLv3:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!3DES:!PSK
 # Prefer the server's order of ciphers over client's.

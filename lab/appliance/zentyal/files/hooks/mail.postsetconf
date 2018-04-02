@@ -38,7 +38,7 @@ if test -f "$configfile"; then
     cat $configfile |
       ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /app/etc/server.cert.pem' |
       ssub '.*ssl_key[\t ]*=.*' 'ssl_key =< /app/etc/server.key.pem' |
-      ssub '.*ssl_dh[\t ]*=.*' 'ssl_dh = </app/etc/dhparam.pem' |
+      ssub '.*ssl_dh[\t ]*=.*' '# ssl_dh = </app/etc/dhparam.pem' |
       cat > $configfile.new
     mv $configfile.new $configfile
 fi
