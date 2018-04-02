@@ -5,4 +5,5 @@ simple_metric letsencrypt_last_update counter "timestamp-epoch-seconds since las
 doveadm reload
 postfix reload
 apache2ctl graceful
-systemctl reload nginx
+nginx -c /var/lib/zentyal/conf/nginx.conf -s reload
+
