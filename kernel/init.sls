@@ -52,7 +52,7 @@ linux-image:
     {%- else %}
       - {{ settings.virtual }}
     {%- endif %}
-    - {{ settings.tools }}
-    - {{ settings.headers }}
+      - {{ settings.tools }}
+      - {{ settings.headers }}
   {%- endif %}
 {%- endif %}
