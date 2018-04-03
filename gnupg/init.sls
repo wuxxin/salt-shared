@@ -2,7 +2,6 @@ gnupg:
   pkg.installed:
     - pkgs:
       - gnupg
-      - gnupg2
       - gnupg-agent
 
 /usr/local/bin/gpgutils.py:

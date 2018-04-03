@@ -15,7 +15,7 @@ import sys, os, subprocess, tempfile, re, inspect, pydoc
 
 
 def _gpgname():
-    GPG_EXECUTABLE = 'gpg2'
+    GPG_EXECUTABLE = 'gpg'
     if os.environ.get('GPG_EXECUTABLE'):
         GPG_EXECUTABLE = os.environ['GPG_EXECUTABLE']
     return GPG_EXECUTABLE
@@ -158,7 +158,7 @@ gpg --fingerprint --with-colons --list-keys |
     if returncode != 0:
         raise IOError('gpg returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
 """
-    pass
+    raise RuntimeError
 
 
 def publickey_list(gpghome):
