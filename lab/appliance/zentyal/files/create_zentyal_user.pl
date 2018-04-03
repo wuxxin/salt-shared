@@ -4,22 +4,22 @@ use strict;
 use warnings;
 
 use EBox;
-use EBox::Users::User;
+use EBox::Samba::User;
 
 EBox::init();
 
-my $parent = EBox::Users::User->defaultContainer();
+my $parent = EBox::Samba::User->defaultContainer();
 
 open (my $USERS, '<-');
 
 while (my $line = <$USERS>) {
     chomp ($line);
     my ($username, $givenname, $surname, $password) = split(',', $line);
-    EBox::Users::User->create(
-        uid => $username,
+    EBox::Samba::User->create(
+        samAccountName => $username,
         parent => $parent,
-        givenname => $givenname,
-        surname => $surname,
+        givenName => $givenname,
+        sn => $surname,
         password => $password
     );
 }

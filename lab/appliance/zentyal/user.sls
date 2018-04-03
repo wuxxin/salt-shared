@@ -2,24 +2,50 @@ include:
   - lab.appliance.zentyal.base
   - lab.appliance.zentyal.zentyal
 
-# ### user creation
-/usr/local/sbin/create_zentyal_user.pl:
+{% for f in ['create_zentyal_user.pl', 'list_zentyal_users.pl'] %}
+/usr/local/sbin/{{ f }}:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/create_zentyal_user.pl
+    - source: salt://lab/appliance/zentyal/files/{{ f }}
     - mode: "0755"
     - require:
       - sls: lab.appliance.zentyal.base
+    #     - require_in:
+    #      - cmd: create_zentyal_user
+
+{% endfor %}
 
 {% if pillar.appliance.zentyal.user|d(false) %}
-  {% for n,v in pillar.appliance.zentyal.user.iteritems() %}
+# ### user creation
+{% endif %}
 
-create_zentyal_user_{{ n }}:
-  cmd.run:
-    - name: echo "{{ v|join(',') }}" | /usr/local/sbin/create_zentyal_user.pl
-    - unless: /usr/share/zentyal/shell 'instance users; exit 1 if not $users->userExists("{{ n }}");'
+
+{% if pillar.appliance.zentyal.sync|d(false) %}
+{# ### imap mail migration #}
+offlineimap:
+  pkg:
+    - installed
+
+/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimaprc:
+  file.managed:
+    - source: {{ pillar.appliance.zentyal.sync.config }}
+    - template: jinja
+    - user: {{ pillar.appliance.zentyal.admin.user }}
+    - context:
+        sync_sets: {{ pillar.appliance.zentyal.sync.set }}
+        functions: {{ pillar.appliance.zentyal.sync.functions}}
     - require:
-      - sls: lab.appliance.zentyal.zentyal
-      - file: /usr/local/sbin/create_zentyal_user.pl
+      - pkg: offlineimap
+      - pkg: zentyal
 
-  {% endfor %}
+/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/{{ pillar.appliance.zentyal.sync.functions.name }}:
+  file.managed:
+    - source: {{ pillar.appliance.zentyal.sync.functions.source }}
+    - template: jinja
+    - user: {{ pillar.appliance.zentyal.admin.user }}
+    - makedirs: true
+    - require:
+      - pkg: offlineimap
+      - pkg: zentyal
+      - user: zentyal-admin-user
+
 {% endif %}

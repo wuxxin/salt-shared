@@ -8,15 +8,21 @@ Zentyal 5.1 Mailserver with the following additions:
 
 ## FIXME
 
++ local user should have maildir
++ 
++ storage: 
+  + add /data storage volume
+  + move /var/backups, cache, crash, lib, local, log, mail, opt, snap, spool, tmp, vmail, www to /data/var/*
+  + move /tmp to /data/tmp
+  
 + /var/lib/zentyal/.first is flag
-+ make stubs and postsetconf working
-+ kernelmodules for firewall
++ samba bind to localhost: smbd (445,139), nmbd (137,138)
++ ntp not working in lxc ?
++ firewall: kernelmodules
     8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp 
     nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp 
     nf_conntrack_sip nf_nat_sip
-+ ntp not working in lxc ?
-+ testing: set_nt_acl: chown /var/lib/samba/sysvol
-+ samba bind to localhost: smbd (445,139), nmbd (137,138)
++ firewall no /proc/sys/net/ipv4/tcp_syncookies
 
 ## todo
 + use wkd-hosting: https://wiki.gnupg.org/WKDHosting
@@ -74,6 +80,12 @@ appliance:
 ```
 
 ## Toolbox
+
+get all config vars:
+```
+cd /usr/share/perl5/EBox
+grep -E "EBox::Config::(boolean|configkey)" -R * | sed -r "s#^([^./]+).+::Config::([^(]+)\('?([^')]+).*#\1:\3 (\2)#g" | sort > ~/zentyal-config.txt
+```
 
 fix_mailfilter:
   cmd.run:

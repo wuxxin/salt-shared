@@ -3,6 +3,8 @@ include:
   - ubuntu
 
 {# ### templates #}
+{# configure templates first, so they are already available on the first template execution run #}
+
 {% for n in ['core/nginx.conf.mas',
   'mail/main.cf.mas', 'mail/dovecot.conf.mas',
   'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
@@ -17,6 +19,7 @@ include:
 zentyal:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
+    - file: /etc/apt/sources.list.d/zentyal-xenial.list
     - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
@@ -40,7 +43,7 @@ zentyal:
     - require:
       - sls: appliance
 
-{# XXX samba breaks on lxc/lxd because of xattr container limits #}
+{# XXX workaround for samba AD needing ext_attr security support not available in an lxc/lxd unprivileged container, this will get overwritten on pkg python-samba update #}
 patch-ntacls.py:
   file.managed:
     - name: /usr/lib/python2.7/dist-packages/samba/ntacls.py

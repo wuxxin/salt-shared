@@ -28,8 +28,42 @@ zentyal-apache-restart-module-config:
     - require:
       - pkg: zentyal
 
+{# XXX disable mk_home (tries chown +1234:+1234 but "+" is unsupported) #}
+/etc/zentyal/users.conf:
+  file.managed:
+    - contents: |
+        # CUSTOMIZE-ZENTYAL-BEGIN
+        # whether to create user homes or not
+        mk_home = no
+        # default mode for home directory (umask mode)
+        dir_umask = 0077
+        # enable quota support
+        enable_quota = no
+        # CUSTOMIZE-ZENTYAL-END
+
+/etc/zentyal/firewall.conf:
+  file.managed:
+    - contents: |
+        # CUSTOMIZE-ZENTYAL-BEGIN
+        # Limit of logged packets per minute.
+        iptables_log_limit = 50
+        # Burst
+        iptables_log_burst = 10
+        # Logs all the drops
+        iptables_log_drops = yes
+        # Extra iptables modules to load
+        # Each module should be sperated by a comma, you can include module parameters
+        iptables_modules = 
+        # Enable source NAT, if your router does NAT you can disable it
+        nat_enabled = no
+        # Uncomment the following to show the from External to Internal section
+        #show_ext_to_int_rules = yes
+        # Uncomment the following to show the Rules added by Zentyal services
+        #show_service_rules = yes
+        # CUSTOMIZE-ZENTYAL-END
+      
 {# ### hooks #}
-{% for n in ['mail', 'samba', 'sogo'] %}
+{% for n in ['core', 'mail', 'sogo'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
@@ -76,34 +110,3 @@ sogo-tmpreaper:
     - backup: false
     - require:
       - pkg: zentyal
-
-
-{% if pillar.appliance.zentyal.sync|d(false) %}
-{# ### imap mail migration #}
-offlineimap:
-  pkg:
-    - installed
-
-/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimaprc:
-  file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.config }}
-    - template: jinja
-    - user: {{ pillar.appliance.zentyal.admin.user }}
-    - context:
-        sync_sets: {{ pillar.appliance.zentyal.sync.set }}
-        functions: {{ pillar.appliance.zentyal.sync.functions}}
-    - require:
-      - pkg: offlineimap
-      - pkg: zentyal
-
-/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/{{ pillar.appliance.zentyal.sync.functions.name }}:
-  file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.functions.source }}
-    - template: jinja
-    - user: {{ pillar.appliance.zentyal.admin.user }}
-    - makedirs: true
-    - require:
-      - pkg: offlineimap
-      - pkg: zentyal
-      - user: zentyal-admin-user
-{% endif %}

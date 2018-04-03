@@ -20,23 +20,6 @@ use EBox::Gettext;
     browseable = no
     create mask = 0611
     directory mask = 0711
-% my $rb = ($recycle xor defined($recycle_exceptions->{'users'}));
-% my $objects = 'acl_tdb';
-% unless ($disableFullAudit) {
-%   $objects .= ' full_audit';
-% }
-% if ($rb) {
-%   $objects .= ' recycle';
-% }
-    vfs objects = <% $objects %>
-    full_audit:success = connect opendir disconnect unlink mkdir rmdir open rename
-    full_audit:failure = connect opendir disconnect unlink mkdir rmdir open rename
-% if ($rb) {
-%   foreach my $key (keys %{$recycle_config}) {
-%       next unless $key;
-    recycle: <% $key %> = <% $recycle_config->{$key} %>
-%   }
-% }
 
 # <% @shares ? "Shares\n" : "No shares configured" %>
 % foreach my $share (@shares) {

@@ -19,6 +19,7 @@ use EBox::Gettext;
 </%init>
 [global]
     vfs objects = acl_tdb
+    # XXX acl_attr is not available under lxd
     workgroup = <% $workgroup %>
     realm = <% $realm %>
     netbios name = <% $netbiosName %>
@@ -38,7 +39,8 @@ use EBox::Gettext;
     template shell = <% $shell %>
     template homedir = /home/%U
 
-% if ($ifaces) {
+    # XX hardcode interface list to not listen on network
+%if ($ifaces) {
     interfaces = <% $ifaces %>
     bind interfaces only = yes
 % }
