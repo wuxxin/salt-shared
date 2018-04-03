@@ -9,7 +9,7 @@ Zentyal 5.1 Mailserver with the following additions:
 ## FIXME
 
 + local user should have maildir
-+ 
++ ssl on port 465 (postfix smtps)
 + storage: 
   + add /data storage volume
   + move /var/backups, cache, crash, lib, local, log, mail, opt, snap, spool, tmp, vmail, www to /data/var/*
