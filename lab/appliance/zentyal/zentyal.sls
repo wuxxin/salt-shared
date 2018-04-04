@@ -63,7 +63,7 @@ zentyal-apache-restart-module-config:
         # CUSTOMIZE-ZENTYAL-END
       
 {# ### hooks #}
-{% for n in ['core', 'mail', 'sogo'] %}
+{% for n in ['webadmin', 'mail', 'sogo'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf

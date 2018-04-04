@@ -11,11 +11,18 @@ Zentyal 5.1 Mailserver with the following additions:
 + local user should have maildir
 + ssl on port 465 (postfix smtps)
 + storage: 
-  + add /data storage volume
-  + move /var/backups, cache, crash, lib, local, log, mail, opt, snap, spool, tmp, vmail, www to /data/var/*
-  + move /tmp to /data/tmp
-  
+  + add /opt storage volume
+  + move /var/backups, cache, crash, lib, local, log, mail, opt, snap, spool, tmp, vmail, www to /opt/var/*
+  + move /tmp to /opt/tmp
+  + root to sentry mail service
 + /var/lib/zentyal/.first is flag
+  + disable quota on first startup
+  + add virtual mail domain (domain part of fqdn)
+    + add virtual alias domain (fqdn) for receiving also c.ep3.at 
+  + provision samba
+  + disable plain pop3,imap
+  + retrieve external mail
+
 + samba bind to localhost: smbd (445,139), nmbd (137,138)
 + ntp not working in lxc ?
 + firewall: kernelmodules

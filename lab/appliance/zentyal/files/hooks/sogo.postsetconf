@@ -23,8 +23,8 @@ configfile=/etc/apache2/sites-available/default-ssl.conf
 {%- if letsencrypt %}
 if test -f "$configfile"; then
     cat $configfile | 
-      ssub '^([\t ]*)#?[\t ]*(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |
-      ssub '^([\t ]*)#?[\t ]*(SSLCertificateKeyFile)[\t ]+/.+' '\1\2 /app/etc/server.key.pem' |
+      ssub '([\t ]*)(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |
+      ssub '([\t ]*)(SSLCertificateKeyFile)[\t ]+/.+' '\1\2 /app/etc/server.key.pem' |
       cat > ${configfile}.new
     mv ${configfile}.new ${configfile}
 fi
