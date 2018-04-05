@@ -51,9 +51,9 @@ if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
 fi
 
 echo "restore files and database dump from backup"
-gosu duplicity duply /var/spool/duplicity/.duply/appliance-backup restore /data/restore
+gosu duplicity duply /var/lib/duplicity/.duply/appliance-backup restore /data/restore
 # add last backup config to cachedir, so we can detect if backup url has changed
-cp /var/spool/duplicity/.duply/appliance-backup/conf  /var/spool/duplicity/.duply/appliance-backup/conf.last
+cp /var/lib/duplicity/.duply/appliance-backup/conf  /var/lib/duplicity/.duply/appliance-backup/conf.last
 
 # test if appliance:backup:mount:type is set, unmount backup storage
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then

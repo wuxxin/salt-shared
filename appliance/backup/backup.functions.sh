@@ -45,8 +45,8 @@ unmount_backup_target() {
 
 create_backup_config() {
     # create ready to use $gpgdir for backup being done using duplicity
-    local gpgdir=/var/spool/duplicity/.gnupg
-    local confdir=/var/spool/duplicity/.duply/appliance-backup
+    local gpgdir=/var/lib/duplicity/.gnupg
+    local confdir=/var/lib/duplicity/.duply/appliance-backup
     local cachedir=/var/cache/duplicity/duply_appliance-backup
     
     install -g duplicity -o duplicity -m 700 -d $gpgdir

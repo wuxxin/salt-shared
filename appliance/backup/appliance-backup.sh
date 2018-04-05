@@ -5,7 +5,7 @@
 
 # remember start time
 start_epoch_seconds=$(date +%s)
-confdir=/var/spool/duplicity/.duply/appliance-backup
+confdir=/var/lib/duplicity/.duply/appliance-backup
 
 backup_hook prefix_mount
 if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
