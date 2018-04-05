@@ -45,6 +45,15 @@ kernel.dmesg_restrict:
 
 {%- endif %}
 
+lxd_prerequisites:
+  pkg.installed:
+    - pkgs:
+      - lxc
+      - lvm2
+      - thin-provisioning-tools
+      - bridge-utils
+      - ebtables
+      - criu
 
 lxd:
   file.managed:
@@ -53,19 +62,18 @@ lxd:
 {{ settings|yaml(false)|indent(8,True) }}
   pkg.installed:
     - pkgs:
-      - lxc
       - lxd
+      - lxd-client
       - lxd-tools
-      - lvm2
-      - thin-provisioning-tools
-      - criu
-      - bridge-utils
+    - fromrepo: xenial-backports
+    - require:
+      - sls: ubuntu.backports
   service.running:
     - enable: True
     - require:
+      - pkg: lxd_prerequisites
       - pkg: lxd
       - sls: kernel.cgroup
-      - sls: ubuntu.backports
   cmd.run:
     - name: lxd init --preseed < /etc/lxd.yaml
     - onchanges:
