@@ -10,17 +10,9 @@ ssub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
 }
 
-{%- if salt['pillar.get']('appliance:zentyal:letsencrypt:enabled', false) %}
-  {%- set letsencrypt = true %}
-  {%- set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
-{%- else %}
-  {%- set letsencrypt= false %}
-  {%- set domain = pillar.appliance.zentyal.domain %}
-{%- endif %}
-
 # apache2 cert+dhparam and key
 configfile=/etc/apache2/sites-available/default-ssl.conf
-{%- if letsencrypt %}
+{%- if settings.letsencrypt.enabled %}
 if test -f "$configfile"; then
     cat $configfile | 
       ssub '([\t ]*)(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |

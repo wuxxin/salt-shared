@@ -22,7 +22,10 @@ Zentyal 5.1 Mailserver with the following additions:
   + provision samba
   + disable plain pop3,imap
   + retrieve external mail
-
++ thunderbird/lightning: Can't dismiss missed reminders for recurring events (CalDAV)
+    + https://bugzilla.mozilla.org/show_bug.cgi?id=769118
+    + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068
+     
 + samba bind to localhost: smbd (445,139), nmbd (137,138)
 + ntp not working in lxc ?
 + firewall: kernelmodules

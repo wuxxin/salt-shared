@@ -2,8 +2,7 @@ include:
   - dehydrated
   - lab.appliance.zentyal.base
 
-{% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
-
+{% from "dehydrated/defaults.jinja" import letsencrypt with context %}
 {% set firstdomain = letsencrypt.domains[0].split(' ')[0] %}
 
 zentyal-dehydrated-hook:

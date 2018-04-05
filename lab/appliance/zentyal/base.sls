@@ -1,3 +1,5 @@
+{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+
 include:
   - appliance
   - ubuntu
@@ -15,6 +17,24 @@ include:
     - require_in:
       - pkg: zentyal
 {% endfor %}
+
+zentyal-requisites:
+  pkg.installed:
+    - pkgs:
+      - bridge-utils
+      
+samba-network:
+  network.managed:
+    - name: sambabr0
+    - type: bridge
+    - enabled: true
+    - ports: none
+    - proto: static
+    - ipaddr: {{ settings.samba.bridge.ipaddr }}
+    - netmask: {{ settings.samba.bridge.netmask }}
+    - stp: off
+    - require:
+      - pkg: zentyal-requisites
 
 zentyal:
   pkgrepo.managed:
@@ -35,13 +55,16 @@ zentyal:
       - zentyal-sogo
       - zentyal-antivirus
       - zentyal-mailfilter
-{%- for i in salt['pillar.get']('appliance:zentyal:languages', []) %}
+{%- if settings.languages %}
+{%- for i in settings.languages %}
 {%- if i != 'en' %}
       - language-pack-zentyal-{{ i }}
 {%- endif %}
 {%- endfor %}
+{%- endif %}
     - require:
       - sls: appliance
+      - network: samba-network
 
 {# XXX workaround for samba AD needing ext_attr security support not available in an lxc/lxd unprivileged container, this will get overwritten on pkg python-samba update #}
 patch-ntacls.py:
@@ -54,14 +77,16 @@ patch-ntacls.py:
     - onchanges:
       - file: patch-ntacls.py
 
+{%- set password= settings.admin.password or salt['cmd.run_stdout']('openssl rand 8 -hex') %}
+
 zentyal-admin-user:
   user.present:
-    - name: {{ pillar.appliance.zentyal.admin.user }}
+    - name: {{ settings.admin.user }}
     - groups:
       - adm
       - sudo
     - remove_groups: False
-    - password: {{ salt.shadow.gen_password(pillar.appliance.zentyal.admin.password) }}
+    - password: {{ salt.shadow.gen_password(password) }}
 
 set_os_extra:
   module.run:
@@ -71,11 +96,3 @@ set_os_extra:
     - require:
       - pkg: zentyal
 
-{# XXX only works on next run, because jinja is evaluated before state run #}
-set_zentyal_version:
-  module.run:
-    - name: grains.setval
-      key: zentyal_version
-      val: {{ salt['cmd.run_stdout']('dpkg -s zentyal | grep "^Version" | sed -re "s/Version:.(.+)/\\1/g"', python_shell=True) }}
-    - require:
-      - pkg: zentyal

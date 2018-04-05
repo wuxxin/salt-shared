@@ -9,31 +9,23 @@ ssub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
 }
 
-{%- if salt['pillar.get']('appliance:zentyal:letsencrypt:enabled', false) %}
-  {%- set letsencrypt = true %}
-  {%- set domain = salt['pillar.get']('appliance:zentyal:letsencrypt:domains', ['domain.not.set'])[0].split(' ')[0] %}
-{%- else %}
-  {%- set letsencrypt= false %}
-  {%- set domain = pillar.appliance.zentyal.domain %}
-{%- endif %}
-
 # postfix domain, cert, key, dhparam
 configfile=/etc/postfix/main.cf
 if test -f "$configfile"; then
     cat $configfile | 
-{%- if letsencrypt %}
+{%- if settings.letsencrypt %}
       ssub '.*smtpd_tls_cert_file[\t ]*=.*' 'smtpd_tls_cert_file = /app/etc/server.cert.pem' |
       ssub '.*smtpd_tls_key_file[\t ]*=.*' 'smtpd_tls_key_file = /app/etc/server.key.pem' |
       ssub '.*smtpd_tls_dh1024_param_file[\t ]*=.*' 'smtpd_tls_dh1024_param_file= /app/etc/dhparam.pem' |
 {%- endif %}
-      ssub '^myhostname.*' 'myhostname = {{ domain }}' |
+      ssub '^myhostname.*' 'myhostname = {{ settings.domain }}' |
       cat > $configfile.new
     mv $configfile.new $configfile
 fi
 
 # dovecot domain, cert, key and dhparam
 configfile=/etc/dovecot/dovecot.conf
-{%- if letsencrypt %}
+{%- if settings.letsencrypt %}
 if test -f "$configfile"; then
     cat $configfile |
       ssub '.*ssl_cert[\t ]*=.*' 'ssl_cert =< /app/etc/server.cert.pem' |
@@ -48,7 +40,7 @@ fi
 restart_opendkim=false
 # opendkim domain
 configfile=/etc/opendkim.conf
-sed -i.bak  "s/^Domain.*/Domain                 {{ domain }}/" $configfile
+sed -i.bak  "s/^Domain.*/Domain                 {{ settings.domain }}/" $configfile
 if ! diff -q $configfile.bak $configfile; then
     echo "opendkim.conf changed"
     diff -u $configfile.bak $configfile
@@ -57,7 +49,7 @@ fi
 # opendkim dkim key
 if test ! -d /etc/dkimkeys; then mkdir /etc/dkimkeys; fi
 configfile=/etc/dkimkeys/dkim.key
-echo "{{ salt['pillar.get']('appliance:zentyal:dkim:key') }}" > $configfile.new
+echo "{{ settings.dkim.key') }}" > $configfile.new
 chown opendkim $configfile.new
 chmod "0600" $configfile.new
 if ! diff -q $configfile $configfile.new; then

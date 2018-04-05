@@ -1,3 +1,5 @@
+{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+
 include:
   - lab.appliance.zentyal.base
 
@@ -68,6 +70,8 @@ zentyal-apache-restart-module-config:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
     - template: jinja
+    - defaults: 
+        settings: {{ settings }}
     - mode: "755"
     - makedirs: true
     

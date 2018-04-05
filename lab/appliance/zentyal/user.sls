@@ -1,3 +1,5 @@
+{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+
 include:
   - lab.appliance.zentyal.base
   - lab.appliance.zentyal.zentyal
@@ -14,34 +16,34 @@ include:
 
 {% endfor %}
 
-{% if pillar.appliance.zentyal.user|d(false) %}
+{% if settings.user|d(false) %}
 # ### user creation
 {% endif %}
 
 
-{% if pillar.appliance.zentyal.sync|d(false) %}
+{% if settings.sync|d(false) %}
 {# ### imap mail migration #}
 offlineimap:
   pkg:
     - installed
 
-/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimaprc:
+/home/{{ settings.admin.user }}/.offlineimaprc:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.config }}
+    - source: {{ settings.sync.config }}
     - template: jinja
-    - user: {{ pillar.appliance.zentyal.admin.user }}
+    - user: {{ settings.admin.user }}
     - context:
-        sync_sets: {{ pillar.appliance.zentyal.sync.set }}
-        functions: {{ pillar.appliance.zentyal.sync.functions}}
+        sync_sets: {{ settings.sync.set }}
+        functions: {{ settings.sync.functions}}
     - require:
       - pkg: offlineimap
       - pkg: zentyal
 
-/home/{{ pillar.appliance.zentyal.admin.user }}/.offlineimap/{{ pillar.appliance.zentyal.sync.functions.name }}:
+/home/{{ settings.admin.user }}/.offlineimap/{{ settings.sync.functions.name }}:
   file.managed:
-    - source: {{ pillar.appliance.zentyal.sync.functions.source }}
+    - source: {{ settings.sync.functions.source }}
     - template: jinja
-    - user: {{ pillar.appliance.zentyal.admin.user }}
+    - user: {{ settings.admin.user }}
     - makedirs: true
     - require:
       - pkg: offlineimap

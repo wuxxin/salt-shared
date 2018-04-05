@@ -1,3 +1,5 @@
+{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+
 include:
   -  lab.appliance.zentyal.base
 
@@ -9,7 +11,7 @@ opendkim:
     - require:
       - sls: lab.appliance.zentyal.base
 
-{%- set dkimkey= salt['pillar.get']('appliance:zentyal:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
+{%- set dkimkey= settings.dkim.key or salt['cmd.run_stdout']('openssl genrsa 2048') %}
 /etc/dkimkeys/dkim.key:
   file.managed:
     - user: opendkim
@@ -27,7 +29,7 @@ opendkim:
     - source: salt://lab/appliance/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
-        domain: {{ salt['pillar.get']('appliance:zentyal:domain') }}
+        domain: {{ settings.domain }}
     - require:
       - file: /etc/dkimkeys/dkim.key
 

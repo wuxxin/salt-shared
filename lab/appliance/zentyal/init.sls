@@ -1,8 +1,9 @@
+{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
 include:
   - lab.appliance.zentyal.base
   - lab.appliance.zentyal.zentyal
   - lab.appliance.zentyal.opendkim
-{%- if salt['pillar.get']('appliance:zentyal:letsencrypt:enabled', false) %}
+{%- if settings.letsencrypt.enabled %}
   - lab.appliance.zentyal.letsencrypt
 {% endif %}
   - lab.appliance.zentyal.user
