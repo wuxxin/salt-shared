@@ -6,9 +6,10 @@ include:
 
 shellcheck:
   pkg.installed:
+    - fromrepo: xenial-backports
     - require:
       - sls: ubuntu.backports
-
+    
 {% else %}
 
 shellcheck:
