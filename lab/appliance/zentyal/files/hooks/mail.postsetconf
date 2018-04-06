@@ -49,7 +49,7 @@ fi
 # opendkim dkim key
 if test ! -d /etc/dkimkeys; then mkdir /etc/dkimkeys; fi
 configfile=/etc/dkimkeys/dkim.key
-echo "{{ settings.dkim.key') }}" > $configfile.new
+echo "{{ settings.dkim.key }}" > $configfile.new
 chown opendkim $configfile.new
 chmod "0600" $configfile.new
 if ! diff -q $configfile $configfile.new; then

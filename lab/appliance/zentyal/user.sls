@@ -35,6 +35,7 @@ offlineimap:
     - context:
         sync_sets: {{ settings.sync.set }}
         functions: {{ settings.sync.functions}}
+        users: {{ settings.user }}
     - require:
       - pkg: offlineimap
       - pkg: zentyal
