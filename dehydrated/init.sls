@@ -9,6 +9,7 @@ dehydrated-user:
   user.present:
     - name: dehydrated
     - gid: dehydrated
+    - system: true
     - home: /usr/local/etc/dehydrated
     - shell: /bin/bash
     - remove_groups: False
