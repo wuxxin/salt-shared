@@ -10,24 +10,20 @@ Zentyal 5.1 Mailserver with the following additions:
 
 + local user should have maildir
 + ssl on port 465 (postfix smtps)
++ firewall: kernelmodules
+    + kernelmodules: 8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp nf_conntrack_sip nf_nat_sip
+    + firewall no /proc/sys/net/ipv4/tcp_syncookies
 + /var/lib/zentyal/.first is flag
-  + disable quota on first startup
+  + set disable quota
+  + set disable plain pop3,imap
+  + set retrieve external mail to true
   + add virtual mail domain (domain part of fqdn)
     + add virtual alias domain (fqdn) for receiving also c.ep3.at 
   + provision samba
-  + disable plain pop3,imap
-  + retrieve external mail
++ ntp not working in lxc ?
 + thunderbird/lightning: Can't dismiss missed reminders for recurring events (CalDAV)
     + https://bugzilla.mozilla.org/show_bug.cgi?id=769118
     + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068
-     
-+ samba bind to localhost: smbd (445,139), nmbd (137,138)
-+ ntp not working in lxc ?
-+ firewall: kernelmodules
-    8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp 
-    nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp 
-    nf_conntrack_sip nf_nat_sip
-+ firewall no /proc/sys/net/ipv4/tcp_syncookies
 
 ## todo
 + use wkd-hosting: https://wiki.gnupg.org/WKDHosting
