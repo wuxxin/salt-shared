@@ -10,11 +10,6 @@ Zentyal 5.1 Mailserver with the following additions:
 
 + local user should have maildir
 + ssl on port 465 (postfix smtps)
-+ storage: 
-  + add /opt storage volume
-  + move /var/backups, cache, crash, lib, local, log, mail, opt, snap, spool, tmp, vmail, www to /opt/var/*
-  + move /tmp to /opt/tmp
-  + root to sentry mail service
 + /var/lib/zentyal/.first is flag
   + disable quota on first startup
   + add virtual mail domain (domain part of fqdn)

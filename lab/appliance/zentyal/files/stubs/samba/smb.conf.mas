@@ -40,10 +40,13 @@ use EBox::Gettext;
     template homedir = /home/%U
 
     # XX hardcode interface list to not listen on network
-%if ($ifaces) {
-    interfaces = <% $ifaces %>
+    interfaces = lo sambabr0
     bind interfaces only = yes
-% }
+    
+    # if ($ifaces) {
+    # interfaces = <% $ifaces %>
+    # bind interfaces only = yes
+    # }
 
     map to guest = Bad User
 
