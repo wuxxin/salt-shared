@@ -72,7 +72,10 @@ zentyal-admin-user:
         # CUSTOMIZE-ZENTYAL-END
 
 {# ### create a private samba network so samba is not exposed on eth0 #}
-samba-network-definition:
+samba-network:
+  pkg.installed:
+    - pkgs:
+      - bridge-utils
   file.managed:
     - name: /etc/network/interfaces.d/90-samba-bridge.cfg
     - contents: |
@@ -83,28 +86,14 @@ samba-network-definition:
             bridge_ports none
             bridge_stp off
             bridge_maxwait 0
-
-samba-network:
-  pkg.installed:
-    - pkgs:
-      - bridge-utils
-  file.replace:
-    - name: /etc/network/interfaces
-    - pattern: |
-        ^.*source interfaces.d/90-samba-bridge.cfg
-    - repl: |
-        source interfaces.d/90-samba-bridge.cfg
-    - append_if_not_found: true
-    - backup: false
+            
     - require:
       - pkg: samba-network
-      - file: samba-network-definition
   cmd.run:
     - name: ifup sambabr0
     - unless: ifquery --read-environment --verbose --state sambabr0
-    - require:
+    - onchanges:
       - file: samba-network
-      
 
 {# ### disable warning flooding logs #}
 sogo-tmpreaper:

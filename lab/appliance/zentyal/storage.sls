@@ -10,10 +10,12 @@ directory:
     require_in:
       - file: "directory_/opt/lib"
       - file: "directory_/opt/spool"
-    require:
-      - sls: lab.appliance.zentyal.zentyal
   - name: /opt/lib
+    require:
+      - pkg: zentyal
   - name: /opt/spool
+    require:
+      - pkg: zentyal
 relocate:
   {%- for i in ['backups', 'mail', 'tmp', 'vmail', 'www'] %}  
   - source: /var/{{ i }}

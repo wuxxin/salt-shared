@@ -33,13 +33,6 @@ zentyal:
     - require:
       - sls: lab.appliance.zentyal.base
 
-  module.run:
-    - name: grains.setval
-      key: os_extra
-      val: zentyal
-    - require:
-      - pkg: zentyal
-
 
 {# XXX workaround for samba AD needing ext_attr security support not available in an lxc/lxd unprivileged container, this will get overwritten on pkg python-samba update #}
 patch-ntacls.py:
