@@ -474,13 +474,14 @@ relocate:
   {%- for item in input_data %}
     {%- set source= item.source %}
     {%- set target= item.target %}
+    {%- set targetbase = salt['file.dirname'](target) %}
     {%- set prefix= item.prefix|d(false) %}
     {%- set postfix= item.postfix|d(false) %}
     {%- if prefix %}
 "pre_rel_{{ source }}":
   cmd.run:
     - name: "{{ prefix }}"
-    - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
+    - onlyif: test -d {{ targetbase }} -a -e {{ source }} -a ! -L {{ source }}
     - require_in:
       - file: "rename_{{ source }}"
     {%- endif %}
@@ -489,7 +490,7 @@ relocate:
   file.rename:
     - name: {{ source }}.rename
     - source: {{ source }}
-    - onlyif: test -d {{ target }} -a -e {{ source }} -a ! -L {{ source }}
+    - onlyif: test -d {{ targetbase }} -a -e {{ source }} -a ! -L {{ source }}
     {%- for opt, optvalue in item.iteritems() %}
       {%- if opt not in ['source', 'target', 'prefix', 'postfix'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
@@ -499,7 +500,7 @@ relocate:
 "relocate_{{ source }}":
   cmd.run:
     - name: rsync -a  {{ source }}.rename {{ target }}
-    - onlyif: test -d {{ target }} -a -e {{ source }}.rename
+    - onlyif: test -d {{ targetbase }} -a -e {{ source }}.rename
     {%- for opt, optvalue in item.iteritems() %}
       {%- if opt not in ['source', 'target', 'prefix', 'postfix', 'require'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
