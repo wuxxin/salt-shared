@@ -1,14 +1,5 @@
 # ### bind
 
-{% if settings.dns:status', "absent") == "present" %}
-
-zentyal-dns:
-  pkg.installed:
-    - pkgs:
-      - zentyal-dns
-    - require:
-      - pkg: zentyal
-
 /etc/zentyal/hooks/dns.postsetconf:
   file.managed:
     - source: salt://lab/appliance/zentyal/dns/dns.postsetconf
@@ -46,5 +37,3 @@ zentyal-dns:
     {% endfor %}
   {% endif %}
 
-
-{% endif %}

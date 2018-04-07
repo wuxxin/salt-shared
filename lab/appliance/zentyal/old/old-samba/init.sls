@@ -1,14 +1,5 @@
 # ### samba
 
-{% if settings.samba:status', "absent") == "present" %}
-
-zentyal-samba:
-  pkg.installed:
-    - pkgs:
-      - zentyal-antivirus
-    - require:
-      - pkg: zentyal
-
 /var/lib/samba/private/dns_update_list.template:
   file.managed:
     - source: salt://lab/appliance/zentyal/samba/dns_update_list
@@ -31,8 +22,8 @@ zentyal-samba:
     - makedirs: true
     - template: jinja
     - context:
-        modify_smb: {{ settings.samba:modify_smb', []) }}
-        modify_shares: {{ settings.samba:modify_shares', []) }}
+        modify_smb: {{ settings.samba.modify_smb|d([]) }}
+        modify_shares: {{ settings.samba.modify_shares|d([]) }}
     - require:
       - pkg: zentyal-samba
       - file: /var/lib/samba/private/dns_update_list.template
