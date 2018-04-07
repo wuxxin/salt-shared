@@ -85,7 +85,7 @@ docker:
       - pkgrepo: docker
       - pkg: docker-requisites
       - file: /etc/apt/preferences.d/docker-preferences
-      - network: docker-network
+      - file: docker-network
   service.running:
     - enable: true
     - require:
