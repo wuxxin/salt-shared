@@ -57,8 +57,8 @@ relocate:
 
 pre_move_storage:
   cmd.run:
-    - name: zs stop; for i in {{ stop_service_list }}; do systemctl stop $i; done
+    - name: zs stop; for i in {{ stop_service_list }}; do systemctl stop $i || true ; done
       
 post_move_storage:
   cmd.run:
-    - name: for i in {{ start_service_list }}; do systemctl start $i; done; zs start
+    - name: for i in {{ start_service_list }}; do systemctl start $i || true; done; zs start
