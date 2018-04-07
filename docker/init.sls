@@ -35,19 +35,26 @@ docker-requisites:
       - systemd-docker
     - require:
       - sls: kernel.cgroup
-      
+
 docker-network:
-  network.managed:
-    - name: docker0
-    - type: bridge
-    - enabled: true
-    - ports: none
-    - proto: static
-    - ipaddr: {{ settings.ipaddr }}
-    - netmask: {{ settings.netmask }}
-    - stp: off
+  file.managed:
+    - name: /etc/network/interfaces.d/80-docker-bridge.cfg
+    - contents: |
+        auto docker0
+        iface docker0 inet static
+            address {{ settings.ipaddr }}
+            netmask {{ settings.netmask }}
+            bridge_ports none
+            bridge_stp off
+            bridge_maxwait 0
+
     - require:
       - pkg: docker-requisites
+  cmd.run:
+    - name: ifup docker0
+    - unless: ifquery --read-environment --verbose --state docker0
+    - onchanges:
+      - file: docker-network
 
 docker-service:
   file.managed:
