@@ -1,8 +1,8 @@
 {% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - lab.appliance.zentyal.base
   - lab.appliance.zentyal.zentyal
+  - lab.appliance.zentyal.storage
 
 {% for f in ['create_zentyal_user.pl', 'list_zentyal_users.pl'] %}
 /usr/local/sbin/{{ f }}:
@@ -10,15 +10,8 @@ include:
     - source: salt://lab/appliance/zentyal/files/{{ f }}
     - mode: "0755"
     - require:
-      - sls: lab.appliance.zentyal.base
-    #     - require_in:
-    #      - cmd: create_zentyal_user
-
+      - sls: lab.appliance.zentyal.zentyal
 {% endfor %}
-
-{% if settings.user|d(false) %}
-# ### user creation
-{% endif %}
 
 
 {% if settings.sync|d(false) %}
@@ -38,7 +31,7 @@ offlineimap:
         users: {{ settings.user }}
     - require:
       - pkg: offlineimap
-      - pkg: zentyal
+      - sls: lab.appliance.zentyal.zentyal
 
 /home/{{ settings.admin.user }}/.offlineimap/{{ settings.sync.functions.name }}:
   file.managed:
@@ -48,7 +41,13 @@ offlineimap:
     - makedirs: true
     - require:
       - pkg: offlineimap
-      - pkg: zentyal
-      - user: zentyal-admin-user
+      - sls: lab.appliance.zentyal.zentyal
 
+{% endif %}
+
+{% if settings.user|d(false) %}
+# ### user creation
+#     - require_in:
+#      - sls: lab.appliance.zentyal.zentyal
+#      - sls: lab.appliance.zentyal.storage
 {% endif %}

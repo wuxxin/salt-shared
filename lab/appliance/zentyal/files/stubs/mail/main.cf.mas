@@ -89,6 +89,9 @@ alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 local_recipient_maps = proxy:unix:passwd.byname $alias_maps
 
+# use Maildir type spool directories
+mail_spool_directory = /var/mail/
+
 relayhost = <% $relay %>
 
 % if ($relay) {

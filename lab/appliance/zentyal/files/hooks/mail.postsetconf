@@ -23,6 +23,23 @@ if test -f "$configfile"; then
     mv $configfile.new $configfile
 fi
 
+# postfix convert /var/mail/*mbox to *maildir
+basedir=/var/mail
+if ! find $basedir -maxdepth 1 -type f -exec false {} +; then
+    for i in $(find $basedir -maxdepth 1 -type f); do
+        original=$(basename $i)
+        if test "$original" = "${original%.renamed}"; then
+            mv $basedir/$original $basedir/${original}.renamed
+        else
+            original="${original%.renamed}"
+        fi
+        renamed="${original}.renamed"
+        echo "Converting mbox $original"
+        gosu $(stat -c "%U" $basedir/$renamed) /usr/local/bin/mb2md.pl -s $basedir/$renamed -d $basedir/$original
+        if test -f $basedir/$renamed; then rm $basedir/$renamed; fi
+    done
+fi
+
 # dovecot domain, cert, key and dhparam
 configfile=/etc/dovecot/dovecot.conf
 {%- if settings.letsencrypt %}

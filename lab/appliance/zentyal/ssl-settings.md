@@ -45,7 +45,7 @@ ssl_stapling_verify on;
 
 ```
 # dovecot ssl setup
-ssl = yes
+ssl = required
 ssl_cert = </etc/dovecot/private/dovecot.pem
 ssl_key = </etc/dovecot/private/dovecot.pem
 # DH parameters length to use.

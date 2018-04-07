@@ -1,6 +1,8 @@
+include:
+  - lab.appliance.zentyal.zentyal
+  
 {% from 'storage/lib.sls' import storage_setup %}
 
-# make directories and relocate files
 {% load_yaml as custom_storage %}
 directory:
   - name: /opt
@@ -8,6 +10,8 @@ directory:
     require_in:
       - file: "directory_/opt/lib"
       - file: "directory_/opt/spool"
+    require:
+      - sls: lab.appliance.zentyal.zentyal
   - name: /opt/lib
   - name: /opt/spool
 relocate:
@@ -42,8 +46,9 @@ relocate:
       - file: "directory_/opt/spool"
   {%- endfor %}
 {% endload %}
-{{ storage_setup(custom_storage) }}
 
+# make directories and relocate files
+{{ storage_setup(custom_storage) }}
 
 {% set stop_service_list  = "dovecot opendkim spamassassin clamav-freshclam redis mysql" %}
 {% set start_service_list = "mysql redis clamav-freshclam spamassassin opendkim dovecot" %}

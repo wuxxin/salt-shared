@@ -94,7 +94,7 @@ log_timestamp = "%Y-%m-%d %H:%M:%S "
 ## SSL settings
 ##
 
-ssl = yes
+ssl = required
 ssl_cert = </etc/dovecot/private/dovecot.pem
 ssl_key = </etc/dovecot/private/dovecot.pem
 # DH parameters length to use.

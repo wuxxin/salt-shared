@@ -3,8 +3,66 @@
 include:
   - lab.appliance.zentyal.base
 
+{# ### install zentyal packages #}
+zentyal:
+  pkgrepo.managed:
+    - name: deb http://archive.zentyal.org/zentyal 5.1 main
+    - file: /etc/apt/sources.list.d/zentyal-xenial.list
+    - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
+    - require:
+      - pkg: ppa_ubuntu_installer
+    - require_in:
+      - pkg: zentyal
+
+  pkg.installed:
+    - pkgs:
+      - zentyal
+      - zentyal-groupware
+      - zentyal-samba
+      - zentyal-mail
+      - zentyal-sogo
+      - zentyal-antivirus
+      - zentyal-mailfilter
+{%- if settings.languages %}
+{%- for i in settings.languages %}
+{%- if i != 'en' %}
+      - language-pack-zentyal-{{ i }}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+    - require:
+      - sls: lab.appliance.zentyal.base
+
+  module.run:
+    - name: grains.setval
+      key: os_extra
+      val: zentyal
+    - require:
+      - pkg: zentyal
+
+
+{# XXX workaround for samba AD needing ext_attr security support not available in an lxc/lxd unprivileged container, this will get overwritten on pkg python-samba update #}
+patch-ntacls.py:
+  file.managed:
+    - name: /usr/lib/python2.7/dist-packages/samba/ntacls.py
+    - source: salt://lab/appliance/zentyal/files/ntacls.py
+    - makedirs: true
+  cmd.run:
+    - name: rm /usr/lib/python2.7/dist-packages/samba/ntacls.pyc; python2 -c "import compileall; compileall.compile_file('/usr/lib/python2.7/dist-packages/samba/ntacls.py')"
+    - onchanges:
+      - file: patch-ntacls.py
+
+{# ### disable system nginx from starting, would listen on port 80, which conflicts with apache, zentyal only uses custom nginx under /var/lib/zentyal #}
+disable-system-nginx:
+  service.dead:
+    - name: nginx
+    - enable: false
+mask-system-nginx:
+  service.masked:
+    - name: nginx
+
 {# ### apache #}  
-{# XXX activate needed apache modules early in setup, so apache is config is valid, and service is available for letsencrypt #}
+{# XXX activate needed apache modules, so apache is config is valid, and service is available for letsencrypt #}
 /etc/apache2/mods-available/ssl.conf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/ssl.conf
@@ -30,52 +88,6 @@ zentyal-apache-restart-module-config:
     - require:
       - pkg: zentyal
 
-{# XXX disable mk_home (tries chown +1234:+1234 but "+" is unsupported) #}
-/etc/zentyal/users.conf:
-  file.managed:
-    - contents: |
-        # CUSTOMIZE-ZENTYAL-BEGIN
-        # whether to create user homes or not
-        mk_home = no
-        # default mode for home directory (umask mode)
-        dir_umask = 0077
-        # enable quota support
-        enable_quota = no
-        # CUSTOMIZE-ZENTYAL-END
-
-/etc/zentyal/firewall.conf:
-  file.managed:
-    - contents: |
-        # CUSTOMIZE-ZENTYAL-BEGIN
-        # Limit of logged packets per minute.
-        iptables_log_limit = 50
-        # Burst
-        iptables_log_burst = 10
-        # Logs all the drops
-        iptables_log_drops = yes
-        # Extra iptables modules to load
-        # Each module should be sperated by a comma, you can include module parameters
-        iptables_modules = 
-        # Enable source NAT, if your router does NAT you can disable it
-        nat_enabled = no
-        # Uncomment the following to show the from External to Internal section
-        #show_ext_to_int_rules = yes
-        # Uncomment the following to show the Rules added by Zentyal services
-        #show_service_rules = yes
-        # CUSTOMIZE-ZENTYAL-END
-      
-{# ### hooks #}
-{% for n in ['webadmin', 'mail', 'sogo'] %}
-/etc/zentyal/hooks/{{ n }}.postsetconf:
-  file.managed:
-    - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
-    - template: jinja
-    - defaults: 
-        settings: {{ settings }}
-    - mode: "755"
-    - makedirs: true
-    
-{% endfor %}
 
 {# ### nslookup for salt via /etc/hosts #}
 {# XXX workaround not resolving salt master after zentyal internal dns installation, add salt to /etc/hosts #}
@@ -101,16 +113,3 @@ adding-salt-master-to-hosts:
   {% endif %}
 {% endif %}
 
-{# disable warning flooding logs #}
-sogo-tmpreaper:
-  file.replace:
-    - name: /etc/tmpreaper.conf
-    - pattern: |
-        ^.*SHOWWARNING=.*
-    - repl: |
-        SHOWWARNING=false
-
-    - append_if_not_found: true
-    - backup: false
-    - require:
-      - pkg: zentyal
