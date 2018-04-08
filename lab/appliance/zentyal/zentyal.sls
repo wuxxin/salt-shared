@@ -107,10 +107,37 @@ adding-salt-master-to-hosts:
 {% endif %}
 
 
+{# XXX workaround zentyal limitation not including "source" statements in /etc/network/interfaces by concating into interfaces and getting confused if external interface is configured via dhcp #}
+{% set gwip = salt['network.default_route']('inet')[0]['gateway'] %}
+{% set gwdev = salt['network.default_route']('inet')[0]['interface'] %}
+{% set address = salt['network.ip_addrs'](gwdev)[0] %}
+{% set netmask = salt['network.convert_cidr'](salt['network.subnets'](gwdev)[0])['netmask'] %}
+
+concat-interfaces:
+  cmd.run:
+    - name: |
+        cat - /etc/network/interfaces.d/90-samba-bridge.cfg /etc/network/interfaces.d/80-docker-bridge.cfg > /etc/network/interfaces <<"EOF"
+        # zentyal hardcoded interface list
+        auto lo
+        iface lo inet loopback
+        
+        auto {{ gwdev }}
+        iface {{ gwdev }} inet static
+            address {{ address }}
+            netmask {{ netmask }}
+            gateway {{ gwip }}
+            dns-nameservers {{ salt['grains.get']('dns:nameservers')|join(' ') }}
+            dns-search {{ salt['grains.get']('dns:search')|join(' ') }}
+        EOF
+  
+    - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
+
 {# XXX both scripts try to access zentyal config not yet started while booting the machine. disabled #}
+{#
 zentyal-dhcp-enter:
   file.absent:
     - name: /etc/dhcp/dhclient-enter-hooks.d/zentyal-dhcp-enter
 zentyal-dhcp-exit:
   file.absent:
     - name: /etc/dhcp/dhclient-exit-hooks.d/zentyal-dhcp-exit
+#}

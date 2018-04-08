@@ -122,14 +122,13 @@ fix_mailfilter:
 
 generate_new_mail_config:
   cmd.run:
-    - name: /etc/init.d/zentyal mail restart
+    - name: zs mail restart
 
 + install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
 + install sogo connector or sogo integrator
   + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
   + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
 
-salt-call state.sls roles.zentyal; /etc/init.d/zentyal mail restart; /etc/init.d/postfix restart
 
 create mailboxes:
   doveadm mailbox create public.incoming.2012 -u postmaster@domain
