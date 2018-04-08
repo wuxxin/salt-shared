@@ -1,8 +1,9 @@
 {% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - appliance
   - ubuntu
+  - python
+  - appliance
 
 {%- set password= settings.admin.password or salt['cmd.run_stdout']('openssl rand 8 -hex') %}
 zentyal-admin-user:
@@ -113,3 +114,7 @@ sogo-tmpreaper:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/mb2md.pl
     - mode: "0755"
+
+{# ### helper to preseed zentyal redis config #}
+{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{{ pip3_install('redis-dump-load') }}

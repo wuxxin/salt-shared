@@ -11,44 +11,25 @@ Zentyal 5.1 Mailserver with the following additions:
 + fixme: TLS mandatory for manage-sieve on port 4190,
 + SSL MANDATORY on port 465 (postfix smtps)
 + fixme: local user should have maildir
-+ fixme: samba provisioning: zentyal log errors
-    + 2018/04/04 02:29:27 ERROR> Sudo.pm:240 EBox::Sudo::_rootError - root command samba-tool ntacl sysvolreset failed. 
-
-## FIXME
++ ntp not working in lxc ?
 + zentyal breaks network 
-  + dhcclient (called supervised by cloud-init) uses zentyal hooks, and zs scripts needs redis and others
-  + /etc/dhcp/dhclient-enter-hooks.d/zentyal-dhcp-enter
-  + /etc/dhcp/dhclient-exit-hooks.d/zentyal-dhcp-exit
   + zentyal breaks default gw
   + zentyal breaks unconfigured network
+
+
+## FIXME
+
++ opendkim key without newlines
++ resolvconf add nameserver and gateway
+
++ /var/lib/zentyal/.first is flag
 
 + firewall: kernelmodules
     + kernelmodules: 8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp nf_conntrack_sip nf_nat_sip
     + firewall no /proc/sys/net/ipv4/tcp_syncookies
+
 + todo: remark to storage.lib that relocate:source=/var/x,dest=/x is not possible because dest needs to be in a subdir
 
-+ /var/lib/zentyal/.first is flag
-  + set disable quota
-  + set disable plain pop3,imap
-  + set retrieve external mail to true
-  
-  + add virtual mail domain (domain part of fqdn)
-    + ="post" action="./Mail/Wizard/VirtualDomain" 
-    + <input type="text" name="vdomain" value="<% $domain %>"/>
-    + "post" action="./Network/Wizard/Ifaces"
-    + add virtual alias domain (fqdn) for receiving also c.ep3.at 
-  
-  + set eth0 as external net
-    + method="post" action="./Network/Wizard/Ifaces
-    + input type="radio" id="<% $iface %>_scopeI" name="<% $iface %>_scope" value="internal" checked="true"
-    + input type="radio" id="<% $iface %>_scopeE" name="<% $iface %>_scope" value="external" />
-    
-  + provision samba
-    + <form method="post" action="./Samba/Wizard/Users" class="formDiv"
-    + id="ad_wizard_form" data-host-domain="<% $hostDomain %>"                 
-        <fieldset>                                                             <input type="radio" name="mode" id="standaloneRadio" value="standalone" checked="true" />              
-
-+ ntp not working in lxc ?
 + thunderbird/lightning: Can't dismiss missed reminders for recurring events (CalDAV)
     + https://bugzilla.mozilla.org/show_bug.cgi?id=769118
     + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068

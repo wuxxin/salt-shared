@@ -108,29 +108,64 @@ adding-salt-master-to-hosts:
 
 
 {# XXX workaround zentyal limitation not including "source" statements in /etc/network/interfaces by concating into interfaces and getting confused if external interface is configured via dhcp #}
-{% set gwip = salt['network.default_route']('inet')[0]['gateway'] %}
-{% set gwdev = salt['network.default_route']('inet')[0]['interface'] %}
-{% set address = salt['network.ip_addrs'](gwdev)[0] %}
-{% set netmask = salt['network.convert_cidr'](salt['network.subnets'](gwdev)[0])['netmask'] %}
+{%- set gwip = salt['network.default_route']('inet')[0]['gateway'] %}
+{%- set gwdev = salt['network.default_route']('inet')[0]['interface'] %}
+{%- set address = salt['network.ip_addrs'](gwdev)[0] %}
+{%- set netmask = salt['network.convert_cidr'](salt['network.subnets'](gwdev)[0])['netmask'] %}
+{%- set broadcast = salt['network.interface'](gwdev)[0]['broadcast'] %}
+{%- set dns_nameservers = salt['grains.get']('dns:nameservers') %}
+{%- set dns_search = salt['grains.get']('dns:search') %}
+{%- set match = settings.domain|regex_search('[^.]+\.(.+)') %}
+{%- set basedomain = match[0] %}
 
-concat-interfaces:
+zentyal-interfaces:
   cmd.run:
     - name: |
-        cat - /etc/network/interfaces.d/90-samba-bridge.cfg /etc/network/interfaces.d/80-docker-bridge.cfg > /etc/network/interfaces <<"EOF"
+        cat - <<"EOF"
         # zentyal hardcoded interface list
-        auto lo
+        auto lo {{ gwdev }}
         iface lo inet loopback
         
-        auto {{ gwdev }}
         iface {{ gwdev }} inet static
             address {{ address }}
             netmask {{ netmask }}
+            broadcast {{ broadcast }}
             gateway {{ gwip }}
-            dns-nameservers {{ salt['grains.get']('dns:nameservers')|join(' ') }}
-            dns-search {{ salt['grains.get']('dns:search')|join(' ') }}
+            dns-nameservers {{ dns_nameservers|join(' ') }}
+            dns-search {{ dns_search|join(' ') }}
+            
         EOF
   
     - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
+
+zentyal-resolv.conf:
+  cmd.run:
+    - name: |
+        cat | resolvconf -u << EOF
+        dns-nameservers {{ dns_nameservers|join(' ') }}
+        dns-search {{ dns_search|join(' ') }}
+        gateway {{ gwip }}
+        EOF
+        
+    - onlyif: ! grep -q "nameserver {{ dns_nameservers[0] }}" /etc/resolv.conf
+
+{# XXX write out a customized zentyal redis config setter #}
+/usr/local/sbin/prepare-zentyal-config.sh:
+  file.managed:
+    - source: salt://lab/appliance/zentyal/files/prepare-zentyal-config.sh
+    - template: jinja
+    - defaults:
+        fqdn: {{ settings.domain }}
+        domain: {{ basedomain }}
+        interface: {{ gwdev }}
+        address: {{ address }}
+        netmask: {{ netmask }}
+        broadcast: {{ broadcast }}
+        gateway: {{ gwip }}
+        nameserver: {{ dns_nameservers[0] }}
+        dnssearch: {{ dns_search[0] }}
+    - mode: "755"
+
 
 {# XXX both scripts try to access zentyal config not yet started while booting the machine. disabled #}
 {#
