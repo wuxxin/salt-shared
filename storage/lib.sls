@@ -488,7 +488,7 @@ relocate:
 
 "rename_{{ source }}":
   file.rename:
-    - name: {{ source }}.rename
+    - name: {{ source }}.relocate
     - source: {{ source }}
     - onlyif: test -d {{ targetbase }} -a -e {{ source }} -a ! -L {{ source }}
     {%- for opt, optvalue in item.iteritems() %}
@@ -499,8 +499,8 @@ relocate:
     
 "relocate_{{ source }}":
   cmd.run:
-    - name: rsync -a  {{ source }}.rename {{ target }}
-    - onlyif: test -d {{ targetbase }} -a -e {{ source }}.rename
+    - name: rsync -a  {{ source }}.relocate {{ targetbase }}
+    - onlyif: test -d {{ targetbase }} -a -e {{ source }}.relocate
     {%- for opt, optvalue in item.iteritems() %}
       {%- if opt not in ['source', 'target', 'prefix', 'postfix', 'require'] %}
     {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
@@ -510,6 +510,20 @@ relocate:
       - file: "rename_{{ source }}"
 {{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
 
+"rename_target_{{ target }}":
+  file.rename:
+    - name: {{ target }}
+    - source: {{ target }}.relocate
+    - onlyif: test -d {{ targetbase }} -a -e {{ target }}.relocate -a ! -e {{ target }}
+    {%- for opt, optvalue in item.iteritems() %}
+      {%- if opt not in ['source', 'target', 'prefix', 'postfix'] %}
+    {{ ("- "+ {opt: optvalue}|yaml(False))|indent(6, False) }}
+      {%- endif %}
+    {%- endfor %}
+    - require:
+      - cmd: "relocate_{{ source }}"
+{{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
+    
 "symlink_{{ source }}":
   file.symlink:
     - name: {{ source }}
@@ -521,12 +535,12 @@ relocate:
       {%- endif %}
     {%- endfor %}
     - require:
-      - cmd: "relocate_{{ source }}"
+      - file: "rename_target_{{ target }}"
 {{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
 
 "remove_renamed_{{ source }}":
   file.absent:
-    - name: {{ source }}.rename
+    - name: {{ source }}.relocate
     - onlyif: test -d {{ target }} -a -L {{ source }}
     {%- for opt, optvalue in item.iteritems() %}
       {%- if opt not in ['source', 'target', 'prefix', 'postfix', 'require'] %}
@@ -534,7 +548,6 @@ relocate:
       {%- endif %}
     {%- endfor %}
     - require:
-      - cmd: "relocate_{{ source }}"
       - file: "symlink_{{ source }}"
 {{ (item['require']|yaml(False))|indent(6, True) if item['require'] is defined else '' }}
 
