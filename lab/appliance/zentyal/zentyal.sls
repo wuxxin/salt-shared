@@ -106,3 +106,11 @@ adding-salt-master-to-hosts:
   {% endif %}
 {% endif %}
 
+
+{# XXX both scripts try to access zentyal config not yet started while booting the machine. disabled #}
+zentyal-dhcp-enter:
+  file.absent:
+    - name: /etc/dhcp/dhclient-enter-hooks.d/zentyal-dhcp-enter
+zentyal-dhcp-exit:
+  file.absent:
+    - name: /etc/dhcp/dhclient-exit-hooks.d/zentyal-dhcp-exit
