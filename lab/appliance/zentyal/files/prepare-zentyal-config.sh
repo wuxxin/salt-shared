@@ -9,9 +9,9 @@ echo "stopping main zentyal processes"
 zs stop
 
 echo -n "Reset config of modules: "
-for i in antivirus dns firewall logs mail mailfilter network ntp samba sogo; do
+for i in antivirus audit dns firewall logs mail mailfilter network ntp samba sogo sysinfo webadmin; do
     echo -n "$i "
-    /usr/share/zentyal/zentyal/clean-conf $i
+    /usr/share/zentyal/clean-conf $i
 done
 echo "."
 
@@ -131,9 +131,6 @@ mail/conf/RetrievalServices/keys/form:
 mail/conf/SMTPOptions/bounceReturnAddress:
   type: string
   value: noreply@{{ domain }}
-mail/ro/SMTPOptions/bounceReturnAddress:
-  type: string
-  value: noreply@{{ domain }}
 mail/conf/VDomainAliases/max_id:
   type: string
   value: '1'
@@ -153,35 +150,29 @@ mail/conf/VDomains/order:
   type: string
   value: '["vd1"]'
 
+network/conf/BalanceGateways/keys/blnc1:
+  type: string
+  value: '{"name":"gw-{{ interface }}","enabled":1}'
+network/conf/BalanceGateways/max_id:
+  type: string
+  value: '1'
+network/conf/BalanceGateways/order:
+  type: string
+  value: '["blnc1"]'
+
 network/conf/DNSResolver/keys/dnsr1:
   type: string
-  value: '{"nameserver":"{{ nameserver }}","interface":"{{ interface }}"}'
+  value: '{"nameserver":"{{ nameserver }}","interface":"zentyal.dnsr1"}'
 network/conf/DNSResolver/max_id:
   type: string
   value: '1'
 network/conf/DNSResolver/order:
   type: string
   value: '["dnsr1"]'
-network/conf/SearchDomain/keys/form:
-  type: string
-  value: '{"domain":"{{ dnssearch }}","interface":"zentyal.form"}'
-
-network/ro/DNSResolver/keys/dnsr1:
-  type: string
-  value: '{"nameserver":"{{ nameserver }}","interface":"{{ interface }}"}'
-network/ro/DNSResolver/max_id:
-  type: string
-  value: '1'
-network/ro/DNSResolver/order:
-  type: string
-  value: '["dnsr1"]'
-network/ro/SearchDomain/keys/form:
-  type: string
-  value: '{"domain":"{{ dnssearch }}","interface":"zentyal.form"}'
 
 network/conf/GatewayTable/keys/gtw1:
   type: string
-  value: '{"ip":"{{ gateway }}","name":"gw-{{ interface }}","default":1,"interface":"{{ interface }}","auto":1,"weight":1,"enabled":1}'
+  value: '{"ip":"{{ gateway }}","interface":"{{ interface }}", "name":"gw-{{ interface }}","default":1,"auto":0,"weight":1,"enabled":1}'
 network/conf/GatewayTable/max_id:
   type: string
   value: '1'
@@ -194,7 +185,11 @@ network/conf/default/gateway:
   value: gtw1
 network/conf/interfaces:
   type: string
-  value: '{"{{ interface }}":{"netmask":"{{ netmask }}","method":"static","name":"{{ interface }}","external":1,"address":"{{ address }}","changed":0}}'
+  value: '{"{{ interface }}":{"name":"{{ interface }}","method":"static","netmask":"{{ netmask }}","address":"{{ address }}","external":1}}'
+network/conf/SearchDomain/keys/form:
+  type: string
+  value: '{"domain":"{{ dnssearch }}","interface":"zentyal.form"}'
+
 
 EOF
 

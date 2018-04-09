@@ -17,7 +17,7 @@ zentyal-admin-user:
 
 {# ### zentyal templates #}
 {% for n in ['core/nginx.conf.mas',
-  'mail/main.cf.mas', 'mail/dovecot.conf.mas',
+  'mail/main.cf.mas', 'mail/master.cf.mas', 'mail/dovecot.conf.mas',
   'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
 /etc/zentyal/stubs/{{ n }}:
   file.managed:

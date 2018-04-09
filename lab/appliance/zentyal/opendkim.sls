@@ -24,12 +24,14 @@ opendkim:
     - require:
       - pkg: opendkim
 
+{%- set match = settings.domain|regex_search('[^.]+\.(.+)') %}
+{%- set basedomain = match[0] %}
 /etc/opendkim.conf:
   file.managed:
     - source: salt://lab/appliance/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
-        domain: {{ settings.domain }}
+        domain: {{ basedomain }}
     - require:
       - file: /etc/dkimkeys/dkim.key
 

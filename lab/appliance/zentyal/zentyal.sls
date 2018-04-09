@@ -118,6 +118,17 @@ adding-salt-master-to-hosts:
 {%- set match = settings.domain|regex_search('[^.]+\.(.+)') %}
 {%- set basedomain = match[0] %}
 
+temporary-shutdown-docker:
+  service.dead:
+    - name: docker
+    
+temporary-shutdown-other-interfaces:
+  cmd.run:
+    - name: for a in $(ifquery --list); do if test "$a" != "lo" -a "$a" != "eth0"; then ifdown $a; fi; done
+    - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
+    - require:
+      - service: temporary-shutdown-docker
+
 zentyal-interfaces:
   cmd.run:
     - name: |
@@ -137,6 +148,8 @@ zentyal-interfaces:
         EOF
   
     - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
+    - require:
+      - cmd: temporary-shutdown-other-interfaces
 
 zentyal-resolv.conf:
   cmd.run:
@@ -165,13 +178,3 @@ zentyal-resolv.conf:
         dnssearch: {{ dns_search[0] }}
     - mode: "755"
 
-
-{# XXX both scripts try to access zentyal config not yet started while booting the machine. disabled #}
-{#
-zentyal-dhcp-enter:
-  file.absent:
-    - name: /etc/dhcp/dhclient-enter-hooks.d/zentyal-dhcp-enter
-zentyal-dhcp-exit:
-  file.absent:
-    - name: /etc/dhcp/dhclient-exit-hooks.d/zentyal-dhcp-exit
-#}

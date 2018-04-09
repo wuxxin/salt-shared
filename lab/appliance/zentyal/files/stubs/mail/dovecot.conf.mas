@@ -237,6 +237,9 @@ plugin {
   sieve_global_path = <% $mailboxesDir %>/default.sieve
   sieve_storage = <% $mailboxesDir %>/%Ld/%Ln
   sieve_dir     = <% $mailboxesDir %>/%Ld/%Ln
+  
+  acl = vfile:/var/vmail/dovecot-acl
+  acl_globals_only = yes
 }
 
 !include_try /etc/dovecot/extra.conf
@@ -270,7 +273,7 @@ service imap {
 }
 
 protocol imap {
-  mail_plugins = quota imap_quota
+  mail_plugins = quota imap_quota acl imap_acl
   mail_max_userip_connections = 20
 }
 </%def>

@@ -6,22 +6,8 @@ Zentyal 5.1 Mailserver with the following additions:
 + opendkim support
 
 ## testing
-+ fixme: open port 4190
-+ fixme: TLS mandatory for manage-sieve on port 4190,
-+ SSL MANDATORY on port 465 (postfix smtps)
-+ fixme: local user should have maildir
-+ ntp not working in lxc ?
-+ zentyal breaks network 
-  + zentyal breaks default gw
-  + zentyal breaks unconfigured network
 
 ## FIXME
-
-+ opendkim key without newlines
-+ resolvconf add nameserver and gateway
-+ milter not run on webmail send
-
-+ /var/lib/zentyal/.first is flag
 
 + firewall: kernelmodules
     + kernelmodules: 8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp nf_conntrack_sip nf_nat_sip
@@ -34,6 +20,9 @@ Zentyal 5.1 Mailserver with the following additions:
     + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068
 
 ## todo
++ make more than one mail domain configurable (opendkim, letsencrypt, postfix, amavis)
+    + https://edoceo.com/howto/opendkim
+    + https://linode.com/docs/email/postfix/configure-spf-and-dkim-in-postfix-on-debian-8/
 + use wkd-hosting: https://wiki.gnupg.org/WKDHosting
 + use rspamd instead of spamassassin
 + use email autoconfig 

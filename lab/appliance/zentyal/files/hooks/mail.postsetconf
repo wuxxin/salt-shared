@@ -25,8 +25,8 @@ fi
 
 # postfix convert /var/mail/*mbox to *maildir
 basedir=/var/mail
-if ! find $basedir -maxdepth 1 -type f -exec false {} +; then
-    for i in $(find $basedir -maxdepth 1 -type f); do
+if ! find $basedir/ -maxdepth 1 -type f -exec false {} +; then
+    for i in $(find $basedir/ -maxdepth 1 -type f); do
         original=$(basename $i)
         if test "$original" = "${original%.renamed}"; then
             mv $basedir/$original $basedir/${original}.renamed
@@ -66,7 +66,7 @@ fi
 # opendkim dkim key
 if test ! -d /etc/dkimkeys; then mkdir /etc/dkimkeys; fi
 configfile=/etc/dkimkeys/dkim.key
-echo "{{ settings.dkim.key }}" > $configfile.new
+echo -e "{{ settings.dkim.key }}" > $configfile.new
 chown opendkim $configfile.new
 chmod "0600" $configfile.new
 if ! diff -q $configfile $configfile.new; then
