@@ -4,7 +4,6 @@ Zentyal 5.1 Mailserver with the following additions:
 
 + support for automatic letsencrypt certificates
 + opendkim support
-+ integrated in appliance state
 
 ## testing
 + fixme: open port 4190
@@ -16,11 +15,11 @@ Zentyal 5.1 Mailserver with the following additions:
   + zentyal breaks default gw
   + zentyal breaks unconfigured network
 
-
 ## FIXME
 
 + opendkim key without newlines
 + resolvconf add nameserver and gateway
++ milter not run on webmail send
 
 + /var/lib/zentyal/.first is flag
 
@@ -43,9 +42,9 @@ Zentyal 5.1 Mailserver with the following additions:
 
 imap: username: username@domainname
 smtp: username: username@domainname
-File:new calender: in the network: format: faldav, offline_support=true
-url: https://hostname/SOGo/dav/username@domainname/Calendar/personal
-file:new remote addressbook: https://hostname/SOGo/dav/username@domainname/Contacts/personal
+File:new calender: in the network: format: caldav, offline_support=true
+url: https://hostname/SOGo/dav/username/Calendar/personal
+file:new remote addressbook: https://hostname/SOGo/dav/username/Contacts/personal
 
 ## pillar example
 
@@ -91,17 +90,17 @@ appliance:
 
 ## Toolbox
 
-get all config vars:
++ get all config vars:
 ```
 cd /usr/share/perl5/EBox
 grep -E "EBox::Config::(boolean|configkey)" -R * | sed -r "s#^([^./]+).+::Config::([^(]+)\('?([^')]+).*#\1:\3 (\2)#g" | sort > ~/zentyal-config.txt
 ```
 
-fix_mailfilter:
++ fix_mailfilter:
   cmd.run:
     - name: echo "DROP DATABASE spamassassin;" | mysql --defaults-file=/etc/mysql/debian.cnf; /usr/share/zentyal-mailfilter/create-spamassassin-db
 
-generate_new_mail_config:
++ generate_new_mail_config:
   cmd.run:
     - name: zs mail restart
 
@@ -111,11 +110,11 @@ generate_new_mail_config:
   + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
 
 
-create mailboxes:
++ create mailboxes:
   doveadm mailbox create public.incoming.2012 -u postmaster@domain
   doveadm mailbox create public.sent.2012 -u postmaster@domain
 
-create sieve of x@domain:
++ create sieve of x@domain:
   rule:[delete_from_to_same]
   if allof (not header :contains "To" "postmaster_public/incoming@domain", not header :contains "To" "postmaster_public/sent@domain", header :contains "To" "domain", header :contains "From" "domain")
   {

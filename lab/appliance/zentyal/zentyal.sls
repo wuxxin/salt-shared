@@ -141,12 +141,11 @@ zentyal-interfaces:
 zentyal-resolv.conf:
   cmd.run:
     - name: |
-        cat | resolvconf -u << EOF
-        dns-nameservers {{ dns_nameservers|join(' ') }}
-        dns-search {{ dns_search|join(' ') }}
-        gateway {{ gwip }}
+        resolvconf -a << EOF
+        nameserver {{ dns_nameservers|join(' ') }}
+        search {{ dns_search|join(' ') }}
         EOF
-        
+        resolvconf -u
     - onlyif: ! grep -q "nameserver {{ dns_nameservers[0] }}" /etc/resolv.conf
 
 {# XXX write out a customized zentyal redis config setter #}

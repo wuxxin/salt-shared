@@ -5,8 +5,17 @@ if test ! -e /var/lib/zentyal/.first; then
     exit 0
 fi
 
+echo "stopping main zentyal processes"
 zs stop
-for a in antivirus dns firewall logs mail mailfilter network ntp samba sogo; do /usr/share/zentyal/clean-conf $a; done
+
+echo -n "Reset config of modules: "
+for i in antivirus dns firewall logs mail mailfilter network ntp samba sogo; do
+    echo -n "$i "
+    /usr/share/zentyal/zentyal/clean-conf $i
+done
+echo "."
+
+echo "Rewrite interfaces as static"
 cat > /etc/network/interfaces << EOF
 auto lo
 
@@ -22,13 +31,20 @@ iface {{ interface }} inet static
       dns-search {{ dnssearch }}
 
 EOF
-cat > /etc/resolv.conf << EOF
+
+echo "Rewrite resolv.conf"
+resolvconf -a {{ interface }} << EOF
 nameserver {{ nameserver }}
 search {{ dnssearch }}
 
 EOF
-cat > /etc/zentyal/seed.yaml <<"EOF"
+if test -e /var/run/resolvconf/interface/lo.domain; then
+    rm /var/run/resolvconf/interface/lo.domain
+fi
+resolvconf -u
 
+# write out seed config
+cat > /etc/zentyal/seed.yaml <<"EOF"
 global/conf/modules/dns/changed:
   type: string
   value: '1'
@@ -165,7 +181,7 @@ network/ro/SearchDomain/keys/form:
 
 network/conf/GatewayTable/keys/gtw1:
   type: string
-  value: '{"ip":"{{ gateway }}","name":"gw-{{ interface }}","default":1,"interface":"{{ interface }}","auto":0,"weight":1,"enabled":1}'
+  value: '{"ip":"{{ gateway }}","name":"gw-{{ interface }}","default":1,"interface":"{{ interface }}","auto":1,"weight":1,"enabled":1}'
 network/conf/GatewayTable/max_id:
   type: string
   value: '1'
@@ -178,9 +194,10 @@ network/conf/default/gateway:
   value: gtw1
 network/conf/interfaces:
   type: string
-  value: '{"{{ interface }}":{"netmask":"{{ netmask }}","method":"static","name":"{{ interface }}","external":1,"address":"{{ address }}","changed":1}}'
+  value: '{"{{ interface }}":{"netmask":"{{ netmask }}","method":"static","name":"{{ interface }}","external":1,"address":"{{ address }}","changed":0}}'
 
 EOF
 
+echo "import /etc/zentyal/seed.yaml into redis"
 cat /etc/zentyal/seed.yaml | python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, sort_keys=True)' | redis-load 
 
