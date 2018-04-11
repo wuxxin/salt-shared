@@ -54,10 +54,12 @@ fi
 {%- endif %}
 
 # openkdim domain, dkim key
+{%- set match = settings.domain|regex_search('[^.]+\.(.+)') %}
+{%- set basedomain = match[0] %}
 restart_opendkim=false
 # opendkim domain
 configfile=/etc/opendkim.conf
-sed -i.bak  "s/^Domain.*/Domain                 {{ settings.domain }}/" $configfile
+sed -i.bak  "s/^Domain.*/Domain                 {{ basedomain }}/" $configfile
 if ! diff -q $configfile.bak $configfile; then
     echo "opendkim.conf changed"
     diff -u $configfile.bak $configfile
@@ -66,8 +68,8 @@ fi
 # opendkim dkim key
 if test ! -d /etc/dkimkeys; then mkdir /etc/dkimkeys; fi
 configfile=/etc/dkimkeys/dkim.key
-echo -e "{{ settings.dkim.key }}" > $configfile.new
-chown opendkim $configfile.new
+echo -e -n "{{ settings.dkim.key }}" > $configfile.new
+chown opendkim:opendkim $configfile.new
 chmod "0600" $configfile.new
 if ! diff -q $configfile $configfile.new; then
     echo "$configfile changed"

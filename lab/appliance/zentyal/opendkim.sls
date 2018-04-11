@@ -20,7 +20,6 @@ opendkim:
     - makedirs: true
     - contents: |
 {{ dkimkey|indent(8,True) }}
-
     - require:
       - pkg: opendkim
 
