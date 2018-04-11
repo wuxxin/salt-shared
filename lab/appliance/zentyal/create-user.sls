@@ -1,17 +1,5 @@
 {% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
-include:
-  - lab.appliance.zentyal.zentyal
-  
-{% for f in ['create_zentyal_user.pl', 'list_zentyal_users.pl'] %}
-/usr/local/sbin/{{ f }}:
-  file.managed:
-    - source: salt://lab/appliance/zentyal/files/{{ f }}
-    - mode: "0755"
-    - require:
-      - sls: lab.appliance.zentyal.zentyal
-{% endfor %}
-
 
 {% if settings.sync|d(false) %}
 {# ### imap mail migration #}
@@ -30,7 +18,6 @@ include:
         users: {{ settings.user }}
     - require:
       - pip: offlineimap
-      - sls: lab.appliance.zentyal.zentyal
 
 /home/{{ settings.admin.user }}/.offlineimap/{{ settings.sync.functions.name }}:
   file.managed:
@@ -42,6 +29,21 @@ include:
     - makedirs: true
     - require:
       - pip: offlineimap
-      - sls: lab.appliance.zentyal.zentyal
+
+{% endif %}
+
+
+{% if settings.user|d(false) %}
+# ### user creation
+
+  {% for name, data in settings.user.iteritems() %}
+create_zentyal_user_{{ name }}:
+  cmd.run:
+    - name: echo "{{ name }},{{ data['firstname'] }},{{ data['lastname'] }},{{ data['password'] }}" | /usr/local/sbin/create_zentyal_user.pl
+
+  {% endfor %}
+#     - require_in:
+#      - sls: lab.appliance.zentyal.zentyal
+#      - sls: lab.appliance.zentyal.storage
 
 {% endif %}
