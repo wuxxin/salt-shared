@@ -10,6 +10,8 @@ Zentyal 5.1 Mailserver with the following additions:
 
 ## FIXME
 
++ disabled zentyal:storage for now, makes circular dependency
+
 + thunderbird/lightning: Can't dismiss missed reminders for recurring events (CalDAV)
     + https://bugzilla.mozilla.org/show_bug.cgi?id=769118
     + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068

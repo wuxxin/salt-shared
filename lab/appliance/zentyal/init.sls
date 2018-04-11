@@ -6,15 +6,16 @@ include:
 {%- if settings.letsencrypt.enabled %}
   - lab.appliance.zentyal.letsencrypt
 {% endif %}
-  - lab.appliance.zentyal.storage
+  {#- lab.appliance.zentyal.storage#}
   - lab.appliance.zentyal.user
 
 zentyal_first_backup:
   cmd.run:
     - name: /usr/share/zentyal/make-backup
+    - onlyif: test -e /var/lib/zentyal/.first
     - require:
       - sls: lab.appliance.zentyal.base
       - sls: lab.appliance.zentyal.zentyal
-      - sls: lab.appliance.zentyal.storage
+      {#- sls: lab.appliance.zentyal.storage #}
       - sls: lab.appliance.zentyal.user
       
