@@ -121,6 +121,7 @@ adding-salt-master-to-hosts:
 temporary-shutdown-docker:
   service.dead:
     - name: docker
+    - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
     
 temporary-shutdown-other-interfaces:
   cmd.run:
@@ -159,7 +160,7 @@ zentyal-resolv.conf:
         search {{ dns_search|join(' ') }}
         EOF
         resolvconf -u
-    - onlyif: ! grep -q "nameserver {{ dns_nameservers[0] }}" /etc/resolv.conf
+    - onlyif: '! grep -q "nameserver {{ dns_nameservers[0] }}" /etc/resolv.conf'
 
 {# XXX write out a customized zentyal redis config setter #}
 /usr/local/sbin/prepare-zentyal-config.sh:
@@ -177,4 +178,6 @@ zentyal-resolv.conf:
         nameserver: {{ dns_nameservers[0] }}
         dnssearch: {{ dns_search[0] }}
     - mode: "755"
+    - onlyif: test -e /var/lib/zentyal/.first
+    - unless: test -e /usr/local/sbin/prepare-zentyal-config.sh
 
