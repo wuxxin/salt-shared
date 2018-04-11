@@ -4,22 +4,18 @@ Zentyal 5.1 Mailserver with the following additions:
 
 + support for automatic letsencrypt certificates
 + opendkim support
++ preseeding config
 
 ## testing
 
 ## FIXME
-
-+ firewall: kernelmodules
-    + kernelmodules: 8021q ip_conntrack_ftp ip_nat_ftp ip_conntrack_tftp nf_conntrack_ftp nf_nat_ftp nf_conntrack_h323 nf_nat_h323 nf_conntrack_pptp nf_nat_pptp nf_conntrack_sip nf_nat_sip
-    + firewall no /proc/sys/net/ipv4/tcp_syncookies
-
-+ todo: remark to storage.lib that relocate:source=/var/x,dest=/x is not possible because dest needs to be in a subdir
 
 + thunderbird/lightning: Can't dismiss missed reminders for recurring events (CalDAV)
     + https://bugzilla.mozilla.org/show_bug.cgi?id=769118
     + https://bugzilla.mozilla.org/show_bug.cgi?id=1344068
 
 ## todo
+
 + make more than one mail domain configurable (opendkim, letsencrypt, postfix, amavis)
     + https://edoceo.com/howto/opendkim
     + https://linode.com/docs/email/postfix/configure-spf-and-dkim-in-postfix-on-debian-8/
@@ -29,11 +25,22 @@ Zentyal 5.1 Mailserver with the following additions:
 
 ## client
 
-imap: username: username@domainname
-smtp: username: username@domainname
-File:new calender: in the network: format: caldav, offline_support=true
-url: https://hostname/SOGo/dav/username/Calendar/personal
-file:new remote addressbook: https://hostname/SOGo/dav/username/Contacts/personal
++ imap username: username@domainname
++ smtp username: username@domainname
+
++ thunderbird:
+    + install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
+    + install sogo connector or sogo integrator: https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
+
+    + add calendar to thunderbird:
+        + File:new calender: in the network: format: caldav, offline_support=true
+        + url: https://hostname/SOGo/dav/username/Calendar/personal
+    + add addressbook to thunderbird:
+        + file:new remote addressbook: https://hostname/SOGo/dav/username/Contacts/personal
+
++ davdroid:
+    + baseurl = https://hostname/SOGo/dav
+    + username: username
 
 ## pillar example
 
@@ -42,10 +49,6 @@ file:new remote addressbook: https://hostname/SOGo/dav/username/Contacts/persona
 {%- set dkim_secretkey= manage_secret('dkim_secretkey', 'rsa_secret') %}
 {%- set dkim_publickey= rsa_public_from_secret(dkim_secretkey) %}
 
-# change dns
-# @   IN  A     1.2.3.4
-# @   IN  MX    10  @
-# @   IN  TXT   "v=spf1 a mx ptr -all"
 # default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; s=email; "
 #    "p={{ dkim_publickey[:250] }}"
 #    "{{ dkim_publickey[250:] }}")
@@ -92,12 +95,6 @@ grep -E "EBox::Config::(boolean|configkey)" -R * | sed -r "s#^([^./]+).+::Config
 + generate_new_mail_config:
   cmd.run:
     - name: zs mail restart
-
-+ install lightning: https://addons.mozilla.org/de/thunderbird/addon/lightning/
-+ install sogo connector or sogo integrator
-  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-connector-31.0.5.xpi
-  + https://sogo.nu/files/downloads/SOGo/Thunderbird/sogo-integrator-31.0.5-sogo-demo.xpi
-
 
 + create mailboxes:
   doveadm mailbox create public.incoming.2012 -u postmaster@domain
