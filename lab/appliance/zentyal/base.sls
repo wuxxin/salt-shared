@@ -14,6 +14,7 @@ zentyal-admin-user:
       - sudo
     - remove_groups: False
     - password: {{ salt.shadow.gen_password(password) }}
+    - unless: getent passwd {{ settings.admin.user }}
 
 {# ### zentyal templates #}
 {% for n in ['core/nginx.conf.mas',
