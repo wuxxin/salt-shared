@@ -62,7 +62,7 @@ mask-system-nginx:
     - require_in:
       - file: zentyal-apache-enable-ssl.conf
  
-{% for i in ['proxy.conf', 'proxy.load', 'proxy_http.load', 
+{% for i in ['proxy.conf', 'proxy.load', 'proxy_http.load', 'rewrite.load',
   'socache_shmcb.load', 'ssl.conf', 'ssl.load', 'headers.load'] %}
 zentyal-apache-enable-{{ i }}:
   file.symlink:

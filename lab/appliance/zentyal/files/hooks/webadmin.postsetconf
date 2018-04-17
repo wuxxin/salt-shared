@@ -3,7 +3,7 @@
 # This is a postsetconf script for zentyal
 
 msub() {
-  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE | re.DOTALL))"
 }
 
 ssub() {

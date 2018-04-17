@@ -3,21 +3,29 @@
 # This is a postsetconf script for zentyal
 
 msub() {
-  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE + re.DOTALL))"
+  python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read(), flags=re.MULTILINE | re.DOTALL))"
 }
 
 ssub() {
   python -c "import sys, re; sys.stdout.write(re.sub(r'$1', r'$2', sys.stdin.read()))"
 }
 
+{%- if settings.letsencrypt.enabled %}
 # apache2 cert+dhparam and key
 configfile=/etc/apache2/sites-available/default-ssl.conf
-{%- if settings.letsencrypt.enabled %}
 if test -f "$configfile"; then
     cat $configfile | 
-      ssub '([\t ]*)(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |
-      ssub '([\t ]*)(SSLCertificateKeyFile)[\t ]+/.+' '\1\2 /app/etc/server.key.pem' |
-      cat > ${configfile}.new
+        ssub '([\t ]*)(SSLCertificateFile)[\t ]+/.+' '\1\2 /app/etc/server.cert.dhparam.pem' |
+        ssub '([\t ]*)(SSLCertificateKeyFile)[\t ]+/.+' '\1\2 /app/etc/server.key.pem' |
+        msub '(^[ \t]*)(ServerAdmin[ \t]+webmaster@localhost).*(DocumentRoot[ \t]+/var/www/html)$' '\1\2\n\1RedirectMatch ^$ /SOGo/\n\1\3\n' |
+        cat > ${configfile}.new
+    mv ${configfile}.new ${configfile}
+fi
+configfile=/etc/apache2/sites-available/000-default.conf
+if test -f "$configfile"; then
+    cat $configfile | 
+        msub '(^[ \t]*)(ServerAdmin[ \t]+webmaster@localhost).+(DocumentRoot[ \t]+/var/www/html)$' '\1\2\n\1RewriteEngine On\n\1RewriteCond %{HTTPS} !=on\n\1RewriteRule ^(?!/\.well-known/acme-challenge/).* https://%{SERVER_NAME}$0 [R,L]\n\1\3' |
+        cat > ${configfile}.new
     mv ${configfile}.new ${configfile}
 fi
 {%- endif %}
