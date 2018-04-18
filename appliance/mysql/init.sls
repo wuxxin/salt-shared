@@ -43,7 +43,7 @@ appliance-mariadb.service:
     - source: salt://appliance/mysql/appliance-mariadb.service
     - template: jinja
     - context: settings
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable appliance-mariadb.service

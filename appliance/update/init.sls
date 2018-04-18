@@ -5,7 +5,7 @@ include:
 disable_shutdown-unattended-upgrades:
   file.absent:
     - name: /etc/systemd/system/shutdown.target.wants/unattended-upgrades.service
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 {% for i in ['20auto-upgrades', '50unattended-upgrades',] %}
@@ -39,7 +39,7 @@ service_stop_{{ i }}:
   file.symlink:
     - target: /dev/null
     - force: true
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 {% endfor %}
 
@@ -76,7 +76,7 @@ service_stop_{{ i }}:
 /etc/systemd/system/appliance-update.service:
   file.managed:
     - source: salt://appliance/update/appliance-update.service
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 /etc/systemd/system/appliance-update.timer.template:
@@ -90,7 +90,7 @@ service_stop_{{ i }}:
   file.managed:
     - source: salt://appliance/update/appliance-update.timer
     - template: jinja
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
   service.running:
     - name: appliance-update.timer
@@ -119,7 +119,7 @@ stop-appliance-update.timer:
   file.symlink:
     - target: /dev/null
     - force: true
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 {%- endif %}

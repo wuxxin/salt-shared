@@ -60,7 +60,7 @@ docker-service:
   file.managed:
     - name: /etc/systemd/system/docker.service
     - source: salt://docker/docker.service
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
     - require:
       - pkg: docker

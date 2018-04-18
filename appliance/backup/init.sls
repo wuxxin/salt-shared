@@ -67,13 +67,13 @@ backup:
 /etc/systemd/system/appliance-backup.timer:
   file.managed:
     - source: salt://appliance/backup/appliance-backup.timer
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 /etc/systemd/system/appliance-backup.service:
   file.managed:
     - source: salt://appliance/backup/appliance-backup.service
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 enable-appliance-backup-service:

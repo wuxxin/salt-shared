@@ -22,7 +22,7 @@ rancher-agent.service:
     - template: jinja
     - context:
       settings: {{ settings }}
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
     - require:
       - cmd: rancher-agent-setup

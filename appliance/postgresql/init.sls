@@ -29,7 +29,7 @@ appliance-postgresql.service:
     - source: salt://appliance/postgresql/appliance-postgresql.service
     - template: jinja
     - context: settings
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable appliance-postgresql.service

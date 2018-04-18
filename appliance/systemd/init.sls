@@ -12,7 +12,7 @@ install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
     - source: salt://appliance/systemd/{{ n }}
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
     - require:
       - sls: appliance.base
@@ -23,7 +23,7 @@ install_appliance.service:
   file.managed:
     - name: /etc/systemd/system/appliance.service
     - source: salt://appliance/systemd/appliance.service
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable appliance.service

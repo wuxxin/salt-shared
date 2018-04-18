@@ -15,7 +15,7 @@ gui_list: grafana
   file.managed:
     - source: salt://appliance/metric/service/{{ name }}.service
     - template: jinja
-    - watch_in:
+    - onchanges_in:
       - cmd: systemd_reload
 
 metric_service_{{ name }}:
