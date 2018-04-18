@@ -1,5 +1,9 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("torbrowser-ppa", "micahflee/ppa",
+  require_in = "pkg:torbrowser-launcher") }}
+  
 torbrowser-launcher:
   pkg:
     - installed
