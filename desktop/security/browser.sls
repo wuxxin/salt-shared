@@ -1,5 +1,6 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
+{# XXX torbrowser-launcher is to old, get it from ppa #}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("torbrowser-ppa", "micahflee/ppa",
   require_in = "pkg:torbrowser-launcher") }}
@@ -8,7 +9,7 @@ torbrowser-launcher:
   pkg:
     - installed
 
-{# XXX Tor Keys are old, update them first #}
+{# XXX Tor Keys are old, update them first 
 update-tor-keys:
   file.directory:
     - name: {{ user_home }}/.local/share/torbrowser/gnupg_homedir
@@ -21,3 +22,4 @@ update-tor-keys:
     - cwd: {{ user_home }}
     - require:
       - file: update-tor-keys
+#}
