@@ -45,7 +45,6 @@ base-tools:
       - iotop       {#  #}
       - dstat       {# versatile replacement for vmstat, iostat and ifstat #}
       - cpu-checker {# check cpu features NX/XD and VMX/SVM #}
-      - iperf       {# Internet Protocol bandwidth measuring tool #}
       - linux-tools-common {# perf-(test, kvm, bench, probe) #}
       - procps      {# watch, free, ps, top, uptime, kill, sysctl, vmstat #}
       - nethogs     {# Net top tool grouping bandwidth per process #}
