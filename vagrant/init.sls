@@ -43,8 +43,7 @@ vagrant-prerequisites:
     - makedirs: true
 
 {% for i in [
-  'vagrant-box-add-lxd-ubuntu.sh',
-  'vagrant-box-add-libvirt-ubuntu.sh',
+  'vagrant-box-add-ubuntu.sh',
   'create-cidata-iso.sh'
 ] %}
 {{ i }}:

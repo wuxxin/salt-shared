@@ -2,6 +2,7 @@
 
 packages:
   - openssh-server
+  - rsync
 
 users:
   - name: vagrant

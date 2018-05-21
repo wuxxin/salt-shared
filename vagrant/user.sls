@@ -57,8 +57,8 @@ vagrant_plugin_{{ p }}:
 {% if p == "vagrant-lxd" %}
 create-lxd-ubuntu-box:
   cmd.run:
-    - name: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh xenial
-    - unless: /usr/local/bin/vagrant-box-add-lxd-ubuntu.sh --check xenial
+    - name: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-lxd --yes
+    - unless: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-lxd --check
     - runas: {{ user }}
     - require:
       - cmd: vagrant_plugin_{{ p }}
@@ -66,8 +66,8 @@ create-lxd-ubuntu-box:
 {% elif p == "vagrant-libvirt" %}
 create-libvirt-ubuntu-box:
   cmd.run:
-    - name: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh xenial
-    - unless: /usr/local/bin/vagrant-box-add-libvirt-ubuntu.sh --check xenial
+    - name: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-libvirt --yes
+    - unless: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-libvirt --check
     - runas: {{ user }}
     - require:
       - cmd: vagrant_plugin_{{ p }}
