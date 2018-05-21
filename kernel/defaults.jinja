@@ -11,8 +11,20 @@ xenial:
   headers: linux-headers-generic-hwe-16.04
   tools: linux-tools-generic-hwe-16.04
   default_tools: linux-tools-generic-hwe-16.04
+bionic:
+  hardware: linux-generic
+  virtual: linux-virtual
+  headers: linux-headers-generic
+  tools: linux-tools-generic
+  default_tools: linux-tools-generic
+generic:
+  hardware: linux-generic
+  virtual: linux-virtual
+  headers: linux-headers-generic
+  tools: linux-tools-generic
+  default_tools: linux-tools-generic
 {% endload %}
 
 {% set settings = salt['grains.filter_by'](defaults, 
-  grain= 'lsb_distrib_codename', default= 'trusty',
+  grain= 'lsb_distrib_codename', default= 'generic',
   merge= salt['pillar.get']('kernel:image', {})) %}

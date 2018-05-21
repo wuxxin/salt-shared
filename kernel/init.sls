@@ -38,6 +38,12 @@ linux-image-default-tools:
   {%- endif %}
       
 
+{% elif settings.keep_current|d(false) %}
+linux-image:
+  pkg.installed:
+    - pkgs:
+      - linux-tools-{{ grains['kernelrelease'] }}
+  
 {% else %}
 
 linux-image:
