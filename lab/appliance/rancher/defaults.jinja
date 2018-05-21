@@ -1,18 +1,19 @@
 {% load_yaml as defaults %}
 server:
-  tag: preview
+  tag: master
   http_port: 80
   https_port: 443
   ip: 1.2.3.4
+  volume: /var/rancher/server
   db:
-    host:
-    port:
+    host: localhost
+    port: 3306
     name: cattle
     user: cattle
     password: cattle
   cluster:
     - name: default
-  
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

@@ -1,7 +1,8 @@
 #!/bin/bash
+set -e
 
 # read server environment
-. /app/etc/rancher-server.env
+. /etc/rancher/rancher-server.env
 
 # wait for server
 while ! curl -k https://localhost/ping; do sleep 3; done
@@ -16,7 +17,8 @@ AGENTTOKEN=`curl -s 'https://127.0.0.1/v3/clusterregistrationtoken' -H 'content-
 CACHECKSUM=`curl -s -H "Authorization: Bearer $APITOKEN" https://127.0.0.1/v3/settings/cacerts --insecure | jq -r .value | sha256sum | awk '{ print $1 }'`
 
 # write agent environment
-cat > /app/etc/rancher-agent.env << EOF
+mkdir -p /etc/rancher
+cat > /etc/rancher/rancher-agent.env << EOF
 AGENTIMAGE=${AGENTIMAGE}
 AGENTTOKEN=${AGENTTOKEN}
 CACHECKSUM=${CACHECKSUM}

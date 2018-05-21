@@ -4,19 +4,22 @@ include:
 {% from "lab/appliance/rancher/defaults.jinja" import settings with context %}
 
 rancher-server-volume:
+  file.directory:
+    - name: {{ settings.server.volume }}
   docker_volume.present:
     - name: rancher-server-volume
     - driver: local
     - driver_opts:
        type: "none"
-       device: "/data/rancher/server"
+       device: "{{ settings.server.volume }}"
        o: "bind"
     - require:
+      - file: rancher-server-volume
       - sls: .common
     
 rancher-server-image:
   docker_image.present:
-    - name: rancher/server:{{ settings.server_tag }}
+    - name: rancher/rancher:{{ settings.server_tag }}
     - require:
       - sls: .common
 

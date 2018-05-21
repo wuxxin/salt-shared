@@ -1,9 +1,8 @@
 [Unit]
 Description=Rancher Server
 After=docker.service
-ConditionPathExists=!/app/etc/flags/no.rancher-server
-ConditionPathExists=/data/rancher/server
-Requires=docker.service appliance-mysql
+ConditionPathExists=!/etc/rancher/no.rancher-server
+Requires=docker.service
 OnFailure=service-failed@%n.service
 StartLimitInterval=300
 StartLimitIntervalSec=300
@@ -16,19 +15,20 @@ TimeoutStartSec=5min
 TimeoutStopSec=15
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull rancher/server:{{ settings.server.tag }}
+ExecStartPre=/usr/bin/docker pull rancher/rancher:{{ settings.server.tag }}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
     -p {{ settings.server_ip }}:{{ settings.server_port }}:8080 \
     -e DEFAULT_CATTLE_TELEMETRY_OPT="out" \
     -e DEFAULT_CATTLE_API_HOST="{{ settings.server_ip }}:{{ settings.server_port }}" \
-    rancher/server:{{ settings.server.tag }} \
-    --db-host {{ settings.db.host }} \
-    --db-port {{ settings.db.port }} \
-    --db-user {{ settings.db.user }} \
-    --db-pass {{ settings.db.pass }} \
-    --db-name {{ settings.db.name }}
-
+    rancher/rancher:{{ settings.server.tag }}
+    
 [Install]
 WantedBy=multi-user.target
+
+# --db-host {{ settings.db.host }} \
+# --db-port {{ settings.db.port }} \
+# --db-user {{ settings.db.user }} \
+# --db-pass {{ settings.db.pass }} \
+# --db-name {{ settings.db.name }}
