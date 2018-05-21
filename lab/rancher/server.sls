@@ -1,7 +1,7 @@
 include:
   - .common
   
-{% from "lab/appliance/rancher/defaults.jinja" import settings with context %}
+{% from "lab/rancher/defaults.jinja" import settings with context %}
 
 rancher-server-volume:
   file.directory:
@@ -25,7 +25,7 @@ rancher-server-image:
 
 rancher-server.service:
   file.managed:
-    - source: salt://lab/appliance/rancher/rancher-server.service
+    - source: salt://lab/rancher/rancher-server.service
     - name: /etc/systemd/system/rancher-server.service
     - template: jinja
     - context:
@@ -44,7 +44,7 @@ rancher-server.service:
       
 rancher-server-setup:
   file.managed:
-    - source: salt://lab/appliance/rancher/rancher-server-setup.sh
+    - source: salt://lab/rancher/rancher-server-setup.sh
     - name: /usr/local/share/appliance/rancher-server-setup.sh
     - mode: "0755"
   cmd.run:

@@ -2,11 +2,11 @@ include:
   - .common
   - .server
   
-{% from "lab/appliance/rancher/defaults.jinja" import settings with context %}
+{% from "lab/rancher/defaults.jinja" import settings with context %}
 
 rancher-agent-setup:
   file.managed:
-    - source: salt://lab/appliance/rancher/rancher-agent-setup.sh
+    - source: salt://lab/rancher/rancher-agent-setup.sh
     - name: /usr/local/share/appliance/rancher-agent-setup.sh
 
   cmd.run:
@@ -17,7 +17,7 @@ rancher-agent-setup:
   
 rancher-agent.service:
   file.managed:
-    - source: salt://lab/appliance/rancher/rancher-agent.service
+    - source: salt://lab/rancher/rancher-agent.service
     - name: /etc/systemd/system/rancher-agent.service
     - template: jinja
     - context:
