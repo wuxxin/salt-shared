@@ -2,19 +2,16 @@
 latex:
   pkg.installed:
     - pkgs:
-      - texinfo
       - texlive
-      - texlive-latex-recommended
       - texlive-latex-extra
-      - texlive-math-extra
-      - texlive-fonts-recommended
+      - texlive-science
       - texlive-font-utils
       - texlive-extra-utils
+      - texlive-lang-english
+      - texlive-lang-german
       - lmodern
-      - latexdiff
-      - auctex
-      - imagemagick
+      # latex companions
       - netpbm
-      - pdftk
       - giftrans
-      - gv
+      - pdftk
+      - ghostscript
