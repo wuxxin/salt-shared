@@ -20,8 +20,7 @@ polipo:
 /etc/polipo/config:
   file.managed:
     - contents: |
-        logSyslog = false
-        logFile = /var/log/polipo/polipo.log
+        logSyslog = true
         proxyAddress = {{ s.bindaddress }}
         proxyPort = {{ s.bindport }}
         cacheIsShared = {{ s.cacheIsShared }}
