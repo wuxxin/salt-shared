@@ -1,16 +1,14 @@
+{%- set gwip = salt['network.default_route']('inet')[0]['gateway'] %}
+{%- set gwdev = salt['network.default_route']('inet')[0]['interface'] %}
+{%- set address = salt['network.ip_addrs'](gwdev)[0] %}
+
 {% load_yaml as defaults %}
 server:
   tag: master
   http_port: 80
   https_port: 443
-  ip: 1.2.3.4
+  ip: {{ address }}
   volume: /var/rancher/server
-  db:
-    host: localhost
-    port: 3306
-    name: cattle
-    user: cattle
-    password: cattle
   cluster:
     - name: default
 

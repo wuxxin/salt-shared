@@ -19,16 +19,13 @@ ExecStartPre=/usr/bin/docker pull rancher/rancher:{{ settings.server.tag }}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p {{ settings.server_ip }}:{{ settings.server_port }}:8080 \
+    -p {{ settings.server.ip }}:{{ settings.server.http_port }} \
+    -p {{ settings.server.ip }}:{{ settings.server.https_port }} \
+    -v rancher-server-volume:/var/lib/rancher \
     -e DEFAULT_CATTLE_TELEMETRY_OPT="out" \
-    -e DEFAULT_CATTLE_API_HOST="{{ settings.server_ip }}:{{ settings.server_port }}" \
+    -e DEFAULT_CATTLE_API_HOST="{{ settings.server.ip }}:{{ settings.server.https_port }}" \
     rancher/rancher:{{ settings.server.tag }}
     
 [Install]
 WantedBy=multi-user.target
 
-# --db-host {{ settings.db.host }} \
-# --db-port {{ settings.db.port }} \
-# --db-user {{ settings.db.user }} \
-# --db-pass {{ settings.db.pass }} \
-# --db-name {{ settings.db.name }}

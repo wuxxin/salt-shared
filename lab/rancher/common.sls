@@ -1,6 +1,5 @@
 include:
   - docker
-  - appliance
   
 rancher-prerequisites:
   pkg.installed:
@@ -9,4 +8,3 @@ rancher-prerequisites:
       - wget
       - curl
       - httpie
-
