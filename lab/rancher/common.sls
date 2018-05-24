@@ -8,3 +8,7 @@ rancher-prerequisites:
       - wget
       - curl
       - httpie
+
+/etc/rancher:
+  file.directory:
+    - makedirs: True

@@ -1,5 +1,5 @@
 include:
-  - .common
+  - lab.rancher.common
   
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
@@ -15,15 +15,15 @@ rancher-server-volume:
        o: "bind"
     - require:
       - file: rancher-server-volume
-      - sls: .common
+      - sls: lab.rancher.common
     
 rancher-server-image:
   docker_image.present:
-    - name: rancher/rancher:{{ settings.server_tag }}
+    - name: rancher/rancher:{{ settings.server.tag }}
     - require:
-      - sls: .common
+      - sls: lab.rancher.common
 
-rancher-server.service:
+rancher-server:
   file.managed:
     - source: salt://lab/rancher/rancher-server.service
     - name: /etc/systemd/system/rancher-server.service
@@ -33,22 +33,21 @@ rancher-server.service:
     - onchanges_in:
       - cmd: systemd_reload
     - require:
-      - sls: .common
-
+      - sls: lab.rancher.common
   service.running:
     - enable: true
     - watch:
-      - file: rancher-server.service
+      - file: rancher-server
     - require:
-      - file: rancher-server.service
+      - file: rancher-server
       
 rancher-server-setup:
   file.managed:
     - source: salt://lab/rancher/rancher-server-setup.sh
-    - name: /usr/local/share/appliance/rancher-server-setup.sh
+    - name: /etc/rancher/rancher-server-setup.sh
     - mode: "0755"
   cmd.run:
-    - name: /usr/local/share/appliance/rancher-server-setup.sh
-    - unless: test -e /app/etc/rancher-server.env
+    - name: /etc/rancher/rancher-server-setup.sh
+    - unless: test -e /etc/rancher/rancher-server.env
     - require:
-      - service: rancher-server.service
+      - service: rancher-server

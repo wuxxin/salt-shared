@@ -1,21 +1,21 @@
 include:
-  - .common
-  - .server
+  - lab.rancher.common
+  - lab.rancher.server
   
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
 rancher-agent-setup:
   file.managed:
     - source: salt://lab/rancher/rancher-agent-setup.sh
-    - name: /usr/local/share/appliance/rancher-agent-setup.sh
+    - name: /etc/rancher/rancher-agent-setup.sh
 
   cmd.run:
-    - name: /usr/local/share/appliance/rancher-agent-setup.sh
-    - unless: test -e /app/etc/rancher-agent.env
+    - name: /etc/rancher/rancher-agent-setup.sh
+    - unless: test -e /etc/rancher/rancher-agent.env
     - require:
-      - sls: .server
+      - sls: lab.rancher.server
   
-rancher-agent.service:
+rancher-agent:
   file.managed:
     - source: salt://lab/rancher/rancher-agent.service
     - name: /etc/systemd/system/rancher-agent.service
@@ -26,13 +26,13 @@ rancher-agent.service:
       - cmd: systemd_reload
     - require:
       - cmd: rancher-agent-setup
-      - sls: .common
+      - sls: lab.rancher.common
   
   service.running:
     - enable: true
     - watch:
-      - file: rancher-agent.service
+      - file: rancher-agent
     - require:
-      - file: rancher-agent.service
+      - file: rancher-agent
       
 
