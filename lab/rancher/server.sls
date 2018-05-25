@@ -41,13 +41,15 @@ rancher-server:
     - require:
       - file: rancher-server
       
-rancher-server-setup:
+/etc/rancher/rancher-server-setup.sh:
   file.managed:
     - source: salt://lab/rancher/rancher-server-setup.sh
-    - name: /etc/rancher/rancher-server-setup.sh
     - mode: "0755"
+    - template: jinja
+    - context:
+      settings: {{ settings }}
   cmd.run:
-    - name: /etc/rancher/rancher-server-setup.sh
     - unless: test -e /etc/rancher/rancher-server.env
     - require:
+      - file: /etc/rancher/rancher-server-setup.sh
       - service: rancher-server

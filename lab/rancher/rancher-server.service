@@ -8,6 +8,8 @@ StartLimitInterval=300
 StartLimitIntervalSec=300
 StartLimitBurst=5
 
+{% set serverip= salt['dnsutil.A'](settings.server.name)[0] %}
+
 [Service]
 Restart=on-failure
 RestartSec=5
@@ -19,11 +21,11 @@ ExecStartPre=/usr/bin/docker pull rancher/rancher:{{ settings.server.tag }}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p {{ settings.server.ip }}:{{ settings.server.http_port }} \
-    -p {{ settings.server.ip }}:{{ settings.server.https_port }} \
+    -p {{ serverip }}:{{ settings.server.http_port }}:80 \
+    -p {{ serverip }}:{{ settings.server.https_port }}:443 \
     -v rancher-server-volume:/var/lib/rancher \
     -e DEFAULT_CATTLE_TELEMETRY_OPT="out" \
-    -e DEFAULT_CATTLE_API_HOST="{{ settings.server.ip }}:{{ settings.server.https_port }}" \
+    -e DEFAULT_CATTLE_API_HOST="{{ settings.server.name }}:{{ settings.server.https_port }}" \
     rancher/rancher:{{ settings.server.tag }}
     
 [Install]

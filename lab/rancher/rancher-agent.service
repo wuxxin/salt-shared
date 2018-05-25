@@ -17,17 +17,22 @@ TimeoutStopSec=15
 EnvironmentFile=/etc/rancher/rancher-agent.env
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull $AGENTIMAGE
+ExecStartPre=/usr/bin/docker pull ${AGENTIMAGE}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    --net= host \
+    --net=host \
+    --privileged \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    $AGENTIMAGE \
-    $ROLEFLAGS \
-    --server $RANCHERSERVER \
-    --token $AGENTTOKEN \
-    --ca-checksum $CACHECKSUM 
+    "${AGENTIMAGE}" \
+    --server "https://${RANCHERSERVER}" \
+    --token "${AGENTTOKEN}" \
+    --ca-checksum "${CACHECKSUM}" \
+    --etcd --controlplane --worker
+
+
+# -v /var/run:/var/run \
+# -v /etc/kubernetes:/etc/kubernetes \
 
 [Install]
 WantedBy=multi-user.target

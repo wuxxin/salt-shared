@@ -4,15 +4,17 @@ include:
   
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
-rancher-agent-setup:
+/etc/rancher/rancher-agent-setup.sh:
   file.managed:
     - source: salt://lab/rancher/rancher-agent-setup.sh
-    - name: /etc/rancher/rancher-agent-setup.sh
-
+    - mode: "0755"
+    - template: jinja
+    - context:
+      settings: {{ settings }}
   cmd.run:
-    - name: /etc/rancher/rancher-agent-setup.sh
     - unless: test -e /etc/rancher/rancher-agent.env
     - require:
+      - file: /etc/rancher/rancher-agent-setup.sh
       - sls: lab.rancher.server
   
 rancher-agent:
@@ -25,7 +27,7 @@ rancher-agent:
     - onchanges_in:
       - cmd: systemd_reload
     - require:
-      - cmd: rancher-agent-setup
+      - cmd: /etc/rancher/rancher-agent-setup.sh
       - sls: lab.rancher.common
   
   service.running:
