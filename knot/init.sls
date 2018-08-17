@@ -7,12 +7,6 @@ include:
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns",
   require_in = "pkg: knot-package") }}
 
-  {% if grains['osrelease_info'][0] < 16 %}
-    {%- set service_name = 'knot' %}
-  {%- else %}
-    {%- set service_name = 'knot.service' %}
-  {%- endif %}
-
 knot-package:
   pkg.installed:
     - names:
@@ -31,8 +25,6 @@ knot-config-check:
     - require:
       - pkg: knot-package
 
-  {%- if s.active|d(false) %}
-
 /etc/default/knot:
   file.managed:
     - name: /etc/default/knot
@@ -40,6 +32,7 @@ knot-config-check:
         KNOTD_ARGS="-c /etc/knot/knot.conf"
         #
 
+  {%- if s.active|d(false) %}
 /etc/knot/knot.conf:
   file.managed:
     - name: 
@@ -77,12 +70,12 @@ knot-zone-{{ zone.domain }}:
     - watch_in: knot.service
     - context:
         common: {{ s.common }}
+    - check_cmd: kzonecheck {{ zone.domain }} FIXME check param
       {%- endif %}
     {%- endfor %}
   
 knot:
   service.running:
-    - name: {{ service_name }}
     - enable: true
     - require:
       - pkg: knot-package
@@ -93,7 +86,7 @@ knot:
   {%- else %}
 knot:
   service.dead:
-    - name: {{ service_name }}
+    - disable: true
 
 /etc/knot/knot.conf:
   file:

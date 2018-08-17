@@ -1,7 +1,7 @@
 # Knot DNS server salt-stack
 
 + pillar: knot
-  + relaxed (order does not matter) knot.conf yaml with some additions
+  + relaxed (order does not matter) knot.conf yaml 
   + active: true,false
   + logging: if empty will use defaults.jinja:log_default
   + zone:
