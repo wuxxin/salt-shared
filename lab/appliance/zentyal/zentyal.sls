@@ -2,6 +2,7 @@
 
 include:
   - lab.appliance.zentyal.base
+  - systemd.reload
 
 {# ### install zentyal packages #}
 zentyal:
@@ -162,6 +163,20 @@ zentyal-resolv.conf:
         resolvconf -u
     - onlyif: '! grep -q "nameserver {{ dns_nameservers[0] }}" /etc/resolv.conf'
 
+bind9-disable-resolvconf-addition:
+  file.managed:
+    - name: /etc/systemd/system/bind9-resolvconf.service.d/fix-no-bind-dns.conf
+    - makedirs: True
+    - contents: |
+        # systemd drop-in for bind9-resolvconf.service
+        # XXX do not set bind9 as local dns resolver, zentyal grabs basedomain from hostname as own domain for kerberus/ldap dns stuff
+        [Service]
+        ExecStart=
+        ExecStop= 
+  
+    - onchanges_in:
+      - cmd: systemd_reload
+  
 {# XXX write out a customized zentyal redis config setter #}
 /usr/local/sbin/prepare-zentyal-config.sh:
   file.managed:

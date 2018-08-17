@@ -1,8 +1,17 @@
 include:
   - lab.rancher.common
-  
+  - systemd.reload
+
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
+rancher-server-volume:
+  docker_volume.present:
+    - name: rancher-server-volume
+    - driver: local
+    - require:
+      - sls: lab.rancher.common
+
+{#
 rancher-server-volume:
   file.directory:
     - name: {{ settings.server.volume }}
@@ -16,6 +25,7 @@ rancher-server-volume:
     - require:
       - file: rancher-server-volume
       - sls: lab.rancher.common
+#}
     
 rancher-server-image:
   docker_image.present:

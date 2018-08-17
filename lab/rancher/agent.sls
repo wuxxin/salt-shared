@@ -1,6 +1,7 @@
 include:
   - lab.rancher.common
   - lab.rancher.server
+  - systemd.reload
   
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
