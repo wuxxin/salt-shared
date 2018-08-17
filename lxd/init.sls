@@ -33,11 +33,6 @@ include:
 
 {%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}  
 
-{# This specifies the maximum number of memory map areas a process may have. Memory map areas are used as a side-effect of calling malloc, directly by mmap and mprotect, and also when loading shared libraries. #}
-vm.max_map_count:
-  sysctl.present:
-    - value: 262144 {# 65530 #}
-
 {# This denies container access to the messages in the kernel ring buffer. Please note that this also will deny access to non-root users on the host system. #}
 kernel.dmesg_restrict:
   sysctl.present:
