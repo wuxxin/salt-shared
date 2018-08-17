@@ -7,10 +7,10 @@ server:
   tag: master
   http_port: 80
   https_port: 443
-  ip: {{ address }}
+  password: admin
+  name: {{ address }}
   volume: /var/rancher/server
-  cluster:
-    - name: default
+  cluster: default
 
 {% endload %}
 

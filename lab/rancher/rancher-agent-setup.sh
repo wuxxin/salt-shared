@@ -5,16 +5,16 @@ set -e
 . /etc/rancher/rancher-server.env
 
 # wait for server
-while ! curl -k https://localhost/ping; do sleep 3; done
+while ! curl -k https://$RANCHERSERVER/ping; do sleep 3; done
 
 # Generate agent image
-AGENTIMAGE=`curl -s -H "Authorization: Bearer $APITOKEN" https://127.0.0.1/v3/settings/agent-image --insecure | jq -r .value`
+AGENTIMAGE=$(curl -s -H "Authorization: Bearer $APITOKEN" "https://$RANCHERSERVER/v3/settings/agent-image" --insecure | jq -r .value)
 
 # Generate token (clusterRegistrationToken)
-AGENTTOKEN=`curl -s 'https://127.0.0.1/v3/clusterregistrationtoken' -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"type":"clusterRegistrationToken","clusterId":"'$CLUSTERID'"}' --insecure | jq -r .token`
+AGENTTOKEN=$(curl -s "https://$RANCHERSERVER/v3/clusterregistrationtoken" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"type":"clusterRegistrationToken","clusterId":"'$CLUSTERID'"}' --insecure | jq -r .token)
 
 # Retrieve CA certificate and generate checksum
-CACHECKSUM=`curl -s -H "Authorization: Bearer $APITOKEN" https://127.0.0.1/v3/settings/cacerts --insecure | jq -r .value | sha256sum | awk '{ print $1 }'`
+CACHECKSUM=$(curl -s -H "Authorization: Bearer $APITOKEN" "https://$RANCHERSERVER/v3/settings/cacerts" --insecure | jq -r .value | sha256sum | awk '{ print $1 }')
 
 # write agent environment
 mkdir -p /etc/rancher
@@ -23,6 +23,5 @@ AGENTIMAGE=${AGENTIMAGE}
 AGENTTOKEN=${AGENTTOKEN}
 CACHECKSUM=${CACHECKSUM}
 RANCHERSERVER="${RANCHERSERVER}"
-ROLEFLAGS="--etcd --controlplane --worker"
 EOF
 
