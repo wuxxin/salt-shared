@@ -6,7 +6,7 @@ include:
 
 shellcheck:
   pkg.installed:
-    - fromrepo: xenial-backports
+    - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
     - require:
       - sls: ubuntu.backports
     
