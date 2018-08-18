@@ -3,7 +3,7 @@ include:
 
 {% from "unbound/defaults.jinja" import settings as s with context %}
 
-{% if s.enabled|d(false) == true %}
+{% if s.enabled|d(false) %}
 
   {% if grains['osrelease_info'][0]|int <= 18 %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
