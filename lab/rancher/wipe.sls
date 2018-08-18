@@ -1,5 +1,7 @@
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
+#fixme evacuate node first
+
 rancher-agent:
   service.dead:
     - enable: false
