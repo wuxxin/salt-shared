@@ -7,6 +7,7 @@ include:
   - kernel.cgroup
   - ubuntu.backports
 
+{#
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
 
 {% from "network/lib.sls" import net_reverse_short with context %}
@@ -21,6 +22,7 @@ include:
         server=/lxd/{{ ipaddr }}
         server=/{{ net_reverse_short(interface) }}/{{ ipaddr }}
 {% endif %}
+#}
 
 {# modify kernel vars for production setup of lxd_ http://lxd.readthedocs.io/en/latest/production-setup/ #}
 
@@ -60,7 +62,7 @@ lxd:
       - lxd
       - lxd-client
       - lxd-tools
-    - fromrepo: xenial-backports
+    - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
     - require:
       - sls: ubuntu.backports
   service.running:
