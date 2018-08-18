@@ -5,14 +5,15 @@ include:
 
 {% if s.enabled|d(false) == true %}
 
+  {% if grains['osrelease_info'][0]|int <= 18 %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("nlnetlabs-ppa", "ondrej/pkg-nlnetlabs",
+{{ apt_add_repository("unbound-ppa", "ondrej/unbound",
   require_in = "pkg: unbound") }}
-
+  {% endif %}
+  
 unbound:
-  pkg.installed:
-    - require:
-      - pkgrepo: nlnetlabs-ppa
+  pkg:
+    - installed
   service.running:
     - require:
       - pkg: unbound
@@ -25,6 +26,9 @@ unbound:
     - template: jinja
     - context:
         settings: {{ s }}
+    - check_cmd: unbound-checkconf
+    - require:
+      - pkg: unbound
 
 default_unbound_resolvconf:
   file.replace:
