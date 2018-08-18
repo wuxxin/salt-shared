@@ -5,7 +5,9 @@ include:
   - kernel.sysctl.big
   - kernel.limits.big
   - kernel.cgroup
+{% if grains['osrelease_info'][0]|int <= 18 %}
   - ubuntu.backports
+{% endif %}
 
 {#
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
@@ -45,7 +47,6 @@ kernel.dmesg_restrict:
 lxd_prerequisites:
   pkg.installed:
     - pkgs:
-      - lxc
       - lvm2
       - thin-provisioning-tools
       - bridge-utils
@@ -62,9 +63,12 @@ lxd:
       - lxd
       - lxd-client
       - lxd-tools
+      - lxc-utils
+{% if grains['osrelease_info'][0]|int <= 18 %}
     - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
     - require:
       - sls: ubuntu.backports
+{% endif %}
   service.running:
     - enable: True
     - require:
