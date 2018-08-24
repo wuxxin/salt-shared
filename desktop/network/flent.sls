@@ -1,8 +1,8 @@
 {# The FLExible Network Tester - make experimental evaluations of networks more reliable and easier #}
 
 include:
-  - .iperf2
-  - .irtt
+  - desktop.network.iperf2
+  - desktop.network.irtt
   - python
   
 http-getter:
@@ -30,9 +30,9 @@ flent:
     - pkgs:
       - fping
       - netperf
-      - flent
     - require:
-      - pkg: iperf2 {# XXX flent needs iperf2 but at least 2.0.8 #}
+      - sls: desktop.network.iperf2 {# XXX flent needs iperf2 but at least 2.0.8 #}
+      - sls: desktop.network.irtt
       - cmd: http-getter
       - pip: python3-flent
   cmd.run:
