@@ -5,7 +5,7 @@ include:
   - vcs.subversion
   - vcs.bzr
 
-vcs_nop:
+vcs_nop_req:
   test:
     - nop
     - require:

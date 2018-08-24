@@ -1,17 +1,17 @@
 include:
-  - vcs.init
+  - vcs
 
 git-remote-hg:
   pkg.installed:
     - require:
-      - sls: vcs.init
+      - sls: vcs
 
 git-remote-bzr:
   pkg.installed:
     - require:
-      - sls: vcs.init
+      - sls: vcs
 
 git-svn:
   pkg.installed:
     - require:
-      - sls: vcs.init
+      - sls: vcs
