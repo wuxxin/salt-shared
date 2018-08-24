@@ -7,7 +7,7 @@ baseurl: https://netcologne.dl.sourceforge.net/project/iperf2/
 hash: 367f651fb1264b13f6518e41b8a7e08ce3e41b2a1c80e99ff0347561eed32646
 {% endload %}
 {% set localfile= iperfconfig.name+ '-'+ iperfconfig.version+ 'tar.gz' %}
-{% set requrl= baseurl+ localfile %}
+{% set requrl= iperfconfig.baseurl+ localfile %}
 
 iperf:
   file.managed:
