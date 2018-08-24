@@ -13,7 +13,7 @@ iperf:
   file.managed:
     - name: /usr/local/src/{{ localfile }}
     - source: {{ requrl }}
-    - source_hash: sha256={{ hash }}
+    - source_hash: sha256={{ iperfconfig.hash }}
   archive.extracted:
     - name: /usr/local/src/
     - source: /usr/local/src/{{ localfile }}
