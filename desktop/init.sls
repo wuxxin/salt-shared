@@ -9,7 +9,6 @@ include:
   - .graphics
   - .music
   - .network
-  - .power
   - .security
   - .spellcheck
   - .terminal
@@ -17,6 +16,7 @@ include:
   - .video
   - .voice
   - .writing
+  #   - .power
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - python.dev
