@@ -5,13 +5,22 @@
 {% load_yaml as defaults %}
 server:
   tag: stable
-  http_port: 80
-  https_port: 443
+  http_port: 2280
+  https_port: 2243
   password: admin
   name: {{ address }}
-  volume: /var/rancher/server
+  data: /var/lib/rancher
   cluster: default
-
+  dns:
+    ip: 
+    search:
+  env:
+agent:
+  dns:
+    ip: 
+    search:
+  ȩnv:
+  
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

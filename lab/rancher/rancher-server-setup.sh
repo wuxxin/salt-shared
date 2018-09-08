@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 
-RANCHERSERVER="{{ settings.server.name }}"
+RANCHERSERVER="{{ settings.server.name }}:{{ settings.server.https_port }}"
 
 # wait for server
 while ! curl -k https://$RANCHERSERVER/ping; do sleep 3; done
