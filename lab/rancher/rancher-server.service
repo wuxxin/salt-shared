@@ -24,11 +24,11 @@ ExecStart=/usr/bin/docker run \
     -p {{ serverip }}:{{ settings.server.http_port }}:80 \
     -p {{ serverip }}:{{ settings.server.https_port }}:443 \
     -v rancher-server-volume:{{ settings.server.data }} \
-{%- if settings.server.dns.ip|d(false) and settings.server.dns.search|d(false) %}
+{%- if settings.server.dns.ip|d(None) != None and settings.server.dns.search|d(None) != None %}
     --dns={{ settings.server.dns.ip }} \
     --dns-search={{ settings.server.dns.search }} \
 {%- endif %}
-{%- if settings.server.env|d(false) %}
+{%- if settings.server.env|d(None) != None %}
 {%- for n,d in settings.server.env.iteritems() %}
     -e {{ n }}='{{ d }}' \
 {%- endfor %}
