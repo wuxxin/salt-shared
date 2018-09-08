@@ -24,7 +24,7 @@ ExecStart=/usr/bin/docker run \
     --net=host \
     --privileged \
     -v /etc/kubernetes:/etc/kubernetes \
-    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run:/var/run \
 {%- if settings.agent.dns|d(None) != None and settings.agent.dns.ip|d(None) != None and settings.agent.dns.search|d(None) != None %}
     --dns={{ settings.agent.dns.ip }} \
     --dns-search={{ settings.agent.dns.search }} \

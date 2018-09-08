@@ -21,9 +21,8 @@ ExecStartPre=/usr/bin/docker pull rancher/rancher:{{ settings.server.tag }}
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p {{ serverip }}:{{ settings.server.http_port }}:80 \
     -p {{ serverip }}:{{ settings.server.https_port }}:443 \
-    -v rancher-server-volume:{{ settings.server.data }} \
+    -v {{ settings.server.data }}:/var/lib/rancher \
 {%- if settings.server.dns|d(None) != None and settings.server.dns.ip|d(None) != None and settings.server.dns.search|d(None) != None %}
     --dns={{ settings.server.dns.ip }} \
     --dns-search={{ settings.server.dns.search }} \
@@ -33,8 +32,6 @@ ExecStart=/usr/bin/docker run \
     -e {{ n }}='{{ d }}' \
 {%- endfor %}
 {%- endif %}
-    -e DEFAULT_CATTLE_TELEMETRY_OPT="out" \
-    -e DEFAULT_CATTLE_API_HOST="{{ settings.server.name }}:{{ settings.server.https_port }}" \
     rancher/rancher:{{ settings.server.tag }}
     
 [Install]
