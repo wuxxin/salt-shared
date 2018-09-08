@@ -26,6 +26,14 @@ rancher-server-volume:
   file:
     - absent
 
+/var/lib/rancher:
+  file:
+    - absent
+
+/var/lib/kublet:
+  file:
+    - absent
+    
 systemd_reload:
   cmd.run:
     - name: systemctl daemon-reload
