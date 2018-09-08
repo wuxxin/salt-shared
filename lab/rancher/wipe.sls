@@ -22,6 +22,10 @@ rancher-server-volume:
   file:
     - absent
 
+/etc/kubernetes:
+  file:
+    - absent
+
 systemd_reload:
   cmd.run:
     - name: systemctl daemon-reload

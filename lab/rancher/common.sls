@@ -12,3 +12,7 @@ rancher-prerequisites:
 /etc/rancher:
   file.directory:
     - makedirs: True
+
+/etc/kubernetes:
+  file.directory:
+    - makedirs: True
