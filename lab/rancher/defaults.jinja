@@ -12,15 +12,15 @@ server:
   data: /var/lib/rancher
   cluster: default
   dns:
-    ip: 
+    ip:
     search:
   env:
 agent:
   dns:
-    ip: 
+    ip:
     search:
-  ȩnv:
-  
+  env:
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
