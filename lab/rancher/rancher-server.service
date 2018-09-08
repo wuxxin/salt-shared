@@ -29,7 +29,7 @@ ExecStart=/usr/bin/docker run \
     --dns-search={{ settings.server.dns.search }} \
 {%- endif %}
 {%- if settings.server.env|d(false) %}
-{%- for n,d in settings.server.env.iterate() %}
+{%- for n,d in settings.server.env.iteritems() %}
     -e {{ n }}='{{ d }}' \
 {%- endfor %}
 {%- endif %}
