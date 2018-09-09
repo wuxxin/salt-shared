@@ -4,24 +4,18 @@ After=docker.service
 ConditionPathExists=!/etc/rancher/no.rancher-agent
 ConditionPathExists=/etc/rancher/rancher-agent.env
 Requires=docker.service
-#OnFailure=service-failed@%n.service
-StartLimitInterval=300
-StartLimitIntervalSec=300
-StartLimitBurst=5
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 SuccessExitStatus=137
-Restart=on-failure
-RestartSec=5
 TimeoutStartSec=3min
 TimeoutStopSec=15
 EnvironmentFile=/etc/rancher/rancher-agent.env
 ExecStartPre=/usr/bin/docker pull ${AGENTIMAGE}
 ExecStart=/usr/bin/docker run \
     --detach \
-    --name systemd-docker-agent \
+    --name systemd-rancher-agent \
     --net=host \
     --privileged \
     -v /etc/kubernetes:/etc/kubernetes \
@@ -40,7 +34,7 @@ ExecStart=/usr/bin/docker run \
     --token "${AGENTTOKEN}" \
     --ca-checksum "${CACHECKSUM}" \
     --etcd --controlplane --worker
-ExecStop=/usr/bin/docker stop rancher-agent
+ExecStop=/usr/bin/docker stop rancher-agent systemd-rancher-agent
 
 [Install]
 WantedBy=multi-user.target
