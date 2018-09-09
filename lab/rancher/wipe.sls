@@ -15,7 +15,8 @@ rancher-server:
     - name: /etc/systemd/system/rancher-server.service
 
 {% for i in ['/etc/rancher', '/etc/kubernetes', '/etc/cni', 
-  '/var/lib/etcd', '/var/lib/cni', '/var/run/calico',
+  '/var/lib/etcd', '/var/lib/cni', '/var/lib/calico',
+  '/var/run/calico', '/var/run/secrets/kubernetes.io',
   '/opt/cni'] %}
 
 {{ i }}:

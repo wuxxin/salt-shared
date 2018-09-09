@@ -8,7 +8,7 @@ set -x
 echo "wait for server"
 while ! curl -k $RANCHERSERVER/ping; do sleep 3; done
 
-echo "Generate agent image"
+echo "Retrieve agent image name"
 AGENTIMAGE=$(curl -s "$RANCHERSERVER/v3/settings/agent-image" -H "Authorization: Bearer $APITOKEN" --insecure | jq -r .value)
 
 echo "Generate token (clusterRegistrationToken)"
