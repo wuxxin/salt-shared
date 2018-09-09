@@ -5,6 +5,10 @@ include:
   
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
+/etc/kubernetes:
+  file.directory:
+    - makedirs: True
+
 /etc/rancher/rancher-agent-setup.sh:
   file.managed:
     - source: salt://lab/rancher/rancher-agent-setup.sh

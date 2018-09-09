@@ -1,22 +1,23 @@
 #!/bin/bash
-set -e
+set -eo pipefail
+set -x
 
 # read server environment
 . /etc/rancher/rancher-server.env
 
-# wait for server
+echo "wait for server"
 while ! curl -k https://$RANCHERSERVER/ping; do sleep 3; done
 
-# Generate agent image
+echo "Generate agent image"
 AGENTIMAGE=$(curl -s "$RANCHERSERVER/v3/settings/agent-image" -H "Authorization: Bearer $APITOKEN" --insecure | jq -r .value)
 
-# Generate token (clusterRegistrationToken)
+echo "Generate token (clusterRegistrationToken)"
 AGENTTOKEN=$(curl -s "$RANCHERSERVER/v3/clusterregistrationtoken" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"type":"clusterRegistrationToken","clusterId":"'$CLUSTERID'"}' --insecure | jq -r .token)
 
-# Retrieve CA certificate and generate checksum
+echo "Retrieve CA certificate and generate checksum"
 CACHECKSUM=$(curl -s "$RANCHERSERVER/v3/settings/cacerts" -H "Authorization: Bearer $APITOKEN" --insecure | jq -r .value | sha256sum | awk '{ print $1 }')
 
-# write agent environment
+echo "write agent environment"
 mkdir -p /etc/rancher
 cat > /etc/rancher/rancher-agent.env << EOF
 AGENTIMAGE=${AGENTIMAGE}

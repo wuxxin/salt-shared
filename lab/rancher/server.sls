@@ -4,6 +4,7 @@ include:
 
 {% from "lab/rancher/defaults.jinja" import settings with context %}
 
+{#
 rancher-server-volume:
   docker_volume.present:
     - name: rancher-server-volume
@@ -11,7 +12,6 @@ rancher-server-volume:
     - require:
       - sls: lab.rancher.common
 
-{#
 rancher-server-volume:
   file.directory:
     - name: {{ settings.server.volume }}
