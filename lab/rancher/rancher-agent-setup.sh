@@ -6,7 +6,7 @@ set -x
 . /etc/rancher/rancher-server.env
 
 echo "wait for server"
-while ! curl -k https://$RANCHERSERVER/ping; do sleep 3; done
+while ! curl -k $RANCHERSERVER/ping; do sleep 3; done
 
 echo "Generate agent image"
 AGENTIMAGE=$(curl -s "$RANCHERSERVER/v3/settings/agent-image" -H "Authorization: Bearer $APITOKEN" --insecure | jq -r .value)
