@@ -26,7 +26,7 @@ include:
 /etc/default/docker:
   file.managed:
     - contents: |
-        DOCKER_OPTIONS="{{ settings.options|d('') }}"
+        DOCKER_OPTIONS="{{ s.options|d('') }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
 {%- from "http_proxy/defaults.jinja" import default_no_proxy %}
         http_proxy="{{ salt['pillar.get']('http_proxy') }}"
@@ -50,8 +50,8 @@ docker-network:
     - contents: |
         auto docker0
         iface docker0 inet static
-            address {{ settings.ipaddr }}
-            netmask {{ settings.netmask }}
+            address {{ s.ipaddr }}
+            netmask {{ s.netmask }}
             bridge_ports none
             bridge_stp off
             bridge_maxwait 0
@@ -74,7 +74,7 @@ docker-network:
           bridges:
             docker0:
               dhcp4: false
-              addresses: [{{ settings.ipaddr }}/{{ settings.netmask }}]
+              addresses: [{{ s.ipaddr }}/{{ s.netmask }}]
               parameters:
                 forward-delay: 0
     - require:
