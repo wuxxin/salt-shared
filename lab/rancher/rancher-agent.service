@@ -10,21 +10,22 @@ StartLimitIntervalSec=300
 StartLimitBurst=5
 
 [Service]
+Type=oneshot
+RemainAfterExit=yes
+SuccessExitStatus=137
 Restart=on-failure
 RestartSec=5
-TimeoutStartSec=5min
+TimeoutStartSec=3min
 TimeoutStopSec=15
 EnvironmentFile=/etc/rancher/rancher-agent.env
-ExecStartPre=-/usr/bin/docker kill %n
-ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=/usr/bin/docker pull ${AGENTIMAGE}
 ExecStart=/usr/bin/docker run \
-    --rm \
-    --name %n \
+    --detach \
+    --name systemd-docker-agent \
     --net=host \
     --privileged \
     -v /etc/kubernetes:/etc/kubernetes \
-    -v /var/run:/var/run \
+    -v /var/run/docker.sock:/var/run/docker.sock \
 {%- if settings.agent.dns|d(None) != None and settings.agent.dns.ip|d(None) != None and settings.agent.dns.search|d(None) != None %}
     --dns={{ settings.agent.dns.ip }} \
     --dns-search={{ settings.agent.dns.search }} \
@@ -39,9 +40,7 @@ ExecStart=/usr/bin/docker run \
     --token "${AGENTTOKEN}" \
     --ca-checksum "${CACHECKSUM}" \
     --etcd --controlplane --worker
-
-
-# -v /var/run:/var/run \
+ExecStop=/usr/bin/docker stop rancher-agent
 
 [Install]
 WantedBy=multi-user.target
