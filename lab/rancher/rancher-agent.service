@@ -35,7 +35,7 @@ ExecStart=/usr/bin/docker run \
 {%- endfor %}
 {%- endif %}
     "${AGENTIMAGE}" \
-    --server "https://${RANCHERSERVER}" \
+    --server "${RANCHERSERVER}" \
     --token "${AGENTTOKEN}" \
     --ca-checksum "${CACHECKSUM}" \
     --etcd --controlplane --worker
