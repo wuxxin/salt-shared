@@ -14,17 +14,14 @@ rancher-server:
   file.absent:
     - name: /etc/systemd/system/rancher-server.service
 
-rancher-server-volume:
-  docker_volume:
-    - absent
+{% for i in ['/etc/rancher', '/etc/kubernetes', '/etc/cni', 
+  '/var/lib/etcd', '/var/lib/cni', '/var/run/calico',
+  '/opt/cni'] %}
 
-/etc/rancher:
+{{ i }}:
   file:
     - absent
-
-/etc/kubernetes:
-  file:
-    - absent
+{% endfor %}
 
 /var/lib/rancher:
   file:

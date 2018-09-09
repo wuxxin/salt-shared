@@ -18,8 +18,9 @@ ExecStart=/usr/bin/docker run \
     --name systemd-rancher-agent \
     --net=host \
     --privileged \
+    --restart=unless-stopped \
     -v /etc/kubernetes:/etc/kubernetes \
-    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run:/var/run \
 {%- if settings.agent.dns|d(None) != None and settings.agent.dns.ip|d(None) != None and settings.agent.dns.search|d(None) != None %}
     --dns={{ settings.agent.dns.ip }} \
     --dns-search={{ settings.agent.dns.search }} \
@@ -34,7 +35,8 @@ ExecStart=/usr/bin/docker run \
     --token "${AGENTTOKEN}" \
     --ca-checksum "${CACHECKSUM}" \
     --etcd --controlplane --worker
-ExecStop=/usr/bin/docker stop rancher-agent systemd-rancher-agent
+ExecStop=-/usr/bin/docker stop rancher-agent systemd-rancher-agent
+ExecStop=-/usr/bin/docker rm rancher-agent systemd-rancher-agent
 
 [Install]
 WantedBy=multi-user.target
