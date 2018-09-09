@@ -1,4 +1,5 @@
-{% from "docker/defaults.jinja" import settings with context %}
+{% from "docker/defaults.jinja" import settings as s with context %}
+{% set pkgname= "docker-ce" if s.from_upstream|d(false) else "docker.io" %}
   
 include:
   - kernel
@@ -8,13 +9,18 @@ include:
   - python
   - systemd.reload
 
-# pin docker to x.y.* release, so we get updates but no major new version
+{# pin docker to x.y.* release, if requested #}
 /etc/apt/preferences.d/docker-preferences:
+{% if s.version|d("*") in ["*", "", None] %}
+  file:
+    - absent
+{% else %}
   file.managed:
     - contents: |
-        Package: {{ settings.pkgname }}
-        Pin: version {{ settings.version }}
+        Package: {{ pkgname }}
+        Pin: version {{ s.version }}
         Pin-Priority: 900
+{% endif %}
 
 # add docker options from pillar to etc/default config, add http_proxy if set
 /etc/default/docker:
@@ -36,6 +42,8 @@ docker-requisites:
     - require:
       - sls: kernel.cgroup
 
+{% if grains['osrelease_info'][0]|int <= 18 %}
+
 docker-network:
   file.managed:
     - name: /etc/network/interfaces.d/80-docker-bridge.cfg
@@ -56,6 +64,28 @@ docker-network:
     - onchanges:
       - file: docker-network
 
+{% else %}
+docker-network:
+  file.managed:
+    - name: /etc/netplan/80-docker0-bridge.yaml
+    - contents: |
+        network:
+          version: 2
+          bridges:
+            docker0:
+              dhcp4: false
+              addresses: [{{ settings.ipaddr }}/{{ settings.netmask }}]
+              parameters:
+                forward-delay: 0
+    - require:
+      - pkg: docker-requisites
+  cmd.run:
+    - name: netplan apply
+    - onlyif: netplan generate
+    - onchanges:
+      - file: docker-network
+{% endif %}
+
 docker-service:
   file.managed:
     - name: /etc/systemd/system/docker.service
@@ -71,18 +101,22 @@ custom-docker-multi-user-symlink:
     - target: /etc/systemd/system/docker.service
 
 docker:
+{%- if s.from_upstream|d(false) %}
   pkgrepo.managed:
-    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ grains.oscodename }} {{ settings.repositories }}'
+    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ grains.oscodename }} {{ s.upstream_flavor }}'
     - humanname: "Docker Repository"
     - file: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
     - key_url: https://download.docker.com/linux/ubuntu/gpg
     - require_in:
       - pkg: docker
+{%- else %}
+  file.absent:
+    - name: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
+{%- endif %}
   pkg.installed:
     - pkgs:
-      - {{ settings.pkgname }}
+      - {{ pkgname }}
     - require:
-      - pkgrepo: docker
       - pkg: docker-requisites
       - file: /etc/apt/preferences.d/docker-preferences
       - file: docker-network

@@ -1,9 +1,13 @@
 {# pin docker to supported version in rancher/kubernets #}
 
+{# set version: "" or "*" to disable version pinning #}
+{# set from_upstream: true to get docker from download.docker.com #}
+
 {% load_yaml as defaults %}
-version: 17.03*
-repositories: stable
-pkgname: docker-ce
+version: 17.*
+from_upstream: false
+upstream_flavor: stable
+
 bridge: docker0
 ipaddr: "172.17.0.1"
 netmask: "255.255.0.0"
