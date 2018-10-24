@@ -5,3 +5,7 @@ shotwell:
 darktable:
   pkg:
     - installed
+
+digikam:
+  pkg:
+    - installed

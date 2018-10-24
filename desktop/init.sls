@@ -5,6 +5,7 @@ include:
   - .browser
   - .chat
   - .chipcard
+  - .email
   - .ftp
   - .graphics
   - .music
