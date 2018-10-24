@@ -5,14 +5,15 @@
 {% load_yaml as defaults %}
 server:
   tag: stable
+  name: {{ salt['grains.item']('host') }}
   http_port: 2280
   https_port: 2243
   password: admin
-  name: {{ address }}
   data: /var/lib/rancher
   cluster: default
 agent:
   data: /var/lib/kublet
+  address: {{ address }}
 
 {% endload %}
 
