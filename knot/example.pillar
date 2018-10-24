@@ -1,5 +1,5 @@
 knot:
-  active: true
+  enabled: true
   server:
     listen:
     - 1.2.3.4

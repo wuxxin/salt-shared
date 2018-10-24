@@ -1,9 +1,10 @@
 include:
   - ubuntu
 
-{% if salt['pillar.get']('knot', false) %}
-  {% from "knot/defaults.jinja" import settings as s with context %}
-  {% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "knot/defaults.jinja" import settings as s with context %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+
+{# knot from ppa is newer even for cosmic #}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns",
   require_in = "pkg: knot-package") }}
 
@@ -32,7 +33,8 @@ knot-config-check:
         KNOTD_ARGS="-c /etc/knot/knot.conf"
         #
 
-  {%- if s.active|d(false) %}
+{% if s.enabled|d(false) %}
+
 /etc/knot/knot.conf:
   file.managed:
     - name: 
@@ -48,7 +50,7 @@ knot-config-check:
     - require:
       - file: knot-config-check
 
-    {%- for zone in s.zone %}
+  {%- for zone in s.zone %}
 knot-zone-{{ zone.domain }}:
       {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
       {%- if zone.source is not defined %}
@@ -72,7 +74,7 @@ knot-zone-{{ zone.domain }}:
         common: {{ s.common }}
     - check_cmd: kzonecheck {{ zone.domain }} FIXME check param
       {%- endif %}
-    {%- endfor %}
+  {%- endfor %}
   
 knot:
   service.running:
@@ -83,7 +85,7 @@ knot:
       - file: /etc/default/knot
       - file: /etc/knot/knot.conf
 
-  {%- else %}
+{%- else %}
 knot:
   service.dead:
     - disable: true
@@ -92,5 +94,4 @@ knot:
   file:
     - absent
 
-  {%- endif %}
 {%- endif %}
