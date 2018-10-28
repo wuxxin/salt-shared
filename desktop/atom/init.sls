@@ -1,15 +1,21 @@
 include:
   - desktop.code
   - desktop.spellcheck
-
 {% if grains['os'] == 'Ubuntu' %}
-{% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("webupd8team_atom", "webupd8team/atom", 
-  require_in= "pkg: atom") }}
+  - ubuntu
 {% endif %}
 
 atom:
-  pkg.latest:
+  pkgrepo.managed:
+    - name: deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main
+    - key_url: https://packagecloud.io/AtomEditor/atom/gpgkey
     - require:
       - sls: desktop.code
       - sls: desktop.spellcheck
+{% if grains['os'] == 'Ubuntu' %}
+      - pkg: ppa_ubuntu_installer
+{% endif %}
+    - require_in:
+      - pkg: atom
+  pkg.installed:
+    - name: atom
