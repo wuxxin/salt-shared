@@ -10,6 +10,7 @@ terminal-tools:
       - poppler-utils
       - pdf-viewer
       - img2pdf
+      - antiword
   
 terminator:
   pkg:
