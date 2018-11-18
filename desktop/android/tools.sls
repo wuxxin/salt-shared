@@ -7,6 +7,7 @@ tools:
       - android-tools-adb
       - android-tools-adbd
       - android-tools-fastboot
+      - aapt
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
 {{ pip2_install('git+https://github.com/google/python-adb') }}
