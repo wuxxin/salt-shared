@@ -23,7 +23,7 @@ fi
 for uuid in `cat $2 | dos2unix | grep -v -- "- "| tr -d " \t"`; do
     echo "uuid: ${uuid}"
     updatelink="${baseurl}&id=${uuid}${firefox}"
-    #echo "updatelink: $updatelink"
+    echo "updatelink: $updatelink"
     rdf=`wget -O - --quiet "$updatelink"`
     #echo "rdf: $rdf"
     if test "$rdf" != ""; then
