@@ -3,6 +3,7 @@ include:
   - gnupg       {# #}
   - openssl     {# #}
   - unison      {# #}
+  - tmux        {# #}
   - .flatyaml   {# #}
   - .raven      {# #}
   - .passgen    {# #}
@@ -22,7 +23,6 @@ base-tools:
       - git
       - rsync
       - curl
-      - wget
       {# packer/compressor #}
       - bzip2
       - xz-utils
