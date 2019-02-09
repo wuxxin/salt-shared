@@ -23,6 +23,9 @@ server:
     ip:
     search:
   env:
+    HTTP_PROXY: "http://192.168.10.1:3128"
+    HTTPS_PROXY: "http://192.168.10.1:3128"
+    NO_PROXY: "localhost,127.0.0.1,0.0.0.0,192.168.10.0/24,example.com"
 agent:
   dns:
     ip:
