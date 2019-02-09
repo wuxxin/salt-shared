@@ -1,3 +1,6 @@
+# version has self advertisment in case of syntax error
+# - source: https://netcologne.dl.sourceforge.net/project/plantuml/1.2019.0/plantuml.1.2019.0.jar
+# - source_hash: sha256=767b2a3f5512ae0636fdaea8a54a58b96ffa8fd41933f941e6fb55bafed381e1
 
 plantuml:
   file.managed:

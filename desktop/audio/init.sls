@@ -25,3 +25,8 @@ audio-player:
     - pkgs:
       - banshee
       - rhythmbox
+
+audio-editor:
+  pkg.installed:
+    - pkgs:
+      - audacity
