@@ -1,15 +1,19 @@
-apport:
-  service.dead:
-    - name: apport
-    - enable: false
 apport_masked:
   service.masked:
     - name: apport
-  
-whoopsie:
-  service.dead:
-    - name: whoopsie
-    - enable: false
+    
 whoopsie_masked:
   service.masked:
     - name: whoopsie
+
+apport:
+  service.dead:
+    - enable: false
+  pkg:
+    - removed
+  
+whoopsie:
+  service.dead:
+    - enable: false
+  pkg:
+    - removed
