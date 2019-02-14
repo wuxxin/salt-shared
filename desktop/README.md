@@ -1,6 +1,6 @@
 # desktop
 
-Installs and configures features you usually want to have for a working desktop
+Installs and configures features usually wanted for a working desktop
 
 ## Desktop Features
 
@@ -18,8 +18,8 @@ Installs and configures features you usually want to have for a working desktop
         * doconce
         * zotero
 
-* voice: mumble, skype (if enabled)
-* chat: pidgin, signal, riot
+* voice: mumble, linphone, skype (if enabled)
+* chat: riot, pidgin, signal 
 * video: vlc and mpv and codecs
 * security:
     * tor browser bundle
@@ -28,13 +28,13 @@ Installs and configures features you usually want to have for a working desktop
     * firejail restricted application jail
 
 * browser:
-    * chromium browser, firefox-std/esr/dev, java plugin
+    * chromium browser, firefox
 
 * Electronic Signing: 
     * jre, java browser plugin, chipcard daemon
 
 * ubuntu:
-    * user: disable shopping lenses
+    * user: disable shopping lenses and other spam
     * /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie, install ubuntu/unity tweaks program
 
 ## Development Features
@@ -50,9 +50,9 @@ Installs and configures features you usually want to have for a working desktop
 * emulation:
   * qemu/kvm, libvirt, virt-manager
   * lxd, vagrant, vagrant-libvirt, vagrant-lxd, tools
-* ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
 
 * optional
+    * ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
     * android: sdk & ndk
     * gcloud: installs google cloud SDK
     * buildozer (kivy - python-for-android - android-sdk, android-ndk buildchain)

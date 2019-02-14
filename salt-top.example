@@ -1,35 +1,33 @@
-# if you want to use this salt state top file, you should copy it to top.sls in one of your salt states root directories
+# to use this file as salt state top, copy it to top.sls in salt/custom
 base:
 
-  # any ubuntu
+  # ubuntu specific
   'os:Ubuntu':
     - match: grain
     - ubuntu
-    - ubuntu.backports
 
-  # any machine (not running Windows)
-  'os:[^(Windows)]':
-    - match: grain_pcre
-    - locale
-    - timezone
-    - tmux
-    - ssh
-  
-  # any machine (including virtual) but not on lxc (is same kernel)
-  'not G@virtual:LXC':
+  # physical machine
+  'virtual:physical':
+    - match: grain
+    - hardware
+
+  # virtual machine
+  'P@virtual:(?!physical)':
     - match: compound
-    - acpi
+    - virtual
+
+  # any machine type (including virtual) but not on lxc (is same kernel)
+  'P@virtual:(?!LXC)':
+    - match: compound
     - haveged
     - kernel
-  
-  # any physical machine and Debian Family:
-  'G@os_family:Debian and G@virtual:physical':  
-    - match: compound
-    - tools
+    - acpi
 
-  # any physical machine and not windows: Harddisk Health Monitor
-  'G@virtual:physical and G@os:[^(Windows)]':
-    - match: compound
-    - smartmon
+  # any
+  '*':
+    - tools
+    - locale
+    - timezone
+    - ssh
 
 

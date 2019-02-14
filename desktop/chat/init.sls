@@ -1,4 +1,4 @@
 include:
+  - .riot
   - .pidgin
   - .signal
-  - .riot

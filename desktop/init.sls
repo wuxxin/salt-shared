@@ -28,12 +28,12 @@ include:
   - .scipy
   - .atom
   - .code
-  - .ubuntu.dev
   - .emulation
   - .android
   - .forensic
 
 {#
+  - .ubuntu.dev
   - .asciinema
   - .gcloud
   - java.jdk

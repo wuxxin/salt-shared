@@ -4,19 +4,14 @@ file: top.sls in pillar root
 ----
 base:
   '*':
-    - timezone
     - custom
-
-----
-
-file: timezone.sls in pillar root
-----
-timezone: Europe/Vienna
 
 ----
 
 file: custom.sls in pillar root
 ----
+timezone: Europe/Vienna
+
 desktop:
   user: mainusernameonthemachine
   development:
