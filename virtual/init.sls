@@ -1,4 +1,3 @@
-#
 {% if grains['virtual'] in ['kvm', 'qemu', 'xen'] %}
 
 spice-vdagent:
