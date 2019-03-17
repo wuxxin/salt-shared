@@ -11,13 +11,13 @@ cgroup:
 
 {% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
 
-{# enable cgroup memory and swap accounting, needs kernel restart #}
+{# enable cgroup v1 swap accounting, needs kernel restart #}
 cgroup-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/cgroup.cfg
     - makedirs: true
     - contents: |
-        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
+        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX swapaccount=1"
   cmd.wait:
     - name: update-grub
     - watch:
