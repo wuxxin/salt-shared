@@ -1,0 +1,29 @@
+[Unit]
+Description=Syncthing - File Synchronization - for user %i
+Documentation=https://github.com/syncthing/syncthing/wiki
+After=network.target
+
+[Service]
+User=%i
+
+Slice=syncthing-slice-%i
+NoNewPrivileges=true
+ProtectHome=tmpfs
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+PrivateTmp=true
+PrivateDevices=true
+WorkingDirectory=/home/%i
+BindPaths=/home/%i/.config/syncthing:/home/%i/.syncthing
+
+ExecStart=/usr/bin/syncthing -no-browser -no-restart -logflags=0 -home="/home/%i%/.syncthing"
+
+Restart=on-failure
+SuccessExitStatus=2 3 4
+RestartForceExitStatus=3 4
+
+[Install]
+WantedBy=multi-user.target
