@@ -1,3 +1,4 @@
+# entropy gathering daemon, useful for virtual machines and headless server
 haveged:
   pkg:
     - installed
