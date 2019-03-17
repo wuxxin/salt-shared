@@ -1,8 +1,3 @@
-suspend_support:
-  pkg.installed:
-    - pkgs:
-      - pm-utils
-      
 polkit_hibernate_enable:
   file.managed:
     - name: /etc/polkit-1/localauthority/50-local.d/com.ubuntu.enable-hibernate.pkla

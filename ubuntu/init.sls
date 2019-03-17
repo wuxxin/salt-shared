@@ -1,24 +1,26 @@
-{% if grains['osrelease_info'][0]|int <= 18 %}
 ppa_ubuntu_installer:
   pkg.installed:
     - pkgs:
+{% if grains['osrelease_info'][0]|int <= 18 %}
       - python-software-properties
       - apt-transport-https
-      - software-properties-common
-    - order: 1
 {% endif %}
+      - software-properties-common
+      - update-notifier-common
+    - order: 1
 
 
 {% macro apt_add_repository(statename, ppaname) %}
 
 {{ statename }}:
-{% if grains['osrelease_info'][0]|int <= 18 %}
   pkg.installed:
     - pkgs:
+{% if grains['osrelease_info'][0]|int <= 18 %}
       - python-software-properties
       - apt-transport-https
-      - software-properties-common
 {% endif %}
+      - software-properties-common
+      - update-notifier-common
   pkgrepo.managed:
     - ppa: {{ ppaname }}
     - file: /etc/apt/sources.list.d/{{ statename }}.list

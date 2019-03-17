@@ -1,2 +1,3 @@
 include:
-  - .reporting.disabled
+  - ubuntu
+  - ubuntu.reporting.disabled
