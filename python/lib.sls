@@ -2,7 +2,7 @@ include:
   - python
 
 {% macro pip_install(package_or_packagelist, version="") %}
-python{{ version }}-{{ package_or_packagelist }}:
+"python{{ version }}-{{ package_or_packagelist }}":
   pip.installed:
   {%- if package_or_packagelist is iterable and package_or_packagelist is not string %}
     - pkgs: {{ package_or_packagelist}}
@@ -24,11 +24,9 @@ python{{ version }}-{{ package_or_packagelist }}:
 {% endmacro %}
 
 {% macro pip3_install(package_or_packagelist) %}
-# pip3_install extra: {{ kwargs }}
 {{ pip_install(package_or_packagelist, '3') }}
 {% endmacro %}
 
 {% macro pip2_install(package_or_packagelist) %}
-# pip2_install extra: {{ kwargs }}
 {{ pip_install(package_or_packagelist, '2') }}
 {% endmacro %}
