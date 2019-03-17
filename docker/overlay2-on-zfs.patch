@@ -1,0 +1,17 @@
+Enable overlay2 storage driver with zfs as backing filesystem
+
+  - this needs a custom zfs version (nodrevalidate)
+  - use at your own risk
+Index: docker.io-18.09.2/components/engine/daemon/graphdriver/overlay2/overlay.go
+===================================================================
+--- docker.io-18.09.2.orig/components/engine/daemon/graphdriver/overlay2/overlay.go
++++ docker.io-18.09.2/components/engine/daemon/graphdriver/overlay2/overlay.go
+@@ -159,7 +159,7 @@ func Init(home string, options []string,
+ 	}
+ 
+ 	switch fsMagic {
+-	case graphdriver.FsMagicAufs, graphdriver.FsMagicEcryptfs, graphdriver.FsMagicNfsFs, graphdriver.FsMagicOverlay, graphdriver.FsMagicZfs:
++	case graphdriver.FsMagicAufs, graphdriver.FsMagicEcryptfs, graphdriver.FsMagicNfsFs, graphdriver.FsMagicOverlay:
+ 		logger.Errorf("'overlay2' is not supported over %s", backingFs)
+ 		return nil, graphdriver.ErrIncompatibleFS
+ 	case graphdriver.FsMagicBtrfs:
