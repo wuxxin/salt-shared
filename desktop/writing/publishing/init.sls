@@ -1,5 +1,4 @@
 include:
-  - desktop.graphics.fonts
   - desktop.spellcheck
 
 publishing:

@@ -1,4 +1,6 @@
 include:
+  - .ubuntu
+
   - java
   - .user
   - .audio
@@ -13,7 +15,6 @@ include:
   - .security
   - .spellcheck
   - .terminal
-  - .ubuntu
   - .video
   - .voice
   - .writing
