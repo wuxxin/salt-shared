@@ -3,8 +3,10 @@ include:
 
 browser-java:
   pkg.installed:
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-    - name: icedtea-7-plugin
+{% if grains['osrelease_info'][0]|int <= 19 %}
+    - name: icedtea-plugin
 {% else %}
-    - name: default-java-plugin
+    - name: icedtea-netx
 {% endif %}
+    - require:
+      - sls: java
