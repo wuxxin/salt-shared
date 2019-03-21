@@ -13,9 +13,9 @@ generic:
 {% set settings = salt['grains.filter_by'](defaults, 
   grain= 'lsb_distrib_codename', default= 'generic',
   merge= salt['pillar.get']('desktop:settings', {})) %}
-
+    
 install_desktop:
-  - pkg.installed:
+  pkg.installed:
     - pkgs:
       - {{ settings.xserver }}
       - gnome-core
