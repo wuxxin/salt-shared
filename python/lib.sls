@@ -17,7 +17,7 @@ include:
       - cmd: pip2-upgrade
       - cmd: pip3-upgrade
   {%- if kwargs is defined %}
-    {%- for k,d in kwargs.iteritems() %}
+    {%- for k,d in kwargs.items() %}
     - {{ k }}: {{ d }}
     {%- endfor %}
   {%- endif %}
