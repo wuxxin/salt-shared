@@ -22,7 +22,7 @@ http-getter:
     - onchanges:
       - git: http-getter
   
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{% from 'python/lib.sls' import pip3_install %}
 {{ pip3_install('flent') }}
 
 flent: 

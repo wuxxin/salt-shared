@@ -7,5 +7,5 @@ forensic-packages:
       {# - cabextract      {# extract MS cab files #}
       {# - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
 
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{% from 'python/lib.sls' import pip3_install %}
 {{ pip3_install('msoffcrypto-tool') }} {# Python tool and library for decrypting encrypted MS Office files #}
