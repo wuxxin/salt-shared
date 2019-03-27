@@ -1,12 +1,21 @@
-{# pin docker to supported version in rancher/kubernets #}
+{# pin docker to a specific version range  #}
 
-{# set version: "" or "*" to disable version pinning #}
-{# set from_upstream: true to get docker from download.docker.com #}
+{#
+version: "18.*"     # to install any 18.XX version
+version: "" or "*"  # disable version pinning
+origin: system|docker|launchpad
+  system= from distribution
+  docker= from download.docker.com
+  launchpad= from launchpad source, self build, with local patches
+old:
+docker_com_flavor: stable, ... # upstream target
+#}
 
 {% load_yaml as defaults %}
-version: 17.*
+version: *
+origin: system
+docker_com_flavor: stable
 from_upstream: false
-upstream_flavor: stable
 
 bridge: docker0
 ipaddr: "172.17.0.1"

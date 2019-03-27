@@ -86,6 +86,16 @@ docker-network:
       - file: docker-network
 {% endif %}
 
+{%- if grains['osrelease_info'][0]|int <= 18 %}
+{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{{ pip2_install('docker-compose') }}
+{%- else %}
+docker-compose:
+  pkg.installed:
+    - pkgs:
+      - docker-compose
+{%- endif %}
+
 docker-service:
   file.managed:
     - name: /etc/systemd/system/docker.service
@@ -124,12 +134,13 @@ docker:
     - enable: true
     - require:
       - pkg: docker
+{%- if grains['osrelease_info'][0]|int <= 18 %}
       - pip: docker-compose
+{%- else %}
+      - pkg: docker-compose
+{%- endif %}
       - file: /etc/default/docker
       - file: docker-service
     - watch:
       - file: /etc/default/docker
       - file: docker-service
-
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('docker-compose') }}
