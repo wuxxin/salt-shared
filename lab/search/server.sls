@@ -20,8 +20,8 @@ recoll_server:
       - libimage-exiftool-perl
       - poppler-utils
       - pstotext
-      - python-chm
-      - python-mutagen
+      - python3-chm
+      - python3-mutagen
       - unrtf
       - untex
     - require:
