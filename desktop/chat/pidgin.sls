@@ -12,5 +12,4 @@ pidgin:
       - pidgin-skype
       - pidgin-otr
       - pidgin-gnome-keyring
-      - bitlbee
 
