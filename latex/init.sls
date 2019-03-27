@@ -10,7 +10,6 @@ latex:
       - texlive-lang-english
       - texlive-lang-german
       - lmodern
-      # latex companions
       - netpbm
       - giftrans
       - pdftk
