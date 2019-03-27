@@ -12,15 +12,8 @@ python3-ravencat-packages:
     - require:
       - sls: python
 
-# python2 packages needed for saltstack raven (_returners/raven_return.py)
-python2-saltstack-raven-packages:
-  pkg.installed:
-    - pkgs:
-      - python-requests
-
-# install both python raven versions
+# install raven
 {{ pip3_install('raven') }}
-{{ pip2_install('raven') }}
 
 /usr/local/bin/ravencat.py:
   file.managed:
