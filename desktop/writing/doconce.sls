@@ -16,7 +16,7 @@ prereq_doconce:
       - pdftk
       - giftrans
       - gv
-      - libav-tools
+      - ffmpeg
       - ispell
       - pandoc
       - unoconv
