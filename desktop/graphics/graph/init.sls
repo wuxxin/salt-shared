@@ -5,7 +5,7 @@ graph:
   pkg.installed:
     - pkgs:
       - graphviz
-      - python-blockdiag
-      - python-actdiag
-      - python-nwdiag
-      - python-seqdiag
+      - python3-blockdiag
+      - python3-actdiag
+      - python3-nwdiag
+      - python3-seqdiag
