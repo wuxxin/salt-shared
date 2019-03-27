@@ -10,6 +10,7 @@ include:
   - .email
   - .ftp
   - .graphics
+  - .health
   - .music
   - .network
   - .security
