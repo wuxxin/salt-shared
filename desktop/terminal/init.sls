@@ -8,7 +8,7 @@ terminal-tools:
       - file
       - odt2txt
       - poppler-utils
-      - pdf-viewer
+      - evince
       - img2pdf
       - antiword
   
