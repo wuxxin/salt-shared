@@ -1,6 +1,6 @@
 keyring:
   pkg.installed:
     - pkgs:
-      - python-keyring
-      - mercurial-keyring
+      - gnome-keyring
+      - python3-keyring
       - keyringer
