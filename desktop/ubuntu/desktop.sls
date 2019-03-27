@@ -4,11 +4,7 @@ gconf-editor:
 
 {#
 Differences to ubuntu-desktop-minimal & ubuntu-desktop
-
-xcursor-themes
-dmz-cursor-theme
-gsettings-ubuntu-schemas yaru-theme-gnome-shell yaru-theme-gtk yaru-theme-icon yaru-theme-sound
-libreoffice-style-breeze
+xcursor-themes dmz-cursor-theme gsettings-ubuntu-schemas yaru-theme-gnome-shell yaru-theme-gtk yaru-theme-icon yaru-theme-sound libreoffice-style-breeze
 #}
 
 fonts:
@@ -46,10 +42,13 @@ gtk3-themes:
 gnome-shell-extensions:
   pkg.installed:
     - pkgs:
-      - gnome-shell-extension-mediaplayer
       - gnome-shell-extension-appindicator
-      - gnome-shell-extension-top-icons-plus
       - gnome-shell-extension-hard-disk-led
       - gnome-shell-extension-pixelsaver
       - gnome-shell-extension-system-monitor
       - gnome-shell-extension-weather
+
+{# only in bionic and cosmic but not in disco
+- gnome-shell-extension-mediaplayer
+- gnome-shell-extension-top-icons-plus
+#}
