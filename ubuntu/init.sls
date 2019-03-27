@@ -2,7 +2,6 @@ ppa_ubuntu_installer:
   pkg.installed:
     - pkgs:
 {% if grains['osrelease_info'][0]|int <= 18 %}
-      - python-software-properties
       - apt-transport-https
 {% endif %}
       - software-properties-common
@@ -15,7 +14,6 @@ ppa_ubuntu_installer:
   pkg.installed:
     - pkgs:
 {%- if grains['osrelease_info'][0]|int <= 18 %}
-      - python-software-properties
       - apt-transport-https
 {%- endif %}
       - software-properties-common
