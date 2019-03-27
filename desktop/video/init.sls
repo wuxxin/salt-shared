@@ -19,6 +19,8 @@ video-packages:
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-libav
       - gstreamer1.0-fluendo-mp3
+      - gstreamer1.0-vaapi
+      - vainfo
       - lame
       - libav-tools
       - libavcodec-extra
@@ -26,6 +28,9 @@ video-packages:
       - frei0r-plugins
       - v4l2loopback-dkms
       - ffmpeg
+      - gst123
+
+{# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-pipewire gstreamer1.0-opencv baresip-gstreamer #}
 
 {% if grains['lsb_distrib_codename'] == 'trusty' %}
 dvd-css-support:
