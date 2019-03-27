@@ -13,4 +13,4 @@ vector:
 pixel_vector:
   pkg.installed:
     - pkgs:
-      - pencil
+      - pencil2d
