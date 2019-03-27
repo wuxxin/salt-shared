@@ -1,22 +1,18 @@
 ## salt-shared - useful Salt states
 
-This is a collection of saltstack states
-as a result of me learning saltstack.
+This is a collection of saltstack states.
 
-It is already in a useful condition,
-both quality and style differ from state to state,
-most states are working, some are not,
-it lacks documentation beside a few README.md.
-
+Both quality and style differ from state to state,
+most states are working, some are not, it lacks documentation beside a few README.md.
 
 ### What can you do with it
 
-* Target Platform: Ubuntu LTS 18.04 (bionic), LTS 16.04 (xenial)
+* Target Platforms: Ubuntu 19.04 (disco) LTS-18.04 (bionic), LTS-16.04 (xenial)
     * many non-gui states also work with older/newer ubuntu and other debian based distros.
    
 * Features to look at:
     * [desktop](desktop):
-        * everything wanted for a desktop installation (18.04)
+        * everything wanted for a desktop installation (19.04, 18.04)
     * [storage](storage):
         * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
     * [network](network): (currently 16.04 xenial based)
