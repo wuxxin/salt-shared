@@ -9,7 +9,7 @@ python-dev:
     - require:
       - sls: python
 
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{% from 'python/lib.sls' import pip3_install %}
 
 {% load_yaml as python_tools %}
 - pudb {# full-screen console debugger for Python #}
