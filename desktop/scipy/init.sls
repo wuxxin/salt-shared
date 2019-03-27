@@ -1,18 +1,16 @@
 include:
   - python.dev
-  - .ppa
 
 scipy:
   pkg.installed:
     - pkgs:
-      - python-numpy
-      - python-scipy
-      - python-matplotlib
-      - python-pandas
-      - python-sympy
-      - python-nose
-      - python-skimage
+      - python3-numpy
+      - python3-scipy
+      - python3-matplotlib
+      - python3-pandas
+      - python3-sympy
+      - python3-nose
+      - python3-skimage
     - require:
       - sls: python
       - sls: python.ipython
-      - pkgrepo: neurodebian_ppa
