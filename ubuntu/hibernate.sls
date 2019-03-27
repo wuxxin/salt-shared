@@ -20,9 +20,6 @@ handle_lidswitch_hibernate:
     - pattern: ^HandleLidSwitch=.*
     - repl: HandleLidSwitch=hibernate
     - unless: pm-is-supported --suspend-hybrid
-    - require:
-      - pkg:
-        - suspend_support
 
 handle_lidswitch_hibernate_hybrid:
   file.replace:
@@ -31,6 +28,3 @@ handle_lidswitch_hibernate_hybrid:
     - pattern: ^HandleLidSwitch=.*
     - repl: HandleLidSwitch=hybrid-sleep
     - onlyif: pm-is-supported --suspend-hybrid
-    - require:
-      - pkg:
-        - suspend_support
