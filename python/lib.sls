@@ -13,9 +13,7 @@ include:
     - bin_env: {{ '/usr/local/bin/pip'+ version }}
   {%- endif %}
     - require:
-      - pkg: python
-      - cmd: pip2-upgrade
-      - cmd: pip3-upgrade
+      - sls: python
   {%- if kwargs is defined %}
     {%- for k,d in kwargs.items() %}
     - {{ k }}: {{ d }}
