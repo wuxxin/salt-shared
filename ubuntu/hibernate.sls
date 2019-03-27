@@ -1,6 +1,7 @@
 polkit_hibernate_enable:
   file.managed:
     - name: /etc/polkit-1/localauthority/50-local.d/com.ubuntu.enable-hibernate.pkla
+    - makedirs: True
     - contents: |
         [Re-enable hibernate by default in upower]
         Identity=unix-user:*
@@ -19,7 +20,7 @@ handle_lidswitch_hibernate:
     - pattern: ^HandleLidSwitch=.*
     - repl: HandleLidSwitch=hibernate
     - unless: pm-is-supported --suspend-hybrid
-    - requires:
+    - require:
       - pkg:
         - suspend_support
 
@@ -30,6 +31,6 @@ handle_lidswitch_hibernate_hybrid:
     - pattern: ^HandleLidSwitch=.*
     - repl: HandleLidSwitch=hybrid-sleep
     - onlyif: pm-is-supported --suspend-hybrid
-    - requires:
+    - require:
       - pkg:
         - suspend_support
