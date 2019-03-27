@@ -18,16 +18,14 @@ video-packages:
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-libav
-      - gstreamer1.0-fluendo-mp3
       - gstreamer1.0-vaapi
       - vainfo
       - lame
-      - libav-tools
+      - ffmpeg
       - libavcodec-extra
       - libdvdread4
       - frei0r-plugins
       - v4l2loopback-dkms
-      - ffmpeg
       - gst123
 
 {# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-pipewire gstreamer1.0-opencv baresip-gstreamer #}
@@ -60,7 +58,11 @@ video-player:
   pkg.installed:
     - pkgs:
       - vlc
+{%- if grains['osmajorrelease']|int < 18 %}
       - vlc-nox
+{%- else %}
+      - vlc-bin
+{%- endif %}
       - vlc-plugin-vlsub
       - mpv {# replaces mplayer #}
       - youtube-dl 
