@@ -7,14 +7,11 @@ include:
 sphinx:
   pkg.installed:
     - pkgs:
-      - python-sphinx
-      - python-sphinxcontrib.actdiag
-      - python-sphinxcontrib.blockdiag
-      - python-sphinxcontrib.nwdiag
-      - python-sphinxcontrib.seqdiag
-      - python-sphinxcontrib-httpdomain
-      - python-sphinxcontrib-programoutput
-      - python-sphinxcontrib.issuetracker
-      - python-sphinxcontrib.spelling
-      - python-imaging
+      - python3-sphinx
+      - python3-sphinxcontrib.actdiag
+      - python3-sphinxcontrib.blockdiag
+      - python3-sphinxcontrib.nwdiag
+      - python3-sphinxcontrib.seqdiag
+      - python3-sphinxcontrib.spelling
+      - python3-pil
       - zip
