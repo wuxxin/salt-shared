@@ -10,7 +10,7 @@ prereq_doconce:
     - pkgs:
       - idle
       - python-pdftools
-      - imagemagick
+      - graphicsmagick-imagemagick-compat
       - netpbm
       - mjpegtools
       - pdftk

@@ -5,7 +5,7 @@ qrcode:
   pkg.installed:
     - pkgs:
       - qrencode
-      - imagemagick
+      - graphicsmagick-imagemagick-compat
       - zbar-tools
 
 {% for a in ['data2qrpdf.sh', 'qrpdf2data.sh'] %}

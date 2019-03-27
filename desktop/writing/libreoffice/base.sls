@@ -22,9 +22,10 @@ libreoffice:
       - libreoffice
       - libreoffice-writer2xhtml
       - libreoffice-writer2latex
-      - fonts-noto-hinted
-      - fonts-noto
-      - imagemagick
+      - fonts-noto-core
+      - fonts-noto-mono
+      - fonts-noto-ui-core
+      - graphicsmagick-imagemagick-compat
       - ghostscript
       - gnupg
       - gpa
