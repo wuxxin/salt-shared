@@ -2,6 +2,15 @@ gconf-editor:
   pkg:
     - installed
 
+{#
+Differences to ubuntu-desktop-minimal & ubuntu-desktop
+
+xcursor-themes
+dmz-cursor-theme
+gsettings-ubuntu-schemas yaru-theme-gnome-shell yaru-theme-gtk yaru-theme-icon yaru-theme-sound
+libreoffice-style-breeze
+#}
+
 fonts:
   pkg.installed:
     - pkgs:
@@ -27,16 +36,12 @@ icon-themes:
   pkg.installed:
     - pkgs:
       - adwaita-icon-theme
-      - humanity-icon-theme
-      - gnome-icon-theme
       - elementary-icon-theme
 
 gtk3-themes:
   pkg.installed:
     - pkgs:
       - gtk3-engines-unico
-      - gtk3-engines-xfce
-      - clearlooks-phenix-theme
 
 gnome-shell-extensions:
   pkg.installed:
