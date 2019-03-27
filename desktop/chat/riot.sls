@@ -1,11 +1,13 @@
 include:
   - ubuntu
 
-{% if grains['osrelease_info'][0]|int <= 19 %}
+{%- if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
+  '"https://riot.im/packages/debian/dists/'+ grains['oscodename']+
+  '/InRelease" | grep -q "200 OK"', python_shell=true) == 0 %}
 
 riot:
   pkgrepo.managed:
-    - name: deb https://riot.im/packages/debian/ {{ grains['lsb_distrib_codename'] }} main
+    - name: deb https://riot.im/packages/debian/ {{ grains['oscodename'] }} main
     - key_url: https://riot.im/packages/debian/repo-key.asc
     - file: /etc/apt/sources.list.d/riot.im-debian-main.list
     - require:
