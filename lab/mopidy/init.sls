@@ -21,6 +21,7 @@ upmpdcli:
       - upplay
 
 {% from 'python/lib.sls' import pip2_install, pip3_install %}
+{# currently only available for python2 #}
 {{ pip2_install([
   'Mopidy',
   'Mopidy-Iris',

@@ -2,7 +2,7 @@ include:
   - tools.qrcode
   - python
 
-{% from "python/init.sls" import pip2_install, pip3_install %}
+{% from "python/init.sls" import pip3_install %}
 
 preseed_pkgs:
   pkg.installed:
