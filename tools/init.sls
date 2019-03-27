@@ -8,10 +8,9 @@ include:
   - .raven      {# #}
   - .passgen    {# #}
 
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{% from 'python/lib.sls' import pip3_install %}
 
 {# conversion/processor #}
-{{ pip2_install('percol') }} {# interactive pipe filtering #}
 {{ pip3_install('jinja2-cli[yaml]') }} {# CLI interface to Jinja2, reads yaml #}
 
 {% if grains['os_family'] == 'Debian' %}
