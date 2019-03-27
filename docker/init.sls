@@ -87,8 +87,8 @@ docker-network:
 {% endif %}
 
 {%- if grains['osrelease_info'][0]|int <= 18 %}
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
-{{ pip2_install('docker-compose') }}
+{% from 'python/lib.sls' import pip3_install %}
+{{ pip3_install('docker-compose') }}
 {%- else %}
 docker-compose:
   pkg.installed:
