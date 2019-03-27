@@ -10,7 +10,6 @@
 audio-packages:
   pkg.installed:
     - pkgs:
-      - paman
       - paprefs
       - pavucontrol
       - pavumeter
@@ -23,7 +22,6 @@ audio-packages:
 audio-player:
   pkg.installed:
     - pkgs:
-      - banshee
       - rhythmbox
 
 audio-editor:
