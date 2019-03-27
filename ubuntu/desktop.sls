@@ -6,8 +6,10 @@ include:
 {% load_yaml as defaults %}
 bionic:
   xserver: xserver-xorg-hwe-18.04
+  xwayland: xwayland-hwe-18.04
 generic:
   xserver: xserver-xorg
+  xwayland: xwayland
 {% endload %}
 
 {% set settings = salt['grains.filter_by'](defaults, 
@@ -17,7 +19,8 @@ generic:
 install_desktop:
   pkg.installed:
     - pkgs:
+      - {{ settings.xwayland }}
       - {{ settings.xserver }}
-      - gnome-core
       - gnome
+      - gnome-core
       - vanilla-gnome-desktop
