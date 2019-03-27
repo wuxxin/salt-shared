@@ -15,16 +15,13 @@ getdeb_ppa:
 virt-tools:
   pkg.installed:
     - pkgs:
-      - python-spice-client-gtk
-      - python-gnomekeyring
-      - python-guestfs
+      - python3-guestfs
       - ssh-askpass
       - virt-viewer
       - spice-client-gtk
     - require:
       - sls: libvirt
 
-# xserver-xspice
 virt-manager:
   pkg.installed:
     - pkgs:
