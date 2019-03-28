@@ -1,6 +1,5 @@
 {% load_yaml as defaults %}
-lang: en
-flavor: us
+lang: en:us
 location: World
 timezone: UTC
 additional:
@@ -10,10 +9,16 @@ posix_messages: true
 {% set merged_defaults=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('locale', {})) %}
 
+{% set merged_defaults.lang_name= merged_defaults.lang.split(':')[0] %}
+{% set merged_defaults.lang_country= merged_defaults.lang.split(':')[1] %}
+{% if not merged_defaults.language|d(false) %}
+{% set merged_defaults.language= merged_defaults.lang_name+ '_'+ merged_defaults.lang_country|upper+ ':'+ merged_defaults.lang_name %}
+{% endif %}
+
 {% set settings = namespace({
-    'lang': merged_defaults.lang+ '_'+ merged_defaults.flavor|upper+ '.UTF-8',
-    'language': merged_defaults.lang+ '_'+ merged_defaults.flavor|upper+ ':'+ merged_defaults.lang,
-    'language_code': merged_defaults.lang+ '-'+ merged_defaults.flavor,
+    'lang': merged_defaults.lang_name+ '_'+ merged_defaults.lang_country|upper+ '.UTF-8',
+    'language': merged_defaults.language,
+    'language_code': merged_defaults.lang_name+ '-'+ merged_defaults.lang_country,
     'timezone': merged_defaults.timezone,
     'location': merged_defaults.location,
     'additional': '',
