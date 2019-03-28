@@ -1,7 +1,7 @@
 {% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("inkscape-ppa", 
-  "inkscape.dev/stable", require_in= "pkg: vector") }}
+  "inkscape.dev/stable-daily", require_in= "pkg: vector") }}
 {% endif %} 
 
 vector:
