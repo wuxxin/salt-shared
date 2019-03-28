@@ -17,4 +17,4 @@ black-req:
       - python3-toml
 
 {# opinionated python source code formating #}
-{{ pip3_install('black', require: 'pkg: black-req') }}
+{{ pip3_install('black', require='pkg: black-req') }}
