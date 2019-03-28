@@ -2,8 +2,7 @@
 
 This is a collection of saltstack states.
 
-Both quality and style differ from state to state,
-most states are working, some are not, it lacks documentation beside a few README.md.
+Both quality and style differ from state to state, most states are working, some are not, it lacks documentation beside a few README.md.
 
 ### What can you do with it
 
@@ -39,9 +38,9 @@ most states are working, some are not, it lacks documentation beside a few READM
     * [vcs](vcs): git,mercurial,bzr,subversion, git-crypt, git-bridge
     
     * [lab](lab): Experimental Work
-    * [appliance](appliance):
-      * base for automatic updates, automatic backup, metric collection and error reporting
-    
+    * [old](old): Old Work
+    * [old desktop](desktop/old) Old Desktop related work
+
 ### How to start
 
  * [`/salt-top.example`](salt-top.example): Example states top file
