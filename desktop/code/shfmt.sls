@@ -1,4 +1,4 @@
-{% set base= "https://github.com/mvdan/sh"}
+{% set base= "https://github.com/mvdan/sh" %}
 {% set version= salt['cmd_stdout'](
   'curl -L -s -o /dev/null -w "%{url_effective}" "'+ base+ '/releases/latest"'+
   '| sed -r "s/.*\/v([^\/]+)$/\1/"', python_shell=true) %}
