@@ -15,8 +15,8 @@ include:
     - require:
       - sls: python
   {%- if require is iterable and require is not string %}
-    {%- for v in require %}
-      - {{ k }}
+    {%- for value in require %}
+      - {{ value }}
     {%- endfor %}
   {%- else %}
     {%- if require != '' %}
