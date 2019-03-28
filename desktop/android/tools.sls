@@ -15,7 +15,7 @@ android-tools:
       - aapt
 
 {% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('python-adb') }}
+{{ pip3_install('adb') }}
 
 heimdall:
   pkg.installed:
