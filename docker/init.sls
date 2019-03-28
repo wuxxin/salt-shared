@@ -86,9 +86,26 @@ docker-network:
       - file: docker-network
 {% endif %}
 
-{%- if grains['osrelease_info'][0]|int <= 18 %}
+{%- if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] = '18.04' %}
+{# the first python3 version of docker-compose was released with 18.10 #}
+docker-compose-req:
+  pkg.installed:
+    - pkgs:
+      - python3-cached-property
+      - python3-distutils
+      - python3-docker
+      - python3-dockerpty
+      - python3-docopt
+      - python3-jsonschema
+      - python3-requests
+      - python3-six
+      - python3-texttable
+      - python3-websocket
+      - python3-yaml
+
 {% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('docker-compose') }}
+{{ pip3_install('docker-compose', require= 'pkg: docker-compose-req') }}
+
 {%- else %}
 docker-compose:
   pkg.installed:
