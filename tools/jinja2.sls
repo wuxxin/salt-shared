@@ -9,6 +9,7 @@ jinja2-cli-req:
       - python3-toml
       - python3-yaml
 
+{# get jinja from pypi if older than bionic #}
 {%- if grains['osmajorrelease']|int < 18 %}
 jinja2-req:
   pkg.installed:
