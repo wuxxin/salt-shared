@@ -86,7 +86,7 @@ docker-network:
       - file: docker-network
 {% endif %}
 
-{%- if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] = '18.04' %}
+{%- if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04' %}
 {# the first python3 version of docker-compose was released with 18.10 #}
 docker-compose-req:
   pkg.installed:
