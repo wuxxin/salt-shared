@@ -25,9 +25,9 @@ posix_messages: true
     })
 %}
 {% if merged_defaults.posix_messages %}
-  {% set settings.messages = 'POSIX') %}
+  {% set settings.messages = 'POSIX' %}
 {% else %}
-  {% set settings.messages = settings['lang']) %}
+  {% set settings.messages = settings['lang'] %}
 {% endif %}
 {% for x in merged_defaults.additional.split(' ') %}
   {% set l = x.split(':')[0] %}
