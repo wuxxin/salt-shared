@@ -21,7 +21,7 @@ options:
     to add contents of filename to user data section
 
 requirements:
-+ genisoimage, openssl; on ubuntu/debian use "apt install genisoimage openssl".
++ genisoimage, openssl; on ubuntu/debian use "apt-get install genisoimage openssl".
 
 EOF
     exit 1

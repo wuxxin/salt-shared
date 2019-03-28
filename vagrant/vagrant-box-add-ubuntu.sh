@@ -23,6 +23,8 @@ codename2version() {
         xenial) echo "16.04" ;;
         artful) echo "17.10" ;;
         bionic) echo "18.04" ;;
+        cosmic) echo "18.10" ;;
+        disco) echo "19.04" ;;
     esac
 }
 

@@ -46,7 +46,7 @@ end
 
 Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
-    config.vm.box = "ubuntu/xenial64"
+    config.vm.box = "ubuntu/bionic64"
     config.vm.define "appliance"
     config.vm.synced_folder ".", "/app/src", type: "rsync", create: true,
         rsync__exclude: "", rsync__auto: false,
@@ -96,7 +96,7 @@ Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |vb, override|
         vb.cpus = settings['cpus']
         vb.memory = settings['memory']
-        override.vm.box_url = "http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
+        override.vm.box_url = "http://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64-vagrant.box"
         if File.exist?(settings['clouddrive'])
             vb.customize [
                 "storageattach", :id,
@@ -127,12 +127,6 @@ Vagrant.configure("2") do |config|
         # set timezone to UTC
         timedatectl set-timezone "Etc/UTC"
         
-        # keep update service from interfering while installing
-        for i in apt-daily.service apt-daily.timer unattended-upgrades.service \
-            apt-daily-upgrade.service apt-daily-upgrade.timer ; do
-            systemctl disable $i; systemctl stop $i
-        done
-
         # install minimal needed packages
         export DEBIAN_FRONTEND=noninteractive
         apt-get -y update
