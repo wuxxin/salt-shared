@@ -22,8 +22,14 @@ http-getter:
     - onchanges:
       - git: http-getter
   
+flent-req:
+  pkg.installed:
+    - pkgs:
+      - python3-pyqt4
+      - python3-matplotlib
+
 {% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('flent') }}
+{{ pip3_install('flent', require='pkg: flent-req') }}
 
 flent: 
   pkg.installed:
