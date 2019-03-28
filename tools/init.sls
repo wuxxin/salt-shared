@@ -4,14 +4,10 @@ include:
   - openssl     {# #}
   - unison      {# #}
   - tmux        {# #}
+  - .jinja2     {# Jinja2 including cli interface #}
   - .flatyaml   {# #}
   - .raven      {# #}
   - .passgen    {# #}
-
-{% from 'python/lib.sls' import pip3_install %}
-
-{# conversion/processor #}
-{{ pip3_install('jinja2-cli[yaml]') }} {# CLI interface to Jinja2, reads yaml #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
