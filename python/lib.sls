@@ -1,7 +1,7 @@
 include:
   - python
 
-{% macro pip_install(package_or_packagelist, version="") %}
+{% macro pip_install(package_or_packagelist, version="", require="") %}
 "python{{ version }}-{{ package_or_packagelist }}":
   pip.installed:
   {%- if package_or_packagelist is iterable and package_or_packagelist is not string %}
@@ -14,17 +14,21 @@ include:
   {%- endif %}
     - require:
       - sls: python
-  {%- if kwargs is defined %}
-    {%- for k,d in kwargs.items() %}
-    - {{ k }}: {{ d }}
+  {%- if require is iterable and require is not string %}
+    {%- for v in require %}
+      - {{ k }}
     {%- endfor %}
+  {%- else %}
+    {%- if require != '' %}
+      - {{ require }}
+    {%- endif %}
   {%- endif %}
 {% endmacro %}
 
-{% macro pip3_install(package_or_packagelist) %}
-{{ pip_install(package_or_packagelist, '3') }}
+{% macro pip3_install(package_or_packagelist, require="") %}
+{{ pip_install(package_or_packagelist, '3', require=require) }}
 {% endmacro %}
 
-{% macro pip2_install(package_or_packagelist) %}
-{{ pip_install(package_or_packagelist, '2') }}
+{% macro pip2_install(package_or_packagelist, require="") %}
+{{ pip_install(package_or_packagelist, '2', require=require) }}
 {% endmacro %}

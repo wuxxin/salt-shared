@@ -25,4 +25,4 @@ python-dev:
 {{ pip3_install(i) }}
 {% endfor %}
 
-{{ pip3_install('cgroup-utils', requires= ['pkg: python3-dev']) }}
+{{ pip3_install('cgroup-utils', require= ['pkg: python-dev']) }}
