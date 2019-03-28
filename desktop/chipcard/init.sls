@@ -7,9 +7,9 @@ pcscd-prereq:
   pkg.installed:
     - pkgs:
       - pcsc-tools
-      - libccid
-      - fxcyberjack
+      - libccid {# all usb smartcard reader #}
 {%- if grains['lsb_distrib_codename'] == 'xenial' %}
+      - fxcyberjack
       - libifd-cyberjack6v5
 {%- else %}
       - libifd-cyberjack6
