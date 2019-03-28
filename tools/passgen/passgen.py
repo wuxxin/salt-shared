@@ -23,15 +23,15 @@ human friendly passwort generator:
         + ~ 72 Bit = 9 Bytes source entropy needed
         + openssl rand is used for entropy gathering
 
-    + Generate 11 Chars of Base 21 (a-z -a,e,i,o,u)
+    + Generate 11 Chars of Base 21 ([a-z] - [a,e,i,o,u])
         + using (5 Bit MOD 21 ) per char
         + Used Entropy Bits: 55 Bit
 
-    + Generate 5 Chars of Base 5 (a,e,i,o,u)
+    + Generate 5 Chars of Base 5 ([a,e,i,o,u])
         + using (3 Bit MOD 5) per Char
         + Used Entropy Bits: 15 Bit
 
-    + Total entropy used: 70 Bit
+    + Total source entropy used: 70 Bit
 
   Personal Metrics:
   
@@ -43,10 +43,8 @@ human friendly passwort generator:
     convinience
       general  : - (16 Chars)
       mobile   : + (only lowercase alphabet)
-    not applicable:
-      any password that can be stored in a password manager
-      encrypted with a master password. you should use complete random 
-      64 to 120 Bit Entropy 13-24 Chars base32 output instead
+    out of scope:
+      any password that can be stored in a password manager that is encrypted with a master password. (use random 64 to 120 Bit Entropy 13-24 Chars base32 output instead)
 
 """
 
