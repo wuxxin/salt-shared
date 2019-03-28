@@ -1,5 +1,5 @@
 {% set base= "https://github.com/mvdan/sh" %}
-{% set version= salt['cmd_stdout'](
+{% set version= salt['cmd.run_stdout'](
   'curl -L -s -o /dev/null -w "%{url_effective}" "'+ base+ '/releases/latest"'+
   '| sed -r "s/.*\/v([^\/]+)$/\1/"', python_shell=true) %}
 {% set name= "shfmt_v"+ version+ "_linux_amd64" %}
