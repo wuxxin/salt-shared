@@ -16,7 +16,7 @@ install_oxt_{{ user }}_{{ identifier }}:
 
 {{ user_install_oxt(user, 
   "org.openoffice.languagetool.oxt", 
-  "https://languagetool.org/download/LanguageTool-4.0.oxt"
+  "https://languagetool.org/download/LanguageTool-stable.oxt"
   ) }}
 
 {{ user_install_oxt(user, 

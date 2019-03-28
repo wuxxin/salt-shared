@@ -17,7 +17,7 @@ include:
   require_in = "pkg:libreoffice") }}
 
 libreoffice:
-  pkg.latest:
+  pkg.installed:
     - pkgs:
       - libreoffice
       - libreoffice-writer2xhtml
