@@ -1,6 +1,5 @@
 include:
   - .ubuntu
-
   - java
   - .user
   - .audio
@@ -19,7 +18,9 @@ include:
   - .video
   - .voice
   - .writing
-  #   - .power
+{#
+  - .power
+#}
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - python.dev
