@@ -23,7 +23,7 @@ python-tools:
       - python3-yapf
       - yapf3             {# takes the code and reformats it #}
 {%- endif %}
-{%- if grains['osmajorrelease']|int < 18 or grains['osrelease'] = '18.04' %}
+{%- if grains['osmajorrelease']|int < 18 or grains['osrelease'] == '18.04' %}
       - python-autopep8
 {%- else %}
       - python3-autopep8  {# formats Python code to conform to the PEP 8 style guide #}
