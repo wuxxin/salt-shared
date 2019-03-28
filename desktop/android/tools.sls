@@ -18,6 +18,7 @@ python-adb-req:
   pkg.installed:
     - pkgs:
       - python3-pycryptodome
+      - python3-rsa
       - python3-libusb1
       - python3-progressbar
       {# either python3-pycryptodome or python3-rsa #}
