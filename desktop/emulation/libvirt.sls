@@ -11,7 +11,6 @@ getdeb_ppa:
       - pkg: virt-manager
 {% endif %}
 
-
 virt-tools:
   pkg.installed:
     - pkgs:
@@ -28,12 +27,3 @@ virt-manager:
       - virt-manager
     - require:
       - pkg: virt-tools
-
-virtualbricks:
-  pkg.installed:
-    - pkgs:
-      - virtualbricks
-      - ksmtuned
-      - vde2
-    - require:
-      - sls: libvirt
