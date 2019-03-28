@@ -4,7 +4,7 @@ include:
   - python
 
 # python3 packages needed for ravencat
-python3-ravencat-packages:
+python3-ravencat-req:
   pkg.installed:
     - pkgs:
       - python3-requests
@@ -13,7 +13,7 @@ python3-ravencat-packages:
       - sls: python
 
 # install raven
-{{ pip3_install('raven') }}
+{{ pip3_install('raven', require= 'pkg: python3-ravencat-req') }}
 
 /usr/local/bin/ravencat.py:
   file.managed:
