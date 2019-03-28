@@ -28,7 +28,7 @@ libvirt:
       - libvirt-daemon
       - libvirt-daemon-system
       - libvirt-daemon-driver-storage-zfs
-{%- fi %}
+{%- endif %}
     - require:
       - pkg: qemu
   service.running:
@@ -36,7 +36,7 @@ libvirt:
     - name: libvirt-bin
 {%- else %}
     - name: libvirtd
-{%- fi %}
+{%- endif %}
     - enable: True
     - require:
       - pkg: libvirt
