@@ -1,42 +1,27 @@
 {% from "lxd/defaults.jinja" import settings with context %}
 
+{# LXD is available through backports for distros before bionic,
+   and for bionic available on normal channels,
+   from 18.10 upwards its only available as snap
+#}
+
 include:
   - kernel
   - kernel.sysctl.big
   - kernel.limits.big
   - kernel.cgroup
-{% if grains['osrelease_info'][0]|int <= 18 %}
+{% if grains['osrelease_info'][0]|int < 18 %}
   - ubuntu.backports
 {% endif %}
 
-{#
-{% if salt['pillar.get']('desktop:development:enabled', false) %}
-
-{% from "network/lib.sls" import net_reverse_short with context %}
-{%- set ipnet = settings.networks[0].config['ipv4.address'] %}
-{%- set ipaddr = salt['extip.net_interface_addr'](ipnet) %}
-{%- set ipmask = salt['extip.cidr_from_net'](ipnet) %}
-{%- set interface = {'ipaddr': ipaddr, 'netmask': ipmask} %}
-
-/etc/NetworkManager/dnsmasq.d/lxd:
-  file.managed:
-    - contents: |
-        server=/lxd/{{ ipaddr }}
-        server=/{{ net_reverse_short(interface) }}/{{ ipaddr }}
-{% endif %}
-#}
-
-{# modify kernel vars for production setup of lxd_ http://lxd.readthedocs.io/en/latest/production-setup/ #}
-
+{# modify kernel for production setup http://lxd.readthedocs.io/en/latest/production-setup/ #}
 /etc/security/limits.d/memlock.conf:
   file.managed:
     - contents: |
         *         soft    memlock   unlimited
         *         hard    memlock   unlimited
-        
 
 {%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}  
-
 {# This denies container access to the messages in the kernel ring buffer. Please note that this also will deny access to non-root users on the host system. #}
 kernel.dmesg_restrict:
   sysctl.present:
@@ -51,11 +36,14 @@ kernel.keys.maxkeys:
 lxd_prerequisites:
   pkg.installed:
     - pkgs:
-      - lvm2
       - thin-provisioning-tools
       - bridge-utils
       - ebtables
       - criu
+    - require:
+      - sls: kernel.sysctl.big
+      - sls: kernel.limits.big
+      - sls: kernel.cgroup
 
 lxd:
   file.managed:
@@ -68,20 +56,28 @@ lxd:
       - lxd-client
       - lxd-tools
       - lxc-utils
-{% if grains['osrelease_info'][0]|int <= 18 %}
-    - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
     - require:
+      - pkg: lxd_prerequisites
+{% if grains['osrelease_info'][0]|int < 18 %}
       - sls: ubuntu.backports
+    - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
 {% endif %}
+{% if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04'%}
   service.running:
     - enable: True
     - require:
-      - pkg: lxd_prerequisites
       - pkg: lxd
-      - sls: kernel.cgroup
   cmd.run:
     - name: lxd init --preseed < /etc/lxd.yaml
     - onchanges:
       - file: lxd
     - require:
       - service: lxd
+{% else %}
+  cmd.run:
+    - name: lxd init --preseed < /etc/lxd.yaml
+    - onchanges:
+      - file: lxd
+    - require:
+      - pkg: lxd
+{% endif %}
