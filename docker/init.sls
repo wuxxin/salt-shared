@@ -1,5 +1,5 @@
-{% from "docker/defaults.jinja" import settings as s with context %}
-{% set pkgname= "docker-ce" if s.from_upstream|d(false) else "docker.io" %}
+{% from "docker/defaults.jinja" import settings with context %}
+{% set pkgname= "docker-ce" if settings.origin == "upstream" else "docker.io" %}
   
 include:
   - kernel
@@ -11,22 +11,22 @@ include:
 
 {# pin docker to x.y.* release, if requested #}
 /etc/apt/preferences.d/docker-preferences:
-{% if s.version|d("*") in ["*", "", None] %}
+{% if settings.version|d("*") in ["*", "", None] %}
   file:
     - absent
 {% else %}
   file.managed:
     - contents: |
         Package: {{ pkgname }}
-        Pin: version {{ s.version }}
+        Pin: version {{ settings.version }}
         Pin-Priority: 900
 {% endif %}
 
-# add docker options from pillar to etc/default config, add http_proxy if set
+{# set docker defaults, add http_proxy if set #}
 /etc/default/docker:
   file.managed:
     - contents: |
-        DOCKER_OPTIONS="{{ s.options|d('') }}"
+        DOCKER_OPTIONS="{{ settings.options|d('') }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
 {%- from "http_proxy/defaults.jinja" import default_no_proxy %}
         http_proxy="{{ salt['pillar.get']('http_proxy') }}"
@@ -40,22 +40,23 @@ docker-requisites:
       - ca-certificates
       - systemd-docker
     - require:
+      - sls: kernel.sysctl.big
+      - sls: kernel.limits.big
       - sls: kernel.cgroup
 
+{# install docker network #}
 {% if grains['osrelease_info'][0]|int <= 18 %}
-
 docker-network:
   file.managed:
     - name: /etc/network/interfaces.d/80-docker-bridge.cfg
     - contents: |
         auto docker0
         iface docker0 inet static
-            address {{ s.ipaddr }}
-            netmask {{ s.netmask }}
+            address {{ settings.ipaddr }}
+            netmask {{ settings.netmask }}
             bridge_ports none
             bridge_stp off
             bridge_maxwait 0
-
     - require:
       - pkg: docker-requisites
   cmd.run:
@@ -74,7 +75,7 @@ docker-network:
           bridges:
             docker0:
               dhcp4: false
-              addresses: [{{ s.ipaddr }}/{{ s.netmask }}]
+              addresses: [{{ settings.ipaddr }}/{{ settings.netmask }}]
               parameters:
                 forward-delay: 0
     - require:
@@ -86,60 +87,77 @@ docker-network:
       - file: docker-network
 {% endif %}
 
-{%- if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04' %}
-{# the first python3 version of docker-compose was released with 18.10 #}
-docker-compose-req:
-  pkg.installed:
-    - pkgs:
-      - python3-cached-property
-      - python3-distutils
-      - python3-docker
-      - python3-dockerpty
-      - python3-docopt
-      - python3-jsonschema
-      - python3-requests
-      - python3-six
-      - python3-texttable
-      - python3-websocket
-      - python3-yaml
 
-{% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('docker-compose', require= 'pkg: docker-compose-req') }}
+{# select origin repo for docker #}
+{%- if settings.origin == "custom" %}
+  {%- set patch_list= ['overlay2-on-zfs.patch', 'overlayfs-in-userns.patch'] %}
+  {%- set patch_dir='/usr/local/src/docker-custom-patches' %}
+  {%- set patches_string= patch_dir+ '/'+ patch_list|join(' '+ patch_dir+ '/') %}
+  {%- set custom_archive= '/usr/local/lib/docker-custom-archive' %}
 
-{%- else %}
-docker-compose:
-  pkg.installed:
-    - pkgs:
-      - docker-compose
-{%- endif %}
-
-docker-service:
+  {% for p in patch_list %}
+add-patch-{{ p }}:
   file.managed:
-    - name: /etc/systemd/system/docker.service
-    - source: salt://docker/docker.service
-    - onchanges_in:
-      - cmd: systemd_reload
+    - source: salt://docker/{{ p }}
+    - name: {{ patch_dir }}/{{ p }}
+    - makedirs: true
+    - require_in:
+      - cmd: docker-custom-build
+  {% endfor %}
+
+docker-custom-build:
+  pkg.installed:
+    - pkgs:
+      - cowbuilder
+      - ubuntu-dev-tools
+  file.managed:
+    - source: salt://docker/build-custom-docker.sh
+    - name: /usr/local/sbin/build-bustom-docker.sh
+  cmd.run:
+    - name: /usr/local/sbin/build-bustom-docker.sh {{ custom_archive }} "overlayzfs" {{ patches_string }}
     - require:
-      - pkg: docker
+      - pkg: docker-custom-build
+      - file: docker-custom-build
 
-custom-docker-multi-user-symlink:
-  file.symlink:
-    - name: /etc/systemd/system/multi-user.target.wants/docker.service
-    - target: /etc/systemd/system/docker.service
-
-docker:
-{%- if s.from_upstream|d(false) %}
+docker-custom-repo:
   pkgrepo.managed:
-    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ grains.oscodename }} {{ s.upstream_flavor }}'
+    - name: 'deb [ trusted=yes ] file:{{ custom_archive }} ./'
+    - file: /etc/apt/sources.list.d/local-docker-custom.list
+    - require_in:
+      - pkg: docker
+    - require:
+      - cmd: docker-custom-build
+      
+docker-upstream-repo:
+  file.absent:
+    - name: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
+  
+{%- elif settings.origin == "upstream" %}
+docker-custom-repo:
+  file.absent:
+    - name: /etc/apt/sources.list.d/local-docker-custom.list
+
+docker-upstream-repo:
+  pkgrepo.managed:
+    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ grains.oscodename }} {{ settings.upstream_flavor }}'
     - humanname: "Docker Repository"
     - file: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
     - key_url: https://download.docker.com/linux/ubuntu/gpg
     - require_in:
       - pkg: docker
+
 {%- else %}
+docker-custom-repo:
+  file.absent:
+    - name: /etc/apt/sources.list.d/local-docker-custom.list
+docker-upstream-repo:
   file.absent:
     - name: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
 {%- endif %}
+
+
+{# install docker #}
+docker:
   pkg.installed:
     - pkgs:
       - {{ pkgname }}
@@ -161,3 +179,46 @@ docker:
     - watch:
       - file: /etc/default/docker
       - file: docker-service
+
+
+docker-service:
+  file.managed:
+    - name: /etc/systemd/system/docker.service
+    - source: salt://docker/docker.service
+    - onchanges_in:
+      - cmd: systemd_reload
+    - require:
+      - pkg: docker
+
+custom-docker-multi-user-symlink:
+  file.symlink:
+    - name: /etc/systemd/system/multi-user.target.wants/docker.service
+    - target: /etc/systemd/system/docker.service
+
+
+{# install docker-compose #}
+{%- if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04' %}
+{# the first python3 version of docker-compose was released with 18.10 #}
+docker-compose-req:
+  pkg.installed:
+    - pkgs:
+      - python3-cached-property
+      - python3-distutils
+      - python3-docker
+      - python3-dockerpty
+      - python3-docopt
+      - python3-jsonschema
+      - python3-requests
+      - python3-six
+      - python3-texttable
+      - python3-websocket
+      - python3-yaml
+{% from 'python/lib.sls' import pip3_install %}
+{{ pip3_install('docker-compose', require= 'pkg: docker-compose-req') }}
+
+{%- else %}
+docker-compose:
+  pkg.installed:
+    - pkgs:
+      - docker-compose
+{%- endif %}
