@@ -15,13 +15,13 @@ virtualbox:
 
 virtualbox-extpack:
   file.managed:
-    - source: https://download.virtualbox.org/virtualbox/5.2.8/Oracle_VM_VirtualBox_Extension_Pack-5.2.8.vbox-extpack
-    - source_hash: 355ea5fe047f751534720c65398b44290d53f389e0f5f66818f3f36746631d26
-    - name: /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.8.vbox-extpack
+    - source: https://download.virtualbox.org/virtualbox/5.2.26/Oracle_VM_VirtualBox_Extension_Pack-5.2.26.vbox-extpack
+    - source_hash: 4b7caa9b722840d49f154c3e5efb6463b1b7129f09973a25813dfdbccd9debb7
+    - name: /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.26.vbox-extpack
     - makedirs: true
     - requires:
       - pkg: virtualbox
   cmd.run:
-    - name: VBoxManage extpack install --replace /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.8.vbox-extpack
+    - name: VBoxManage extpack install --replace /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.26.vbox-extpack
     - onchanges:
       - file: virtualbox-extpack
