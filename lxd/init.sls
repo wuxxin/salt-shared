@@ -62,7 +62,7 @@ lxd:
       - sls: ubuntu.backports
     - fromrepo: {{ grains['lsb_distrib_codename'] }}-backports
 {% endif %}
-{% if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04'%}
+{% if grains['osrelease_info'][0]|int < 18 or grains['osrelease'] == '18.04' %}
   service.running:
     - enable: True
     - require:
