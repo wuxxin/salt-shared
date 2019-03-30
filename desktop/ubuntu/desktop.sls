@@ -1,13 +1,24 @@
-gconf-editor:
-  pkg:
-    - installed
-
+additional-desktop-packages:
+  pkg.installed:
+    - pkgs:
+      - gconf-editor
+      - xcursor-themes
+      - dmz-cursor-theme 
+      - gsettings-ubuntu-schemas
+      - gnome-remote-desktop
 {#
-Differences to ubuntu-desktop-minimal & ubuntu-desktop
-xcursor-themes dmz-cursor-theme gsettings-ubuntu-schemas yaru-theme-gnome-shell yaru-theme-gtk yaru-theme-icon yaru-theme-sound libreoffice-style-breeze
+      - alacarte
 #}
 
-fonts:
+remove-unwanted-desktop-packages:
+  pkg.removed:
+    - gnome-games
+  module.run:
+    - name: pkg.autoremove
+    - onchanges: 
+      - pkg: remove-unwanted-desktop-packages
+
+desktop-fonts:
   pkg.installed:
     - pkgs:
       - fonts-dejavu
@@ -34,10 +45,15 @@ icon-themes:
       - adwaita-icon-theme
       - elementary-icon-theme
 
-gtk3-themes:
+{%- if grains['osmajorrelease']|int >= 18 and grains['osrelease'] != '18.04' %}
+yaru-theme:
   pkg.installed:
     - pkgs:
-      - gtk3-engines-unico
+      - yaru-theme-gnome-shell
+      - yaru-theme-gtk
+      - yaru-theme-icon
+      - yaru-theme-sound
+{%- endif %}
 
 gnome-shell-extensions:
   pkg.installed:
