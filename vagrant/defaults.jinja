@@ -1,10 +1,11 @@
 {% load_yaml as defaults %}
-version: "2.2.4"
-hash:
-  amd64: "1ffb66020b580492ebf9189af8a48c48cdb31825be0717d600518a881584fe4a"
-  i386: "1ef60de19d4fd1fa6c4cd199c3b9f14a41b6291f0b70de590b0f86e05409ba06"
-virtualbox: true
-{# virtualbox will only be installed if virtualbox: true and pillar:desktop.proprietary: true #}
+origin: system
+upstream:
+  version: "2.2.4"
+  hash:
+    amd64: "1ffb66020b580492ebf9189af8a48c48cdb31825be0717d600518a881584fe4a"
+    i386: "1ef60de19d4fd1fa6c4cd199c3b9f14a41b6291f0b70de590b0f86e05409ba06"
+virtualbox: false
 plugins:
   - vagrant-gatling-rsync
   - vagrant-env
@@ -16,8 +17,8 @@ plugins:
 {% load_yaml as dependencies %}
 
 vagrant-libvirt:
-  pkgs: 
-    - libxslt-dev
+  build:
+    - libxslt1-dev
     - libxml2-dev
     - zlib1g-dev
     - libvirt-dev

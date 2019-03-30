@@ -1,75 +1,92 @@
 {% from "vagrant/defaults.jinja" import settings, dependencies with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
-{# include states needed for plugins #}
+{# include requisite states needed for plugins #}
 include:
   - vagrant
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
-{%- for slsfile in dependencies[plugin]['sls'] %}
+  {%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
+    {%- for slsfile in dependencies[plugin]['sls'] %}
   - {{ slsfile }}
+    {%- endfor %}
+  {%- endif %}
 {%- endfor %}
-{%- endif %}
-{%- endfor %}
-{%- if settings.virtualbox|d(false) and 
-  salt['pillar.get']('desktop:proprietary:enabled', false) %}
+{%- if settings.virtualbox|d(false) %}
   - desktop.emulation.virtualbox
 {%- endif %}
 
 
-{# install pkgs and require sls files needed for plugins #}
 vagrant_plugin_deps:
   pkg.installed:
     - pkgs:
       - ruby-dev
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies and dependencies[plugin]['pkgs'] is defined %}
-{%- for pkg in dependencies[plugin]['pkgs'] %}
+  {%- if settings.origin == 'upstream' or salt['pkg.show'](plugin)|d(none) == none %}
+    {# install build dependencies if plugin unavailable as distro package or origin == upstream #}
+    {%- if plugin in dependencies and dependencies[plugin]['build'] is defined %}
+      {%- for pkg in dependencies[plugin]['build'] %}
       - {{ pkg }}
-{%- endfor %}
-{%- endif %}
+      {%- endfor %}
+    {%- endif %}
+  {%- endif %}
 {%- endfor %}
     - require:
       - sls: vagrant
 {%- for plugin in settings.plugins %}
-{%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
-{%- for slsfile in dependencies[plugin]['sls'] %}
+  {# require sls files needed for plugin #}
+  {%- if plugin in dependencies and dependencies[plugin]['sls'] is defined %}
+    {%- for slsfile in dependencies[plugin]['sls'] %}
       - sls: {{ slsfile }}
-{%- endfor %}
-{%- endif %}
+    {%- endfor %}
+  {%- endif %}
 {%- endfor %}
   
 
-{# install plugins #}
-{% for p in settings.plugins %}
-vagrant_plugin_{{ p }}:
-  cmd.run:
-    - name: vagrant plugin install {{ p }}
-    - runas: {{ user }}
-    - unless: vagrant plugin list | grep -q {{ p }}
+{% for plugin in settings.plugins %}
+vagrant_plugin_{{ plugin }}:
+  {%- if settings.origin != 'upstream' and salt['pkg.show'](plugin)|d(none) != none %}
+    {# install plugins as distro package if available and origin != upstream #}
+  pkg.installed:
+    - name: {{ plugin }}
     - require:
       - pkg: vagrant_plugin_deps
+  cmd.run:
+    - name: true
+    - require:
+      - pkg: vagrant_plugin_{{ plugin }}
+  {%- else %}
+  cmd.run:
+    - name: vagrant plugin install {{ plugin }}
+    {%- if p == 'vagrant-libvirt' %}
+    {# XXX workaround for vagrant-libvirt not compiling on bionic and newer #}
+    - env:
+      - CONFIGURE_ARGS: "with-libvirt-include=/usr/include/libvirt with-libvirt-lib=/usr/lib64"
+    {%- endif %}
+    - runas: {{ user }}
+    - unless: vagrant plugin list | grep -q {{ plugin }}
+    - require:
+      - pkg: vagrant_plugin_deps
+  {%- endif %}
 {% endfor %}
 
 
 {# after plugin install, create base boxes #}
-{% for p in settings.plugins %}
-{% if p == "vagrant-lxd" %}
+{% for plugin in settings.plugins %}
+{% if plugin == "vagrant-lxd" %}
 create-lxd-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-lxd --yes
     - unless: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-lxd --check
     - runas: {{ user }}
     - require:
-      - cmd: vagrant_plugin_{{ p }}
-
-{% elif p == "vagrant-libvirt" %}
+      - cmd: vagrant_plugin_{{ plugin }}
+{% elif plugin == "vagrant-libvirt" %}
 create-libvirt-ubuntu-box:
   cmd.run:
     - name: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-libvirt --yes
     - unless: /usr/local/bin/vagrant-box-add-ubuntu.sh --only-libvirt --check
     - runas: {{ user }}
     - require:
-      - cmd: vagrant_plugin_{{ p }}
+      - cmd: vagrant_plugin_{{ plugin }}
 {% endif %}
 {% endfor %}

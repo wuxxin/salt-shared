@@ -1,26 +1,26 @@
 {% from "vagrant/defaults.jinja" import settings with context %}
 
-{% set actversion= salt['pkg.version']('vagrant') %}
-{% if actversion == "" %}
-  {% set newer_or_equal= 1 %}
-{% else %}
-  {% set newer_or_equal= salt['pkg.version_cmp']("1:"+settings.version, actversion) %}
-{% endif %}
-
-{% if newer_or_equal <= -1 %}
-  {% set reqversion= actversion %}
-{% else %}
-  {% set reqversion= settings.version %}
-{% endif %}
-
-{% if grains.osarch == "amd64" %}
-  {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_x86_64.deb" %}
-  {% set localfile = "vagrant_"+ reqversion+ "_x86_64.deb" %}
-  {% set hash = settings.hash.amd64 %}
-{% elif grains.osarch == "i386" %}
-  {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_i686.deb" %}
-  {% set localfile = "vagrant_"+ reqversion+ "_i686.deb" %}
-  {% set hash = settings.hash.i386 %}
+{% if settings.origin == 'upstream' %}
+  {% set actversion= salt['pkg.version']('vagrant') %}
+  {% if actversion == "" %}
+    {% set newer_or_equal= 1 %}
+  {% else %}
+    {% set newer_or_equal= salt['pkg.version_cmp']("1:"+settings.upstream.version, actversion) %}
+  {% endif %}
+  {% if newer_or_equal <= -1 %}
+    {% set reqversion= actversion %}
+  {% else %}
+    {% set reqversion= settings.upstream.version %}
+  {% endif %}
+  {% if grains.osarch == "amd64" %}
+    {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_x86_64.deb" %}
+    {% set localfile = "vagrant_"+ reqversion+ "_x86_64.deb" %}
+    {% set hash = settings.upstream.hash.amd64 %}
+  {% elif grains.osarch == "i386" %}
+    {% set requrl = "https://releases.hashicorp.com/vagrant/"+ reqversion+ "/vagrant_"+ reqversion+ "_i686.deb" %}
+    {% set localfile = "vagrant_"+ reqversion+ "_i686.deb" %}
+    {% set hash = settings.upstream.hash.i386 %}
+  {% endif %}
 {% endif %}
 
 vagrant-prerequisites:
@@ -53,8 +53,7 @@ vagrant-prerequisites:
     - mode: "0755"
 {% endfor %}
 
-{% if newer_or_equal >= 1 %}
-
+{% if settings.origin == 'upstream' and newer_or_equal|d(0) >= 1 %}
 vagrant:
   file.managed:
     - name: /var/cache/apt/archives/{{ localfile }}
@@ -65,11 +64,8 @@ vagrant:
       - vagrant: /var/cache/apt/archives/{{ localfile }}
     - require:
       - file: vagrant
-
 {% else %}
-
 vagrant:
   pkg.installed:
     - name: vagrant
-
 {% endif %}
