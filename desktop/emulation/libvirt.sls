@@ -15,7 +15,7 @@ virt-tools:
   pkg.installed:
     - pkgs:
       - python3-guestfs
-      - ssh-askpass
+      - ssh-askpass-gnome
       - virt-viewer
       - spice-client-gtk
     - require:
