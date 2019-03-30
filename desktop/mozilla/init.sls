@@ -9,6 +9,12 @@ firefox:
   pkg.installed:
     - pkgs:
       - firefox
+{%- if grains['osmajorrelease']|int >= 18 and grains['osrelease'] != '18.04' %}
+      - webext-ublock-origin
+      - webext-umatrix
+      - webext-privacy-badger
+      - webext-form-history-control
+{%- endif %}
 
 thunderbird:
   pkg.installed:
