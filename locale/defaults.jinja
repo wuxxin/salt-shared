@@ -3,7 +3,7 @@ lang: en:us
 location: World
 timezone: UTC
 additional:
-posix_messages: true
+posix_messages: false
 {% endload %}
 
 {% set merged_defaults=salt['grains.filter_by']({'none': defaults},
