@@ -60,7 +60,7 @@ vagrant_plugin_{{ plugin }}:
   {%- else %}
   cmd.run:
     - name: vagrant plugin install {{ plugin }}
-    {%- if p == 'vagrant-libvirt' %}
+    {%- if plugin == 'vagrant-libvirt' %}
     {# XXX workaround for vagrant-libvirt not compiling on bionic and newer #}
     - env:
       - CONFIGURE_ARGS: "with-libvirt-include=/usr/include/libvirt with-libvirt-lib=/usr/lib64"
