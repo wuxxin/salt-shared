@@ -1,30 +1,39 @@
 {% load_yaml as defaults %}
 trusty:
-  hardware: linux-generic-lts-xenial
-  virtual: linux-virtual-lts-xenial
+  meta: linux-generic-lts-xenial
+  image: linux-image-generic-lts-xenial
+  image_extra: linux-image-extra-generic-lts-xenial
   headers: linux-headers-generic-lts-xenial
   tools: linux-tools-generic-lts-xenial
-  default_tools: linux-tools-generic-lts-xenial
 xenial:
-  hardware: linux-generic-hwe-16.04
-  virtual: linux-virtual-hwe-16.04
+  meta: linux-generic-hwe-16.04
+  image: linux-image-generic-hwe-16.04
+  image_extra: linux-image-extra-generic-hwe-16.04
   headers: linux-headers-generic-hwe-16.04
   tools: linux-tools-generic-hwe-16.04
-  default_tools: linux-tools-generic-hwe-16.04
 bionic:
-  hardware: linux-generic-hwe-18.04
-  virtual: linux-virtual-hwe-18.04
+  meta: linux-generic-hwe-18.04
+  image: linux-image-generic-hwe-18.04
+  image_extra: linux-image-extra-generic-hwe-18.04
   headers: linux-headers-generic-hwe-18.04
   tools: linux-tools-generic-hwe-18.04
-  default_tools: linux-tools-generic-hwe-18.04
 generic:
-  hardware: linux-generic
-  virtual: linux-virtual
+  meta: linux-generic
+  image: linux-image-generic
+  image_extra: linux-image-extra
   headers: linux-headers-generic
   tools: linux-tools-generic
-  default_tools: linux-tools-generic
 {% endload %}
+
+{# 
+additional settings:
+  keep_current: True     only matching kernel-tools will be installed
+  manual_download: True  to install a manual kernel from the web
+
+automatic:
+  on LXC only matching kernel-tools will be installed
+#}
 
 {% set settings = salt['grains.filter_by'](defaults, 
   grain= 'lsb_distrib_codename', default= 'generic',
-  merge= salt['pillar.get']('kernel:image', {})) %}
+  merge= salt['pillar.get']('kernel:package', {})) %}
