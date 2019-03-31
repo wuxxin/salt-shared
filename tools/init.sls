@@ -5,9 +5,9 @@ include:
   - unison      {# #}
   - tmux        {# #}
   - .jinja2     {# Jinja2 including cli interface #}
-  - .flatyaml   {# #}
-  - .raven      {# #}
-  - .passgen    {# #}
+  - .flatyaml   {# convert yaml to a flat key=value format #}
+  - .sentry     {# sentrycat.py error reporting to sentry #}
+  - .passgen    {# human friendly passwort generator #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
@@ -18,14 +18,15 @@ base-tools:
       - git
       - rsync
       - curl
-      {# packer/compressor #}
+      {# compression #}
       - bzip2
       - xz-utils
-      {# conversion/processor #}
+      {# conversion/transformation/querying #}
       - sqlite3         {# A command line interface for SQLite version 3 #}
       - jq              {# Command-line JSON processor #}
       - xmlstarlet      {# transform, query, validate, and edit XML #}
       - html-xml-utils  {# manipulating and converting HTML and XML #}
+      - ssss            {# Shamir's secret sharing scheme implementation #}
       {# network #}
       - httpie          {# CLI, cURL-like tool for humans #}
       - pv              {# monitor the progress of data through a pipe #}
