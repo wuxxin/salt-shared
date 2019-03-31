@@ -22,8 +22,8 @@ linux-image:
     {%- endif %}
       - {{ settings.meta|replace('generic', flavor) }}
       - {{ settings.image|replace('generic', flavor) }}
-    {% if not settings.no_extra|d(false) %}
-      - {{ settings.image_extra|replace('generic', flavor) }}
+    {% if settings.virtual_extra|d(true) %}
+      - {{ settings.virtual_extra|replace('generic', flavor) }}
     {%- endif %}
       - {{ settings.tools|replace('generic', flavor) }}
       - {{ settings.headers|replace('generic', flavor) }}
