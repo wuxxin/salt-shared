@@ -4,7 +4,7 @@ include:
   - python
 
 # python3 packages needed for sentrycat
-python3-sentrycat-packages:
+python3-sentrycat-req:
   pkg.installed:
     - pkgs:
       - python3-requests

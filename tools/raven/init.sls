@@ -12,7 +12,6 @@ python3-ravencat-req:
     - require:
       - sls: python
 
-# install raven
 {{ pip3_install('raven', require= 'pkg: python3-ravencat-req') }}
 
 /usr/local/bin/ravencat.py:
