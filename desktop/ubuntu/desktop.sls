@@ -12,7 +12,8 @@ additional-desktop-packages:
 
 remove-unwanted-desktop-packages:
   pkg.removed:
-    - gnome-games
+    - pkgs:
+      - gnome-games
   module.run:
     - name: pkg.autoremove
     - onchanges: 
