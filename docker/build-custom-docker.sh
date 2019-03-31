@@ -57,6 +57,7 @@ cd "$basedir"
 # get source
 pull-lp-source docker.io disco
 cd docker.io*
+
 # add patches
 changes=""
 for i in $@; do
@@ -64,6 +65,7 @@ for i in $@; do
     changes="$changes $(basename $i)"
 done
 quilt push
+
 # update changelog
 current_version=$(head -1 debian/changelog | sed -r "s/[^(]+\(([^)]+)\).+/\1/g");
 new_version=${current_version:0:-1}$(( ${current_version: -1} +1 ))${verpostfix};
@@ -71,6 +73,7 @@ debchange -v "$new_version" --distribution disco "experimental: $changes"
 # generate new source archive
 dpkg-source -b .
 cd ..
+
 # build generated source
 backportpackage -B cowbuilder --dont-sign -b -w build docker*${verpostfix}*.dsc
 
@@ -82,6 +85,7 @@ apt-ftparchive release . > Release
 gzip -c < Release > Release.gz
 cd ../..
 
+# copy buildresult to targetdir
 if test -e "$targetdir"; then rm -rf "$targetdir"; fi
 mkdir -p "$targetdir"
 mv -t "$targetdir" $basedir/build/buildresult/*
