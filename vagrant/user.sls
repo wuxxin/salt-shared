@@ -54,7 +54,7 @@ vagrant_plugin_{{ plugin }}:
     - require:
       - pkg: vagrant_plugin_deps
   cmd.run:
-    - name: true
+    - name: "true"
     - require:
       - pkg: vagrant_plugin_{{ plugin }}
   {%- else %}

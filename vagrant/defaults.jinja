@@ -7,12 +7,15 @@ upstream:
     i386: "1ef60de19d4fd1fa6c4cd199c3b9f14a41b6291f0b70de590b0f86e05409ba06"
 virtualbox: false
 plugins:
-  - vagrant-gatling-rsync
-  - vagrant-env
-  - vagrant-proxyconf
   - vagrant-libvirt
   - vagrant-lxd
 {% endload %}
+
+{# 
+  - vagrant-gatling-rsync
+  - vagrant-env
+  - vagrant-proxyconf
+#}
 
 {% load_yaml as dependencies %}
 
