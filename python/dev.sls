@@ -31,11 +31,7 @@ python-tools:
 
 {# - repren     Multi-pattern string replacement and file renaming #}
 
-{# workaround for broken pypi installation of cgroup-utils
-    version 0.6 (which is the current version and the only py3 compatible)
-    is listed in https://pypi.org/project/cgroup-utils/ 
-    but not in https://pypi.org/simple/cgroup-utils/
-    {{ pip3_install('cgroup-utils>=0.6', require= ['pkg: python-dev']) }}
+{#
+{{ pip3_install('git+https://github.com/peo3/cgroup-utils.git#cgroup-utils', require= ['pkg: python-dev']) }}
 #}
-{{ pip3_install('git+https://github.com/peo3/cgroup-utils.git#cgroup-utils',
-    require= ['pkg: python-dev']) }}
+{{ pip3_install('cgroup-utils>=0.6', require= ['pkg: python-dev']) }}
