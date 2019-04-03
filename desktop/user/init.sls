@@ -3,10 +3,13 @@
 
 {{ add_to_groups(['users']) }}
 
-add_local_bin:
+{% for key in ['bin', '.local/bin', '.local/lib', '.local/share'] %}
+add_local_{{ key }}:
   file.directory:
-    - name: {{ user_home }}/bin
+    - name: {{ user_home }}/{{ key }}
     - user: {{ user }}
     - group: {{ user }}
+    - makedirs: true
+{% endfor %}
 
 
