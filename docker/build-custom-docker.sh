@@ -81,7 +81,7 @@ backportpackage -B cowbuilder --dont-sign -b -w build docker*${verpostfix}*.dsc
 cd build/buildresult
 apt-ftparchive packages . > Packages
 gzip -c < Packages > Packages.gz
-apt-ftparchive release . > Release
+apt-ftparchive -o "APT::FTPArchive::Release::Origin=local" release . > Release
 gzip -c < Release > Release.gz
 cd ../..
 
