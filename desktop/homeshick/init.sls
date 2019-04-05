@@ -17,9 +17,7 @@ homeshick_bashrc:
   file.append:
     - name: {{ user_home }}/.bashrc
     - text:
-      - # ### HOMESICK BEGIN ###
       - source "$HOME/.homesick/repos/homeshick/homeshick.sh"
       - homeshick --quiet refresh
-      - # ### HOMESICK END ###
     - require:
       - git: homeshick
