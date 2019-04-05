@@ -40,9 +40,9 @@ flent:
       - sls: desktop.network.iperf2
       - sls: desktop.network.irtt
       - cmd: http-getter
-      - pip: python3-flent
+      - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
   cmd.run:
     - name: make all install
     - cwd: /usr/local/share/doc/flent/misc
     - onchanges:
-      - pip: python3-flent
+      - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
