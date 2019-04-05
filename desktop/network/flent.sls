@@ -45,4 +45,4 @@ flent:
     - name: make all install
     - cwd: /usr/local/share/doc/flent/misc
     - onchanges:
-      - pip: flent
+      - pip: python3-flent
