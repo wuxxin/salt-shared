@@ -25,11 +25,11 @@ http-getter:
 flent-req:
   pkg.installed:
     - pkgs:
-      - python3-pyqt4
+      - python3-pyqt5
       - python3-matplotlib
 
 {% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('flent', require='pkg: flent-req') }}
+{{ pip3_install('git+https://github.com/tohojo/flent.git#egg=flent', require='pkg: flent-req') }}
 
 flent: 
   pkg.installed:
@@ -37,7 +37,7 @@ flent:
       - fping
       - netperf
     - require:
-      - sls: desktop.network.iperf2 {# XXX flent needs iperf2 but at least 2.0.8 #}
+      - sls: desktop.network.iperf2
       - sls: desktop.network.irtt
       - cmd: http-getter
       - pip: python3-flent
@@ -45,5 +45,4 @@ flent:
     - name: make all install
     - cwd: /usr/local/share/doc/flent/misc
     - onchanges:
-      - pip: python3-flent
-      
+      - pip: flent

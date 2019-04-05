@@ -1,3 +1,11 @@
+{%- if grains['osmajorrelease']|int >= 18 %}
+
+irtt:
+  pkg.installed:
+    - name: irtt
+
+{%- else %}
+
 include:
   - golang
 
@@ -13,3 +21,5 @@ build:
 {% endload %}
 
 {{ go_build_from_git(config) }}
+
+{% endif %}

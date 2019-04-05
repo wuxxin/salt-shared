@@ -1,4 +1,12 @@
-{# iperf3 is bitrotten on ubuntu/debian, download from source #}
+{%- if grains['osmajorrelease']|int >= 18 %}
+
+iperf3:
+  pkg.installed:
+    - name: iperf3
+
+{%- else %}
+
+{# iperf3 is bitrotten, download from source #}
 {% load_yaml as iperfconfig %}
 version: "3.1.3-1"
 baseurl: https://iperf.fr/download/ubuntu/
@@ -13,25 +21,24 @@ packages:
       i386: 36eb1498d79f3672bb31cc144e45bd8e18e18942ee2710f9b6aac7b6a6fe69a6
 {% endload %}
 
-{% set actversion= salt['pkg.version']('iperf3') %}
-{% if actversion == "" %}
-  {% set newer_or_equal= 1 %}
-{% else %}
-  {% set newer_or_equal= salt['pkg.version_cmp']("1:"+iperfconfig.version, actversion) %}
-{% endif %}
-{% if newer_or_equal <= -1 %}
-  {% set reqversion= actversion %}
-{% else %}
-  {% set reqversion= iperfconfig.version %}
-{% endif %}
+  {% set actversion= salt['pkg.version']('iperf3') %}
+  {% if actversion == "" %}
+    {% set newer_or_equal= 1 %}
+  {% else %}
+    {% set newer_or_equal= salt['pkg.version_cmp']("1:"+iperfconfig.version, actversion) %}
+  {% endif %}
+  {% if newer_or_equal <= -1 %}
+    {% set reqversion= actversion %}
+  {% else %}
+    {% set reqversion= iperfconfig.version %}
+  {% endif %}
 
+  {% for package in iperfconfig.packages %}
+    {% set localfile = package.name+ "_"+ iperfconfig.version+ "_"+ grains.osarch+ ".deb" %}
+    {% set requrl = iperfconfig.baseurl+ localfile %}
+    {% set hash = package.hash[grains.osarch] %}
 
-{% for package in iperfconfig.packages %}
-  {% set localfile = package.name+ "_"+ iperfconfig.version+ "_"+ grains.osarch+ ".deb" %}
-  {% set requrl = iperfconfig.baseurl+ localfile %}
-  {% set hash = package.hash[grains.osarch] %}
-
-  {% if newer_or_equal >= 1 %}    
+    {% if newer_or_equal >= 1 %}    
 {{ package.name }}:
   file.managed:
     - name: /var/cache/apt/archives/{{ localfile }}
@@ -43,10 +50,11 @@ packages:
     - require:
       - file: {{ package.name }}
 
-  {% else %}
+    {% else %}
 {{ package.name }}:
   pkg:
     - installed
-  {% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 
+{% endif %}
