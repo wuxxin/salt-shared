@@ -1,0 +1,17 @@
+diff --git a/drivers/overlay/overlay.go b/drivers/overlay/overlay.go
+index ef83b6c87..6d7f20f0a 100644
+--- a/drivers/overlay/overlay.go
++++ b/drivers/overlay/overlay.go
+@@ -139,10 +139,10 @@ func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
+ 		backingFs = fsName
+ 	}
+ 
+-	// check if they are running over btrfs, aufs, zfs, overlay, or ecryptfs
++	// check if they are running over btrfs, aufs, overlay, or ecryptfs
+ 	if opts.mountProgram == "" {
+ 		switch fsMagic {
+-		case graphdriver.FsMagicAufs, graphdriver.FsMagicZfs, graphdriver.FsMagicOverlay, graphdriver.FsMagicEcryptfs:
++		case graphdriver.FsMagicAufs, graphdriver.FsMagicOverlay, graphdriver.FsMagicEcryptfs:
+ 			logrus.Errorf("'overlay' is not supported over %s", backingFs)
+ 			return nil, errors.Wrapf(graphdriver.ErrIncompatibleFS, "'overlay' is not supported over %s", backingFs)
+ 		}
