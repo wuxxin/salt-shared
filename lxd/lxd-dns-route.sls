@@ -1,4 +1,4 @@
-
+{# warning: did create a dns cycle resolve failure on xenial and buildin dns, needs recheck before usage #}
 {% if salt['pillar.get']('desktop:development:enabled', false) %}
 
 {% from "network/lib.sls" import net_reverse_short with context %}
