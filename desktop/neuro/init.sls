@@ -1,10 +1,18 @@
 include:
-  - desktop.neuro.ppa
+  - .neurodsp
+  - .mne
+{# currently not working, or not omnipotent
+  - .edfbrowser
+  - .opensesam
+  - .openvibe
+  - .openbci
+#}  
+{# new ideas
+  - stimfit for python3
+  - https://github.com/curiositry/EEGrunt
+#}
 
-opensesam:
-  pkg:
-    - installed
-{% if grains['os'] == 'Ubuntu' %}
-    - require:
-      - pkgrepo: cogscinl_ppa
-{% endif %}
+neuro-tools:
+  pkg.installed:
+    - pkgs:
+      - gdf-tools
