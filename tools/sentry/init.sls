@@ -4,7 +4,7 @@ include:
   - python
 
 # python3 packages needed for sentrycat
-python3-sentrycat-req:
+python3-sentrycat-packages:
   pkg.installed:
     - pkgs:
       - python3-requests
@@ -12,7 +12,7 @@ python3-sentrycat-req:
     - require:
       - sls: python
 
-{{ pip3_install('sentry-sdk', require= 'pkg: python3-sentrycat-req') }}
+{{ pip3_install('sentry-sdk>=0.7.3', require= 'pkg: python3-sentrycat-packages') }}
 
 /usr/local/bin/sentrycat.py:
   file.managed:
