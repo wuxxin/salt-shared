@@ -85,3 +85,9 @@ webcamstudio:
       - webcamstudio
       - webcamstudio-dkms
 {% endif %}  
+
+video-creation-conversion:
+  pkg.installed:
+    - pkgs:
+      - mkvtoolnix-gui
+      - handbrake
