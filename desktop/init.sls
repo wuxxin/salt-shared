@@ -24,11 +24,11 @@ include:
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - python.dev
+  - python.scientific
   - vcs
   - vcs.git-bridge
   - tools.extra
   - .homeshick
-  - .scipy
   - .atom
   - .code
   - .emulation
