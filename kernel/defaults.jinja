@@ -25,16 +25,14 @@ generic:
   tools: linux-tools-generic
 {% endload %}
 
-{# 
-additional settings:
-  keep_current: True     only matching kernel-tools will be installed
-  manual_download: True  to install a manual kernel from the web
-  virtual_extra: False   to not install additional extra modules (on vm)
-
-automatic:
-  on LXC only matching kernel-tools will be installed
+{#
+optional settings:
+  # do not change kernel, just install matching kernel-tools
+  keep_current: True     # Default false
+  # do not install additional extra modules (if running on virtual machine)
+  virtual_extra: False   # Default true
 #}
 
-{% set settings = salt['grains.filter_by'](defaults, 
+{% set settings = salt['grains.filter_by'](defaults,
   grain= 'lsb_distrib_codename', default= 'generic',
   merge= salt['pillar.get']('kernel:package', {})) %}

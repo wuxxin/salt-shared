@@ -5,7 +5,7 @@ linux-image:
   pkg.installed:
     - pkgs:
       - linux-tools-{{ grains['kernelrelease'] }}
-  
+
 {% else %}
 
 linux-image:

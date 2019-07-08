@@ -6,7 +6,7 @@
 
 # General: use swappiness=10 for less aggresive swappiness
 
-# while using KVM and other full virtualization: swappiness=1 
+# while using KVM and other full virtualization: swappiness=1
 # rationale: memory is given to the other domains, so we dont want the host to swap guest memory
 
 {% set swappiness = salt['pillar.get']('kernel:swappiness', 10) %}
@@ -14,5 +14,3 @@
 vm.swappiness:
   sysctl.present:
     - value: {{ swappiness }}
-
-    
