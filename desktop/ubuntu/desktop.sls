@@ -56,6 +56,12 @@ yaru-theme:
       - yaru-theme-sound
 {%- endif %}
 
+nautilus-plugins:
+  pkg.installed:
+    - pkgs:
+      - seahorse-nautilus
+
+{# 
 gnome-shell-extensions:
   pkg.installed:
     - pkgs:
@@ -64,8 +70,4 @@ gnome-shell-extensions:
       - gnome-shell-extension-pixelsaver
       - gnome-shell-extension-system-monitor
       - gnome-shell-extension-weather
-
-{# only in bionic and cosmic but not in disco
-- gnome-shell-extension-mediaplayer
-- gnome-shell-extension-top-icons-plus
 #}
