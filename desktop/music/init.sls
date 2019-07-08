@@ -11,3 +11,14 @@ sonic-pi:
   pkg.installed:
     - pkgs:
       - sonic-pi
+
+music-cd-ripper:
+  pkg.installed:
+    - pkgs:
+      - sound-juicer
+      
+music-tagger:
+  pkg.installed:
+    - pkgs:
+      - picard
+      
