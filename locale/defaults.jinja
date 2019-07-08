@@ -27,9 +27,11 @@ posix_messages: false
 {% else %}
   {% set settings.messages = settings['lang'] %}
 {% endif %}
-{% for x in merged_defaults.additional.split(' ') %}
-  {% set l = x.split(':')[0] %}
-  {% set c = x.split(':')[1] %}
-  {% set tobeadded = l+ '_'+ c|upper()+ '.UTF-8' %}
-  {% set settings.additional= settings.additional+ ' '+ tobeadded %}
-{% endfor %}
+{% if merged_defaults.additional %}
+  {% for x in merged_defaults.additional.split(' ') %}
+    {% set l = x.split(':')[0] %}
+    {% set c = x.split(':')[1] %}
+    {% set tobeadded = l+ '_'+ c|upper()+ '.UTF-8' %}
+    {% set settings.additional= settings.additional+ ' '+ tobeadded %}
+  {% endfor %}
+{% endif %}

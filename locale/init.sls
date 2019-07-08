@@ -11,7 +11,7 @@ locales:
   pkg:
     - installed
 
-SystemTimezone:
+set_system_timezone:
   timezone.system:
     - name: {{ settings.timezone }}
     - utc: True
