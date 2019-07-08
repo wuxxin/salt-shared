@@ -6,9 +6,13 @@ ipython:
     - pkgs:
       - ipython3
       - python3-ipdb
-      
 {%- if grains['osmajorrelease']|int >= 18 %}
+      - python3-ipykernel
+
 jupyter:
   pkg.installed:
-    - name: jupyter
+    - pkgs:
+      - jupyter
+      - jupyter-notebook
+
 {%- endif %}
