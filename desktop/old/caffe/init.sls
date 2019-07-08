@@ -2,8 +2,7 @@
 {% set workdir= user_home+ '/.caffe' %}
 
 include:
-  - python.dev
-  - desktop.scipy
+  - python.scientific
 
 caffe_req:
   pkg.installed:
@@ -40,8 +39,7 @@ caffe:
     - target: {{ workdir }}
     - user: {{ user }}
     - require:
-      - sls: python.dev
-      - sls: desktop.scipy
+      - sls: python.scientific
       - pkg: caffe_req
       - pkg: caffe_no_recommends_req
       - file: caffe_profile
