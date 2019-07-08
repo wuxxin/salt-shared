@@ -1,39 +1,29 @@
 {% from "http_proxy/defaults.jinja" import settings as s with context %}
 
-{% if (grains['lsb_distrib_codename'] == "trusty") %}
-{% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("polipo_ppa", 
-  "phraktle/backports", require_in= "pkg: polipo") }}
-{% endif %}
-
-polipo:
+squid:
   pkg:
     - installed
   service:
     - running
     - enable: True
     - require:
-      - pkg: polipo
+      - pkg: squid
     - watch:
-      - file: /etc/polipo/config
+      - file: /etc/squid/squid.conf
 
-/etc/polipo/config:
+/etc/squid/conf.d/salt.conf:
   file.managed:
     - contents: |
-        logSyslog = true
         proxyAddress = {{ s.bindaddress }}
         proxyPort = {{ s.bindport }}
-        cacheIsShared = {{ s.cacheIsShared }}
-        disableIndexing = {{ s.disableIndexing }}
-        disableServersList = {{ s.disableServersList }}
         diskCacheRoot = {{ s.diskCacheRoot }}
         maxDiskCacheEntrySize = {{ s.maxDiskCacheEntrySize }}
 
     - require:
-      - pkg: polipo
+      - pkg: squid
 
 
-{% if salt['pillar.get']('polipo:server:custom_storage', false) %}
+{% if salt['pillar.get']('squid:server:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
-{{ storage_setup(salt['pillar.get']('polipo:server:custom_storage')) }}
+{{ storage_setup(salt['pillar.get']('squid:server:custom_storage')) }}
 {% endif %}
