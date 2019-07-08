@@ -34,6 +34,7 @@ base-tools:
       - jq              {# Command-line JSON processor #}
       - xmlstarlet      {# transform, query, validate, and edit XML #}
       - html-xml-utils  {# manipulating and converting HTML and XML #}
+      - html2text       {# converter from HTML to plain text #}
       - ssss            {# Shamir's secret sharing scheme implementation #}
       {# network #}
       - httpie          {# CLI, cURL-like tool for humans #}
