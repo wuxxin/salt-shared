@@ -10,7 +10,7 @@ Encryption/Signing, Decryption/Verifying modul.
   - set environment variable GPG_EXECUTABLE to use a custom existing gnupg binary 
 
 """
-
+from __future__ import print_function
 import sys, os, subprocess, tempfile, re, inspect, pydoc
 
 
@@ -59,7 +59,7 @@ def _gpgversion():
   
   
 def _isgpg2():
-    ''' returns True if gpg executable is gpg version 2 is detected '''
+    ''' returns True if gpg executable is gpg version 2'''
     return _gpgversion()[0] == 2
 
     
@@ -112,15 +112,15 @@ def gen_keypair(owneremail, secretkey_filename, publickey_filename, keylength= 2
         try:
             gpghome = tempfile.mkdtemp()
             reset_keystore(gpghome)
-            base_args = ['--homedir', gpghome, '--batch', '--yes' ]
+            baseargs = ['--homedir', gpghome, '--batch', '--yes' ]
             args = baseargs + ['--gen-key']
             returncode, stdout, stderr = _gpg(args, batch_args)
             args = baseargs + ['--armor', '--export',
                 '--output', publickey_filename]
-            returncode, stdout, stderr = _gpg(args, batch_args)
+            returncode, stdout, stderr = _gpg(args)
             args = baseargs + ['--armor', '--export-secret-keys',
-                '--output', publickey_filename]
-            returncode, stdout, stderr = _gpg(args, batch_args)
+                '--output', secretkey_filename]
+            returncode, stdout, stderr = _gpg(args)
         finally:
             print(gpghome)
             reset_keystore(gpghome)
@@ -211,7 +211,7 @@ def decrypt_verify(sourcefile, destfile, gpghome, decrypt_owner, verify_owner=No
     if verify_owner is not None:
         p = re.compile('gpg: Good signature from "'+ verify_owner+ '"')
         if p.match is None:
-            raise KeyError, 'could not verify that signer was keyowner: %s , args: %s , stdout: %s , stderr: %s' % (verify_owner, str(args), stdout, stderr)
+            raise(KeyError, 'could not verify that signer was keyowner: %s , args: %s , stdout: %s , stderr: %s' % (verify_owner, str(args), stdout, stderr))
 
 
 def help(which=None):
