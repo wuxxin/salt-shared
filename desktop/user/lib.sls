@@ -4,7 +4,7 @@
 {% set user_home= user_info['home'] %}
 {% set user_download= user_home %}
 
-{% macro add_to_groups(groups) %}
+{% macro add_to_groups(user, groups) %}
 {{ user }}-add-to-groups:
   user.present:
     - name: {{ user }}
