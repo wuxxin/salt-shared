@@ -14,9 +14,13 @@ pip3-upgrade:
     - name: pip3 install -U pip
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
+{# virtualenv is included in newer pip installs
+
 virtualenv3-upgrade:
   cmd.run:
     - name: /usr/local/bin/pip3 -U virtualenv
     - onlyif: test "$(which virtualenv)" = "/usr/bin/virtualenv"
     - require:
       - cmd: pip3-upgrade
+
+#}
