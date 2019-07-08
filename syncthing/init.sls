@@ -13,4 +13,3 @@ syncthing:
   pkg.installed:
     - pkgs:
       - syncthing
-      - syncthing-inotify
