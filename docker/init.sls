@@ -52,8 +52,8 @@ docker-network:
     - contents: |
         auto docker0
         iface docker0 inet static
-            address {{ settings.ipaddr }}
-            netmask {{ settings.netmask }}
+            address {{ settings.ipv4_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
+            netmask {{ salt['network.convert_cidr'](settings.ipv4_cidr)['netmask'] }}
             bridge_ports none
             bridge_stp off
             bridge_maxwait 0
@@ -75,7 +75,7 @@ docker-network:
           bridges:
             docker0:
               dhcp4: false
-              addresses: [{{ settings.ipaddr }}/{{ settings.netmask }}]
+              addresses: [{{ settings.ipv4_cidr }}]
               parameters:
                 forward-delay: 0
     - require:
@@ -113,6 +113,7 @@ docker-custom-build:
   file.managed:
     - source: salt://docker/build-custom-docker.sh
     - name: /usr/local/sbin/build-bustom-docker.sh
+    - mode: "755"
   cmd.run:
     - name: /usr/local/sbin/build-bustom-docker.sh {{ custom_archive }} "overlayzfs" {{ patches_string }}
     - require:

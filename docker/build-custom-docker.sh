@@ -4,7 +4,7 @@ set -x
 
 usage() {
     cat <<EOF
-Usage: $0 <target-archive-dir> [<version-postfix> patch-file>*]
+Usage: $0 <target-archive-dir> [<version-postfix> <patch-file>*]
 
 target-archive-dir = directory where the resulting packages should be stores
     including standard files (eg. Packages) to be used as custom apt source
@@ -56,7 +56,7 @@ cd "$basedir"
 
 # get source
 pull-lp-source docker.io disco
-cd docker.io*
+cd $(find . -type d -name "docker.io*" -print -quit)
 
 # add patches
 changes=""
