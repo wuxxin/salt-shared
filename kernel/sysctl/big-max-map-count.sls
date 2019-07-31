@@ -15,4 +15,4 @@ Elasticsearch uses a mmapfs directory by default to store its indices. The defau
 
 vm.max_map_count:
   sysctl.present:
-    - value: 262144 {# 65536 #}
+    - value: 262144 {# 65530 #}
