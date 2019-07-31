@@ -1,0 +1,35 @@
+From 05b8d59015f8a5ce26c8bbaa8053b5bc7cb1a77b Mon Sep 17 00:00:00 2001
+From: Phil Estes <estesp@linux.vnet.ibm.com>
+Date: Wed, 13 Dec 2017 23:38:22 -0500
+Subject: [PATCH] Fix overlay2 storage driver inside a user namespace
+
+The overlay2 driver was not setting up the archive.TarOptions field
+properly like other storage backend routes to "applyTarLayer"
+functionality. The InUserNS field is populated now for overlay2 using
+the same query function used by the other storage drivers.
+
+Signed-off-by: Phil Estes <estesp@linux.vnet.ibm.com>
+---
+ daemon/graphdriver/overlay2/overlay.go | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/components/engine/daemon/graphdriver/overlay2/overlay.go b/components/engine/daemon/graphdriver/overlay2/overlay.go
+index f1731ea935d1..4b596ae33e6a 100644
+--- a/components/engine/daemon/graphdriver/overlay2/overlay.go
++++ b/components/engine/daemon/graphdriver/overlay2/overlay.go
+@@ -31,6 +31,7 @@ import (
+ 	"github.com/docker/docker/pkg/parsers/kernel"
+ 	"github.com/docker/docker/pkg/system"
+ 	"github.com/docker/go-units"
++	rsystem "github.com/opencontainers/runc/libcontainer/system"
+ 	"github.com/opencontainers/selinux/go-selinux/label"
+ 	"github.com/sirupsen/logrus"
+ 	"golang.org/x/sys/unix"
+@@ -704,6 +705,7 @@ func (d *Driver) ApplyDiff(id string, parent string, diff io.Reader) (size int64
+ 		UIDMaps:        d.uidMaps,
+ 		GIDMaps:        d.gidMaps,
+ 		WhiteoutFormat: archive.OverlayWhiteoutFormat,
++		InUserNS:       rsystem.RunningInUserNS(),
+ 	}); err != nil {
+ 		return 0, err
+ 	}

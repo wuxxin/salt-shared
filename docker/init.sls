@@ -2,10 +2,7 @@
 {% set pkgname= "docker-ce" if settings.origin == "upstream" else "docker.io" %}
   
 include:
-  - kernel
-  - kernel.sysctl.big
-  - kernel.limits.big
-  - kernel.cgroup
+  - kernel.server
   - python
   - systemd.reload
 
@@ -40,9 +37,7 @@ docker-requisites:
       - ca-certificates
       - systemd-docker
     - require:
-      - sls: kernel.sysctl.big
-      - sls: kernel.limits.big
-      - sls: kernel.cgroup
+      - sls: kernel.server
 
 {# install docker network #}
 {% if grains['osrelease_info'][0]|int <= 18 %}

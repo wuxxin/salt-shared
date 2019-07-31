@@ -18,35 +18,11 @@ Signed-off-by: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
  pkg/archive/archive_other.go |   2 +-
  3 files changed, 177 insertions(+), 8 deletions(-)
 
-From 037e370de12830c867bf1be0955247ed06d33e17 Mon Sep 17 00:00:00 2001
-From: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
-Date: Thu, 29 Nov 2018 16:38:55 +0900
-Subject: [PATCH 2/3] pkg/archive: annotate tests that requires initial userns
-
-`rootlesskit go test ./pkg/archive` now succeeds
-
-Signed-off-by: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
----
- pkg/archive/archive_linux_test.go | 2 ++
- pkg/archive/archive_test.go       | 2 ++
- pkg/archive/archive_unix_test.go  | 2 ++
- 3 files changed, 6 insertions(+)
-
-From ec153ccfc8a66ec7efd032206026461bc5224c04 Mon Sep 17 00:00:00 2001
-From: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
-Date: Thu, 29 Nov 2018 18:25:17 +0900
-Subject: [PATCH 3/3] pkg/archive: add TestReexecUserNSOverlayWhiteoutConverter
-
-Signed-off-by: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
----
- pkg/archive/archive_linux_test.go | 130 ++++++++++++++++++++++++++++++
- 1 file changed, 130 insertions(+)
-
 diff --git a/components/engine/pkg/archive/archive.go b/components/engine/pkg/archive/archive.go
-index 070dccb..aebb129 100644
+index 32132fcfed81..bb623fa85648 100644
 --- a/components/engine/pkg/archive/archive.go
 +++ b/components/engine/pkg/archive/archive.go
-@@ -743,7 +743,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error)
+@@ -745,7 +745,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error)
  			compressWriter,
  			options.ChownOpts,
  		)
@@ -55,7 +31,7 @@ index 070dccb..aebb129 100644
  
  		defer func() {
  			// Make sure to check the error on Close.
-@@ -901,7 +901,7 @@ func Unpack(decompressedArchive io.Reader, dest string, options *TarOptions) err
+@@ -903,7 +903,7 @@ func Unpack(decompressedArchive io.Reader, dest string, options *TarOptions) err
  	var dirs []*tar.Header
  	idMapping := idtools.NewIDMappingsFromMaps(options.UIDMaps, options.GIDMaps)
  	rootIDs := idMapping.RootPair()
@@ -65,7 +41,7 @@ index 070dccb..aebb129 100644
  	// Iterate through the files in the archive.
  loop:
 diff --git a/components/engine/pkg/archive/archive_linux.go b/components/engine/pkg/archive/archive_linux.go
-index 970d4d0..0601f7b 100644
+index 970d4d06800d..0601f7b0d1f5 100644
 --- a/components/engine/pkg/archive/archive_linux.go
 +++ b/components/engine/pkg/archive/archive_linux.go
 @@ -2,22 +2,29 @@ package archive // import "github.com/docker/docker/pkg/archive"
@@ -291,11 +267,109 @@ index 970d4d0..0601f7b 100644
 +	upperDummy := filepath.Join(upper, dummyBase)
 +	return upperDummy, nil
 +}
+diff --git a/components/engine/pkg/archive/archive_other.go b/components/engine/pkg/archive/archive_other.go
+index 462dfc632325..65a73354c429 100644
+--- a/components/engine/pkg/archive/archive_other.go
++++ b/components/engine/pkg/archive/archive_other.go
+@@ -2,6 +2,6 @@
+ 
+ package archive // import "github.com/docker/docker/pkg/archive"
+ 
+-func getWhiteoutConverter(format WhiteoutFormat) tarWhiteoutConverter {
++func getWhiteoutConverter(format WhiteoutFormat, inUserNS bool) tarWhiteoutConverter {
+ 	return nil
+ }
+
+From 037e370de12830c867bf1be0955247ed06d33e17 Mon Sep 17 00:00:00 2001
+From: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
+Date: Thu, 29 Nov 2018 16:38:55 +0900
+Subject: [PATCH 2/3] pkg/archive: annotate tests that requires initial userns
+
+`rootlesskit go test ./pkg/archive` now succeeds
+
+Signed-off-by: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
+---
+ pkg/archive/archive_linux_test.go | 2 ++
+ pkg/archive/archive_test.go       | 2 ++
+ pkg/archive/archive_unix_test.go  | 2 ++
+ 3 files changed, 6 insertions(+)
+
 diff --git a/components/engine/pkg/archive/archive_linux_test.go b/components/engine/pkg/archive/archive_linux_test.go
-index 9422269..8fdcb34 100644
+index 9422269dffe7..92b8f2d7d789 100644
 --- a/components/engine/pkg/archive/archive_linux_test.go
 +++ b/components/engine/pkg/archive/archive_linux_test.go
-@@ -1,13 +1,18 @@
+@@ -8,6 +8,7 @@ import (
+ 	"testing"
+ 
+ 	"github.com/docker/docker/pkg/system"
++	rsystem "github.com/opencontainers/runc/libcontainer/system"
+ 	"golang.org/x/sys/unix"
+ 	"gotest.tools/assert"
+ 	"gotest.tools/skip"
+@@ -24,6 +25,7 @@ import (
+ //     └── f1 # whiteout, 0644
+ func setupOverlayTestDir(t *testing.T, src string) {
+ 	skip.If(t, os.Getuid() != 0, "skipping test that requires root")
++	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires initial userns (trusted.overlay.opaque xattr cannot be set in userns, even with Ubuntu kernel)")
+ 	// Create opaque directory containing single file and permission 0700
+ 	err := os.Mkdir(filepath.Join(src, "d1"), 0700)
+ 	assert.NilError(t, err)
+diff --git a/components/engine/pkg/archive/archive_test.go b/components/engine/pkg/archive/archive_test.go
+index affc7fa83bcc..b49ad6723e75 100644
+--- a/components/engine/pkg/archive/archive_test.go
++++ b/components/engine/pkg/archive/archive_test.go
+@@ -18,6 +18,7 @@ import (
+ 
+ 	"github.com/docker/docker/pkg/idtools"
+ 	"github.com/docker/docker/pkg/ioutils"
++	rsystem "github.com/opencontainers/runc/libcontainer/system"
+ 	"gotest.tools/assert"
+ 	is "gotest.tools/assert/cmp"
+ 	"gotest.tools/skip"
+@@ -1229,6 +1230,7 @@ func TestReplaceFileTarWrapper(t *testing.T) {
+ // version of this package that was built with <=go17 are still readable.
+ func TestPrefixHeaderReadable(t *testing.T) {
+ 	skip.If(t, runtime.GOOS != "windows" && os.Getuid() != 0, "skipping test that requires root")
++	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires more than 010000000 UIDs, which is unlikely to be satisfied when running in userns")
+ 	// https://gist.github.com/stevvooe/e2a790ad4e97425896206c0816e1a882#file-out-go
+ 	var testFile = []byte("\x1f\x8b\x08\x08\x44\x21\x68\x59\x00\x03\x74\x2e\x74\x61\x72\x00\x4b\xcb\xcf\x67\xa0\x35\x30\x80\x00\x86\x06\x10\x47\x01\xc1\x37\x40\x00\x54\xb6\xb1\xa1\xa9\x99\x09\x48\x25\x1d\x40\x69\x71\x49\x62\x91\x02\xe5\x76\xa1\x79\x84\x21\x91\xd6\x80\x72\xaf\x8f\x82\x51\x30\x0a\x46\x36\x00\x00\xf0\x1c\x1e\x95\x00\x06\x00\x00")
+ 
+diff --git a/components/engine/pkg/archive/archive_unix_test.go b/components/engine/pkg/archive/archive_unix_test.go
+index dc4e1fdae651..6119133f8eb4 100644
+--- a/components/engine/pkg/archive/archive_unix_test.go
++++ b/components/engine/pkg/archive/archive_unix_test.go
+@@ -14,6 +14,7 @@ import (
+ 	"testing"
+ 
+ 	"github.com/docker/docker/pkg/system"
++	rsystem "github.com/opencontainers/runc/libcontainer/system"
+ 	"golang.org/x/sys/unix"
+ 	"gotest.tools/assert"
+ 	is "gotest.tools/assert/cmp"
+@@ -182,6 +183,7 @@ func getInode(path string) (uint64, error) {
+ 
+ func TestTarWithBlockCharFifo(t *testing.T) {
+ 	skip.If(t, os.Getuid() != 0, "skipping test that requires root")
++	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires initial userns")
+ 	origin, err := ioutil.TempDir("", "docker-test-tar-hardlink")
+ 	assert.NilError(t, err)
+ 
+
+From ec153ccfc8a66ec7efd032206026461bc5224c04 Mon Sep 17 00:00:00 2001
+From: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
+Date: Thu, 29 Nov 2018 18:25:17 +0900
+Subject: [PATCH 3/3] pkg/archive: add TestReexecUserNSOverlayWhiteoutConverter
+
+Signed-off-by: Akihiro Suda <suda.akihiro@lab.ntt.co.jp>
+---
+ pkg/archive/archive_linux_test.go | 130 ++++++++++++++++++++++++++++++
+ 1 file changed, 130 insertions(+)
+
+diff --git a/components/engine/pkg/archive/archive_linux_test.go b/components/engine/pkg/archive/archive_linux_test.go
+index 92b8f2d7d789..8fdcb34b5321 100644
+--- a/components/engine/pkg/archive/archive_linux_test.go
++++ b/components/engine/pkg/archive/archive_linux_test.go
+@@ -1,14 +1,18 @@
  package archive // import "github.com/docker/docker/pkg/archive"
  
  import (
@@ -309,20 +383,12 @@ index 9422269..8fdcb34 100644
  
 +	"github.com/docker/docker/pkg/reexec"
  	"github.com/docker/docker/pkg/system"
-+	rsystem "github.com/opencontainers/runc/libcontainer/system"
+ 	rsystem "github.com/opencontainers/runc/libcontainer/system"
 +	"github.com/pkg/errors"
  	"golang.org/x/sys/unix"
  	"gotest.tools/assert"
  	"gotest.tools/skip"
-@@ -24,6 +29,7 @@ import (
- //     └── f1 # whiteout, 0644
- func setupOverlayTestDir(t *testing.T, src string) {
- 	skip.If(t, os.Getuid() != 0, "skipping test that requires root")
-+	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires initial userns (trusted.overlay.opaque xattr cannot be set in userns, even with Ubuntu kernel)")
- 	// Create opaque directory containing single file and permission 0700
- 	err := os.Mkdir(filepath.Join(src, "d1"), 0700)
- 	assert.NilError(t, err)
-@@ -160,3 +166,129 @@ func TestOverlayTarAUFSUntar(t *testing.T) {
+@@ -162,3 +166,129 @@ func TestOverlayTarAUFSUntar(t *testing.T) {
  	checkFileMode(t, filepath.Join(dst, "d2", "f1"), 0660)
  	checkFileMode(t, filepath.Join(dst, "d3", WhiteoutPrefix+"f1"), 0600)
  }
@@ -452,56 +518,3 @@ index 9422269..8fdcb34 100644
 +		os.Exit(0)
 +	}
 +}
-diff --git a/components/engine/pkg/archive/archive_other.go b/components/engine/pkg/archive/archive_other.go
-index 462dfc6..65a7335 100644
---- a/components/engine/pkg/archive/archive_other.go
-+++ b/components/engine/pkg/archive/archive_other.go
-@@ -2,6 +2,6 @@
- 
- package archive // import "github.com/docker/docker/pkg/archive"
- 
--func getWhiteoutConverter(format WhiteoutFormat) tarWhiteoutConverter {
-+func getWhiteoutConverter(format WhiteoutFormat, inUserNS bool) tarWhiteoutConverter {
- 	return nil
- }
-diff --git a/components/engine/pkg/archive/archive_test.go b/components/engine/pkg/archive/archive_test.go
-index b448bac..f82771c 100644
---- a/components/engine/pkg/archive/archive_test.go
-+++ b/components/engine/pkg/archive/archive_test.go
-@@ -18,6 +18,7 @@ import (
- 
- 	"github.com/docker/docker/pkg/idtools"
- 	"github.com/docker/docker/pkg/ioutils"
-+	rsystem "github.com/opencontainers/runc/libcontainer/system"
- 	"gotest.tools/assert"
- 	is "gotest.tools/assert/cmp"
- 	"gotest.tools/skip"
-@@ -1254,7 +1255,7 @@ func TestReplaceFileTarWrapper(t *testing.T) {
- // TestPrefixHeaderReadable tests that files that could be created with the
- // version of this package that was built with <=go17 are still readable.
- func TestPrefixHeaderReadable(t *testing.T) {
--	skip.If(t, os.Getuid() != 0, "skipping test that requires root")
-+	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires more than 010000000 UIDs, which is unlikely to be satisfied when running in userns")
- 	// https://gist.github.com/stevvooe/e2a790ad4e97425896206c0816e1a882#file-out-go
- 	var testFile = []byte("\x1f\x8b\x08\x08\x44\x21\x68\x59\x00\x03\x74\x2e\x74\x61\x72\x00\x4b\xcb\xcf\x67\xa0\x35\x30\x80\x00\x86\x06\x10\x47\x01\xc1\x37\x40\x00\x54\xb6\xb1\xa1\xa9\x99\x09\x48\x25\x1d\x40\x69\x71\x49\x62\x91\x02\xe5\x76\xa1\x79\x84\x21\x91\xd6\x80\x72\xaf\x8f\x82\x51\x30\x0a\x46\x36\x00\x00\xf0\x1c\x1e\x95\x00\x06\x00\x00")
- 
-diff --git a/components/engine/pkg/archive/archive_unix_test.go b/components/engine/pkg/archive/archive_unix_test.go
-index dc4e1fd..6119133 100644
---- a/components/engine/pkg/archive/archive_unix_test.go
-+++ b/components/engine/pkg/archive/archive_unix_test.go
-@@ -14,6 +14,7 @@ import (
- 	"testing"
- 
- 	"github.com/docker/docker/pkg/system"
-+	rsystem "github.com/opencontainers/runc/libcontainer/system"
- 	"golang.org/x/sys/unix"
- 	"gotest.tools/assert"
- 	is "gotest.tools/assert/cmp"
-@@ -182,6 +183,7 @@ func getInode(path string) (uint64, error) {
- 
- func TestTarWithBlockCharFifo(t *testing.T) {
- 	skip.If(t, os.Getuid() != 0, "skipping test that requires root")
-+	skip.If(t, rsystem.RunningInUserNS(), "skipping test that requires initial userns")
- 	origin, err := ioutil.TempDir("", "docker-test-tar-hardlink")
- 	assert.NilError(t, err)
- 

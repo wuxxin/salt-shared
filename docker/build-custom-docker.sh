@@ -43,6 +43,9 @@ fi
 if ! grep -q "disco" /usr/share/distro-info/ubuntu.csv; then
     echo "19.04,Disco Dingo,disco,2018-10-18,2019-04-18,2020-01-18" >> /usr/share/distro-info/ubuntu.csv
 fi
+if ! grep -q "eoan" /usr/share/distro-info/ubuntu.csv; then
+    echo "19.10,Eoan Ermine,eoan,2019-04-18,2019-10-17,2020-07-17" >>  /usr/share/distro-info/ubuntu.csv
+fi
 if test ! -e /var/cache/pbuilder/base.cow; then
     cowbuilder --create
 else
