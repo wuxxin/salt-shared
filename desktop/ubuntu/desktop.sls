@@ -60,6 +60,7 @@ nautilus-plugins:
   pkg.installed:
     - pkgs:
       - seahorse-nautilus
+      - nautilus-image-converter
 
 {# 
 gnome-shell-extensions:
