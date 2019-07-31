@@ -15,11 +15,28 @@ include:
     - require:
       - pkg: python
       - cmd: pip3-upgrade
-  {%- if kwargs is defined %}
-    {%- for k,d in kwargs.items() %}
-    - {{ k }}: {{ d }}
-    {%- endfor %}
+  {%- if 'require' in kwargs %}
+    {%- set d = kwargs['require'] %}
+    {%- if d is sequence and d is not string %}
+      {%- for l in d %}
+      - {{ l }}
+      {%- endfor %}
+    {%- else %}
+      - {{ d }}
+    {%- endif %}
   {%- endif %}
+  {%- for k,d in kwargs.items() %}
+    {%- if k != 'require' %}
+      {%- if d is sequence and d is not string %}
+    - {{ k }}:
+        {%- for l in d %}
+      - {{ l }}
+        {%- endfor %}
+      {%- else %}
+    - {{ k }}: {{ d }}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
 {% endmacro %}
 
 {% macro pip3_install(package_or_packagelist) %}
