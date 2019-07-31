@@ -5,16 +5,19 @@
    from 18.10 upwards its only available as snap
 #}
 
+{# modify kernel for production setup http://lxd.readthedocs.io/en/latest/production-setup/ #}
+
 include:
-  - kernel
-  - kernel.sysctl.big
-  - kernel.limits.big
-  - kernel.cgroup
+  - kernel.server
 {% if grains['osrelease_info'][0]|int < 18 %}
   - ubuntu.backports
 {% endif %}
 
-{# modify kernel for production setup http://lxd.readthedocs.io/en/latest/production-setup/ #}
+{#
+Domain Type  Item    Value     Default Description
+*      soft  memlock unlimited unset   maximum locked-in-memory address space (KB)
+*      hard  memlock unlimited unset   maximum locked-in-memory address space (KB)
+#}
 /etc/security/limits.d/memlock.conf:
   file.managed:
     - contents: |
@@ -41,9 +44,7 @@ lxd_prerequisites:
       - ebtables
       - criu
     - require:
-      - sls: kernel.sysctl.big
-      - sls: kernel.limits.big
-      - sls: kernel.cgroup
+      - sls: kernel.server
 
 lxd:
   file.managed:

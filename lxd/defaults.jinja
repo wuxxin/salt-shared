@@ -26,6 +26,10 @@ networks:
     ipv4.address: {{ ipaddr }}/{{ netsize }}
     ipv4.nat: true
     ipv6.address: none
+    # needed parameter to prevent dns loop and point host dns to lxd for *.lxd
+    raw.dnsmasq: |
+        auth-zone=lxd
+        dns-loop-detect
 
 # Profiles
 profiles:
@@ -44,6 +48,9 @@ profiles:
   config:
     boot.autostart: true
     boot.autostart.delay: 2
+- name: nested
+  config:
+    security.nesting: true
 - name: gui
   config:
     environment.DISPLAY: :0
