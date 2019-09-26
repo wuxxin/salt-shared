@@ -28,7 +28,25 @@ flent-req:
       - python3-pyqt5
       - python3-matplotlib
 
-{% from 'python/lib.sls' import pip3_install %}
+{% if grains['os'] == 'Ubuntu' %}
+
+  {% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("flent_ppa", "tohojo/flent", require_in= "pkg: flent") }}
+
+flent: 
+  pkg.installed:
+    - pkgs:
+      - fping
+      - netperf
+      - flent
+    - require:
+      - sls: desktop.network.iperf2
+      - sls: desktop.network.irtt
+      - cmd: http-getter
+
+{% else %}
+
+  {% from 'python/lib.sls' import pip3_install %}
 {{ pip3_install('git+https://github.com/tohojo/flent.git#egg=flent', require='pkg: flent-req') }}
 
 flent: 
@@ -46,3 +64,5 @@ flent:
     - cwd: /usr/local/share/doc/flent/misc
     - onchanges:
       - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
+
+{% endif %}

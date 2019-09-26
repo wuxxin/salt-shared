@@ -1,6 +1,7 @@
 include:
   - .iperf3
   - .flent
+  - .dns
     
 desktop_network_packages:
   pkg.installed:
