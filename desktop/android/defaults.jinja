@@ -1,0 +1,11 @@
+{% load_yaml as defaults %}
+GRADLE_VERSION: "5.2.1"
+KOTLIN_VERSION: "1.3.21"
+ANDROID_SDK_VERSION: "4333796"
+ANDROID_SDK_HASH: ""
+
+ANDROID_HOME: "/opt/android"
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('android', {})) %}
