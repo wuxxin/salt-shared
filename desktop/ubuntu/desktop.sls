@@ -6,6 +6,7 @@ additional-desktop-packages:
       - dmz-cursor-theme 
       - gsettings-ubuntu-schemas
       - gnome-remote-desktop
+      - indicator-application
 {#
       - alacarte
 #}
