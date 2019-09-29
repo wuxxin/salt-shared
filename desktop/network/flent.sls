@@ -1,10 +1,11 @@
 {# The FLExible Network Tester - make experimental evaluations of networks more reliable and easier #}
 
 include:
+  - python
   - desktop.network.iperf2
   - desktop.network.irtt
-  - python
-  
+  - desktop.network.netperf
+
 http-getter:
   pkg.installed:
     - pkgs:
@@ -27,6 +28,11 @@ flent-req:
     - pkgs:
       - python3-pyqt5
       - python3-matplotlib
+    - require:
+      - sls: desktop.network.iperf2
+      - sls: desktop.network.irtt
+      - sls: desktop.network.netperf
+      - cmd: http-getter
 
 {% if grains['os'] == 'Ubuntu' %}
 
@@ -37,12 +43,9 @@ flent:
   pkg.installed:
     - pkgs:
       - fping
-      - netperf
       - flent
     - require:
-      - sls: desktop.network.iperf2
-      - sls: desktop.network.irtt
-      - cmd: http-getter
+      - pkg: flent-req
 
 {% else %}
 
@@ -53,11 +56,8 @@ flent:
   pkg.installed:
     - pkgs:
       - fping
-      - netperf
     - require:
-      - sls: desktop.network.iperf2
-      - sls: desktop.network.irtt
-      - cmd: http-getter
+      - pkg: flent-req
       - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
   cmd.run:
     - name: make all install

@@ -1,7 +1,13 @@
 {%- if grains['osmajorrelease']|int >= 18 %}
 
 irtt:
-  pkg.installed:
+  pkg:
+    - installed
+  service.dead:
+    - enable: False
+
+mask-irtt:
+  service.masked:
     - name: irtt
 
 {%- else %}
