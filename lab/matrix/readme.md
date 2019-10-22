@@ -6,7 +6,7 @@ lxc shell matrix
 # ansible must be >= 2.5.2 , but bionic has 2.5.1
 add-apt-repository ppa:ansible/ansible
 apt-get update
-apt install docker.io pwgen mc ansible
+apt install docker.io pwgen mc ansible python-dns
 ssh-keygen
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 

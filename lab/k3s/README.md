@@ -1,39 +1,81 @@
 # k3s
 
 ## Additional Components
+    + examples, see https://github.com/danderson/homelab/blob/master/website/content/stack.md
     + Load Balancer & router
-        + https://metallb.universe.tf/
+        + A network load-balancer implementation for Kubernetes using standard routing protocols
+            + https://metallb.universe.tf/
         + https://github.com/cloudnativelabs/kube-router
     + External DNS
         + https://github.com/kubernetes-incubator/external-dns
-    + local storage provisioner
-        + https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner
-        + hostpath based: https://github.com/rancher/local-path-provisioner
+    + storage
+        + Storage Orchestration for Kubernetes https://rook.io using http://edgefs.io/
+        + local storage provisioner
+            + https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner
+            + hostpath based but with claims: https://github.com/rancher/local-path-provisioner
+    + Machine Net-booting
+        + not directly related to k8s, but useful
+            + Pixiecore is an tool to manage network booting of machines.
+            + https://github.com/danderson/netboot/tree/master/pixiecore
+    + authentification
+        + OpenID Connect Identity (OIDC) and OAuth 2.0 Provider with Pluggable Connectors
+            + https://github.com/dexidp/dex
+        + An application that can be used to easily enable authentication flows via OIDC for a kubernetes cluster.
+            + https://github.com/heptiolabs/gangway
+    + sandboxing
+        + https://github.com/google/gvisor
+    + database
+        + cloud native postgresql compatible database (can be managed by rook.io)
+            + https://github.com/yugabyte/yugabyte-db
+        + https://github.com/CrunchyData/postgres-operator
+    + Metric Gathering
+        + Prometheus, Grafana
+        + A multitenant, horizontally scalable Prometheus as a Service
+            + https://github.com/cortexproject/cortex
+        + Thanos is a set of components that can be composed into a highly available metric system with unlimited storage capacity, which can be added seamlessly on top of existing Prometheus deployments.
+            + https://github.com/thanos-io/thanos
     + Certificates
+        + Traefik 2.x with ALPN-TLS
+            + https://docs.traefik.io/
         + https://github.com/jetstack/cert-manager
     + Install and Update- CI
+        + Kured (KUbernetes REboot Daemon) is a Kubernetes daemonset that performs safe automatic node reboots when the need to do so is indicated by the package management system of the underlying OS.
+            + https://github.com/weaveworks/kured
         + https://keel.sh/
         + https://github.com/fluxcd/helm-operator-get-started
-    
     + ingress
+        + https://docs.traefik.io/
         + https://www.envoyproxy.io/
         + https://github.com/kubernetes/ingress-nginx
         + https://github.com/appscode/voyager
         + https://github.com/jcmoraisjr/haproxy-ingress
-        + https://traefik.io/
     + service mesh
+        + https://docs.mae.sh/
         + https://github.com/istio/istio
     + backup (with restic)
-        + https://github.com/heptio/velero
+        + https://github.com/vmware-tanzu/velero
         + https://github.com/vshn/k8up
-    + kubernet config check
-        + https://github.com/derailed/popeye
-        + https://github.com/zegl/kube-score
+    + security
+        + kubernet config check
+            + https://github.com/derailed/popeye
+            + https://github.com/zegl/kube-score
+        + static container security analyse
+            + https://github.com/coreos/clair
+        + An auditing system for Kubernetes
+            + https://github.com/k8guard/k8guard-start-from-here
+        + kube-bench is a Go application that checks whether Kubernetes is deployed securely
+            + https://github.com/aquasecurity/kube-bench
+        + https://github.com/target/portauthority
+    + scheduling
+        + https://github.com/kubernetes-sigs/descheduler
+    + modules needed for production rollout
+        + mail service for cluster
+        + secret service via vault
+        + container registry
+        + oauth/openid proxy -> google-gsuite
     + unsorted
         + pxe,tftp,http metal provisioner
             + https://github.com/digitalrebar/provision
-        + static container analyse
-            + https://github.com/coreos/clair
         + conformance test
             + https://github.com/heptio/sonobuoy  
         + local develop with remote Cluster
@@ -42,21 +84,14 @@
             + https://github.com/virtual-kubelet/virtual-kubelet
         + system info
             + https://github.com/draios/sysdig
-            + 
-        
+        + apt_repository: repo="deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
 ## kernel modules to be loaded at start
 
 ```
 overlay br_netfilter nf_conntrack ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh
 ```
 ## production todo
-
-Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
-
-
-Please note: by default, Tiller is deployed with an insecure 'allow unauthenticated users' policy.
-To prevent this, run `helm init` with the --tiller-tls-verify flag.
-For more information on securing your installation see: https://docs.helm.sh/using_helm/#securing-your-helm-installation
 
 ## errors
 
@@ -91,10 +126,13 @@ lxc file push /usr/local/lib/docker-custom-archive k3s/usr/local/lib/ -r
 lxc file push /etc/apt/sources.list.d/local-docker-custom.list k3s/etc/apt/sources.list.d/
 lxc shell k3s
 
+# add symlink for missing kmsg to console
+echo 'L /dev/kmsg - - - - /dev/console' > /etc/tmpfiles.d/kmsg.conf
+
 # install prerequisites
 DEBIAN_FRONTEND=noninteractive
 apt-get -y update
-apt -y install thin-provisioning-tools bridge-utils ebtables criu zfsutils-linux zfs-zed-
+apt -y install thin-provisioning-tools bridge-utils ebtables criu squashfs-tools  snapd- --purge
 
 # configure eth1
 cat > /etc/netplan/60-phyeth1.yaml << EOF
@@ -108,13 +146,14 @@ netplan generate
 netplan apply
 
 # add hostname k3s to /etc/hosts, is needed by containerd to find internal interface 
-echo "10.140.222.162 k3s" >> /etc/hosts
+echo "10.140.222.227 k3s" >> /etc/hosts
 
 # install k3s
 curl -sfL https://get.k3s.io -o install-k3s.sh
 chmod +x install-k3s.sh
-export INSTALL_K3S_VERSION="v0.7.0"
-export INSTALL_K3S_EXEC="server --no-deploy=servicelb --no-deploy=traefik --node-ip 10.140.222.162 --tls-san 10.140.222.162 --bind-address 10.140.222.162"
+export INSTALL_K3S_VERSION="v0.9.1"
+export INSTALL_K3S_VERSION="v0.10.0-alpha1"
+export INSTALL_K3S_EXEC="server --no-deploy=servicelb --no-deploy=traefik --node-ip 10.140.222.227 --tls-san 10.140.222.227 --bind-address 10.140.222.227"
 ./install-k3s.sh 
 
 # optional install of docker (to have a second container technology)
@@ -141,14 +180,16 @@ cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 # install helm and tiller
 curl -sfL "https://git.io/get_helm.sh" -o get_helm.sh
 chmod +x get_helm.sh
-./get_helm.sh
-kubectl --namespace kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller-cluster-rule  --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-helm init --upgrade --service-account tiller
+./get_helm.sh  -v "v3.0.0-beta.4"
+# kubectl --namespace kube-system create serviceaccount tiller
+# kubectl create clusterrolebinding tiller-cluster-rule  --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+# helm init --upgrade --service-account tiller
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
 
 
 # helm install rancher local path provisioner
+# newest k3s has it buildin
 cat > ~/values-local-path-provisioner.yaml << EOF
 storageClass:
   defaultClass: true
@@ -162,7 +203,7 @@ EOF
 if test -e local-path-provisioner; then rm -r local-path-provisioner; fi
 git clone https://github.com/rancher/local-path-provisioner.git
 cd local-path-provisioner
-helm install --name local-path-storage --namespace local-path-storage ./deploy/chart/ -f ../values-local-path-provisioner.yaml
+helm install local-path-storage --namespace local-path-storage ./deploy/chart/ -f ../values-local-path-provisioner.yaml
 cd ..
 
 
@@ -194,7 +235,7 @@ kubernetes:
 
 EOF
 kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
-helm install --namespace=kube-system --values values-traefik.yaml --name=traefik stable/traefik 
+helm install --namespace=kube-system --values values-traefik.yaml traefik stable/traefik 
 
 
 cat > ~/traefik-dashboard.yaml << EOF
@@ -245,7 +286,7 @@ keel:
     - repository: image.repository
       tag: image.tag
 EOF
-helm install --namespace=metallb-system --name=metallb -f configinline-metallb-10.9.8.32.yaml stable/metallb 
+helm install -f configinline-metallb-10.9.8.32.yaml metallb stable/metallb
 # more up2date chart inside repo of metallb
 # https://github.com/danderson/metallb/tree/master/helm-chart
 
@@ -277,7 +318,7 @@ keel:
 EOF
 helm repo add keel-charts https://charts.keel.sh 
 helm repo update
-helm upgrade --install keel --namespace=kube-system keel-charts/keel --values values-keel.yaml
+helm upgrade --install keel keel-charts/keel --namespace=kube-system --values values-keel.yaml
 
 
 cat > ~/keel-dashboard.yaml << EOF
@@ -299,7 +340,6 @@ kind: Ingress
 metadata:
   name: keel-dashboard
   namespace: kube-system
-  kubernetes.io/ingress.class: traefik
 spec:
   rules:
   - host: keel.k3s.lan
@@ -346,7 +386,7 @@ EOF
 
 kubectl apply -f dashboard-adminuser.yaml 
 kubectl apply -f rbac-cluster-admin.yaml 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta5/aio/deploy/recommended.yaml
 
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
 kubectl proxy
