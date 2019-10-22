@@ -48,6 +48,7 @@ base-tools:
       - htop            {#  #}
       - iftop           {#  #}
       - iotop           {#  #}
+      - conntrack       {# manage the in-kernel connection tracking state table #}
       - dstat           {# versatile replacement for vmstat, iostat and ifstat #}
       - cpu-checker     {# check cpu features NX/XD and VMX/SVM #}
       - linux-tools-common {# perf-(test, kvm, bench, probe) #}
