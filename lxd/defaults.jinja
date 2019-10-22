@@ -51,6 +51,13 @@ profiles:
 - name: nested
   config:
     security.nesting: true
+- name: network_extra
+  config:
+    linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,xt_conntrack
+- name: syscalls_intercept
+  config:
+    security.syscalls.intercept.mknod: true
+    security.syscalls.intercept.setxattr: true
 - name: gui
   config:
     environment.DISPLAY: :0
