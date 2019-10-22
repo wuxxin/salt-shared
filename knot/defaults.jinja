@@ -1,4 +1,7 @@
 {% load_yaml as defaults %}
+server:
+  rundir: '/run/knot'
+  user: knot:knot
 common:
   ttl: 7200         {# 2 hours #}
   refresh: 14400    {# 4 hours #}

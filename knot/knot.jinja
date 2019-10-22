@@ -1,11 +1,12 @@
+{# mandatory context: settings, log_default #}
 {%- set template_default = {
     'id': 'default',
     'storage': '/var/lib/knot'
+    'file': '%s.zone'
     }
 %}
-{%- set dns = server %}
+{%- set dns = settings %}
 {%- if dns.log is not defined %}
-  {%- from "knot/defaults.jinja" import log_default %}
   {%- set dummy = dns.__setitem__('log', log_default) %}
 {%- endif %}
 {%- if not dns.template['default']|d(false) %}
@@ -16,7 +17,7 @@
     {%- set dummy = dns.__setitem__('template', template) %}
   {%- endif %}
 {%- endif %}
-{%- set dummy = dns.__delitem__('active') %}
+{%- set dummy = dns.__delitem__('enabled') %}
 {%- for z in range(dns.zone|length) %}
   {%- if dns.zone[z].source is defined %}
     {%- set dummy = dns.zone[z].__delitem__('source') %}

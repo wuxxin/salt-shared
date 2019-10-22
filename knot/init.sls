@@ -1,10 +1,11 @@
 include:
   - ubuntu
 
-{% from "knot/defaults.jinja" import settings as s with context %}
+{% from "knot/defaults.jinja" import settings with context %}
+{% from "knot/defaults.jinja" import log_default %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
-{# knot from ppa is newer even for cosmic #}
+{# knot from ppa is newer even for unreleased eoan (2019.10.06) #}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns",
   require_in = "pkg: knot-package") }}
 
@@ -12,12 +13,15 @@ knot-package:
   pkg.installed:
     - names:
       - knot
+      - knot-dnsutils
+      - knot-doc
+      - knot-host
     - require:
       - pkgrepo: knot-ppa
 
 knot-config-check:
   file.managed:
-    - name: /usr/sbin/knot-config-check
+    - name: /usr/local/sbin/knot-config-check
     - contents: |
         #!/bin/sh
         /usr/sbin/knotc -c $1 conf-check
@@ -33,24 +37,9 @@ knot-config-check:
         KNOTD_ARGS="-c /etc/knot/knot.conf"
         #
 
-{% if s.enabled|d(false) %}
+{% if s.enabled|d(true) %}
 
-/etc/knot/knot.conf:
-  file.managed:
-    - name: 
-    - source: salt://knot/knot.jinja
-    - template: jinja
-    - makedirs: true
-    - user: knot
-    - group: knot
-    - mode: "0640"
-    - context:
-        server: {{ config }}
-    - check_cmd: /usr/sbin/knot-config-check
-    - require:
-      - file: knot-config-check
-
-  {%- for zone in s.zone %}
+  {%- for zone in settings.zone %}
 knot-zone-{{ zone.domain }}:
       {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
       {%- if zone.source is not defined %}
@@ -70,12 +59,27 @@ knot-zone-{{ zone.domain }}:
     - group: knot
     - mode: "0640"
     - watch_in: knot.service
-    - context:
-        common: {{ s.common }}
-    - check_cmd: kzonecheck {{ zone.domain }} FIXME check param
+    - defaults:
+        common: {{ settings.common }}
+    - check_cmd: /usr/bin/kzonecheck -o {{ zone.domain }}
       {%- endif %}
   {%- endfor %}
   
+/etc/knot/knot.conf:
+  file.managed:
+    - source: salt://knot/knot.jinja
+    - template: jinja
+    - makedirs: true
+    - user: knot
+    - group: knot
+    - mode: "0640"
+    - defaults:
+        settings: {{ settings }}
+        log_default: {{ log_default }}
+    - check_cmd: /usr/local/sbin/knot-config-check
+    - require:
+      - file: knot-config-check
+
 knot:
   service.running:
     - enable: true
