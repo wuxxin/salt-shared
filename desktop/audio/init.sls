@@ -19,11 +19,6 @@ audio-packages:
       {# from ppa up to zesty #}
       - pulseaudio-dlna
 
-audio-player:
-  pkg.installed:
-    - pkgs:
-      - rhythmbox
-
 audio-editor:
   pkg.installed:
     - pkgs:
