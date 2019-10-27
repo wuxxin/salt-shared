@@ -45,6 +45,22 @@ lxd_prerequisites:
       - criu
     - require:
       - sls: kernel.server
+{#
+lxd_kernel_modules:
+  ip_tables
+  ip6_tables
+  netlink_diag
+  nf_nat
+  nf_conntrack
+  xt_conntrack
+  br_netfilter
+  ip_vs
+  ip_vs_rr
+  ip_vs_wrr
+  ip_vs_sh
+  overlay
+  shiftfs
+#}
 
 lxd:
   file.managed:

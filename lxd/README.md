@@ -4,7 +4,7 @@ see defaults.jinja for config Options
 
 ## security issue: user to group lxd
 
-+ adding a user to group lxd is equivalent (with more work) to a passwordless sudo
++ adding a user to group lxd is equivalent (with more work) to a passwordless sudo, aka. root
 + use sudo or be root while using lxc cmdline utility
 
 see: https://shenaniganslabs.io/2019/05/21/LXD-LPE.html

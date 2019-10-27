@@ -53,7 +53,7 @@ profiles:
     security.nesting: true
 - name: network_extra
   config:
-    linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,xt_conntrack
+    linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,xt_conntrack,br_netfilter,nf_conntrack,ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh
 - name: syscalls_intercept
   config:
     security.syscalls.intercept.mknod: true
