@@ -7,8 +7,8 @@ forensic-packages:
       - nikto       {# web server,CGI scanner to perform security checks #}
       - wapiti      {# audit the security of your web applications #}
       - nmap        {# utility for network exploration or security auditing #}
-      {# - cabextract      {# extract MS cab files #}
-      {# - pff-tools       {# export PAB,PST and OST files (MS Outlook) #}
+      - cabextract  {# extract MS cab files #}
+      - pff-tools   {# export PAB,PST and OST files (MS Outlook) #}
 
 {% from 'python/lib.sls' import pip3_install %}
 {{ pip3_install('msoffcrypto-tool') }} {# decrypting encrypted MS Office files #}

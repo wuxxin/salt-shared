@@ -1,6 +1,7 @@
 include:
   - .qrcode
   - .stress
+  - .forensic
 
 {% if grains['os_family'] == 'Debian' %}
 extended-tools:
