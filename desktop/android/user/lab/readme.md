@@ -1,3 +1,9 @@
+
+get-android-id:
+    https://github.com/nviennot/android-checkin
+googleplay-api:
+    https://github.com/kanzure/googleplay-api.git
+
 sbkcalc:
   cmd.run:
     - name: gcc sbkcalc.c -o sbkcalc
