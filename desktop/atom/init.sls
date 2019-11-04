@@ -9,6 +9,7 @@ atom:
   pkgrepo.managed:
     - name: deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main
     - key_url: https://packagecloud.io/AtomEditor/atom/gpgkey
+    - file: /etc/apt/sources.list.d/atom-packagecloud.io.list
     - require:
       - sls: desktop.code
       - sls: desktop.spellcheck
