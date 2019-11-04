@@ -194,5 +194,5 @@ network/conf/SearchDomain/keys/form:
 EOF
 
 echo "import /etc/zentyal/seed.yaml into redis"
-cat /etc/zentyal/seed.yaml | python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, sort_keys=True)' | redis-load 
+cat /etc/zentyal/seed.yaml | python -c 'import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, sort_keys=True)' | redis-load 
 
