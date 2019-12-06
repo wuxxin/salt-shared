@@ -5,22 +5,19 @@ python:
       - python3-pip
       - python3-setuptools
       - python3-venv
+      - python3-virtualenv
+      - virtualenv
 
-{# XXX pip and virtualenv is broken on xenial, update from pypi #}
-{# https://github.com/pypa/pip/issues/3282 #}
-
+{# python3-pip is at 9.x on cosmic (therefore bionic) and earlier, and 18.x* on disco and later #}
 pip3-upgrade:
   cmd.run:
     - name: pip3 install -U pip
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
-{# virtualenv is included in newer pip installs
-
-virtualenv3-upgrade:
+{# unconditionaly set python to python3 #}
+update_python_alternative:
   cmd.run:
-    - name: /usr/local/bin/pip3 -U virtualenv
-    - onlyif: test "$(which virtualenv)" = "/usr/bin/virtualenv"
+    - name: update-alternatives --install /usr/bin/python python /usr/bin/python3 50
+    - unless: test $(readlink -f /usr/bin/python) = $(readlink -f /usr/bin/python3)
     - require:
-      - cmd: pip3-upgrade
-
-#}
+      - pkg: python
