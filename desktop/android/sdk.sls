@@ -23,6 +23,7 @@ kotlin-compiler:
     - target: /var/local/lib/kotlin-compiler-{{ s.KOTLIN_VERSION }}.zip
   archive.extract:
     - name: /var/local/lib/kotlin-compiler-{{ s.KOTLIN_VERSION }}.zip
+    - target: /opt/
 
 android-prereq:
   pkg.installed:
