@@ -1,3 +1,3 @@
 include:
-  - desktop.mozilla
+  - desktop.mozilla.thunderbird
 

@@ -1,6 +1,6 @@
 include:
   - java.browser
-  - desktop.mozilla
+  - desktop.mozilla.firefox
 
 chromium-browser:
   pkg.installed:
