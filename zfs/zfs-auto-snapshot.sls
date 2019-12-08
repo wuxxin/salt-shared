@@ -1,14 +1,22 @@
 {% load_yaml as defaults %}
 args: --quiet --syslog --default-exclude --fast --skip-scrub
-{# --min-size 1 (only in github version) 
+{# --min-size 1 #}
+{# only in github version: 
 https://github.com/zfsonlinux/zfs-auto-snapshot/commit/27413ac7983ca9ed22af111f64268cbe376078d7
+#}
+{#
+15min   intervals for the last  2 hours
+ 1hour  intervals for the last 12 hours
+ 1day   intervals for the last 14 days
+ 1week  intervals for the last  4 weeks
+ 1month intervals for the last  4 months
 #}
 keep:
   frequent: 8
-  hourly: 24
+  hourly: 12
   daily: 14
-  weekly: 8
-  monthly: 12
+  weekly: 4
+  monthly: 4
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
