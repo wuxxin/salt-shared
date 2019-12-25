@@ -1,10 +1,21 @@
 {% if grains['virtual'] in ['kvm', 'qemu', 'xen'] %}
 
-spice-vdagent:
+{# allowed API:
+guest-fsfreeze-freeze,guest-fsfreeze-status,guest-fsfreeze-thaw,guest-fsfreeze-freeze-list,guest-fstrim,guest-get-host-name,guest-get-vcpus,guest-network-get-interfaces,guest-set-vcpus,guest-sync,guest-sync-delimited,guest-ping,guest-get-time,guest-set-time,guest-get-timezone,guest-shutdown,guest-suspend-disk,
+#}
+
+/etc/default/qemu-guest-agent:
+  file.managed:
+    - makedirs: true
+    - contents: |
+        [general]
+        blacklist=guest-exec,guest-exec-status,guest-file-close,guest-file-flush,guest-file-open,guest-file-read,guest-file-seek,guest-file-write,guest-get-fsinfo,guest-get-memory-block-info,guest-get-memory-blocks,guest-get-osinfo,guest-get-users,guest-info,guest-set-memory-blocks,guest-set-user-password,guest-suspend-hybrid,guest-suspend-ram
+
+qemu-guest-agent:
   pkg:
     - installed
 
-qemu-guest-agent:
+spice-vdagent:
   pkg:
     - installed
 
