@@ -1,13 +1,9 @@
 {% load_yaml as defaults %}
 
-bindaddress: "127.0.0.1"
-bindport: 8123
-
-cacheIsShared: "true"
-disableIndexing: "false"
-disableServersList: "false"
-diskCacheRoot: /var/cache/polipo/
-maxDiskCacheEntrySize: 1610612736 {# = 1.5GB #}
+listen_ip: "127.0.0.1"
+listen_port: 8123
+cache_dir: /var/cache/squid
+cache_size_mb: 10240 {# = 10GB #}
 
 {% endload %}
 

@@ -1,7 +1,7 @@
 include:
   - .client_no_proxy
 
-polipo:
+squid:
   service:
     - dead
   pkg:
