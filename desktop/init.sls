@@ -16,7 +16,6 @@ include:
   - .spellcheck
   - .terminal
   - .video
-  - .voice
   - .writing
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
@@ -38,6 +37,8 @@ include:
 {% endif %}
 
 {#
+tts: ppa:msclrhd-gmail/cainteoir
+
 sysdig:
   pkg:
     - installed
