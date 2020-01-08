@@ -18,10 +18,10 @@ unbound:
     - require:
       - pkg: unbound
     - watch:
-      - file: unbound
-      - file: /etc/default/unbound
+      - file: /etc/unbound/unbound.conf.d/unbound.conf
+
+/etc/unbound/unbound.conf.d/unbound.conf:
   file.managed:
-    - name: /etc/unbound/unbound.conf.d/unbound.conf
     - source: salt://unbound/unbound.conf
     - template: jinja
     - context:
