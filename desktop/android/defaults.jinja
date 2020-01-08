@@ -1,10 +1,12 @@
-{% load_yaml as defaults %}
-GRADLE_VERSION: "5.2.1"
-KOTLIN_VERSION: "1.3.21"
-ANDROID_SDK_VERSION: "4333796"
-ANDROID_SDK_HASH: ""
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
-ANDROID_HOME: "/opt/android"
+{% load_yaml as defaults %}
+ANDROID_API_VER: 28.0.3
+ANDROID_API: 28
+ANDROID_TARGET: x86_64
+ANDROID_HOME: "{{ user_home }}/.local/lib/android"
+ANDROID_SDK_VERSION: "4333796"
+ANDROID_SDK_HASH: "sha256=92ffee5a1d98d856634e8b71132e8a95d96c83a63fde1099be3d86df3106def9"
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

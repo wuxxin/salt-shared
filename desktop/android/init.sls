@@ -1,2 +1,2 @@
 include:
-  - .tools
+  - desktop.android.tools
