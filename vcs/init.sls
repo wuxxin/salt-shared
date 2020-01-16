@@ -4,6 +4,7 @@ include:
   - vcs.mercurial
   - vcs.subversion
   - vcs.bzr
+  - vcs.git-bridge
 
 vcs_nop_req:
   test:
@@ -13,3 +14,4 @@ vcs_nop_req:
       - sls: vcs.mercurial
       - sls: vcs.subversion
       - sls: vcs.bzr
+      - sls: vcs.git-bridge
