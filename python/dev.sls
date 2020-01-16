@@ -11,6 +11,9 @@ python-dev:
     - require:
       - sls: python
 
+{# Install and Run Python Applications in Isolated Environments #}
+{{ pip3_install('pipx') }}
+
 python-tools:
   pkg.installed:
     - pkgs:
@@ -26,12 +29,14 @@ python-tools:
       - pylama          {# code audit and reformating for Python #}
 {%- endif %}
 
+{# autopep8 - code audit and reformating to PEP 8 style #}
 {%- if grains['osmajorrelease']|int < 18 or grains['osrelease'] == '18.04' %}
       - python-autopep8
 {%- else %}
-      - python3-autopep8  {# code audit and reformating to PEP 8 style #}
+      - python3-autopep8
 {%- endif %}
 
+{# black - opinionated python source code formating #}
 black:
   pkg.installed:
     - pkgs:
@@ -39,8 +44,13 @@ black:
       - python3-attr {# XXX python package is named attrs not attr #}
       - python3-click
       - python3-toml
-{# opinionated python source code formating #}
 {{ pip3_install('black', require='pkg: black') }}
 
-{# - repren     Multi-pattern string replacement and file renaming #}
-{{ pip3_install('cgroup-utils>=0.6', require= ['pkg: python-dev']) }}
+{# 
+python shell stuff
+pip install sh        # very elegant python shell
+pip install click     # elegant cmdline parsing
+pip install sarge     # python shell execute with "; &  | && || <>"
+https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
+pip install requests  # Python HTTP Requests for Humans
+#}

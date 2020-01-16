@@ -9,13 +9,6 @@ include:
   - .sentry     {# sentrycat.py error reporting to sentry #}
   - .passgen    {# human friendly passwort generator #}
 
-{# python shell stuff
-  pip install sh        # very elegant python shell
-  pip install click     # elegant cmdline parsing
-  pip install sarge     # python shell execute with "; &  | && || <>"
-  https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
-  pip install requests  # Python HTTP Requests for Humans
-#}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
@@ -64,5 +57,3 @@ base-tools:
       - lynx            {# classic non-graphical (text-mode) web browser #}
       - command-not-found {#  #}
 {% endif %}
-
-# utrac: http://www.ubuntuupdates.org/package/getdeb_apps/trusty/apps/getdeb/utrac
