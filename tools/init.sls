@@ -17,11 +17,10 @@ base-tools:
       {# system tools #}
       - gosu
       - git
-      - rsync
-      - curl
+      - faketime        {# Report faked system time to programs (cli) #}
       {# compression #}
-      - bzip2
-      - xz-utils
+      - bzip2           {# bzip2 is a patent free, high-quality data compressor #}
+      - xz-utils        {# command line tools for working with XZ compression #}
       {# conversion/transformation/querying #}
       - sqlite3         {# A command line interface for SQLite version 3 #}
       - jq              {# Command-line JSON processor #}
@@ -30,6 +29,8 @@ base-tools:
       - html2text       {# converter from HTML to plain text #}
       - ssss            {# Shamir's secret sharing scheme implementation #}
       {# network #}
+      - curl            {# command line tool for transferring data with URL syntax #}
+      - rsync           {# fast, versatile, remote (and local) file-copying tool #}
       - httpie          {# CLI, cURL-like tool for humans #}
       - pv              {# monitor the progress of data through a pipe #}
       - socat           {# multipurpose relay for bidirectional data transfer #}
