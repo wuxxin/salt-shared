@@ -1,10 +1,3 @@
-{% from "ubuntu/init.sls" import apt_add_repository %}
-  
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-{# ffmpeg needs ppa for trusty #}
-{{ apt_add_repository("ffmpeg_ppa", "kirillshkrogalev/ffmpeg-next", require_in="pkg: video-packages") }}
-{% endif %}
-  
 video-packages:
   pkg.installed:
     - pkgs:
@@ -25,15 +18,6 @@ video-packages:
       - v4l2loopback-dkms
       - gst123
 {# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-pipewire gstreamer1.0-opencv baresip-gstreamer #}
-
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-{{ apt_add_repository("x265-ppa", "strukturag/libde265", require_in= "pkg: x256-packages") }}
-x256-packages:
-  pkg.installed:
-    - pkgs:
-      - gstreamer1.0-libde265
-      - vlc-plugin-libde265
-{% endif %}
 
 v4l2-tools:
   pkg.installed:

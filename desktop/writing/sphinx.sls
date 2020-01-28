@@ -1,12 +1,13 @@
 include:
   - vcs
   - python
-  - desktop.spellcheck
   - latex
+  - desktop.spellcheck
 
 sphinx:
   pkg.installed:
     - pkgs:
+      - zip
       - python3-sphinx
       - python3-sphinxcontrib.actdiag
       - python3-sphinxcontrib.blockdiag
@@ -14,4 +15,3 @@ sphinx:
       - python3-sphinxcontrib.seqdiag
       - python3-sphinxcontrib.spelling
       - python3-pil
-      - zip

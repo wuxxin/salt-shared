@@ -19,10 +19,9 @@ include:
   - .writing
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
+  - vcs
   - python.dev
   - python.scientific
-  - vcs
-  - vcs.git-bridge
   - tools.extra
   - .homeshick
   - .atom

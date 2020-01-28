@@ -3,8 +3,3 @@ include:
   - .libreoffice
   - .sphinx
   - .publishing
-  
-{#
-  - .zotero
-  - .doconce
-#}
