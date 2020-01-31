@@ -1,4 +1,11 @@
 
+pdfutils:
+  pkg.installed:
+    - pkgs:
+      - pdftk
+      - qpdf
+      - ghostscript
+
 latex:
   pkg.installed:
     - pkgs:
@@ -12,5 +19,3 @@ latex:
       - lmodern
       - netpbm
       - giftrans
-      - pdftk
-      - ghostscript
