@@ -1,4 +1,5 @@
 {# The FLExible Network Tester - make experimental evaluations of networks more reliable and easier #}
+{% from 'python/lib.sls' import pip3_install %}
 
 include:
   - python
@@ -35,22 +36,13 @@ flent-req:
       - cmd: http-getter
 
 {% if grains['os'] == 'Ubuntu' %}
-
-  {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("flent_ppa", "tohojo/flent", require_in= "pkg: flent") }}
-
-flent: 
-  pkg.installed:
-    - pkgs:
-      - fping
-      - flent
-    - require:
-      - pkg: flent-req
-
-{% else %}
-
-  {% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('git+https://github.com/tohojo/flent.git#egg=flent', require='pkg: flent-req') }}
+  {%- if grains['osmajorrelease']|int >= 19 %}
+    {# flent is broken with newer pyqt5, 
+        git master @2020-01-30 has pyside2 support which is working #}
+{{ pip3_install('shiboken2', require='pkg: flent-req') }}
+{{ pip3_install('pyside2', require='pip: shiboken2') }}
+{{ pip3_install('qtpy', require='pip: pyside2') }}
+{{ pip3_install('git+https://github.com/tohojo/flent.git#egg=flent', require=['pkg: flent-req', 'pip: qtpy']) }}
 
 flent: 
   pkg.installed:
@@ -65,4 +57,18 @@ flent:
     - onchanges:
       - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
 
-{% endif %}
+  {%- else %}
+
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("flent_ppa", "tohojo/flent", require_in= "pkg: flent") }}
+
+flent: 
+  pkg.installed:
+    - pkgs:
+      - fping
+      - flent
+    - require:
+      - pkg: flent-req
+
+  {%- endif %}
+{%- endif %}
