@@ -4,4 +4,5 @@ include:
   - .keyring
   - .metadata
   - .vpn
+  - .solokey
 
