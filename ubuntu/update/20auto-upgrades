@@ -1,0 +1,5 @@
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "1";
+APT::Periodic::CleanInterval "1";
+APT::Periodic::Verbose "2";
