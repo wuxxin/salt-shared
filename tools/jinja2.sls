@@ -1,4 +1,6 @@
 {% from 'python/lib.sls' import pip3_install %}
+include:
+  - python
 
 {# conversion/processor #}
 {# CLI interface to Jinja2, reads yaml,xml,toml #}
