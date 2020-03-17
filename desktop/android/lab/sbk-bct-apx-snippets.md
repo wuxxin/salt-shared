@@ -1,3 +1,17 @@
+# snippets
+
+## TWRP
+
++ Mainpage: https://twrp.me/
+    + Eu DownloadMirror: https://eu.dl.twrp.me/
+
++ sourcecode: https://github.com/omnirom/android_bootable_recovery/
++ twrp jenkins builder: https://jenkins.twrp.me/view/prod/
++ download jenkins images at:
+    + https://build.twrp.me/$imagename
+    + eg. imagename=twrp-3.3.0-0-a3y17lte.img see build output of jenkins
+
+## sbk
 
 sbkcalc:
   cmd.run:
@@ -20,6 +34,8 @@ getsbkshort:
     - name: ./sbcalc `sudo adb shell su -c dmesg | grep androidboot.serialno | sed -re "s/.+androidboot.serialno=([0-9a-fA-F]+).+/\1/g"` | sed -re "s/0x([0-9A-F]{8}) 0x([0-9A-F]{8}) 0x([0-9A-F]{8}) 0x([0-9A-F]{8})/\1\2\3\4/g"
   require:
     - pkg: android-tools
+
+## apx
 
 mmcblk0_start:
   cmd.run:
@@ -50,3 +66,5 @@ flash_recovery:
 reboot_apx:
   cmd.run:
     - name: sudo ./nvflash -r --go
+
+    
