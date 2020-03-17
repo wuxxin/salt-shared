@@ -16,8 +16,8 @@ see defaults.jinja for options
     + set pillar: "docker:origin"="custom"
     + execute `salt-call state.sls docker`
 
-+ or using the shell:
-    + execute: `build-custom-docker.sh $0 <target-archive-dir> [<version-postfix> <patch-file>*]`
++ or using the shell, execute:
+    + `build-custom-docker.sh <target-dir> [--source distro] [--dest distro] [--version-postfix <postfix>] [<patch-file>*]`
     + add to a custom apt repository, install from there
 
 ### patches applied
@@ -60,14 +60,3 @@ c/rdwoo822984297/m/d: mkdir /etc/rdwoo822984297/m/d: input/output error
     + https://github.com/docker/engine/pull/84
         + [18.09 backport] overlay2: use index=off if possible (fix EBUSY on mount) #84
 
-### runc and containerd info
-```
-pull-lp-source: Downloading runc version 1.0.0~rc7+git20190403.029124da-0ubuntu1
-pull-lp-source: Downloading runc_1.0.0~rc7+git20190403.029124da.orig.tar.gz 
-dpkg-source: Information: test--fix_TestGetAdditionalGroups.patch wird angewandt
-dpkg-source: Information: test--skip-Hugetlb.patch wird angewandt
-dpkg-source: Information: test--skip_TestFactoryNewTmpfs.patch wird angewandt
-pull-lp-source: Downloading containerd version 1.2.6-0ubuntu1
-pull-lp-source: Downloading containerd_1.2.6.orig.tar.gz from archive.ubuntu.com (4.648 MiB)
-pull-lp-source: Downloading containerd_1.2.6-0ubuntu1.debian.tar.xz from archive.ubuntu.com (0.010 MiB)
-```
