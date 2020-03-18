@@ -15,6 +15,7 @@ qemu:
       - qemu-user-binfmt
       - qemu-utils
       - ovmf
+      - libosinfo-bin
     - require:
       - sls: kernel.cgroup
 
