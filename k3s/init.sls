@@ -98,9 +98,15 @@ rio:
     - source_hash: https://github.com/rancher/rio/releases/download/{{ settings.rio_version }}/sha256sum-amd64.txt
     - mode: "755"
 
+
+local_kube_config_dir:
+  file.directory:
+    - name: {{ settings.home }}/.kube
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+
 local_kube_config:
   file.copy:
-    - makedirs: true
     - source: /etc/rancher/k3s/k3s.yaml
     - name: {{ settings.home }}/.kube/config
     - user: {{ settings.user }}
@@ -108,6 +114,7 @@ local_kube_config:
     - filemode: "0600"
     - force: true
     - require:
+      - file: local_kube_config_dir
       - cmd: k3s
       
 helm-x:
