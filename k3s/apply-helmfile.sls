@@ -1,5 +1,5 @@
 {% from "k3s/defaults.jinja" import settings %}
-{% set helm_binary='--helm-binary '+ settings.home+ '/bin/helm-x' %}
+{% set helm_binary='--helm-binary '+ settings.home+ '.local/bin/helm-x' %}
 
 helmfile_sync:
   cmd.run:
