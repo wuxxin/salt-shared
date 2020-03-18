@@ -104,11 +104,12 @@ local_kube_config:
     - source: /etc/rancher/k3s/k3s.yaml
     - name: {{ settings.home }}/.kube/config
     - require:
-      - sls: k3s
+      - cmd: k3s
       
 helm-x:
   cmd.run:
     - runas: {{ settings.user }}
+    - shell: /usr/bin/bash
     - name: helm plugin install https://github.com/mumoshu/helm-x
     - unless: helm plugin list | grep -q "^x "
     - requires:
