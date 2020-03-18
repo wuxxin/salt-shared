@@ -103,12 +103,17 @@ local_kube_config:
     - makedirs: true
     - source: /etc/rancher/k3s/k3s.yaml
     - name: {{ settings.home }}/.kube/config
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - filemode: "0600"
+    - force: true
     - require:
       - cmd: k3s
       
 helm-x:
   cmd.run:
     - runas: {{ settings.user }}
+    - cwd: {{ settings.home }}
     - shell: /usr/bin/bash
     - name: helm plugin install https://github.com/mumoshu/helm-x
     - unless: helm plugin list | grep -q "^x "
