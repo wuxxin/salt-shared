@@ -40,6 +40,7 @@ k3s-kernel-modules:
 
 
 k3s-install:
+  file.managed:
     - name: /usr/local/sbin/k3s-install.sh
     - source: https://raw.githubusercontent.com/rancher/k3s/master/install.sh
     - skip_verify: true
