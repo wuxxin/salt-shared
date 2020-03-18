@@ -1,7 +1,5 @@
 {% set user= 'app' %}
 {% set home= '/'+ user %}
-{% set gwip= salt['network.default_route']('inet')[0]['gateway'] %}
-{% set gwdev= salt['network.default_route']('inet')[0]['interface'] %}
 
 {% load_yaml as defaults %}
 k3s_version: 'v1.17.3+k3s1'
@@ -10,7 +8,7 @@ helm_version: 'v3.1.1'
 helmfile_version: 'v0.102.0'
 user: {{ user }}
 home: {{ home }}
-route_ip: {{ salt['network.ip_addrs'](gwdev)[0] }}
+route_ip: {{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\1/g"', shell=true) }}
 state_dir: {{ home }}/{{ user }}-k3s-helmfile
 {% endload %}
 
