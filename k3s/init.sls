@@ -57,13 +57,13 @@ k3s:
       # criu
   file.managed:
     - name: /usr/local/bin/k3s
-    - source: https://github.com/rancher/k3s/releases/download/{{ settings.k3s_version }}/k3s
-    - source_hash: https://github.com/rancher/k3s/releases/download/{{ settings.k3s_version }}/sha256sum-amd64.txt
+    - source: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/k3s
+    - source_hash: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/sha256sum-amd64.txt
     - mode: "755"
   cmd.run:
     - name: /usr/local/sbin/k3s-install.sh
     - env:
-      - INSTALL_K3S_VERSION: {{ settings.k3s_version }}
+      - INSTALL_K3S_VERSION: v{{ settings.k3s_version }}
       - INSTALL_K3S_EXEC: server --no-deploy=servicelb --no-deploy=traefik --node-ip {{ settings.route_ip }} --tls-san {{ settings.route_ip }} --bind-address {{ settings.route_ip }}
     - unless: test -e /etc/rancher/k3s/k3s.yaml
     - require:
@@ -76,8 +76,8 @@ k3s:
 helm:
   file.managed:
     - name: /usr/local/lib/helm-linux-amd64.tar.gz
-    - source: https://get.helm.sh/helm-{{ settings.helm_version }}-linux-amd64.tar.gz
-    - source_hash: https://get.helm.sh/helm-{{ settings.helm_version }}-linux-amd64.tar.gz.sha256
+    - source: https://get.helm.sh/helm-v{{ settings.helm_version }}-linux-amd64.tar.gz
+    - source_hash: https://get.helm.sh/helm-v{{ settings.helm_version }}-linux-amd64.tar.gz.sha256
     - mode: "755"
   cmd.run:
     - name: tar xzf /usr/local/lib/helm-linux-amd64.tar.gz --overwrite -C /usr/local/bin --strip-components=1 linux-amd64/helm 
@@ -87,23 +87,24 @@ helm:
 helmfile:
   file.managed:
     - name: /usr/local/bin/helmfile
-    - source: https://github.com/roboll/helmfile/releases/download/{{ settings.helmfile_version }}/helmfile_linux_amd64
+    - source: https://github.com/roboll/helmfile/releases/download/v{{ settings.helmfile_version }}/helmfile_linux_amd64
     - skip_verify: true
     - mode: "755"
     
 rio:
   file.managed:
     - name: /usr/local/bin/rio
-    - source: https://github.com/rancher/rio/releases/download/{{ settings.rio_version }}/rio-linux-amd64
-    - source_hash: https://github.com/rancher/rio/releases/download/{{ settings.rio_version }}/sha256sum-amd64.txt
+    - source: https://github.com/rancher/rio/releases/download/v{{ settings.rio_version }}/rio-linux-amd64
+    - source_hash: https://github.com/rancher/rio/releases/download/v{{ settings.rio_version }}/sha256sum-amd64.txt
     - mode: "755"
 
-
-local_kube_config_dir:
+{% for d in ['.kube', '.local/bin', '.local/share'] %}
+{{ settings.home }}/{{ d }}:
   file.directory:
-    - name: {{ settings.home }}/.kube
+    - makedirs: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+{% endfor %}
 
 local_kube_config:
   file.copy:
@@ -114,15 +115,19 @@ local_kube_config:
     - filemode: "0600"
     - force: true
     - require:
-      - file: local_kube_config_dir
+      - file: {{ settings.home }}/.kube
       - cmd: k3s
-      
+
 helm-x:
-  cmd.run:
-    - runas: {{ settings.user }}
-    - cwd: {{ settings.home }}
-    - shell: /usr/bin/bash
-    - name: helm plugin install https://github.com/mumoshu/helm-x
-    - unless: helm plugin list | grep -q "^x "
+  file.managed:
+    - name: {{ settings.home }}/.local/share/helm-x.tar.gz
+    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_linux_amd64.tar.gz
+    - skip_verify: true
     - requires:
+      - file: {{ settings.home }}/.local/share
+  cmd.run:
+    - name: tar xzf {{ settings.home }}/.local/share/helm-x.tar.gz --overwrite -C {{ settings.home }}/.local/bin helm-x
+    - onchanges:
+      - file: helm-x
+    - require:
       - file: local_kube_config

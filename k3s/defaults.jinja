@@ -2,10 +2,11 @@
 {% set home= '/home/'+ user %}
 
 {% load_yaml as defaults %}
-k3s_version: 'v1.17.3+k3s1'
-rio_version: 'v0.7.0' 
-helm_version: 'v3.1.1'
-helmfile_version: 'v0.102.0'
+k3s_version: '1.17.3+k3s1'
+rio_version: '0.7.0'
+helm_version: '3.1.1'
+helmfile_version: '0.102.0'
+helmx_version: '0.7.2'
 user: {{ user }}
 home: {{ home }}
 route_ip: {{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) }}
