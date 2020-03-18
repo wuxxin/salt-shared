@@ -1,9 +1,9 @@
 {% from "k3s/defaults.jinja" import settings %}
-{
+
 include:
   - kernel.server
 
-{%- if grains['virtual'] == 'LXC' %}
+{% if grains['virtual'] == 'LXC' %}
 /etc/tmpfiles.d/kmsg.conf:
   file.managed:
     - contents: |
@@ -15,9 +15,9 @@ include:
       - file: /etc/tmpfiles.d/kmsg.conf
     - require_in:
       - cmd: k3s
-{%- endif %}
+{% endif %}
 
-{%- if grains['virtual'] != 'LXC' %}
+{% if grains['virtual'] != 'LXC' %}
 k3s-kernel-modules:
   kmod.present:
     - persist: true
@@ -36,7 +36,7 @@ k3s-kernel-modules:
       - ip_vs_sh
     - require_in:
       - cmd: k3s
-{%- endif %}
+{% endif %}
 
 
 k3s-install:
