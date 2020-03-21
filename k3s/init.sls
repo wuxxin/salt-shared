@@ -177,14 +177,15 @@ helm-diff:
   archive.extracted:
     - source: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
     - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
+    - options: '--strip-components=1'
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - requires:
       - file: helm-diff
 helm-diff-symlink:
   file.symlink:
-    - name: {{ settings.home }}/.local/share/helm/plugins/helm-x
-    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x
+    - name: {{ settings.home }}/.local/share/helm/plugins/helm-diff
+    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
     - makedirs: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
