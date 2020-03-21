@@ -68,8 +68,6 @@ k3s:
     - onchanges:
       - file: k3s
     - require:
-      - sls: app.network
-      - sls: app.hostname
       - pkg: k3s
       - file: k3s
       - file: k3s-install
@@ -119,16 +117,69 @@ local_kube_config:
       - file: {{ settings.home }}/.kube
       - cmd: k3s
 
-helm-x:
+{# helm plugin: helm x #}
+helm-x-bin-dir:
+  file.directory:
+    - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x/bin
+    - makedirs: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+helm-x.tar.gz:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-x.tar.gz
-    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_linux_amd64.tar.gz
+    - source: https://github.com/mumoshu/helm-x/archive/v{{ settings.helmx_version }}.tar.gz
     - skip_verify: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - requires:
+      - file: {{ settings.home }}/.local/share
+  archive.extracted:
+    - source: {{ settings.home }}/.local/share/helm-x.tar.gz
+    - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - require:
+      - file: helm-x.tar.gz
+helm-x-symlink:
+  file.symlink:
+    - name: {{ settings.home }}/.local/share/helm/plugins/helm-x
+    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x
+    - makedirs: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - requires:
+      - file: {{ settings.home }}/.local/share
+helm-x-binary:
+  file.managed:
+    - name: {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz
+    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}
+    - source_hash: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_checksums.txt
     - requires:
       - file: {{ settings.home }}/.local/share
   cmd.run:
-    - name: tar xzf {{ settings.home }}/.local/share/helm-x.tar.gz --overwrite -C {{ settings.home }}/.local/bin helm-x
+    - name: tar xzf {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz --overwrite -C {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x/bin helm-x
+    - runas: {{ settings.user }}
     - onchanges:
-      - file: helm-x
-    - require:
-      - file: local_kube_config
+      - file: helm-x-binary
+
+{# helm plugin: helm diff #}
+helm-diff-bin-dir:
+  file.directory:
+    - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff/bin
+    - makedirs: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+helm-diff:
+  file.managed:
+    - name: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
+    - source: https://github.com/databus23/helm-diff/releases/download/v{{ settings.helmdiff_version }}/helm-diff-linux.tgz
+  archive.extracted:
+    - name: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
+    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
+helm-diff-symlink:
+  file.symlink:
+    - name: {{ settings.home }}/.local/share/helm/plugins/helm-x
+    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x
+    - makedirs: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
