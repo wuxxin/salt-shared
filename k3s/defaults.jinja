@@ -7,6 +7,7 @@ rio_version: '0.7.1-rc1'
 helm_version: '3.1.2'
 helmfile_version: '0.104.0'
 helmx_version: '0.7.2'
+helmdiff_version: '3.1.1'
 user: {{ user }}
 home: {{ home }}
 route_ip: {{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) }}
