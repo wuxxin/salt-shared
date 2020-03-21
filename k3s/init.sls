@@ -65,7 +65,8 @@ k3s:
     - env:
       - INSTALL_K3S_VERSION: v{{ settings.k3s_version }}
       - INSTALL_K3S_EXEC: server --no-deploy=traefik --node-ip {{ settings.route_ip }} {% if settings.external_ip|d(false) %}{{ '--node-external-ip '+ settings.external_ip }}{% endif %}
-    - unless: test -e /etc/rancher/k3s/k3s.yaml
+    - onchanges:
+      - file: k3s
     - require:
       - sls: app.network
       - sls: app.hostname
