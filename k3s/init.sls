@@ -175,8 +175,12 @@ helm-diff:
     - source: https://github.com/databus23/helm-diff/releases/download/v{{ settings.helmdiff_version }}/helm-diff-linux.tgz
     - skip_verify: true
   archive.extracted:
-    - name: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
-    - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
+    - source: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
+    - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+  - require:
+    - file: helm-diff
 helm-diff-symlink:
   file.symlink:
     - name: {{ settings.home }}/.local/share/helm/plugins/helm-x
