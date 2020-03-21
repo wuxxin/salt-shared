@@ -152,7 +152,7 @@ helm-x-symlink:
 helm-x-binary:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz
-    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}
+    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_linux_amd64.tar.gz
     - source_hash: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_checksums.txt
     - requires:
       - file: {{ settings.home }}/.local/share
