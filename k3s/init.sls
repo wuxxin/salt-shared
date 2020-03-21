@@ -173,6 +173,7 @@ helm-diff:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
     - source: https://github.com/databus23/helm-diff/releases/download/v{{ settings.helmdiff_version }}/helm-diff-linux.tgz
+    - skip_verify: true
   archive.extracted:
     - name: {{ settings.home }}/.local/share/helm-diff-linux.tar.gz
     - target: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
