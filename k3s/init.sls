@@ -179,8 +179,8 @@ helm-diff:
     - name: {{ settings.home }}/.cache/helm/plugins/https-github.com-databus23-helm-diff
     - user: {{ settings.user }}
     - group: {{ settings.user }}
-  - require:
-    - file: helm-diff
+    - requires:
+      - file: helm-diff
 helm-diff-symlink:
   file.symlink:
     - name: {{ settings.home }}/.local/share/helm/plugins/helm-x
