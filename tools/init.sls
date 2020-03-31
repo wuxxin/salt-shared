@@ -27,6 +27,7 @@ base-tools:
       - xmlstarlet      {# transform, query, validate, and edit XML #}
       - html-xml-utils  {# manipulating and converting HTML and XML #}
       - html2text       {# converter from HTML to plain text #}
+      - tidy            {# convert html to xml #}
       - ssss            {# Shamir's secret sharing scheme implementation #}
       {# network #}
       - curl            {# command line tool for transferring data with URL syntax #}
