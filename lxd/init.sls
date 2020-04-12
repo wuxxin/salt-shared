@@ -5,13 +5,21 @@
    from 18.10 upwards its only available as snap
 #}
 
-{# modify kernel for production setup http://lxd.readthedocs.io/en/latest/production-setup/ #}
-
+{# modify kernel for production http://lxd.readthedocs.io/en/latest/production-setup/ #}
 include:
   - kernel.server
 {% if grains['osrelease_info'][0]|int < 18 %}
   - ubuntu.backports
 {% endif %}
+
+lxd_prerequisites:
+  pkg.installed:
+    - pkgs:
+      - thin-provisioning-tools
+      - bridge-utils
+      - ebtables
+    - require:
+      - sls: kernel.server
 
 {#
 Domain Type  Item    Value     Default Description
@@ -34,33 +42,31 @@ kernel.dmesg_restrict:
 kernel.keys.maxkeys:
   sysctl.present:
     - value: 2000 {# 200 #}
+
+lxd_kernel_modules:
+  kmod.present:
+    - mods:
+      - ip_tables
+      - ip6_tables
+      - netlink_diag
+      - nf_nat
+      - nf_conntrack
+      - xt_conntrack
+      - br_netfilter
+      - ip_vs
+      - ip_vs_rr
+      - ip_vs_wrr
+      - ip_vs_sh
+      - overlay
+      - shiftfs
+    - require:
+      - file: /etc/security/limits.d/memlock.conf
+      - sysctl: kernel.dmesg_restrict
+      - sysctl: kernel.keys.maxkeys
+    - require_in:
+      - pkg: lxd
 {%- endif %}
 
-lxd_prerequisites:
-  pkg.installed:
-    - pkgs:
-      - thin-provisioning-tools
-      - bridge-utils
-      - ebtables
-      - criu
-    - require:
-      - sls: kernel.server
-{#
-lxd_kernel_modules:
-  ip_tables
-  ip6_tables
-  netlink_diag
-  nf_nat
-  nf_conntrack
-  xt_conntrack
-  br_netfilter
-  ip_vs
-  ip_vs_rr
-  ip_vs_wrr
-  ip_vs_sh
-  overlay
-  shiftfs
-#}
 
 lxd:
   file.managed:
