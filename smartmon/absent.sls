@@ -1,16 +1,7 @@
 smartmontools:
-  pkg:
-    - removed
   service:
     - dead
+  pkg:
+    - removed
     - require:
-      - pkg: smartmontools
-    - watch:
-      - file: /etc/default/smartmontools
-
-/etc/default/smartmontools:
-  file.comment:
-    - regex: start_smartd=yes
-    - backup: false
-    - require:
-      - pkg: smartmontools
+      - service: smartmontools
