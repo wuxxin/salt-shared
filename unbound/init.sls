@@ -30,26 +30,4 @@ unbound:
     - require:
       - pkg: unbound
 
-default_unbound_resolvconf:
-  file.replace:
-    - name: /etc/default/unbound
-    - append_if_not_found: true
-    - pattern: |
-        ^#?[ \t]*RESOLVCONF=.*
-    - repl: |
-        RESOLVCONF={{ "true" if s.redirect_host_dns == true else "false" }}
-    - require:
-      - pkg: unbound
-
-default_unbound_RESOLVCONF_FORWARDERS:
-  file.replace:
-    - name: /etc/default/unbound
-    - append_if_not_found: true
-    - pattern: |
-        ^#?[ \t]*RESOLVCONF_FORWARDERS=.*
-    - repl: |
-        RESOLVCONF_FORWARDERS=false
-    - require:
-      - pkg: unbound
-
 {% endif %}
