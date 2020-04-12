@@ -4,12 +4,13 @@
 {% set pool= "default" %}
 
 {% load_yaml as defaults %}
-
 # Daemon settings
 config:
   core.https_address: 127.0.0.1
   images.auto_update_interval: 15
+{% endload %}
 
+{% load_yaml as examples %}
 # Storage pools
 storage_pools:
 - name: {{ pool }}
@@ -92,21 +93,25 @@ images:
   source:
     name: bionic/amd64
     remote: ubuntu
-- name: bionic-daily
+- name: focal
   public: true
   auto_update: true
   source:
-    name: bionic/amd64
-    remote: ubuntu-daily
-- name: eoan-daily
+    name: focal/amd64
+    remote: ubuntu
+- name: focal-daily
   public: true
   auto_update: true
   source:
-    name: eoan/amd64
+    name: focal/amd64
     remote: ubuntu-daily
-
 {% endload %}
 
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('lxd', {})) %}
+
+{% for section in ['storage_pools', 'networks', 'profiles', 'images'] %}
+  {% set settings[section] = salt['grains.filter_by']({'none': examples[section]},
+  grain='none', default= 'none', merge= salt['pillar.get']('lxd:'+section, []))
+{% endfor %}
