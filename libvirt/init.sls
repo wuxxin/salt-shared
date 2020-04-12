@@ -3,7 +3,6 @@ include:
   - kernel.cgroup
   - kernel.swappiness
 
-
 qemu:
   pkg.installed:
     - pkgs:
