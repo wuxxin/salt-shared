@@ -47,7 +47,7 @@ ATS_{{ item }}:
       - service: trafficserver
 {% endfor %}
 
-{% set ip_list=[listen_ip,] if listen_ip is string else listen_ip %}
+{% set ip_list=[settings.listen_ip,] if settings.listen_ip is string else settings.listen_ip %}
 trafficserver_listen_ip:
   file.replace:
     - name: /etc/trafficserver/records.config
