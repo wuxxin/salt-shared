@@ -4,10 +4,10 @@ include:
   - openssl     {# #}
   - unison      {# #}
   - tmux        {# #}
-  - .jinja2     {# Jinja2 including cli interface #}
-  - .flatyaml   {# convert yaml to a flat key=value format #}
-  - .sentry     {# sentrycat.py error reporting to sentry #}
-  - .passgen    {# human friendly passwort generator #}
+  - python.jinja2  {# Jinja2 including cli interface #}
+  - .flatyaml      {# convert yaml to a flat key=value format #}
+  - .sentry        {# sentrycat.py error reporting to sentry #}
+  - .passgen       {# human friendly passwort generator #}
 
 
 {% if grains['os_family'] == 'Debian' %}

@@ -1,6 +1,7 @@
 {% from 'python/lib.sls' import pip3_install %}
 include:
   - python.dev
+  - python.jinja2
   - python.ipython
 
 {# scientific python composed of
@@ -30,7 +31,6 @@ scipy-test:
 scipy-tools:
   pkg.installed:
     - pkgs:
-      - python3-jinja2
       - python3-dateutil
       - python3-packaging
       - python3-six
@@ -38,6 +38,8 @@ scipy-tools:
       - python3-tornado
       - python3-markdown
       - python3-requests
+    - require:
+      - sls: python.jinja2
 
 scipy:
   pkg.installed:
