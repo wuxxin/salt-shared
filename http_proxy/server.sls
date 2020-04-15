@@ -1,30 +1,70 @@
 {% from "http_proxy/defaults.jinja" import settings with context %}
 
-/var/cache/squid:
-  file.directory:
-    - user: proxy
-    - group: proxy
+include:
+  - http_proxy.squid_absent
 
-/etc/squid/conf.d/http_proxy.conf:
-  file.managed:
-    - source: salt://http_proxy/http_proxy.conf
-    - template: jinja
-    - makedirs: true
-    - defaults:
-        settings: {{ settings }}
-
-squid:
+trafficserver:
   pkg.installed:
     - pkgs:
-      - squid
-      - squid-purge
-      - squidclient
-    - require:
-      - file: /etc/squid/conf.d/http_proxy.conf
-      - file: /var/cache/squid
+      - trafficserver
   service.running:
     - enable: True
     - require:
-      - pkg: squid
+      - pkg: trafficserver
+      - file: {{ settings.cache_dir }}
     - watch:
-      - file: /etc/squid/conf.d/http_proxy.conf
+      
+{{ settings.cache_dir }}:
+  file.directory:
+    - user: trafficserver
+    - group: trafficserver
+    - makedirs: true
+    - require:
+      - pkg: trafficserver
+
+{#
+# 1 to 4 weeks lifetime
+# throttle to 10K connections
+# use ats as caching proxy
+# how much memory 'proxy.config.cache.ram_cache.size INT', ''
+#}
+{% set config_list= [
+  ('proxy.config.http.server_ports STRING', settings.listen_port),
+  ('proxy.config.http.cache.heuristic_min_lifetime INT', '604800'),
+  ('proxy.config.http.cache.heuristic_max_lifetime INT', '2419200'),
+  ('proxy.config.net.connections_throttle INT', '10000'),
+  ('proxy.config.url_remap.remap_required INT' , '0'),
+] %}
+
+{% for item,value in config_list %}
+ATS_{{ item }}:
+  file.replace:
+    - name: /etc/trafficserver/records.config
+    - pattern: "^CONFIG {{ item }}.+"
+    - repl: CONFIG {{ item }} {{ value }}
+    - append_if_not_found: true
+    - watch_in:
+      - service: trafficserver
+{% endfor %}
+
+{% set ip_list=[listen_ip,] if listen_ip is string else listen_ip %}
+trafficserver_listen_ip:
+  file.replace:
+    - name: /etc/trafficserver/records.config
+    - pattern: "^LOCAL proxy.local.incoming_ip_to_bind STRING .+"
+    - repl: LOCAL proxy.local.incoming_ip_to_bind STRING {% for ip in ip_list %}{{ ip }} {% endfor %}
+    - append_if_not_found: true
+    - require:
+      - pkg: trafficserver
+    - watch_in:
+      - service: trafficserver
+
+/etc/trafficserver/storage.config:
+  file.replace:
+    - pattern: "^/[^ ]+ [0-9]+M"
+    - repl: {{ settings.cache_dir }} {{ settings.cache_size_mb }}M
+    - append_if_not_found: true
+    - require:
+      - pkg: trafficserver
+    - watch_in:
+      - service: trafficserver
