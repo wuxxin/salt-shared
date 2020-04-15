@@ -12,7 +12,6 @@ trafficserver:
     - require:
       - pkg: trafficserver
       - file: {{ settings.cache_dir }}
-    - watch:
       
 {{ settings.cache_dir }}:
   file.directory:
