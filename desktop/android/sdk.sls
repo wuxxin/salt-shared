@@ -50,7 +50,7 @@ sdk-manager-perm:
 
 {#
 manager-install:
-  cmd.run: 
+  cmd.run:
     - name: |
         {{ s.ANDROID_HOME }}/tools/bin/sdkmanager install \
         platform-tools \
@@ -75,11 +75,11 @@ android-create-user-profile:
     - name: {{ user_home }}/.profile
 
 android-modify-user-profile:
-  file.blockreplace:
+  file.blockreplace: {# file.blockreplace does use "content" instead of "contents" #}
     - name: {{ user_home }}/.profile
     - marker_start: "{{ start }}"
     - marker_end: "{{ end }}"
-    - contents: |
+    - content: |
         # set the environment variables
         # ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
         # ENV KOTLIN_HOME /opt/kotlinc
@@ -90,7 +90,7 @@ android-modify-user-profile:
           export _JAVA_OPTIONS="-XX:+UnlockExperimentalVMOptions -XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee"
         export PATH="${PATH}:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/tools/bin"
         export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
-        
+
         export ANDROIDAPI={{ grains['ANDROIDAPI'] }}
         export ANDROID_TARGET={{ grains['ANDROID_TARGET'] }}
         export PATH=${PATH}:${ANDROIDSDK}/tools:${ANDROIDSDK}/platform-tools

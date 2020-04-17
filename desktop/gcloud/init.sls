@@ -41,7 +41,7 @@ gcloud-create-user-profile:
     - name: {{ user_home }}/.profile
 
 gloucd-modify-path-user-profile:
-  file.blockreplace:
+  file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
     - name: {{ user_home }}/.profile
     - marker_start: "# The next line updates PATH for the Google Cloud SDK."
     - marker_end: "source '{{ gcloud_destdir }}/path.bash.inc'"

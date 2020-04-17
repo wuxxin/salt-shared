@@ -25,9 +25,9 @@ create_tmux_conf:
 create_root_profile:
   file.touch:
     - name: /root/.profile
-  
+
 /root/.profile:
-  file.blockreplace:
+  file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
     - marker_start: "{{ start }}"
     - marker_end: "{{ end }}"
     - content: |
