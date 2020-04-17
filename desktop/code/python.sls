@@ -2,13 +2,14 @@
 
 include:
   - python.dev
-  
+  - python.nbdev
+
 {# poetry - Python packaging and dependency management made easy #}
 {# install poetry as pipx user package, so its isolated from others #}
 poetry:
   cmd.run:
     - name: pipx install poetry
-    - unless: pipx list | grep poetry -q 
+    - unless: pipx list | grep poetry -q
     - runas: {{ user }}
 
 {# pyenv - easily switch between multiple versions of Python #}
@@ -21,9 +22,12 @@ pyenv:
     - runas: {{ user }}
 
 pyenv_bashrc:
-  file.blockreplace:
-    -
+  file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
+    - name: {{ user_home }}/.bashrc
+    - marker_start: "# ### PYENV BEGIN ###"
+    - marker_end: "# ### PYENV END ###"
+    - append_if_not_found: True
+    - runas: {{ user }}
     - content: |
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
-  
