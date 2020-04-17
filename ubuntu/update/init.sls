@@ -1,3 +1,4 @@
+{% from "ubuntu/update/defaults.jinja" import settings with context %}
 
 {% for i in ['20auto-upgrades', '50unattended-upgrades',] %}
 /etc/apt/apt.conf.d/{{ i }}.ucf-dist:
@@ -6,6 +7,9 @@
 /etc/apt/apt.conf.d/{{ i }}:
   file.managed:
     - source: salt://ubuntu/update/{{ i }}
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
 {% endfor %}
 
 system_updates:
