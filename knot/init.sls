@@ -1,11 +1,8 @@
-include:
-  - ubuntu
-
 {% from "knot/defaults.jinja" import settings with context %}
 {% from "knot/defaults.jinja" import log_default %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
-{# knot from ppa is newer even for unreleased eoan (2019.10.06) #}
+{# knot from ppa is newer for almost any distro #}
 {{ apt_add_repository("knot-ppa", "cz.nic-labs/knot-dns",
   require_in = "pkg: knot-package") }}
 
@@ -40,31 +37,34 @@ knot-config-check:
 {% if s.enabled|d(true) %}
 
   {%- for zone in settings.zone %}
+    {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
 knot-zone-{{ zone.domain }}:
-      {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
-      {%- if zone.source is not defined %}
-  file.present:
-    - name: {{ targetfile }}
-    - makedirs: true
-    - user: knot
-    - group: knot
-    - mode: "0640"
-      {%- else %}
   file.managed:
     - name: {{ targetfile }}
-    - template: jinja
-    - source: {{ zone.source }}
     - makedirs: true
     - user: knot
     - group: knot
     - mode: "0640"
     - watch_in: knot.service
+    {%- if zone.source is defined %}
+    - template: jinja
+    - source: {{ zone.source }}
     - defaults:
+        domain: zone.domain
         common: {{ settings.common }}
-    - check_cmd: /usr/bin/kzonecheck -o {{ zone.domain }}
+        autoserial: {{ salt['cmd.run_stdout']('date +%y%m%d%H%M' }}
+      {%- if zone.context is defined %}
+    - context: {{ zone.context }}
       {%- endif %}
+    {%- else %}
+    - contents: |
+{{ zone.contents|d('')|indent(8, True) }}
+    {%- endif %}
+    {%- if zone.master is not defined %}
+    - check_cmd: /usr/bin/kzonecheck -o {{ zone.domain }}
+    {%- endif %}
   {%- endfor %}
-  
+
 /etc/knot/knot.conf:
   file.managed:
     - source: salt://knot/knot.jinja

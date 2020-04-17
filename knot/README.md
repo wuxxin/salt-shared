@@ -1,9 +1,16 @@
 # Knot DNS server
 
-+ pillar: knot
-  + relaxed (order does not matter) knot.conf yaml 
-  + automatic check of zone files before udpate of files
-  + to disable a configured knot, set pillar['knot:enabled']= false
-  + logging: if empty will use defaults.jinja:log_default
-  + zone:source: salt source file which gets copied to default file target for zone
-        + you can use jinja templating in source file
++ pillar: relaxed (order does not matter) knot.conf yaml 
+    + to disable a configured knot, set pillar['knot:enabled']= false
++ automatic check of zone files before udpate of files
++ logging: if empty will use defaults.jinja:log_default
++ zone source files
+    + salt source file which gets copied to default file target for zone
+    + jinja templating in source file
+    + prefilled context:
+        + common.* from defaults.jinja
+        + autoserial (YYMMDDHHMM)
+            + conditions: one change per minute max, breaks in year 2100
+    + additional custom context:
+        + add context: data to zone
++ example: example.pillar, example.zone
