@@ -75,7 +75,7 @@ android-create-user-profile:
     - name: {{ user_home }}/.profile
 
 android-modify-user-profile:
-  file.blockreplace: {# file.blockreplace does use "content" instead of "contents" #}
+  file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
     - name: {{ user_home }}/.profile
     - marker_start: "{{ start }}"
     - marker_end: "{{ end }}"
