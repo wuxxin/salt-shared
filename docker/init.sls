@@ -1,6 +1,6 @@
 {% from "docker/defaults.jinja" import settings with context %}
 {% set pkgname= "docker-ce" if settings.origin == "upstream" else "docker.io" %}
-  
+
 include:
   - kernel.server
   - python
@@ -107,10 +107,10 @@ docker-custom-build:
       - ubuntu-dev-tools
   file.managed:
     - source: salt://docker/build-custom-docker.sh
-    - name: /usr/local/sbin/build-bustom-docker.sh
+    - name: /usr/local/sbin/build-custom-docker.sh
     - mode: "755"
   cmd.run:
-    - name: /usr/local/sbin/build-bustom-docker.sh {{ custom_archive }} "overlayzfs" {{ patches_string }}
+    - name: /usr/local/sbin/build-custom-docker.sh {{ custom_archive }} "overlayzfs" {{ patches_string }}
     - require:
       - pkg: docker-custom-build
       - file: docker-custom-build
@@ -123,11 +123,11 @@ docker-custom-repo:
       - pkg: docker
     - require:
       - cmd: docker-custom-build
-      
+
 docker-upstream-repo:
   file.absent:
     - name: /etc/apt/sources.list.d/docker-{{ grains.oscodename }}.list
-  
+
 {%- elif settings.origin == "upstream" %}
 docker-custom-repo:
   file.absent:
