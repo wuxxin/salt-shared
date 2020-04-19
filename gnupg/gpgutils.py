@@ -115,7 +115,7 @@ def gen_keypair(
     else:
         batch_args += "%no-protection\n"
     if _isgpg2():
-        keytype = "default"
+        keytype = "RSA"
         gpgver = _gpgversion()
         if gpgver[1] < 1 or (gpgver[1] == 1 and gpgver[2] < 15):
             print(
@@ -129,7 +129,8 @@ def gen_keypair(
             secretkey_filename, publickey_filename
         )
 
-    batch_args = "Key-Type: {0}\nKey-Length: {1}\n".format(keytype, keylength)
+    batch_args += "Key-Type: {0}\nKey-Length: {1}\n".format(keytype, keylength)
+    batch_args += "Key-Usage: encrypt,sign\n"
     batch_args += "Name-Real: {0}\nName-Email: {1}\n".format(ownername, owneremail)
     batch_args += "Expire-Date: 0\n"
     batch_args += "%commit\n%echo done\n"
@@ -170,26 +171,10 @@ def import_key(keyfile, gpghome):
 
 def set_ownertrust(userid, gpghome, trustlevel=5):
     """ edit a already imported key and change the trustlevel (default 5=ultimate trust) """
-    """
-gpg --fingerprint --with-colons --list-keys |
-  awk -F: -v keyname="$1" -v trustlevel="$2" '
-        $1=="pub" && $10 ~ keyname { fpr=1 }
-        $1=="fpr" && fpr { fpr=$10; exit }
-        END {
-            cmd="gpg --export-ownertrust"
-            while (cmd | getline) if ($1!=fpr) print
-            close(cmd)
-            print fpr ":" trustlevel ":"
-        }
-    ' | gpg --import-ownertrust
-    args = [GPG_EXECUTABLE, '--homedir' , gpghome, '--batch', '--yes', '--import', keyfile]
-    popen = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-    stdout, empty = popen.communicate()
-    returncode = popen.returncode
-    if returncode != 0:
-        raise IOError('gpg returned error code: %d , cmd line was: %s , output was: %s' % (returncode, str(args), stdout))
-"""
-    raise RuntimeError
+    args = ["--homedir", gpghome, "--batch", "--yes", "--import-ownertrust"]
+    batch_args = userid + ":" + str(trustlevel) + ":\n"
+    returncode, stdout, stderr = _gpg(args, batch_args)
+    return stdout
 
 
 def publickey_list(gpghome):
