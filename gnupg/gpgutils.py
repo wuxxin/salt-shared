@@ -9,7 +9,13 @@ Encryption/Signing, Decryption/Verifying modul.
   - set environment variable GPG_EXECUTABLE to use a custom existing gnupg binary
 
 """
-import sys, os, subprocess, tempfile, re, inspect, pydoc
+import sys
+import os
+import subprocess
+import tempfile
+import re
+import inspect
+import pydoc
 
 
 def _gpgname():
@@ -95,6 +101,7 @@ def reset_keystore(gpghome):
 
 def gen_keypair(
     owneremail,
+    ownername,
     secretkey_filename,
     publickey_filename,
     keylength=2560,
@@ -112,10 +119,9 @@ def gen_keypair(
         gpgver = _gpgversion()
         if gpgver[1] < 1 or (gpgver[1] == 1 and gpgver[2] < 15):
             print(
-                "Warning: gpg version < 2.1.15 (your version={0}.{1}.{2}) has a known bug in secret key export if no passphrase is used, use gpg version 1 for gen_keypair or upgrade gpg2 to >= 2.1.15 ".format(
-                    *gpgver
-                ),
-                file=sys.stderr,
+                "Warning: gpg < 2.1.15 (this={}.{}.{}) secret export bug".format(
+                    gpgver[0], gpgver[1], gpgver[2]
+                )
             )
     else:
         keytype = "1"
@@ -124,7 +130,7 @@ def gen_keypair(
         )
 
     batch_args = "Key-Type: {0}\nKey-Length: {1}\n".format(keytype, keylength)
-    batch_args += "Name-Real: {0}\nName-Email: {0}\n".format(owneremail)
+    batch_args += "Name-Real: {0}\nName-Email: {1}\n".format(ownername, owneremail)
     batch_args += "Expire-Date: 0\n"
     batch_args += "%commit\n%echo done\n"
     print(batch_args)
@@ -300,7 +306,8 @@ if __name__ == "__main__":
         print("ERROR: unknown command {0}".format(c), file=sys.stderr)
         help()
     signature = inspect.getfullargspec(f)
-    if len(signature.args) - len(signature.defaults) > len(args):
+    defaults_len = len(signature.defaults) if signature.defaults else 0
+    if len(signature.args) - defaults_len > len(args):
         print("ERROR: wrong number of arguments for {0}".format(c), file=sys.stderr)
         help(c)
     r = f(*args)
