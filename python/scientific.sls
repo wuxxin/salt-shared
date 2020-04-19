@@ -5,9 +5,9 @@ include:
   - python.ipython
 
 {# scientific python composed of
-  numpy , scipy, matplotlib, pandas, sympy, sklearn, skimage, 
-  panel, bokeh, plotly #}
-      
+numpy, scipy, matplotlib, pandas, sympy, sklearn, skimage, panel, bokeh, plotly
+#}
+
 scipy-image:
   pkg.installed:
     - pkgs:
@@ -27,7 +27,7 @@ scipy-test:
       - python3-nose
       - python3-joblib
       - python3-psutil
-      
+
 scipy-tools:
   pkg.installed:
     - pkgs:
