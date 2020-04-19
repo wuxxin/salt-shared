@@ -20,7 +20,7 @@ keep:
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
-  grain='none', default= 'none', merge= salt['pillar.get']('zfs-auto-snapshot', {})) %}
+  grain='none', default= 'none', merge= salt['pillar.get']('zfs:auto-snapshot', {})) %}
 
 zfs-auto-snapshot:
   pkg:
