@@ -8,6 +8,7 @@ include:
   - .chipcard
   - .email
   - .ftp
+  - .flatpak
   - .graphics
   - .health
   - .music

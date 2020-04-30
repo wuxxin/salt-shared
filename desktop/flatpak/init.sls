@@ -9,9 +9,8 @@ flatpak:
   pkg.installed:
     - require:
       - pkgrepo: flatpak-ppa
-{#
+
 gnome-software-plugin-flatpak:
   pkg.installed:
     - require:
       - pkgrepo: flatpak-ppa
-#}
