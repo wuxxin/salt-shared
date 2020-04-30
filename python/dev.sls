@@ -42,14 +42,13 @@ black:
     - pkgs:
       - python3-appdirs
       - python3-attr {# XXX python package is named attrs not attr #}
-      - python3-click
+      - python3-click {# # elegant cmdline parsing #}
       - python3-toml
 {{ pip3_install('black', require='pkg: black') }}
 
-{# 
+{#
 python shell stuff
 pip install sh        # very elegant python shell
-pip install click     # elegant cmdline parsing
 pip install sarge     # python shell execute with "; &  | && || <>"
 https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
 pip install requests  # Python HTTP Requests for Humans

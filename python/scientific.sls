@@ -5,7 +5,7 @@ include:
   - python.ipython
 
 {# scientific python composed of
-numpy, scipy, matplotlib, pandas, sympy, sklearn, skimage, panel, bokeh, plotly
+numpy, scipy, matplotlib, pandas, sympy, sklearn, skimage, panel, bokeh, plotly, altair
 #}
 
 scipy-image:
@@ -66,3 +66,12 @@ scipy:
 # recommends holoviews notebook matplotlib pillow plotly
 # needs testpath<4 which conflicts with other system pacakges
 #  pip3_install('panel', require='pkg: scipy')
+
+altair:
+  pkg.installed:
+    - pkgs:
+      - python3-jsonschema
+      - python3-entrypoints
+      - python3-toolz
+
+{{ pip3_install('altair', require=['pkg: altair', 'sls: python.jinja2', 'pkg: scipy']) }}
