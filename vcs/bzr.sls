@@ -1,3 +1,0 @@
-bzr:
-  pkg:
-    - installed
