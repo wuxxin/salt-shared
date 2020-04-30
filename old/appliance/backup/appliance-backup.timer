@@ -1,9 +1,0 @@
-[Unit]
-Description=Appliance Backup Timer
-
-[Timer]
-# daily at 00:30 am
-OnCalendar=*-*-* 00:30:00
-
-[Install]
-WantedBy=timers.target

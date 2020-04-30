@@ -1,9 +1,0 @@
-HTTP/1.0 503 Service Unavailable
-Cache-Control: no-cache
-Connection: close
-Content-Type: text/html
-
-<html><body><h1>503 Service Name Unavailable</h1>
-Service Name requested is not known.
-</body></html>
-

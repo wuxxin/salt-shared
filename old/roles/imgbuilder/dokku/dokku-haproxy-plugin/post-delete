@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-source "$(dirname $0)/vars"
-
-sudo /etc/init.d/nginx reload > /dev/null

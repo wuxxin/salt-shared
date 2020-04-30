@@ -1,5 +1,0 @@
-
-  acl {{ hostname }} req_ssl_sni -i {{ hostname }}
-  use-server {{ ip }}_{{ backend_port }} if {{ hostname }}
-  server {{ ip }}_{{ backend_port }} {{ ip }}:{{ backend_port }} check
-

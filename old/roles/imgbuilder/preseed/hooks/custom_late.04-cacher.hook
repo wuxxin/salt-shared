@@ -1,8 +1,0 @@
-#!/bin/sh
-
-logger -t custom_late.sh "in the custom_late.04 hook, modify /etc/apt.d/02proxy"
-apt_proxy_mirror=`debconf-get apt/mirror/http/proxy`
-if test "$apt_proxy_mirror" != ""; then
-    logger -t custom_late.sh "adding proxy $apt_proxy_mirror"
-    in-target sh -c "mkdir -p /etc/apt/apt.conf.d; echo 'Acquire::http { Proxy \"$apt_proxy_mirror\"; };' > /etc/apt/apt.conf.d/02proxy"
-fi

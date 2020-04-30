@@ -1,7 +1,0 @@
-# The following bookmarks will be appended to the default bookmark folders in the toolbar
-# For now only Firefox is supported.
-#
-# Format: arbitrarily many lines with
-# URL Name
-#
-http://www.zeit.de    Die Zeit Nachrichten

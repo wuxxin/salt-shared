@@ -1,5 +1,0 @@
-#!/bin/bash
-
-apt-get install -q -y python-yaml python-jinja
-pip install sh click sarge salty pydokku
-

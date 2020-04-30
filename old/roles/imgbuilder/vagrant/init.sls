@@ -1,4 +1,0 @@
-include:
-  - vagrant
-  - .dirs
-  - .plugins
