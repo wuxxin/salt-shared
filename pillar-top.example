@@ -12,12 +12,5 @@ file: custom.sls in pillar root
 ----
 timezone: Europe/Vienna
 
-desktop:
-  user: mainusernameonthemachine
-  development:
-    enabled: true
-  proprietary:
-    enabled: true
 
 ----
-
