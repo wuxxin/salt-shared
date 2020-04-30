@@ -12,4 +12,5 @@ fastprogress>=0.1.22 pillow scikit-learn scipy spacy
 {{ pip3_install('torch', require='sls: python.scientific') }}
 {{ pip3_install('torchvision', require='pip: torch') }}
 {{ pip3_install('spacy', require='pip: torch') }}
+{{ pip3_install('fastai', require=['sls: python.nbdev', 'pip: spacy']) }}
 {{ pip3_install('fastai2', require=['sls: python.nbdev', 'pip: spacy']) }}
