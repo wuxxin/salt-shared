@@ -71,8 +71,8 @@ network-utils:
 {# restrict rpcbind to localhost and default list ([bridge_ip]) #}
 /etc/default/rpcbind:
   file.replace:
-    - pattern: "^OPTIONS=.+"
-    - repl: OPTIONS="-w -l -h 127.0.0.1 -h ::1 {% for ip in settings.rpcbind %}-h {{ ip }}{% endfor %}
+    - pattern: '^OPTIONS=".+"'
+    - repl: OPTIONS="-w -l -h 127.0.0.1 -h ::1 {% for ip in settings.rpcbind %}-h {{ ip }}{% endfor %}"
     - append_if_not_found: true
   service.running:
     - name: rpcbind
