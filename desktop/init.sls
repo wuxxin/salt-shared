@@ -29,7 +29,6 @@ include:
   - .code
   - .emulation
   - .android
-  - .forensic
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
