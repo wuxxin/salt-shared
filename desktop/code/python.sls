@@ -15,11 +15,10 @@ poetry:
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:
   git.latest:
-    - name: {{ config.source.repo }}
+    - name: https://github.com/pyenv/pyenv.git
     - target: {{ user_home }}/.pyenv
-    - user: {{ config.user }}
+    - user: {{ user }}
     - submodules: True
-    - runas: {{ user }}
 
 pyenv_bashrc:
   file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
