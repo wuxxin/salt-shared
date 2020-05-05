@@ -13,7 +13,6 @@ video-packages:
       - lame
       - ffmpeg
       - libavcodec-extra
-      - libdvdread4
       - frei0r-plugins
       - v4l2loopback-dkms
       - gst123

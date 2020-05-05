@@ -13,7 +13,6 @@ android-tools:
       - adb
       - fastboot
 {%- endif %}
-      - android-tools-adbd
       - aapt
 
 python-adb-req:

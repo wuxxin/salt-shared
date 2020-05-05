@@ -7,7 +7,7 @@ audio-packages:
       - sox
       - libsox-fmt-pulse
       - lame
-      - pulseaudio-dlna  {# available since bionic #}
+      {# pulseaudio-dlna  only available in bionic #}
 
 audio-editor:
   pkg.installed:
