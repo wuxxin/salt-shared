@@ -1,8 +1,5 @@
 {% from "http_proxy/defaults.jinja" import settings with context %}
 
-include:
-  - http_proxy.squid_absent
-
 trafficserver:
   pkg.installed:
     - pkgs:
@@ -12,7 +9,7 @@ trafficserver:
     - require:
       - pkg: trafficserver
       - file: {{ settings.cache_dir }}
-      
+
 {{ settings.cache_dir }}:
   file.directory:
     - user: trafficserver
@@ -42,6 +39,8 @@ ATS_{{ item }}:
     - pattern: "^CONFIG {{ item }}.+"
     - repl: CONFIG {{ item }} {{ value }}
     - append_if_not_found: true
+    - require:
+      - pkg: trafficserver
     - watch_in:
       - service: trafficserver
 {% endfor %}
