@@ -1,8 +1,8 @@
 {% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("bitcoin-ppa", "bitcoin/bitcoin",
+{{ apt_add_repository("bitcoin_ppa", "bitcoin/bitcoin",
   require_in= "pkg: bitcoin") }}
-{% endif %} 
+{% endif %}
 
 bitcoin:
   pkg.installed:
@@ -14,4 +14,3 @@ bitcoin:
 ssss:
   pkg:
     - installed
-

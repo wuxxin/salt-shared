@@ -14,6 +14,17 @@ include:
 {{ storage_setup(salt['pillar.get']('dokku:custom_storage')) }}
 {% endif %}
 
+{% if grains['os'] == 'Ubuntu' %}
+dokku_ppa:
+  pkgrepo.managed:
+    - name: deb http://packagecloud.io/dokku/dokku/ubuntu/ {{ grains['oscodename'] }} main
+    - file: /etc/apt/sources.list.d/dokku_ppa.list
+    - key_url: salt://roles/dokku/packagecloud.gpg.key
+    - require_in:
+      - pkg: dokku
+{% endif %}
+
+
 dokku:
   debconf.set:
     - name: dokku

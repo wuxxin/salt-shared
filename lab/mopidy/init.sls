@@ -1,6 +1,6 @@
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("upmpd-ppa", 
+{{ apt_add_repository("upmpd_ppa",
   "jean-francois-dockes/upnpp1", require_in= "pkg: upmpdcli") }}
 {% endif %}
 

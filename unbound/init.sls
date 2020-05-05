@@ -7,10 +7,10 @@ include:
 
   {% if grains['osrelease_info'][0]|int <= 18 %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("unbound-ppa", "ondrej/unbound",
+{{ apt_add_repository("unbound_ppa", "ondrej/unbound",
   require_in = "pkg: unbound") }}
   {% endif %}
-  
+
 unbound:
   pkg:
     - installed

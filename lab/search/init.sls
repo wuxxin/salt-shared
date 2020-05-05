@@ -1,5 +1,7 @@
-include:
-  - .ppa
+{% if grains['os'] == 'Ubuntu' %}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("recoll_ppa", "recoll-backports/recoll-1.15-on", require_in= "pkg: recoll") }}
+{% endif %}
 
 recoll:
   pkg.installed:
@@ -15,5 +17,3 @@ recoll:
       - python3-mutagen
       - unrtf
       - untex
-    - require:
-      - pkgrepo: recoll_ppa

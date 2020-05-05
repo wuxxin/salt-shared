@@ -9,7 +9,7 @@ riot:
   pkgrepo.managed:
     - name: deb https://riot.im/packages/debian/ {{ grains['oscodename'] }} main
     - key_url: https://riot.im/packages/debian/repo-key.asc
-    - file: /etc/apt/sources.list.d/riot.im-debian-main.list
+    - file: /etc/apt/sources.list.d/riot.im_ppa.list
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:

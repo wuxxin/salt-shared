@@ -7,8 +7,8 @@ gimp:
 
 {% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("krita-ppa", "kritalime/ppa", require_in= "pkg: krita") }}
-{% endif %} 
+{{ apt_add_repository("krita_ppa", "kritalime/ppa", require_in= "pkg: krita") }}
+{% endif %}
 
 krita:
   pkg.installed:

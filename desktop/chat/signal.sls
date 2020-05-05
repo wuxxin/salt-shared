@@ -9,7 +9,7 @@ signal:
   pkgrepo.managed:
     - name: deb [arch=amd64] https://updates.signal.org/desktop/apt {{ grains['oscodename'] }} main
     - key_url: https://updates.signal.org/desktop/apt/keys.asc
-    - file: /etc/apt/sources.list.d/signal.org-ppa-{{ grains['oscodename'] }}.list
+    - file: /etc/apt/sources.list.d/signal.org_ppa.list
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:

@@ -1,14 +1,14 @@
 {% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
-{{ apt_add_repository("retroarch-ppa", 
+{{ apt_add_repository("retroarch_ppa",
   "libretro/stable", require_in= "pkg: retroarch") }}
 
 retroarch:
   pkg:
     - installed
 
-{{ apt_add_repository("pcsx2_ppa", 
+{{ apt_add_repository("pcsx2_ppa",
   "gregory-hainaut/pcsx2.official.ppa", require_in= "pkg: pcsx2") }}
 
 {% endif %}
@@ -20,4 +20,3 @@ pcsx2:
 mupen64plus:
   pkg:
     - installed
-

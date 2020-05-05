@@ -5,7 +5,7 @@ music-cd-ripper:
     - pkgs:
       - cdparanoia
       - sound-juicer
-      
+
 music-tagger:
   pkg.installed:
     - pkgs:
@@ -17,12 +17,12 @@ music-player:
       - rhythmbox
       - lollypop
 
-      
+
 {% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
   '"http://ppa.launchpad.net/fossfreedom/rhythmbox-plugins/ubuntu/dists/'+ grains['oscodename']+
   '/InRelease" | grep -q "200 OK"', python_shell=true) == 0 %}
 
-{{ apt_add_repository("rhythmbox-plugins-ppa",
+{{ apt_add_repository("rhythmbox-plugins_ppa",
   "fossfreedom/rhythmbox-plugins", require_in= "pkg: rhythmbox-plugins") }}
 
 rhythmbox-plugins:
@@ -41,7 +41,7 @@ rhythmbox-plugins:
 
 {% if grains['os'] == 'Ubuntu' %}
   {% if grains['osrelease_info'][0]|int <= 19 %}
-{{ apt_add_repository("sonic-pi-ppa", 
+{{ apt_add_repository("sonic-pi_ppa",
   "sonic-pi/ppa", require_in= "pkg: sonic-pi") }}
   {% endif %}
 {% endif %}

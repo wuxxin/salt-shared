@@ -11,7 +11,7 @@ terminal-tools:
       - evince
       - img2pdf
       - antiword
-  
+
 terminator:
   pkg:
     - installed
@@ -23,12 +23,10 @@ other-terminal:
 
 {% if grains['os'] == 'Ubuntu' %}
   {% from "ubuntu/init.sls" import apt_add_repository %}
-{{ apt_add_repository("alacritty_ppa",
-  "mmstick76/alacritty", require_in= "pkg: alacritty") }}
+{{ apt_add_repository("alacritty_ppa", "mmstick76/alacritty", require_in= "pkg: alacritty") }}
 
 alacritty:
   pkg:
     - installed
 
 {% endif %}
-
