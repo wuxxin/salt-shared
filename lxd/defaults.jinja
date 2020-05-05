@@ -16,7 +16,7 @@ storage_pools:
 - name: {{ pool }}
   description: LXD {{ pool }} pool
   driver: dir
-  config:     
+  config:
     source: /var/lib/lxd/storage-pools/{{ pool }}
 
 # self managed Network devices

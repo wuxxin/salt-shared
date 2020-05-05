@@ -32,7 +32,7 @@ Domain Type  Item    Value     Default Description
         *         soft    memlock   unlimited
         *         hard    memlock   unlimited
 
-{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}  
+{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
 {# This denies container access to the messages in the kernel ring buffer. Please note that this also will deny access to non-root users on the host system. #}
 kernel.dmesg_restrict:
   sysctl.present:
@@ -72,7 +72,12 @@ lxd:
   file.managed:
     - name: /etc/lxd.yaml
     - contents: |
-{{ settings|yaml(false)|indent(8,True) }}
+{%- for section in ['config', 'storage_pools', 'networks', 'profiles', 'projects', 'images', 'certificates'] %}
+{%- if settings[section]|d(false) %}
+        {{ section }}:
+{{ settings[section]|yaml(false)|indent(10,True) }}
+{% endif %}
+{% endfor %}
   pkg.installed:
     - pkgs:
       - lxd
