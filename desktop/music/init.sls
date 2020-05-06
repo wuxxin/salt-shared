@@ -32,7 +32,6 @@ rhythmbox-plugins:
       - rhythmbox-plugin-countdown-playlist
       - rhythmbox-plugin-drc
       - rhythmbox-plugin-equalizer
-      - rhythmbox-plugin-fileorganizer
       - rhythmbox-plugin-fullscreen
       - rhythmbox-plugin-parametriceq
       - rhythmbox-plugin-rating-filters
