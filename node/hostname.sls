@@ -4,12 +4,12 @@ set_hostsfile:
   host.only:
     - name: {{ settings.bridge_ip }}
     - hostnames:
-      - {{ salt['pillar.get']('hostname') }}
-      - {{ salt['pillar.get']('hostname').partition('.')[0] }}
+      - {{ settings.hostname }}
+      - {{ settings.hostname.partition('.')[0] }}
 
 set_hostname:
   cmd.run:
-    - name: hostnamectl set-hostname "{{ salt['pillar.get']('hostname') }}"
-    - onlyif: test "$(hostname -f)" != "{{ salt['pillar.get']('hostname') }}"
+    - name: hostnamectl set-hostname "{{ settings.hostname }}"
+    - onlyif: test "$(hostname -f)" != "{{ settings.hostname }}"
     - require:
       - host: set_hostsfile

@@ -3,8 +3,42 @@
 {% set bridge_ip= bridge_cidr|regex_replace ('([^/]+)/.+', '\\1') %}
 {% set netplan_path= grains['project_basepath']+ '/config/netplan.yaml' %}
 {% import_text netplan_path as netplan_raw %}
-{% set netplan_recovery= salt['pillar.get']('node:network:recovery', netplan_raw) %}
-{% set netplan_default= salt['pillar.get']('node:network:default', netplan_raw) %}
+{% set recovery_netplan= salt['pillar.get']('node:network:recovery', netplan_raw) %}
+{% set default_netplan= salt['pillar.get']('node:network:default', netplan_raw) %}
+
+
+{% load_yaml as example %}
+node:
+  user:
+    - name: XX
+  ssh_user:
+    - XX
+  locale:
+    lang: en:us
+    location: World
+    timezone: UTC
+    additional:
+    posix_messages: false
+  network:
+    internal:
+      cidr:
+      name:
+    default:
+    recovery:
+  storage:
+    filesystem:
+      zfs:
+        - name: rpool/data/volumes
+      lvm:
+        - name: vg0/ext4data
+    mount:
+    directory:
+      - name: /data/volumes/lxd
+        require:
+          - zfs: zfs_fs_present_rpool/data/volumes
+      - name: /mnt/data/volumes/lxd
+        makedirs: true
+{% endload %}
 
 {% load_yaml as defaults %}
 def_route_ip: {{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) }}
@@ -14,7 +48,7 @@ bridge_netcidr: {{ salt['network.convert_cidr'](bridge_cidr)['network'] }}
 bridge_netmask: {{ salt['network.convert_cidr'](bridge_cidr)['netmask'] }}
 bridge_ip: {{ bridge_ip }}
 rpcbind: ['{{ bridge_ip }}']
-netplan_recovery: |
+recovery_netplan: |
 {{ netplan_recovery|indent(4,True) }}
 netplan_default: |
 {{ netplan_default|indent(4,True) }}

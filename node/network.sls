@@ -2,6 +2,7 @@
 
 include:
   - .hostname
+  - ssh
 
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
   {% if salt['cmd.retcode']('which netplan') == 0 %}
@@ -79,6 +80,8 @@ network-utils:
     - enable: True
     - require:
       - pkg: network-utils
+      - cmd: /etc/netplan/50-lan.yaml
+      - cmd: bridge_{{ settings.bridge_name }}
     - watch:
       - file: /etc/default/rpcbind
 
@@ -117,5 +120,7 @@ network-utils:
     - require:
       - pkg: network-utils
       - cmd: /etc/systemd/system/rpcbind.socket
+      - cmd: /etc/netplan/50-lan.yaml
+      - cmd: bridge_{{ settings.bridge_name }}
     - watch:
       - file: /etc/systemd/system/rpcbind.socket
