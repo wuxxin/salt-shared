@@ -42,7 +42,7 @@ some states have documentation README.md's.
         * [python](python)
         * [java](java)
         * [latex](latex)
-        * [vcs](vcs): git,mercurial,bzr,subversion, git-crypt, git-bridge
+        * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
 
     * [lab](lab): Experimental Work
     * [old](old): Old States
