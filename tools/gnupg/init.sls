@@ -8,5 +8,5 @@ gnupg:
 
 /usr/local/bin/gpgutils.py:
   file.managed:
-    - source: salt://gnupg/gpgutils.py
+    - source: salt://tools/gnupg/gpgutils.py
     - mode: "0755"

@@ -1,5 +1,5 @@
 include:
-  - smartmon
+  - .smartmon
 
 hardware-tools:
   pkg.installed:

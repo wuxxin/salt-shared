@@ -19,12 +19,12 @@ acpid:
     - makedirs: True
     - require:
       - pkg: acpid
-    - watch_in: 
+    - watch_in:
       - service: acpid
 
 /etc/acpi/events/powerbtn:
   file.managed:
-    - source: salt://acpi/powerbtn
+    - source: salt://kernel/power/powerbtn
     - user: root
     - group: root
     - mode: 644
@@ -34,7 +34,7 @@ acpid:
 
 /etc/acpi/powerbtn.sh:
   file.managed:
-    - source: salt://acpi/powerbtn.sh
+    - source: salt://kernel/power/powerbtn.sh
     - user: root
     - group: root
     - mode: 755
