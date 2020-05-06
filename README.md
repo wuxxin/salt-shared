@@ -1,47 +1,48 @@
 ## salt-shared - useful Salt states
 
-This is a collection of saltstack states.
+A collection of saltstack states.
 
-Both quality and style differ from state to state, most states are working, some are not, it lacks documentation beside a few README.md.
+Quality and style differ from state to state, most states are working,
+some states have documentation README.md's.
 
 ### What can you do with it
 
-* Target Platforms: Ubuntu 19.04 (disco) LTS-18.04 (bionic), LTS-16.04 (xenial)
+* Target Platforms: Ubuntu Focal 20.04 LTS and 19.10; 19.04; 18.04; debian 10
     * many non-gui states also work with older/newer ubuntu and other debian based distros.
-   
+
 * Features to look at:
-    * [desktop](desktop):
-        * everything wanted for a desktop installation (19.04, 18.04)
-    * [storage](storage):
-        * setup harddisk storage, features parted, mdadm, crypt, lvm, format, mount, swap, directories, relocate services
-    * [network](network): (currently 16.04 xenial based)
-        * setup network, calculate network adresses netmasks a.o.
-    * [http_proxy](http_proxy):
-        * [.server](http_proxy/server.sls): install polipo
-        * [.client_use_proxy](http_proxy/client_use_proxy.sls)
-        * [.client_no_proxy](http_proxy/client_no_proxy.sls)
-        * setup http_proxy, HTTP_PROXY for: apt, profile.d, sudoers.d
-    * [unbound](unbound): caching recursive dns resolver
-    * [knot](knot): authoritative dnsec capable dns server
-    * [tools](tools): command line tools for administration
-    * [hardware](hardware): custom hardware setup
+    * [node](node): basic machine setup (hostname, locale, network, storage)
+    * [hardware](hardware): hardware setup
     * [kernel](kernel): kernel image,headers,tools
-    * [libvirt](libvirt): libvirt/qemu/kvm setup
-    * [docker](docker): docker production installation
-    * [lxd](lxd): lxd production installation
-    * [dehydrated](dehydrated): manage letsencrypt certificates
-    * [vagrant](vagrant): vagrant virtual machine manager
-    
-    * [golang](golang)
-    * [python](python)
-    * [java](java)
-    * [vcs](vcs): git,mercurial,bzr,subversion, git-crypt, git-bridge
-    
+    * [tools](tools): command line tools for administration
+
+    * Desktop
+        * [desktop](desktop):
+          * everything wanted for a desktop installation (mostly 20.04)
+
+    * Network
+        * [http_proxy](http_proxy):
+            * [.server](http_proxy/server.sls): install trafficserver
+            * [.client_use_proxy](http_proxy/client_use_proxy.sls)
+            * [.client_no_proxy](http_proxy/client_no_proxy.sls)
+        * [unbound](unbound): caching recursive dns resolver
+        * [knot](knot): authoritative dnsec capable dns server
+        * [syncthing](syncthing): network file syncronisation
+        * [strongswan](strongswan): IPsec VPN
+        * [wireguard](wireguard): Wireguard VPN
+
+    * Virtual Machines
+        * [libvirt](libvirt): libvirt/qemu/kvm setup
+        * [docker](docker): docker production installation
+        * [lxd](lxd): lxd production installation
+        * [vagrant](vagrant): vagrant virtual machine manager
+        * [k3s](k3s): small footprint Kubernetes Distribution
+
+    * Language Support
+        * [python](python)
+        * [java](java)
+        * [latex](latex)
+        * [vcs](vcs): git,mercurial,bzr,subversion, git-crypt, git-bridge
+
     * [lab](lab): Experimental Work
-    * [old](old): Old Work
-    * [old desktop](desktop/old) Old Desktop related work
-
-### How to start
-
- * [`/salt-top.example`](salt-top.example): Example states top file
- * [`/pillar-top.example`](pillar-top.example): Example pillar data
+    * [old](old): Old States
