@@ -1,8 +1,8 @@
 include:
-  . openssl         {# #}
-  . unison          {# #}
-  . tmux            {# #}
-  . gnupg           {# #}
+  - .openssl        {# #}
+  - .unison         {# #}
+  - .tmux           {# #}
+  - .gnupg          {# #}
   - python          {# #}
   - python.jinja2   {# Jinja2 including cli interface #}
   - .flatyaml       {# convert yaml to a flat key=value format #}

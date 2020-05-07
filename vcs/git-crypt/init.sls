@@ -1,9 +1,10 @@
 include:
   - vcs.git
-  - openssl
 
 git-crypt:
   pkg.installed:
+    - pkgs:
+      - git-crypt
+      - openssl
     - require:
       - pkg: git
-      - pkg: openssl

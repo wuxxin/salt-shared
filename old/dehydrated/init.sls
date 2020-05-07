@@ -1,8 +1,5 @@
-include:
-  - openssl
-
 {% from "dehydrated/defaults.jinja" import settings, letsencrypt with context %}
-        
+
 dehydrated-user:
   group.present:
     - name: dehydrated
@@ -15,6 +12,11 @@ dehydrated-user:
     - remove_groups: False
     - groups:
       - www-data
+
+dehydrated-requisites:
+  pkg.installed:
+    - pkgs:
+      - openssl
 
 /usr/local/bin/dehydrated:
   file.managed:
