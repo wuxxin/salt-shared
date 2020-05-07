@@ -8,7 +8,7 @@ include:
   file.managed:
     - contents: |
         Package: libreoffice
-        Pin: version 5.*
+        Pin: version 6.*
         Pin-Priority: 900
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
