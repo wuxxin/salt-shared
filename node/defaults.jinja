@@ -49,9 +49,9 @@ bridge_netmask: {{ salt['network.convert_cidr'](bridge_cidr)['netmask'] }}
 bridge_ip: {{ bridge_ip }}
 rpcbind: ['{{ bridge_ip }}']
 recovery_netplan: |
-{{ netplan_recovery|indent(4,True) }}
+{{ recovery_netplan|indent(4,True) }}
 netplan_default: |
-{{ netplan_default|indent(4,True) }}
+{{ default_netplan|indent(4,True) }}
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
