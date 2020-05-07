@@ -1,4 +1,4 @@
 include:
   - ubuntu
-  - ubuntu.reporting.disabled
   - ubuntu.update
+  - ubuntu.reporting.disabled
