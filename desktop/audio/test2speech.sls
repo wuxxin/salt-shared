@@ -1,5 +1,5 @@
 
-speach-packages:
+text2speech-packages:
   pkg.installed:
     - pkgs:
       - mbrola
