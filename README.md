@@ -9,12 +9,16 @@ some states have documentation README.md's.
 
 * Target Platforms: Ubuntu Focal 20.04 LTS and 19.10; 19.04; 18.04; debian 10
     * many non-gui states also work with older/newer ubuntu and other debian based distros.
+    * To bootstrap a machine with a custom storage setup, see:
+      [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
 * Features to look at:
     * [node](node): basic machine setup (hostname, locale, network, storage)
     * [hardware](hardware): hardware setup
     * [kernel](kernel): kernel image,headers,tools
     * [tools](tools): command line tools for administration
+    * [gitops](gitops): deploy and update machines from git, with webhook support
+    * [http_frontend](http_frontend): simple modern https frontend
 
     * Desktop
         * [desktop](desktop):
