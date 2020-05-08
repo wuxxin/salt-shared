@@ -90,7 +90,7 @@ git-crypt add-gpg-user $gitgpguser
 # create machine gpg id files
 gpgutils.py gen_keypair gitops@node "$gitreponame" config/gitops@node-secret-key.gpg config/gitops@node-public-key.gpg
 # add machine gpg id files to git-crypt
-fixme!
+fixme add machine gpg id files to git-crypt
 git add .
 git commit -v -m "add git-crypt config"
 
