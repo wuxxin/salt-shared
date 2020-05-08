@@ -50,11 +50,21 @@ include:
       - file: /etc/nginx/proxy_params
       - file: /etc/nginx/uwsgi_params
 
+{% if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 20 %}
+{# xenial 1.10, bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
+{% from "ubuntu/init.sls" import apt_add_repository %}
+{{ apt_add_repository("nginx_ppa", "nginx/mainline", require_in= "pkg: nginx") }}
+nginx:
+  pkg.installed:
+    - pkgs:
+      - nginx
+{% else %}
 nginx:
   pkg.installed:
     - pkgs:
       - nginx
       - nginx-extras
+{% endif %}
   service.running:
     - enable: true
     - require:
