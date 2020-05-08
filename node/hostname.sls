@@ -2,7 +2,7 @@
 
 set_hostsfile:
   host.only:
-    - name: {{ settings.bridge_ip }}
+    - name: {{ settings.network.internal_ip }}
     - hostnames:
       - {{ settings.hostname }}
       - {{ settings.hostname.partition('.')[0] }}

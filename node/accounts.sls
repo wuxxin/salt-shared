@@ -4,18 +4,19 @@
 include:
   - .hostname
 
-{% for u in settings.user|d([]) %}
+{% for u in settings.users|d([]) %}
 user_present_{{ u.name }}:
   user.present:
     - name: {{ u.name }}
   {%- for name,value in u.items() %}
-    {%- if name != 'name' %}
+    {%- if name != 'name' and name != 'authorized_keys' %}
       {{ name }}: {{ value }}
     {%- endif %}
   {%- endfor %}
+
 {%- endfor %}
 
-{% for u in settings.group|d([]) %}
+{% for u in settings.groups|d([]) %}
 group_present_{{ u.name }}:
   group.present:
     - name: {{ u.name }}

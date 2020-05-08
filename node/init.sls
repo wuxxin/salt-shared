@@ -1,6 +1,6 @@
 include:
-  - .hostname
   - .locale
-  - .accounts
   - .network
+  - .hostname
+  - .accounts
   - .storage

@@ -1,58 +1,56 @@
-{% set bridge_cidr= salt['pillar.get']('node:network:internal:cidr', '10.140.250.1/24') %}
-{% set bridge_name= salt['pillar.get']('node:network:internal:name', 'resident') %}
-{% set bridge_ip= bridge_cidr|regex_replace ('([^/]+)/.+', '\\1') %}
-{% set netplan_path= grains['project_basepath']+ '/config/netplan.yaml' %}
-{% import_text netplan_path as netplan_raw %}
-{% set recovery_netplan= salt['pillar.get']('node:network:recovery', netplan_raw) %}
-{% set default_netplan= salt['pillar.get']('node:network:default', netplan_raw) %}
-
-
-{% load_yaml as example %}
-node:
-  user:
-    - name: XX
-  ssh_user:
-    - XX
-  locale:
-    lang: en:us
-    location: World
-    timezone: UTC
-    additional:
-    posix_messages: false
-  network:
-    internal:
-      cidr:
-      name:
-    default:
-    recovery:
-  storage:
-    filesystem:
-      zfs:
-        - name: rpool/data/volumes
-      lvm:
-        - name: vg0/ext4data
-    mount:
-    directory:
-      - name: /data/volumes/lxd
-        require:
-          - zfs: zfs_fs_present_rpool/data/volumes
-      - name: /mnt/data/volumes/lxd
-        makedirs: true
-{% endload %}
+{% set default_route_ip= salt['cmd.run_stdout'](
+    'ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) %}
+{% import_text grains['project_basepath']+ '/config/netplan.yaml' as netplan_raw %}
 
 {% load_yaml as defaults %}
-def_route_ip: {{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) }}
-bridge_cidr: {{ bridge_cidr }}
-bridge_name: {{ bridge_name }}
-bridge_netcidr: {{ salt['network.convert_cidr'](bridge_cidr)['network'] }}
-bridge_netmask: {{ salt['network.convert_cidr'](bridge_cidr)['netmask'] }}
-bridge_ip: {{ bridge_ip }}
-rpcbind: ['{{ bridge_ip }}']
-recovery_netplan: |
-{{ recovery_netplan|indent(4,True) }}
-netplan_default: |
-{{ default_netplan|indent(4,True) }}
+hostname:
+users:
+
+locale:
+  lang: en:us
+  additional:
+  posix_messages: false
+  timezone: UTC
+  location: World
+
+network:
+  outgoing_ip: {{ default_route_ip }}
+  internal_cidr: 10.140.250.1/24
+  internal_name: resident
+  netplan: |
+{{ netplan_raw|indent(6,True) }}
+  rpc_bind_list:
+    - 10.140.250.1
+  default_route_ip: {{ default_route_ip }}
 {% endload %}
+
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('node', {})) %}
+
+{# update locale #}
+{% set lang_name= settings.locale.lang.split(':')[0] %}
+{% set lang_country= settings.locale.lang.split(':')[1] %}
+{% set lang_env=: lang_name+ '_'+ lang_country|upper+ '.UTF-8' %}
+{% do settings.locale.update({
+  'language': settings.locale.language|d(lang_name+ '_'+ lang_country|upper+ ':'+ lang_name),
+  'language_code': lang_name+ '-'+ lang_country,
+  'lang_env': lang_env,
+  'lang_all': lang_env,
+  'messages_env': 'POSIX' if settings.locale.posix_messages else '',
+  }) %}
+{% if settings.locale.additional %}
+  {% for x in settings.locale.additional.split(' ') %}
+    {% set l = x.split(':')[0] %}
+    {% set c = x.split(':')[1] %}
+    {% set tobeadded = l+ '_'+ c|upper()+ '.UTF-8' %}
+    {% set settings.locale.lang_all= settings.locale.lang_all+ ' '+ tobeadded %}
+  {% endfor %}
+{% endif %}
+
+{# update network #}
+{% do settings.network.update({
+  'internal_ip': settings.network.internal_cidr|regex_replace ('([^/]+)/.+', '\\1'),
+  'internal_netcidr': salt['network.convert_cidr'](settings.network.internal_cidr)['network'],
+  'internal_netmask': salt['network.convert_cidr'](settings.network.internal_cidr)['netmask'],
+  }) %}

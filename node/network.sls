@@ -1,7 +1,7 @@
 {% from "node/defaults.jinja" import settings %}
 
+
 include:
-  - .hostname
   - ssh
 
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
@@ -57,36 +57,42 @@ network-utils:
       - rpcbind
 
 {# add resident bridge #}
-{{ add_internal_bridge(settings.bridge_name, settings.bridge_cidr) }}
+{{ add_internal_bridge(settings.network.internal_name, settings.network.internal_cidr) }}
 
 {# write possible different to recovery netplan #}
-/etc/netplan/50-lan.yaml:
+{% if settings.network.netplan %}
+/etc/netplan/50-default.yaml:
   file.managed:
     - contents: |
-{{ settings.netplan_default|indent(8,True) }}
+{{ settings.network.netplan|indent(8,True) }}
   cmd.run:
     - name: netplan generate && netplan apply
     - onchanges:
-      - file: /etc/netplan/50-lan.yaml
+      - file: /etc/netplan/50-default.yaml
+    - require_in:
+      - service: rpcbind
+      - service: rpcbind.socket
+{% endif %}
 
-{# restrict rpcbind to localhost and default list ([bridge_ip]) #}
-/etc/default/rpcbind:
+{# restrict rpcbind to localhost and default list ([internal_ip]) #}
+rpcbind:
   file.replace:
+    - name: /etc/default/rpcbind
     - pattern: '^OPTIONS=".+"'
-    - repl: OPTIONS="-w -l -h 127.0.0.1 -h ::1 {% for ip in settings.rpcbind %}-h {{ ip }}{% endfor %}"
+    - repl: OPTIONS="-w -l -h 127.0.0.1 -h ::1 {% for ip in settings.network.rpc_bind_list %}-h {{ ip }}{% endfor %}"
     - append_if_not_found: true
   service.running:
     - name: rpcbind
     - enable: True
     - require:
       - pkg: network-utils
-      - cmd: /etc/netplan/50-lan.yaml
-      - cmd: bridge_{{ settings.bridge_name }}
+      - cmd: bridge_{{ settings.network.internal_name }}
     - watch:
-      - file: /etc/default/rpcbind
+      - file: rpcbind
 
-/etc/systemd/system/rpcbind.socket:
+rpcbind.socket:
   file.managed:
+    - name: /etc/systemd/system/rpcbind.socket
     - makedirs: true
     - contents: |
         [Unit]
@@ -103,7 +109,7 @@ network-utils:
         ListenDatagram=127.0.0.1:111
         ListenStream=[::1]:111
         ListenDatagram=[::1]:111
-{%- for ip in settings.rpcbind %}
+{%- for ip in settings.network.rpc_bind_list %}
         ListenStream={{ ip }}:111
         ListenDatagram={{ ip }}:111
 {%- endfor %}
@@ -113,14 +119,13 @@ network-utils:
     - name: systemctl daemon-reload
     - order: last
     - onchanges:
-      - file: /etc/systemd/system/rpcbind.socket
+      - file: rpcbind.socket
   service.running:
     - name: rpcbind.socket
     - enable: True
     - require:
       - pkg: network-utils
-      - cmd: /etc/systemd/system/rpcbind.socket
-      - cmd: /etc/netplan/50-lan.yaml
-      - cmd: bridge_{{ settings.bridge_name }}
+      - cmd: rpcbind.socket
+      - cmd: bridge_{{ settings.network.internal_name }}
     - watch:
-      - file: /etc/systemd/system/rpcbind.socket
+      - file: rpcbind.socket
