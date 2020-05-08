@@ -1,6 +1,10 @@
-{% set default_route_ip= salt['cmd.run_stdout'](
-    'ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) %}
-{% import_text grains['project_basepath']+ '/config/netplan.yaml' as netplan_raw %}
+{% macro netcidr(cidr) %}{{ salt['network.convert_cidr'](cidr)['network'] }}{% endmacro %}
+{% macro netmask(cidr) %}{{ salt['network.convert_cidr'](cidr)['netmask'] }}{% endmacro %}
+{% macro cidr2ip(cidr) %}{{ cidr|regex_replace ('([^/]+)/.+', '\\1') }}{% endmacro %}
+
+{% set internal_cidr = salt['pillar.get']('node:network:internal_cidr', '10.140.250.1/24') %}
+{% set internal_name = salt['pillar.get']('node:network:internal_name', 'resident') %}
+
 
 {# defaults #}
 {% load_yaml as defaults %}
@@ -16,14 +20,11 @@ locale:
   location: World
 
 network:
-  outgoing_ip: {{ default_route_ip }}
-  internal_cidr: 10.140.250.1/24
-  internal_name: resident
-  netplan: |
-{{ netplan_raw|indent(6,True) }}
+  internal_cidr: {{ internal_cidr }}
+  internal_name: {{ internal_name }}
+  netplan:
   rpc_bind_list:
-    - 10.140.250.1
-  default_route_ip: {{ default_route_ip }}
+    - {{ cidr2ip(internal_cidr) }}
 {% endload %}
 
 {# merge defaults with pillar #}
@@ -53,7 +54,7 @@ network:
 
 {# update settings.network #}
 {% do settings.network.update({
-  'internal_ip': settings.network.internal_cidr|regex_replace ('([^/]+)/.+', '\\1'),
-  'internal_netcidr': salt['network.convert_cidr'](settings.network.internal_cidr)['network'],
-  'internal_netmask': salt['network.convert_cidr'](settings.network.internal_cidr)['netmask'],
+  'internal_ip': cidr2ip(settings.network.internal_cidr),
+  'internal_netcidr': netcidr(settings.network.internal_cidr),
+  'internal_netmask': netmask(settings.network.internal_cidr),
   }) %}

@@ -1,6 +1,5 @@
 {% from "node/defaults.jinja" import settings %}
 
-
 include:
   - ssh
 
@@ -59,12 +58,16 @@ network-utils:
 {# add resident bridge #}
 {{ add_internal_bridge(settings.network.internal_name, settings.network.internal_cidr) }}
 
-{# write possible different to recovery netplan #}
-{% if settings.network.netplan %}
+{# write if not empty, remove if empty #}
 /etc/netplan/50-default.yaml:
+{% if not settings.network.netplan %}
+  file:
+    - absent
+{% else %}
   file.managed:
     - contents: |
 {{ settings.network.netplan|indent(8,True) }}
+{% endif %}
   cmd.run:
     - name: netplan generate && netplan apply
     - onchanges:
@@ -72,7 +75,6 @@ network-utils:
     - require_in:
       - service: rpcbind
       - service: rpcbind.socket
-{% endif %}
 
 {# restrict rpcbind to localhost and default list ([internal_ip]) #}
 rpcbind:

@@ -37,19 +37,14 @@ node:
   network:
     internal_cidr: 10.140.250.1/24
     internal_name: resident
-
-    # default
-    netplan: |
-{{ netplan from config/netplan.yaml }}
-    rpc_bind_list:
-      - 10.140.250.1
-    outgoing_ip: {{ default_route_ip }}
+    netplan: ""
 
     # computed
     internal_ip: {{ internal_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
     internal_netcidr: {{ salt['network.convert_cidr'](internal_cidr)['network'] }}
     internal_netmask: {{ salt['network.convert_cidr'](internal_cidr)['netmask'] }}
-    default_route_ip: {{ default_route_ip }}
+    rpc_bind_list:
+      - {{ internal_ip }}
 
   storage:
     filesystem:
