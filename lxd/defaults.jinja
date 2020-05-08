@@ -10,7 +10,7 @@ config:
   images.auto_update_interval: 15
 {% endload %}
 
-{% load_yaml as examples %}
+{% load_yaml as extended_defaults %}
 # Storage pools
 storage_pools:
 - name: {{ pool }}
@@ -83,13 +83,13 @@ images:
 {% endload %}
 
 
-{%- set settings=salt['grains.filter_by']({'default': defaults},
+{%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('lxd', {})) %}
 
 {%- for section in ['storage_pools', 'networks', 'profiles', 'images'] %}
   {%- set section_org = salt['pillar.get']('lxd:'+ section, []) %}
   {%- set section_names= section_org|map(attribute='name') %}
-  {%- for item in examples[section] %}
+  {%- for item in extended_defaults[section] %}
     {%- if item.name not in section_names %}
       {%- do section_org.append(item) %}
     {%- endif %}
