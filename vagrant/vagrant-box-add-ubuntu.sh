@@ -8,7 +8,7 @@ Usage: $0 [--codename codename] [--daily] [--only-lxd|--only-libvirt] [--yes|--c
 
 download and modify an ubuntu vagrant box for virtualbox, libvirt & lxd
 
-default codename=$codename 
+default codename=$codename
 remark: needs lxd running for vagrant lxd container
 
 EOF
@@ -25,17 +25,20 @@ codename2version() {
         bionic) echo "18.04" ;;
         cosmic) echo "18.10" ;;
         disco) echo "19.04" ;;
+        eoan)  echo "19.10" ;;
+        focal) echo "20.04" ;;
+        groovy) echo "20.10" ;;
     esac
 }
 
 
 virtualbox_to_libvirt() {
-    local codename boxversion virtualboxdir libvirtdir 
+    local codename boxversion virtualboxdir libvirtdir
     codename=$1
     boxversion=$2
     virtualboxdir=$3
     libvirtdir=$4
-    
+
     # check if box of type virtualbox is already there
     test -e $virtualboxdir/metadata.json
 
@@ -45,7 +48,7 @@ virtualbox_to_libvirt() {
 {
   "provider"     : "libvirt",
   "format"       : "qcow2",
-  "virtual_size" : 10 
+  "virtual_size" : 10
 }
 EOF
     cat > $libvirtdir/Vagrantfile << EOF
@@ -75,7 +78,7 @@ download_convert_virtualbox() {
     local keyid real_fingerprint expected_fingerprint
     codename="$1"
     daily="$2"
-    
+
     # construct box url and version
     if test "$daily" = "true"; then
         baseurl="https://cloud-images.ubuntu.com/daily/server/$codename/current"
@@ -86,7 +89,7 @@ download_convert_virtualbox() {
         baseurl="https://cloud-images.ubuntu.com/releases/$codename/release"
         basename="ubuntu-$releasever-server-cloudimg-$arch"
         boxversion="$(curl -L -s $baseurl/unpacked/build-info.txt | grep '^serial' | sed -r 's/serial=(.*)/\1/')"
-    fi    
+    fi
     if ! $(echo "$boxversion" | grep -q -E "[0-9]+\.[0-9]+\.[0-9]+"); then
         boxversion="${boxversion}.0"
     fi
@@ -98,7 +101,7 @@ download_convert_virtualbox() {
     libvirtdir=$basedir/libvirt
 
     # create directory,metadata, change to basedir
-    mkdir -p $basedir   
+    mkdir -p $basedir
     echo -n "https://vagrantcloud.com/ubuntu/${codename}64" > "$(dirname $basedir)/metadata_url"
     cd $basedir
 
@@ -107,7 +110,7 @@ download_convert_virtualbox() {
     mkdir -m 0700 gpghome
     keyid="7DB87C81"
     expected_fingerprint="D2EB 4462 6FDD C30B 513D  5BB7 1A5D 6C4C 7DB8 7C81"
-    gpg --quiet --homedir gpghome --batch --yes --keyserver keyserver.ubuntu.com --recv-keys $keyid 
+    gpg --quiet --homedir gpghome --batch --yes --keyserver keyserver.ubuntu.com --recv-keys $keyid
     real_fingerprint=$(LC_MESSAGES=POSIX gpg --quiet --homedir gpghome --fingerprint $keyid | grep "fingerprint = " | sed -r "s/.*= (.*)/\1/g")
     if test "$expected_fingerprint" != "$real_fingerprint"; then
         echo "error: fingerprint mismatch: expected: $expected_fingerprint , real: $real_fingerprint"
@@ -115,7 +118,7 @@ download_convert_virtualbox() {
     fi
     gpg --quiet --homedir gpghome --export $keyid > "$basedir/cdimage@ubuntu.com.gpg"
     rm -rf gpghome
-        
+
     # get checksum files
     for i in SHA256SUMS SHA256SUMS.gpg; do
         echo "get $baseurl/$i"
@@ -136,10 +139,10 @@ download_convert_virtualbox() {
         echo "information: check sha256sum of $i"
         grep "$i" SHA256SUMS | sha256sum --check
     done
-    
+
     mkdir -p $virtualboxdir
     tar xf $basedir/${basename}-vagrant.box -C $virtualboxdir
-    
+
     virtualbox_to_libvirt $codename $boxversion $virtualboxdir $libvirtdir
 }
 
@@ -149,7 +152,7 @@ download_convert_lxcd() {
     codename=$1
     cloudblock=$scriptpath/cloud-init-block.yaml
     if test ! -e $cloudblock; then
-        cloudblock=/usr/local/share/vagrant/cloud-init-block.yaml    
+        cloudblock=/usr/local/share/vagrant/cloud-init-block.yaml
     fi
     if test "$daily" = "true"; then
         boxversion=$(lxc image show ubuntu-daily:$codename/$arch --format yaml | grep "serial:" | sed -r 's/.*serial: "([0-9\.]+)"/\1/')
@@ -171,17 +174,17 @@ download_convert_lxcd() {
     lxcdir=$basedir/lxc
     lxdconfig=${basename}-lxd.tar.xz
     rootfs=${basename}.squashfs
-        
+
     # create directory,metadata, change to basedir
-    mkdir -p $basedir   
+    mkdir -p $basedir
     echo -n "https://vagrantcloud.com/ubuntu/${codename}64" > "$(dirname $basedir)/metadata_url"
     cd $basedir
-    
+
     echo "information: download ubuntu lxd container"
     mkdir -p $lxcdir $lxddir
     #lxc image export ubuntu:$codename/$arch $basedir
     echo "xxx todo fixme: write checksum, redownload when ?"
-    
+
     echo "information: convert lxd container to vagrant lxd friendly layout"
     fakeroot -- bash -c "\
     if test -e temp; then rm -rf temp; fi; mkdir -p temp; \
@@ -234,7 +237,7 @@ EOF
 
 # main
 scriptpath=$(dirname $(readlink -e "$0"))
-codename=bionic
+codename=focal
 arch=amd64
 daily=false
 onylxd=false
