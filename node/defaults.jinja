@@ -2,6 +2,7 @@
     'ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) %}
 {% import_text grains['project_basepath']+ '/config/netplan.yaml' as netplan_raw %}
 
+{# defaults #}
 {% load_yaml as defaults %}
 hostname:
 users:
@@ -25,31 +26,32 @@ network:
   default_route_ip: {{ default_route_ip }}
 {% endload %}
 
-
+{# merge defaults with pillar #}
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('node', {})) %}
 
-{# update locale #}
+{# update settings.locale #}
 {% set lang_name= settings.locale.lang.split(':')[0] %}
 {% set lang_country= settings.locale.lang.split(':')[1] %}
 {% set lang_env= lang_name+ '_'+ lang_country|upper+ '.UTF-8' %}
-{% do settings.locale.update({
-  'language': settings.locale.language|d(lang_name+ '_'+ lang_country|upper+ ':'+ lang_name),
-  'language_code': lang_name+ '-'+ lang_country,
-  'lang_env': lang_env,
-  'lang_all': lang_env,
-  'messages_env': 'POSIX' if settings.locale.posix_messages else '',
-  }) %}
+{% set tempspace = namespace({'lang_all': lang_env}) %}
 {% if settings.locale.additional %}
   {% for x in settings.locale.additional.split(' ') %}
     {% set l = x.split(':')[0] %}
     {% set c = x.split(':')[1] %}
     {% set tobeadded = l+ '_'+ c|upper()+ '.UTF-8' %}
-    {% set settings.locale.lang_all= settings.locale.lang_all+ ' '+ tobeadded %}
+    {% set tempspace.lang_all= tempspace.lang_all+ ' '+ tobeadded %}
   {% endfor %}
 {% endif %}
+{% do settings.locale.update({
+  'language': settings.locale.language|d(lang_name+ '_'+ lang_country|upper+ ':'+ lang_name),
+  'language_code': lang_name+ '-'+ lang_country,
+  'lang_env': lang_env,
+  'lang_all': tempspace.lang_all,
+  'messages_env': 'POSIX' if settings.locale.posix_messages else '',
+  }) %}
 
-{# update network #}
+{# update settings.network #}
 {% do settings.network.update({
   'internal_ip': settings.network.internal_cidr|regex_replace ('([^/]+)/.+', '\\1'),
   'internal_netcidr': salt['network.convert_cidr'](settings.network.internal_cidr)['network'],
