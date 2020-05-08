@@ -1,0 +1,53 @@
+
+{% load_yaml as defaults %}
+
+user: {{ salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('gitops') }}
+
+timer:
+  enabled: false
+  oncalendar: '*-*-* 06:30:00'
+
+webhook:
+  enabled: false
+  ip: 127.0.0.1
+  port: 5555
+  default_command: /usr/local/bin/webhook-gitops-update.sh
+  hooks: []
+
+git:
+  source: ssh://git@git.domain.top:22/user/project.git
+  branch: master
+  ssh_id:
+  ssh_id_pub:
+  ssh_known_hosts:
+  gpg_id:
+
+automatic_reboot: true
+maintenance_template: /var/lib/gitops/maintenance.template
+maintenance_target: /var/lib/gitops/www/503.html
+update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate
+pre_update_command: /usr/bin/true
+post_update_command: /usr/bin/true
+{#
+pre ist only executed if update would run,
+post is executed after update run, except if machine needs to be rebooted
+#}
+
+env_file: /etc/gitops.env
+var_dir: /var/lib/gitops
+src_dir: {{ grains['project_basepath'] }}
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('gitops', {})) %}
+
+{% if settings.git.branch is not defined %}
+  {% do settings.git.update({ 'branch': 'master' }) %}
+{% endif %}
+
+{% if settings.home_dir is not defined %}
+  {% do settings.update(
+    { 'home_dir': salt['cmd.run']('getent passwd '+
+      settings.user+ ' | cut -d: -f6', python_shell=True) } ) %}
+{% endif %}

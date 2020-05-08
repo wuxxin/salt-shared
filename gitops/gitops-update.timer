@@ -1,0 +1,8 @@
+[Unit]
+Description=Gitops Update Timer
+
+[Timer]
+OnCalendar={{ settings.timer.oncalendar }}
+
+[Install]
+WantedBy=timers.target

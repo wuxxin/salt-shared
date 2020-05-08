@@ -1,0 +1,4 @@
+include:
+  - .service
+  - .timer
+  - .webhook
