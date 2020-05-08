@@ -1,0 +1,18 @@
+[Unit]
+Description=Letsencrypt Certificates Renewal
+After=network-online.target
+Wants=network-online.target
+ConditionFileNotEmpty={{ settings.cert_dir }}/acme.sh/account.conf
+
+[Service]
+Type=oneshot
+User={{ settings.user }}
+Group={{ settings.user }}
+Environment=UNITNAME=%n
+Environment=HOME="{{ settings.home_dir }}"
+Environment=USER="{{ settings.user }}"
+PassEnvironment=UNITNAME HOME USER
+WorkingDirectory={{ settings.home_dir }}
+ExecStart={{ settings.cert_dir }}/acme.sh/acme.sh --cron --home "{{ settings.cert_dir }}/acme.sh"
+# acme.sh returns 2 when renewal is skipped (i.e. certs up to date)
+SuccessExitStatus=0 2
