@@ -1,3 +1,10 @@
+# Node state
+
+Configures hostname, first user, locale, timezone, network, storage
+
+## Example pillar
+
+```yaml
 node:
   hostname: unsethostname
   users:
@@ -59,3 +66,4 @@ node:
           - zfs: zfs_fs_present_rpool/data/volumes
       - name: /mnt/data/volumes/lxd
         makedirs: true
+```
