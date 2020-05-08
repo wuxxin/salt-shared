@@ -4,7 +4,7 @@ include:
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {% macro user_install_oxt(user, identifier, url) %}
-  {%- set localfile = user_home+ '/.local/cache/libreoffice-extensions/'+ identifier %}
+  {%- set localfile = user_home+ '/.local/cache/libreoffice-extensions/'+ identifier+ '.oxt' %}
 install_{{ user }}_{{ identifier }}:
   file.managed:
     - source: {{ url }}
@@ -15,13 +15,16 @@ install_{{ user }}_{{ identifier }}:
     - name: unopkg add -s {{ localfile }}
     - runas: {{ user }}
     - cwd: {{ user_home }}
+    - unless: unopkg list | grep -q "{{ identifier }}"  #}
     - onchanges:
       - file: install_{{ user }}_{{ identifier }}
+    - require:
+      - pkg: libreoffice
 {% endmacro %}
 
 {# -  unless: unopkg list | grep -q "{{ identifier }}"  #}
 
-{{ user_install_oxt(user, "org.openoffice.languagetool.oxt",
+{{ user_install_oxt(user, "org.openoffice.languagetool",
   "https://languagetool.org/download/LanguageTool-stable.oxt"
   ) }}
 
