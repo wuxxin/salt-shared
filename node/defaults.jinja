@@ -5,6 +5,7 @@
 {% load_yaml as defaults %}
 hostname:
 users:
+groups:
 
 locale:
   lang: en:us
@@ -31,7 +32,7 @@ network:
 {# update locale #}
 {% set lang_name= settings.locale.lang.split(':')[0] %}
 {% set lang_country= settings.locale.lang.split(':')[1] %}
-{% set lang_env=: lang_name+ '_'+ lang_country|upper+ '.UTF-8' %}
+{% set lang_env= lang_name+ '_'+ lang_country|upper+ '.UTF-8' %}
 {% do settings.locale.update({
   'language': settings.locale.language|d(lang_name+ '_'+ lang_country|upper+ ':'+ lang_name),
   'language_code': lang_name+ '-'+ lang_country,
