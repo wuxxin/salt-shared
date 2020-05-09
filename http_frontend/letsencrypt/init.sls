@@ -1,10 +1,10 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
+{% set tlsport= settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1') %}
+{% set acme_sh_local_file= "/usr/local/"+ settings.external.acme_sh_tar_gz.target+ "/acme_sh.tar.gz" %}
 
 include:
   - http_frontend.dirs
   - http_frontend.nginx
-
-{% set acme_sh_local_file= "/usr/local/"+ settings.external.acme_sh_tar_gz.target+ "/acme_sh.tar.gz" %}
 
 {{ settings.cert_dir }}/acme.sh:
   file.directory:
@@ -83,7 +83,7 @@ acme.sh:
         #AUTO_UPGRADE="1"
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
-        TLSPORT=10443
+        TLSPORT={{ tlsport }}
         DOMAIN={{ settings.domain }}
     - require:
       - file: {{ settings.cert_dir }}/acme.sh
@@ -107,7 +107,7 @@ acme-issue-cert:
     - name: |
         gosu {{ settings.user }} ./acme.sh --issue \
         {% for i in settings.allowed_hosts.split(" ") %}-d {{ i }} {% endfor %} \
-        --alpn --tlsport 10443 \
+        --alpn --tlsport {{ tlsport }} \
         --renew-hook '{{ settings.cert_dir }}/acme.sh/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - env:
       - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"

@@ -19,36 +19,34 @@ group: ssl-cert
 cert_dir: /etc/ssl
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
 client_max_body_size: 0
-{# list of ip's allowed to set real ip proxy header see http://nginx.org/en/docs/http/ngx_http_realip_module.html #}
+{# list of ips allowed to set real ip proxy header, http://nginx.org/en/docs/http/ngx_http_realip_module.html #}
 set_real_ip_from: "127.0.0.1"
-{# list of commands to be executted after ssl certificate has changed, eg. letsencrypt update.
-cmds are executed as settings.user, each sudo needs an entry in sudoers for proper privilege handling #}
+{# list of commands executed after ssl certificate has changed, eg. letsencrypt update #}
+{# cmds are run as settings.user, each usage of sudo needs an entry in the sudoers files #}
 ssl_reload_cmd:
-  - sudo /bin/systemctl reload-or-restart nginx
-  {# - sudo /bin/systemctl restart postfix #}
+  - /usr/bin/sudo /bin/systemctl reload-or-restart nginx
+maintenance_target: /var/lib/http_frontend/www/503.html
 
 {#
-upstream: [] # list of upstream services
-location: [] # list of [source, dest] tuples
-host: [] # list of [domain, location, upstream]
+upstream: [] # list of {name, server}
+location: [] # list of {source, target}
+host: [] # list of {domain, upstream, location}
 key: | # key, pem encoded ssl key, default empty
 cert: | # cert, pem encoded ssl cert chain, default empty
 #}
 
-
 {# mostly internal settings #}
+main_endpoint: "127.0.0.1:8443"
+alpn_proxy: "127.0.0.1:9443"
+alpn_endpoint: "127.0.0.1:10443"
+stub_status_endpoint: "127.0.0.1:10080"
+
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
 ssl_chain_cert: server.cert.pem
 ssl_full_cert: server.cert.dhparam.pem
 ssl_client_ca: client-ca.cert.pem
 ssl_client_crl: client-ca.crl.pem
-
-main_endpoint: "127.0.0.1:8443"
-alpn_proxy: "127.0.0.1:9443"
-alpn_endpoint: "127.0.0.1:10443"
-stub_status_endpoint: "127.0.0.1:10080"
-maintenance_target: /var/lib/http_frontend/www/503.html
 
 external:
   acme_sh_tar_gz:
