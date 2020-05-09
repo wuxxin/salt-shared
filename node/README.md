@@ -2,6 +2,10 @@
 
 Configures hostname, users, groups, locales, timezone, network, storage
 
++ state network
+    + add internal bridge
+    + install and configure rpcbind and nfs-common to only listen to internal ip's
+
 ## Example pillar
 
 ```yaml
