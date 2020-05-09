@@ -4,11 +4,13 @@ include:
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {% macro user_install_oxt(user, identifier, url) %}
-  {%- set localfile = user_home+ '/.local/cache/libreoffice-extensions/'+ identifier+ '.oxt' %}
+  {%- set localfile = user_home+ '/.cache/libreoffice-extensions/'+ identifier+ '.oxt' %}
 install_{{ user }}_{{ identifier }}:
   file.managed:
     - source: {{ url }}
     - name: {{ localfile }}
+    - user: {{ user }}
+    - group: {{ user }}
     - skip_verify: true
     - makedirs: true
   cmd.run:
