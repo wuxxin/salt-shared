@@ -112,9 +112,9 @@ base:
   '*':
     - custom
 EOF
-cp salt/salt-shared/gitops/config.template.sls config/config.sls
-cp salt/salt-shared/gitops/pillar.template.sls config/custom.sls
-cp salt/salt-shared/gitops/state.template.sls salt/custom/top.sls
+cp salt/salt-shared/gitops/template/config.template.sls config/config.sls
+cp salt/salt-shared/gitops/template/pillar.template.sls config/custom.sls
+cp salt/salt-shared/gitops/template/state.template.sls salt/custom/top.sls
 touch salt/custom/custom.sls
 cat > bootstrap.sh <<"EOF"
 #!/usr/bin/env bash

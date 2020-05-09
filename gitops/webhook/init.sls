@@ -1,5 +1,8 @@
 {% from "gitops/defaults.jinja" import settings with context %}
-{% from "gitops/webhook-lib.sls" import mkhook with context %}
+{% from "gitops/webhook/webhook-lib.sls" import mkhook with context %}
+
+include:
+  - service
 
 {# install package, but disable and mask default webhook service #}
 webhook:
@@ -35,7 +38,7 @@ webhook_masked:
 
 /etc/systemd/system/gitops-webhook.service:
   file.managed:
-    - source: salt://gitops/gitops-webhook.service
+    - source: salt://gitops/webhook/gitops-webhook.service
     - template: jinja
     - defaults:
         settings: {{ settings }}

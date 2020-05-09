@@ -10,19 +10,22 @@ clone and update (encrypted) git repository
 
 Install Usage:
     $0 bootstrap --url giturl --branch branch --user user --home homedir --git-dir clonedir
-    [--export-dir targetdir] [--gitrev-dir gitrevdir]
-    [--keys-from-stdin | --keys-from-file filename]
+        [--export-dir targetdir] [--gitrev-dir gitrevdir]
+        [--keys-from-stdin | --keys-from-file filename]
 
 Update Usage:
     $0 pull --url giturl --branch branch --user user --git-dir clonedir
+        [--export-dir targetdir] [--gitrev-dir gitrevdir]
 
-giturl:     url of git repository
-branch:     branchname
-user:       user to be created and owner of the targetdir files
-homedir:    home directory of user to be created
-clonedir:   directory where the source should be cloned to
+Mandatory Parameter:
 
-optional:
+--url giturl:       url of git repository
+--branch branch:    branchname
+--user user:        user to be created and owner of the targetdir files
+--home homedir:     home directory of user to be created
+--git-dir clonedir: directory where the source should be cloned to
+
+Optional Parameter:
 
 --export-dir targetdir:  directory with the checked out specific source version
 
