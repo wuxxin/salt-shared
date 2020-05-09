@@ -1,3 +1,9 @@
+# python bindings
+
++ use official python bindings (gpgme) "python3-gpg" from gnupg that are comming with system
++ use Hkp4py for keyserver
++ create mime email by hand
+
 # create gpg key and encrypt with personal keychain
 gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key | gpg --encrypt > ./user@email.gpg.crypted << EOF
 Key-Type: 1

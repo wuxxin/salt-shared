@@ -15,8 +15,8 @@ some states have documentation README.md's.
 * Features to look at:
     * [node](node): basic machine setup (hostname, locale, network, storage)
     * [hardware](hardware): hardware setup
-    * [kernel](kernel): kernel image,headers,tools
-    * [tools](tools): command line tools for administration
+    * [kernel](kernel): kernel- image,headers,tools
+    * [tools](tools): command line tools
     * [gitops](gitops): deploy and update machines from git, with webhook support
     * [http_frontend](http_frontend): simple modern https frontend
 
