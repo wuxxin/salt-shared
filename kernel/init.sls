@@ -1,10 +1,8 @@
 {% from "kernel/defaults.jinja" import settings with context %}
 
 {% if settings.keep_current|d(false) %}
-linux-image:
-  pkg.installed:
-    - pkgs:
-      - linux-tools-{{ grains['kernelrelease'] }}
+include:
+  - .running.headers
 
 {% else %}
 
