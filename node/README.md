@@ -1,6 +1,6 @@
 # Node state
 
-Configures hostname, first user, locale, timezone, network, storage
+Configures hostname, users, groups, locales, timezone, network, storage
 
 ## Example pillar
 
