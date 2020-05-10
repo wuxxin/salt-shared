@@ -1,8 +1,6 @@
 {% from "nfs/defaults.jinja" import settings %}
 
-{% macro param_list(param_name, list) %}
-{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}
-{% endmacro %}
+{% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
 
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
 {% set nfs_common_replace = [
@@ -33,28 +31,34 @@ rpcbind:
     - append_if_not_found: true
     - require:
       - pkg: rpcbind
-  service:
+{% if settings.legacy_support %}{# nfs3 needs rpcbind #}
+unmask_legacy_rpcbind:
+  service.unmasked:
     - name: rpcbind
+    - require_in:
+      - service: legacy_rpcbind
+legacy_rpcbind:
+  service.running:
+    - name: rpcbind
+    - enable: True
     - require:
       - file: rpcbind
     - watch:
       - file: rpcbind
-{% if settings.legacy_support %}{# nfs3 needs rpcbind #}
-    - running
-    - enable: True
-rpcbind_unmask:
-  service.unmasked:
-    - name: rpcbind
-    - require_in:
-      - service: rpcbind
 {% else %}
-    - dead
+legacy_rpcbind:
+  service.dead:
+    - name: rpcbind
     - enable: False
-rpcbind_mask:
+    - require:
+      - file: rpcbind
+    - watch:
+      - file: rpcbind
+mask_legacy_rpcbind:
   service.masked:
     - name: rpcbind
     - require:
-      - service: rpcbind
+      - service: legacy_rpcbind
 {% endif %}
 
 
@@ -74,8 +78,7 @@ rpcbind.socket:
         # RPC netconfig can't handle ipv6/ipv4 dual sockets
         BindIPv6Only=ipv6-only
 {%- for ip in settings.listen_ip %}
-{% set ip = '['+ ip+ ']' if xyz else ip %}
-fixme xyz to if its ipv6 address
+{%- set ip = '['+ ip+ ']' if ip|is_ipv6 else ip %}
         ListenStream={{ ip }}:111
         ListenDatagram={{ ip }}:111
 {%- endfor %}
@@ -87,28 +90,35 @@ fixme xyz to if its ipv6 address
     - name: systemctl daemon-reload
     - onchanges:
       - file: rpcbind.socket
-  service:
+
+{% if settings.legacy_support %}{# nfs3 needs rpcbind #}
+unmask_legacy_rpcbind.socket:
+  service.unmasked:
     - name: rpcbind.socket
+    - require_in:
+      - service: legacy_rpcbind.socket
+legacy_rpcbind.socket:
+  service.running:
+    - name: rpcbind.socket
+    - enable: True
     - require:
       - cmd: rpcbind.socket
     - watch:
       - file: rpcbind.socket
-{% if settings.legacy_support %}{# nfs3 needs rpcbind #}
-    - running
-    - enable: True
-rpcbind.socket_unmask:
-  service.unmasked:
-    - name: rpcbind.socket
-    - require_in:
-      - service: rpcbind.socket
 {% else %}
-    - dead
+legacy_rpcbind.socket:
+  service.dead:
+    - name: rpcbind.socket
     - enable: False
-rpcbind.socket_mask:
+    - require:
+      - cmd: rpcbind.socket
+    - watch:
+      - file: rpcbind.socket
+mask_legacy_rpcbind.socket:
   service.masked:
     - name: rpcbind.socket
     - require:
-      - service: rpcbind.socket
+      - service: legacy_rpcbind.socket
 {% endif %}
 
 
@@ -116,10 +126,10 @@ nfs-common:
   pkg.installed:
     - name: nfs-common
     - require:
-      - service: rpcbind
-      - service: rpcbind.socket
+      - service: legacy_rpcbind
+      - service: legacy_rpcbind.socket
 
-{% for name, value in settings.nfs_common_replace %}
+{% for name, value in nfs_common_replace %}
 {{ name }}-nfs-common:
   file.replace:
     - name: /etc/default/nfs-common
@@ -134,7 +144,7 @@ nfs-common:
       - service: nfs-kernel-server
 {% endfor %}
 
-{% for name, value in settings.nfs_server_replace %}
+{% for name, value in nfs_server_replace %}
 {{ name }}-nfs-kernel-server:
   file.replace:
     - name: /etc/default/nfs-kernel-server
@@ -155,7 +165,7 @@ nfs-kernel-server:
     - enable: True
 
 {%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
-  {% for name, value in settings.nfs_sysctl %}
+  {% for name, value in nfs_sysctl %}
 {{ name }}:
   sysctl.present:
     - value: {{ value }}
@@ -195,7 +205,6 @@ nfs-kernel-server:
 
 {#
 /usr/lib/systemd/scripts/nfs-utils_env.sh creates /run/sysconfig/nfs-utils
-uses tcp_wrapper for access control
 + /etc/default/nfs-common
   + rpc.statd: --no-notify $STATDARGS=\"$STATDOPTS\"
 + /etc/default/nfs-kernel-server
@@ -206,9 +215,10 @@ uses tcp_wrapper for access control
   + sm-notify: SMNOTIFYARGS=\"$SMNOTIFYARGS\"
   + rpc.idmapd: RPCIDMAPDARGS=\"$RPCIDMAPDARGS\"
   + blkmapd: BLKMAPDARGS=\"$BLKMAPDARGS\"
-+ /etc/hosts.deny:
++ uses tcp_wrapper for access control
+  + /etc/hosts.deny:
     rpcbind mountd nfsd statd lockd rquotad portmap: ALL
-+ /etc/hosts.allow:
+  + /etc/hosts.allow:
     rpcbind mountd nfsd statd lockd rquotad portmap: 127.0.0.1/24
     # nur fuer die IP 192.168.1.13: portmap: 192.168.1.13
     # fuer das gesamte LAN Zugriff: portmap: 192.168.1. oder portmap: 192.168.1.0/24

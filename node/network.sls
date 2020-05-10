@@ -2,6 +2,7 @@
 
 include:
   - ssh
+  - nfs.common
 
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
   {% if salt['cmd.retcode']('which netplan') == 0 %}
