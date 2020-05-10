@@ -23,8 +23,6 @@ network:
   internal_cidr: {{ internal_cidr }}
   internal_name: {{ internal_name }}
   netplan:
-  rpc_bind_list:
-    - {{ cidr2ip(internal_cidr) }}
 {% endload %}
 
 {# merge defaults with pillar #}

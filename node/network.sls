@@ -2,7 +2,6 @@
 
 include:
   - ssh
-  - .rpcbind
 
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
   {% if salt['cmd.retcode']('which netplan') == 0 %}
@@ -57,6 +56,13 @@ network-utils:
 {# add resident bridge #}
 {{ add_internal_bridge(settings.network.internal_name, settings.network.internal_cidr) }}
 
+nfs.common_after_bridge:
+  test.nop:
+    - require:
+      - cmd: bridge_{{ settings.network.internal_name }}
+    - require_in:
+      - sls: nfs.common
+
 {# write if not empty, remove if empty #}
 default_netplan:
   file:
@@ -72,3 +78,5 @@ default_netplan:
     - name: netplan generate && netplan apply
     - onchanges:
       - file: default_netplan
+    - require_in:
+      - sls: nfs.common

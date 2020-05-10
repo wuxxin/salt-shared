@@ -4,7 +4,8 @@ Configures hostname, users, groups, locales, timezone, network, storage
 
 + state network
     + add internal bridge
-    + install and configure rpcbind and nfs-common to only listen to internal ip's
+    + install and configure nfs-common (and rpcbind) to only listen to internal ip's
+        + change pillar list: nfs:listen_ip to overwrite default list
 
 ## Example pillar
 
@@ -54,8 +55,6 @@ node:
     internal_ip: {{ internal_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
     internal_netcidr: {{ salt['network.convert_cidr'](internal_cidr)['network'] }}
     internal_netmask: {{ salt['network.convert_cidr'](internal_cidr)['netmask'] }}
-    rpc_bind_list:
-      - {{ internal_ip }}
 
   storage:
     filesystem:
