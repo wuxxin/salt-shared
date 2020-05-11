@@ -1,0 +1,152 @@
+From b06bc28d4e493e668c6fbe8e174f15259502e1ba Mon Sep 17 00:00:00 2001
+From: Pavel Snajdr <snajpa@snajpa.net>
+Date: Thu, 7 Nov 2019 12:07:08 -0500
+Subject: [PATCH 07/13] EL7 directory inode operations rename2 compat
+
+EL7 has .rename2 op upper in the inode_operations_wrapper,
+so let's add a wrapping ifdef to dir inode_operations
+and ifdef the ops assignment too.
+
+Configure test lives in kernel-rename.m4 for now, as rename2/EL7 case
+is the only reason why we need it - for now, until support for
+tmpfile is needed. then it would me more logical to move this check
+to a separate file.
+
+Signed-off-by: Pavel Snajdr <snajpa@snajpa.net>
+---
+ config/kernel-rename.m4         | 29 +++++++++++++++++++++++++----
+ include/os/linux/zfs/sys/zpl.h  |  4 ++++
+ module/os/linux/zfs/zfs_znode.c |  5 +++++
+ module/os/linux/zfs/zpl_inode.c |  9 +++++++++
+ 4 files changed, 43 insertions(+), 4 deletions(-)
+
+diff --git a/config/kernel-rename.m4 b/config/kernel-rename.m4
+index 6a61a8c5f..b97d95b46 100644
+--- a/config/kernel-rename.m4
++++ b/config/kernel-rename.m4
+@@ -4,6 +4,18 @@ dnl # iops->rename2() merged into iops->rename(), and iops->rename() now wants
+ dnl # flags.
+ dnl #
+ AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME], [
++	ZFS_LINUX_TEST_SRC([inode_operations_rename2], [
++		#include <linux/fs.h>
++		int rename2_fn(struct inode *sip, struct dentry *sdp,
++			struct inode *tip, struct dentry *tdp,
++			unsigned int flags) { return 0; }
++
++		static const struct inode_operations
++		    iops __attribute__ ((unused)) = {
++			.rename2 = rename2_fn,
++		};
++	],[])
++
+ 	ZFS_LINUX_TEST_SRC([inode_operations_rename_flags], [
+ 		#include <linux/fs.h>
+ 		int rename_fn(struct inode *sip, struct dentry *sdp,
+@@ -16,13 +28,13 @@ AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME], [
+ 		};
+ 	],[])
+ 
+-	ZFS_LINUX_TEST_SRC([inode_operations_rename], [
++	ZFS_LINUX_TEST_SRC([dir_inode_operations_wrapper_rename2], [
+ 		#include <linux/fs.h>
+ 		int rename2_fn(struct inode *sip, struct dentry *sdp,
+ 			struct inode *tip, struct dentry *tdp,
+ 			unsigned int flags) { return 0; }
+ 
+-		static const struct inode_operations
++		static const struct inode_operations_wrapper
+ 		    iops __attribute__ ((unused)) = {
+ 			.rename2 = rename2_fn,
+ 		};
+@@ -30,8 +42,8 @@ AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME], [
+ ])
+ 
+ AC_DEFUN([ZFS_AC_KERNEL_RENAME], [
+-	AC_MSG_CHECKING([whether iops->rename() wants flags])
+-	ZFS_LINUX_TEST_RESULT([inode_operations_rename], [
++	AC_MSG_CHECKING([whether iops->rename2() exists])
++	ZFS_LINUX_TEST_RESULT([inode_operations_rename2], [
+ 		AC_MSG_RESULT(yes)
+ 		AC_DEFINE(HAVE_RENAME2, 1, [iops->rename2() exists])
+ 	],[
+@@ -44,6 +56,15 @@ AC_DEFUN([ZFS_AC_KERNEL_RENAME], [
+ 			    [iops->rename() wants flags])
+ 		],[
+ 			AC_MSG_RESULT(no)
++
++			AC_MSG_CHECKING([whether struct inode_operations_wrapper takes .rename2()])
++			ZFS_LINUX_TEST_RESULT([dir_inode_operations_wrapper_rename2], [
++				AC_MSG_RESULT(yes)
++				AC_DEFINE(HAVE_RENAME2_OPERATIONS_WRAPPER, 1,
++				    [struct inode_operations_wrapper takes .rename2()])
++			],[
++				AC_MSG_RESULT(no)
++			])
+ 		])
+ 	])
+ ])
+diff --git a/include/os/linux/zfs/sys/zpl.h b/include/os/linux/zfs/sys/zpl.h
+index 39015ddd7..7f811dc70 100644
+--- a/include/os/linux/zfs/sys/zpl.h
++++ b/include/os/linux/zfs/sys/zpl.h
+@@ -42,7 +42,11 @@ extern void zpl_vap_init(vattr_t *vap, struct inode *dir,
+     umode_t mode, cred_t *cr);
+ 
+ extern const struct inode_operations zpl_inode_operations;
++#ifdef HAVE_RENAME2_OPERATIONS_WRAPPER
++extern const struct inode_operations_wrapper zpl_dir_inode_operations;
++#else
+ extern const struct inode_operations zpl_dir_inode_operations;
++#endif
+ extern const struct inode_operations zpl_symlink_inode_operations;
+ extern const struct inode_operations zpl_special_inode_operations;
+ #if 0
+diff --git a/module/os/linux/zfs/zfs_znode.c b/module/os/linux/zfs/zfs_znode.c
+index 45f19785d..9befc07c6 100644
+--- a/module/os/linux/zfs/zfs_znode.c
++++ b/module/os/linux/zfs/zfs_znode.c
+@@ -415,7 +415,12 @@ zfs_inode_set_ops(zfsvfs_t *zfsvfs, struct inode *ip)
+ 		break;
+ 
+ 	case S_IFDIR:
++#ifdef HAVE_RENAME2_OPERATIONS_WRAPPER
++		ip->i_flags |= S_IOPS_WRAPPER;
++		ip->i_op = &zpl_dir_inode_operations.ops;
++#else
+ 		ip->i_op = &zpl_dir_inode_operations;
++#endif
+ 		ip->i_fop = &zpl_dir_file_operations;
+ 		ITOZ(ip)->z_zn_prefetch = B_TRUE;
+ 		break;
+diff --git a/module/os/linux/zfs/zpl_inode.c b/module/os/linux/zfs/zpl_inode.c
+index dab7d0ec3..587a57892 100644
+--- a/module/os/linux/zfs/zpl_inode.c
++++ b/module/os/linux/zfs/zpl_inode.c
+@@ -671,7 +671,12 @@ const struct inode_operations zpl_inode_operations = {
+ #endif /* CONFIG_FS_POSIX_ACL */
+ };
+ 
++#ifdef HAVE_RENAME2_OPERATIONS_WRAPPER
++const struct inode_operations_wrapper zpl_dir_inode_operations = {
++	.ops = {
++#else
+ const struct inode_operations zpl_dir_inode_operations = {
++#endif
+ 	.create		= zpl_create,
+ 	.lookup		= zpl_lookup,
+ 	.link		= zpl_link,
+@@ -704,6 +709,10 @@ const struct inode_operations zpl_dir_inode_operations = {
+ #endif /* HAVE_SET_ACL */
+ 	.get_acl	= zpl_get_acl,
+ #endif /* CONFIG_FS_POSIX_ACL */
++#ifdef HAVE_RENAME2_OPERATIONS_WRAPPER
++	},
++	.rename2	= zpl_rename2,
++#endif
+ };
+ 
+ const struct inode_operations zpl_symlink_inode_operations = {
+-- 
+2.20.1
+

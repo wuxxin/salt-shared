@@ -1,0 +1,25 @@
+From 0220c02e1e243ed55ed2971a0453bbdfbce3c992 Mon Sep 17 00:00:00 2001
+From: Jakub Skokan <jakub.skokan@havefun.cz>
+Date: Tue, 12 Nov 2019 16:13:37 +0100
+Subject: [PATCH 13/13] [vpsAdminOS] Hide ZFS from podman
+
+---
+ module/os/linux/zfs/zfs_vfsops.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/module/os/linux/zfs/zfs_vfsops.c b/module/os/linux/zfs/zfs_vfsops.c
+index e015a7ffe..25929e5ef 100644
+--- a/module/os/linux/zfs/zfs_vfsops.c
++++ b/module/os/linux/zfs/zfs_vfsops.c
+@@ -1143,6 +1143,8 @@ zfs_statvfs(struct dentry *dentry, struct kstatfs *statp)
+ 		magic_hack = true;
+ 	if (strcmp(current->comm, "lxd") == 0)
+ 		magic_hack = true;
++	if (strcmp(current->comm, "podman") == 0)
++		magic_hack = true;
+ 	if (magic_hack) {
+ 		printk(KERN_INFO "ZFS magic faked to %s\n", current->comm);
+ 		statp->f_type = ZFS_SHACK_MAGIC;
+-- 
+2.20.1
+

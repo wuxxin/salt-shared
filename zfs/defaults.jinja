@@ -1,0 +1,111 @@
+{% load_yaml as defaults %}
+# use cfq i/o scheduler for cgroup i/o quota support
+vdev_scheduler: cfq
+
+# use up to x% of memory for arc
+arc_max_percent: 25
+
+autosnapshot: true
+
+keep_frequent: 4 {# 15min  intervals for the last hour #}
+keep_hourly: 12  {# 1hour  intervals for the last 12 hours #}
+keep_daily: 10   {# 1day   intervals for the last 10 days #}
+keep_weekly: 4   {# 1week  intervals for the last  4 weeks #}
+keep_monthly: 4  {# 1month intervals for the last  4 months #}
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('zfs', {})) %}
+
+{% if settings.arc_max_bytes is not defined %}
+  {% do settings.update({
+    'arc_max_bytes': ((grains['mem_total'] * settings.arc_max_percent / 100 ) * 1024 * 1024),
+  }) %}
+{% endif %}
+
+{# if mountpoint is set, take path excluding last and create if not existing before calling state #}
+{% load_yaml as zfs_fs_defaults %}
+- name: ROOT
+  properties:
+    canmount: off
+    mountpoint: none
+
+- name: ROOT/ubuntu
+  properties:
+    canmount: noauto
+    mountpoint: /
+{{ mksnapshot(4, frequent=true, daily=true) }}
+
+- name: data
+  properties:
+    setuid: off
+    exec: off
+    canmount: off
+    mountpoint: none
+{{ mksnapshot(4, all=true) }}
+
+- name: data/home
+  properties:
+    setuid: off
+    exec: on
+    mountpoint: /home
+
+- name: data/home/root
+  properties:
+    mountpoint: /root
+
+mkdir -p "$basedir/var/lib"
+- name: data/mail
+  properties:
+    mountpoint: /var/lib/mail
+
+- name: data/postgresql
+  properties:
+    recordsize: 16K
+    logbias: throughput
+    primarycache: metadata
+- name: data/postgresql/localhost
+  properties:
+    mountpoint: /var/lib/postgresql
+
+- name: var
+  properties:
+    logbias: throughput
+    canmount: off
+    com.sun:auto-snapshot:frequent: true
+    com.sun:auto-snapshot:hourly: false
+    com.sun:auto-snapshot:daily: false
+    com.sun:auto-snapshot:weekly: false
+    com.sun:auto-snapshot:monthly: false
+    local.custom:auto-backup: false
+
+- name: var/basedir-tmp
+  properties:
+    mountpoint: /tmp
+chmod 1777 "$basedir/tmp"
+- name: var/tmp
+chmod 1777 "$basedir/var/tmp"
+- name: var/spool
+- name: var/backups
+- name: var/log
+  properties:
+    exec: off
+- name: var/cache
+  properties:
+    exec: off
+- name: var/cache/pbuilder
+  properties:
+    exec: on
+    devices: on
+- name: var/lib
+  properties:
+    canmount: off
+- name: var/lib/apt-lists
+  properties:
+    exec: off
+    mountpoint: /var/lib/apt/lists
+- name: var/lib/snapd
+- name: var/lib/libvirt
+
+{% endload %}

@@ -1,0 +1,604 @@
+From 295210782d840220e3cd724179b5233d8e246e2d Mon Sep 17 00:00:00 2001
+From: Aleksa Sarai <cyphar@cyphar.com>
+Date: Mon, 14 Oct 2019 22:37:03 +0200
+Subject: [PATCH 04/13] tests: add tests for renameat2(2) flags
+
+Since mv(1) doesn't expose the RENAME_* flags we need to have our own
+variation in the tests/ tree. The tests are fairly obvious functional
+tests, though in the future (once we solve the d_revalidate issue) we
+might also add a full-stack overlayfs integration test.
+
+Signed-off-by: Aleksa Sarai <cyphar@cyphar.com>
+Signed-off-by: Pavel Snajdr <snajpa@snajpa.net>
+---
+ configure.ac                                  |   2 +
+ tests/runfiles/linux.run                      |   4 +
+ tests/test-runner/bin/zts-report.py           |   6 +
+ tests/zfs-tests/cmd/Makefile.am               |   1 +
+ tests/zfs-tests/cmd/renameat2/.gitignore      |   1 +
+ tests/zfs-tests/cmd/renameat2/Makefile.am     |   6 +
+ tests/zfs-tests/cmd/renameat2/renameat2.c     | 128 ++++++++++++++++++
+ tests/zfs-tests/include/commands.cfg          |   1 +
+ tests/zfs-tests/tests/functional/Makefile.am  |   1 +
+ .../tests/functional/renameat2/Makefile.am    |   7 +
+ .../tests/functional/renameat2/cleanup.ksh    |  34 +++++
+ .../renameat2/renameat2_exchange.ksh          |  63 +++++++++
+ .../renameat2/renameat2_noreplace.ksh         |  53 ++++++++
+ .../renameat2/renameat2_whiteout.ksh          |  52 +++++++
+ .../tests/functional/renameat2/setup.ksh      |  41 ++++++
+ .../functional/slog/slog_replay_fs_001.ksh    |  16 +++
+ 16 files changed, 416 insertions(+)
+ create mode 100644 tests/zfs-tests/cmd/renameat2/.gitignore
+ create mode 100644 tests/zfs-tests/cmd/renameat2/Makefile.am
+ create mode 100644 tests/zfs-tests/cmd/renameat2/renameat2.c
+ create mode 100644 tests/zfs-tests/tests/functional/renameat2/Makefile.am
+ create mode 100755 tests/zfs-tests/tests/functional/renameat2/cleanup.ksh
+ create mode 100755 tests/zfs-tests/tests/functional/renameat2/renameat2_exchange.ksh
+ create mode 100755 tests/zfs-tests/tests/functional/renameat2/renameat2_noreplace.ksh
+ create mode 100755 tests/zfs-tests/tests/functional/renameat2/renameat2_whiteout.ksh
+ create mode 100755 tests/zfs-tests/tests/functional/renameat2/setup.ksh
+
+diff --git a/configure.ac b/configure.ac
+index 370a1970f..09a17c07d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -209,6 +209,7 @@ AC_CONFIG_FILES([
+ 	tests/zfs-tests/cmd/randfree_file/Makefile
+ 	tests/zfs-tests/cmd/randwritecomp/Makefile
+ 	tests/zfs-tests/cmd/readmmap/Makefile
++	tests/zfs-tests/cmd/renameat2/Makefile
+ 	tests/zfs-tests/cmd/rename_dir/Makefile
+ 	tests/zfs-tests/cmd/rm_lnkcnt_zero_file/Makefile
+ 	tests/zfs-tests/cmd/stride_dd/Makefile
+@@ -350,6 +351,7 @@ AC_CONFIG_FILES([
+ 	tests/zfs-tests/tests/functional/refquota/Makefile
+ 	tests/zfs-tests/tests/functional/refreserv/Makefile
+ 	tests/zfs-tests/tests/functional/removal/Makefile
++	tests/zfs-tests/tests/functional/renameat2/Makefile
+ 	tests/zfs-tests/tests/functional/rename_dirs/Makefile
+ 	tests/zfs-tests/tests/functional/replacement/Makefile
+ 	tests/zfs-tests/tests/functional/reservation/Makefile
+diff --git a/tests/runfiles/linux.run b/tests/runfiles/linux.run
+index 897a6a955..6828578cb 100644
+--- a/tests/runfiles/linux.run
++++ b/tests/runfiles/linux.run
+@@ -139,6 +139,10 @@ tests = ['projectid_001_pos', 'projectid_002_pos', 'projectid_003_pos',
+     'projecttree_001_pos', 'projecttree_002_pos', 'projecttree_003_neg']
+ tags = ['functional', 'projectquota']
+ 
++[tests/functional/renameat2:Linux]
++tests = ['renameat2_noreplace', 'renameat2_exchange', 'renameat2_whiteout']
++tags = ['functional', 'renameat2']
++
+ [tests/functional/rsend:Linux]
+ tests = ['send_realloc_dnode_size', 'send_encrypted_files']
+ tags = ['functional', 'rsend']
+diff --git a/tests/test-runner/bin/zts-report.py b/tests/test-runner/bin/zts-report.py
+index 92fc5f6d6..8ec06a62c 100755
+--- a/tests/test-runner/bin/zts-report.py
++++ b/tests/test-runner/bin/zts-report.py
+@@ -69,6 +69,11 @@ exec_reason = 'Test user execute permissions required for utilities'
+ python_reason = 'Python v3.5 or newer required'
+ python_deps_reason = 'Python modules missing: python-cffi'
+ 
++#
++# Some tests require that the kernel supports renameat2 syscall.
++#
++renameat2_reason = 'Kernel renameat2 support required'
++
+ #
+ # Some tests require the O_TMPFILE flag which was first introduced in the
+ # 3.11 kernel.
+@@ -221,6 +226,7 @@ maybe = {
+     'no_space/enospc_002_pos': ['FAIL', enospc_reason],
+     'projectquota/setup': ['SKIP', exec_reason],
+     'redundancy/redundancy_004_neg': ['FAIL', '7290'],
++    'renameat2/setup': ['SKIP', renameat2_reason],
+     'reservation/reservation_008_pos': ['FAIL', '7741'],
+     'reservation/reservation_018_pos': ['FAIL', '5642'],
+     'rsend/rsend_019_pos': ['FAIL', '6086'],
+diff --git a/tests/zfs-tests/cmd/Makefile.am b/tests/zfs-tests/cmd/Makefile.am
+index 20e85cf6b..f64754548 100644
+--- a/tests/zfs-tests/cmd/Makefile.am
++++ b/tests/zfs-tests/cmd/Makefile.am
+@@ -21,6 +21,7 @@ SUBDIRS = \
+ 	nvlist_to_lua \
+ 	randwritecomp \
+ 	readmmap \
++	renameat2 \
+ 	rename_dir \
+ 	rm_lnkcnt_zero_file \
+ 	stride_dd \
+diff --git a/tests/zfs-tests/cmd/renameat2/.gitignore b/tests/zfs-tests/cmd/renameat2/.gitignore
+new file mode 100644
+index 000000000..1d540598d
+--- /dev/null
++++ b/tests/zfs-tests/cmd/renameat2/.gitignore
+@@ -0,0 +1 @@
++/renameat2
+diff --git a/tests/zfs-tests/cmd/renameat2/Makefile.am b/tests/zfs-tests/cmd/renameat2/Makefile.am
+new file mode 100644
+index 000000000..0d68b02b0
+--- /dev/null
++++ b/tests/zfs-tests/cmd/renameat2/Makefile.am
+@@ -0,0 +1,6 @@
++include $(top_srcdir)/config/Rules.am
++
++pkgexecdir = $(datadir)/@PACKAGE@/zfs-tests/bin
++
++pkgexec_PROGRAMS = renameat2
++renameat2_SOURCES = renameat2.c
+diff --git a/tests/zfs-tests/cmd/renameat2/renameat2.c b/tests/zfs-tests/cmd/renameat2/renameat2.c
+new file mode 100644
+index 000000000..a9d0a8b20
+--- /dev/null
++++ b/tests/zfs-tests/cmd/renameat2/renameat2.c
+@@ -0,0 +1,128 @@
++/* SPDX-License-Identifier: CDDL-1.0 OR MPL-2.0 */
++/*
++ * CDDL HEADER START
++ *
++ * The contents of this file are subject to the terms of the
++ * Common Development and Distribution License (the "License").
++ * You may not use this file except in compliance with the License.
++ *
++ * You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++ * or http://www.opensolaris.org/os/licensing.
++ * See the License for the specific language governing permissions
++ * and limitations under the License.
++ *
++ * When distributing Covered Code, include this CDDL HEADER in each
++ * file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++ * If applicable, add the following below this CDDL HEADER, with the
++ * fields enclosed by brackets "[]" replaced with your own identifying
++ * information: Portions Copyright [yyyy] [name of copyright owner]
++ *
++ * CDDL HEADER END
++ */
++
++/*
++ * Copyright (C) 2019 Aleksa Sarai <cyphar@cyphar.com>
++ * Copyright (C) 2019 SUSE LLC
++ */
++
++/*
++ * mv(1) doesn't currently support RENAME_{EXCHANGE,WHITEOUT} so this is a very
++ * simple renameat2(2) wrapper for the OpenZFS self-tests.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/syscall.h>
++
++#ifndef SYS_renameat2
++#ifdef __NR_renameat2
++#define	SYS_renameat2 __NR_renameat2
++#elif defined(__x86_64__)
++#define	SYS_renameat2 316
++#elif defined(__i386__)
++#define	SYS_renameat2 353
++#elif defined(__arm__) || defined(__aarch64__)
++#define	SYS_renameat2 382
++#else
++#error "SYS_renameat2 not known for this architecture."
++#endif
++#endif
++
++#ifndef RENAME_NOREPLACE
++#define	RENAME_NOREPLACE	(1 << 0) /* Don't overwrite target */
++#endif
++#ifndef RENAME_EXCHANGE
++#define	RENAME_EXCHANGE		(1 << 1) /* Exchange source and dest */
++#endif
++#ifndef RENAME_WHITEOUT
++#define	RENAME_WHITEOUT		(1 << 2) /* Whiteout source */
++#endif
++
++/* glibc doesn't provide renameat2 wrapper, let's use our own */
++static int
++sys_renameat2(int olddirfd, const char *oldpath,
++    int newdirfd, const char *newpath, unsigned int flags)
++{
++	int ret = syscall(SYS_renameat2, olddirfd, oldpath, newdirfd, newpath,
++	    flags);
++	return ((ret < 0) ? -errno : ret);
++}
++
++static void
++usage(void)
++{
++	fprintf(stderr, "usage: renameat2 [-Cnwx] src dst\n");
++	exit(1);
++}
++
++static void
++check(void)
++{
++	int err = sys_renameat2(AT_FDCWD, ".", AT_FDCWD, ".", RENAME_EXCHANGE);
++	exit(err == -ENOSYS);
++}
++
++int
++main(int argc, char **argv)
++{
++	char *src, *dst;
++	int ch, err;
++	unsigned int flags = 0;
++
++	while ((ch = getopt(argc, argv, "Cnwx")) >= 0) {
++		switch (ch) {
++			case 'C':
++				check();
++				break;
++			case 'n':
++				flags |= RENAME_NOREPLACE;
++				break;
++			case 'w':
++				flags |= RENAME_WHITEOUT;
++				break;
++			case 'x':
++				flags |= RENAME_EXCHANGE;
++				break;
++			default:
++				usage();
++				break;
++		}
++	}
++
++	argc -= optind;
++	argv += optind;
++
++	if (argc != 2)
++		usage();
++	src = argv[0];
++	dst = argv[1];
++
++	err = sys_renameat2(AT_FDCWD, src, AT_FDCWD, dst, flags);
++	if (err < 0)
++		fprintf(stderr, "renameat2: %s", strerror(-err));
++	return (err != 0);
++}
+diff --git a/tests/zfs-tests/include/commands.cfg b/tests/zfs-tests/include/commands.cfg
+index 4498f1a53..21642a20e 100644
+--- a/tests/zfs-tests/include/commands.cfg
++++ b/tests/zfs-tests/include/commands.cfg
+@@ -205,6 +205,7 @@ export ZFSTEST_FILES='btree_test
+     randfree_file
+     randwritecomp
+     readmmap
++    renameat2
+     rename_dir
+     rm_lnkcnt_zero_file
+     threadsappend
+diff --git a/tests/zfs-tests/tests/functional/Makefile.am b/tests/zfs-tests/tests/functional/Makefile.am
+index bd484b2da..5efacf729 100644
+--- a/tests/zfs-tests/tests/functional/Makefile.am
++++ b/tests/zfs-tests/tests/functional/Makefile.am
+@@ -59,6 +59,7 @@ SUBDIRS = \
+ 	refquota \
+ 	refreserv \
+ 	removal \
++	renameat2 \
+ 	rename_dirs \
+ 	replacement \
+ 	reservation \
+diff --git a/tests/zfs-tests/tests/functional/renameat2/Makefile.am b/tests/zfs-tests/tests/functional/renameat2/Makefile.am
+new file mode 100644
+index 000000000..bd8d6c9d6
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/Makefile.am
+@@ -0,0 +1,7 @@
++pkgdatadir = $(datadir)/@PACKAGE@/zfs-tests/tests/functional/renameat2
++dist_pkgdata_SCRIPTS = \
++	setup.ksh \
++	cleanup.ksh \
++	renameat2_noreplace.ksh \
++	renameat2_exchange.ksh \
++	renameat2_whiteout.ksh
+diff --git a/tests/zfs-tests/tests/functional/renameat2/cleanup.ksh b/tests/zfs-tests/tests/functional/renameat2/cleanup.ksh
+new file mode 100755
+index 000000000..3166bd6ec
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/cleanup.ksh
+@@ -0,0 +1,34 @@
++#!/bin/ksh -p
++#
++# CDDL HEADER START
++#
++# The contents of this file are subject to the terms of the
++# Common Development and Distribution License (the "License").
++# You may not use this file except in compliance with the License.
++#
++# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++# or http://www.opensolaris.org/os/licensing.
++# See the License for the specific language governing permissions
++# and limitations under the License.
++#
++# When distributing Covered Code, include this CDDL HEADER in each
++# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++# If applicable, add the following below this CDDL HEADER, with the
++# fields enclosed by brackets "[]" replaced with your own identifying
++# information: Portions Copyright [yyyy] [name of copyright owner]
++#
++# CDDL HEADER END
++#
++
++#
++# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
++# Use is subject to license terms.
++#
++
++#
++# Copyright (c) 2013 by Delphix. All rights reserved.
++#
++
++. $STF_SUITE/include/libtest.shlib
++
++default_cleanup
+diff --git a/tests/zfs-tests/tests/functional/renameat2/renameat2_exchange.ksh b/tests/zfs-tests/tests/functional/renameat2/renameat2_exchange.ksh
+new file mode 100755
+index 000000000..d85bc9a07
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/renameat2_exchange.ksh
+@@ -0,0 +1,63 @@
++#!/bin/ksh -p
++# SPDX-License-Identifier: CDDL-1.0 OR MPL-2.0
++
++#
++# CDDL HEADER START
++#
++# The contents of this file are subject to the terms of the
++# Common Development and Distribution License (the "License").
++# You may not use this file except in compliance with the License.
++#
++# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++# or http://www.opensolaris.org/os/licensing.
++# See the License for the specific language governing permissions
++# and limitations under the License.
++#
++# When distributing Covered Code, include this CDDL HEADER in each
++# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++# If applicable, add the following below this CDDL HEADER, with the
++# fields enclosed by brackets "[]" replaced with your own identifying
++# information: Portions Copyright [yyyy] [name of copyright owner]
++#
++# CDDL HEADER END
++#
++
++#
++# Copyright (C) 2019 Aleksa Sarai <cyphar@cyphar.com>
++# Copyright (C) 2019 SUSE LLC
++#
++
++. $STF_SUITE/include/libtest.shlib
++
++verify_runnable "both"
++
++function cleanup
++{
++	log_must rm -rf $TESTDIR/*
++}
++
++log_assert "ZFS supports RENAME_EXCHANGE."
++log_onexit cleanup
++
++cd $TESTDIR
++echo "foo" > foo
++echo "bar" > bar
++
++# Self-exchange is a no-op.
++log_must renameat2 -x foo foo
++log_must grep '^foo$' foo
++
++# Basic exchange.
++log_must renameat2 -x foo bar
++log_must grep '^bar$' foo
++log_must grep '^foo$' bar
++
++# And exchange back.
++log_must renameat2 -x foo bar
++log_must grep '^foo$' foo
++log_must grep '^bar$' bar
++
++# Exchange with a bad path should fail.
++log_mustnot renameat2 -x bar baz
++
++log_pass "ZFS supports RENAME_EXCHANGE as expected."
+diff --git a/tests/zfs-tests/tests/functional/renameat2/renameat2_noreplace.ksh b/tests/zfs-tests/tests/functional/renameat2/renameat2_noreplace.ksh
+new file mode 100755
+index 000000000..1f346f165
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/renameat2_noreplace.ksh
+@@ -0,0 +1,53 @@
++#!/bin/ksh -p
++# SPDX-License-Identifier: CDDL-1.0 OR MPL-2.0
++
++#
++# CDDL HEADER START
++#
++# The contents of this file are subject to the terms of the
++# Common Development and Distribution License (the "License").
++# You may not use this file except in compliance with the License.
++#
++# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++# or http://www.opensolaris.org/os/licensing.
++# See the License for the specific language governing permissions
++# and limitations under the License.
++#
++# When distributing Covered Code, include this CDDL HEADER in each
++# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++# If applicable, add the following below this CDDL HEADER, with the
++# fields enclosed by brackets "[]" replaced with your own identifying
++# information: Portions Copyright [yyyy] [name of copyright owner]
++#
++# CDDL HEADER END
++#
++
++#
++# Copyright (C) 2019 Aleksa Sarai <cyphar@cyphar.com>
++# Copyright (C) 2019 SUSE LLC
++#
++
++. $STF_SUITE/include/libtest.shlib
++
++verify_runnable "both"
++
++function cleanup
++{
++	log_must rm -rf $TESTDIR/*
++}
++
++log_assert "ZFS supports RENAME_NOREPLACE."
++log_onexit cleanup
++
++cd $TESTDIR
++touch foo bar
++
++# Clobbers should always fail.
++log_mustnot renameat2 -n foo foo
++log_mustnot renameat2 -n foo bar
++log_mustnot renameat2 -n bar foo
++
++# Regular renames should succeed.
++log_must renameat2 -n bar baz
++
++log_pass "ZFS supports RENAME_NOREPLACE as expected."
+diff --git a/tests/zfs-tests/tests/functional/renameat2/renameat2_whiteout.ksh b/tests/zfs-tests/tests/functional/renameat2/renameat2_whiteout.ksh
+new file mode 100755
+index 000000000..a75ffed4a
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/renameat2_whiteout.ksh
+@@ -0,0 +1,52 @@
++#!/bin/ksh -p
++# SPDX-License-Identifier: CDDL-1.0 OR MPL-2.0
++
++#
++# CDDL HEADER START
++#
++# The contents of this file are subject to the terms of the
++# Common Development and Distribution License (the "License").
++# You may not use this file except in compliance with the License.
++#
++# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++# or http://www.opensolaris.org/os/licensing.
++# See the License for the specific language governing permissions
++# and limitations under the License.
++#
++# When distributing Covered Code, include this CDDL HEADER in each
++# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++# If applicable, add the following below this CDDL HEADER, with the
++# fields enclosed by brackets "[]" replaced with your own identifying
++# information: Portions Copyright [yyyy] [name of copyright owner]
++#
++# CDDL HEADER END
++#
++
++#
++# Copyright (C) 2019 Aleksa Sarai <cyphar@cyphar.com>
++# Copyright (C) 2019 SUSE LLC
++#
++
++. $STF_SUITE/include/libtest.shlib
++
++verify_runnable "both"
++
++function cleanup
++{
++	log_must rm -rf $TESTDIR/*
++}
++
++log_assert "ZFS supports RENAME_WHITEOUT."
++log_onexit cleanup
++
++cd $TESTDIR
++echo "whiteout" > whiteout
++
++# Straight-forward rename-with-whiteout.
++log_must renameat2 -w whiteout new
++# Check new file.
++log_must grep '^whiteout$' new
++# Check that the whiteout is actually a {0,0} char device.
++log_must grep '^character special file:0:0$' <<<"$(stat -c '%F:%t:%T' whiteout)"
++
++log_pass "ZFS supports RENAME_WHITEOUT as expected."
+diff --git a/tests/zfs-tests/tests/functional/renameat2/setup.ksh b/tests/zfs-tests/tests/functional/renameat2/setup.ksh
+new file mode 100755
+index 000000000..118555749
+--- /dev/null
++++ b/tests/zfs-tests/tests/functional/renameat2/setup.ksh
+@@ -0,0 +1,41 @@
++#!/bin/ksh -p
++#
++# CDDL HEADER START
++#
++# The contents of this file are subject to the terms of the
++# Common Development and Distribution License (the "License").
++# You may not use this file except in compliance with the License.
++#
++# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
++# or http://www.opensolaris.org/os/licensing.
++# See the License for the specific language governing permissions
++# and limitations under the License.
++#
++# When distributing Covered Code, include this CDDL HEADER in each
++# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
++# If applicable, add the following below this CDDL HEADER, with the
++# fields enclosed by brackets "[]" replaced with your own identifying
++# information: Portions Copyright [yyyy] [name of copyright owner]
++#
++# CDDL HEADER END
++#
++
++#
++# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
++# Use is subject to license terms.
++#
++
++#
++# Copyright (c) 2013 by Delphix. All rights reserved.
++#
++
++. $STF_SUITE/include/libtest.shlib
++
++if ! is_linux ; then
++	log_unsupported "renameat2 is linux-only"
++elif ! renameat2 -C ; then
++	log_unsupported "renameat2 not supported on this (pre-3.15) linux kernel"
++fi
++
++DISK=${DISKS%% *}
++default_setup $DISK
+diff --git a/tests/zfs-tests/tests/functional/slog/slog_replay_fs_001.ksh b/tests/zfs-tests/tests/functional/slog/slog_replay_fs_001.ksh
+index 0b78a099f..309438a5a 100755
+--- a/tests/zfs-tests/tests/functional/slog/slog_replay_fs_001.ksh
++++ b/tests/zfs-tests/tests/functional/slog/slog_replay_fs_001.ksh
+@@ -175,6 +175,22 @@ log_must ln /$TESTPOOL/$TESTFS/link_and_unlink \
+    /$TESTPOOL/$TESTFS/link_and_unlink.link
+ log_must rm /$TESTPOOL/$TESTFS/link_and_unlink.link
+ 
++# We can't test TX_EXCHANGE or TX_WHITEOUT without renameat2(2) support.
++if ! is_linux ; then
++	log_note "renameat2 is linux-only"
++elif ! renameat2 -C ; then
++	log_note "renameat2 not supported on this (pre-3.15) linux kernel"
++else
++	# TX_EXCHANGE
++	log_must dd if=/dev/urandom of=/$TESTPOOL/$TESTFS/xchg-a bs=1k count=1
++	log_must dd if=/dev/urandom of=/$TESTPOOL/$TESTFS/xchg-b bs=1k count=1
++	log_must renameat2 -x /$TESTPOOL/$TESTFS/xchg-{a,b}
++
++	# TX_WHITEOUT
++	log_must mkfile 1k /$TESTPOOL/$TESTFS/whiteout
++	log_must renameat2 -w /$TESTPOOL/$TESTFS/whiteout{,-moved}
++fi
++
+ #
+ # 4. Copy TESTFS to temporary location (TESTDIR/copy)
+ #
+-- 
+2.20.1
+

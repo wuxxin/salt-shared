@@ -1,0 +1,584 @@
+From f95b2c522099b542af350b8874531466ca449ee0 Mon Sep 17 00:00:00 2001
+From: Pavel Snajdr <snajpa@snajpa.net>
+Date: Tue, 5 Nov 2019 01:19:57 +0100
+Subject: [PATCH 05/13] zfs_rename: pick up and finish renameat2 flags support
+
+Removing new txtypes in favor of compound ZIL operations, see comment in
+module/zfs/zfs_log.c.
+
+Other notable changes:
+
+- unlock after the inodes are updated
+- pass whiteout znode pointer to zfs_log_rename_whiteout
+- don't wrap code directly in ASSERT*(), it turn to noop on non-debug
+  builds
+- update configure time tests for rename2 to support kernels
+  from 3.5 to 4.8
+
+Fixes #2256
+Fixes #8648
+Fixes #8774
+
+Signed-off-by: Pavel Snajdr <snajpa@snajpa.net>
+---
+ AUTHORS                         |   1 +
+ config/kernel-rename.m4         |  31 +++++++--
+ config/kernel.m4                |   4 +-
+ include/sys/zfs_znode.h         |   7 +++
+ include/sys/zil.h               |   4 +-
+ module/os/linux/zfs/zfs_dir.c   |   3 +-
+ module/os/linux/zfs/zfs_vnops.c | 107 +++++++++++++++++---------------
+ module/os/linux/zfs/zpl_inode.c |   6 +-
+ module/zfs/zfs_log.c            | 101 +++++++++++++++++++++++++++++-
+ module/zfs/zfs_replay.c         |  23 +------
+ 10 files changed, 201 insertions(+), 86 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index 1043af489..e5afe8e52 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -234,6 +234,7 @@ CONTRIBUTORS:
+     Paul Dagnelie <pcd@delphix.com>
+     Paul Zuchowski <pzuchowski@datto.com>
+     Pavel Boldin <boldin.pavel@gmail.com>
++    Pavel Snajdr <snajpa@snajpa.net>
+     Pavel Zakharov <pavel.zakharov@delphix.com>
+     Pawel Jakub Dawidek <pjd@FreeBSD.org>
+     Pedro Giffuni <pfg@freebsd.org>
+diff --git a/config/kernel-rename.m4 b/config/kernel-rename.m4
+index f70739153..6a61a8c5f 100644
+--- a/config/kernel-rename.m4
++++ b/config/kernel-rename.m4
+@@ -3,8 +3,8 @@ dnl # 4.9 API change,
+ dnl # iops->rename2() merged into iops->rename(), and iops->rename() now wants
+ dnl # flags.
+ dnl #
+-AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME_WANTS_FLAGS], [
+-	ZFS_LINUX_TEST_SRC([inode_operations_rename], [
++AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME], [
++	ZFS_LINUX_TEST_SRC([inode_operations_rename_flags], [
+ 		#include <linux/fs.h>
+ 		int rename_fn(struct inode *sip, struct dentry *sdp,
+ 			struct inode *tip, struct dentry *tdp,
+@@ -15,15 +15,36 @@ AC_DEFUN([ZFS_AC_KERNEL_SRC_RENAME_WANTS_FLAGS], [
+ 			.rename = rename_fn,
+ 		};
+ 	],[])
++
++	ZFS_LINUX_TEST_SRC([inode_operations_rename], [
++		#include <linux/fs.h>
++		int rename2_fn(struct inode *sip, struct dentry *sdp,
++			struct inode *tip, struct dentry *tdp,
++			unsigned int flags) { return 0; }
++
++		static const struct inode_operations
++		    iops __attribute__ ((unused)) = {
++			.rename2 = rename2_fn,
++		};
++	],[])
+ ])
+ 
+-AC_DEFUN([ZFS_AC_KERNEL_RENAME_WANTS_FLAGS], [
++AC_DEFUN([ZFS_AC_KERNEL_RENAME], [
+ 	AC_MSG_CHECKING([whether iops->rename() wants flags])
+ 	ZFS_LINUX_TEST_RESULT([inode_operations_rename], [
+ 		AC_MSG_RESULT(yes)
+-		AC_DEFINE(HAVE_RENAME_WANTS_FLAGS, 1,
+-		    [iops->rename() wants flags])
++		AC_DEFINE(HAVE_RENAME2, 1, [iops->rename2() exists])
+ 	],[
+ 		AC_MSG_RESULT(no)
++
++		AC_MSG_CHECKING([whether iops->rename() wants flags])
++		ZFS_LINUX_TEST_RESULT([inode_operations_rename_flags], [
++			AC_MSG_RESULT(yes)
++			AC_DEFINE(HAVE_RENAME_WANTS_FLAGS, 1,
++			    [iops->rename() wants flags])
++		],[
++			AC_MSG_RESULT(no)
++		])
+ 	])
+ ])
++
+diff --git a/config/kernel.m4 b/config/kernel.m4
+index 3e50fc823..482dfddd8 100644
+--- a/config/kernel.m4
++++ b/config/kernel.m4
+@@ -111,7 +111,7 @@ AC_DEFUN([ZFS_AC_KERNEL_TEST_SRC], [
+ 	ZFS_AC_KERNEL_SRC_KUIDGID_T
+ 	ZFS_AC_KERNEL_SRC_KUID_HELPERS
+ 	ZFS_AC_KERNEL_SRC_MODULE_PARAM_CALL_CONST
+-	ZFS_AC_KERNEL_SRC_RENAME_WANTS_FLAGS
++	ZFS_AC_KERNEL_SRC_RENAME
+ 	ZFS_AC_KERNEL_SRC_CURRENT_TIME
+ 	ZFS_AC_KERNEL_SRC_USERNS_CAPABILITIES
+ 	ZFS_AC_KERNEL_SRC_IN_COMPAT_SYSCALL
+@@ -206,7 +206,7 @@ AC_DEFUN([ZFS_AC_KERNEL_TEST_RESULT], [
+ 	ZFS_AC_KERNEL_KUIDGID_T
+ 	ZFS_AC_KERNEL_KUID_HELPERS
+ 	ZFS_AC_KERNEL_MODULE_PARAM_CALL_CONST
+-	ZFS_AC_KERNEL_RENAME_WANTS_FLAGS
++	ZFS_AC_KERNEL_RENAME
+ 	ZFS_AC_KERNEL_CURRENT_TIME
+ 	ZFS_AC_KERNEL_USERNS_CAPABILITIES
+ 	ZFS_AC_KERNEL_IN_COMPAT_SYSCALL
+diff --git a/include/sys/zfs_znode.h b/include/sys/zfs_znode.h
+index 0e8d44637..f71204208 100644
+--- a/include/sys/zfs_znode.h
++++ b/include/sys/zfs_znode.h
+@@ -273,6 +273,13 @@ extern void zfs_log_link(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+     znode_t *dzp, znode_t *zp, char *name);
+ extern void zfs_log_symlink(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+     znode_t *dzp, znode_t *zp, char *name, char *link);
++extern void zfs_log_rename_exchange(zilog_t *zilog, dmu_tx_t *tx,
++    uint64_t txtype, znode_t *sdzp, char *sname, znode_t *tdzp,
++    char *dname, znode_t *szp);
++extern void zfs_log_rename_whiteout(zilog_t *zilog, dmu_tx_t *tx,
++    uint64_t txtype, znode_t *sdzp, char *sname, znode_t *tdzp,
++    char *dname, znode_t *szp, znode_t *wzp, vsecattr_t *vsecp,
++    zfs_fuid_info_t *fuidp, vattr_t *vap);
+ extern void zfs_log_rename(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+     znode_t *sdzp, char *sname, znode_t *tdzp, char *dname, znode_t *szp);
+ extern void zfs_log_write(zilog_t *zilog, dmu_tx_t *tx, int txtype,
+diff --git a/include/sys/zil.h b/include/sys/zil.h
+index 1099c2f7f..716b19e56 100644
+--- a/include/sys/zil.h
++++ b/include/sys/zil.h
+@@ -162,9 +162,7 @@ typedef enum zil_create {
+ #define	TX_MKDIR_ATTR		18	/* mkdir with attr */
+ #define	TX_MKDIR_ACL_ATTR	19	/* mkdir with ACL + attrs */
+ #define	TX_WRITE2		20	/* dmu_sync EALREADY write */
+-#define	TX_EXCHANGE		21	/* Exchange two paths */
+-#define	TX_WHITEOUT		22	/* Rename a file, leaving a whiteout */
+-#define	TX_MAX_TYPE		23	/* Max transaction type */
++#define	TX_MAX_TYPE		21	/* Max transaction type */
+ 
+ /*
+  * The transactions for mkdir, symlink, remove, rmdir, link, and rename
+diff --git a/module/os/linux/zfs/zfs_dir.c b/module/os/linux/zfs/zfs_dir.c
+index ee37a5c84..99f290935 100644
+--- a/module/os/linux/zfs/zfs_dir.c
++++ b/module/os/linux/zfs/zfs_dir.c
+@@ -1034,7 +1034,8 @@ zfs_link_destroy(zfs_dirlock_t *dl, znode_t *zp, dmu_tx_t *tx, int flag,
+ 		}
+ 
+ 		/* The only error is !zfs_dirempty() and we checked earlier. */
+-		ASSERT3U(zfs_drop_nlink_locked(zp, tx, &unlinked), ==, 0);
++		error = zfs_drop_nlink_locked(zp, tx, &unlinked);
++		ASSERT3U(error, ==, 0);
+ 		mutex_exit(&zp->z_lock);
+ 	} else {
+ 		error = zfs_dropname(dl, zp, dzp, tx, flag);
+diff --git a/module/os/linux/zfs/zfs_vnops.c b/module/os/linux/zfs/zfs_vnops.c
+index 9c39a329c..3a96b25b9 100644
+--- a/module/os/linux/zfs/zfs_vnops.c
++++ b/module/os/linux/zfs/zfs_vnops.c
+@@ -3497,24 +3497,18 @@ zfs_rename(znode_t *sdzp, char *snm, znode_t *tdzp, char *tnm,
+ 	int		error = 0;
+ 	int		zflg = 0;
+ 	boolean_t	waited = B_FALSE;
+-	uint64_t	txtype;
+ 	/* Needed for whiteout inode creation. */
+ 	vattr_t		wo_vap;
+ 	uint64_t	wo_projid;
+ 	boolean_t	fuid_dirtied;
+ 	zfs_acl_ids_t	acl_ids;
+ 	boolean_t	have_acl = B_FALSE;
++	znode_t		*wzp = NULL;
++
+ 
+ 	if (snm == NULL || tnm == NULL)
+ 		return (SET_ERROR(EINVAL));
+ 
+-	if (flags & RENAME_EXCHANGE)
+-		txtype = TX_EXCHANGE;
+-	else if (flags & RENAME_WHITEOUT)
+-		txtype = TX_WHITEOUT;
+-	else
+-		txtype = TX_RENAME;
+-
+ 	ZFS_ENTER(zfsvfs);
+ 	zilog = zfsvfs->z_log;
+ 
+@@ -3711,7 +3705,7 @@ top:
+ 		/*
+ 		 * Source and target must be the same type (unless exchanging).
+ 		 */
+-		if (txtype != TX_EXCHANGE) {
++		if (!(flags & RENAME_EXCHANGE)) {
+ 			boolean_t s_is_dir = S_ISDIR(ZTOI(szp)->i_mode) != 0;
+ 			boolean_t t_is_dir = S_ISDIR(ZTOI(tzp)->i_mode) != 0;
+ 
+@@ -3729,15 +3723,14 @@ top:
+ 			error = 0;
+ 			goto out;
+ 		}
+-	}
+-	/* Target must exist for RENAME_EXCHANGE. */
+-	if (!tzp && txtype == TX_EXCHANGE) {
++	} else if (flags & RENAME_EXCHANGE) {
++		/* Target must exist for RENAME_EXCHANGE. */
+ 		error = SET_ERROR(ENOENT);
+ 		goto out;
+ 	}
+ 
+ 	/* Set up inode creation for RENAME_WHITEOUT. */
+-	if (txtype == TX_WHITEOUT) {
++	if (flags & RENAME_WHITEOUT) {
+ 		error = zfs_zaccess(sdzp, ACE_ADD_FILE, 0, B_FALSE, cr);
+ 		if (error)
+ 			goto out;
+@@ -3761,7 +3754,7 @@ top:
+ 	tx = dmu_tx_create(zfsvfs->z_os);
+ 	dmu_tx_hold_sa(tx, szp->z_sa_hdl, B_FALSE);
+ 	dmu_tx_hold_sa(tx, sdzp->z_sa_hdl, B_FALSE);
+-	dmu_tx_hold_zap(tx, sdzp->z_id, txtype == TX_EXCHANGE, snm);
++	dmu_tx_hold_zap(tx, sdzp->z_id, !!(flags & RENAME_EXCHANGE), snm);
+ 	dmu_tx_hold_zap(tx, tdzp->z_id, TRUE, tnm);
+ 	if (sdzp != tdzp) {
+ 		dmu_tx_hold_sa(tx, tdzp->z_sa_hdl, B_FALSE);
+@@ -3771,7 +3764,7 @@ top:
+ 		dmu_tx_hold_sa(tx, tzp->z_sa_hdl, B_FALSE);
+ 		zfs_sa_upgrade_txholds(tx, tzp);
+ 	}
+-	if (txtype == TX_WHITEOUT) {
++	if (flags & RENAME_WHITEOUT) {
+ 		dmu_tx_hold_sa_create(tx, acl_ids.z_aclp->z_acl_bytes +
+ 		    ZFS_SA_BASE_ATTR_SIZE);
+ 
+@@ -3824,7 +3817,7 @@ top:
+ 
+ 	error = sa_update(szp->z_sa_hdl, SA_ZPL_FLAGS(zfsvfs),
+ 	    (void *)&szp->z_pflags, sizeof (uint64_t), tx);
+-	ASSERT0(error);
++	VERIFY0(error);
+ 
+ 	error = zfs_link_destroy(sdl, szp, tx, ZRENAMING, NULL);
+ 	if (error)
+@@ -3836,7 +3829,7 @@ top:
+ 	if (tzp) {
+ 		int tzflg = zflg;
+ 
+-		if (txtype == TX_EXCHANGE) {
++		if (flags & RENAME_EXCHANGE) {
+ 			/* This inode will be re-linked soon. */
+ 			tzflg |= ZRENAMING;
+ 
+@@ -3870,38 +3863,50 @@ top:
+ 		goto commit_link_tzp;
+ 	}
+ 
+-	switch (txtype) {
+-		case TX_EXCHANGE:
+-			error = zfs_link_create(sdl, tzp, tx, ZRENAMING);
+-			/*
+-			 * The same argument as zfs_link_create() failing for
+-			 * szp applies here, since the source directory must
+-			 * have had an entry we are replacing.
+-			 */
+-			ASSERT3U(error, ==, 0);
+-			if (error)
+-				goto commit_unlink_td_szp;
+-			break;
+-		case TX_WHITEOUT: {
+-			znode_t		*wzp;
+-
+-			zfs_mknode(sdzp, &wo_vap, tx, cr, 0, &wzp, &acl_ids);
+-			error = zfs_link_create(sdl, wzp, tx, ZNEW);
+-			if (error) {
+-				zfs_znode_delete(wzp, tx);
+-				remove_inode_hash(ZTOI(wzp));
+-				goto commit_unlink_td_szp;
+-			}
+-			/* No need to zfs_log_create_txtype here. */
++	if (flags & RENAME_EXCHANGE) {
++		error = zfs_link_create(sdl, tzp, tx, ZRENAMING);
++		/*
++		 * The same argument as zfs_link_create() failing for
++		 * szp applies here, since the source directory must
++		 * have had an entry we are replacing.
++		 */
++		ASSERT3U(error, ==, 0);
++		if (error)
++			goto commit_unlink_td_szp;
++	} else if (flags & RENAME_WHITEOUT) {
++		zfs_mknode(sdzp, &wo_vap, tx, cr, 0, &wzp, &acl_ids);
++		error = zfs_link_create(sdl, wzp, tx, ZNEW);
++		if (error) {
++			zfs_znode_delete(wzp, tx);
++			remove_inode_hash(ZTOI(wzp));
++			goto commit_unlink_td_szp;
+ 		}
++		/* No need to zfs_log_create_txtype here. */
+ 	}
+ 
+ 	if (fuid_dirtied)
+ 		zfs_fuid_sync(zfsvfs, tx);
+ 
+-	zfs_log_rename(zilog, tx, txtype |
+-	    (flags & FIGNORECASE ? TX_CI : 0), sdzp,
+-	    sdl->dl_name, tdzp, tdl->dl_name, szp);
++	if (flags & RENAME_EXCHANGE) {
++		zfs_log_rename_exchange(zilog, tx,
++		    (flags & FIGNORECASE ? TX_CI : 0), sdzp,
++		    sdl->dl_name, tdzp, tdl->dl_name, szp);
++	} else if (flags & RENAME_WHITEOUT) {
++		vsecattr_t vsecp;
++
++		vsecp.vsa_mask |= VSA_ACE_ALLTYPES;
++		error = zfs_getacl(szp, &vsecp, B_TRUE, cr);
++		VERIFY0(error);
++
++		zfs_log_rename_whiteout(zilog, tx,
++		    (flags & FIGNORECASE ? TX_CI : 0), sdzp,
++		    sdl->dl_name, tdzp, tdl->dl_name, szp, wzp,
++		    &vsecp, acl_ids.z_fuidp, &wo_vap);
++	} else {
++		zfs_log_rename(zilog, tx,
++		    (flags & FIGNORECASE ? TX_CI : 0), sdzp,
++		    sdl->dl_name, tdzp, tdl->dl_name, szp);
++	}
+ 
+ commit:
+ 	dmu_tx_commit(tx);
+@@ -3909,12 +3914,6 @@ out:
+ 	if (have_acl)
+ 		zfs_acl_ids_free(&acl_ids);
+ 
+-	if (zl != NULL)
+-		zfs_rename_unlock(&zl);
+-
+-	zfs_dirent_unlock(sdl);
+-	zfs_dirent_unlock(tdl);
+-
+ 	zfs_inode_update(sdzp);
+ 	if (sdzp == tdzp)
+ 		rw_exit(&sdzp->z_name_lock);
+@@ -3924,11 +3923,21 @@ out:
+ 
+ 	zfs_inode_update(szp);
+ 	zrele(szp);
++	if (wzp) {
++		zfs_inode_update(wzp);
++		zrele(wzp);
++	}
+ 	if (tzp) {
+ 		zfs_inode_update(tzp);
+ 		zrele(tzp);
+ 	}
+ 
++	if (zl != NULL)
++		zfs_rename_unlock(&zl);
++
++	zfs_dirent_unlock(sdl);
++	zfs_dirent_unlock(tdl);
++
+ 	if (zfsvfs->z_os->os_sync == ZFS_SYNC_ALWAYS)
+ 		zil_commit(zilog, 0);
+ 
+diff --git a/module/os/linux/zfs/zpl_inode.c b/module/os/linux/zfs/zpl_inode.c
+index 86c867fa6..dab7d0ec3 100644
+--- a/module/os/linux/zfs/zpl_inode.c
++++ b/module/os/linux/zfs/zpl_inode.c
+@@ -420,7 +420,7 @@ zpl_rename2(struct inode *sdip, struct dentry *sdentry,
+ 	return (error);
+ }
+ 
+-#ifndef HAVE_RENAME_WANTS_FLAGS
++#if !defined(HAVE_RENAME_WANTS_FLAGS) && !defined(HAVE_RENAME2)
+ static int
+ zpl_rename(struct inode *sdip, struct dentry *sdentry,
+     struct inode *tdip, struct dentry *tdentry)
+@@ -680,7 +680,9 @@ const struct inode_operations zpl_dir_inode_operations = {
+ 	.mkdir		= zpl_mkdir,
+ 	.rmdir		= zpl_rmdir,
+ 	.mknod		= zpl_mknod,
+-#ifdef HAVE_RENAME_WANTS_FLAGS
++#ifdef HAVE_RENAME2
++	.rename2	= zpl_rename2,
++#elif defined(HAVE_RENAME_WANTS_FLAGS)
+ 	.rename		= zpl_rename2,
+ #else
+ 	.rename		= zpl_rename,
+diff --git a/module/zfs/zfs_log.c b/module/zfs/zfs_log.c
+index 0a5de7143..8d0baa0a2 100644
+--- a/module/zfs/zfs_log.c
++++ b/module/zfs/zfs_log.c
+@@ -501,9 +501,7 @@ zfs_log_symlink(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+ }
+ 
+ /*
+- * Handles TX_{RENAME,EXCHANGE,WHITEOUT} transactions. They all have the same
+- * underyling structure (lr_rename_t) but have different txtypes to indicate
+- * different renameat2(2) flags.
++ * Handles TX_RENAME transactions.
+  */
+ void
+ zfs_log_rename(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+@@ -517,6 +515,7 @@ zfs_log_rename(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+ 	if (zil_replaying(zilog, tx))
+ 		return;
+ 
++	txtype |= TX_RENAME;
+ 	itx = zil_itx_create(txtype, sizeof (*lr) + snamesize + dnamesize);
+ 	lr = (lr_rename_t *)&itx->itx_lr;
+ 	lr->lr_sdoid = sdzp->z_id;
+@@ -528,6 +527,102 @@ zfs_log_rename(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
+ 	zil_itx_assign(zilog, itx, tx);
+ }
+ 
++/*
++ * At the moment, only Linux supports the renameat2 variant of renameat, which
++ * adds three new flags of interest for us:
++ *
++ *     RENAME_NOREPLACE: if the target name at the moment of the call exists,
++ *                       don't rewrite it and return error
++ *     RENAME_EXCHANGE: atomically swap the two names on the filesystem
++ *     RENAME_WHITEOUT: creates a whiteout inode in place of renamed file as
++ *                      an atomic operation
++ *
++ * Ideally, these operations should be represented as new ZFS Intent Log
++ * txtypes, which would mandate a new ZFS feature flag due to the on-disk
++ * format change.  One would then use spa_feature_incr/decr functions to
++ * indicate that the on-disk log contains these new txtypes.  However, these
++ * functions are only supposed to be called from the txg syncing context.
++ *
++ * This means that we would need to force out an in-progress txg to disk and
++ * start a new one before writing any ZIL records.  This would ensure that
++ * previous versions of ZFS which do not support these log txtypes would
++ * never encounter them during ZIL replay.  Doing this would hurt performance.
++ *
++ * Alternatively, we could just activate the feature on a pool when these
++ * renameat2 flags get first used and leave it at that.  This would render
++ * the pool read-only importable on implementations without the new feature
++ * flag, even when no new txtypes were present on-disk.  This could be almost
++ * all of the time, so it'd be a shame to render the pool read-only on
++ * non-Linux platforms.
++ *
++ * Instead, we choose to rely on the fact that the ZIL is replayed in single-
++ * threaded mode before the dataset is mounted.  This means we can represent
++ * the otherwise atomic operations as a series of plain good old txtypes
++ * known to all current OpenZFS implementations. To do that, we use the
++ * following functions (at least until more platforms implement renameat2).
++ *
++ *     zfs_log_rename_exchange
++ *     zfs_log_rename_whiteout
++ */
++
++void
++zfs_log_rename_exchange(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
++    znode_t *sdzp, char *sname, znode_t *tdzp, char *dname, znode_t *szp)
++{
++	zfs_dirlock_t *tmpdl;
++	znode_t *tmpzp = NULL;
++	char *tmpname;
++	int retries = 0;
++	int pos = 0;
++	int error;
++
++	tmpname = kmem_alloc(MAXPATHLEN, KM_SLEEP);
++
++	/*
++	 * To represent atomic rename with old non-atomic operations, we need
++	 * a temporary new name; so we try picking a name until we succeed,
++	 * then we get a dirent lock for that temp name until the final itx
++	 * gets queued
++	 */
++retry:
++	retries++;
++	pos = snprintf(tmpname, MAXPATHLEN, "%s.zfs_renameat2_emul_", dname);
++
++	for (int i = 0; i < 16; i++) {
++		int r = 0xFF;
++		random_get_pseudo_bytes((void *)&r, 1);
++		pos += snprintf(tmpname+pos, MAXPATHLEN, "%02x", r);
++	}
++
++	error = zfs_dirent_lock(&tmpdl, tdzp, tmpname,
++	    &tmpzp, ZNEW, NULL, NULL);
++
++	VERIFY3U(retries, <, 10);
++	if (error)
++		goto retry;
++
++	/* dst -> tmp */
++	zfs_log_rename(zilog, tx, txtype, tdzp, dname, tdzp, tmpname, szp);
++	/* src -> dst */
++	zfs_log_rename(zilog, tx, txtype, sdzp, sname, tdzp, dname, szp);
++	/* tmp -> src */
++	zfs_log_rename(zilog, tx, txtype, tdzp, tmpname, sdzp, sname, szp);
++
++	zfs_dirent_unlock(tmpdl);
++	kmem_free(tmpname, MAXPATHLEN);
++}
++
++/* See comment above zfs_log_rename_exchange */
++void
++zfs_log_rename_whiteout(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
++    znode_t *sdzp, char *sname, znode_t *tdzp, char *dname, znode_t *szp,
++    znode_t *wzp, vsecattr_t *vsecp, zfs_fuid_info_t *fuidp, vattr_t *vap)
++{
++	zfs_log_rename(zilog, tx, txtype, sdzp, sname, tdzp, dname, szp);
++	txtype |= TX_CREATE;
++	zfs_log_create(zilog, tx, txtype, sdzp, wzp, sname, vsecp, fuidp, vap);
++}
++
+ /*
+  * zfs_log_write() handles TX_WRITE transactions. The specified callback is
+  * called as soon as the write is on stable storage (be it via a DMU sync or a
+diff --git a/module/zfs/zfs_replay.c b/module/zfs/zfs_replay.c
+index 6e8cc68ff..cba5e8c9c 100644
+--- a/module/zfs/zfs_replay.c
++++ b/module/zfs/zfs_replay.c
+@@ -641,7 +641,7 @@ zfs_replay_link(void *arg1, void *arg2, boolean_t byteswap)
+ }
+ 
+ static int
+-_zfs_replay_renameat2(void *arg1, void *arg2, boolean_t byteswap, int vflg)
++zfs_replay_rename(void *arg1, void *arg2, boolean_t byteswap)
+ {
+ 	zfsvfs_t *zfsvfs = arg1;
+ 	lr_rename_t *lr = arg2;
+@@ -649,6 +649,7 @@ _zfs_replay_renameat2(void *arg1, void *arg2, boolean_t byteswap, int vflg)
+ 	char *tname = sname + strlen(sname) + 1;
+ 	znode_t *sdzp, *tdzp;
+ 	int error;
++	int vflg = 0;
+ 
+ 	if (byteswap)
+ 		byteswap_uint64_array(lr, sizeof (*lr));
+@@ -671,24 +672,6 @@ _zfs_replay_renameat2(void *arg1, void *arg2, boolean_t byteswap, int vflg)
+ 	return (error);
+ }
+ 
+-static int
+-zfs_replay_rename(void *arg1, void *arg2, boolean_t byteswap)
+-{
+-	return (_zfs_replay_renameat2(arg1, arg2, byteswap, 0));
+-}
+-
+-static int
+-zfs_replay_exchange(void *arg1, void *arg2, boolean_t byteswap)
+-{
+-	return (_zfs_replay_renameat2(arg1, arg2, byteswap, RENAME_EXCHANGE));
+-}
+-
+-static int
+-zfs_replay_whiteout(void *arg1, void *arg2, boolean_t byteswap)
+-{
+-	return (_zfs_replay_renameat2(arg1, arg2, byteswap, RENAME_WHITEOUT));
+-}
+-
+ static int
+ zfs_replay_write(void *arg1, void *arg2, boolean_t byteswap)
+ {
+@@ -1006,6 +989,4 @@ zil_replay_func_t *zfs_replay_vector[TX_MAX_TYPE] = {
+ 	zfs_replay_create,	/* TX_MKDIR_ATTR */
+ 	zfs_replay_create_acl,	/* TX_MKDIR_ACL_ATTR */
+ 	zfs_replay_write2,	/* TX_WRITE2 */
+-	zfs_replay_exchange,	/* TX_EXCHANGE */
+-	zfs_replay_whiteout,	/* TX_WHITEOUT */
+ };
+-- 
+2.20.1
+
