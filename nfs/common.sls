@@ -5,12 +5,12 @@
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
 {% set nfs_common_replace = [
   ('STATDOPTS', '--port 32765 --outgoing-port 32766 '+ param_list('--name', settings.listen_ip) ),
-  ('NEED_STATD', 'no'),
-  ('NEED_IDMAPD', 'yes'),
+  ('NEED_STATD', 'yes' if settings.legacy_support else 'no'),
+  ('NEED_IDMAPD', ''),
 ] %}
 {% set nfs_server_replace = [
   ('RPCNFSDOPTS',   '-N 2 '+ nfs3_option+ '--no-udp '+ param_list('--host', settings.listen_ip) ),
-  ('RPCMOUNTDOPTS', '-N 2 '+ nfs3_option+ '--manage-gids --port 32767 --no-udp'),
+  ('RPCMOUNTDOPTS', '-N 2 '+ nfs3_option+ '--no-udp --manage-gids --port 32767'),
 ] %}
 {#  ('fs.nfs.nfs_callback_tcpport', 32764), #}
 {% set nfs_sysctl= [
