@@ -2,7 +2,7 @@
 """
 Encryption/Signing, Decryption/Verifying modul.
 
-- This module uses Gnu Privacy Guard 1/2 for the actual encryption work
+- This module uses Gnu Privacy Guard for the actual encryption work
   - The GNU Privacy Guard -- a free implementation of the OpenPGP standard as defined by RFC4880
 
 - Environment
