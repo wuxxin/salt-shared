@@ -32,6 +32,7 @@ some states have documentation README.md's.
         * [unbound](unbound): caching recursive dns resolver
         * [knot](knot): authoritative dnsec capable dns server
         * [syncthing](syncthing): network file syncronisation
+        * [unison](unison): Unison File Sync
         * [strongswan](strongswan): IPsec VPN
         * [wireguard](wireguard): Wireguard VPN
 
