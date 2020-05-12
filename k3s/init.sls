@@ -18,27 +18,6 @@ include:
       - cmd: k3s
 {% endif %}
 
-{% if grains['virtual'] != 'LXC' %}
-k3s-kernel-modules:
-  kmod.present:
-    - persist: true
-    - mods:
-      - overlay
-      - ip_tables
-      - ip6_tables
-      - netlink_diag
-      - nf_nat
-      - xt_conntrack
-      - br_netfilter
-      - nf_conntrack
-      - ip_vs
-      - ip_vs_rr
-      - ip_vs_wrr
-      - ip_vs_sh
-    - require_in:
-      - cmd: k3s
-{% endif %}
-
 k3s-install:
   file.managed:
     - name: /usr/local/sbin/k3s-install.sh
@@ -71,7 +50,8 @@ k3s:
       - pkg: k3s
       - file: k3s
       - file: k3s-install
-  
+      - sls: kernel.server
+
 {% for d in ['.kube', '.local/bin', '.local/share'] %}
 {{ settings.home }}/{{ d }}:
   file.directory:

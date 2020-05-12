@@ -1,9 +1,6 @@
 {% from "lxd/defaults.jinja" import settings with context %}
 
-{# LXD is available through backports for distros before bionic,
-   and for bionic available on normal channels,
-   from 18.10 upwards its only available as snap
-#}
+{# LXD is available in backports before bionic, default on bionic, and as snap after bionic #}
 
 {# modify kernel for production http://lxd.readthedocs.io/en/latest/production-setup/ #}
 include:
@@ -11,15 +8,6 @@ include:
 {% if grains['osrelease_info'][0]|int < 18 %}
   - ubuntu.backports
 {% endif %}
-
-lxd_prerequisites:
-  pkg.installed:
-    - pkgs:
-      - thin-provisioning-tools
-      - bridge-utils
-      - ebtables
-    - require:
-      - sls: kernel.server
 
 {#
 Domain Type  Item    Value     Default Description
@@ -37,36 +25,26 @@ Domain Type  Item    Value     Default Description
 kernel.dmesg_restrict:
   sysctl.present:
     - value: 1 {# 0 #}
+    - require_in:
+      - pkg: lxd_prerequisites
 
 {# This is the maximum number of keys a non-root user can use, should be higher than the number of containers #}
 kernel.keys.maxkeys:
   sysctl.present:
     - value: 2000 {# 200 #}
-
-lxd_kernel_modules:
-  kmod.present:
-    - mods:
-      - ip_tables
-      - ip6_tables
-      - netlink_diag
-      - nf_nat
-      - nf_conntrack
-      - xt_conntrack
-      - br_netfilter
-      - ip_vs
-      - ip_vs_rr
-      - ip_vs_wrr
-      - ip_vs_sh
-      - overlay
-      - shiftfs
-    - require:
-      - file: /etc/security/limits.d/memlock.conf
-      - sysctl: kernel.dmesg_restrict
-      - sysctl: kernel.keys.maxkeys
     - require_in:
-      - pkg: lxd
+      - pkg: lxd_prerequisites
 {%- endif %}
 
+lxd_prerequisites:
+  pkg.installed:
+    - pkgs:
+      - thin-provisioning-tools
+      - bridge-utils
+      - ebtables
+    - require:
+      - file: /etc/security/limits.d/memlock.conf
+      - sls: kernel.server
 
 lxd:
   file.managed:
