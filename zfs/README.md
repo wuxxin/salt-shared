@@ -1,6 +1,17 @@
 # zfs state
 
+## todo
++ rebase custom-zfs-patches and fix custom-build-zfs
+
 ### snippets
+
+#### recreate zfs fs list (for machine-bootstrap)
+
+{%- for item in test %}zfs create
+  {%- if item.properties is defined %}
+    {%- for key,value in item.properties.items() %} -o "{{ key }}={{ value|replace('True', 'on')|replace('False', 'off') if value is boolean else value }}"{%- endfor %}
+  {%- endif %} {{ item.name }}
+{% endfor %}
 
 #### list snapshots
 zfs list -t snapshot -o name

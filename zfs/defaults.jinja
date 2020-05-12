@@ -1,9 +1,15 @@
 {% load_yaml as defaults %}
+# origin: system (from distribution) | custom (from source, self build, with local patches)
+origin: custom
+custom_src_dist: focal
+custom_apply_patches: true
+
 # use cfq i/o scheduler for cgroup i/o quota support
 vdev_scheduler: cfq
 
-# use up to x% of memory for arc
+# use up to x % of memory for arc
 arc_max_percent: 25
+# arc_max_bytes will be computed from arc_max_percent if unset
 
 autosnapshot: true
 
@@ -24,8 +30,8 @@ keep_monthly: 4  {# 1month intervals for the last  4 months #}
   }) %}
 {% endif %}
 
-{# if mountpoint is set, take path excluding last and create if not existing before calling state #}
-{% load_yaml as zfs_fs_defaults %}
+
+{% load_yaml as zfs_rpool_base %}
 - name: ROOT
   properties:
     canmount: off
@@ -37,75 +43,78 @@ keep_monthly: 4  {# 1month intervals for the last  4 months #}
     mountpoint: /
 {{ mksnapshot(4, frequent=true, daily=true) }}
 
+- name: var
+  properties:
+    canmount: off
+    logbias: throughput
+{{ mksnapshot(4, frequent=true) }}
+    local.custom:auto-backup: false
+
+- name: var/lib
+  properties:
+    canmount: off
+
 - name: data
   properties:
-    setuid: off
-    exec: off
     canmount: off
     mountpoint: none
-{{ mksnapshot(4, all=true) }}
+    setuid: off
+    exec: off
+{{ mksnapshot(4, frequent=true, hourly=true, daily=true, weekly=true, monthly=true) }}
 
+{% endload %}
+
+
+{% load_yaml as zfs_rpool_defaults %}
 - name: data/home
   properties:
+    mountpoint: /home
     setuid: off
     exec: on
-    mountpoint: /home
 
 - name: data/home/root
   properties:
     mountpoint: /root
-
-mkdir -p "$basedir/var/lib"
-- name: data/mail
-  properties:
-    mountpoint: /var/lib/mail
 
 - name: data/postgresql
   properties:
     recordsize: 16K
     logbias: throughput
     primarycache: metadata
+
 - name: data/postgresql/localhost
   properties:
     mountpoint: /var/lib/postgresql
 
-- name: var
+- name: data/mail
   properties:
-    logbias: throughput
-    canmount: off
-    com.sun:auto-snapshot:frequent: true
-    com.sun:auto-snapshot:hourly: false
-    com.sun:auto-snapshot:daily: false
-    com.sun:auto-snapshot:weekly: false
-    com.sun:auto-snapshot:monthly: false
-    local.custom:auto-backup: false
+    mountpoint: /var/lib/mail
 
 - name: var/basedir-tmp
   properties:
     mountpoint: /tmp
-chmod 1777 "$basedir/tmp"
+
 - name: var/tmp
-chmod 1777 "$basedir/var/tmp"
 - name: var/spool
 - name: var/backups
 - name: var/log
   properties:
     exec: off
+
 - name: var/cache
   properties:
     exec: off
+
 - name: var/cache/pbuilder
   properties:
     exec: on
     devices: on
-- name: var/lib
-  properties:
-    canmount: off
+
 - name: var/lib/apt-lists
   properties:
     exec: off
     mountpoint: /var/lib/apt/lists
+
 - name: var/lib/snapd
-- name: var/lib/libvirt
 
 {% endload %}

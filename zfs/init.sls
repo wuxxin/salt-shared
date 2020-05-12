@@ -23,27 +23,13 @@ zfsutils-linux:
 {% endfor %}
 
 
-
 {#
-+ include machine-bootstrap/zfs/custom-zfs.sls
-  if zfs:custom-build:enabled: true
-    look if current custom build, rebuild
-    reinstall packages "zfsutils-linux zfs-dkms" after custom build
 
 + set scrub non linear, for 6 weeks every 14days on sunday, then twice per year
   + default: Scrub the second Sunday of every month.
   +  24 0 8-14 * * root [ $(date +\%w) -eq 0 ] && [ -x /usr/lib/zfs-linux/scrub ] && /usr/lib/zfs-linux/scrub
-#}
 
-{#
-+ update all files
-+ if machine-config says frankenstein=true
-  + test which customized zfs we have runninng
-  + if there is a newer version (or not installed so far)
-    + build and update running system
-    + update recovery-squashfs
-
-https://github.com/vpsfreecz/zfs/tree/vpsadminos-master-2004060
++ write out zfs patches somewhere ?
 
 {% for p in salt['cmd.run_stdout'](
   'find '+ grains['project_basepath']+
@@ -53,5 +39,14 @@ https://github.com/vpsfreecz/zfs/tree/vpsadminos-master-2004060
   file.managed:
     - source: salt://machine-bootstrap/zfs/{{ p }}
 {% endfor %}
+
+if zfs:custom-build:enabled: true
+  + test which customized zfs we have in custom archive
+    + if there is a newer version (or not installed so far)
+    + build and update running system
+    + reinstall packages "zfsutils-linux zfs-dkms" after custom build
+    + update recovery-squashfs
+
++ https://github.com/vpsfreecz/zfs/tree/vpsadminos-master-2004060
 
 #}
