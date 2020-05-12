@@ -1,4 +1,4 @@
-{% load_yaml as defaults %}
+{% load_yaml as package_defaults %}
 trusty:
   meta: linux-generic-lts-xenial
   image: linux-image-generic-lts-xenial
@@ -25,14 +25,20 @@ generic:
   tools: linux-tools-generic
 {% endload %}
 
-{#
-optional settings:
-  # do not change kernel, just install matching kernel-tools
-  keep_current: True     # Default false
-  # do not install additional extra modules (if running on virtual machine)
-  virtual_extra: False   # Default true
-#}
+{% load_yaml as defaults %}
+# if keep_current, do not change kernel, just install matching kernel-tools
+keep_current: false
+# if virtual_extra, install additional extra modules
+virtual_extra: true
+package: {{ salt['grains.filter_by'](package_defaults,
+  grain= 'lsb_distrib_codename', default= 'generic',
+  merge= salt['pillar.get']('kernel:package', {})) }}
+overlay:
+  redirect_dir: "on"
+  xino_auto: "on"
+  metacopy: "off"
+{% endload %}
 
 {% set settings = salt['grains.filter_by'](defaults,
   grain= 'lsb_distrib_codename', default= 'generic',
-  merge= salt['pillar.get']('kernel:package', {})) %}
+  merge= salt['pillar.get']('kernel', {})) %}

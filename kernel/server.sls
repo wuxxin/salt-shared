@@ -3,6 +3,7 @@ include:
   - kernel.sysctl
   - kernel.cgroup
   - kernel.limits
+  - kernel.module
   - kernel.swappiness
 
 kernel_big_nop:

@@ -1,13 +1,22 @@
 # kernel
 
-install matching kernel-package, headers and tools, depending os-version.
++ state: kernel
+  + install matching kernel-package, headers and tools, depending os-version.
+  + pillar item: "kernel:keep_current:True" (default=False) or instance running on LXC
+      + only install a matching kernel-tools and headers to the running kernel
 
-+ will install the "virtual" flavor if running as virtual machine
-+ will only install matching kernel-tools on LXC
- 
-+ pillar item: "kernel:package:keep_current:True" (default=False)
-    + keep state.kernel from modifying or installing a kernel-image
-    + will only install a matching kernel-tools to the running kernel
++ state: kernel.server: big setup (lot of open files, connections, ...)
+  + kernel.sysctl
+  + kernel.cgroup
+  + kernel.limits
+  + kernel.module
+    + kernel.module.netfilter
+    + kernel.module.overlay
+  + kernel.swappiness
+  + kernel overlay fs
 
-+ pillar item: "kernel:package:no_extra:True" (default=False)
-    + do not install kernel-image-extra
++ state: kernel.entropy
+  + installs haveged
+
++ state: power
+  + installs acpid
