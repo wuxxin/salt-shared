@@ -13,7 +13,6 @@ video-player:
 {%- else %}
       - vlc-bin
 {%- endif %}
-      - vlc-plugin-vlsub
       - mpv {# replaces mplayer #}
     - require:
       - sls: desktop.video.base
@@ -25,8 +24,8 @@ youtube-dl:
 
 {# install distro package and then update pip version #}
 {{ pip3_install('youtube-dl', require='pkg: youtube-dl') }}
-  
-    
+
+
 {# The YouTube channel checker - Command Line tool to keep track of your
     favourite YouTube channels without signing up for a Google account. #}
 ytcc-req:
