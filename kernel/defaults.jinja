@@ -39,6 +39,5 @@ overlay:
   metacopy: "off"
 {% endload %}
 
-{% set settings = salt['grains.filter_by'](defaults,
-  grain= 'lsb_distrib_codename', default= 'generic',
-  merge= salt['pillar.get']('kernel', {})) %}
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('kernel', {})) %}

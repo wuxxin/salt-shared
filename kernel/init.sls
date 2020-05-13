@@ -1,6 +1,6 @@
 {% from "kernel/defaults.jinja" import settings with context %}
 
-{% if settings.keep_current|d(false) or if grains['virtual'] == 'LXC' %}
+{% if settings.keep_current|d(false) or grains['virtual'] == 'LXC' %}
 include:
   - .running.headers
 
