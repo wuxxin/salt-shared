@@ -8,6 +8,8 @@
   {%- for item, value in settings.overlay.items() %}
         options overlay {{ item }}={{ value }}
   {%- endfor %}
+    - require_in:
+      - kmod: load-overlay-kernel-module
 
   {% for i in ['overlay', 'shiftfs'] %}
 /etc/modules-load.d/{{ i }}.conf:
@@ -18,8 +20,6 @@
 load-{{ i }}-kernel-module:
   kmod.present:
     - name: {{ i }}
-    - require:
-      - file: /etc/modprobe.d/{{ i }}.conf
   {% endfor %}
 
 {% endif %}
