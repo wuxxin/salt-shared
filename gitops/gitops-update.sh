@@ -23,77 +23,97 @@ fi
 main () {
     start_epoch_ms="$(date +%s)000"
     need_service_restart="false"
+    result=0
 
-    # update origin repository source, remember old and new HEAD
+    if flag_is_set failed.gitops.update; then
+        echo "Error: failed.gitops.update flag is set, abort update run"
+        exit 1
+    fi
+    if flag_is_set disable.gitops.update; then
+        echo "Warning: disable.gitops.update flag is set, exit update run without update"
+        simple_metric update_duration_sec gauge \
+            "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
+        exit 0
+    fi
+
+    echo "update origin repository source"
     current_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
     /usr/local/sbin/from-git.sh pull --url "$src_url" --branch "$src_branch" --user "$src_user" --git-dir "$src_dir"
     latest_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
 
     if test "$latest_origin_rev" != "$current_origin_rev" -o \
         "$latest_origin_rev" != "$(get_tag gitops_current_rev "invalid")" -o \
-        -e "{{ settings.var_dir }}/flags/force.app.update"; then
+        -e "{{ settings.var_dir }}/flags/force.gitops.update"; then
 
-        simple_metric update_start_timestamp counter "timestamp-epoch-seconds since last update to app" "$start_epoch_ms"
+        need_service_restart="true"
+        msg="Updating app from $(get_gitrev "$src_dir") to $latest_origin_rev"
         if test "$(get_gitrev "$src_dir")" = "$latest_origin_rev"; then
             msg="Reapplying Update $latest_origin_rev"
-        else
-            msg="Updating app from $(get_gitrev "$src_dir") to $latest_origin_rev"
         fi
-
-        # execute stop app
         gitops_maintenance "Gitops Update" "$msg"
-        echo "Information: executing pre_update_command"
-        {{ settings.pre_update_command }} && err=$? || err=$?
-        if test $err -ne 0; then
-            extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
-            gitops_error "Gitops Error" \
-                "pre_update_command failed with error $err" error "$extra"
-            exit 1
-        fi
-        need_service_restart="true"
+        simple_metric update_start_timestamp counter \
+            "timestamp-epoch-seconds since last update to app" "$start_epoch_ms"
 
-        # call gitops update procedure, defaults to execute-saltstack.sh
-        cd $src_dir
-        {{ settings.update_command }} && err=$? || err=$?
-        if test $err -ne 0; then
+        echo "calling pre_update_command"
+        {{ settings.pre_update_command }} && result=$? || result=$?
+        if test $result -ne 0; then
             extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
             gitops_error "Gitops Error" \
-                "update command failed with error $err" error "$extra"
-            set_tag_from_file gitops_failed_rev "{{ settings.staging_dir }}/GIT_REV"
+                "pre_update_command failed with error $result" error "$extra"
+        else
+            echo "calling update_command, defaults to execute-saltstack.sh"
+            cd $src_dir
+            {{ settings.update_command }} && result=$? || result=$?
+            if test $result -ne 0; then
+                extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
+                gitops_error "Gitops Error" \
+                    "update command failed with error $result" error "$extra"
+                set_tag_from_file gitops_failed_rev "{{ settings.staging_dir }}/GIT_REV"
+            else
+                echo "calling post_update_command"
+                {{ settings.post_update_command }} && result=$? || result=$?
+                if test $result -ne 0; then
+                    extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
+                    gitops_error "Gitops Error" \
+                        "post_update_command failed with error $result" error "$extra"
+                fi
+            fi
         fi
     fi
 
     if test -e /run/reboot-required; then
         if flag_is_set no.automatic.reboot; then
             echo "Warning: reboot of system required, but automatic reboot not allowed; contacting admin"
-            sentry_entry "Gitops Attention" "node needs reboot, human attantion required" error
+            sentry_entry "Gitops Attention" "node needs reboot, human attention required" error
         else
             echo "Warning: reboot of system required, initiating automatic reboot"
             simple_metric update_duration_sec gauge \
-            "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
+                "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
             simple_metric update_reboot_timestamp counter \
-            "timestamp-epoch-seconds since update requested reboot" "$start_epoch_ms"
+                "timestamp-epoch-seconds since update requested reboot" "$start_epoch_ms"
             systemctl --no-block reboot
             exit 0
         fi
     fi
 
-    if $need_service_restart; then
-        echo "Information: executing post_update_command"
-        {{ settings.post_update_command }} && err=$? || err=$?
-        if test $err -ne 0; then
+    if test "$need_service_restart" = "true" -a "$result" = "0"; then
+        echo "calling finish_update_command"
+        {{ settings.finish_update_command }} && result=$? || result=$?
+        if test $result -ne 0; then
             extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
             gitops_error "Gitops Error" \
-                "post_update_command failed with error $err" error "$extra"
-            exit 1
+                "finish_update_command failed with error $result" error "$extra"
         fi
     fi
-    echo "Information: all done, enable access to frontend service"
-    gitops_maintenance --clear
+
+    if test "$need_service_restart" = "true" -a "$result" = "0"; then
+        echo "Information: all done, enable access to frontend service"
+        gitops_maintenance --clear
+    fi
 
     simple_metric update_duration_sec gauge \
         "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
-    exit 0
+    exit $result
 }
 
 main "$@"

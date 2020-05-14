@@ -1,6 +1,5 @@
 [Unit]
 Description=Gitops Update
-# ConditionPathExists=!{{ fixme tag of gitops.disable }}
 ConditionFileNotEmpty={{ settings.env_file }}
 After=network-online.target
 Wants=network-online.target

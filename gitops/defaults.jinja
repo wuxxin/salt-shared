@@ -25,12 +25,24 @@ git:
 automatic_reboot: true
 maintenance_template: /var/lib/gitops/maintenance.template
 maintenance_target: /var/lib/gitops/www/503.html
-update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate
+
 pre_update_command: /usr/bin/true
+update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate
 post_update_command: /usr/bin/true
+finish_update_command: /usr/bin/true
+
 {#
-pre ist only executed if update would run,
-post is executed after update run, except if machine needs to be rebooted
++ pre_update: is executed before update but only if update would run
++ update: is executed if pre_update was sucessful and update would run
++ post_update is executed after update did run sucessful
++ finish_update is executed after post_update was sucessful and machine does not need a reboot
+example:
+```
+pre_update_command: /usr/bin/systemctl stop xyz
+post_update_command: /usr/bin/bash -c '. /usr/local/lib/gitops-library.sh;
+    simple_metric update_command_run counter "timestamp of update run" "$(date +%s)000"'
+finish_update_command: /usr/bin/systemctl start --no-block xyz
+```
 #}
 
 env_file: /etc/gitops.env

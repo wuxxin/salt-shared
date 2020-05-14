@@ -245,5 +245,5 @@ gitops_error() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
 gitops_failed() { # $1=topic, $2=message, [$3=level=critical], [$4=extra={}]
     gitops_maintenance "$1" "$2"
     sentry_entry "$1" "$2" critical "$4"
-    set_flag gitops_failed
+    set_flag failed.gitops.update
 }
