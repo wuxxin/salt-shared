@@ -1,6 +1,6 @@
-#!/bin/bash
-#set -eo pipefail
-#set -x
+#!/usr/bin/bash
+set -eo pipefail
+set -x
 
 self_path=$(dirname "$(readlink -e "$0")")
 
@@ -8,21 +8,25 @@ firstuser=gitops
 gitserver_sshport=22
 authorized_keys="~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub"
 
-gitserver=pgit.on.ep3.at
-gitserver_sshport=10023
-gituser=wuxxin
-gitgpguser=felix@ep3.at
-gitreponame=k3s.goof
-basepath=~/work
-hostname=k3s.goof.ep3.at
-
+gitserver=
+gitserver_sshport=
+gituser=
+gitgpguser=
+gitreponame=
+basepath=
+hostname=
 
 usage(){
     cat << EOF
 Usage: $0 basepath reponame gitserver gituser creator-gpgid hostname
     [--firstuser username #default=$firstuser] [--git-port gitsshport #default=$gitserver_sshport]
     [--authorized-keys authorized_keys #default="$authorized_keys"]
-    [--no-saltstack] [--no-remote|--only-remote]
+    [--machine-bootstrap] [--no-saltstack] [--no-remote|--only-remote]
+
+--machine-bootstrap: add machine-bootstrap repository setup for hardware install
+--no-saltstack     : do not add gitops saltstack repository setup
+--no-remote        : do not execute remote calls
+--only-remote      : only execute remote calls
 
 + local
     + create (partly encrypted) gitops git repository
@@ -30,8 +34,8 @@ Usage: $0 basepath reponame gitserver gituser creator-gpgid hostname
     + add templates for quick start
 + remote
     + create repository on git server
-    + add access key to git server
-    + push repository to git server
+    + add access key for gitops user to access repository on the git server
+    + add origin git server as upstream and push repository to git server
 
 creating and configuring the remote git repository using API Calls
 (currently tested on gogs), needs the env variable "Authorization" to be set
@@ -40,7 +44,7 @@ to the gituser API token, eg. Authorization="token hexdigits".
 + Example
 ```sh
 Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" \
-    ~/work k3s.goof pgit.on.ep3.at wuxxin felix@ep3.at k3s.goof.ep3.at \
+    $0 ~/work repository.name git.server.domain gituser gpguserid full.machine.hostname \
         --git-port 10023 --authorized_keys ~/work/id_rsa
 ```
 EOF
@@ -101,7 +105,6 @@ ssh-keygen -q -t ed25519 -N "$gitreponame" -f config/gitops.id_ed25519
 git add .
 git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
 
-
 # add saltstack
 mkdir -p salt/custom
 pushd salt
@@ -133,7 +136,11 @@ chmod +x bootstrap.sh
 git add .
 git commit -v -m "add saltstack skeleton"
 
+# add machine-bootstrap
+fixme add machine bootstrap and make symlink on saltstack
 
+# add origin to upstream
+git remote add origin ssh://git@${gitserver}:${gitserver_sshport}/${gituser}/${gitreponame}.git
 
 # remote configuration, currently using the gogs api
 # create origin repo on server
@@ -146,9 +153,6 @@ http -j  https://${gitserver}/api/v1/admin/users/${gituser}/repos \
 http -j https://${gitserver}/api/v1/repos/${gituser}/${gitreponame}/keys \
     title="machine@${gitreponame}" \
     key="$(cat config/gitops.id_ed25519.pub)"
-
-# add origin to upstream
-git remote add origin ssh://git@${gitserver}:${gitserver_sshport}/${gituser}/${gitreponame}.git
 
 # push changes to origin
 git push -u origin master
