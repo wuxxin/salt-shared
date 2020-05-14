@@ -66,7 +66,7 @@ acme.sh:
     - makedirs: True
     - mode: "0644"
     - contents: |
-        {{ settings.user }} ALL=(ALL) NOPASSWD:/bin/systemctl reload-or-restart nginx
+        {{ settings.user }} ALL=(ALL) NOPASSWD:/usr/bin/systemctl reload-or-restart nginx
 
 {% if settings.letsencrypt and
     not (settings.key|d(false) and settings.cert|d(false)) %}
