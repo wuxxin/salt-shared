@@ -3,6 +3,19 @@
 include:
   - .hostname
   - .accounts
+{%- if settings.storage.filesystem.zfs|d(false) %}
+  - zfs
+
+{# if there are any storage.filesystem.zfs entries,
+  depend on the zfs.sls state completed storage.filesystem.zfs entries are set #}
+zfs_requisites:
+  test:
+    - nop
+    - require:
+      - sls: zfs
+    - require_in:
+      - zfs_fs_present_all
+{%- endif %}
 
 zfs_fs_present_all:
   test:
