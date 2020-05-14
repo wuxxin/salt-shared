@@ -9,7 +9,7 @@ usage(){
     cat << EOF
 
 Usage:  $0 create <reponame> <gitserver> <gituser> <webhook_target> [--output <file>]
-    
+
 - needs env variable "Authorization" set to the gituser API token,
     eg. 'Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"'
 
@@ -35,4 +35,7 @@ git commit -v -m "add webhook config"
 
 # add webhook
 http -j https://${gitserver}/api/v1/repos/${gituser}/${gitreponame}/hooks \
-    type=gogs config:='{}' url="$webhookurl" secret="$webhook_secret"
+    type=gogs \
+    config:='{}' \
+    url="$webhookurl" \
+    secret="$webhook_secret"
