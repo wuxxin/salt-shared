@@ -1,6 +1,6 @@
 {% from "gitops/defaults.jinja" import settings with context %}
 include:
-  - .service
+  - gitops.service
 
 {% if settings.timer.enabled|d(false) %}
 

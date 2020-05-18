@@ -2,7 +2,7 @@
 {% from "gitops/webhook/webhook-lib.sls" import mkhook with context %}
 
 include:
-  - service
+  - gitops.service
 
 {# install package, but disable and mask default webhook service #}
 webhook:

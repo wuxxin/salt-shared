@@ -56,6 +56,8 @@ fixme reinstall gpg id
   file.directory:
     - user: {{ settings.user }}
     - mode: "0750"
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
 
@@ -67,6 +69,8 @@ fixme reinstall gpg id
     - present
 {% endif %}
     - user: {{ settings.user }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 
 {{ salt['file.dirname'](settings.maintenance_target) }}:
   file.directory:
@@ -78,6 +82,8 @@ fixme reinstall gpg id
     - template: jinja
     - defaults:
         settings: {{ settings }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 
 {% for i in ['execute-saltstack.sh', 'from-git.sh', 'gitops-update.sh'] %}
 /usr/local/sbin/{{ i }}:
@@ -87,6 +93,8 @@ fixme reinstall gpg id
     - template: jinja
     - defaults:
         settings: {{ settings }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
 /etc/systemd/system/gitops-update.service:
@@ -97,3 +105,5 @@ fixme reinstall gpg id
         settings: {{ settings }}
     - onchanges_in:
       - cmd: systemd_reload
+    - require:
+      -
