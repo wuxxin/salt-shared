@@ -38,6 +38,10 @@ include:
         uwsgi_param  HTTPS              $https if_not_empty;
         uwsgi_param  REMOTE_ADDR        $remote_addr;
         uwsgi_param  REMOTE_PORT        $remote_port;
+        # XXX overwrite server_port for uwsgi because we are behind ALPN-Stream Switch
+        uwsgi_param  SERVER_PORT        443;
+        uwsgi_param  SERVER_NAME        $server_name;
+
 
 /etc/nginx/nginx.conf:
   file.managed:
@@ -62,7 +66,7 @@ nginx:
 nginx:
   pkg.installed:
     - pkgs:
-      - nginx
+      - nginx-full
       - nginx-extras
 {% endif %}
   service.running:
