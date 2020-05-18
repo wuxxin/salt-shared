@@ -162,8 +162,8 @@ get_gitrev () {
 # main
 cd /run
 src_url=""; src_branch=""; user=""; home_dir=""; clone_dir=""
-target_dir=""; gitrev_dir=""; keys_from_stdin="false"; keys_from_file=""
-acknowledged="false" sshkey=""; known_hosts=""; gpgkey=""
+target_dir=""; gitrev_dir=""; keys_from_file=""
+sshkey=""; known_hosts=""; gpgkey=""
 
 if test "$1" != "pull" -o "$1" != "bootstrap"; then usage; fi
 cmd="$1"
@@ -195,17 +195,31 @@ fi
 echo "src: $src_url branch: $src_branch user: $user home: $home_dir clone: $clone_dir target: $target_dir gitrev: $gitrev_dir"
 
 # extract keys from input
-if test  "$keys_from_file" != ""; then
+if test "$keys_from_file" != ""; then
     keydata=$(cat $keys_from_file)
 
     sshkey=$(extract_ssh "$keydata") && result=true || result=false
-    if ! $result; then echo "Error: no ssh key found from input"; exit 1; fi
+    if ! $result; then
+        if test "${src_url:0:3}" != "ssh"; then
+            echo "Warning: no ssh key found from input"
+        else
+            echo "Error: src_url is using ssh, but no ssh key found from input"; exit 1
+        fi
+    fi
 
     known_hosts=$(extract_known_hosts "$keydata") && result=true || result=false
-    if ! $result; then echo "Error: no ssh known hosts found from input"; exit 1; fi
+    if ! $result; then
+        if test "${src_url:0:3}" != "ssh"; then
+            echo "Warning: no ssh known_hosts found from input"
+        else
+            echo "Error: src_url is using ssh, but no ssh known hosts found from input"; exit 1
+        fi
+    fi
 
     gpgkey=$(extract_gpg "$keydata") && result=true || result=false
-    if ! $result; then echo "Warning: no gpg key found from input"; fi
+    if ! $result; then
+        echo "Warning: no gpg key found from input"
+    fi
 fi
 
 if test "$cmd" = "bootstrap"; then
@@ -248,23 +262,28 @@ if test "$cmd" = "bootstrap"; then
     chown -R "$user:$user" "$home_dir"
 
     # install keys
-    if test "$keys_from_stdin" = "true"; then
+    if test "$keys_from_file" != ""; then
         install -o "$user" -g "$user" -m "0700" -d "$home_dir/.ssh"
-        sshkeytarget="$home_dir/.ssh/$(ssh_type \"$sshkey\")"
-        echo "$sshkey" > "$sshkeytarget"
-        chown "$user:$user" "$sshkeytarget"
-        chmod "0600" "$sshkeytarget"
 
-        install -o "$user" -g "$user" -m "0700" -d "$home_dir/.ssh"
-        echo "$known_hosts" > "$home_dir/.ssh/known_hosts"
-        chown "$user:$user" "$home_dir/.ssh/known_hosts"
-        chmod "0600" "$home_dir/.ssh/known_hosts"
-
-        echo "$gpgkey" | gosu $user gpg --batch --yes --import || true
-        # XXX get first key id, assumes ~/.gnupg of user is empty
-        gpg_id=$(gosu $user gpg --batch --yes --list-key --with-colons | grep ^fpr | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
-        # trust key absolute
-        echo "$gpg_id:5:" | gosu $user gpg --batch --yes --import-ownertrust
+        if test "$sshkey" != ""; then
+            sshkeytarget="$home_dir/.ssh/$(ssh_type \"$sshkey\")"
+            echo "$sshkey" > "$sshkeytarget"
+            chown "$user:$user" "$sshkeytarget"
+            chmod "0600" "$sshkeytarget"
+        fi
+        if test "$known_hosts" != ""; then
+            echo "$known_hosts" > "$home_dir/.ssh/known_hosts"
+            chown "$user:$user" "$home_dir/.ssh/known_hosts"
+            chmod "0600" "$home_dir/.ssh/known_hosts"
+        fi
+        if test "$gpgkey" != ""; then
+            install -o "$user" -g "$user" -m "0700" -d "$home_dir/.gnupg"
+            echo "$gpgkey" | gosu $user gpg --batch --yes --import || true
+            # XXX get first key id, assumes ~/.gnupg of user is empty
+            gpg_id=$(gosu $user gpg --batch --yes --list-key --with-colons | grep ^fpr | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
+            # trust key absolute
+            echo "$gpg_id:5:" | gosu $user gpg --batch --yes --import-ownertrust
+        fi
     fi
 fi
 
