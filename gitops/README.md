@@ -2,8 +2,8 @@
 
 + flags recognized
   + failed.gitops.update
-  + disable.gitops.update
   + force.gitops.update
+  + disable.gitops.update
   + disable.automatic.reboot
 
 + tags recognized

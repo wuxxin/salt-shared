@@ -28,8 +28,9 @@ gitop-requisites:
     - group: {{ settings.user }}
 
 {% if settings.git.ssh_id %}
+fixme reinstall ssh id
 {{ settings.home_dir }}/.ssh/id_ed25519:
-  file.managed:
+  file.blockreplace:
     - mode: "0600"
     - user: {{ settings.user }}
     - group: {{ settings.user }}
@@ -40,10 +41,12 @@ gitop-requisites:
 {% endif %}
 
 {% if settings.git.ssh_known_hosts %}
-fixme reinstall known hosts
+{{ settings.home_dir }}/.ssh/known_hosts:
+fixme reinstall ssh_kown hosts
 {% endif %}
 
 {% if settings.git.gpg_id %}
+
 fixme reinstall gpg id
 {% endif %}
 

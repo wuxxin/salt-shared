@@ -207,7 +207,7 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
             --logger app.status \
             --level "$level" \
             --culprit "${UNITNAME:-shellscript}" \
-            --server_name "$DOMAIN"  \
+            --server_name "${DOMAIN:-$(hostname -f)}"  \
             --tags "$tags" \
             --extra "$extra" \
             "$msg"

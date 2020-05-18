@@ -3,9 +3,6 @@ set -eo pipefail
 set -x
 
 self_path=$(dirname "$(readlink -e "$0")")
-config_path=/etc/salt
-config_list="config"
-states_list="salt/salt-shared salt/custom"
 
 
 usage(){
@@ -18,7 +15,7 @@ paths are relative to base_path
 
 script rewrites $config_path/minion on execution
 
-script expects root, call with sudo as sudo able user
+script expects root, or call with sudo as sudo able user
 
 EOF
     exit 1
@@ -28,15 +25,15 @@ EOF
 build_from_lp_usage() { # $1=source $2=dest
     cat <<EOF
 Usage: $0 <pkgname> <target-dir> [--source distro] [--dest distro]
-        [--debbuildopts <options>] [--version-postfix <postfix>] [<patch-file>*]
+        [--debbuildopts <options>] [--ver-suffix <suffix>] [<patch-file>*]
 
 pkgname         = source package name from launchpad
 target-dir      = directory where the resulting packages should be stored as apt archive
 --source distro = defines the launch-pad branch to use, will default to "$1"
 --dest   distro = build for distribution codename eg. "bionic", default=running system ($2)
 --debbuildopts  = DEB_BUILD_OPTIONS for builder, eg. "nocheck"
---version-postfix postfix
-                = text to appended to version nr, defaults to "custom"
+--ver-suffix suffix
+                = text to appended to version nr, eg. "~prebuild.1"
 patch-file      = zero or more patch files to be applied via quilt before building source
 
 EOF
@@ -44,15 +41,13 @@ EOF
 }
 
 
-build_from_lp() {
-    # <pkgname> <target-dir> [--source distro] [--dest distro]
-    # [--debbuildopts <options>] [--version-postfix <postfix>] [<patch-file>*]
-    local source dest verpostfix pkgname targetdir cowbasedir i need_install
-    local basedir changes current_version new_version debbuildopts dscfile
+build_from_lp() { # <pkgname> <target-dir> [--source distro] [--dest distro] [--debbuildopts <options>] [--ver-suffix <suffix>] [<patch-file>*]
+    local source dest versuffix pkgname targetdir cowbasedir i need_install
+    local basedir changes current_version new_version debbuildopts dsc_name dsc_file
     # defaults
     source=groovy
     dest="$(lsb_release -c -s)"
-    verpostfix="custom"
+    versuffix=""
     debbuildopts=""
 
     # parse args
@@ -63,7 +58,7 @@ build_from_lp() {
     if test "$1" = "--source"; then source=$2; shift 2; fi
     if test "$1" = "--dest"; then dest=$2; shift 2; fi
     if test "$1" = "--debbuildopts"; then debbuildopts="$2"; shift 2; fi
-    if test "$1" = "--version-postfix"; then verpostfix=$2; shift 2; fi
+    if test "$1" = "--ver-suffix"; then versuffix=$2; shift 2; fi
     cowbasedir="/var/cache/pbuilder/base-$dest.cow"
 
     for i in $@; do
@@ -120,21 +115,22 @@ build_from_lp() {
 
         # update changelog
         current_version=$(head -1 debian/changelog | sed -r "s/[^(]+\(([^)]+)\).+/\1/g");
-        new_version=${current_version:0:-1}$(( ${current_version: -1} +1 ))${verpostfix};
+        new_version=${current_version:0:-1}$(( ${current_version: -1} +1 ))${versuffix};
         debchange -v "$new_version" --distribution $dest "experimental: $changes"
         # generate new source archive
         dpkg-source -b .
         cd ..
+        dsc_name="${pkgname}*${versuffix}.dsc"
     else
-        # without patches, dont use version postfix, because it is the original source
-        verpostfix=""
+        # without patches, dont use version suffix in dsc_name, because nothing changed
+        dsc_name=""
     fi
 
     # build generated source
-    dscfile=$(find . -type f -name "${pkgname}*${verpostfix}.dsc" -print -quit)
+    dsc_file=$(find . -type f -name "$dsc_name" -print -quit)
     DEB_BUILD_OPTIONS="$debbuildopts" BASEPATH="$cowbasedir" backportpackage \
         -d "$dest" --builder=cowbuilder --dont-sign --build --workdir=build \
-        $dscfile
+        -S "$versuffix" $dsc_file
 
     # generate local apt archive files
     cd build/buildresult
@@ -153,7 +149,7 @@ build_from_lp() {
 }
 
 
-minion_config() { # basepath configpath config_list states_list
+minion_config() { # $1=basepath $2=configpath $3=config_list $4=states_list
     local base_path config_path config_list states_list
     base_path=$(readlink -e $1)
     config_path=$2
@@ -184,7 +180,7 @@ EOF
 
 }
 
-salt_install() {
+salt_install() { # no parameter
     os_release=$(lsb_release -r -s)
     os_codename=$(lsb_release -c -s)
     os_distributor=$(lsb_release  -i -s | tr '[:upper:]' '[:lower:]')
@@ -200,10 +196,10 @@ salt_install() {
             DEBIAN_FRONTEND=noninteractive apt-get update --yes
 
         elif test "$os_codename" = "focal"; then
-            echo "building saltstack from latest launchpad source"
+            echo "Currently (2020/05/15) there is no saltstack package for focal, building from latest launchpad source"
             custom_archive=/usr/local/lib/saltstack-custom-archive
             custom_sources_list=/etc/apt/sources.list.d/local-saltstack-custom.list
-            build_from_lp salt $custom_archive --debbuildopts nocheck
+            build_from_lp salt $custom_archive --debbuildopts nocheck --ver-suffix "~prebuild.1"
             cat > $custom_sources_list << EOF
 deb [ trusted=yes ] file:$custom_archive ./
 EOF
@@ -223,14 +219,11 @@ EOF
 
 main() {
     cd /run
-    if test "$1" = "--config"; then
-        config_list="$2"
-        shift 2
-    fi
-    if test "$1" = "--states"; then
-        states_list="$2"
-        shift 2
-    fi
+    config_path=/etc/salt
+    config_list="config"
+    states_list="salt/salt-shared salt/custom"
+    if test "$1" = "--config"; then config_list="$2"; shift 2; fi
+    if test "$1" = "--states"; then states_list="$2"; shift 2; fi
     if test ! -e "$1"; then usage; fi
     base_path="$1"
     shift
