@@ -41,6 +41,7 @@ include:
         # XXX overwrite server_port for uwsgi because we are behind ALPN-Stream Switch
         uwsgi_param  SERVER_PORT        443;
         uwsgi_param  SERVER_NAME        $server_name;
+        uwsgi_buffers 8 64k;            # Default: 8 4k|8k; 2nd parameter defines max streaming chunk
 
 
 /etc/nginx/nginx.conf:
