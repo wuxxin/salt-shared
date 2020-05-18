@@ -12,7 +12,7 @@ uplink_ip() {
     echo "$default_ip"
 }
 
-version_gt() {
+version_gt() { # $1=version $2=version
     test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
 }
 
@@ -32,27 +32,27 @@ yaml_dict_get() { # $1=entry, [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, yaml, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)))" $@
 }
 
-systemd_json_status() {
+systemd_json_status() { # $1= systemdservice
     systemctl status -l -q --no-pager -n 15 "$@" | text2json_status
 }
 
-text2json_status() {
+text2json_status() { # $1=text , output=json dict {'status': [text.split] }
     python3 -c "import sys, json; d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
 }
 
-is_truestr() {
+is_truestr() { # $1= boolstring , return true if lower($1) = "true"
     test "$(printf "%s" "$1" | tr A-Z a-z)" = "true"
 }
 
-is_falsestr() {
+is_falsestr() { # $1= boolstring , return true if lower($1) != "true"
     test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
 }
 
-install_as_user() {
+install_as_user() { # $1..$x= parameter for install
     install -o "{{ settings.user }}" -g "{{ settings.user }}" "$@"
 }
 
-chown_to_user() {
+chown_to_user() { # $1=filename
     if test "$(id -u)" = "0"; then
         # if currently root, set owner to {{ settings.user }}
         chown "{{ settings.user }}:{{ settings.user }}" "$1"
