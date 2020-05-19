@@ -48,7 +48,7 @@ gitops-library.sh:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-create_maintenance_target_dir:
+create_gitops_maintenance_target_dir:
   file.directory:
     - name: {{ salt['file.dirname'](settings.maintenance_target) }}
     - makedirs: true

@@ -4,8 +4,9 @@ include:
   - http_frontend.ssl
   - http_frontend.pki
 
-{{ salt['file.dirname'](settings.maintenance_target) }}:
+create_http_frontend_maintenance_target_dir:
   file.directory:
+    - name: {{ salt['file.dirname'](settings.maintenance_target) }}
     - makedirs: true
 
 /etc/nginx/proxy_params:
