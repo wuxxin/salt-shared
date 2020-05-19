@@ -1,5 +1,4 @@
 {% from "gitops/defaults.jinja" import settings with context %}
-
 include:
   - tools.sentry
 
@@ -49,8 +48,9 @@ gitops-library.sh:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-{{ salt['file.dirname'](settings.maintenance_target) }}:
+create_maintenance_target_dir:
   file.directory:
+    - name: {{ salt['file.dirname'](settings.maintenance_target) }}
     - makedirs: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
