@@ -32,7 +32,7 @@ helm-x.tar.gz:
     - skip_verify: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
-    - requires:
+    - require:
       - file: {{ settings.home }}/.local/share
   archive.extracted:
     - source: {{ settings.home }}/.local/share/helm-x.tar.gz
@@ -48,14 +48,14 @@ helm-x-symlink:
     - makedirs: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
-    - requires:
+    - require:
       - file: {{ settings.home }}/.local/share
 helm-x-binary:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz
     - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_linux_amd64.tar.gz
     - source_hash: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_checksums.txt
-    - requires:
+    - require:
       - file: {{ settings.home }}/.local/share
   cmd.run:
     - name: tar xzf {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz --overwrite -C {{ settings.home }}/.cache/helm/plugins/https-github.com-mumoshu-helm-x/bin helm-x
