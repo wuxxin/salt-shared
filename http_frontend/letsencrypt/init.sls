@@ -163,16 +163,20 @@ acme-deploy:
     - template: jinja
     - defaults:
         settings: {{ settings }}
-    - onchanges_in:
-      - cmd: systemd_reload
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/letsencrypt.service
 
 /etc/systemd/system/letsencrypt.timer:
   file.managed:
     - source: salt://http_frontend/letsencrypt/letsencrypt.timer
-    - onchanges_in:
-      - cmd: systemd_reload
     - require:
       - file: /etc/systemd/system/letsencrypt.service
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/letsencrypt.timer
 
 enable-letsencrypt-service:
   service.running:
