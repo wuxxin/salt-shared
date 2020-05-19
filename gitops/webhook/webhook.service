@@ -3,8 +3,7 @@ Description=configurable HTTP endpoints (Webhooks)
 Documentation=https://github.com/adnanh/webhook/
 After=network-online.target
 Wants=network-online.target
-#OnFailure=app-service-failed@%n.service
-#ConditionFileNotEmpty={{ settings.etc_dir }}/webhook.conf
+ConditionFileNotEmpty=/etc/webhook.conf
 
 [Service]
 User={{ settings.user }}
@@ -12,13 +11,12 @@ Group={{ settings.user }}
 Environment=UNITNAME=%n
 Environment=HOME="{{ settings.home_dir }}"
 Environment=USER="{{ settings.user }}"
-EnvironmentFile={{ settings.env_file }}
 PassEnvironment=UNITNAME HOME USER
 WorkingDirectory={{ settings.home_dir }}
 ExecStart=/usr/bin/webhook \
     -ip {{ settings.webhook.ip }} \
     -port {{ settings.webhook.port }} \
-    -hooks {{ settings.etc_dir }}/webhook.conf \
+    -hooks /etc/webhook.conf \
     -urlprefix hooks \
     -nopanic \
     -verbose

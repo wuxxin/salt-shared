@@ -4,16 +4,17 @@
 include:
   - gitops.service
 
-{# install package, but disable and mask default webhook service #}
 webhook:
   pkg:
     - installed
-  service.dead:
-    - enable: false
-
-webhook_masked:
-  service.masked:
-    - name: webhook
+  file.managed:
+    - name: /etc/systemd/system/webhook.service
+    - source: salt://gitops/webhook/webhook.service
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
+    - requires:
+      - pkg: webhook
 
 /usr/local/bin/webhook-gitops-update.sh:
   file.managed:
@@ -25,7 +26,7 @@ webhook_masked:
           echo "starting gitops-update"
           sudo /bin/systemctl --no-block start gitops-update
     - requires_in:
-      - file: {{ settings.etc_dir }}/webhook.conf
+      - file: /etc/webhook.conf
 
 /etc/sudoers.d/webhook-gitops-update:
   file.managed:
@@ -34,34 +35,23 @@ webhook_masked:
     - contents: |
         {{ settings.user }} ALL=(ALL) NOPASSWD:/bin/systemctl --no-block start gitops-update
     - requires_in:
-      - file: {{ settings.etc_dir }}/webhook.conf
-
-/etc/systemd/system/gitops-webhook.service:
-  file.managed:
-    - source: salt://gitops/webhook/gitops-webhook.service
-    - template: jinja
-    - defaults:
-        settings: {{ settings }}
-    - requires:
-      - file: {{ settings.etc_dir }}/webhook.conf
-    - onchanges_in:
-      - cmd: systemd_reload
-
+      - file: /etc/webhook.conf
 
 {% if salt['pillar.get']('gitops:webhook:hooks', {}) == {} %}
 
-{{ settings.etc_dir }}/webhook.conf:
+/etc/webhook.conf:
   file:
     - absent
 
-gitops-webhook.service:
+webhook.service:
   service.dead:
     - enable: false
     - require:
       - pkg: webhook
-    - watch:
-      - file: {{ settings.etc_dir }}/webhook.conf
-      - file: /etc/systemd/system/gitops-webhook.service
+      - file: /etc/systemd/system/webhook.service
+    - onchanges:
+      - file: /etc/webhook.conf
+      - file: /etc/systemd/system/webhook.service
 
 {% else %}
 
@@ -75,7 +65,7 @@ gitops-webhook.service:
     {% set ns.hook_data = new_hook_data %}
   {% endfor %}
 
-{{ settings.etc_dir }}/webhook.conf:
+/etc/webhook.conf:
   file.managed:
     - user: {{ settings.user }}
     - group: {{ settings.user }}
@@ -83,13 +73,14 @@ gitops-webhook.service:
     - contents: |
 {{ ns.hook_data|json(True)|indent(8,True) }}
 
-gitops-webhook.service:
+webhook.service:
   service.running:
     - enable: true
     - require:
       - pkg: webhook
-    - watch:
-      - file: {{ settings.etc_dir }}/webhook.conf
-      - file: /etc/systemd/system/gitops-webhook.service
+      - file: /etc/systemd/system/webhook.service
+    - onchanges:
+      - file: /etc/webhook.conf
+      - file: /etc/systemd/system/webhook.service
 
 {% endif %}
