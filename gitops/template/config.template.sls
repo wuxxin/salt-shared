@@ -22,7 +22,9 @@
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/gitops.id_ed25519') %}
   {% import_text 'gitops.id_ed25519' as gitops_ssh_secret %}
-  {% set gitops_ssh_public = salt['cmd.run_stdout']("ssh-keygen -q -y -f /dev/stdin", stdin=gitops_ssh_secret) %}
+{% endif %}
+{% if salt['file.file_exists'](project_basepath+ '/config/gitops.id_ed25519.pub') %}
+  {% import_text 'gitops.id_ed25519.pub' as gitops_ssh_public %}
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/gitops@node-secret-key.gpg') %}
   {% import_text 'gitops@node-secret-key.gpg' as gitops_gpg_secret %}
@@ -32,10 +34,6 @@
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/gitops.known_hosts') %}
   {% import_text 'gitops.known_hosts' as gitops_known_hosts %}
-  {% if gitops_known_hosts %}
-    {% set gitops_known_hosts = '# ---BEGIN OPENSSH KNOWN HOSTS---\n'+
-      gitops_known_hosts+ '\n'+ '# ---END OPENSSH KNOWN HOSTS---\n' %}
-  {%- endif %}
 {% endif %}
 
 {% set gitops_user = node.gitops_user|d(node.firstuser) %}
