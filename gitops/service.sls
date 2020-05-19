@@ -152,9 +152,13 @@ gitops-update:
     - template: jinja
     - defaults:
         settings: {{ settings }}
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: gitops-update
   service.running:
     - enable: true
     - require:
-      - file: gitops-update
-    - onchanges:
+      - cmd: gitops-update
+    - watch:
       - file: /etc/systemd/system/gitops-update.service
