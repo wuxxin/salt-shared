@@ -1,13 +1,13 @@
 {% from "zfs/defaults.jinja" import settings with context %}
 
 include:
-  - nfs.common
+  - nfs.server
   - zfs.autosnapshot
 
 zfsutils-linux:
   pkgs.installed:
     - require:
-      - sls: nfs.common
+      - sls: nfs.server
 
 /etc/modprobe.d/zfs.conf:
   file.managed:

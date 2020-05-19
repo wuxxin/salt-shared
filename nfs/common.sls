@@ -1,23 +1,12 @@
 {% from "nfs/defaults.jinja" import settings %}
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
-
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
 {% set nfs_common_replace = [
   ('STATDOPTS', '--port 32765 --outgoing-port 32766 '+ param_list('--name', settings.listen_ip) ),
   ('NEED_STATD', 'yes' if settings.legacy_support else 'no'),
   ('NEED_IDMAPD', ''),
 ] %}
-{% set nfs_server_replace = [
-  ('RPCNFSDOPTS',   '-N 2 '+ nfs3_option+ '--no-udp '+ param_list('--host', settings.listen_ip) ),
-  ('RPCMOUNTDOPTS', '-N 2 '+ nfs3_option+ '--no-udp --manage-gids --port 32767'),
-] %}
-{#  ('fs.nfs.nfs_callback_tcpport', 32764), #}
-{% set nfs_sysctl= [
-  ('fs.nfs.nlm_tcpport', 32768),
-  ('fs.nfs.nlm_udpport', 32768),
-] %}
-
 
 rpcbind:
   pkg.installed:
@@ -152,7 +141,6 @@ mask_legacy_rpcbind:
 {% endif %}
 
 
-
 nfs-common:
   pkg.installed:
     - name: nfs-common
@@ -169,46 +157,7 @@ nfs-common:
     - append_if_not_found: true
     - require:
       - pkg: nfs-common
-    - require_in:
-      - service: nfs-kernel-server
-    - watch_in:
-      - service: nfs-kernel-server
 {% endfor %}
-
-{% for name, value in nfs_server_replace %}
-{{ name }}-nfs-kernel-server:
-  file.replace:
-    - name: /etc/default/nfs-kernel-server
-    - pattern: '^{{ name }}=.*'
-    - repl: {{ name }}="{{ value }}"
-    - append_if_not_found: true
-    - require:
-      - pkg: nfs-common
-    - require_in:
-      - service: nfs-kernel-server
-    - watch_in:
-      - service: nfs-kernel-server
-{% endfor %}
-
-nfs-kernel-server:
-  service.running:
-    - name: nfs-kernel-server
-    - enable: True
-
-{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
-  {% for name, value in nfs_sysctl %}
-{{ name }}:
-  sysctl.present:
-    - value: {{ value }}
-    - require:
-      - pkg: nfs-common
-    - require_in:
-      - service: nfs-kernel-server
-    - watch_in:
-      - service: nfs-kernel-server
-  {% endfor %}
-{% endif %}
-
 
 /etc/services:
   file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
@@ -235,7 +184,11 @@ nfs-kernel-server:
        rpc.quotad      32769/udp                       # RPC quotad
 
 {#
-/usr/lib/systemd/scripts/nfs-utils_env.sh creates /run/sysconfig/nfs-utils
++ sysctl
+('fs.nfs.nfs_callback_tcpport', 32764),
+('fs.nfs.nlm_tcpport', 32768),
+('fs.nfs.nlm_udpport', 32768),]
++ /usr/lib/systemd/scripts/nfs-utils_env.sh creates /run/sysconfig/nfs-utils
 + /etc/default/nfs-common
   + rpc.statd: --no-notify $STATDARGS=\"$STATDOPTS\"
 + /etc/default/nfs-kernel-server
