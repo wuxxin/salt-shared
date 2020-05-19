@@ -293,9 +293,9 @@ pull_latest_src $src_url $src_branch $clone_dir $user
 
 if test "$gpgkey" != ""; then
     # unlock source if gpgkey is available
-    pushd "$clone_dir"
+    pushd "$clone_dir" > /dev/null
     gosu $user git-crypt unlock
-    popd
+    popd > /dev/null
 fi
 if test "$target_dir" != ""; then
     # export specified source to target
