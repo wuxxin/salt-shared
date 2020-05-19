@@ -7,11 +7,11 @@
 #}
 
 {%- macro mkhook(hookname, name, secret, branch, command) %}
-{%- if hookname = 'gogs_push_this_branch' %}
+{%- if hookname == 'gogs_push_this_branch' %}
 {{ gogs_push_this_branch(name, secret, branch, command) }}
-{%- elif hookname = 'github_push_this_branch' %}
+{%- elif hookname == 'github_push_this_branch' %}
 {{ github_push_this_branch(name, secret, branch, command) }}
-{%- elif hookname = 'gitea_push_this_branch' %}
+{%- elif hookname == 'gitea_push_this_branch' %}
 {{ gitea_push_this_branch(name, secret, branch, command) }}
 {%- endif %}
 {%- endmacro %}
