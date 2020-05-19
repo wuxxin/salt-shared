@@ -63,7 +63,7 @@ lvm_fs_present_{{ fs.name }}:
   cmd.run:
     - name: mkfs.{{ fs.fs_type }} /dev/{{ fs.vgname }}/{{ fs.name }}
     - onlyif: test "$(blkid -p -s TYPE -o value /dev/{{ fs.vgname }}/{{ fs.name }})" == ""
-    - onchange:
+    - onchanges:
       - lvm: lvm_fs_present_{{ fs.name }}
     - require:
       - lvm: lvm_fs_present_{{ fs.name }}
