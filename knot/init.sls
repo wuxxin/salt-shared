@@ -34,7 +34,7 @@ knot-config-check:
         KNOTD_ARGS="-c /etc/knot/knot.conf"
         #
 
-{% if s.enabled|d(true) %}
+{% if settings.enabled|d(true) %}
 
   {%- for zone in settings.zone %}
     {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
