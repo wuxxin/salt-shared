@@ -68,7 +68,7 @@ main () {
                 extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
                 gitops_error "Gitops Error" \
                     "update command failed with error $result" error "$extra"
-                set_tag_from_file gitops_failed_rev "{{ settings.staging_dir }}/GIT_REV"
+                set_tag_from_file gitops_failed_rev "$latest_origin_rev"
             else
                 echo "calling post_update_command"
                 {{ settings.post_update_command }} && result=$? || result=$?
