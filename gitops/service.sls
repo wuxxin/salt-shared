@@ -132,10 +132,10 @@ prepend_known_hosts:
     ' |  grep "^fpr" | head -1 | sed -r "s/^.+:([^:]+):$/\\1/g"' %}
 add_gpg_id:
   cmd.run:
-    - name: |
-        gosu {{ settings.user }} gpg --batch --yes --import << EOF
-{{ settings.git.gpg_id|indent(8, True) }}
-        EOF
+    - name: echo "$gpgid" | gosu {{ settings.user }} gpg --batch --yes --import
+    - env:
+      - gpgid: |
+{{ settings.git.gpg_id|indent(12, True) }}
     - onlyif: test "$({{ get_fingerprint }})" = ""
     - require:
       - file: {{ settings.home_dir }}/.gnupg
