@@ -10,7 +10,7 @@
 {# remove system version of package, use github version, script selfsustained #}
 zfs-auto-snapshot:
   pkg:
-    - absent
+    - removed
 
 {# snapshot from commit f938d9cc1c414a54a1ee8d638cea7d0ba388ea1a #}
 /usr/local/sbin/zfs-auto-snapshot.sh:
