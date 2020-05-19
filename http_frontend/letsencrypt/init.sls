@@ -106,7 +106,7 @@ acme-issue-cert:
   cmd.run:
     - name: |
         gosu {{ settings.user }} ./acme.sh --issue \
-        {% for i in settings.allowed_hosts.join(" ") %}-d {{ i }} {% endfor %} \
+        {% for i in settings.allowed_hosts|join(" ") %}-d {{ i }} {% endfor %} \
         --alpn --tlsport {{ tlsport }} \
         --renew-hook '{{ settings.cert_dir }}/acme.sh/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - env:
