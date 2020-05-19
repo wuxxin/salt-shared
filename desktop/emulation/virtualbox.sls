@@ -20,7 +20,7 @@ virtualbox-extpack:
     - source_hash: 4b7caa9b722840d49f154c3e5efb6463b1b7129f09973a25813dfdbccd9debb7
     - name: /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.26.vbox-extpack
     - makedirs: true
-    - requires:
+    - require:
       - pkg: virtualbox
   cmd.run:
     - name: VBoxManage extpack install --replace /usr/local/share/virtualbox/Oracle_VM_VirtualBox_Extension_Pack-5.2.26.vbox-extpack
