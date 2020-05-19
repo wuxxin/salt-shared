@@ -39,7 +39,7 @@ gitops-library.sh:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-{% for i in ['tags', 'flags', 'metrics', 'www' %}
+{% for i in ['tags', 'flags', 'metrics', 'www'] %}
 {{ settings.var_dir }}/{{ i }}:
   file.directory:
     - user: {{ settings.user }}
