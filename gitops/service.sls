@@ -63,7 +63,7 @@ gitops-library.sh:
     - group: {{ settings.user }}
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
-{% endif %}
+{% endfor %}
 
 {{ settings.var_dir }}/flags/no.automatic.reboot:
   file:
