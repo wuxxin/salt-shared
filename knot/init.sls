@@ -52,7 +52,7 @@ knot-zone-{{ zone.domain }}:
     - defaults:
         domain: zone.domain
         common: {{ settings.common }}
-        autoserial: {{ salt['cmd.run_stdout']('date +%y%m%d%H%M' }}
+        autoserial: {{ salt['cmd.run_stdout']('date +%y%m%d%H%M') }}
       {%- if zone.context is defined %}
     - context: {{ zone.context }}
       {%- endif %}
