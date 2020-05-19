@@ -76,5 +76,4 @@ external:
 {% for n,v in settings.external.items() %}
   {% set dummy=settings.external[n].__setitem__('download',
         v['download']|regex_replace('##version##', v.version)) %}
-  {% endif %}
 {% endfor %}
