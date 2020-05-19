@@ -11,7 +11,7 @@ gitop-requisites:
       - gnupg
       - git-crypt
 
-gitops-library.sh:
+/usr/local/lib/gitops-library.sh:
   file.managed:
     - source: salt://gitops/gitops-library.sh
     - template: jinja
@@ -33,7 +33,7 @@ gitops-library.sh:
         settings: {{ settings }}
     - require:
       - pkg: gitop-requisites
-      - file: gitops-library.sh
+      - file: /usr/local/lib/gitops-library.sh
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
@@ -70,7 +70,8 @@ create_gitops_maintenance_target_dir:
 {% if settings.automatic_reboot %}
     - absent
 {% else %}
-    - present
+    - managed
+    - contents: ""
 {% endif %}
     - user: {{ settings.user }}
     - require_in:
@@ -93,6 +94,7 @@ create_id_ed25519:
     - mode: "0600"
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+    - replace: false
     - require:
       - file: {{ settings.home_dir }}/.ssh
 prepend_id_ed25519:
@@ -100,7 +102,7 @@ prepend_id_ed25519:
     - name: {{ settings.home_dir }}/.ssh/id_ed25519
     - require:
       - file: create_id_ed25519
-    - contents: |
+    - text: |
 {{ settings.git.ssh_id|indent(8,True)}}
 {% endif %}
 
@@ -111,6 +113,7 @@ create_known_hosts:
     - mode: "0600"
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+    - replace: false
     - require:
       - file: {{ settings.home_dir }}/.ssh
 prepend_known_hosts:
@@ -118,7 +121,7 @@ prepend_known_hosts:
     - name: {{ settings.home_dir }}/.ssh/known_hosts
     - require:
       - file: create_known_hosts
-    - contents: |
+    - text: |
 {{ settings.git.ssh_known_hosts|indent(8,True)}}
 {% endif %}
 
