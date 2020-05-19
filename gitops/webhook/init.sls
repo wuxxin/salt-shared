@@ -13,7 +13,7 @@ webhook:
     - template: jinja
     - defaults:
         settings: {{ settings }}
-    - requires:
+    - require:
       - pkg: webhook
 
 /usr/local/bin/webhook-gitops-update.sh:
@@ -25,7 +25,7 @@ webhook:
           echo "called as $0 with parameter $@"
           echo "starting gitops-update"
           sudo /bin/systemctl --no-block start gitops-update
-    - requires_in:
+    - require_in:
       - file: /etc/webhook.conf
 
 /etc/sudoers.d/webhook-gitops-update:
@@ -34,7 +34,7 @@ webhook:
     - mode: "0440"
     - contents: |
         {{ settings.user }} ALL=(ALL) NOPASSWD:/bin/systemctl --no-block start gitops-update
-    - requires_in:
+    - require_in:
       - file: /etc/webhook.conf
 
 {% if salt['pillar.get']('gitops:webhook:hooks', []) == [] %}
