@@ -279,10 +279,12 @@ if test "$cmd" = "bootstrap"; then
         if test "$gpgkey" != ""; then
             install -o "$user" -g "$user" -m "0700" -d "$home_dir/.gnupg"
             echo "$gpgkey" | gosu $user gpg --batch --yes --import || true
-            # XXX get first key id, assumes ~/.gnupg of user is empty
-            gpg_id=$(gosu $user gpg --batch --yes --list-key --with-colons | grep ^fpr | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
+            gpg_fullname="$(basename $clone_dir) <gitops@node>"
+            gpg_fingerprint=$(gosu $user gpg --batch --yes \
+                --list-key --with-colons "$gpg_fullname" | \
+                    grep "^fpr" | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
             # trust key absolute
-            echo "$gpg_id:5:" | gosu $user gpg --batch --yes --import-ownertrust
+            echo "$gpg_fingerprint:5:" | gosu $user gpg --batch --yes --import-ownertrust
         fi
     fi
 fi

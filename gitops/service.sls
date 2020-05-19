@@ -123,12 +123,23 @@ prepend_known_hosts:
 {% endif %}
 
 {% if settings.git.gpg_id %}
-echo "$gpgkey" | gosu $user gpg --batch --yes --import || true
-  # XXX get first key id, assumes ~/.gnupg of user is empty
-  gpg_id=$(gosu $user gpg --batch --yes --list-key --with-colons | grep ^fpr | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
-  # trust key absolute
-  echo "$gpg_id:5:" | gosu $user gpg --batch --yes --import-ownertrust
-fixme reinstall gpg id
+  {% set gpg_fullname = salt['file.basename'](settings.src_dir)+ ' <gitops@node>' %}
+  {% set get_fingerprint = 'gosu '+ settings.user+
+    ' gpg --batch --yes --list-key --with-colons '+ '"'+ gpg_fullname+ '"'+
+    ' |  grep "^fpr" | head -1 | sed -r "s/^.+:([^:]+):$/\\1/g"' %}
+add_gpg_id:
+  cmd.run:
+    - name: echo "{{ settings.git.gpg_id }}" | gosu {{ settings.user }} gpg --batch --yes --import
+    - onlyif: test "$({{ get_fingerprint }})" = ""
+    - require:
+      - file: {{ settings.home_dir }}/.gnupg
+trust_gpg_id:
+  cmd.run:
+    - name: echo "$({{ get_fingerprint }}):5:" | gosu {{ settings.user }} --batch --yes --import-ownertrust
+    - onchanges:
+      - cmd: add_gpg_id
+    - require:
+      - cmd: add_gpg_id
 {% endif %}
 
 gitops-update:
