@@ -81,10 +81,10 @@ gitops-library.sh:
     - mode: "600"
     - makedirs: true
     - contents: |
-      src_user={{ settings.user }}
-      src_url={{ settings.git.source }}
-      src_branch={{ settings.git.branch }}
-      src_dir={{ settings.src_dir }}
+        src_user={{ settings.user }}
+        src_url={{ settings.git.source }}
+        src_branch={{ settings.git.branch }}
+        src_dir={{ settings.src_dir }}
 
 {% if settings.git.ssh_id %}
 create_id_ed25519:
