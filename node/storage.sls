@@ -51,7 +51,7 @@ lvm_fs_present_{{ fs.name }}:
   lvm.lv_present:
     - name: {{ fs.name }}
       {%- for name,value in fs.items() %}
-        {%- if name not in ['name', 'fs_type']%}
+        {%- if name not in ['name', 'fstype']%}
     - {{ name }}: {{ value }}
         {%- endif %}
       {%- endfor %}
@@ -59,9 +59,9 @@ lvm_fs_present_{{ fs.name }}:
       - test: zfs_fs_present_all
     - require_in:
       - lvm: lvm_fs_present_all
-      {%- if fs.fs_type is defined and fs.vgname is defined %}
+      {%- if fs.fstype is defined and fs.vgname is defined %}
   cmd.run:
-    - name: mkfs.{{ fs.fs_type }} /dev/{{ fs.vgname }}/{{ fs.name }}
+    - name: mkfs.{{ fs.fstype }} /dev/{{ fs.vgname }}/{{ fs.name }}
     - onlyif: test "$(blkid -p -s TYPE -o value /dev/{{ fs.vgname }}/{{ fs.name }})" == ""
     - onchanges:
       - lvm: lvm_fs_present_{{ fs.name }}
