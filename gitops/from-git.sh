@@ -109,7 +109,7 @@ pull_latest_src () {
        old_src_url=$(gosu "$user" git -C "$target_dir" config --get remote.origin.url || echo "invalid")
        if test "$src_url" != "$old_src_url"; then
            echo "Warning: new/different upstream source, will re-clone."
-           echo "\nCurrent: \"$old_src_url\", new: \"$src_url\""
+           echo "Current: \"$old_src_url\", new: \"$src_url\""
            rm -r "$target_dir"
            install -o "$user" -g "$user" -d "$target_dir"
            gosu "$user" git clone "$src_url" "$target_dir"
@@ -293,7 +293,9 @@ pull_latest_src $src_url $src_branch $clone_dir $user
 
 if test "$gpgkey" != ""; then
     # unlock source if gpgkey is available
-    pushd "$clone_dir" && gosu $user git-crypt unlock && popd
+    pushd "$clone_dir"
+    gosu $user git-crypt unlock
+    popd
 fi
 if test "$target_dir" != ""; then
     # export specified source to target
