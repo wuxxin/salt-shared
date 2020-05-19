@@ -165,7 +165,7 @@ src_url=""; src_branch=""; user=""; home_dir=""; clone_dir=""
 target_dir=""; gitrev_dir=""; keys_from_file=""
 sshkey=""; known_hosts=""; gpgkey=""
 
-if test "$1" != "pull" -o "$1" != "bootstrap"; then usage; fi
+if test "$1" != "pull" -a "$1" != "bootstrap"; then usage; fi
 cmd="$1"
 shift
 
