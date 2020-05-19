@@ -37,7 +37,7 @@ webhook:
     - requires_in:
       - file: /etc/webhook.conf
 
-{% if salt['pillar.get']('gitops:webhook:hooks', {}) == {} %}
+{% if salt['pillar.get']('gitops:webhook:hooks', []) == [] %}
 
 /etc/webhook.conf:
   file:
@@ -56,7 +56,7 @@ webhook.service:
 {% else %}
 
   {% set ns = namespace(hook_data = []) %}
-  {% for hook in settings.hooks %}
+  {% for hook in settings.webhook.hooks %}
     {% load_yaml as new_data %}
 {{ mkhook(hook.type, hook.name, hook.secret,
   hook.branch|d('master'), hook.command|d('settings.default_command')) }}
