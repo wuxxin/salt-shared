@@ -30,6 +30,9 @@ keep_monthly: 4  {# 1month intervals for the last  4 months #}
   }) %}
 {% endif %}
 
+{%- macro mksnapshot(spaces, frequent=false, hourly=false, daily=false, weekly=false, monthly=false) %}
+{# fixme: implement mksnapshot #}
+{%- endmacro %}
 
 {% load_yaml as zfs_rpool_base %}
 - name: ROOT
