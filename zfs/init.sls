@@ -1,3 +1,5 @@
+{% from "zfs/defaults.jinja" import settings with context %}
+
 include:
   - nfs.common
   - autosnapshot
@@ -13,6 +15,7 @@ zfsutils-linux:
         options zfs zfs_vdev_scheduler={{ settings.vdev_scheduler }}
         options zfs zfs_arc_max={{ settings.arc_max_bytes }}
 
+{#
 
 {% for f in ['build_from_lp.sh', 'customize-running-system.sh'] %}
 /etc/recovery/zfs/{{ f }}:
@@ -21,9 +24,6 @@ zfsutils-linux:
     - filemode: "0755"
     - makedirs: true
 {% endfor %}
-
-
-{#
 
 + set scrub non linear, for 6 weeks every 14days on sunday, then twice per year
   + default: Scrub the second Sunday of every month.
