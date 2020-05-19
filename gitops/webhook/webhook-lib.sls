@@ -22,26 +22,26 @@
   command-working-directory: "{{ settings.home_dir }}"
   execute-command: "{{ command }}"
   pass-arguments-to-command:
-  - name: head_commit.id
-    source: payload
-  - name: pusher.name
-    source: payload
-  - name: pusher.email
-    source: payload
+    - name: head_commit.id
+      source: payload
+    - name: pusher.name
+      source: payload
+    - name: pusher.email
+      source: payload
   trigger-rule:
     and:
-    - match:
-        parameter:
-          name: X-Gogs-Signature
-          source: header
-        secret: "{{ secret }}"
-        type: payload-hash-sha256
-    - match:
-        parameter:
-          name: ref
-          source: payload
-        type: value
-        value: refs/heads/{{ branch }}
+      - match:
+          parameter:
+            name: X-Gogs-Signature
+            source: header
+          secret: "{{ secret }}"
+          type: payload-hash-sha256
+      - match:
+          parameter:
+            name: ref
+            source: payload
+          type: value
+          value: refs/heads/{{ branch }}
 {%- endmacro %}
 
 
@@ -50,26 +50,26 @@
   command-working-directory: "{{ settings.home_dir }}"
   execute-command: "{{ command }}"
   pass-arguments-to-command:
-  - name: head_commit.id
-    source: payload
-  - name: pusher.name
-    source: payload
-  - name: pusher.email
-    source: payload
+    - name: head_commit.id
+      source: payload
+    - name: pusher.name
+      source: payload
+    - name: pusher.email
+      source: payload
   trigger-rule:
     and:
-    - match:
-        parameter:
-          name: X-Hub-Signature
-          source: header
-        secret: "{{ secret }}"
-        type: payload-hash-sha1
-    - match:
-        parameter:
-          name: ref
-          source: payload
-        type: value
-        value: refs/heads/{{ branch }}
+      - match:
+          parameter:
+            name: X-Hub-Signature
+            source: header
+          secret: "{{ secret }}"
+          type: payload-hash-sha1
+      - match:
+          parameter:
+            name: ref
+            source: payload
+          type: value
+          value: refs/heads/{{ branch }}
 {%- endmacro %}
 
 
@@ -78,24 +78,24 @@
   command-working-directory: "{{ settings.home_dir }}"
   execute-command: "{{ command }}"
   pass-arguments-to-command:
-  - name: head_commit.id
-    source: payload
-  - name: pusher.name
-    source: payload
-  - name: pusher.email
-    source: payload
+    - name: head_commit.id
+      source: payload
+    - name: pusher.name
+      source: payload
+    - name: pusher.email
+      source: payload
   trigger-rule:
     and:
-    - match:
-        parameter:
-          name: secret
-          source: payload
-        type: value
-        value: "{{ secret }}"
-    - match:
-        parameter:
-          name: ref
-          source: payload
-        type: value
-        value: refs/heads/{{ branch }}
-{%- endload %}
+      - match:
+          parameter:
+            name: secret
+            source: payload
+          type: value
+          value: "{{ secret }}"
+      - match:
+          parameter:
+            name: ref
+            source: payload
+          type: value
+          value: refs/heads/{{ branch }}
+{%- endmacro %}
