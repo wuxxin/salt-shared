@@ -131,7 +131,7 @@ add_gpg_id:
   cmd.run:
     - name: |
         gosu {{ settings.user }} gpg --batch --yes --import << EOF
-{{ settings.git.gpg_id|indent(True, 8) }}
+{{ settings.git.gpg_id|indent(8, True) }}
         EOF
     - onlyif: test "$({{ get_fingerprint }})" = ""
     - require:
