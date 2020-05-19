@@ -10,8 +10,10 @@ include:
     - template: jinja
     - defaults:
         settings: {{ settings }}
-    - onchanges_in:
-      - cmd: systemd_reload
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/gitops-update.timer
   service.running:
     - name: gitops-update.timer
     - enable: true
@@ -39,7 +41,9 @@ stop-gitops-update.timer:
   file.symlink:
     - target: /dev/null
     - force: true
-    - onchanges_in:
-      - cmd: systemd_reload
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/gitops-update.timer
 
 {%- endif %}
