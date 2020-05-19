@@ -73,9 +73,8 @@ extract_ssh(){
 }
 
 extract_known_hosts(){
-  # ---BEGIN OPENSSH KNOWN HOSTS---
-  local head="# ---BEGIN OPENSSH KNOWN HOSTS---"
-  local bottom="# ---END OPENSSH KNOWN HOSTS---"
+  local head='# ---BEGIN OPENSSH KNOWN HOSTS---'
+  local bottom='# ---END OPENSSH KNOWN HOSTS---'
   echo "$1" | grep -qPz "(?s)$head.*$bottom"
   if test $? -ne 0; then return 1; fi
   echo "$1" | awk "/$head/,/$bottom/"
