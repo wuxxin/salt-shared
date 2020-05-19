@@ -12,54 +12,58 @@ gitop-requisites:
       - gnupg
       - git-crypt
 
-{{ settings.env_file }}:
+gitops-library.sh:
   file.managed:
-    - mode: "600"
-    - contents: |
-      src_user={{ settings.user }}
-      src_url={{ settings.git.source }}
-      src_branch={{ settings.git.branch }}
-      src_dir={{ settings.src_dir }}
-
-{{ settings.home_dir }}/.ssh:
-  file.directory:
-    - mode: "0600"
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
-
-{% if settings.git.ssh_id %}
-fixme reinstall ssh id
-{{ settings.home_dir }}/.ssh/id_ed25519:
-  file.blockreplace:
-    - mode: "0600"
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - source: salt://gitops/gitops-library.sh
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
     - require:
-      - file: {{ settings.home_dir }}/.ssh
-    - contents: |
-{{ settings.git.ssh_id|indent(8,True)}}
-{% endif %}
+      - pkg: gitop-requisites
+      - sls: tools.sentry
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 
-{% if settings.git.ssh_known_hosts %}
-{{ settings.home_dir }}/.ssh/known_hosts:
-fixme reinstall ssh_kown hosts
-{% endif %}
-
-{% if settings.git.gpg_id %}
-
-fixme reinstall gpg id
-{% endif %}
-
+{% for i in ['execute-saltstack.sh', 'from-git.sh', 'gitops-update.sh'] %}
+/usr/local/sbin/{{ i }}:
+  file.managed:
+    - source: salt://gitops/{{ i }}
+    - mode: "0755"
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
+    - require:
+      - pkg: gitop-requisites
+      - file: gitops-library.sh
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
+{% endfor %}
 
 {% for i in ['tags', 'flags', 'metrics', 'www' %}
 {{ settings.var_dir }}/{{ i }}:
   file.directory:
     - user: {{ settings.user }}
+    - makedirs: true
     - mode: "0750"
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
+{{ salt['file.dirname'](settings.maintenance_target) }}:
+  file.directory:
+    - makedirs: true
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+
+{% for i in ['.ssh', '.gnupg'] %}
+{{ settings.home_dir }}/{{ i }}:
+  file.directory:
+    - mode: "0600"
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
+{% endif %}
 
 {{ settings.var_dir }}/flags/no.automatic.reboot:
   file:
@@ -72,38 +76,71 @@ fixme reinstall gpg id
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 
-{{ salt['file.dirname'](settings.maintenance_target) }}:
-  file.directory:
+{{ settings.env_file }}:
+  file.managed:
+    - mode: "600"
     - makedirs: true
+    - contents: |
+      src_user={{ settings.user }}
+      src_url={{ settings.git.source }}
+      src_branch={{ settings.git.branch }}
+      src_dir={{ settings.src_dir }}
 
-/usr/local/lib/gitops-library.sh:
+{% if settings.git.ssh_id %}
+create_id_ed25519:
   file.managed:
-    - source: salt://gitops/gitops-library.sh
-    - template: jinja
-    - defaults:
-        settings: {{ settings }}
-    - require_in:
-      - file: /etc/systemd/system/gitops-update.service
+    - name: {{ settings.home_dir }}/.ssh/id_ed25519
+    - mode: "0600"
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - require:
+      - file: {{ settings.home_dir }}/.ssh
+prepend_id_ed25519:
+  file.prepend:
+    - name: {{ settings.home_dir }}/.ssh/id_ed25519
+    - require:
+      - file: create_id_ed25519
+    - contents: |
+{{ settings.git.ssh_id|indent(8,True)}}
+{% endif %}
 
-{% for i in ['execute-saltstack.sh', 'from-git.sh', 'gitops-update.sh'] %}
-/usr/local/sbin/{{ i }}:
+{% if settings.git.ssh_known_hosts %}
+create_known_hosts:
   file.managed:
-    - source: salt://gitops/{{ i }}
-    - mode: "0755"
-    - template: jinja
-    - defaults:
-        settings: {{ settings }}
-    - require_in:
-      - file: /etc/systemd/system/gitops-update.service
-{% endfor %}
+    - name: {{ settings.home_dir }}/.ssh/known_hosts
+    - mode: "0600"
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - require:
+      - file: {{ settings.home_dir }}/.ssh
+prepend_known_hosts:
+  file.prepend:
+    - name: {{ settings.home_dir }}/.ssh/known_hosts
+    - require:
+      - file: create_known_hosts
+    - contents: |
+{{ settings.git.ssh_known_hosts|indent(8,True)}}
+{% endif %}
 
-/etc/systemd/system/gitops-update.service:
+{% if settings.git.gpg_id %}
+echo "$gpgkey" | gosu $user gpg --batch --yes --import || true
+  # XXX get first key id, assumes ~/.gnupg of user is empty
+  gpg_id=$(gosu $user gpg --batch --yes --list-key --with-colons | grep ^fpr | head -1 | sed -r "s/^.+:([^:]+):$/\1/g")
+  # trust key absolute
+  echo "$gpg_id:5:" | gosu $user gpg --batch --yes --import-ownertrust
+fixme reinstall gpg id
+{% endif %}
+
+gitops-update:
   file.managed:
+    - name: /etc/systemd/system/gitops-update.service
     - source: salt://gitops/gitops-update.service
     - template: jinja
     - defaults:
         settings: {{ settings }}
-    - onchanges_in:
-      - cmd: systemd_reload
+  service.running:
+    - enable: true
     - require:
-      -
+      - file: gitops-update
+    - onchanges:
+      - file: /etc/systemd/system/gitops-update.service
