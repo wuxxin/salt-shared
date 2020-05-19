@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eo pipefail
-#set -x
+set -x
 
 self_path=$(dirname "$(readlink -e "$0")")
 
