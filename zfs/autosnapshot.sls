@@ -23,7 +23,7 @@ zfs-auto-snapshot:
   file.managed:
     - contents: |
         PATH="/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
-        */15 * * * * root which zfs-auto-snapshot > /dev/null || exit 0 ; zfs-auto-snapshot {{ calling_args }} --label=frequent --keep={{ settings.keep.frequent }} //
+        */15 * * * * root which zfs-auto-snapshot > /dev/null || exit 0 ; zfs-auto-snapshot {{ calling_args }} --label=frequent --keep={{ settings.keep_frequent }} //
 
 {% for label in ['hourly', 'daily', 'weekly', 'monthly'] %}
   {% set value = settings['keep_'+label] %}
