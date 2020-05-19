@@ -15,6 +15,10 @@ webhook:
         settings: {{ settings }}
     - require:
       - pkg: webhook
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: webhook
 
 /usr/local/bin/webhook-gitops-update.sh:
   file.managed:
@@ -49,7 +53,7 @@ webhook.service:
     - require:
       - pkg: webhook
       - file: /etc/systemd/system/webhook.service
-    - onchanges:
+    - watch:
       - file: /etc/webhook.conf
       - file: /etc/systemd/system/webhook.service
 
@@ -79,7 +83,7 @@ webhook.service:
     - require:
       - pkg: webhook
       - file: /etc/systemd/system/webhook.service
-    - onchanges:
+    - watch:
       - file: /etc/webhook.conf
       - file: /etc/systemd/system/webhook.service
 
