@@ -2,7 +2,7 @@
 
 include:
   - nfs.common
-  - autosnapshot
+  - zfs.autosnapshot
 
 zfsutils-linux:
   pkgs.installed:
