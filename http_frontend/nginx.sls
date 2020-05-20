@@ -73,7 +73,6 @@ nginx:
 nginx:
   pkg.installed:
     - pkgs:
-      - nginx-full
       - nginx-extras
 {% endif %}
   service.running:
