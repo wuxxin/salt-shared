@@ -15,6 +15,12 @@
   {%- if dns.zone[z].source is defined %}
     {%- set dummy = dns.zone[z].__delitem__('source') %}
   {%- endif %}
+  {%- if dns.zone[z].context is defined %}
+    {%- set dummy = dns.zone[z].__delitem__('context') %}
+  {%- endif %}
+  {%- if dns.zone[z].contents is defined %}
+    {%- set dummy = dns.zone[z].__delitem__('contents') %}
+  {%- endif %}
 {%- endfor %}
 {%- macro iter_first(data, section, keyname) %}
 {%- if data[section] is defined %}
