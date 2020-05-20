@@ -4,6 +4,11 @@ include:
   - http_frontend.ssl
   - http_frontend.pki
 
+create_file_root_dir:
+  file.directory:
+    - name: {{ settings.file_root }}
+    - makedirs: true
+
 create_http_frontend_maintenance_target_dir:
   file.directory:
     - name: {{ salt['file.dirname'](settings.maintenance_target) }}
@@ -78,6 +83,8 @@ nginx:
       - file: /etc/nginx/nginx.conf
       - file: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
       - file: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
+      - file: create_file_root_dir
+      - file: create_http_frontend_maintenance_target_dir
     - watch:
       - file: /etc/nginx/nginx.conf
       - file: /etc/nginx/proxy_params
