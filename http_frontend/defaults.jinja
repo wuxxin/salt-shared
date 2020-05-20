@@ -11,7 +11,7 @@ http_frontend ssl cert:
 domain: {{ domain }}
 allowed_hosts: []
 listen_ip:
-  - '{{ salt['cmd.run_stdout']('ip route list default | sed -r "s/.+src ([0-9a-f.:]+) metric.*/\\1/g"', python_shell=true) }}'
+  - '{{ salt['cmd.run_stdout']('ip -j route list default | sed -r "s/.+gateway\":\"([^\"]+)\".+/\\1/g"', python_shell=true) }}'
 letsencrypt: true
 client_cert_mandatory: false
 user: {{ salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('user') }}
