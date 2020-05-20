@@ -16,6 +16,8 @@ nfs-kernel-server:
       - sls: nfs.common
   service.running:
     - enable: True
+    - require:
+      - pkg: nfs-kernel-server
 
 {% for name, value in nfs_server_replace %}
 {{ name }}-nfs-kernel-server:
