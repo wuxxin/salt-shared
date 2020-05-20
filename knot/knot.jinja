@@ -1,10 +1,4 @@
-{# mandatory context: settings, log_default #}
-{%- set template_default = {
-    'id': 'default',
-    'storage': '/var/lib/knot',
-    'file': '%s.zone',
-    }
-%}
+{# mandatory context: settings, log_default, template_default #}
 {%- set dns = settings %}
 {%- if dns.log is not defined %}
   {%- set dummy = dns.__setitem__('log', log_default) %}
@@ -54,6 +48,11 @@ control:
 statistics:
 {{ dns.statistics|yaml(False)|indent(2,True) }}
 {%- endif %}
+{%- if dns.database is defined %}
+database:
+{{ dns.database|yaml(False)|indent(2,True) }}
+{%- endif %}
+
 {{ iter_first (dns, 'module', 'id') }}
 {{ iter_first (dns, 'log', 'target') }}
 {{ iter_first (dns, 'keystore', 'id') }}

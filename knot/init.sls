@@ -1,5 +1,5 @@
 {% from "knot/defaults.jinja" import settings with context %}
-{% from "knot/defaults.jinja" import log_default %}
+{% from "knot/defaults.jinja" import log_default, template_default %}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
 {# knot from ppa is newer for almost any distro #}
@@ -74,6 +74,7 @@ knot-zone-{{ zone.domain }}:
     - defaults:
         settings: {{ settings }}
         log_default: {{ log_default }}
+        template_default: {{ template_default }}
     - check_cmd: /usr/local/sbin/knot-config-check
     - require:
       - file: knot-config-check

@@ -2,12 +2,24 @@
 server:
   rundir: '/run/knot'
   user: knot:knot
+  listen:
+    - 127.0.0.1@53
+    - ::1@53
+database:
+  storage: '/var/lib/knot'
 common:
   ttl: 7200         {# 2 hours #}
   refresh: 14400    {# 4 hours #}
   retry: 1800       {# 30 min #}
   expire: 1814400   {# 3 weeks #}
   nxdomain: 14400   {# 4 hours #}
+{% endload %}
+
+{% load_yaml as template_default %}
+id: default
+storage: '/var/lib/knot'
+semantic-checks: on
+file: '%s.zone'
 {% endload %}
 
 {% load_yaml as log_default %}
