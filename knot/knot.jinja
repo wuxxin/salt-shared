@@ -28,7 +28,7 @@
 {{ section }}:
 {%- for i in data[section] %}
 - {{ keyname }}: {{ i[keyname] }}
-    {%- for v,d in i.iteritems() %}
+    {%- for v,d in i.items() %}
       {%- if v != keyname %}
         {%- if d is iterable and d is not string and d|length > 1 %}
   {{ v }}: [{%- for j in d %}{{ j }},{%- endfor %}]
