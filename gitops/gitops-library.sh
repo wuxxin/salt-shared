@@ -1,14 +1,9 @@
 #!/usr/bin/bash
 
 uplink_ip() {
-    local default_iface default_cidr default_ip
-    default_iface=$(cat /proc/net/route | \
-        grep -E -m 1 "^[^[:space:]]+[[:space:]]+00000000" | \
-        sed -r "s/^([^[:space:]]+).*/\1/g")
-    default_cidr=$(ip addr show dev "$default_iface" | \
-        grep -E -m 1 "^[[:space:]]+inet[[:space:]]" | \
-        sed -r "s/^[[:space:]]+inet[[:space:]]+(.+)[[:space:]]+brd.*/\1/g")
-    default_ip=$(echo "$default_cidr" | sed -E "s#^([^/]+)/.*#\1#g")
+    local default_iface default_ip
+    default_iface=$(ip -j route list default | sed -r 's/.+dev":"([^"]+)".+/\1/g')
+    default_ip=$(ip -j addr show $default_iface | sed -r 's/.+"inet","local":"([^"]+)",.+/\1/g')
     echo "$default_ip"
 }
 

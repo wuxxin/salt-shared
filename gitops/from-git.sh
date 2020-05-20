@@ -152,12 +152,6 @@ GIT_VERSION=$GIT_VERSION
 EOF
 }
 
-get_gitrev () {
-   # $1=srcdir $2=default=invalid
-   cat "$1/GIT_REV" 2> /dev/null || echo "${2:-invalid}"
-}
-
-
 # main
 cd /run
 src_url=""; src_branch=""; user=""; home_dir=""; clone_dir=""

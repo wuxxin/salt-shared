@@ -46,8 +46,8 @@ main () {
         -e "{{ settings.var_dir }}/flags/force.gitops.update"; then
 
         need_service_restart="true"
-        msg="Updating app from $(get_gitrev "$src_dir") to $latest_origin_rev"
-        if test "$(get_gitrev "$src_dir")" = "$latest_origin_rev"; then
+        msg="Updating app from $current_origin_rev to $latest_origin_rev"
+        if test "$current_origin_rev" = "$latest_origin_rev"; then
             msg="Reapplying Update $latest_origin_rev"
         fi
         gitops_maintenance "Gitops Update" "$msg"
