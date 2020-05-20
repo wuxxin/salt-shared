@@ -159,9 +159,6 @@ gitops-update:
     - name: systemctl daemon-reload
     - onchanges:
       - file: gitops-update
-  service.running:
-    - enable: true
+  service.enabled:
     - require:
       - cmd: gitops-update
-    - watch:
-      - file: /etc/systemd/system/gitops-update.service
