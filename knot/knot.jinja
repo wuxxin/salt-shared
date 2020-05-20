@@ -3,13 +3,12 @@
 {%- if dns.log is not defined %}
   {%- set dummy = dns.__setitem__('log', log_default) %}
 {%- endif %}
+{%- if dns.template is not defined %}
+  {%- set dummy = dns.__setitem__('template', [template_default]) %}
+{%- endif %}
 {%- if not dns.template['default']|d(false) %}
-  {%- if dns.template is not defined %}
-    {%- set dummy = dns.__setitem__('template', [template_default]) %}
-  {%- else %}
-    {%- set template = dns.template+ [template_default] %}
-    {%- set dummy = dns.__setitem__('template', template) %}
-  {%- endif %}
+  {%- set template = dns.template+ [template_default] %}
+  {%- set dummy = dns.__setitem__('template', template) %}
 {%- endif %}
 {%- set dummy = dns.__delitem__('enabled') %}
 {%- for z in range(dns.zone|length) %}
