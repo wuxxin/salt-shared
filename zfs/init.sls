@@ -5,7 +5,7 @@ include:
   - zfs.autosnapshot
 
 zfsutils-linux:
-  pkgs.installed:
+  pkg.installed:
     - require:
       - sls: nfs.server
 
