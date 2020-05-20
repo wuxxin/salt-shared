@@ -58,7 +58,7 @@ lvm_fs_present_{{ fs.name }}:
     - require:
       - test: zfs_fs_present_all
     - require_in:
-      - lvm: lvm_fs_present_all
+      - test: lvm_fs_present_all
       {%- if fs.fstype is defined and fs.vgname is defined %}
   cmd.run:
     - name: mkfs.{{ fs.fstype }} /dev/{{ fs.vgname }}/{{ fs.name }}
@@ -68,7 +68,7 @@ lvm_fs_present_{{ fs.name }}:
     - require:
       - lvm: lvm_fs_present_{{ fs.name }}
     - require_in:
-      - lvm: lvm_fs_present_all
+      - test: lvm_fs_present_all
       {%- endif %}
     {%- endfor %}
   {%- endif %}
