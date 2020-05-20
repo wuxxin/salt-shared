@@ -58,7 +58,7 @@ create_gitops_maintenance_target_dir:
 {% for i in ['.ssh', '.gnupg'] %}
 {{ settings.home_dir }}/{{ i }}:
   file.directory:
-    - mode: "0600"
+    - mode: "0700"
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - require_in:
