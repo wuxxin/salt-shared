@@ -10,7 +10,7 @@ helmx_version: '0.8.0'
 helmdiff_version: '3.1.1'
 user: {{ user }}
 home: {{ home }}
-route_ip: {{ salt['cmd.run_stdout']('ip -j route list default | sed -r "s/.+gateway\":\"([^\"]+)\".+/\\1/g"', python_shell=true) }}
+route_ip: {{ salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) }}
 state_dir: {{ home }}/{{ user }}-k3s-helmfile
 {% endload %}
 
