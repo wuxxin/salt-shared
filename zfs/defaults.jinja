@@ -26,7 +26,7 @@ keep_monthly: 4  {# 1month intervals for the last  4 months #}
 
 {% if settings.arc_max_bytes is not defined %}
   {% do settings.update({
-    'arc_max_bytes': ((grains['mem_total'] * settings.arc_max_percent / 100 ) * 1024 * 1024),
+    'arc_max_bytes': ((grains['mem_total'] * settings.arc_max_percent / 100 ) * 1024 * 1024)|round|int,
   }) %}
 {% endif %}
 
