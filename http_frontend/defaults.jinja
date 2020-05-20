@@ -6,33 +6,55 @@ http_frontend ssl cert:
 #}
 
 {% set domain = salt['pillar.get']('node:hostname', grains['fqdn']) %}
+{% set def_route_ip= salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
+{% set def_user= salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True) %}
+{% set users= salt['pillar.get']('node:users', [{'name': def_user}]) %}
+{% set user= users[0].name %}
+{% set user_info= salt['user.info'](user) %}
+{% set user_home= user_info['home'] %}
 
 {% load_yaml as defaults %}
 domain: {{ domain }}
 allowed_hosts: []
 listen_ip:
-  - {{ salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) }}
+  - {{ def_route_ip }}
 letsencrypt: true
 client_cert_mandatory: false
-user: {{ salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('user') }}
+user: {{ user }}
 group: ssl-cert
-cert_dir: /etc/ssl
+cert_dir: {{ user_home }}/ssl
+
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
 client_max_body_size: 0
 {# list of ips allowed to set real ip proxy header, http://nginx.org/en/docs/http/ngx_http_realip_module.html #}
 set_real_ip_from: "127.0.0.1"
+
 {# list of commands executed after ssl certificate has changed, eg. letsencrypt update #}
 {# cmds are run as settings.user, each usage of sudo needs an entry in the sudoers files #}
 on_ssl_renew:
   - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
+
+{# filepath, if exists will be displayed instead of normal operation#}
 maintenance_target: /var/lib/http_frontend/www/503.html
-file_root: /var/lib/http_frontend/empty
+
 {#
-upstream: [] # list of {name, server}
-location: [] # list of {source, target}
-host: [] # list of {domain, client_cert_mandatory, location}
 key: | # key, pem encoded ssl key, default empty
 cert: | # cert, pem encoded ssl cert chain, default empty
+
+upstream: # [] # list of {name, server}
+  - name: webhooks
+    server: "127.0.0.1:5555"
+location:
+  - source: /hooks/
+    target: proxy_pass http://webhooks
+  - source: /
+    target: root /var/www/main.domain/
+host:
+  - domain: another.domain
+    client_cert_mandatory: true
+    location:
+      - source: /
+        target: root /var/www/another.domain/
 #}
 
 {# mostly internal settings #}
