@@ -24,7 +24,7 @@ git:
 
 automatic_reboot: true
 maintenance_template: /var/lib/gitops/maintenance.template
-maintenance_target: /var/lib/gitops/www/503.html
+maintenance_target: /var/lib/gitops/maintenance/503.html
 
 pre_update_command: /usr/bin/true
 update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate

@@ -38,12 +38,23 @@ gitop-requisites:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-{% for i in ['tags', 'flags', 'metrics', 'www'] %}
+create_var_dir:
+  file.directory:
+    - name: {{ settings.var_dir }}
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - mode: "0755"
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
+
+{% for i in ['tags', 'flags', 'metrics'] %}
 {{ settings.var_dir }}/{{ i }}:
   file.directory:
     - user: {{ settings.user }}
-    - makedirs: true
+    - group: {{ settings.user }}
     - mode: "0750"
+    - require:
+      - file: create_var_dir
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
@@ -52,8 +63,11 @@ create_gitops_maintenance_target_dir:
   file.directory:
     - name: {{ salt['file.dirname'](settings.maintenance_target) }}
     - makedirs: true
+    - mode: "0755"
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
 
 {% for i in ['.ssh', '.gnupg'] %}
 {{ settings.home_dir }}/{{ i }}:
