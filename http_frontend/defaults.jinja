@@ -6,7 +6,7 @@ http_frontend ssl cert:
 #}
 
 {% set domain = salt['pillar.get']('node:hostname', grains['fqdn']) %}
-{% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) }}
+{% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) %}
 {% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
 {% set def_user= salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True) %}
 {% set users= salt['pillar.get']('node:users', [{'name': def_user}]) %}
