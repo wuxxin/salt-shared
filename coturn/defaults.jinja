@@ -3,11 +3,13 @@
 
 {% load_yaml as defaults %}
 domain: turn.{{ grains['fqdn'] }}
+auth_secret:
+# openssl rand  --hex 32
 listen_ip:
   - {{ def_route_ip }}
 external_ip: []
-  # - 60.70.80.91
-  # or 60.70.80.91/172.17.19.101
+# - 60.70.80.91
+# or 60.70.80.91/172.17.19.101
 
 ssl: true
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
