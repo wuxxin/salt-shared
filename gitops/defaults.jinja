@@ -13,6 +13,11 @@ webhook:
   port: 5555
   default_command: /usr/local/bin/webhook-gitops-update.sh
   hooks: []
+  # - name: activatepath
+  #   type: one of [gogs_push_this_branch, github_push_this_branch, gitea_push_this_branch]
+  #   branch: default= master
+  #   command: default= default_command
+  #   secret: eg. output of openssl rand -base64 12
 
 git:
   source: ssh://git@git.domain.top:22/user/project.git
