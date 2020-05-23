@@ -1,0 +1,25 @@
+{% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) }}
+{% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
+
+{% load_yaml as defaults %}
+domain: turn.{{ grains['fqdn'] }}
+listen_ip:
+  - {{ def_route_ip }}
+external_ip: []
+  # - 60.70.80.91
+  # or 60.70.80.91/172.17.19.101
+
+ssl: true
+ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+udp_min_port: 49152
+udp_max_port: 49752 {# 49152 + 600 #}
+user-quota: 12
+total-quota: 600
+denied_peer_ip: []
+allowed_peer_ip: []
+
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('coturn', {})) %}
