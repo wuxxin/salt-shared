@@ -98,7 +98,7 @@ build_from_lp() { # <pkgname> <target-dir> [--source distro] [--dest distro] [--
     # create build directories
     basedir="$(mktemp -d)"
     mkdir -p "$basedir/build"
-    cd "$basedir"
+    pushd "$basedir"
 
     # get source
     pull-lp-source "$pkgname" "$source"
@@ -146,12 +146,13 @@ build_from_lp() { # <pkgname> <target-dir> [--source distro] [--dest distro] [--
     mkdir -p "$targetdir"
     mv -t "$targetdir" $basedir/build/buildresult/*
     rm -rf "$basedir"
+    popd
 }
 
 
 minion_config() { # $1=basepath $2=configpath $3=config_list $4=states_list
     local base_path config_path config_list states_list
-    base_path=$(readlink -e $1)
+    base_path=$1
     config_path=$2
     config_list=$3
     states_list=$4
@@ -218,14 +219,13 @@ EOF
 
 
 main() {
-    cd /run
     config_path=/etc/salt
     config_list="config"
     states_list="salt/salt-shared salt/custom"
     if test "$1" = "--config"; then config_list="$2"; shift 2; fi
     if test "$1" = "--states"; then states_list="$2"; shift 2; fi
     if test ! -e "$1"; then usage; fi
-    base_path="$1"
+    base_path="$(readlink -e $1)"
     shift
     if which cloud-init > /dev/null; then
         # be sure that cloud-init has finished
