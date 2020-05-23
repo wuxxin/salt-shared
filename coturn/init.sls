@@ -1,3 +1,4 @@
+{% from "coturn/defaults.jinja" import settings with context %}
 
 /etc/default/coturn:
   file.managed:
@@ -25,7 +26,7 @@ coturn:
     - require:
       - pkg: coturn-snakeoil
   service.running:
-    - enabled: true
+    - enable: true
     - require:
       - pkg: coturn
     - watch:
