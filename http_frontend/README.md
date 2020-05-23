@@ -18,9 +18,7 @@ listen_ip:
 letsencrypt: default true
 client_cert_mandatory: default false, make client cert mandatory if true
 user: {{ user }}
-group: ssl-cert
 cert_dir: {{ user_home }}/ssl
-
 
 upstream: # [] # list of {name, server}
   - name: webhooks

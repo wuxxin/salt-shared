@@ -9,7 +9,7 @@ include:
 {{ settings.cert_dir }}/acme.sh:
   file.directory:
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - require:
       - sls: http_frontend.dirs
 
@@ -51,23 +51,6 @@ acme.sh:
     - require:
       - file: {{ settings.cert_dir }}/acme.sh
 
-{{ settings.cert_dir }}/acme.sh/cert-renew-hook.sh:
-  file.managed:
-    - source: salt://http_frontend/letsencrypt/cert-renew-hook.sh
-    - mode: "0755"
-    - template: jinja
-    - defaults:
-        settings: {{ settings }}
-    - require:
-      - file: {{ settings.cert_dir }}/acme.sh
-
-/etc/sudoers.d/http_frontend_cert_renew_hook:
-  file.managed:
-    - makedirs: True
-    - mode: "0644"
-    - contents: |
-        {{ settings.user }} ALL=(ALL) NOPASSWD:/usr/bin/systemctl reload-or-restart nginx
-
 {% if settings.letsencrypt and
     not (settings.key|d(false) and settings.cert|d(false)) %}
     {# use letsencrypt but only if we dont have a ssl key pair defined #}
@@ -108,7 +91,7 @@ acme-issue-cert:
         gosu {{ settings.user }} ./acme.sh --issue \
         {% for i in settings.allowed_hosts %}-d {{ i }} {% endfor %} \
         --alpn --tlsport {{ tlsport }} \
-        --renew-hook '{{ settings.cert_dir }}/acme.sh/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
+        --renew-hook '{{ settings.cert_dir }}/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - env:
       - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
     - unless: |
@@ -136,7 +119,7 @@ acme-issue-cert:
 acme-deploy:
   cmd.run:
     - name: |
-        gosu {{ settings.user }} {{ settings.cert_dir }}/acme.sh/cert-renew-hook.sh \
+        gosu {{ settings.user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
         "{{ settings.domain }}" \
         "{{ domain_dir }}/{{ settings.domain }}.key" \
         "{{ domain_dir }}/{{ settings.domain }}.cer" \

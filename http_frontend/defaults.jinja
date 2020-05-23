@@ -6,7 +6,8 @@ http_frontend ssl cert:
 #}
 
 {% set domain = salt['pillar.get']('node:hostname', grains['fqdn']) %}
-{% set def_route_ip= salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
+{% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) }}
+{% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
 {% set def_user= salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True) %}
 {% set users= salt['pillar.get']('node:users', [{'name': def_user}]) %}
 {% set user= users[0].name %}
@@ -21,7 +22,6 @@ listen_ip:
 letsencrypt: true
 client_cert_mandatory: false
 user: {{ user }}
-group: ssl-cert
 cert_dir: {{ user_home }}/ssl
 
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
@@ -31,6 +31,7 @@ set_real_ip_from: "127.0.0.1"
 
 {# list of commands executed after ssl certificate has changed, eg. letsencrypt update #}
 {# cmds are run as settings.user, each usage of sudo needs an entry in the sudoers files #}
+{# available environment vars: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
 on_ssl_renew:
   - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
 
@@ -65,8 +66,9 @@ stub_status_endpoint: "127.0.0.1:10080"
 
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
-ssl_chain_cert: server.cert.pem
-ssl_full_cert: server.cert.dhparam.pem
+ssl_cert: server.cert.pem
+ssl_chain_cert: server.chain.cert.pem
+ssl_full_cert: server.chain.cert.dhparam.pem
 ssl_client_ca: client-ca.cert.pem
 ssl_client_crl: client-ca.crl.pem
 

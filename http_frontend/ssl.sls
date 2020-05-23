@@ -25,33 +25,52 @@ generate_snakeoil:
       - sls: http_frontend.dirs
   file.managed:
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - replace: false
     - require:
       - cmd: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
+
+{{ settings.cert_dir }}/cert-renew-hook.sh:
+  file.managed:
+    - source: salt://http_frontend/cert-renew-hook.sh
+    - mode: "0755"
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
+    - require:
+      - sls: http_frontend.dirs
+
+/etc/sudoers.d/http_frontend_cert_renew_hook:
+  file.managed:
+    - makedirs: True
+    - mode: "0644"
+    - contents: |
+        {{ settings.user }} ALL=(ALL) NOPASSWD:/usr/bin/systemctl reload-or-restart nginx
 
 {% if settings.key|d(false) and settings.cert|d(false) %}
 # use static cert/key
 {{ settings.cert_dir }}/{{ settings.ssl_key }}:
   file.managed:
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - contents: |
 {{ settings.key|indent(8, True) }}
     - require:
       - sls: http_frontend.dirs
 
-{{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}:
+  {% for i in [settings.ssl_chain_cert, settings.ssl_cert]}
+{{ settings.cert_dir }}/{{ i }}:
   file.managed:
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - contents: |
 {{ settings.cert|indent(8, True) }}
     - require:
       - sls: http_frontend.dirs
+  {% endfor %}
 
 {% else %}
 # use snakeoil cert/key
@@ -59,21 +78,23 @@ generate_snakeoil:
   file.copy:
     - source: /etc/ssl/private/ssl-cert-snakeoil.key
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - require:
       - sls: http_frontend.dirs
       - cmd: generate_snakeoil
 
-{{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}:
+  {% for i in [settings.ssl_chain_cert, settings.ssl_cert]}
+{{ settings.cert_dir }}/{{ i }}:
   file.copy:
     - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - require:
       - sls: http_frontend.dirs
       - cmd: generate_snakeoil
+  {% endfor %}
 {% endif %}
 
 # append dhparam to current server cert
@@ -85,7 +106,7 @@ generate_snakeoil:
       - file: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
   file.managed:
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - replace: false
     - require:

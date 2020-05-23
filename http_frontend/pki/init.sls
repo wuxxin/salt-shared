@@ -105,7 +105,7 @@ easyrsa_gen_crl:
   file.copy:
     - source: {{ settings.cert_dir }}/easyrsa/pki/ca.crt
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - force: true
     - onchanges:
@@ -115,7 +115,7 @@ easyrsa_gen_crl:
   file.copy:
     - source: {{ settings.cert_dir }}/easyrsa/pki/crl.pem
     - user: {{ settings.user }}
-    - group: {{ settings.group }}
+    - group: {{ settings.user }}
     - mode: "0640"
     - force: true
     - onchanges:
