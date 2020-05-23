@@ -31,6 +31,8 @@ some states have documentation README.md's.
             * [.client_no_proxy](http_proxy/client_no_proxy.sls)
         * [unbound](unbound): caching recursive dns resolver
         * [knot](knot): authoritative dnsec capable dns server
+        * [coturn](coturn): STUN (Session Traversal Utilities for NAT) and TURN (Traversal Using Relays
+ around NAT)
         * [syncthing](syncthing): network file syncronisation
         * [unison](unison): Unison File Sync
         * [strongswan](strongswan): IPsec VPN
