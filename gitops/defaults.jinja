@@ -40,7 +40,7 @@ example:
 ```
 pre_update_command: /usr/bin/systemctl stop xyz
 post_update_command: /usr/bin/bash -c '. /usr/local/lib/gitops-library.sh;
-    simple_metric update_command_run counter "timestamp of update run" "$(date +%s)000"'
+    simple_metric test_update_run counter "timestamp of update run" "$(date +%s)000"'
 finish_update_command: /usr/bin/systemctl start --no-block xyz
 ```
 #}
