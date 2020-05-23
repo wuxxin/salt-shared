@@ -1,0 +1,10 @@
+[Unit]
+Description=Gitops SSL Certificates Validity Check
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

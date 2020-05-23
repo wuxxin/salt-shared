@@ -1,4 +1,5 @@
 include:
-  - .service
-  - .timer
-  - .webhook
+  - gitops.service
+  - gitops.timer
+  - gitops.webhook
+  # - gitops.cert-check
