@@ -60,7 +60,7 @@ generate_snakeoil:
     - require:
       - sls: http_frontend.dirs
 
-  {% for i in [settings.ssl_chain_cert, settings.ssl_cert]}
+  {% for i in [settings.ssl_chain_cert, settings.ssl_cert] %}
 {{ settings.cert_dir }}/{{ i }}:
   file.managed:
     - user: {{ settings.user }}
@@ -84,7 +84,7 @@ generate_snakeoil:
       - sls: http_frontend.dirs
       - cmd: generate_snakeoil
 
-  {% for i in [settings.ssl_chain_cert, settings.ssl_cert]}
+  {% for i in [settings.ssl_chain_cert, settings.ssl_cert] %}
 {{ settings.cert_dir }}/{{ i }}:
   file.copy:
     - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
