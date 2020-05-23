@@ -63,9 +63,9 @@ webhook.service:
   {% for hook in settings.webhook.hooks %}
     {% load_yaml as new_data %}
 {{ mkhook(hook.type, hook.name, hook.secret,
-  hook.branch|d('master'), hook.command|d('settings.default_command')) }}
+  hook.branch|d('master'), hook.command|d(settings.webhook.default_command)) }}
     {% endload %}
-    {% set new_hook_data = ns.hook_data+ [new_data] %}
+    {% set new_hook_data = ns.hook_data+ new_data %}
     {% set ns.hook_data = new_hook_data %}
   {% endfor %}
 

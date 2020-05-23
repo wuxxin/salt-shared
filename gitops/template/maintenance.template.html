@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="30" />
+    <style>
+      *, body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 22px;
+      }
+      #content {
+        margin: 50px auto 0;
+      }
+      .innerwrap {
+        padding: 20px;
+        border: 1px solid #EBEBEB;
+        background: #F8F8F8;
+        text-align: center;
+      }
+      #content .innerwrap p {
+        display: block;
+        margin-bottom: 10px;
+      }
+      #content a {
+        color: #2B558E;
+        text-decoration: none;
+      }
+      #content a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="content">
+      <div class="innerwrap">
+        <p><h2>{{ topic }}</h2></p>
+        <p>{{ text }}</p>
+      </div>
+    </div>
+  </body>
+</html>

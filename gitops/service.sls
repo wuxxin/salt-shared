@@ -59,6 +59,15 @@ create_var_dir:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
+create_gitops_maintenance_template:
+  file.managed:
+    - source: salt://gitops/template/maintenance.template.html
+    - name: {{ settings.maintenance_template }}
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
+
 create_gitops_maintenance_target_dir:
   file.directory:
     - name: {{ salt['file.dirname'](settings.maintenance_target) }}
