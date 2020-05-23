@@ -1,30 +1,35 @@
-{% set ipaddr= "10.140.222.1" %}
-{% set netsize= "24" %}
-{% set bridge= "lxdbr0" %}
-{% set pool= "default" %}
-
 {% load_yaml as defaults %}
+# saltstack state defaults, only used by saltstack
+defaults:
+  bridge_cidr: 10.140.222.1/24
+  bridge_name: lxdbr0
+  storage_name: default
+
 # Daemon settings
 config:
   core.https_address: 127.0.0.1
   images.auto_update_interval: 15
 {% endload %}
 
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('lxd', {})) %}
+
+
 {% load_yaml as extended_defaults %}
 # Storage pools
 storage_pools:
-- name: {{ pool }}
-  description: LXD {{ pool }} pool
+- name: {{ settings.defaults.storage_name }}
+  description: LXD {{ settings.defaults.storage_name }} pool
   driver: dir
   config:
-    source: /var/lib/lxd/storage-pools/{{ pool }}
+    source: /var/lib/lxd/storage-pools/{{ settings.defaults.storage_name }}
 
 # self managed Network devices
 networks:
-- name: {{ bridge }}
+- name: {{ settings.defaults.bridge_name }}
   type: bridge
   config:
-    ipv4.address: {{ ipaddr }}/{{ netsize }}
+    ipv4.address: {{ settings.defaults.bridge_cidr }}
     ipv4.nat: true
     ipv6.address: none
     # needed parameter to prevent dns loop and point host dns to lxd for *.lxd
@@ -39,11 +44,11 @@ profiles:
   devices:
     eth0:
       nictype: bridged
-      parent: {{ bridge }}
+      parent: {{ settings.defaults.bridge_name }}
       type: nic
     root:
       path: /
-      pool: {{ pool }}
+      pool: {{ settings.defaults.storage_name }}
       type: disk
 - name: autostart
   config:
@@ -82,9 +87,6 @@ images:
     remote: ubuntu-daily
 {% endload %}
 
-
-{%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('lxd', {})) %}
 
 {%- for section in ['storage_pools', 'networks', 'profiles', 'images'] %}
   {%- set section_org = salt['pillar.get']('lxd:'+ section, []) %}
