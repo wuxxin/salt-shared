@@ -25,12 +25,17 @@ main () {
     need_service_restart="false"
     result=0
 
-    if flag_is_set failed.gitops.update; then
-        echo "Error: failed.gitops.update flag is set, abort update run"
-        exit 1
+    if flag_is_set gitops.update.failed; then
+        if flag_is_set gitops.update.force; then
+            echo "Warning: gitops.update.failed flag is set, but gitops.update.force flag also, forcing update, removing failed flag"
+            del_flag gitops.update.failed
+        else
+            echo "Error: gitops.update.failed flag is set, abort. Either delete flag, or set gitops.update.force to ignore"
+            exit 1
+        fi
     fi
-    if flag_is_set disable.gitops.update; then
-        echo "Warning: disable.gitops.update flag is set, exit update run without update"
+    if flag_is_set gitops.update.disable; then
+        echo "Warning: gitops.update.disable flag is set, exit update run without update"
         simple_metric update_duration_sec gauge \
             "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
         exit 0
@@ -43,12 +48,15 @@ main () {
 
     if test "$latest_origin_rev" != "$current_origin_rev" -o \
         "$latest_origin_rev" != "$(get_tag gitops_current_rev "invalid")" -o \
-        -e "{{ settings.var_dir }}/flags/force.gitops.update"; then
+        -e "{{ settings.var_dir }}/flags/gitops.update.force"; then
 
         need_service_restart="true"
         msg="Updating app from $current_origin_rev to $latest_origin_rev"
         if test "$current_origin_rev" = "$latest_origin_rev"; then
             msg="Reapplying Update $latest_origin_rev"
+        fi
+        if test -e "{{ settings.var_dir }}/flags/gitops.update.force"; then
+            rm "{{ settings.var_dir }}/flags/gitops.update.force"
         fi
         gitops_maintenance "Gitops Update" "$msg"
         simple_metric update_start_timestamp counter \
@@ -82,7 +90,7 @@ main () {
     fi
 
     if test -e /run/reboot-required; then
-        if flag_is_set no.automatic.reboot; then
+        if flag_is_set reboot.automatic.disable; then
             echo "Warning: reboot of system required, but automatic reboot not allowed; contacting admin"
             sentry_entry "Gitops Attention" "node needs reboot, human attention required" error
         else

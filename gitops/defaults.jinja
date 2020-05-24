@@ -27,6 +27,10 @@ git:
   ssh_known_hosts:
   gpg_id:
 
+{# set sentry:dsn for reporting to sentry #}
+sentry:
+  dsn:
+
 automatic_reboot: true
 maintenance_template: /var/lib/gitops/maintenance.template.html
 maintenance_target: /var/lib/gitops/maintenance/503.html

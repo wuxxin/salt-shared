@@ -88,7 +88,7 @@ create_gitops_maintenance_target_dir:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-{{ settings.var_dir }}/flags/no.automatic.reboot:
+{{ settings.var_dir }}/flags/reboot.automatic.disable:
   file:
 {% if settings.automatic_reboot %}
     - absent

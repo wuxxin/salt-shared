@@ -187,7 +187,10 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
     gitops_run_rev=$(cat "{{ settings.src_dir }}/GIT_REV" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
     gitops_failed_rev=$(get_tag gitops_failed_rev "invalid")
+    gitops_sentry_dsn="{{ settings.sentry.dsn|d('') }}"
     sentrycat="/usr/local/bin/sentrycat.py"
+    if test -n "$SENTRY_DSN"; then gitops_sentry_dsn="$SENTRY_DSN"; fi
+
     tags="{\"topic\": \"$topic\", \
         \"gitops_run_rev\": \"$gitops_run_rev\", \
         \"gitops_current_rev\": \"$gitops_current_rev\", \
@@ -196,8 +199,8 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
 
     printf "Sentry Entry: Level: %s Topic: %s Message: %s Extra: %s" "$level" "$topic" "$msg" "$extra" 1>&2
 
-    if test -n "SENTRY_DSN" -a -e "$sentrycat"; then
-        SENTRY_DSN="$SENTRY_DSN" "$sentrycat" \
+    if test -n "gitops_sentry_dsn" -a -e "$sentrycat"; then
+        SENTRY_DSN="$gitops_sentry_dsn" "$sentrycat" \
             --release "$gitops_current_rev" \
             --logger app.status \
             --level "$level" \
@@ -240,5 +243,5 @@ gitops_error() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
 gitops_failed() { # $1=topic, $2=message, [$3=level=critical], [$4=extra={}]
     gitops_maintenance "$1" "$2"
     sentry_entry "$1" "$2" critical "$4"
-    set_flag failed.gitops.update
+    set_flag gitops.update.failed
 }
