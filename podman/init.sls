@@ -6,7 +6,7 @@ include:
   grains['osrelease'] %}
 
 {% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 "'+
-  baseurl+ '/InRelease" | grep -q "200 OK"', python_shell=true) == 0 %}
+  baseurl+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
 
 podman:
   pkgrepo.managed:

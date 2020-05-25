@@ -20,7 +20,7 @@ music-player:
 
 {% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
   '"http://ppa.launchpad.net/fossfreedom/rhythmbox-plugins/ubuntu/dists/'+ grains['oscodename']+
-  '/InRelease" | grep -q "200 OK"', python_shell=true) == 0 %}
+  '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
 
 {{ apt_add_repository("rhythmbox-plugins_ppa",
   "fossfreedom/rhythmbox-plugins", require_in= "pkg: rhythmbox-plugins") }}
