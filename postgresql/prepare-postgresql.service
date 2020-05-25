@@ -1,0 +1,19 @@
+[Unit]
+Description=Reconfigure PostgreSQL RDBMS and wait for network before starting postgresql
+# start after network-online.target because we also listen to other interfaces than boot
+After=network-online.target
+Before=postgresql@{{ settings.pgmajor }}-main.service
+
+[Service]
+Type=oneshot
+{% if settings.pgtune %}
+ExecStart=/usr/local/bin/pgtune.sh update /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf --reserve {{ settings.pgtune_reserve_mem_general }} {{ settings.pgtune_reserve_mem_per_core }}
+{% else %}
+ExecStart=/usr/bin/true
+{% endif %}
+ExecReload=/usr/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=postgresql@{{ settings.pgmajor }}-main.service
