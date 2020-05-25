@@ -1,0 +1,12 @@
+{% load_yaml as defaults %}
+
+# runtime= default="runc", alternative="crun": alternative OCI runtime with support for cgroup V2
+runtime: "crun"
+storage:
+  driver: "overlay"
+  options:
+    mount_program: "/usr/bin/fuse-overlayfs"
+{% endload %}
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('podman', {})) %}
