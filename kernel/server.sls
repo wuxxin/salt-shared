@@ -1,5 +1,5 @@
 include:
-  - kernel.running.headers
+  - kernel.running
   - kernel.sysctl
   - kernel.cgroup
   - kernel.limits

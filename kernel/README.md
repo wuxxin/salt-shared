@@ -6,7 +6,7 @@
       + only install a matching kernel- headers and tools of the running kernel
 
 + state: kernel.server: big setup (lot of open files, connections, ...)
-  + kernel.running-headers
+  + kernel.running
   + kernel.sysctl
   + kernel.cgroup
   + kernel.limits
