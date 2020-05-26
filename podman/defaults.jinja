@@ -19,7 +19,19 @@ container:
   start: true
   update_on_start: true
   remove_on_stop: false
+  command: None
+  # command: if set, will replace default command
+  args: ""
+  # args: if set, will add args for command, command must also be set
   env: {}
+  # env: dict: {key: value,}
+  label: {}
+  # label: dict: {key: value,}
+  volume: []
+  # volume: list: - [source-volume|host-dir:]container-dir[:options]
+  options: {}
+  # options: dict: {key: value,} container options for podman run
+
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},

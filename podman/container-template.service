@@ -1,5 +1,6 @@
 [Unit]
 Description=Systemd service for podman container {{ pod.container.name }}
+After=network-online.target
 
 [Service]
 Restart=always
@@ -11,7 +12,28 @@ ExecStartPre=podman build {{ pod.image.build }} {{ "--tag="+ pod.image.tag if po
 ExecStartPre=podman pull {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
   {%- endif %}
 {%- endif %}
-ExecStart=podman run {{ pod.container.options }} --name={{ pod.container.name }} {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }} {{ pod.container.cmd }} {{ pod.container.args }}
+
+ExecStart=podman run {{ pod.container.options }} \
+    --name={{ pod.container.name }} \
+{%- for key,value in pod.container.env.items() %}
+    --env={{ key }}={{ value }} \
+{%- endfor %}
+{%- for key,value in pod.container.label.items() %}
+    --label={{ key }}={{ value }} \
+{%- endfor %}
+{%- for key,value in pod.container.options.items() %}
+    --{{ key }}={{ value }} \
+{%- endfor %}
+{%- for vol in pod.container.volume %}
+    --volume={{ vol }} \
+{%- endfor %}
+{%- if pod.container.command %}
+    {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }} \
+    {{ pod.container.command }} {{ pod.container.args }}
+{%- else %}
+    {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
+{%- endif %}
+
 ExecStop=podman stop {{ pod.container.name }}
 {%- if pod.container.remove_on_stop %}
 ExecStopPost=podman rm -f {{ pod.container.name }}
