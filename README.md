@@ -18,13 +18,13 @@ some states have documentation README.md's.
     * [kernel](kernel): kernel- image,headers,tools
     * [tools](tools): command line tools
     * [gitops](gitops): deploy and update machines from git, with webhook support
-    * [http_frontend](http_frontend): simple modern https frontend
 
     * Desktop
         * [desktop](desktop):
           * everything wanted for a desktop installation (mostly 20.04)
 
     * Network
+        * [http_frontend](http_frontend): simple modern https frontend
         * [http_proxy](http_proxy):
             * [.server](http_proxy/server.sls): install trafficserver
             * [.client_use_proxy](http_proxy/client_use_proxy.sls)
@@ -40,9 +40,12 @@ some states have documentation README.md's.
 
     * Virtual Machines
         * [libvirt](libvirt): libvirt/qemu/kvm setup
-        * [docker](docker): docker production installation
         * [lxd](lxd): lxd production installation
         * [vagrant](vagrant): vagrant virtual machine manager
+
+    * Container Management
+        * [docker](docker): Docker Containers and Container Images Runtime
+        * [podman](podman): Open Containers Initiative (OCI) Containers and Container Images Runtime
         * [k3s](k3s): small footprint Kubernetes Distribution
 
     * Language Support
