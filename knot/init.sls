@@ -1,6 +1,6 @@
 {% from "knot/defaults.jinja" import settings with context %}
-{% from "knot/defaults.jinja" import log_default, template_default %}
-{% from "knot/zone.sls" import write_zone %}
+{% from "knot/defaults.jinja" import defaults, log_default, template_default %}
+{% from "knot/lib.sls" import write_zone, write_config %}
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
@@ -27,35 +27,15 @@ knot-config-check:
     - require:
       - pkg: knot-package
 
-/etc/default/knot:
-  file.managed:
-    - name: /etc/default/knot
-    - contents: |
-        KNOTD_ARGS="-c /etc/knot/knot.conf"
-        #
 
 {% if settings.enabled|d(true) %}
+
+{{ write_config('', settings, log_default, template_default) }}
   {%- for zone in settings.zone %}
 {{ write_zone(zone, settings.common, watch_in="knot.service") }}
   {%- endfor %}
 
-/etc/knot/knot.conf:
-  file.managed:
-    - source: salt://knot/knot.jinja
-    - template: jinja
-    - makedirs: true
-    - user: knot
-    - group: knot
-    - mode: "0640"
-    - defaults:
-        settings: {{ settings }}
-        log_default: {{ log_default }}
-        template_default: {{ template_default }}
-    - check_cmd: /usr/local/sbin/knot-config-check
-    - require:
-      - file: knot-config-check
-
-knot:
+knot.service:
   service.running:
     - enable: true
     - require:
@@ -65,12 +45,45 @@ knot:
       - file: /etc/knot/knot.conf
 
 {%- else %}
-knot:
+knot.service:
   service.dead:
     - disable: true
 
-/etc/knot/knot.conf:
-  file:
-    - absent
-
 {%- endif %}
+
+
+{% if settings.profile|d(false) %}
+  {% for name, instance_config in settings.profile.items() %}
+
+    {% set profile_defaults = defaults %}
+    {% do profile_defaults.server.update({'rundir': ''}) %}
+    {% do profile_defaults.database.update({'storage': ''}) %}
+    {% set profile_template= template_default %}
+    {% do profile_template.update({'storage': ''}) %}
+    {% set merged_config=salt['grains.filter_by']({'none': profile_defaults},
+      grain='none', default= 'none', merge= instance_config) %}
+
+    {% if merged_config.enabled|d(true) %}
+
+{{ write_config(name, merged_config, log_default, profile_template) }}
+      {%- for zone in merged_config.zone %}
+{{ write_zone(zone, merged_config.common, watch_in="knot-{{ name }}.service") }}
+      {%- endfor %}
+
+knot-{{ name }}.service:
+  service.running:
+    - enable: true
+    - require:
+      - pkg: knot-package
+    - watch:
+      - file: /etc/default/knot-{{ name }}
+      - file: /etc/knot/knot{{ name }}.conf
+
+    {%- else %}
+knot-{{ name }}.service:
+  service.dead:
+    - disable: true
+
+    {%- endif %}
+  {% endfor %}
+{% endif %}

@@ -1,23 +1,29 @@
+{% set def_config_path= '/etc/knot' %}
+{% set def_storage_path= '/var/lib/knot' %}
+{% set def_run_path= '/run/knot' %}
+
 {% load_yaml as defaults %}
+config_path: {{ def_config_path }}
 server:
-  rundir: '/run/knot'
+  rundir: {{ run_path }}
   user: knot:knot
   listen:
     - 127.0.0.1@53
     - ::1@53
 database:
-  storage: '/var/lib/knot'
+  storage: {{ def_storage_path }}
 common:
   ttl: 7200         {# 2 hours #}
   refresh: 14400    {# 4 hours #}
   retry: 1800       {# 30 min #}
   expire: 1814400   {# 3 weeks #}
   nxdomain: 14400   {# 4 hours #}
+profile:
 {% endload %}
 
 {% load_yaml as template_default %}
 id: default
-storage: '/var/lib/knot'
+storage: {{ def_storage_path }}
 semantic-checks: on
 file: '%s.zone'
 {% endload %}
@@ -29,6 +35,3 @@ file: '%s.zone'
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('knot', {})) %}
-
-{% set container_settings=salt['grains.filter_by']({'none': defaults},
-  grain='none', default= 'none', merge= salt['pillar.get']('container:knot', {})) %}

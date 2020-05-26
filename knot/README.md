@@ -13,12 +13,17 @@
 + logging: if empty will use defaults.jinja:log_default
 + example: example.pillar, example.zone
 
-## System DNS
+## Default Server
 
 + uses pillar "knot"
 
-## Container DNS
+## Additional Server
 
-+ uses podman and systemd service and pillar "container:knot" instead of "knot"
-+ set "container:knot:name" as container and systemd service name
-  + defaults to "container_knot"
++ one per pillar "knot:profile:xxx"
+
+## Containerized Server
+
++ pillar "container:knot"
++ uses podman and a systemd service
++ set "container:knot:name" parameter as container **and** systemd service name
+    + defaults to "container_knot", watch for name clashes in systemd service name

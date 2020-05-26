@@ -1,6 +1,14 @@
-{% from "knot/defaults.jinja" import container_settings as settings with context %}
-{% from "knot/defaults.jinja" import log_default, template_default %}
-{% from "knot/zone.sls" import write_zone %}
+{% from "knot/defaults.jinja" import defaults, log_default, template_default %}
+{% from "knot/zone.sls" import write_zone, write_config %}
+
+{% set container_defaults = defaults %}
+{% do container_defaults.server.update({'rundir': '/rundir'}) %}
+{% do container_defaults.database.update({'storage': '/storage'}) %}
+{% set container_template= template_default %}
+{% do container_template.update({'storage': '/storage'}) %}
+
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('container:knot', {})) %}
 
 include:
   - podman
@@ -12,9 +20,6 @@ image:
   name: knot
 container:
   name: {{ settings.name|d('container_knot') }}
-  start: true
-  remove_on_stop: false
-  update_on_start: true
   env:
 {% endload %}
 
@@ -33,7 +38,7 @@ container:
     - defaults:
         settings: {{ settings }}
         log_default: {{ log_default }}
-        template_default: {{ template_default }}
+        template_default: {{ container_template }}
 
 {% from "podman/container.sls" import podman_container %}
 {{ podman_container(knot_service) }}
