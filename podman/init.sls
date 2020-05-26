@@ -2,8 +2,7 @@
 
 include:
   - ubuntu
-
-{# /etc/cni/net.d/87-podman-bridge.conflist #}
+  - kernel.server
 
 {% set baseurl =
   'https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_'+
@@ -16,6 +15,8 @@ include:
   file.managed:
     - contents: |
         runtime = "{{ settings.runtime }}"
+
+{# /etc/cni/net.d/87-podman-bridge.conflist #}
 
 /etc/containers/mounts.conf:
   file.managed:
@@ -44,11 +45,25 @@ include:
   file.managed:
     - contents: |
         [storage]
-        driver = "{{ settings.storage.driver }}"
+  {%- for key,value in settings.storage.items() %}
+    {%- if key != 'options' %}
+        {{ key }} = "{{ value }}"
+    {%- endif %}
+  {%- endfor %}
         [storage.options]
   {%- if settings.storage.options|d(false) %}
     {%- for key,value in settings.storage.options.items() %}
+      {%- if value is not mapping %}
         {{ key }} = "{{ value }}"
+      {%- endif %}
+    {%- endfor %}
+    {%- for key,value in settings.storage.options.items() %}
+      {%- if value is mapping %}
+        [storage.options.{{ key }}]
+        {%- for subkey,subvalue in value.items() %}
+        {{ subkey }} = "{{ subvalue }}"
+        {%- endfor %}
+      {%- endif %}
     {%- endfor %}
   {%- endif %}
 

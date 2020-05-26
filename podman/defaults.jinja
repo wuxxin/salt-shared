@@ -1,10 +1,20 @@
 {% load_yaml as defaults %}
 # runtime: ["runc","crun"]: crun: alternative OCI runtime with support for cgroup V2
 runtime: "crun"
+
 storage:
   driver: "overlay"
+
+  # Primary Read/Write location of container storage
+  graphroot = "/var/lib/containers/storage"
+
+  # Storage path for rootless users
+  # rootless_storage_path = "$HOME/.local/share/containers/storage"
+
   options:
-    mount_program: "/usr/bin/fuse-overlayfs"
+    overlay:
+      mount_program: "/usr/bin/fuse-overlayfs"
+
 {% endload %}
 
 {% load_yaml as default_service %}
@@ -15,22 +25,26 @@ image:
   dockerfile: None
   insecure_registry: false
 container:
+  # name: container name, must be set
   name: None
-  start: true
-  update_on_start: true
-  remove_on_stop: false
-  command: None
+
+  # update: if set true: container image will be pulled/build on start
+  update: true
+  # ephemeral: if set true, container will be removed on stop
+  ephemeral: false
+
   # command: if set, will replace default command
-  args: ""
+  command: None
   # args: if set, will add args for command, command must also be set
-  env: {}
+  args: ""
   # env: dict: {key: value,}
-  label: {}
+  env: {}
   # label: dict: {key: value,}
-  volume: []
+  label: {}
   # volume: list: - [source-volume|host-dir:]container-dir[:options]
+  volume: []
+  # options: dict: {key: value,} container options parameter for podman run
   options: {}
-  # options: dict: {key: value,} container options for podman run
 
 {% endload %}
 

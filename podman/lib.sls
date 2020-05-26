@@ -5,7 +5,7 @@
   grain='default', default= 'default', merge=service_definition) %}
 
 {# if not update on every container start , update now #}
-{%- if not pod.container.update_on_start %}
+{%- if not pod.container.update %}
 update_image_{{ pod.image.name }}:
   cmd.run:
   {%- if pod.image.build %}

@@ -5,7 +5,7 @@ After=network-online.target
 [Service]
 Restart=always
 
-{%- if pod.container.update_on_start %}
+{%- if pod.container.update %}
   {%- if pod.image.build %}
 ExecStartPre=podman build {{ pod.image.build }} {{ "--tag="+ pod.image.tag if pod.image.tag }}
   {%- else %}
@@ -13,7 +13,10 @@ ExecStartPre=podman pull {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.
   {%- endif %}
 {%- endif %}
 
-ExecStart=podman run {{ pod.container.options }} \
+ExecStart=podman run \
+{%- for key,value in pod.container.options.items() %}
+    --{{ key }}={{ value }} \
+{%- endfor %}
     --name={{ pod.container.name }} \
 {%- for key,value in pod.container.env.items() %}
     --env={{ key }}={{ value }} \
@@ -35,7 +38,7 @@ ExecStart=podman run {{ pod.container.options }} \
 {%- endif %}
 
 ExecStop=podman stop {{ pod.container.name }}
-{%- if pod.container.remove_on_stop %}
+{%- if pod.container.ephemeral %}
 ExecStopPost=podman rm -f {{ pod.container.name }}
 {%- endif %}
 
