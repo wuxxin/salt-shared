@@ -1,15 +1,13 @@
 ## salt-shared - useful Salt states
 
-A collection of saltstack states.
-
-Quality and style differ from state to state, most states are working,
-some states have documentation README.md's.
+A collection of saltstack states. Most states are working,
+some states have a documentation README.md
 
 ### What can you do with it
 
-* Target Platforms: Ubuntu Focal 20.04 LTS and 19.10; 19.04; 18.04; debian 10
-    * many non-gui states also work with older/newer ubuntu and other debian based distros.
-    * To bootstrap a machine with a custom storage setup, see:
+* Target Platforms: Ubuntu Focal 20.04 LTS
+    * many states also work with older/newer ubuntu and other debian based distros.
+    * To bootstrap a machine from scratch with a custom storage setup, see:
       [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
 * Features to look at:
@@ -20,11 +18,10 @@ some states have documentation README.md's.
     * [gitops](gitops): deploy and update machines from git, with webhook support
 
     * Desktop
-        * [desktop](desktop):
-          * everything wanted for a desktop installation (mostly 20.04)
+        * [desktop](desktop): everything wanted for a desktop installation
 
     * Network
-        * [http_frontend](http_frontend): simple modern https frontend
+        * [http_frontend](http_frontend): simple modern https frontend using nginx, acme.sh and easyrsa
         * [http_proxy](http_proxy):
             * [.server](http_proxy/server.sls): install trafficserver
             * [.client_use_proxy](http_proxy/client_use_proxy.sls)
