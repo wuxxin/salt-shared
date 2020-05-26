@@ -6,8 +6,3 @@
         *         hard    nofile    1048576
         root      soft    nofile    1048576
         root      hard    nofile    1048576
-
-{# Legacy, can be removed after one run #}        
-/etc/security/limits.d/nofile.conf:
-  file:
-    - absent
