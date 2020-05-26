@@ -113,12 +113,12 @@ popd
 cat > config/top.sls << EOF
 base:
   '*':
-    - custom
+    - main
 EOF
 cp salt/salt-shared/gitops/template/config.template.sls config/config.sls
-cp salt/salt-shared/gitops/template/pillar.template.sls config/custom.sls
+cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
 cp salt/salt-shared/gitops/template/state.template.sls salt/custom/top.sls
-touch salt/custom/custom.sls
+touch salt/custom/main.sls
 cat > bootstrap.sh <<"EOF"
 #!/usr/bin/env bash
 set -eo pipefail
