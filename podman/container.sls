@@ -4,14 +4,14 @@
 {%- set pod= salt['grains.filter_by']({'default': default_service},
   grain='default', default= 'default', merge=service_definition) %}
 
+{# if not update on every container start , update now #}
 {%- if not pod.container.update_on_start %}
-  {# if not update on every container start , update now #}
 update_image_{{ pod.image.name }}:
   cmd.run:
   {%- if pod.image.build %}
-    - name: podman build bla
+    - name: podman build {{ pod.image.build }} {{ "--tag="+ pod.image.tag if pod.image.tag }}
   {%- else %}
-    - name: podman pull bla
+    - name: podman pull {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
   {%- endif %}
     - require_in:
       - file: {{ pod.container.name }}.service

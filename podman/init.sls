@@ -45,7 +45,6 @@ include:
     - contents: |
         [storage]
         driver = "{{ settings.storage.driver }}"
-
         [storage.options]
   {%- if settings.storage.options|d(false) %}
     {%- for key,value in settings.storage.options.items() %}

@@ -1,5 +1,5 @@
 {% load_yaml as defaults %}
-# runtime= default="runc", alternative="crun": alternative OCI runtime with support for cgroup V2
+# runtime: ["runc","crun"]: crun: alternative OCI runtime with support for cgroup V2
 runtime: "crun"
 storage:
   driver: "overlay"

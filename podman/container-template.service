@@ -1,17 +1,17 @@
 [Unit]
-Description=Systemd service for container {{ pod.container.name }}
+Description=Systemd service for podman container {{ pod.container.name }}
 
 [Service]
 Restart=always
 
 {%- if pod.container.update_on_start %}
   {%- if pod.image.build %}
-ExecStartPre=podman build {{ pod.image.name }}
+ExecStartPre=podman build {{ pod.image.build }} {{ "--tag="+ pod.image.tag if pod.image.tag }}
   {%- else %}
-ExecStartPre=podman pull {{ pod.image.name }}
+ExecStartPre=podman pull {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
   {%- endif %}
 {%- endif %}
-ExecStart=podman run {{ pod.container.options }} --name={{ pod.container.name }} {{ pod.image.name }} {{ pod.container.cmd }} {{ pod.container.args }}
+ExecStart=podman run {{ pod.container.options }} --name={{ pod.container.name }} {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }} {{ pod.container.cmd }} {{ pod.container.args }}
 ExecStop=podman stop {{ pod.container.name }}
 {%- if pod.container.remove_on_stop %}
 ExecStopPost=podman rm -f {{ pod.container.name }}
