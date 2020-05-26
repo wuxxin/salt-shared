@@ -1,11 +1,9 @@
-{% set def_config_path= '/etc/knot' %}
 {% set def_storage_path= '/var/lib/knot' %}
 {% set def_run_path= '/run/knot' %}
 
 {% load_yaml as defaults %}
-config_path: {{ def_config_path }}
 server:
-  rundir: {{ run_path }}
+  rundir: {{ def_run_path }}
   user: knot:knot
   listen:
     - 127.0.0.1@53
