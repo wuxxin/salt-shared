@@ -32,7 +32,9 @@ knot-config-check:
 
 {{ write_config('', settings, log_default, template_default) }}
   {%- for zone in settings.zone %}
-{{ write_zone(zone, settings.common, watch_in="knot.service") }}
+    {%- set targetpath= settings.template|selectattr('id', 'equalto',
+        zone.template|d('default'))|map(attribute='storage')|first %}
+{{ write_zone(zone, settings.common, targetpath, watch_in="knot.service") }}
   {%- endfor %}
 
 knot.service:
@@ -67,7 +69,9 @@ knot.service:
 
 {{ write_config(name, merged_config, log_default, profile_template) }}
       {%- for zone in merged_config.zone %}
-{{ write_zone(zone, merged_config.common, watch_in="knot-{{ name }}.service") }}
+        {%- set targetpath=  merged_config.template|selectattr('id', 'equalto',
+            zone.template|d('default'))|map(attribute='storage')|first %}
+{{ write_zone(zone, merged_config.common, targetpath, watch_in="knot-{{ name }}.service") }}
       {%- endfor %}
 
 knot-{{ name }}.service:

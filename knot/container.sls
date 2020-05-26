@@ -24,7 +24,7 @@ container:
 {% endload %}
 
 {%- for zone in settings.zone %}
-{{ write_zone(zone, settings.common, targetpath=user_home+ '/knot.container') }}
+{{ write_zone(zone, settings.common, user_home+ '/knot.container') }}
 {%- endfor %}
 
 {{ user_home }}/knot.container/knot.conf:
