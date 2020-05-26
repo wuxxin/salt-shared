@@ -8,7 +8,7 @@
     + be sure to include '127.0.0.1' and '::1' in the list
 
 eg.
-```
+```yaml
 nfs:
   listen_ip:
     - '127.0.0.1'

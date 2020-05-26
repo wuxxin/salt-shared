@@ -10,7 +10,7 @@ see: https://shenaniganslabs.io/2019/05/21/LXD-LPE.html
 
 ### gui profile example
 
-```
+```yaml
 profiles:
 - name: gui
   config:
@@ -41,7 +41,7 @@ profiles:
 
 ### zfs config example
 
-```
+```yaml
 lxd:
   storage_pools:
   - name: zfs
@@ -61,7 +61,7 @@ lxd:
 ```
 
 ### cloud init compatible images metadata passing example
-```
+```yaml
     config:
       user.network-config: |
         version: 1

@@ -50,6 +50,3 @@ some states have a documentation README.md
         * [java](java)
         * [latex](latex)
         * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
-
-    * [lab](lab): Experimental Work
-    * [old](old): Old States
