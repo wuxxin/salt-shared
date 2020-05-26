@@ -1,9 +1,9 @@
 include:
-  - kernel
+  - kernel.running.headers
   - kernel.sysctl
   - kernel.cgroup
   - kernel.limits
-  - kernel.module
+  - kernel.modules
   - kernel.swappiness
 
 kernel_big_nop:
