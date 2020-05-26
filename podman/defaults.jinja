@@ -1,11 +1,25 @@
 {% load_yaml as defaults %}
-
 # runtime= default="runc", alternative="crun": alternative OCI runtime with support for cgroup V2
 runtime: "crun"
 storage:
   driver: "overlay"
   options:
     mount_program: "/usr/bin/fuse-overlayfs"
+{% endload %}
+
+{% load_yaml as default_service %}
+image:
+  name: None
+  tag: None
+  build: None
+  dockerfile: None
+  insecure_registry: false
+container:
+  name: None
+  start: true
+  update_on_start: true
+  remove_on_stop: false
+  env: {}
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},

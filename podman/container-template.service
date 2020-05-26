@@ -1,32 +1,20 @@
-{%- set runoptions = container.get("runoptions", []) %}
-{%- set stopoptions = container.get("stopoptions", []) %}
-{%- set cmd = container.get("cmd", "") %}
-{%- set args = container.get("args", []) -%}
-
-{%- set runoptions = runoptions|join(' ') %}
-{%- set stopoptions = stopoptions|join(' ') %}
-{%- set args = args|join(' ') -%}
-
-{%- set podman_start_command = "run %s --name=%s %s %s %s"|format(runoptions, name, container.image, cmd, args) %}
-{%- set podman_stop_command = "stop %s %s"|format(stopoptions, name) %}
-{%- set podman_poststop_command = "rm -f %s"|format(name) -%}
 [Unit]
-Description=Systemd service for container {{ name }}
-
-{%- set remove_on_stop = container.get("remove_on_stop", False) %}
-{%- set pull_before_start = container.get("pull_before_start", False) %}
+Description=Systemd service for container {{ pod.container.name }}
 
 [Service]
 Restart=always
 
-{%- if pull_before_start %}
-ExecStartPre={{ podman_bin }} pull {{ container.image }}
+{%- if pod.container.update_on_start %}
+  {%- if pod.image.build %}
+ExecStartPre=podman build {{ pod.image.name }}
+  {%- else %}
+ExecStartPre=podman pull {{ pod.image.name }}
+  {%- endif %}
 {%- endif %}
-
-ExecStart={{ podman_bin }} {{ podman_start_command }}
-ExecStop={{ podman_bin }} {{ podman_stop_command }}
-{%- if remove_on_stop %}
-ExecStopPost={{ podman_bin }} {{ podman_poststop_command }}
+ExecStart=podman run {{ pod.container.options }} --name={{ pod.container.name }} {{ pod.image.name }} {{ pod.container.cmd }} {{ pod.container.args }}
+ExecStop=podman stop {{ pod.container.name }}
+{%- if pod.container.remove_on_stop %}
+ExecStopPost=podman rm -f {{ pod.container.name }}
 {%- endif %}
 
 [Install]
