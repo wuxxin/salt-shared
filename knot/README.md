@@ -12,3 +12,13 @@
         + custom additional context vars: add context data to zone
 + logging: if empty will use defaults.jinja:log_default
 + example: example.pillar, example.zone
+
+## System DNS
+
++ uses pillar "knot"
+
+## Container DNS
+
++ uses podman and systemd service and pillar "container:knot" instead of "knot"
++ set "container:knot:name" as container and systemd service name
+  + defaults to "container_knot"

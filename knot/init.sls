@@ -1,5 +1,7 @@
 {% from "knot/defaults.jinja" import settings with context %}
 {% from "knot/defaults.jinja" import log_default, template_default %}
+{% from "knot/zone.sls" import write_zone %}
+
 {% from "ubuntu/init.sls" import apt_add_repository %}
 
 {# knot from ppa is newer for almost any distro #}
@@ -33,34 +35,8 @@ knot-config-check:
         #
 
 {% if settings.enabled|d(true) %}
-
   {%- for zone in settings.zone %}
-    {%- set targetfile = '/var/lib/knot/' + zone.template|d('default')+ '/'+ zone.domain+ '.zone' %}
-knot-zone-{{ zone.domain }}:
-  file.managed:
-    - name: {{ targetfile }}
-    - makedirs: true
-    - user: knot
-    - group: knot
-    - mode: "0640"
-    - watch_in: knot.service
-    {%- if zone.source is defined %}
-    - template: jinja
-    - source: {{ zone.source }}
-    - defaults:
-        domain: zone.domain
-        common: {{ settings.common }}
-        autoserial: {{ salt['cmd.run_stdout']('date +%y%m%d%H%M') }}
-      {%- if zone.context is defined %}
-    - context: {{ zone.context }}
-      {%- endif %}
-    {%- else %}
-    - contents: |
-{{ zone.contents|d('')|indent(8, True) }}
-    {%- endif %}
-    {%- if zone.master is not defined %}
-    - check_cmd: /usr/bin/kzonecheck -o {{ zone.domain }}
-    {%- endif %}
+{{ write_zone(zone, settings.common, watch_in="knot.service") }}
   {%- endfor %}
 
 /etc/knot/knot.conf:
