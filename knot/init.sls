@@ -55,15 +55,16 @@ knot.service:
 
 
 {% if settings.profile|d(false) %}
-  {% for name, instance_config in settings.profile.items() %}
+  {% for instance in settings.profile %}
 
+    {% set name = instance.name %}
     {% set profile_defaults = defaults %}
     {% do profile_defaults.server.update({'rundir': ''}) %}
     {% do profile_defaults.database.update({'storage': ''}) %}
     {% set profile_template= template_default %}
     {% do profile_template.update({'storage': ''}) %}
     {% set merged_config=salt['grains.filter_by']({'none': profile_defaults},
-      grain='none', default= 'none', merge= instance_config) %}
+      grain='none', default= 'none', merge= instance) %}
 
     {% if merged_config.enabled|d(true) %}
 
