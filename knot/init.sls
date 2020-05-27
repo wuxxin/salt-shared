@@ -70,6 +70,13 @@ knot.service:
 
 {{ write_config(name, merged_config, log_default, profile_template) }}
       {%- for zone in merged_config.zone %}
+        {%- if merged_config.template is not defined %}
+          {%- set dummy = merged_config.__setitem__('template', [profile_template]) %}
+        {%- endif %}
+        {%- if merged_config.template|selectattr('id', 'equalto', 'default')|map(attribute='id')|first != 'default' %}
+          {%- set template = merged_config.template+ [profile_template] %}
+          {%- set dummy = merged_config.__setitem__('template', template) %}
+        {%- endif %}
         {%- set targetpath=  merged_config.template|selectattr('id', 'equalto',
             zone.template|d('default'))|map(attribute='storage')|first %}
 {{ write_zone(zone, merged_config.common, targetpath, watch_in="knot-{{ name }}.service") }}
