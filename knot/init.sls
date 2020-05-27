@@ -56,19 +56,36 @@ knot.service:
 
 {% if settings.profile|d(false) %}
   {% for instance in settings.profile %}
-
     {% set name = instance.name %}
     {% set profile_defaults = defaults %}
-    {% do profile_defaults.server.update({'rundir': ''}) %}
-    {% do profile_defaults.database.update({'storage': ''}) %}
+    {% set def_storage_path= '/var/lib/knot-'+ name %}
+    {% set def_run_path= '/run/knot-'+ name %}
+    {% do profile_defaults.server.update({'rundir': def_run_path}) %}
+    {% do profile_defaults.database.update({'storage': def_storage_path}) %}
     {% set profile_template= template_default %}
-    {% do profile_template.update({'storage': ''}) %}
+    {% do profile_template.update({'storage': def_storage_path}) %}
     {% set merged_config=salt['grains.filter_by']({'none': profile_defaults},
-      grain='none', default= 'none', merge= instance) %}
+      grain='none', default='none', merge=instance) %}
 
     {% if merged_config.enabled|d(true) %}
 
 {{ write_config(name, merged_config, log_default, profile_template) }}
+
+profile_{{ name }}_run_path:
+  file.managed:
+    - name: /etc/tmpfiles.d/knot-{{ name }}.conf
+    - contents: |
+        # tmpfiles.d(5) runtime directory for knot
+        #Type Path        Mode UID      GID      Age Argument
+            d {{ merged_config.server.rundir }}   0755 knot     knot     -   -
+
+profile_{{ name }}_storage_path:
+  file.directory:
+    - name: {{ merged_config.database.storage }}
+    - makedirs: true
+    - user: knot
+    - group: knot
+
       {%- for zone in merged_config.zone %}
         {%- if merged_config.template is not defined %}
           {%- set dummy = merged_config.__setitem__('template', [profile_template]) %}
@@ -89,7 +106,7 @@ knot-{{ name }}.service:
       - pkg: knot-package
     - watch:
       - file: /etc/default/knot-{{ name }}
-      - file: /etc/knot/knot{{ name }}.conf
+      - file: /etc/knot/knot-{{ name }}.conf
 
     {%- else %}
 knot-{{ name }}.service:
