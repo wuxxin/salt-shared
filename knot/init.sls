@@ -32,7 +32,7 @@ knot-config-check:
 
 {{ write_config('', settings, log_default, template_default) }}
   {%- for zone in settings.zone %}
-    {%- set targetpath= settings.template|selectattr('id', 'equalto',
+    {%- set targetpath= settings.template|d([template_default])|selectattr('id', 'equalto',
         zone.template|d('default'))|map(attribute='storage')|first %}
 {{ write_zone(zone, settings.common, targetpath, watch_in="knot.service") }}
   {%- endfor %}
