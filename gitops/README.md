@@ -25,3 +25,16 @@
     + "update command failed with error $result"
     + "post_update_command failed with error $result"
     + "finish_update_command failed with error $result"
+
++ store sts-report webhoook macro
+
+{%- macro store_sts_report(name) %}
+- id: {{ name }}
+  command-working-directory: "{{ settings.home_dir }}/mta-sts-report/temp"
+  execute-command: /usr/bin/bash -c 'mv "$STS_REPORT" "{{ settings.home_dir }}/mta-sts-report/new/$(date +%s).json"'
+  incoming-payload-content-type: application/json
+  http-methods: POST
+  pass-file-to-command:
+    - source: entire-payload
+      envname: STS_REPORT
+{%- endmacro %}
