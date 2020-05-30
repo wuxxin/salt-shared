@@ -112,6 +112,7 @@ profile_{{ name }}_storage_path:
     - group: knot
     - require:
       - pkg: knot-package
+      - cmd: profile_{{ name }}_run_path
 
       {%- for i in ['journal', 'keys', 'timers'] %}
 profile_{{ name }}_{{ i }}:
