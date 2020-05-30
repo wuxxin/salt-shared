@@ -30,7 +30,7 @@
     {%- for v,d in i.items() %}
       {%- if v != keyname %}
         {%- if d is iterable and d is not string and d|length > 1 %}
-  {{ v }}: [{{ d|join(',') }} }}]
+  {{ v }}: [{{ d|join(',') }}]
         {%- elif d is iterable and d is not string and d|length == 1 %}
   {{ v }}: {{ d[0] }}
         {%- else %}
