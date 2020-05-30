@@ -27,7 +27,7 @@ include:
         # would cause the contents of the /usr/share/secrets directory on the host
         # to be mounted on the /run/secrets directory inside the container.
         # Setting mountpoints allows containers to use the files of the host.
-  {%- if settings.mounts %}
+  {%- if settings.mounts is defined %}
     {%- for mount in settings.mounts %}
         {{ mount }}
     {%- endfor %}
