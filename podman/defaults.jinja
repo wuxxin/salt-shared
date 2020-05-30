@@ -1,15 +1,16 @@
+
 {% load_yaml as defaults %}
-# runtime: ["runc","crun"]: crun: alternative OCI runtime with support for cgroup V2
+# runtime: ["runc","crun"], crun: alternative OCI runtime with support for cgroup V2
 runtime: "crun"
 
 storage:
   driver: "overlay"
 
   # Primary Read/Write location of container storage
-  graphroot = "/var/lib/containers/storage"
+  graphroot: "/var/lib/containers/storage"
 
   # Storage path for rootless users
-  # rootless_storage_path = "$HOME/.local/share/containers/storage"
+  # rootless_storage_path : "$HOME/.local/share/containers/storage"
 
   options:
     overlay:
@@ -24,6 +25,7 @@ image:
   build: None
   dockerfile: None
   insecure_registry: false
+
 container:
   # name: container name, must be set
   name: None
