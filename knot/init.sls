@@ -30,6 +30,26 @@ knot-config-check:
 
 {% if settings.enabled|d(true) %}
 
+knot_default_{{ settings.database.storage }}:
+  file.directory:
+    - name: {{ settings.database.storage }}
+    - makedirs: true
+    - user: knot
+    - group: knot
+    - require:
+      - pkg: knot-package
+
+{% for i in ['journal', 'keys', 'timers'] %}
+knot_default_{{ settings.database.storage }}/{{ i }}:
+  file.directory:
+    - name: {{ settings.database.storage }}/{{ i }}
+    - user: knot
+    - group: knot
+    - mode: 0750
+    - require:
+      - file: knot_default_{{ settings.database.storage }}
+{%- endfor %}
+
 {{ write_config('', settings, log_default, template_default) }}
   {%- for zone in settings.zone %}
     {%- set targetpath= settings.template|d([template_default])|selectattr('id', 'equalto',
@@ -78,6 +98,10 @@ profile_{{ name }}_run_path:
         # tmpfiles.d(5) runtime directory for knot
         #Type Path        Mode UID      GID      Age Argument
             d {{ merged_config.server.rundir }}   0755 knot     knot     -   -
+  cmd.run:
+    - name: systemd-tmpfiles --create
+    - onchanges:
+      - file: profile_{{ name }}_run_path
 
 profile_{{ name }}_storage_path:
   file.directory:

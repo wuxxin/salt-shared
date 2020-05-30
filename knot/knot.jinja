@@ -43,7 +43,15 @@
 {%- endmacro %}
 {%- if dns.server is defined %}
 server:
-{{ dns.server|yaml(False)|indent(2,True) }}
+  {%- for k,v in dns.server.items() %}
+    {%- if k == 'listen' and v is iterable and v is not string %}
+      {%- for listen_ip in v %}
+  listen: {{ listen_ip }}
+      {%- endfor %}
+    {%- else %}
+  {{ k }}: {{ v }}
+    {%- endif %}
+  {%- endfor %}
 {%- endif %}
 {%- if dns.control is defined %}
 control:

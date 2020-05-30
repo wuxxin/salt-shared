@@ -3,15 +3,15 @@
 + pillar
     + relaxed order (does not matter) of knot.conf yaml
     + to disable a configured knot, set pillar['knot:enabled']= false
+    + additional knot instances, add pillar 'knot:profile:[{'name': 'xxx',}]'
 + zone source files
     + automatic check of zone files before udpate of files
     + salt source file which gets copied to default file target for zone
     + jinja templating in source file with prefilled context var
         + common.* from defaults.jinja
-        + autoserial (YYMMDDHHMM) (conditions: one change per minute max, breaks in year 2100)
         + custom additional context vars: add context data to zone
 + logging: if empty will use defaults.jinja:log_default
-+ example: example.pillar, example.zone
++ example: example.pillar.yaml, example.zone.jinja
 
 ## Default Server
 
@@ -19,11 +19,4 @@
 
 ## Additional Server
 
-+ one per pillar "knot:profile:xxx"
-
-## Containerized Server
-
-+ pillar "container:knot"
-+ uses podman and a systemd service
-+ set "container:knot:name" parameter as container **and** systemd service name
-    + defaults to "container_knot", watch for name clashes in systemd service name
++ one per pillar list: "knot:profile:[{'name': 'profilename', }]"
