@@ -13,6 +13,10 @@
 + logging: if empty will use defaults.jinja:log_default
 + example: example.pillar.yaml, example.zone.jinja
 
+## Secrets
+
+Warning: key:secret must be encoded with
+  salt['hashutil.base64_b64encode'](secret)
 ## Default Server
 
 + uses pillar "knot"

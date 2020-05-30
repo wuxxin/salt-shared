@@ -8,10 +8,13 @@ knot:
   key:
     - id: transfer_key
       secret: secret
+      algorithm: hmac-sha256
     - id: update_key
       secret: secret
+      algorithm: hmac-sha256
     - id: notify_key
       secret: secret
+      algorithm: hmac-sha256
   acl:
     - id: slave1_transfer
       key: transfer_key
@@ -20,9 +23,11 @@ knot:
     - id: master1_notify
       key: notify_key
       action: notify
+      address: 192.168.2.1
     - id: updater1_update
       key: update_key
       action: update
+      address: 192.168.2.1
   remote:
     - id: slave1
       address: 192.168.2.1
