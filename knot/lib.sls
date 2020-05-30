@@ -9,6 +9,7 @@ zone-{{ targetpath }}-{{ zone.domain }}:
     - group: knot
     - mode: "0640"
   {%- if watch_in %}
+    - require_in: {{ watch_in }}
     - watch_in: {{ watch_in }}
   {% endif %}
   {%- if zone.source is defined %}
