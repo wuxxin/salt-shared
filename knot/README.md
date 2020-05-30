@@ -15,8 +15,10 @@
 
 ## Secrets
 
-Warning: key:secret must be encoded with
-  salt['hashutil.base64_b64encode'](secret)
++ Warning: key:secret (hmac-sha256) must generated as 256bit base64 encoded
+  + eg. openssl rand -base64 32
+  + eg. keymgr -t test hmac-sha256 256
+  
 ## Default Server
 
 + uses pillar "knot"
