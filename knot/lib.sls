@@ -26,7 +26,7 @@ zone-{{ targetpath }}-{{ zone.domain }}:
 {{ zone.contents|d('')|indent(8, True) }}
   {%- endif %}
   {%- if zone.master is not defined %}
-    - check_cmd: /usr/bin/kzonecheck -o {{ zone.domain }}
+    - check_cmd: /usr/bin/kzonecheck -v -o {{ zone.domain }}
   {%- endif %}
 {% endmacro %}
 
