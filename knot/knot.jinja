@@ -30,7 +30,7 @@
     {%- for v,d in i.items() %}
       {%- if v != keyname %}
         {%- if d is iterable and d is not string and d|length > 1 %}
-  {{ v }}: [{%- for j in d %}{{ j }},{%- endfor %}]
+  {{ v }}: [{{ d|join(',') }} }}]
         {%- elif d is iterable and d is not string and d|length == 1 %}
   {{ v }}: {{ d[0] }}
         {%- else %}
@@ -44,10 +44,8 @@
 {%- if dns.server is defined %}
 server:
   {%- for k,v in dns.server.items() %}
-    {%- if k == 'listen' and v is iterable and v is not string %}
-      {%- for listen_ip in v %}
-  listen: {{ listen_ip }}
-      {%- endfor %}
+    {%- if k == 'listen' and v is iterable and v is not string and v|length > 1 %}
+  listen: [{{ v|join(',') }}]
     {%- else %}
   {{ k }}: {{ v }}
     {%- endif %}
