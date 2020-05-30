@@ -31,7 +31,7 @@ include:
 /etc/containers/policy.json:
   file.managed:
     - contents: |
-{{ settings.policy|indent() }}
+{{ settings.policy|indent(8,True) }}
 
 
 /etc/containers/storage.conf:
