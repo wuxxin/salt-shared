@@ -48,6 +48,8 @@ knot_default_{{ settings.database.storage }}/{{ i }}:
     - mode: 0750
     - require:
       - file: knot_default_{{ settings.database.storage }}
+    - require_in:
+      - service: knot.service
 {%- endfor %}
 
 {{ write_config('', settings, log_default, template_default) }}
@@ -88,9 +90,6 @@ knot.service:
       grain='none', default='none', merge=instance) %}
 
     {% if merged_config.enabled|d(true) %}
-
-{{ write_config(name, merged_config, log_default, profile_template) }}
-
 profile_{{ name }}_run_path:
   file.managed:
     - name: /etc/tmpfiles.d/knot-{{ name }}.conf
@@ -98,6 +97,8 @@ profile_{{ name }}_run_path:
         # tmpfiles.d(5) runtime directory for knot
         #Type Path        Mode UID      GID      Age Argument
             d {{ merged_config.server.rundir }}   0755 knot     knot     -   -
+    - require:
+      - pkg: knot-package
   cmd.run:
     - name: systemd-tmpfiles --create
     - onchanges:
@@ -109,6 +110,23 @@ profile_{{ name }}_storage_path:
     - makedirs: true
     - user: knot
     - group: knot
+    - require:
+      - pkg: knot-package
+
+      {%- for i in ['journal', 'keys', 'timers'] %}
+profile_{{ name }}_{{ i }}:
+  file.directory:
+    - name: {{ merged_config.database.storage }}/{{ i }}
+    - user: knot
+    - group: knot
+    - mode: 0750
+    - require:
+      - file: profile_{{ name }}_storage_path
+    - require_in:
+      - service: knot-{{ name }}.service
+      {%- endfor %}
+
+{{ write_config(name, merged_config, log_default, profile_template) }}
 
       {%- for zone in merged_config.zone %}
         {%- if merged_config.template is not defined %}
