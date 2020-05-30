@@ -21,13 +21,8 @@ include:
 /etc/containers/mounts.conf:
   file.managed:
     - contents: |
-        # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
-        # one mount per line. For example, a mounts.conf with the line
-        # /usr/share/secrets:/run/secrets
-        # would cause the contents of the /usr/share/secrets directory on the host
-        # to be mounted on the /run/secrets directory inside the container.
-        # Setting mountpoints allows containers to use the files of the host.
-  {%- if settings.mounts is defined %}
+        # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST
+  {%- if settings.mounts|d([]) %}
     {%- for mount in settings.mounts %}
         {{ mount }}
     {%- endfor %}
@@ -36,10 +31,8 @@ include:
 /etc/containers/policy.json:
   file.managed:
     - contents: |
-        # Manages which registries you trust as a source of container images based on its location.
-        # The location is determined by the transport and the registry host of the image.
-        # Using this container image docker://docker.io/library/busybox as an example,
-        #   docker is the transport and docker.io is the registry host.
+{{ settings.policy|indent() }}
+
 
 /etc/containers/storage.conf:
   file.managed:
