@@ -34,11 +34,11 @@ gitea_binary:
   {% if entry.global.run_user is not defined %}
     {% do entry.global.update({ 'run_user': 'gitea_' ~ entry.name }) %}
   {% endif %}
+  {% if entry.salt.home_dir is not defined %}
+    {% do entry.salt.update({ 'home_dir': '/home/gitea_' ~ entry.global.run_user }) %}
+  {% endif %}
   {% if entry.repository.root is not defined %}
     {% do entry.repository.update({ 'root': entry.salt.home_dir ~ '/repos' }) %}
-  {% endif %}
-  {% if entry.salt.home_dir is not defined %}
-    {% do entry.salt.update({ 'home_dir': '/home/gitea_' ~ entry.name }) %}
   {% endif %}
   {% if entry.salt.custom_dir is not defined %}
     {% do entry.salt.update({ 'custom_dir': entry.salt.home_dir ~ '/custom' }) %}
@@ -51,6 +51,13 @@ gitea_binary:
   {% endif %}
   {% if entry.server.lfs_jwt_secret is not defined %}
     {% do entry.server.update({ 'lfs_start_server': 'false'}) %}
+  {% endif %}
+  {% if entry.server.http_addr is not defined %}
+    {% if entry.server.protocol == 'http' %}
+      {% do entry.server.update({ 'http_addr': '127.0.0.1'}) %}
+    {% elif entry.server.protocol == 'unix' %}
+      {% do entry.server.update({ 'http_addr': '/run/gitea_' ~ entry.name ~ '/gitea.sock'}) %}
+    {% endif %}
   {% endif %}
 
 account_{{ entry.global.run_user }}:

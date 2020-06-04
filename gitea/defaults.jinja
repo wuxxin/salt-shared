@@ -9,7 +9,7 @@ gitea:
         key: optional, gpg secret key (ascii armored) to be activated for gitea
       server:
         domain: full.qualified.domain.name
-        root_url: mandatory if behind reverse proxy eg. %(PROTOCOL)s://%(DOMAIN)s:%(HTTP_PORT)s/
+        root_url: may be needed to set, eg. if behind reverse proxy eg. %(PROTOCOL)s://%(DOMAIN)s:%(HTTP_PORT)s/
         lfs_jwt_secret: optional, but mandatory if enabling lfs
       security:
         secret_key: mandatory, eg. "openssl rand -base64 32"
@@ -17,19 +17,21 @@ gitea:
         # enable: default "true"
         jwt_secret: mandatory if oauth2:enable:true , eg. "openssl rand -base64 32"
       session:
-        cookie_secure: 'true' if access to gitea is only via https
+        cookie_secure: "true" if access to gitea is only accessed via https
       any_section_from_app_ini:
           # app.ini sections, all keys are lowercase
 
-# on apply
+# profile modifications
 #   + the profile_defaults will be merged with the defined profile
-#   + global:run_user if not set will be set to gitea_<profile:name>
-#   + repository:root if not set will be set to ~/repos
-#   + oauth2:enable will be set to false if oauth2:jwt_secret is not set
-#   + server:lfs_start_server will be set to false if server:lfs_jwt_secret is not set
+#   + global:run_user if not defined will be set to gitea_<profile:name>
+#   + repository:root if not defined will be set to ~/repos
 #   + GITEA_WORK_DIR will be set to salt:work_dir (defaults to ~/work)
 #   + GITEA_CUSTOM will be set to salt:custom_dir (defaults to ~/custom)
-#
+#   + oauth2:enable will be set to false if oauth2:jwt_secret is not set
+#   + server:lfs_start_server will be set to false if server:lfs_jwt_secret is not set
+#   + server:http_addr if not defined and
+#     + server:protocol == unix, it will be set to /run/gitea_<profile:name>/gitea.sock
+#     + server:protocol == http, it will be set to 127.0.0.1
 
 #}
 
@@ -45,9 +47,7 @@ salt: {}
 database:
   db_type: sqlite3
 server:
-  protocol: http
-  http_addr: 127.0.0.1
-  http_port: 8050
+  protocol: unix
   start_ssh_server: "false"
   ssh_create_authorized_keys_file: "true"
 repository: {}
