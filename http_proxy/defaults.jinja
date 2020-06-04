@@ -2,7 +2,16 @@
 listen_ip: "127.0.0.1" {# can be string or list of strings #}
 listen_port: 8123
 cache_dir: /var/cache/trafficserver
-cache_size_mb: 10240 {# = 10GB #}
+cache_size_mb: 10240 {# = 10GB disk cache size produces ~100mb ram cache size #}
+
+{# memory_cache_size_mb: if not set: set between 10-200
+  cache_size_mb < 1024:
+    memory_cache_size_mb = 10
+  cache_size_mb > 1024 and cache_size_mb < 20480:
+    memory_cache_size_mb = cache_size_mb / 1024 * 10
+  cache_size_mb > 20480
+    memory_cache_size_mb = 200
+#}
 {% endload %}
 
 {% set default_no_proxy = 'localhost,127.0.0.1,169.254.169.254,metadata.google.internal' %}
@@ -10,3 +19,12 @@ cache_size_mb: 10240 {# = 10GB #}
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('http_proxy_server', {})) %}
 
+{% if settings.memory_cache_size_mb is not defined %}
+  {% set mem_mb = 10 %}
+  {% if settings.cache_size_mb > 1024 and settings.cache_size_mb < 20480 %}
+    {% set mem_mb = settings.cache_size_mb / 1024 * 10 %}
+  {% elif settings.cache_size_mb > 20480 %}
+    {% set mem_mb = 200 %}
+  {% endif %}
+  {% do settings.update({ 'memory_cache_size_mb': mem_mb }) %}
+{% endif %}
