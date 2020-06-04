@@ -40,7 +40,7 @@ create_http_frontend_maintenance_target_dir:
         uwsgi_param  REMOTE_ADDR        $remote_addr;
         uwsgi_param  REMOTE_PORT        $remote_port;
         # XXX overwrite server_port for uwsgi because we are behind ALPN-Stream Switch
-        uwsgi_param  SERVER_PORT        443;
+        uwsgi_param  SERVER_PORT        {{ settings.https_port }};
         uwsgi_param  SERVER_NAME        $server_name;
         uwsgi_buffers 8 64k;            # Default: 8 4k|8k; 2nd parameter defines max streaming chunk
 
