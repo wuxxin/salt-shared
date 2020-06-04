@@ -48,7 +48,7 @@ trafficserver:
   ('CONFIG', 'proxy.config.exec_thread.autoconfig INT', '0'),
   ('CONFIG', 'proxy.config.exec_thread.limit INT', '4'),
   ('CONFIG', 'proxy.config.hostdb.max_size INT', '8M'),
-  ('CONFIG', 'proxy.config.cache.ram_cache.size INT', str(settings.memory_cache_size_mb) ~ 'M'),
+  ('CONFIG', 'proxy.config.cache.ram_cache.size INT', str(settings.memory_cache_size_mb) ~ 'M')
 ] %}
 
 {% for section,item,value in config_list %}
