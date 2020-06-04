@@ -18,7 +18,8 @@ allowed_hosts: [hostname if empty]
 listen_ip:
   - default-route-ip
 letsencrypt: default true
-client_cert_mandatory: default false, make client cert mandatory if true
+client_cert_verify: default false, true will make optional client certificate verification
+client_cert_mandatory: default false, true will make mandatory client certificate verification
 user: {{ user }}
 cert_dir: {{ user_home }}/ssl
 
@@ -32,7 +33,7 @@ location:
     target: root /var/www/main.domain/
 host:
   - domain: another.domain
-    client_cert_mandatory: true
+    client_cert_verify: true
     location:
       - source: /
         target: root /var/www/another.domain/

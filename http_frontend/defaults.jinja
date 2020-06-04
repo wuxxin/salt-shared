@@ -20,6 +20,7 @@ allowed_hosts: []
 listen_ip:
   - {{ def_route_ip }}
 letsencrypt: true
+client_cert_verify: false
 client_cert_mandatory: false
 user: {{ user }}
 cert_dir: {{ user_home }}/ssl
@@ -69,7 +70,7 @@ location:
     target: root /var/www/main.domain/
 host:
   - domain: another.domain
-    client_cert_mandatory: true
+    client_cert_verify: true
     location:
       - source: /
         target: root /var/www/another.domain/
