@@ -36,7 +36,7 @@ trafficserver:
 #}
 {% set ip_list=[settings.listen_ip,] if settings.listen_ip is string else settings.listen_ip %}
 {% set config_list= [
-  ('LOCAL',  'proxy.local.incoming_ip_to_bind STRING', ip_list.join(' ')),
+  ('LOCAL',  'proxy.local.incoming_ip_to_bind STRING', ip_list|join(' ')),
   ('CONFIG', 'proxy.config.http.server_ports STRING', settings.listen_port),
   ('CONFIG', 'proxy.config.http.cache.http INT', '1'),
   ('CONFIG', 'proxy.config.url_remap.remap_required INT' , '0'),
