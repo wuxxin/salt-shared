@@ -1,6 +1,11 @@
 {% load_yaml as defaults %}
-listen_ip:
-  - localhost
+additional_adresses: []
+# list of additional allowed ip network ranges to listen and answer to queries after auth
+# example:
+#   - listen: 1.2.3.4
+#     answer: 1.2.3.0/24
+#   - listen: 2.3.4.9
+#     answer: 2.3.5.9/32
 
 extensions:
   - pg_stat_statements

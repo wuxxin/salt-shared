@@ -22,7 +22,6 @@ postgresql:
     - pkgs:
       - postgresql
       - postgresql-{{ settings.pgmajor }}
-      - postgresql-contrib
   service.running:
     - enable: true
     - require:
@@ -32,21 +31,29 @@ postgresql:
       - file: /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf
       - file: /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf
 
+{% set ns = namespace(listen = ['localhost']] %}
+
+{% if settings.additional_adresses %}
+  {% for addr in settings.additional_adresses  %}
+    {% set new_listen = ns.listen+ ','+ addr.listen %}
+    {% set ns.listen = new_listen %}
+  {% endfor %}
+
+  {% for listen_answer in settings.additional_adresses %}
 /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf:
   file.replace:
     - pattern: |
-        ^host.*{{ settings.bridge_cidr }}.*
+        ^host.*{{ listen_answer.listen }}.*
     - repl: |
-        host    all             app             {{ settings.bridge_cidr }}          md5
+        host    all             all             {{ listen_answer.answer|d(listen_answer.listen~"/32") }}          md5
     - append_if_not_found: true
     - require:
       - pkg: postgresql
+  {% endfor %}
+{%- endif %}
 
-{% for p,r in [
-  ("listen_addresses",
-      "listen_addresses = 'localhost,"+ settings.bridge_cidr|regex_replace('([^/]+)/.+', '\\1')+ "'"),
-  ] %}
-
+{% set p="listen_addresses" %}
+{% set r="listen_addresses = '" ~ ns.listen ~ "'" %}
 /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf_{{ p }}:
   file.replace:
     - name: /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf
@@ -61,7 +68,6 @@ postgresql:
       - service: postgresql
     - require_in:
       - service: postgresql
-{% endfor %}
 
 {% for extension in settings.extensions %}
 {{ extension }}_postgresql_extension:
