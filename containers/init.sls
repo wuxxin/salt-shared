@@ -1,4 +1,4 @@
-{% from "podman/defaults.jinja" import settings with context %}
+{% from "containers/defaults.jinja" import settings with context %}
 
 include:
   - ubuntu
@@ -11,12 +11,34 @@ include:
 {% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 "'+
   baseurl+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
 
-/etc/containers/libpod.conf:
-  file.managed:
-    - contents: |
-        runtime = "{{ settings.runtime }}"
+/etc/containers:
+  file:
+    - directory
+  cmd.run:
+    - name: rm /etc/containers/containers.conf && cp /usr/share/containers/containers.conf /etc/containers/containers.conf
+    - onlyif: test -L /etc/containers/containers.conf
+    - require:
+      - file: /etc/containers
 
-{# /etc/cni/net.d/87-podman-bridge.conflist #}
+/etc/containers/containers.conf:
+  file.serialize:
+    - dataset:
+        engine: {{ settings.engine }}
+    - formatter: toml
+    - merge_if_exists: True
+    - require:
+      - file: /etc/containers
+      - cmd: /etc/containers
+
+/etc/containers/storage.conf:
+  file.serialize:
+    - dataset:
+        storage: {{ settings.storage }}
+    - formatter: toml
+    - merge_if_exists: True
+    - require:
+      - file: /etc/containers
+      - cmd: /etc/containers
 
 /etc/containers/mounts.conf:
   file.managed:
@@ -27,38 +49,15 @@ include:
         {{ mount }}
     {%- endfor %}
   {%- endif %}
+    - require:
+      - file: /etc/containers
 
 /etc/containers/policy.json:
   file.managed:
     - contents: |
 {{ settings.policy|indent(8,True) }}
-
-
-/etc/containers/storage.conf:
-  file.managed:
-    - contents: |
-        [storage]
-  {%- for key,value in settings.storage.items() %}
-    {%- if key != 'options' %}
-        {{ key }} = "{{ value }}"
-    {%- endif %}
-  {%- endfor %}
-        [storage.options]
-  {%- if settings.storage.options|d(false) %}
-    {%- for key,value in settings.storage.options.items() %}
-      {%- if value is not mapping %}
-        {{ key }} = "{{ value }}"
-      {%- endif %}
-    {%- endfor %}
-    {%- for key,value in settings.storage.options.items() %}
-      {%- if value is mapping %}
-        [storage.options.{{ key }}]
-        {%- for subkey,subvalue in value.items() %}
-        {{ subkey }} = "{{ subvalue }}"
-        {%- endfor %}
-      {%- endif %}
-    {%- endfor %}
-  {%- endif %}
+    - require:
+      - file: /etc/containers
 
 podman:
   pkgrepo.managed:
@@ -74,6 +73,7 @@ podman:
       - podman
       - buildah
       - crun
+      - slirp4netns
       - cri-o-runc
       - cri-tools
       - skopeo

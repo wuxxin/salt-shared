@@ -1,10 +1,14 @@
-
 {% load_yaml as defaults %}
+# part of /etc/containers/containers.conf:[engine]
+engine:
+  # Container Runtime: ["runc", "crun"]
+  # crun: alternative OCI runtime with support for cgroup V2
+  # runtime = "runc"
+  runtime: "crun"
+  # Directory for libpod named volumes. Default:
+  # volume_path = "/var/lib/containers/storage/volumes"
 
-# Container Runtime: ["runc","crun"]
-# crun: alternative OCI runtime with support for cgroup V2
-runtime: "crun"
-
+# part of /etc/containers/storage.conf
 storage:
   # Primary storage driver
   driver: "overlay"
@@ -20,6 +24,7 @@ storage:
     overlay:
       mount_program: "/usr/bin/fuse-overlayfs"
 
+# part of /etc/containers/mounts.conf
 # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
 # one mount per line. For example, a mounts.conf with the line
 # - "/usr/share/secrets:/run/secrets"
@@ -28,6 +33,7 @@ storage:
 # Setting mountpoints allows containers to use the files of the host.
 mounts: []
 
+# /etc/containers/policy.json
 # Policy: Manages which registries you trust as a source of container images based on its location.
 # The location is determined by the transport and the registry host of the image.
 # Using this container image docker://docker.io/library/busybox as an example,
@@ -47,7 +53,6 @@ image:
   tag: None
   build: None
   dockerfile: None
-  insecure_registry: false
 
 container:
   # name: container name, must be set
@@ -74,4 +79,4 @@ container:
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('podman', {})) %}
+  grain='default', default= 'default', merge= salt['pillar.get']('containers', {})) %}

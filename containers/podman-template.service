@@ -24,9 +24,6 @@ ExecStart=podman run \
 {%- for key,value in pod.container.label.items() %}
     --label={{ key }}={{ value }} \
 {%- endfor %}
-{%- for key,value in pod.container.options.items() %}
-    --{{ key }}={{ value }} \
-{%- endfor %}
 {%- for vol in pod.container.volume %}
     --volume={{ vol }} \
 {%- endfor %}

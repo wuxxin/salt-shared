@@ -1,6 +1,6 @@
 
 {% macro podman_container(service_definition) %}
-{%- from "podman/defaults.jinja" import settings, default_service with context %}
+{%- from "containers/defaults.jinja" import settings, default_service with context %}
 {%- set pod= salt['grains.filter_by']({'default': default_service},
   grain='default', default= 'default', merge=service_definition) %}
 
@@ -19,7 +19,7 @@ update_image_{{ pod.image.name }}:
 
 {{ pod.container.name }}.service:
   file.managed:
-    - source: salt://podman/container-template.service
+    - source: salt://containers/podman/podman-template.service
     - name: /etc/systemd/system/{{ pod.container.name }}.service
     - template: jinja
     - defaults:
@@ -33,4 +33,14 @@ update_image_{{ pod.image.name }}:
     - enable: true
     - require:
       - cmd: {{ pod.container.name }}.service
+{% endmacro %}
+
+
+{% macro storage_volume(name, labels=[], driver='local', opts=[]) %}
+{%- set labels_string = '' if not labels else '-l ' ~ labels|join(' -l ') %}
+{%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
+containers_volume_{{ name }}:
+  cmd.run:
+    - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }}
+    - unless: podman ls -q | grep -q {{ name }}
 {% endmacro %}
