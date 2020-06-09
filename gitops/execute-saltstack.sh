@@ -212,7 +212,7 @@ EOF
         echo "installing distro buildin saltstack version"
     fi
 
-    DEBIAN_FRONTEND=noninteractive apt-get install -y salt-minion curl gosu git gnupg git-crypt
+    DEBIAN_FRONTEND=noninteractive apt-get install -y salt-minion python3-pytoml curl gosu git gnupg git-crypt
     echo "keep minion from running automatically"
     for i in disable stop mask; do systemctl $i salt-minion; done
 }
