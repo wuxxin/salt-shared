@@ -1,4 +1,3 @@
-
 {% macro podman_container(service_definition) %}
 {%- from "containers/defaults.jinja" import settings, default_service with context %}
 {%- set pod= salt['grains.filter_by']({'default': default_service},
@@ -43,4 +42,8 @@ containers_volume_{{ name }}:
   cmd.run:
     - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }}
     - unless: podman ls -q | grep -q {{ name }}
+{% endmacro %}
+
+{% macro podman_compose(composefile) %}
+
 {% endmacro %}

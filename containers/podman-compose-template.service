@@ -1,0 +1,23 @@
+[Unit]
+Description=Systemd service for podman-compose {{ compose.name }}
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+
+WorkingDirectory=%h/work/tracking
+EnvironmentFile=%h/work/tracking/.env
+
+{%- if compose.update %}
+  {%- if compose.build %}
+ExecStartPre=podman-compose build
+  {%- else %}
+ExecStartPre=podman-compose pull
+  {%- endif %}
+{%- endif %}
+ExecStart=podman-compose up --abort-on-container-exit
+ExecStop=podman-compose down
+
+[Install]
+WantedBy=default.target
