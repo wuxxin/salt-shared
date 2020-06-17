@@ -1,4 +1,4 @@
-{% from "locale/defaults.jinja" import settings with context %}
+{% from "old/locale/defaults.jinja" import settings with context %}
 
 /etc/default/locale:
   file.managed:
