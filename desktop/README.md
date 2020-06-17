@@ -17,7 +17,7 @@ Installs and configures features usually wanted for a working desktop
 
 * voice: mumble, linphone, skype (if enabled)
 * chat: riot, signal, optional: pidgin
-* video: mpv, vlc, gstreamer and codecs
+* video: vlc, gstreamer and codecs
 * security:
     * tor browser bundle
     * keychain/keyring support packages
@@ -27,7 +27,7 @@ Installs and configures features usually wanted for a working desktop
 * browser:
     * firefox, chromium browser
 
-* electronic signing: 
+* electronic signing:
     * jre, Java Webstart (icedtea-netx), chipcard daemon
 
 * ubuntu:
@@ -35,7 +35,7 @@ Installs and configures features usually wanted for a working desktop
 
 * optional:
     * emulation:games: Arcade, PS2, Nintendo64 Emulator
- 
+
 ## Development Features
 
 needs desktop:development:enabled: true
@@ -43,7 +43,7 @@ needs desktop:development:enabled: true
 * editor: atom
 * revision control systems & tools
     * git-crypt, homeshick
-* python development 
+* python development
 * python sci-py distribution
 * android: tools
 * emulation:
@@ -60,4 +60,3 @@ needs desktop:development:enabled: true
 desktop:
   development:enabled: true    # installs developer packages
 vagrant.virtualbox: true       # installs virtualbox if desktop.development
-  

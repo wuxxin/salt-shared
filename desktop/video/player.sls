@@ -13,7 +13,6 @@ video-player:
 {%- else %}
       - vlc-bin
 {%- endif %}
-      - mpv {# replaces mplayer #}
     - require:
       - sls: desktop.video.base
 
