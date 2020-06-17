@@ -47,45 +47,39 @@ policy: |
 {% endload %}
 
 {% load_yaml as default_service %}
-image:
-  name: None
-  tag: None
-  build: None
-  dockerfile: None
+# container name
+container_name: None
 
-container:
-  # name: container name, must be set
-  name: None
+# name of the container image: x/y[:z]
+image: None
+# optional tag, will be appended to image and on build
+tag: None
+# optional build path
+build: None
 
-  # update: if set true: container image will be pulled/build on start
-  update: true
-  # ephemeral: if set true, container will be removed on stop
-  ephemeral: false
+# environment: dict: {key: value,} add environment data
+environment: {}
+# label: dict: {key: value,} add label to container
+labels: {}
+# volume: list: - [source-volume|host-dir:]container-dir[:options]
+volumes: []
+# ports: list
+ports: []
 
-  # command: if set, will replace default command
-  command: None
-  # args: if set, will add args for command, command must also be set
-  args: ""
+# update: if set true: container image will be pulled/build on start
+update: true
+# ephemeral: if set true, container will be removed on stop
+ephemeral: false
 
-  # env: dict: {key: value,} add environment data
-  env: {}
-  # label: dict: {key: value,} add label to container
-  label: {}
-  # volume: list: - [source-volume|host-dir:]container-dir[:options]
-  volume: []
+# command: if set, will replace default command
+command: None
+# args: if set, will add args for command, command must also be set
+args: ""
 
-  # options: dict: {key: value,} container options parameter for podman run
-  options: {}
+# options: dict: {key: value,} container options parameter for podman run
+options: {}
 {% endload %}
 
-{#
-# replace: If True, and if the named container already exists, this will remove the existing container.
-replace: false
-# force: If True, and the named container already exists, and replace is also set to True, then the container will be forcibly removed.
-force: false
-# start: if False,  to suppress starting of the container if it exists, matches the desired configuration, but is not running
-start: true
-#}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('containers', {})) %}

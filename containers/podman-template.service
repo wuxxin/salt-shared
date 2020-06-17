@@ -1,42 +1,42 @@
 [Unit]
-Description=Systemd service for podman container {{ pod.container.name }}
+Description=Systemd service for podman container {{ pod.container_name }}
 After=network-online.target
 
 [Service]
 Restart=always
 
-{%- if pod.container.update %}
-  {%- if pod.image.build %}
-ExecStartPre=podman build {{ pod.image.build }} {{ "--tag="+ pod.image.tag if pod.image.tag }}
+{%- if pod.update %}
+  {%- if pod.build %}
+ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
   {%- else %}
-ExecStartPre=podman pull {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
+ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
   {%- endif %}
 {%- endif %}
 
 ExecStart=podman run \
-{%- for key,value in pod.container.options.items() %}
+{%- for key,value in pod.options.items() %}
     --{{ key }}={{ value }} \
 {%- endfor %}
-    --name={{ pod.container.name }} \
-{%- for key,value in pod.container.env.items() %}
+    --name={{ pod.container_name }} \
+{%- for key,value in pod.environment.items() %}
     --env={{ key }}={{ value }} \
 {%- endfor %}
-{%- for key,value in pod.container.label.items() %}
+{%- for key,value in pod.labels.items() %}
     --label={{ key }}={{ value }} \
 {%- endfor %}
-{%- for vol in pod.container.volume %}
+{%- for vol in pod.volumes %}
     --volume={{ vol }} \
 {%- endfor %}
-{%- if pod.container.command %}
-    {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }} \
-    {{ pod.container.command }} {{ pod.container.args }}
+{%- if pod.command %}
+    {{ pod.cont_name }}{{ ":"+ pod.tag if pod.tag }} \
+    {{ pod.command }} {{ pod.args }}
 {%- else %}
-    {{ pod.image.name }}{{ ":"+ pod.image.tag if pod.image.tag }}
+    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
 {%- endif %}
 
-ExecStop=podman stop {{ pod.container.name }}
-{%- if pod.container.ephemeral %}
-ExecStopPost=podman rm -f {{ pod.container.name }}
+ExecStop=podman stop {{ pod.container_name }}
+{%- if pod.ephemeral %}
+ExecStopPost=podman rm -f {{ pod.container_name }}
 {%- endif %}
 
 [Install]
