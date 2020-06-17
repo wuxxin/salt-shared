@@ -11,7 +11,7 @@ cgroup:
 
 {% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
 
-{# enable cgroup v2 only hierachy, needs kernel restart #}
+{# it's 2020, enable cgroup v2 only hierachy, needs kernel restart #}
 cgroup-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/cgroup.cfg
