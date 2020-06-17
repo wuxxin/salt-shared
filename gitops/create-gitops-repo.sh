@@ -94,14 +94,15 @@ git-crypt add-gpg-user $gitgpguser
 # create machine gpg id files
 gpgutils.py gen_keypair gitops@node "$gitreponame" config/gitops@node-secret-key.gpg config/gitops@node-public-key.gpg
 # add machine gpg id files to git-crypt
-fixme add machine gpg id files to git-crypt
+gpg  --import config/gitops@node-public-key.gpg
+git-crypt git-crypt add-gpg-user --trusted "$gitreponame"
 git add .
 git commit -v -m "add git-crypt config"
 
 
 # add known_hosts and machine ssh id
 ssh-keyscan -H -p $gitserver_sshport $gitserver > config/gitops.known_hosts
-ssh-keygen -q -t ed25519 -N "$gitreponame" -f config/gitops.id_ed25519
+ssh-keygen -q -t ed25519 -N "" -C "$gitreponame" -f config/gitops.id_ed25519
 git add .
 git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
 
