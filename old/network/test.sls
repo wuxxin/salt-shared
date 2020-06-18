@@ -3,7 +3,7 @@
 {% set routes = salt['pillar.get']('network:routes', {}) %}
 {% set groups = salt['pillar.get']('network:groups', {}) %}
 
-{% from "network/lib.sls" import net_list, net_addr, net_short, net_addr_cidr, net_broadcast, net_reverse, net_reverse_short, net_calc with context %}
+{% from "old/network/lib.sls" import net_list, net_addr, net_short, net_addr_cidr, net_broadcast, net_reverse, net_reverse_short, net_calc with context %}
 
 {% set a=[] %}
 {% set b=[] %}
@@ -25,7 +25,7 @@
 
 
 {% load_yaml as defaults %}
-cache_serve_to: 
+cache_serve_to:
 {%- for n in net_list('masquerade', 'net_short')|load_yaml %}
   - "{{ n }}"
 {%- endfor %}
@@ -41,7 +41,7 @@ ip_routes:
 {%- endfor %}
 apt-cacher-ng:
   bind_address: "{{ net_list('masquerade', 'interface_ip')|load_yaml|join(' ') }}"
-default: 
+default:
   ip_address: "{{ net_addr(interfaces['isobr0']) }}"
   netmask: "{{ interfaces['isobr0'].netmask }}"
   range_start: "{{ net_calc(interfaces['isobr0'], 2) }}"
@@ -53,4 +53,3 @@ default:
   file.managed:
     - contents: |
 {{ defaults|yaml(false)|indent(8, true) }}
-

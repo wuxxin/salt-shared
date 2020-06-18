@@ -1,5 +1,5 @@
-{% from "roles/dokku/lib.sls" import dokku_checkout, dokku_files, dokku_pre_commit, dokku_git_commit, dokku_git_add_remote with context %}
-{% from "roles/dokku/defaults.jinja" import settings as s with context %}
+{% from "old/roles/dokku/lib.sls" import dokku_checkout, dokku_files, dokku_pre_commit, dokku_git_commit, dokku_git_add_remote with context %}
+{% from "old/roles/dokku/defaults.jinja" import settings as s with context %}
 {% import_yaml s.templates.source+ "/"+ pillar['name']+ "/dokku.yml" as data with context %}
 
 {{ dokku_checkout(pillar['name'], data) }}

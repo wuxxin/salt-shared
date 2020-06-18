@@ -70,7 +70,7 @@ done
 mkdir -p /etc/salt
 echo "{{ hostname }}.{{ domainname }}" > /etc/salt/minion_id
 
-# local call state.sls haveged,network, roles.salt.master
+# local call state.sls haveged,network, old.roles.salt.master
 # (entropy daemon, network, re/install salt.master, add dnscache)
 salt-call --local --config-dir={{ targetdir }} state.sls haveged,network,roles.salt.master,roles.tinydns
 

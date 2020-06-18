@@ -135,7 +135,7 @@ copy_crypted_secret:
 generate_bootstrap_{{ source }}:
   file.managed:
     - name: {{ make_targetdir }}/{{ target }}
-    - source: salt://roles/salt/files/{{ source }}
+    - source: salt://old/roles/salt/files/{{ source }}
     - mode: 700
     - template: jinja
     - context:

@@ -1,7 +1,7 @@
 include:
   - .master
 
-{% from "roles/salt/defaults.jinja" import settings as s with context %}
+{% from "old/roles/salt/defaults.jinja" import settings as s with context %}
 {% set reactor_dict={} %}
 {% for part in s.master.reactor.includes|d({}) %}
   {% import_yaml part+"/reactor/reactor.conf" as single_reactor %}
@@ -10,7 +10,7 @@ include:
 
 /etc/salt/master.d/reactor.conf:
   file.managed:
-    - source: salt://roles/salt/files/reactor.conf
+    - source: salt://old/roles/salt/files/reactor.conf
     - template: jinja
     - context: 
         reactor: {{ reactor_dict }}

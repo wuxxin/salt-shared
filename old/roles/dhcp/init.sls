@@ -12,7 +12,7 @@ dhcp-server:
 
 /etc/dhcp/dhcpd.conf:
   file.managed:
-    - source: {{ pillar.dhcp_server.data|default('salt://roles/dhcp/dhcpd.conf') }}
+    - source: {{ pillar.dhcp_server.data|default('salt://old/roles/dhcp/dhcpd.conf') }}
     - template: jinja
     - mode: 644
     - watch_in:

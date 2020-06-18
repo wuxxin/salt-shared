@@ -1,4 +1,4 @@
-{% from "roles/salt/defaults.jinja" import settings as s with context %}
+{% from "old/roles/salt/defaults.jinja" import settings as s with context %}
 {% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt') %}
 {% set leave_alone= true %}
 {% else %}

@@ -1,8 +1,8 @@
-{% from "roles/dokku/defaults.jinja" import settings as s with context %}
+{% from "old/roles/dokku/defaults.jinja" import settings as s with context %}
 include:
   - .ppa
-  - nginx
-  - roles.docker
+  - old.nginx
+  - old.roles.docker
 
 {# fixme: dokku storage relocate makes quirks #}
 {# fixme: dokku installer gets stuck as process on install #}
@@ -19,7 +19,7 @@ dokku_ppa:
   pkgrepo.managed:
     - name: deb http://packagecloud.io/dokku/dokku/ubuntu/ {{ grains['oscodename'] }} main
     - file: /etc/apt/sources.list.d/dokku_ppa.list
-    - key_url: salt://roles/dokku/packagecloud.gpg.key
+    - key_url: salt://old/roles/dokku/packagecloud.gpg.key
     - require_in:
       - pkg: dokku
 {% endif %}
@@ -39,8 +39,8 @@ dokku:
 {% if grains['os'] == 'Ubuntu' %}
       - pkgrepo: dokku_ppa
 {% endif %}
-      - sls: roles.docker
-      - sls: nginx
+      - sls: old.roles.docker
+      - sls: old.nginx
 
 dokku_core_dependencies:
   cmd.wait:

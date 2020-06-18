@@ -1,4 +1,4 @@
-{% from "roles/salt/defaults.jinja" import settings as s with context %}
+{% from "old/roles/salt/defaults.jinja" import settings as s with context %}
 
 {{ s.master.extensions.base }}:
   file.directory:

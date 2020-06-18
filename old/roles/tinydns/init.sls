@@ -24,7 +24,7 @@ create_etc_sv:
 populate_etc_sv:
   file.recurse:
     - name: /etc/sv
-    - source: salt://roles/tinydns/sv
+    - source: salt://old/roles/tinydns/sv
     - template: jinja
     - defaults:
         dnscache_ip: {{ salt['network.ip_addrs']()[0] }}
@@ -64,7 +64,7 @@ populate_etc_sv:
 
 /etc/sv/tinydns/root/data:
   file.managed:
-    - source: {{ "%s" % pillar.tinydns_server.internal_data if pillar.tinydns_server.internal_data else 'salt://roles/tinydns/localhost' }}
+    - source: {{ "%s" % pillar.tinydns_server.internal_data if pillar.tinydns_server.internal_data else 'salt://old/roles/tinydns/localhost' }}
     - require:
       - file: populate_etc_sv
 
@@ -89,7 +89,7 @@ create_seed:
 
 /etc/sv/axfrdns/tcp:
   file.managed:
-    - source: salt://roles/tinydns/axfr_permissions
+    - source: salt://old/roles/tinydns/axfr_permissions
     - template: jinja
     - context:
       permissions: {{ pillar.tinydns_server.axfr_permissions|d(None) }}
@@ -146,7 +146,7 @@ axfrdns_export:
 {% for n,s in dnscache_follow.iteritems() %}
 /etc/sv/dnscache/root/servers/{{ n }}:
   file.managed:
-    - source: salt://roles/tinydns/dnsfollow
+    - source: salt://old/roles/tinydns/dnsfollow
     - template: jinja
     - context:
         ip: {{ "%s" % s if s != '' else '127.0.0.1' }}

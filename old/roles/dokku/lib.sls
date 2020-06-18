@@ -1,4 +1,4 @@
-{% from "roles/dokku/defaults.jinja" import settings as s with context %}
+{% from "old/roles/dokku/defaults.jinja" import settings as s with context %}
 
 
 {% macro dokku(command, param1, param2=None) %}
@@ -299,7 +299,7 @@ files:
   comment:
     .gitignore: ^(config/site.yml)|(config/database.yml)
   templates:
-    /config/site.yml: "salt://roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
+    /config/site.yml: "salt://old/roles/imgbuilder/extra/dokku-definitions/tracks/site.yml"
 #}
 
 {% if data['files']['content'] is defined %}

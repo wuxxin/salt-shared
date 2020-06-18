@@ -1,4 +1,4 @@
-{% from "roles/salt/defaults.jinja" import settings as s with context %}
+{% from "old/roles/salt/defaults.jinja" import settings as s with context %}
 {% if s.install.type is defined and s.install.type == 'git' and salt.cmd.run('which salt-call') %}
   {# we do not intervene if salt is installed from git #}
   {% set leave_alone= true %}
@@ -6,7 +6,7 @@
 create_usr_local_{{ source }}:
   file.managed:
     - name: /usr/local/sbin/{{ source }}
-    - source: salt://roles/salt/files/{{ source }}
+    - source: salt://old/roles/salt/files/{{ source }}
     - mode: 700
   {% endfor %}
 {% else %}

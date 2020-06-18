@@ -41,7 +41,7 @@ shorewall:
   {%- for name in shorewall_parts %}
 /etc/shorewall/{{ name }}:
   file.managed:
-    - source: salt://shorewall/files/{{ name }}
+    - source: salt://old/shorewall/files/{{ name }}
     - template: jinja
     - context:
       shorewall: {{ pillar.shorewall }}

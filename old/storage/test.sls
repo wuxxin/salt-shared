@@ -1,4 +1,4 @@
-{% from 'storage/lib.sls' import storage_setup %}
+{% from 'old/storage/lib.sls' import storage_setup %}
 
 test:
   test:
@@ -18,7 +18,7 @@ in_another:
 parted:
 {% for a in ["/dev/vdb", "/dev/vdc"] %}
   - device: {{ a }}
-    type: gpt 
+    type: gpt
     parts:
       - name: bios_grub
         start: 1024kiB
@@ -84,9 +84,9 @@ lvm:
     - name: other_volume
       vgname: vg0
       size: 30g
-      expand: true 
+      expand: true
       # no optional kwargs are passed, volume must exist, volume is resized
-      
+
 format:
   - device: /dev/md0
     fstype: ext3
