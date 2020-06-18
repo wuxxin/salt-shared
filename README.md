@@ -41,9 +41,9 @@ some states have a documentation README.md
         * [vagrant](vagrant): vagrant virtual machine manager
 
     * Container Management
-        * [docker](docker): Docker Containers and Container Images Runtime
-        * [podman](podman): Open Containers Initiative (OCI) Containers and Container Images Runtime
+        * [containers](containers): (OCI) Containers and Container Images Runtime including podman
         * [k3s](k3s): small footprint Kubernetes Distribution
+        * [docker](docker): Legacy Docker Containers and Container Images Runtime
 
     * Language Support
         * [python](python)
