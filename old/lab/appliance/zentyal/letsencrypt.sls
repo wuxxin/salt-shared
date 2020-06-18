@@ -1,6 +1,6 @@
 include:
   - dehydrated
-  - lab.appliance.zentyal.base
+  - old.lab.appliance.zentyal.base
 
 {% from "dehydrated/defaults.jinja" import letsencrypt with context %}
 {% set firstdomain = letsencrypt.domains[0].split(' ')[0] %}
@@ -8,21 +8,21 @@ include:
 zentyal-dehydrated-hook:
   file.managed:
     - name: /usr/local/etc/dehydrated/zentyal-dehydrated-hook.sh
-    - source: salt://lab/appliance/zentyal/files/letsencrypt/zentyal-dehydrated-hook.sh
+    - source: salt://old/lab/appliance/zentyal/files/letsencrypt/zentyal-dehydrated-hook.sh
     - mode: "0755"
     - require:
       - sls: dehydrated
-      - sls: lab.appliance.zentyal.base
+      - sls: old.lab.appliance.zentyal.base
 
 /app/etc/hooks/appliance-update/check/zentyal-letsencrypt.sh:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/letsencrypt/check-zentyal-letsencrypt.sh
+    - source: salt://old/lab/appliance/zentyal/files/letsencrypt/check-zentyal-letsencrypt.sh
     - makedirs: true
     - mode: "0755"
 
 /app/etc/hooks/appliance-update/update/zentyal-letsencrypt:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/letsencrypt/update-zentyal-letsencrypt.sh
+    - source: salt://old/lab/appliance/zentyal/files/letsencrypt/update-zentyal-letsencrypt.sh
     - makedirs: true
     - mode: "0755"
 
@@ -30,7 +30,7 @@ zentyal-dehydrated-hook:
 /usr/local/sbin/{{ i }}:
   file.managed:
     - mode: "0755"
-    - source: salt://lab/appliance/zentyal/files/letsencrypt/{{ i }}
+    - source: salt://old/lab/appliance/zentyal/files/letsencrypt/{{ i }}
 {% endfor %}
 
 /etc/sudoers.d/dehydrated_newcert:
@@ -49,7 +49,7 @@ zentyal-apache-restart-wellknown:
       - file: /etc/apache2/conf-available/10-wellknown-acme.conf
     - require:
       - sls: dehydrated
-      - sls: lab.appliance.zentyal.base
+      - sls: old.lab.appliance.zentyal.base
 
 dhparam-creation:
   cmd.run:

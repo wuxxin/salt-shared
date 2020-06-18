@@ -1,7 +1,7 @@
-{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+{% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  -  lab.appliance.zentyal.base
+  -  old.lab.appliance.zentyal.base
 
 opendkim:
   pkg.installed:
@@ -9,7 +9,7 @@ opendkim:
       - opendkim
       - opendkim-tools  
     - require:
-      - sls: lab.appliance.zentyal.base
+      - sls: old.lab.appliance.zentyal.base
 
 {%- set dkimkey= settings.dkim.key or salt['cmd.run_stdout']('openssl genrsa 2048') %}
 /etc/dkimkeys/dkim.key:
@@ -27,7 +27,7 @@ opendkim:
 {%- set basedomain = match[0] %}
 /etc/opendkim.conf:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/opendkim.conf
+    - source: salt://old/lab/appliance/zentyal/files/opendkim.conf
     - template: jinja
     - defaults:
         domain: {{ basedomain }}

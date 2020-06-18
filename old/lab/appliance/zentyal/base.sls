@@ -1,4 +1,4 @@
-{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+{% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
   - ubuntu
@@ -22,7 +22,7 @@ zentyal-admin-user:
   'samba/smb.conf.mas', 'samba/shares.conf.mas'] %}
 /etc/zentyal/stubs/{{ n }}:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/stubs/{{ n }}
+    - source: salt://old/lab/appliance/zentyal/files/stubs/{{ n }}
     - makedirs: true
 {% endfor %}
 
@@ -30,7 +30,7 @@ zentyal-admin-user:
 {% for n in ['webadmin', 'mail', 'sogo'] %}
 /etc/zentyal/hooks/{{ n }}.postsetconf:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
+    - source: salt://old/lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
     - template: jinja
     - defaults: 
         settings: {{ settings }}
@@ -113,7 +113,7 @@ sogo-tmpreaper:
 {# ### helper to convert mbox to maildir #}
 /usr/local/bin/mb2md.pl:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/mb2md.pl
+    - source: salt://old/lab/appliance/zentyal/files/mb2md.pl
     - mode: "0755"
 
 {# ### helper to preseed zentyal redis config #}

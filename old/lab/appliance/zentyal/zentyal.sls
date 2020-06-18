@@ -1,7 +1,7 @@
-{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+{% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - lab.appliance.zentyal.base
+  - old.lab.appliance.zentyal.base
   - systemd.reload
 
 {# ### install zentyal packages #}
@@ -9,7 +9,7 @@ zentyal:
   pkgrepo.managed:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
     - file: /etc/apt/sources.list.d/zentyal-xenial.list
-    - key_url: salt://lab/appliance/zentyal/files/zentyal-5.1-archive.asc
+    - key_url: salt://old/lab/appliance/zentyal/files/zentyal-5.1-archive.asc
     - require:
       - pkg: ppa_ubuntu_installer
     - require_in:
@@ -32,14 +32,14 @@ zentyal:
 {%- endfor %}
 {%- endif %}
     - require:
-      - sls: lab.appliance.zentyal.base
+      - sls: old.lab.appliance.zentyal.base
 
 
 {# XXX workaround for samba AD needing ext_attr security support not available in an lxc/lxd unprivileged container, this will get overwritten on pkg python-samba update #}
 patch-ntacls.py:
   file.managed:
     - name: /usr/lib/python2.7/dist-packages/samba/ntacls.py
-    - source: salt://lab/appliance/zentyal/files/ntacls.py
+    - source: salt://old/lab/appliance/zentyal/files/ntacls.py
     - makedirs: true
   cmd.run:
     - name: rm /usr/lib/python2.7/dist-packages/samba/ntacls.pyc; python2 -c "import compileall; compileall.compile_file('/usr/lib/python2.7/dist-packages/samba/ntacls.py')"
@@ -59,7 +59,7 @@ mask-system-nginx:
 {# XXX activate needed apache modules, so apache is config is valid, and service is available for letsencrypt #}
 /etc/apache2/mods-available/ssl.conf:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/ssl.conf
+    - source: salt://old/lab/appliance/zentyal/files/ssl.conf
     - require_in:
       - file: zentyal-apache-enable-ssl.conf
  
@@ -180,7 +180,7 @@ bind9-disable-resolvconf-addition:
 {# XXX write out a customized zentyal redis config setter #}
 /usr/local/sbin/prepare-zentyal-config.sh:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/prepare-zentyal-config.sh
+    - source: salt://old/lab/appliance/zentyal/files/prepare-zentyal-config.sh
     - template: jinja
     - defaults:
         fqdn: {{ settings.domain }}

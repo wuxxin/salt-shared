@@ -1,4 +1,4 @@
-{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+{% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 
 {% if settings.sync|d(false) %}
@@ -45,7 +45,7 @@ create_zentyal_user_{{ name }}:
 
   {% endfor %}
 #     - require_in:
-#      - sls: lab.appliance.zentyal.zentyal
-#      - sls: lab.appliance.zentyal.storage
+#      - sls: old.lab.appliance.zentyal.zentyal
+#      - sls: old.lab.appliance.zentyal.storage
 
 {% endif %}

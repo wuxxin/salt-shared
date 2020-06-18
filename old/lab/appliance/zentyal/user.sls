@@ -1,15 +1,15 @@
-{% from "lab/appliance/zentyal/defaults.jinja" import settings with context %}
+{% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - lab.appliance.zentyal.zentyal
+  - old.lab.appliance.zentyal.zentyal
   
 {% for f in ['create_zentyal_user.pl', 'list_zentyal_users.pl'] %}
 /usr/local/sbin/{{ f }}:
   file.managed:
-    - source: salt://lab/appliance/zentyal/files/{{ f }}
+    - source: salt://old/lab/appliance/zentyal/files/{{ f }}
     - mode: "0755"
     - require:
-      - sls: lab.appliance.zentyal.zentyal
+      - sls: old.lab.appliance.zentyal.zentyal
 {% endfor %}
 
 
@@ -32,7 +32,7 @@ https://github.com/OfflineIMAP/offlineimap/issues?q=is%3Aissue+is%3Aopen+label%3
         users: {{ settings.user }}
     - require:
       - pip: offlineimap
-      - sls: lab.appliance.zentyal.zentyal
+      - sls: old.lab.appliance.zentyal.zentyal
 
 /home/{{ settings.admin.user }}/.offlineimap/{{ settings.sync.functions.name }}:
   file.managed:
@@ -44,6 +44,6 @@ https://github.com/OfflineIMAP/offlineimap/issues?q=is%3Aissue+is%3Aopen+label%3
     - makedirs: true
     - require:
       - pip: offlineimap
-      - sls: lab.appliance.zentyal.zentyal
+      - sls: old.lab.appliance.zentyal.zentyal
 
 {% endif %}

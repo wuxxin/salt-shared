@@ -1,5 +1,5 @@
 include:
-  - lab.appliance.zentyal.zentyal
+  - old.lab.appliance.zentyal.zentyal
   
 {% from 'storage/lib.sls' import storage_setup %}
 
