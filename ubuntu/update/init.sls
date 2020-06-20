@@ -1,4 +1,4 @@
-{% from "ubuntu/update/defaults.jinja" import settings with context %}
+{% from "ubuntu/defaults.jinja" import settings with context %}
 
 {% for i in ['20auto-upgrades', '50unattended-upgrades',] %}
 /etc/apt/apt.conf.d/{{ i }}.ucf-dist:

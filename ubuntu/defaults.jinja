@@ -1,0 +1,24 @@
+{% load_yaml as defaults %}
+bionic:
+  desktop:
+    xserver: xserver-xorg-hwe-18.04
+    xwayland: xwayland-hwe-18.04
+  update:
+    automatic_reboot: true
+    allowed_origins: []
+  reporting: false
+  snapd: false
+generic:
+  desktop:
+    xserver: xserver-xorg
+    xwayland: xwayland
+  update:
+    automatic_reboot: true
+    allowed_origins: []
+  reporting: false
+  snapd: false
+{% endload %}
+
+{% set settings = salt['grains.filter_by'](defaults,
+  grain= 'lsb_distrib_codename', default= 'generic',
+  merge= salt['pillar.get']('ubuntu', {})) %}

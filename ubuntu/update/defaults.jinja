@@ -1,7 +1,0 @@
-{% load_yaml as defaults %}
-automatic_reboot: true
-allowed_origins: []
-{% endload %}
-
-{% set settings=salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('ubuntu:update', {})) %}
