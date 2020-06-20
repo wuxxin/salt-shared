@@ -8,7 +8,7 @@ upstream:
 virtualbox: false
 plugins:
   - vagrant-libvirt
-  - vagrant-lxd
+  - vagrant-lxc
 {% endload %}
 
 {#
@@ -29,6 +29,10 @@ vagrant-libvirt:
     - libvirt
     - nfs.common
     - nfs.server
+
+vagrant-lxc:
+  sls:
+    - lxc
 
 vagrant-lxd:
   sls:
