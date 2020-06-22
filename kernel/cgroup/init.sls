@@ -1,13 +1,7 @@
 cgroup:
   pkg.installed:
     - pkgs:
-      - cgroup-lite
-      {% if grains['osfullname'] == 'ubuntu' and
-        grains['osrelease_info'][0] < 16 %}
-      - cgroup-bin
-      {% else %}
       - cgroup-tools
-      {% endif %}
 
 {% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
 

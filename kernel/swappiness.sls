@@ -4,8 +4,6 @@
 # swappiness=10: Less aggressive swap than the default of 60
 # swappiness=100: aggressively swap processes out of physical memory
 
-# General: use swappiness=10 for less aggresive swappiness
-
 # while using KVM and other full virtualization: swappiness=1
 # rationale: memory is given to the other domains, so we dont want the host to swap guest memory
 
