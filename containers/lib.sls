@@ -1,11 +1,11 @@
 
-{% macro storage_volume(name, labels=[], driver='local', opts=[]) %}
+{% macro podman_volume(name, labels=[], driver='local', opts=[]) %}
   {%- set labels_string = '' if not labels else '-l ' ~ labels|join(' -l ') %}
   {%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
 containers_volume_{{ name }}:
   cmd.run:
     - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }}
-    - unless: podman ls -q | grep -q {{ name }}
+    - unless: podman volume ls -q | grep -q {{ name }}
 {% endmacro %}
 
 
@@ -14,8 +14,8 @@ containers_volume_{{ name }}:
   {%- set pod= salt['grains.filter_by']({'default': default_service},
     grain='default', default= 'default', merge=service_definition) %}
 
+  {# if not update on every container start, update now on install state #}
   {%- if not pod.container.update %}
-  {# if not update on every container start, update now #}
 update_image_{{ pod.image }}:
   cmd.run:
     {%- if pod.build %}
@@ -24,7 +24,7 @@ update_image_{{ pod.image }}:
     - name: podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
     {%- endif %}
     - require_in:
-      - file: {{ pod.container_name }}.service
+      - file: {{ service_name }}.service
   {%- endif %}
 
 {{ pod.container_name }}.service:
@@ -46,6 +46,22 @@ update_image_{{ pod.image }}:
 {% endmacro %}
 
 
-{% macro podman_compose(composefile) %}
+{% macro podman_compose(service_name, composefile, environment={}) %}
+{{ service_name }}.service:
+  file.managed:
+    - source: salt://containers/podman/podman-compose-template.service
+    - name: /etc/systemd/system/{{ service_name }}.service
+    - template: jinja
+    - defaults:
+        pod: {{ pod }}
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: {{ service_name }}.service
+  service.running:
+    - name: {{ service_name }}.service
+    - enable: true
+    - require:
+      - cmd: {{ service_name }}.service
 
 {% endmacro %}
