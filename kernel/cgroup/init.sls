@@ -5,16 +5,21 @@ cgroup:
 
 {% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
 
-{# it's 2020, enable cgroup v2 only hierachy, needs kernel restart #}
+{# it's 2020, enable cgroup v2 only hierachy #}
 cgroup-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/cgroup.cfg
     - makedirs: true
     - contents: |
-        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX systemd.unified_cgroup_hierarchy=1"
+        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX swapaccount=1 systemd.unified_cgroup_hierarchy=1"
   cmd.wait:
     - name: update-grub
     - watch:
       - file: cgroup-grub-settings
+
+{# allow normal users to run unprivileged containers #}
+kernel.unprivileged_userns_clone:
+  sysctl.present:
+    - value: 1 {# 0 #}
 
 {% endif %}

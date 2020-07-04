@@ -1,10 +1,11 @@
 # swappiness=60 (Default)
-# swappiness=0: Kernel >= 3.5: disables swappiness
-# swappiness=1: Kernel >= 3.5: minimum swappiness without disabling it entirely.
-# swappiness=10: Less aggressive swap than the default of 60
-# swappiness=100: aggressively swap processes out of physical memory
+# swappiness=0: disables swappiness
+# swappiness=1: minimum swappiness without disabling it entirely.
+# swappiness=10: Less swapping than the default of 60
+# swappiness=100: More swapping processes out of physical memory
 
-# while using KVM and other full virtualization: swappiness=1
+# in general, on modern linux kernels with a psi controlled oom daemon, swap mitigates peak load
+# under some cirumstances while using KVM or other virtualization: swappiness=1 may be desired.
 # rationale: memory is given to the other domains, so we dont want the host to swap guest memory
 
 {% set swappiness = salt['pillar.get']('kernel:swappiness', 60) %}

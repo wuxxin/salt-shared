@@ -5,7 +5,8 @@ include:
   - kernel.limits
   - kernel.modules
   - kernel.swappiness
+  - systemd.cgroup-accounting
 
-kernel_big_nop:
+kernel_server_nop:
   test:
     - nop
