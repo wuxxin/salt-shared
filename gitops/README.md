@@ -26,6 +26,8 @@
     + "post_update_command failed with error $result"
     + "finish_update_command failed with error $result"
 
+## snippets
+
 + store sts-report webhoook macro
 
 {%- macro store_sts_report(name) %}

@@ -15,9 +15,9 @@ Usage:  $0 create <reponame> <gitserver> <gituser> <webhook_target> [--output <f
 
 - writes the generated webhook secret to stdout or --output filename
 
-eg. $0  k3s.goof pgit.on.ep3.at wuxxin \
+eg. $0  k3s.goof ssh://pgit.on.ep3.at:10023 wuxxin \
         https://goof.ep3.at/hooks/k3s.goof.update \
-        --ssh-port 10023 > k3s.goof.update.secret.env
+        > k3s.goof.update.secret.env
 EOF
 }
 
