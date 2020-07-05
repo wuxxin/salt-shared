@@ -1,10 +1,11 @@
 # lxd
 
-## security remark: a user with group lxd is equivalent to passwordless sudo
++ snapd: if state ubuntu.desktop/server has been run with defaults snapd will be disabled, lxd install will fail. add "ubuntu:snapd:true" to pillar to enabled snapd.
 
-+ adding a user to group lxd is equivalent (with more work) to a passwordless sudo, aka. root
-+ use sudo or be root while using lxc cmdline utility
-see: https://shenaniganslabs.io/2019/05/21/LXD-LPE.html
++ security: a user with group lxd is equivalent to passwordless sudo
+    + adding a user to group lxd is equivalent (with more work) to a passwordless sudo, aka. root
+    + use sudo or be root while using lxc cmdline utility
+      see: https://shenaniganslabs.io/2019/05/21/LXD-LPE.html
 
 ## Examples
 

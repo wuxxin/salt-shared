@@ -1,6 +1,6 @@
 {% from "lxd/defaults.jinja" import settings with context %}
 
-{# lxd needs same configuration as lxc, therefore depend on lxc #}
+{# lxd is based on lxc #}
 include:
   - lxc
 
@@ -9,10 +9,10 @@ lxd:
     - name: /etc/lxd.yaml
     - contents: |
 {%- for section in ['config', 'storage_pools', 'networks', 'profiles', 'projects', 'images', 'certificates'] %}
-{%- if settings[section]|d(false) %}
+  {%- if settings[section]|d(false) %}
         {{ section }}:
 {{ settings[section]|yaml(false)|indent(10,True) }}
-{% endif %}
+  {% endif %}
 {% endfor %}
   pkg.installed:
     - pkgs:
