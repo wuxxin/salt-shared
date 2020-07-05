@@ -1,0 +1,11 @@
+{% load_yaml as defaults %}
+listen_ip:
+  - localhost
+
+user: []
+database: []
+
+{% endload %}
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('redis', {})) %}
