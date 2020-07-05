@@ -1,0 +1,38 @@
+{% load_yaml as defaults %}
+domain: {{ grains['fqdn'] }}
+allowed_domains: []
+
+aliases:
+  postmaster: root
+
+internal:
+  answer:
+    - {{ salt['network.convert_cidr'](settings.bridge_cidr)['network'] }}
+  listen: []
+
+incoming:
+  enabled: true
+  getmail: []
+
+outgoing:
+  enabled: true
+  relay:
+    enabled: false
+    host:
+    port: 587
+    username:
+    password:
+
+ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+dhparam:
+dkim:
+  enabled: false
+  secret:
+  public:
+
+{% endload %}
+
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('email', {})) %}

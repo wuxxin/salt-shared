@@ -1,0 +1,22 @@
+[Unit]
+Description=Getmail from Imap/Pop3 Service %I
+After=network-online.target
+Wants=network-online.target
+# OnFailure=app-service-failed@%n_%i.service
+
+[Service]
+User={{ settings.user }}
+Group={{ settings.user }}
+Type=simple
+Environment=UNITNAME=%n
+Environment=HOME="{{ settings.home_dir }}"
+Environment=USER="{{ settings.user }}"
+EnvironmentFile={{ settings.common_env }}
+PassEnvironment=UNITNAME HOME USER SENTRY_DSN DOMAIN ALLOWED_HOSTS
+WorkingDirectory={{ settings.home_dir }}
+ExecStart=/usr/bin/getmail --rcfile={{ settings.etc_dir }}/getmail/%i --idle INBOX
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

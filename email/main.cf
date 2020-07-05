@@ -1,0 +1,111 @@
+# use defaults from postfix 3.x
+compatibility_level=2
+myhostname = {{ domain }}
+mydomain = {{ domain }}
+mydestination = $myhostname, localhost
+mynetworks = 127.0.0.0/8 {{ salt['network.convert_cidr'](settings.bridge_cidr)['network'] }}
+
+# only use ipv4, because ipv6 fails under some circumstances
+inet_protocols = ipv4
+smtp_address_preference = ipv4
+
+# ### outgoing mail
+{%- if outgoing_enabled %}
+  {%- if relayhost %}
+# deliver outgoing mail by using a "smartmx" host as relay
+relayhost = [{{ relayhost }}]:{{ relayport }}
+  {%- else %}
+# deliver outgoing mail by directly contacting the target host, dont use a relay
+relayhost =
+  {%- endif %}
+default_transport = smtp
+{%- else %}
+# do not deliver outgoing mail at all
+default_transport = error: outside mail is not deliverable
+{%- endif %}
+
+# ### incoming mail
+smtpd_banner = $myhostname ESMTP $mail_name
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination
+{%- if incoming_enabled %}
+# accept incoming mail from all interfaces
+inet_interfaces = all
+{%- else %}
+# accept incoming mail only from internal interfaces
+inet_interfaces = 127.0.0.1, {{ settings.bridge_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
+{%- endif %}
+
+# enable sasl client auth, but add smtp_sasl_password_maps,
+# so only server listed there will use sasl authentification
+smtp_sasl_auth_enable = yes
+smtp_sasl_tls_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+
+# ### mailboxes and recipient configuration
+# recipient_delimiter = + (default: empty)
+# mailbox_size_limit (default: 51200000)
+# message_size_limit (default: 10240000)
+append_dot_mydomain = yes
+alias_database = hash:/etc/aliases
+biff = no
+
+# ### local delivery
+# pathnames ending in "/" marks path as qmail-style email directory
+# other pathnames are treated as mbox-style email file
+# home_mailbox path is relative to user's home directory
+# resolution order is home_mailbox then mail_spool_directory
+home_mailbox =
+mail_spool_directory = /var/mail/
+
+# ### filter
+# connect postfix with opendkim milter
+milter_default_action = accept
+milter_protocol   = 6
+{%- if dkim_enabled %}
+# use opendkim to sign outgoing mail
+smtpd_milters     = inet:localhost:12345
+non_smtpd_milters = inet:localhost:12345
+{%- else %}
+# do not use opendkim for dkim signing of outgoing mails
+{%- endif %}
+
+# ### TLS
+# 2019-11-08 mixture of:
+# incoming: https://ssl-config.mozilla.org/#server=postfix&server-version=3.3.0&config=intermediate&openssl-version=1.1.1
+# outgoing: https://ssl-config.mozilla.org/#server=postfix&server-version=3.3.0&config=old&openssl-version=1.1.1
+# XXX set different tls incoming and outgoing parameter because
+# postfix will abort sending to some tlsv1 hosts instead of fallback to unencrypted
+# incoming: min TLSv1.2 , tls_medium_cipherlist: Strong PFS ciphers
+# outgoing: min TLSv1 , tls_low_cipherlist: Weaker cipher list
+
+tls_medium_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+
+tls_low_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA
+
+# XXX do not enforce the server cipher preference, because it is only used for
+# incoming connections where postfix uses the medium list, with strong PFS ciphers only
+tls_preempt_cipherlist = no
+
+# TLS Incoming
+smtpd_use_tls = yes
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = yes
+smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_ciphers = medium
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_mandatory_ciphers = medium
+smtpd_tls_loglevel = 1
+
+smtpd_tls_cert_file = {{ settings.etc_dir }}/server.cert.pem
+smtpd_tls_key_file = {{ settings.etc_dir }}/server.key.pem
+# *dh1024_param_file is missleading name, takes >= 1024bit dhparam file
+smtpd_tls_dh1024_param_file = {{ settings.etc_dir }}/dhparam.pem
+
+# TLS Outgoing
+smtp_use_tls=yes
+smtp_tls_security_level = may
+smtp_tls_protocols = !SSLv2, !SSLv3
+smtp_tls_ciphers = low
+smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtp_tls_mandatory_ciphers = low
+smtp_tls_loglevel = 1
