@@ -15,28 +15,12 @@ Domain Type  Item    Value     Default Description
         *         soft    memlock   unlimited
         *         hard    memlock   unlimited
 
-{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
-{# This denies container access to the messages in the kernel ring buffer. Please note that this also will deny access to non-root users on the host system. #}
-kernel.dmesg_restrict:
-  sysctl.present:
-    - value: 1 {# 0 #}
-    - require_in:
-      - pkg: lxc
+/etc/default/lxc:
+  file.managed:
+    
+/etc/default/lxc-net:
+  file.managed:
 
-{# This is the maximum number of keys a non-root user can use, should be higher than the number of containers #}
-kernel.keys.maxkeys:
-  sysctl.present:
-    - value: 2000 {# 200 #}
-    - require_in:
-      - pkg: lxc
-
-{# allow normal users to run unprivileged containers #}
-kernel.unprivileged_userns_clone:
-  sysctl.present:
-    - value: 1 {# 0 #}
-    - require_in:
-      - pkg: lxc
-{%- endif %}
 
 lxc:
   pkg.installed:

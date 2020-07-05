@@ -1,34 +1,46 @@
 {% load_yaml as defaults %}
-container_profile:
-  default:
-    template: download
-    options:
-      dist: Ubuntu
-      release: focal
-      arch: {{ salt['grains.get']('osarch') }}
-    backing: best
-
-network_profile:
-  default:
-    eth0:
-      link: br0
-      type: veth
-      flags: up
-
-default:
-  backing: best
+config:
   bridge_cidr: 10.0.3.1/24
   bridge_name: lxcbr0
   bridge_reservations: |
       dhcp-host=test,10.0.3.10
   bridge_domain: lxc
-  container_profile: default
-  network_profile: default
-  lxc: |
-      lxc.mount.auto= proc sys cgroup:rw:force
-      # lxc.cgroup2.memory.high={{ (1024 * 1024 * 1024) / 100 * 95 }}
-      lxc.cgroup2.memory.max={{ 1024 * 1024 * 1024 }}
-      # cgroup2: cpuset cpu io memory pids rdma
+
+profile:
+  storage:
+    - name: default
+  network:
+    - name: default
+      eth0:
+        link: br0
+        type: veth
+        flags: up
+  image:
+    - name: default
+      template: download
+      options:
+        dist: Ubuntu
+        release: focal
+        arch: {{ salt['grains.get']('osarch') }}
+  container:
+    - name: default
+      image: default
+      network: default
+      storage: default
+      cpus:
+      # lxc.cgroup2.cpuset.cpus: {# lists the requested CPUs to be used by tasks within this cgroup. #}
+      # lxc.cgroup2.cpuset.cpus: 0-4,6,8-10
+      memory: {# guaranteed memory in MB. If no value is passed, default is 1024mb #}
+      # lxc.cgroup2.memory.low= memory * 1024 * 1024
+      autostart: false {# autostart container on reboot #}
+
+      config:
+        head: |
+          lxc.include = /usr/share/lxc/config/ubuntu.common.conf
+          lxc.include = /usr/share/lxc/config/ubuntu.userns.conf
+          lxc.include = /usr/share/lxc/config/nesting.conf
+          lxc.mount.auto= proc sys cgroup:rw:force
+
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
