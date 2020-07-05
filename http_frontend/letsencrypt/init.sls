@@ -1,10 +1,61 @@
+include:
+  - http_frontend.dirs
+  - http_frontend.nginx
+
 {% from "http_frontend/defaults.jinja" import settings with context %}
 {% set tlsport= settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1') %}
 {% set acme_sh_local_file= "/usr/local/"+ settings.external.acme_sh_tar_gz.target+ "/acme_sh.tar.gz" %}
 
-include:
-  - http_frontend.dirs
-  - http_frontend.nginx
+{% macro issue_cert(domain, san_list) %}
+{# issue new cert, if not already available or SAN list != expected SAN list #}
+{% set domain_dir = settings.cert_dir+ '/acme.sh/' + domain %}
+acme-issue-cert-{{ domain }}:
+  cmd.run:
+    - name: |
+        gosu {{ settings.user }} ./acme.sh --issue \
+        {% for i in san_list %}-d {{ i }} {% endfor %} \
+        --alpn --tlsport {{ tlsport }} \
+        --renew-hook '{{ settings.cert_dir }}/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
+    - env:
+      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
+    - unless: |
+        result="false"
+        if test -f "{{ domain_dir }}/fullchain.cer"; then
+          if test -f "{{ domain_dir }}/{{ domain }}.cer"; then
+            san_list=$(openssl x509 -text -noout \
+              -in "{{ domain_dir }}/{{ domain }}.cer" | \
+              awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
+              tr -d "DNS:" | tr "," "\\n" | sort)
+            exp_list=$(echo "{{ san_list|join(' ') }}" | \
+              tr " " "\\n" | sort)
+            if test "$san_list" = "$exp_list"; then
+              result="true"
+            fi
+          fi
+        fi
+        $result
+    - cwd: {{ settings.cert_dir }}/acme.sh
+    - require:
+      - cmd: acme-register-account
+      - service: nginx
+
+{# DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}" #}
+acme-deploy-{{ domain }}:
+  cmd.run:
+    - name: |
+        gosu {{ settings.user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
+        "{{ settings.domain }}" \
+        "{{ domain_dir }}/{{ domain }}.key" \
+        "{{ domain_dir }}/{{ domain }}.cer" \
+        "{{ domain_dir }}/fullchain.cer" \
+        "{{ domain_dir }}/ca.cer"
+    - env:
+      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
+    - cwd: {{ settings.cert_dir }}/acme.sh
+    - onchanges:
+      - cmd: acme-issue-cert-{{ domain }}
+{% endmacro %}
+
 
 {{ settings.cert_dir }}/acme.sh:
   file.directory:
@@ -67,7 +118,7 @@ acme.sh:
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         TLSPORT={{ tlsport }}
-        DOMAIN={{ settings.domain }}
+        # DOMAIN={{ settings.domain }}
     - require:
       - file: {{ settings.cert_dir }}/acme.sh
 
@@ -83,53 +134,11 @@ acme-register-account:
       - file: {{ settings.cert_dir }}/acme.sh/acme.sh.env
       - file: {{ settings.cert_dir }}/acme.sh/account.conf
 
-{# issue new cert, if not already available or SAN list != expected SAN list #}
-{% set domain_dir = settings.cert_dir+ '/acme.sh/' + settings.domain %}
-acme-issue-cert:
-  cmd.run:
-    - name: |
-        gosu {{ settings.user }} ./acme.sh --issue \
-        {% for i in settings.allowed_hosts %}-d {{ i }} {% endfor %} \
-        --alpn --tlsport {{ tlsport }} \
-        --renew-hook '{{ settings.cert_dir }}/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
-    - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
-    - unless: |
-        result="false"
-        if test -f "{{ domain_dir }}/fullchain.cer"; then
-          if test -f "{{ domain_dir }}/{{ settings.domain }}.cer"; then
-            san_list=$(openssl x509 -text -noout \
-              -in "{{ domain_dir }}/{{ settings.domain }}.cer" | \
-              awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
-              tr -d "DNS:" | tr "," "\\n" | sort)
-            exp_list=$(echo "{{ settings.allowed_hosts|join(' ') }}" | \
-              tr " " "\\n" | sort)
-            if test "$san_list" = "$exp_list"; then
-              result="true"
-            fi
-          fi
-        fi
-        $result
-    - cwd: {{ settings.cert_dir }}/acme.sh
-    - require:
-      - cmd: acme-register-account
-      - service: nginx
+{{ issue_cert(settings.domain, settings.allowed_hosts) }}
+  {% for domain in settings.isolated_hosts %}
+{{ issue_cert(domain, [domain]) }}
+  {% endfor %}
 
-{# DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}" #}
-acme-deploy:
-  cmd.run:
-    - name: |
-        gosu {{ settings.user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
-        "{{ settings.domain }}" \
-        "{{ domain_dir }}/{{ settings.domain }}.key" \
-        "{{ domain_dir }}/{{ settings.domain }}.cer" \
-        "{{ domain_dir }}/fullchain.cer" \
-        "{{ domain_dir }}/ca.cer"
-    - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
-    - cwd: {{ settings.cert_dir }}/acme.sh
-    - onchanges:
-      - cmd: acme-issue-cert
 
 {% else %}
 

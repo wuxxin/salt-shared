@@ -111,3 +111,19 @@ generate_snakeoil:
     - replace: false
     - require:
       - cmd: {{ settings.cert_dir }}/{{ settings.ssl_full_cert }}
+
+# copy snakeoil to every isolated host as default, will not get copied if target already existing
+{%- for vhost in settings.isolated_hosts %}
+{{ settings.cert_dir }}/{{ vhost.domain }}/{{ settings.ssl_chain_cert }}:
+  file.copy:
+    - source: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - mode: "0640"
+{{ settings.cert_dir }}/{{ vhost.domain }}/{{ settings.ssl_key }}:
+  file.copy:
+    - source: {{ settings.cert_dir }}/{{ settings.ssl_key }}
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - mode: "0640"
+{% endfor %}

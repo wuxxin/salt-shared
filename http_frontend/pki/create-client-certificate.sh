@@ -1,17 +1,20 @@
-settings.user#!/bin/bash
+#!/bin/bash
 set -eo pipefail
 # set -x
 
 usage(){
     cat << EOF
-Usage:  $0 user-email@address.domain cert_name [--days daysvalid]
+Usage:  $0 user-email@address.domain cert_name [--days daysvalid] [--san additional-san-values]
 
 Creates a client certificate, and send certificate via Email.
 
 + The default certificate lifetime is $daysvalid days.
     + Change this by supplying --days number-of-days
 + The password is generated using "openssl rand -base64 $randbytes" = $(( randbytes *8 )) bits entropy encoded base64
-
++ --san <additional-san-values> MUST be in a valid format accepted by openssl or
+    req/cert generation will fail. Note that including multiple such names
+    requires them to be comma-separated (',')
+    + Example: --san "uri:https://web.domain.tl/"
 EOF
     exit 1
 }
@@ -19,10 +22,11 @@ EOF
 randbytes=15
 base64size=$(echo "if (($randbytes * 8) > ($randbytes * 8 /6 *6)) { $randbytes * 8 /6 +1} else { $randbytes *8 /6 }" | bc)
 daysvalid=1095
+additional_san=""
+call_prefix=""
 place=""
 user=""
 subject=""
-call_prefix=""
 
 if test "$2" = ""; then usage; fi
 email="$1"
@@ -32,7 +36,9 @@ if test "$1" = "--days" -a "$2" != ""; then
     daysvalid=$2
     shift 2
 fi
-
+if test "$1" = "--san" -a "$2" != ""; then
+    additional_san=",$2"
+fi
 call_prefix=""
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.user }}"
@@ -48,7 +54,8 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin --days="$daysvalid" \
         --req-cn="$certname" \
-        --subject-alt-name="email:$email" \
+        --subject-alt-name="email:$email${additional_san}" \
+        --copy-ext \
         --req-org="{{ settings.domain }} Client Cert CA" \
         build-client-full "$certname"
 
@@ -74,4 +81,4 @@ randpass=""
 randspellout=""
 
 echo "sending cert to $email"
-$call_prefix swaks -n --no-hints --to "$email" --header "Subject: Certificate $certname" --body "the client certificate is in the attachment" --attach-type "application/x-pkcs12" --attach-name "$certname.p12" --attach "{{ settings.cert_dir }}/easyrsa/pki/private/$certname.p12"
+$call_prefix swaks -n --no-hints --to "$email" --header "Subject: Client Certificate $certname for $(hostname)" --body "the p12 client certificate for $(hostname)" --attach-type "application/x-pkcs12" --attach-name "$certname.p12" --attach "{{ settings.cert_dir }}/easyrsa/pki/private/$certname.p12"

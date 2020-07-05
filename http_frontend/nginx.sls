@@ -56,6 +56,11 @@ create_http_frontend_maintenance_target_dir:
       - file: /etc/nginx/proxy_params
       - file: /etc/nginx/uwsgi_params
 
+/var/cache/nginx:
+  file.directory:
+    - user: www-data
+    - group: www-data
+
 {% if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 20 %}
 {# xenial 1.10, bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
 {% from "ubuntu/init.sls" import apt_add_repository %}

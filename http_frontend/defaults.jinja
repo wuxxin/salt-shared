@@ -15,25 +15,9 @@ http_frontend ssl cert:
 {% set user_home= user_info['home'] %}
 
 {% load_yaml as defaults %}
-domain: {{ domain }}
-allowed_hosts: []
+user: {{ user }}
 listen_ip:
   - {{ def_route_ip }}
-letsencrypt: true
-client_cert_verify: false
-client_cert_mandatory: false
-user: {{ user }}
-cert_dir: {{ user_home }}/ssl
-
-{# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
-client_max_body_size: 0
-
-{# list of commands executed after ssl certificate has changed, eg. letsencrypt update #}
-{# cmds are run as settings.user, each usage of sudo needs an entry in the sudoers files #}
-{# available environment vars: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
-on_ssl_renew:
-  - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
-
 {# default http, https ports,
   plain http port will serve redirection as convinience if needed,
   but is not neeed for normal operation  #}
@@ -42,24 +26,45 @@ https_port: 443
 {# list of ips allowed to set real ip proxy header. The Default is correct and safe, read
 http://nginx.org/en/docs/http/ngx_http_realip_module.html before changing this #}
 set_real_ip_from: "127.0.0.1"
+{# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
+client_max_body_size: 0
+
+domain: {{ domain }}
+{# allowed_hosts: List of expected hostnames (SAN's), must include domain as first entry #}
+allowed_hosts: []
+{# isolated_hosts: List of additional hostnames, will need/create one cert per hostname #}
+isolated_hosts: []
+{# use letsencrypt to gather certificates #}
+letsencrypt: true
+{# key: | # key, pem encoded ssl key, default empty #}
+{# cert: | # cert, pem encoded ssl cert chain, default empty #}
+client_cert_verify: false
+client_cert_mandatory: false
+cert_dir: {{ user_home }}/ssl
+{# list of commands executed after ssl certificate has changed, eg. letsencrypt update #}
+{# cmds are run as settings.user, each usage of sudo needs an entry in the sudoers files #}
+{# available environment vars: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
+on_ssl_renew:
+  - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
 
 {# filepath, if exists will be displayed instead of normal operation#}
 maintenance_target: /var/lib/http_frontend/www/503.html
 
-{# customize nginx configuration, strings can be multiline yaml like "|" #}
-custom:
-  nginx:
-    global: ""
-    stream: ""
-    http: ""
-    host:
-      default: ""
-      {# any.other.vhost.name: string #}
+{# headers to be inserted, if header or host:header is not present or empty dict. #}
+default_header:
+  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security #}
+  Strict-Transport-Security: '"max-age=31536000"' {# 3x10^7 s ~ 1 y #}
+  {# https://scotthelme.co.uk/hardening-your-http-response-headers #}
+  Referrer-Policy: '"strict-origin-when-cross-origin"'
+  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy #}
+  X-Content-Type-Options: '"nosniff" always'
+
+{# headers to be inserted for the main domain:
+  will use default_header if not existing or empty,
+  Use Boolean false to not set any default header #}
+header: {}
 
 {#
-key: | # key, pem encoded ssl key, default empty
-cert: | # cert, pem encoded ssl cert chain, default empty
-
 upstream: # [] # list of {name, server}
   - name: webhooks
     server: "127.0.0.1:5555"
@@ -70,15 +75,25 @@ location:
     target: root /var/www/main.domain/
 host:
   - domain: another.domain
-    client_cert_verify: true
+    client_cert_verify: false,true
+    client_cert_mandatory: false,true
+    header: {}
     location:
       - source: /
         target: root /var/www/another.domain/
 #}
 
+{# additional customization of  nginx configuration, strings can be multiline yaml like "|" #}
+custom:
+  nginx:
+    global: ""
+    stream: ""
+    http: ""
+    host:
+      main: ""
+      {# any.other.vhost.name: string #}
 
 {# mostly internal settings #}
-
 main_endpoint: "127.0.0.1:8443"
 alpn_proxy: "127.0.0.1:9443"
 alpn_endpoint: "127.0.0.1:10443"
@@ -94,11 +109,11 @@ ssl_client_crl: client-ca.crl.pem
 
 external:
   acme_sh_tar_gz:
-    version: 2.8.5
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/Neilpang/acme.sh/releases/latest" | sed -r "s/.*\/([^\/]+)$/\1/"
-    download: "https://github.com/Neilpang/acme.sh/archive/##version##.tar.gz"
+    version: 2.8.6
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/acmesh-official/acme.sh/releases/latest" | sed -r "s/.*\/([^\/]+)$/\1/"
+    download: "https://github.com/acmesh-official/acme.sh/archive/##version##.tar.gz"
     target: lib
-    hash: 45d964de8970096dae06aaa45dba2d9d09a41c0a43355191ee627eb00ba5db45
+    hash: fd36cb749466296ded521ceacda3fc841ec76be620900d1116e0492d171c1d9f
   easy_rsa_tar_gz:
     version: 3.0.7
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/OpenVPN/easy-rsa/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
