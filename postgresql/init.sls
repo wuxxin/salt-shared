@@ -98,10 +98,20 @@ pg_database_{{ database.name }}:
     - encoding: {{ database.encoding|d('UTF8') }}
     - template: {{ database.template|d('template0') }}
   {%- for key,value in database.items() %}
-    {%- if key not in ['name', 'encoding', 'template']%}
+    {%- if key not in ['name', 'encoding', 'template', 'extensions']%}
     - {{ key }}: {{ value }}
     {%- endif %}
   {%- endfor %}
     - require:
       - service: postgresql
+  {% if database.extensions is defined %}
+    {% for ext in database.extensions %}
+{{ ext }}_pg_database_{{ database.name }}:
+  postgres_extension.present:
+    - name: {{ ext }}
+    - maintenance_db: {{ database.name }}
+    - require:
+      - postgres_database: {{ database.name }}
+    {% endfor %}
+  {%- endif %}
 {% endfor %}
