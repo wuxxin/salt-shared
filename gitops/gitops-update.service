@@ -10,5 +10,5 @@ Type=oneshot
 TimeoutStartSec=30min
 Environment=UNITNAME=%n
 EnvironmentFile={{ settings.env_file }}
-PassEnvironment=UNITNAME SENTRY_DSN DOMAIN src_user src_url src_branch src_dir
+PassEnvironment=UNITNAME SENTRY_DSN src_user src_url src_branch src_dir
 ExecStart=/usr/local/sbin/gitops-update.sh --from-systemd-service
