@@ -15,7 +15,7 @@
         {{ p }}=True
     - append_if_not_found: true
     - onchanges_in:
-      cmd: cgroup-accounting-reload
+      - cmd: cgroup-accounting-reload
 {% endfor %}
 
 cgroup-accounting-reload:
