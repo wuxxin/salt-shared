@@ -61,6 +61,7 @@ main () {
         gitops_maintenance "Gitops Update" "$msg"
         simple_metric update_start_timestamp counter \
             "timestamp-epoch-seconds since last update to app" "$start_epoch_ms"
+        cd $src_dir
 
         echo "calling pre_update_command"
         {{ settings.pre_update_command }} && result=$? || result=$?
@@ -70,7 +71,6 @@ main () {
                 "pre_update_command failed with error $result" error "$extra"
         else
             echo "calling update_command, defaults to execute-saltstack.sh"
-            cd $src_dir
             {{ settings.update_command }} && result=$? || result=$?
             if test $result -ne 0; then
                 extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
