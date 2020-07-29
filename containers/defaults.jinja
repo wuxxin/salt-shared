@@ -46,7 +46,7 @@ policy: |
 
 {% endload %}
 
-{% load_yaml as default_service %}
+{% load_yaml as default_container %}
 # container name
 container_name: None
 
@@ -78,6 +78,17 @@ args: ""
 
 # options: dict: {key: value,} container options parameter for podman run
 options: {}
+{% endload %}
+
+
+{% load_yaml as default_compose %}
+service_name: None
+composefile: None
+workingdirectory: None
+environment: {}
+environmentfile: None
+update: true
+build: false
 {% endload %}
 
 

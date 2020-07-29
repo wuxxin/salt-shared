@@ -9,10 +9,17 @@ containers_volume_{{ name }}:
 {% endmacro %}
 
 
-{% macro podman_container(service_definition) %}
-  {%- from "containers/defaults.jinja" import settings, default_service with context %}
-  {%- set pod= salt['grains.filter_by']({'default': default_service},
-    grain='default', default= 'default', merge=service_definition) %}
+{% macro podman_image(name, tag='') %}
+podman_image_{{ name }}:
+  cmd.run:
+    - name: podman
+    - unless: podman volume ls -q | grep -q {{ name }}
+{% endmacro %}
+
+{% macro podman_container(container_definition) %}
+  {%- from "containers/defaults.jinja" import settings, default_container with context %}
+  {%- set pod= salt['grains.filter_by']({'default': default_container},
+    grain='default', default= 'default', merge=container_definition) %}
 
   {# if not update on every container start, update now on install state #}
   {%- if not pod.container.update %}
@@ -29,7 +36,7 @@ update_image_{{ pod.image }}:
 
 {{ pod.container_name }}.service:
   file.managed:
-    - source: salt://containers/podman/podman-template.service
+    - source: salt://containers/podman-container-template.service
     - name: /etc/systemd/system/{{ pod.container_name }}.service
     - template: jinja
     - defaults:
@@ -46,22 +53,30 @@ update_image_{{ pod.image }}:
 {% endmacro %}
 
 
-{% macro podman_compose(service_name, composefile, environment={}) %}
-{{ service_name }}.service:
+{% macro podman_compose(compose_definition) %}
+  {%- from "containers/defaults.jinja" import settings, default_compose with context %}
+  {%- set compose= salt['grains.filter_by']({'default': default_compose},
+    grain='default', default= 'default', merge=compose_definition) %}
+  {%- set composetarget= "/etc/containers/podman-compose/"+ compose.service_name+ "/docker-compose.yml" %}
+{{ compose.service_name }}.compose:
+  file.managed:
+    - source: {{ compose.composefile }}
+    - name: {{ composetarget }}
+    - makedirs: true
+{{ compose.service_name }}.service:
   file.managed:
     - source: salt://containers/podman/podman-compose-template.service
-    - name: /etc/systemd/system/{{ service_name }}.service
+    - name: /etc/systemd/system/{{ compose.service_name }}.service
     - template: jinja
     - defaults:
-        pod: {{ pod }}
+        compose: {{ compose }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: {{ service_name }}.service
+      - file: {{ compose.service_name }}.service
   service.running:
-    - name: {{ service_name }}.service
+    - name: {{ compose.service_name }}.service
     - enable: true
     - require:
-      - cmd: {{ service_name }}.service
-
+      - cmd: {{ compose.service_name }}.service
 {% endmacro %}

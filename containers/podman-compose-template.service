@@ -1,5 +1,5 @@
 [Unit]
-Description=Systemd service for podman-compose {{ compose.name }}
+Description=Systemd service for podman-compose {{ compose.service_name }}
 After=network-online.target
 
 [Service]
