@@ -37,7 +37,7 @@ some states have a documentation README.md
 
     * Virtual Machines
         * [libvirt](libvirt): libvirt/qemu/kvm setup
-        * [lxd](lxd): lxd production installation
+        * [lxc](lxc): lxc production installation
         * [vagrant](vagrant): vagrant virtual machine manager
 
     * Container Management
