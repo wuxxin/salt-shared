@@ -4,7 +4,7 @@
   {%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
 containers_volume_{{ name }}:
   cmd.run:
-    - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }}
+    - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }} {{ name }}
     - unless: podman volume ls -q | grep -q {{ name }}
 {% endmacro %}
 
@@ -12,8 +12,8 @@ containers_volume_{{ name }}:
 {% macro podman_image(name, tag='') %}
 podman_image_{{ name }}:
   cmd.run:
-    - name: podman
-    - unless: podman volume ls -q | grep -q {{ name }}
+    - name: podman xxxx
+    - unless: podman xxxx ls -q | grep -q {{ name }}
 {% endmacro %}
 
 {% macro podman_container(container_definition) %}
