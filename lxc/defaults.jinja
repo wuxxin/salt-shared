@@ -1,5 +1,5 @@
 {% load_yaml as defaults %}
-config:
+net:
   bridge_cidr: 10.0.3.1/24
   bridge_name: lxcbr0
   bridge_reservations: |
@@ -16,7 +16,7 @@ profile:
         type: veth
         flags: up
   image:
-    - name: default
+    - name: focal
       template: download
       options:
         dist: Ubuntu
@@ -24,23 +24,19 @@ profile:
         arch: {{ salt['grains.get']('osarch') }}
   container:
     - name: default
-      image: default
+      image: focal
       network: default
       storage: default
-      cpus:
-      # lxc.cgroup2.cpuset.cpus: {# lists the requested CPUs to be used by tasks within this cgroup. #}
-      # lxc.cgroup2.cpuset.cpus: 0-4,6,8-10
-      memory: {# guaranteed memory in MB. If no value is passed, default is 1024mb #}
-      # lxc.cgroup2.memory.low= memory * 1024 * 1024
       autostart: false {# autostart container on reboot #}
-
-      config:
-        head: |
+      config_head: |
           lxc.include = /usr/share/lxc/config/ubuntu.common.conf
           lxc.include = /usr/share/lxc/config/ubuntu.userns.conf
           lxc.include = /usr/share/lxc/config/nesting.conf
           lxc.mount.auto= proc sys cgroup:rw:force
-
+      config_custom: |
+          # custom config
+      config_bottom: |
+          # end of config
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
