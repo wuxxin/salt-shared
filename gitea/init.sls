@@ -1,4 +1,6 @@
 {% from "gitea/defaults.jinja" import profile_defaults, external with context %}
+{% set gitea_local_archive= "/usr/local/"+ external.gitea_binary_xz.target+ "/gitea.xz" %}
+{% set gitea_local_binary = "/usr/local/bin/gitea" %}
 
 include:
   - vcs.git
@@ -10,9 +12,6 @@ gitea_requisites:
       - xz-utils
     - require:
       - sls: vcs.git
-
-{% set gitea_local_archive= "/usr/local/"+ external.gitea_binary_xz.target+ "/gitea.xz" %}
-{% set gitea_local_binary = "/usr/local/bin/gitea" %}
 
 gitea_archive:
   file.managed:
