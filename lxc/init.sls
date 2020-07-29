@@ -17,10 +17,11 @@ Domain Type  Item    Value     Default Description
 
 /etc/default/lxc:
   file.managed:
-    
+    - source: salt://lxc/default-lxc
+
 /etc/default/lxc-net:
   file.managed:
-
+    - source: salt://lxc/default-lxc-net
 
 lxc:
   pkg.installed:
