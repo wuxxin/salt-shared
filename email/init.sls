@@ -8,10 +8,10 @@ include:
 {% set dkim_enabled = dkim_key != false and
         salt['pillar.get']('email:dkim:enabled', true) %}
 
-{%- set relay_host = salt['pillar.get']('email:outgoing:host', false) %}
-{%- set relay_port = salt['pillar.get']('email:outgoing:port', 587) %}
-{%- set relay_username = salt['pillar.get']('email:outgoing:username', '') %}
-{%- set relay_password = salt['pillar.get']('email:outgoing:password', '') %}
+{%- set relay_host = salt['pillar.get']('email:outgoing:relay:host', false) %}
+{%- set relay_port = salt['pillar.get']('email:outgoing:relay:port', 587) %}
+{%- set relay_username = salt['pillar.get']('email:outgoing:relay:username', '') %}
+{%- set relay_password = salt['pillar.get']('email:outgoing:relay:password', '') %}
 
 {# create /var/mail/root Maildir directory, overwrite in case it is mbox file #}
 {%- for v in ['', '/cur', '/new', '/tmp',] %}
