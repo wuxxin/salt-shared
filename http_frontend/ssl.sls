@@ -119,11 +119,13 @@ generate_snakeoil:
     - source: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+    - makedirs: true
     - mode: "0640"
 {{ settings.cert_dir }}/{{ vhost }}/{{ settings.ssl_key }}:
   file.copy:
     - source: {{ settings.cert_dir }}/{{ settings.ssl_key }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
+    - makedirs: true
     - mode: "0640"
 {% endfor %}
