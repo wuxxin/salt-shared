@@ -31,7 +31,7 @@ postgresql:
       - file: /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf
       - file: /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf
 
-{% set ns = namespace(listen = ['localhost']) %}
+{% set ns = namespace(listen = 'localhost') %}
 
 {% if settings.additional_adresses %}
   {% for addr in settings.additional_adresses  %}
