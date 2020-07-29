@@ -114,6 +114,12 @@ generate_snakeoil:
 
 # copy snakeoil to every isolated host as default, will not get copied if target already existing
 {%- for vhost in settings.isolated_hosts %}
+{{ settings.cert_dir }}/{{ vhost }}:
+  file.directory:
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+    - makedirs: true
+    - mode: "0750"
 {{ settings.cert_dir }}/{{ vhost }}/{{ settings.ssl_chain_cert }}:
   file.copy:
     - source: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
