@@ -5,8 +5,6 @@ additional-desktop-packages:
   pkg.installed:
     - pkgs:
       - gconf-editor
-      - xcursor-themes
-      - dmz-cursor-theme 
       - gsettings-ubuntu-schemas
       - gnome-remote-desktop
       - indicator-application
@@ -17,7 +15,7 @@ remove-unwanted-desktop-packages:
       - gnome-games
   module.run:
     - name: pkg.autoremove
-    - onchanges: 
+    - onchanges:
       - pkg: remove-unwanted-desktop-packages
 
 desktop-fonts:
@@ -30,6 +28,12 @@ desktop-fonts:
       - fonts-lmodern
       - fonts-larabie-deco
       - fonts-larabie-straight
+
+cursor-themes:
+  pkg.installed:
+    - pkgs:
+      - xcursor-themes
+      - dmz-cursor-theme
 
 icon-themes:
   pkg.installed:
@@ -46,6 +50,12 @@ yaru-theme:
       - yaru-theme-icon
       - yaru-theme-sound
 {%- endif %}
+
+eog-plugins:
+  pkg.installed:
+    - pkgs:
+      - eog
+      - eog-plugins
 
 nautilus-plugins:
   pkg.installed:
