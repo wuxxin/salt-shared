@@ -22,7 +22,7 @@ podman_image_{{ name }}:
     grain='default', default= 'default', merge=container_definition) %}
 
   {# if not update on every container start, update now on install state #}
-  {%- if not pod.container.update %}
+  {%- if not pod.update %}
 update_image_{{ pod.image }}:
   cmd.run:
     {%- if pod.build %}
