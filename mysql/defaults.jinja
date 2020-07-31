@@ -1,0 +1,13 @@
+{% load_yaml as defaults %}
+additional_adresses: []
+# list of additional allowed ip network ranges, example:
+#   - listen: 1.2.3.4
+#     answer: 1.2.3.0/24
+user: []
+database: []
+character_set: utf8mb4
+collate: utf8mb4_general_ci
+{% endload %}
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('mysql', {})) %}

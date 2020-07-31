@@ -1,0 +1,15 @@
+[Unit]
+Description=wait for network before starting Mariadb RDBMS
+# start after network-online.target because we also listen to other interfaces than boot
+After=network-online.target
+Before=mariadb.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/true
+ExecReload=/usr/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=mariadb.service
