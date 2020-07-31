@@ -54,8 +54,12 @@ container_name:
 image:
 # optional tag, will be appended to image and on build
 tag:
-# optional build path
-build:
+# build: build container from source
+build: false
+# update: if set true: container image will be pulled/build on every service start
+update: true
+# ephemeral: if set true, container will be removed on stop
+ephemeral: false
 
 # environment: dict: {key: value,} add environment data
 environment: {}
@@ -66,10 +70,6 @@ volumes: []
 # ports: list
 ports: []
 
-# update: if set true: container image will be pulled/build on start
-update: true
-# ephemeral: if set true, container will be removed on stop
-ephemeral: false
 
 # command: if set, will replace default command
 command:
