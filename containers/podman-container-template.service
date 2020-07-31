@@ -13,6 +13,7 @@ ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
   {%- endif %}
 {%- endif %}
 
+RuntimeDirectory={{ pod.container_name }}
 ExecStart=podman run \
 {%- for key,value in pod.options.items() %}
     --{{ key }}={{ value }} \
