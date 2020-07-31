@@ -45,9 +45,14 @@ update_image_{{ pod.image }}:
     - name: systemctl daemon-reload
     - onchanges:
       - file: {{ pod.container_name }}.service
+  {%- if pod.enabled %}
   service.running:
-    - name: {{ pod.container_name }}.service
     - enable: true
+  {%- else %}
+  service.dead:
+    - enable: false
+  {%- endif %}
+    - name: {{ pod.container_name }}.service
     - require:
       - cmd: {{ pod.container_name }}.service
 {% endmacro %}

@@ -14,25 +14,29 @@ ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
 {%- endif %}
 
 RuntimeDirectory={{ pod.container_name }}
+{%- if pod.enabled %}
 ExecStart=podman run \
-{%- for key,value in pod.options.items() %}
+  {%- for key,value in pod.options.items() %}
     --{{ key }}={{ value }} \
-{%- endfor %}
+  {%- endfor %}
     --name={{ pod.container_name }} \
-{%- for key,value in pod.environment.items() %}
+  {%- for key,value in pod.environment.items() %}
     --env={{ key }}={{ value }} \
-{%- endfor %}
-{%- for key,value in pod.labels.items() %}
+  {%- endfor %}
+  {%- for key,value in pod.labels.items() %}
     --label={{ key }}={{ value }} \
-{%- endfor %}
-{%- for vol in pod.volumes %}
+  {%- endfor %}
+  {%- for vol in pod.volumes %}
     --volume={{ vol }} \
-{%- endfor %}
+  {%- endfor %}
     {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} \
-{%- if pod.command %}
+  {%- if pod.command %}
     {{ pod.command }} {{ pod.args }}
-{%- else %}
+  {%- else %}
 
+  {%- endif %}
+{%- else %}
+ExecStart=/usr/bin/false
 {%- endif %}
 
 ExecStop=podman stop {{ pod.container_name }}
