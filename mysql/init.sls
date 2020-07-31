@@ -3,7 +3,7 @@
 prepare-mariadb.service:
   file.managed:
     - name: /etc/systemd/system/prepare-mariadb.service
-    - source: salt://mariadb/prepare-mariadb.service
+    - source: salt://mysql/prepare-mariadb.service
     - template: jinja
     - defaults:
         settings: {{ settings }}
@@ -28,7 +28,7 @@ mariadb:
 /etc/mysql/mariadb.conf.d/50-server.cnf:
   file.replace:
     - pattern: ^bind-address.*
-    - repl: bind-address = 127.0.0.1
+    - repl: bind-address = {{ settings.listen }}
     - append_if_not_found: true
     - require:
       - pkg: mariadb
