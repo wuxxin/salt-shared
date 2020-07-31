@@ -11,10 +11,10 @@ Creates a client certificate, and send certificate via Email.
 + The default certificate lifetime is $daysvalid days.
     + Change this by supplying --days number-of-days
 + The password is generated using "openssl rand -base64 $randbytes" = $(( randbytes *8 )) bits entropy encoded base64
-+ --san <additional-san-values> MUST be in a valid format accepted by openssl or
-    req/cert generation will fail. Note that including multiple such names
-    requires them to be comma-separated (',')
-    + Example: --san "uri:https://web.domain.tl/"
++ --san <additional-san-values> MUST be in a valid format accepted by openssl
+    + format: (email|URI|DNS|RID|IP|dirName|otherName):<value>
+    + comma seperated multiple entries from each other.
+    + Example: --san "URI:https://web.domain.tl"
 EOF
     exit 1
 }

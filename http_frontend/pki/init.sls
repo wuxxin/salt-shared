@@ -8,6 +8,7 @@ include:
 pki_requisites:
   pkg.installed:
     - pkgs:
+      - bc
       - swaks
 
 {% for i in ['create-client-certificate.sh', 'revoke-client-certificate.sh'] %}
