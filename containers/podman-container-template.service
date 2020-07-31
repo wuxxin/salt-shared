@@ -27,11 +27,11 @@ ExecStart=podman run \
 {%- for vol in pod.volumes %}
     --volume={{ vol }} \
 {%- endfor %}
+    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} \
 {%- if pod.command %}
-    {{ pod.cont_name }}{{ ":"+ pod.tag if pod.tag }} \
     {{ pod.command }} {{ pod.args }}
 {%- else %}
-    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
+
 {%- endif %}
 
 ExecStop=podman stop {{ pod.container_name }}
