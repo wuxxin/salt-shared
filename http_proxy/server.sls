@@ -44,7 +44,7 @@ trafficserver:
   ('CONFIG', 'proxy.config.http.cache.heuristic_min_lifetime INT', '604800'),
   ('CONFIG', 'proxy.config.http.cache.heuristic_max_lifetime INT', '2419200'),
   ('CONFIG', 'proxy.config.net.connections_throttle INT', '1000'),
-  ('CONFIG', 'proxy.config.net.poll_timeout INT', '50'),
+  ('CONFIG', 'proxy.config.net.poll_timeout INT', '100'),
   ('CONFIG', 'proxy.config.exec_thread.autoconfig INT', '0'),
   ('CONFIG', 'proxy.config.exec_thread.limit INT', '4'),
   ('CONFIG', 'proxy.config.hostdb.max_size INT', '8M'),
