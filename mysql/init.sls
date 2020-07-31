@@ -61,7 +61,7 @@ mariadb_database_{{ database.name }}:
     - character_set: {{ database.character_set|d(settings.character_set) }}
     - collate: {{ database.collate|d(settings.collate) }}
   {%- for key,value in database.items() %}
-    {%- if key not in ['name', 'character_set', 'collate', 'owner', 'grant'] %}
+    {%- if key not in ['name', 'character_set', 'collate', 'owner', 'grant',] %}
     - {{ key }}: {{ value }}
     {%- endif %}
   {%- endfor %}
@@ -72,7 +72,8 @@ mariadb_database_owner_{{ database.name }}:
   mysql_grants.present:
     - grant: "{{ database.grant|d('all privileges') }}"
     - database: "{{ database.name }}.*"
-    - user: {{ database.owner }}
+    - user: {{ database.owner.split("@")[0] }}
+    - host: {{ database.owner.split("@")[1]|d('localhost') }}
     - require:
       - mysql_database: mariadb_database_{{ database.name }}
   {%- endif %}
