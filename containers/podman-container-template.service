@@ -12,7 +12,7 @@ ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
 ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
   {%- endif %}
 {%- endif %}
-
+# will create /run/{{ pod.container_name }} for runtime pid, socket, etc. files
 RuntimeDirectory={{ pod.container_name }}
 {%- if pod.enabled %}
 ExecStart=podman run \
@@ -29,12 +29,9 @@ ExecStart=podman run \
   {%- for vol in pod.volumes %}
     --volume={{ vol }} \
   {%- endfor %}
-    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} \
-  {%- if pod.command %}
+    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
     {{ pod.command }} {{ pod.args }}
-  {%- else %}
-
-  {%- endif %}
+  {% endif %}
 {%- else %}
 ExecStart=/usr/bin/false
 {%- endif %}
