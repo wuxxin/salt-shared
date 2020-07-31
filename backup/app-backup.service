@@ -1,0 +1,23 @@
+[Unit]
+Description=Backup Service using Restic
+After=network-online.target {{ settings.systemd.after }}
+Wants=network-online.target {{ settings.systemd.wants}}
+{% if settings.systemd.requires %}
+Requires={{ settings.systemd.requires }}
+{% endif %}
+{% if settings.systemd.onfailure %}
+OnFailure={{ settings.systemd.onfailure }}
+{% endif %}
+
+[Service]
+Type=oneshot
+TimeoutStartSec={{ settings.maxruntime }}
+User={{ settings.user }}
+Group={{ settings.user }}
+Environment=UNITNAME=%n
+Environment=HOME={{ settings.home_dir }}
+Environment=USER={{ settings.user }}
+EnvironmentFile={{ settings.backup_env }}
+PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD REPOSITORY_MAXSIZE {% if env %}{% for k,v in env.items() %}{{ k }} {% endfor %}{% endif %}
+WorkingDirectory={{ settings.home_dir }}
+ExecStart=/usr/local/bin/app-backup.sh --from-systemd-service
