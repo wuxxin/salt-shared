@@ -12,11 +12,19 @@ prepare-mariadb.service:
     - onchanges:
       - file: prepare-mariadb.service
 
+mariadb_requisites:
+  pkg.installed:
+    - pkgs:
+      - python3-mysqldb
+
 mariadb:
   pkg.installed:
     - pkgs:
       - mariadb-server
       - mariadb-client
+    - require:
+      - pkg: mariadb_requisites
+
   service.running:
     - enable: true
     - watch:
