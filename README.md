@@ -13,9 +13,10 @@ some states have a documentation README.md
 * Features to look at:
     * [node](node): basic machine setup (hostname, locale, network, storage)
     * [hardware](hardware): hardware setup
-    * [kernel](kernel): kernel- image,headers,tools
+    * [kernel](kernel): kernel- image,headers,tools, modification for running on big machines
     * [tools](tools): command line tools
     * [gitops](gitops): deploy and update machines from git, with webhook support
+    * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
 
     * Desktop
         * [desktop](desktop): everything wanted for a desktop installation
@@ -38,15 +39,18 @@ some states have a documentation README.md
     * Virtual Machines
         * [libvirt](libvirt): libvirt/qemu/kvm setup
         * [lxc](lxc): lxc production installation
-        * [vagrant](vagrant): vagrant virtual machine manager
+        * [vagrant](vagrant): vagrant virtual machine manager for libvirt, lxc, lxd, a.o.
 
     * Container Management
         * [containers](containers): (OCI) Containers and Container Images Runtime including podman
         * [k3s](k3s): small footprint Kubernetes Distribution
         * [docker](docker): Legacy Docker Containers and Container Images Runtime
 
+    * Database
+      * [postgresql](postgresql): Postgresql Database
+      * [mysql](mysql) MariaDB (mysql compatible) Database
+
     * Language Support
         * [python](python)
         * [java](java)
         * [latex](latex)
-        * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
