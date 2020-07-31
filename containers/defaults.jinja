@@ -48,14 +48,14 @@ policy: |
 
 {% load_yaml as default_container %}
 # container name
-container_name: None
+container_name:
 
 # name of the container image: x/y[:z]
-image: None
+image:
 # optional tag, will be appended to image and on build
-tag: None
+tag:
 # optional build path
-build: None
+build:
 
 # environment: dict: {key: value,} add environment data
 environment: {}
@@ -72,7 +72,7 @@ update: true
 ephemeral: false
 
 # command: if set, will replace default command
-command: None
+command:
 # args: if set, will add args for command, command must also be set
 args: ""
 
@@ -82,11 +82,11 @@ options: {}
 
 
 {% load_yaml as default_compose %}
-service_name: None
-composefile: None
-workingdirectory: None
+service_name:
+composefile:
+workingdirectory:
 environment: {}
-environmentfile: None
+environmentfile:
 update: true
 build: false
 {% endload %}
