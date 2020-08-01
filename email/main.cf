@@ -1,19 +1,19 @@
 # use defaults from postfix 3.x
 compatibility_level=2
-myhostname = {{ domain }}
-mydomain = {{ domain }}
+myhostname = {{ settings.domain }}
+mydomain = {{ settings.domain }}
 mydestination = $myhostname, localhost
-mynetworks = 127.0.0.0/8 {{ salt['network.convert_cidr'](settings.bridge_cidr)['network'] }}
+mynetworks = 127.0.0.0/8 {% for network in settings.internal.answer %} {{ network }} {% endfor %}
 
 # only use ipv4, because ipv6 fails under some circumstances
 inet_protocols = ipv4
 smtp_address_preference = ipv4
 
 # ### outgoing mail
-{%- if outgoing_enabled %}
-  {%- if relayhost %}
+{%- if settings.outgoing.enabled %}
+  {%- if settings.outgoing.relay.enabled %}
 # deliver outgoing mail by using a "smartmx" host as relay
-relayhost = [{{ relayhost }}]:{{ relayport }}
+relayhost = [{{ settings.outgoing.relay.host }}]:{{ settings.outgoing.relay.port }}
   {%- else %}
 # deliver outgoing mail by directly contacting the target host, dont use a relay
 relayhost =
@@ -27,12 +27,12 @@ default_transport = error: outside mail is not deliverable
 # ### incoming mail
 smtpd_banner = $myhostname ESMTP $mail_name
 smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination
-{%- if incoming_enabled %}
+{%- if settings.incoming.enabled %}
 # accept incoming mail from all interfaces
 inet_interfaces = all
 {%- else %}
 # accept incoming mail only from internal interfaces
-inet_interfaces = 127.0.0.1, {{ settings.bridge_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
+inet_interfaces = 127.0.0.1 {% for ip in settings.internal.listen %} {{ ip }} {% endfor %}
 {%- endif %}
 
 # enable sasl client auth, but add smtp_sasl_password_maps,
@@ -61,7 +61,7 @@ mail_spool_directory = /var/mail/
 # connect postfix with opendkim milter
 milter_default_action = accept
 milter_protocol   = 6
-{%- if dkim_enabled %}
+{%- if settings.dkim.enabled %}
 # use opendkim to sign outgoing mail
 smtpd_milters     = inet:localhost:12345
 non_smtpd_milters = inet:localhost:12345
@@ -96,10 +96,10 @@ smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 smtpd_tls_mandatory_ciphers = medium
 smtpd_tls_loglevel = 1
 
-smtpd_tls_cert_file = {{ settings.etc_dir }}/server.cert.pem
-smtpd_tls_key_file = {{ settings.etc_dir }}/server.key.pem
+smtpd_tls_cert_file = {{ settings.ssl_cert }}
+smtpd_tls_key_file = {{ settings.ssl_key }}
 # *dh1024_param_file is missleading name, takes >= 1024bit dhparam file
-smtpd_tls_dh1024_param_file = {{ settings.etc_dir }}/dhparam.pem
+smtpd_tls_dh1024_param_file = {{ settings.dhparam }}
 
 # TLS Outgoing
 smtp_use_tls=yes

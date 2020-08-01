@@ -1,10 +1,6 @@
 {% from "email/defaults.jinja" import settings with context %}
 
-{% set dkim_key = salt['pillar.get']('email:dkim:key', false) %}
-{% set dkim_enabled = dkim_key != false and
-        salt['pillar.get']('email:dkim:enabled', true) %}
-
-{% if dkim_enabled == false %}
+{% if not settings.dkim.enabled %}
 
 opendkim.service:
   service.dead:
@@ -24,7 +20,6 @@ opendkim_masked:
     - source: salt://app/email/opendkim.conf
     - template: jinja
     - defaults:
-        domain: {{ salt['pillar.get']('email:domain') }}
         settings: {{ settings }}
 
 /etc/dkimkeys:
@@ -41,7 +36,7 @@ opendkim_masked:
     - group: opendkim
     - mode: "0600"
     - contents: |
-{{ dkim_key |indent(8,True) }}
+{{ settings.dkim.secret|indent(8,True) }}
     - require:
       - file: /etc/dkimkeys
       - user: opendkim
@@ -70,13 +65,6 @@ opendkim:
     - require:
       - pkg: opendkim
 
-/etc/systemd/system/opendkim.service.d/onfailure.conf:
-  file.managed:
-    - makedirs: true
-    - contents: |
-        [Unit]
-        OnFailure=app-service-failed@%n.service
-
 opendkim_unmasked:
     service.unmasked:
       - name: opendkim
@@ -91,6 +79,5 @@ opendkim.service:
       - file: /etc/default/opendkim
       - file: /etc/opendkim.conf
       - file: /etc/dkimkeys/dkim.key
-      - file: /etc/systemd/system/opendkim.service.d/onfailure.conf
 
 {% endif %}

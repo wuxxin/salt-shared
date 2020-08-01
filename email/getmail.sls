@@ -24,7 +24,7 @@ app-getmail@.service:
     - file_mode: 660
     - makedirs: true
 
-{% for entry in salt['pillar.get']('email:incoming:getmail', []) %}
+{% for entry in settings.incoming.getmail %}
   {% if entry.name|d(False) != False and entry.config|d(False) != False %}
 "{{ settings.etc_dir }}/getmail/{{ entry.name }}":
   file.managed:

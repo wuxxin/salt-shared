@@ -5,11 +5,6 @@ allowed_domains: []
 aliases:
   postmaster: root
 
-internal:
-  answer:
-    - {{ salt['network.convert_cidr'](settings.bridge_cidr)['network'] }}
-  listen: []
-
 incoming:
   enabled: true
   getmail: []
@@ -23,9 +18,14 @@ outgoing:
     username:
     password:
 
+internal:
+  listen: []
+  answer: []
+
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
-dhparam:
+dhparam: /etc/ssl/private/dhparam
+
 dkim:
   enabled: false
   secret:
