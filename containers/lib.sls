@@ -62,9 +62,10 @@ update_image_{{ pod.image }}:
     - enable: false
   {%- endif %}
     - name: {{ pod.container_name }}.service
-    - require:
+    - watch:
       - file: {{ pod.container_name }}.env
       - file: {{ pod.container_name }}.service
+    - require:
       - cmd: {{ pod.container_name }}.service
 {% endmacro %}
 
