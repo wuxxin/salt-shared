@@ -1,10 +1,11 @@
 [Unit]
 Description=Systemd service for podman container {{ pod.container_name }}
 After=network-online.target
+StartLimitBurst=5
+StartLimitIntervalSec=100
 
 [Service]
 Restart=always
-
 {%- if pod.update %}
   {%- if pod.build %}
 ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
@@ -12,10 +13,16 @@ ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
 ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
   {%- endif %}
 {%- endif %}
-# will create /run/{{ pod.container_name }} for runtime pid, socket, etc. files
+{%- if pod.ephemeral %}
+ExecStartPre=-podman rm -f {{ pod.container_name }}
+{%- endif %}
+# RuntimeDirectory will create /run/{{ pod.container_name }} for pid, socket files
 RuntimeDirectory={{ pod.container_name }}
 {%- if pod.enabled %}
 ExecStart=podman run \
+  {%- if pod.ephemeral %}
+  --rm \
+  {%- endif %}
   {%- for key,value in pod.options.items() %}
     --{{ key }}={{ value }} \
   {%- endfor %}
@@ -35,11 +42,7 @@ ExecStart=podman run \
 {%- else %}
 ExecStart=/usr/bin/false
 {%- endif %}
-
 ExecStop=podman stop {{ pod.container_name }}
-{%- if pod.ephemeral %}
-ExecStopPost=podman rm -f {{ pod.container_name }}
-{%- endif %}
 
 [Install]
 WantedBy=multi-user.target
