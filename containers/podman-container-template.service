@@ -37,6 +37,9 @@ ExecStart=podman run \
   {%- for vol in pod.volumes %}
   --volume={{ vol }} \
   {%- endfor %}
+  {%- for publish in pod.ports %}
+  --publish={{ publish }} \
+  {%- endfor %}
   {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
   {{ pod.command }} {{ pod.args }}
   {% endif %}
