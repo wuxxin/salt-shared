@@ -18,30 +18,32 @@ ExecStartPre=-podman rm -f {{ pod.container_name }}
 {%- endif %}
 # RuntimeDirectory will create /run/{{ pod.container_name }} for pid, socket files
 RuntimeDirectory={{ pod.container_name }}
+# contents of Environmentfile will be passed to container using --env-host
+EnvironmentFile=/etc/{{ pod.container_name }}.env
+
 {%- if pod.enabled %}
 ExecStart=podman run \
   {%- if pod.ephemeral %}
   --rm \
   {%- endif %}
+  --name={{ pod.container_name }} \
+  --env-host \
   {%- for key,value in pod.options.items() %}
-    --{{ key }}={{ value }} \
-  {%- endfor %}
-    --name={{ pod.container_name }} \
-  {%- for key,value in pod.environment.items() %}
-    --env={{ key }}={{ value }} \
+  --{{ key }}={{ value }} \
   {%- endfor %}
   {%- for key,value in pod.labels.items() %}
-    --label={{ key }}={{ value }} \
+  --label={{ key }}={{ value }} \
   {%- endfor %}
   {%- for vol in pod.volumes %}
-    --volume={{ vol }} \
+  --volume={{ vol }} \
   {%- endfor %}
-    {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
-    {{ pod.command }} {{ pod.args }}
+  {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
+  {{ pod.command }} {{ pod.args }}
   {% endif %}
 {%- else %}
 ExecStart=/usr/bin/false
 {%- endif %}
+
 ExecStop=podman stop {{ pod.container_name }}
 
 [Install]

@@ -34,6 +34,15 @@ update_image_{{ pod.image }}:
       - file: {{ service_name }}.service
   {%- endif %}
 
+{{ pod.container_name }}.env:
+  file.managed:
+    - name: /etc/{{ pod.container_name }}.env
+    - mode: 0600
+    - contents: |
+  {%- for key,value in pod.environment.items() %}
+        {{ key }}={{ value }}
+  {%- endfor %}
+
 {{ pod.container_name }}.service:
   file.managed:
     - source: salt://containers/podman-container-template.service
@@ -54,6 +63,8 @@ update_image_{{ pod.image }}:
   {%- endif %}
     - name: {{ pod.container_name }}.service
     - require:
+      - file: {{ pod.container_name }}.env
+      - file: {{ pod.container_name }}.service
       - cmd: {{ pod.container_name }}.service
 {% endmacro %}
 
