@@ -1,6 +1,6 @@
 # use defaults from postfix 3.x
 compatibility_level=2
-myhostname = {{ settings.domain }}
+myhostname = {{ settings.hostname }}
 mydomain = {{ settings.domain }}
 mydestination = $myhostname, localhost
 mynetworks = 127.0.0.0/8 {% for network in settings.internal.answer %} {{ network }} {% endfor %}

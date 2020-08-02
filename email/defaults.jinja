@@ -1,5 +1,6 @@
 {% load_yaml as defaults %}
 domain: {{ grains['fqdn'] }}
+hostname: {{ grains['fqdn'] }}
 allowed_domains: []
 
 aliases:
