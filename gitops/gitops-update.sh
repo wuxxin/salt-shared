@@ -73,11 +73,12 @@ main () {
             echo "calling update_command, defaults to execute-saltstack.sh"
             {{ settings.update_command }} && result=$? || result=$?
             if test $result -ne 0; then
+                set_tag_from_file gitops_failed_rev "$latest_origin_rev"
                 extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
                 gitops_error "Gitops Error" \
                     "update command failed with error $result" error "$extra"
-                set_tag_from_file gitops_failed_rev "$latest_origin_rev"
             else
+                set_tag_from_file gitops_current_rev "$latest_origin_rev"
                 echo "calling post_update_command"
                 {{ settings.post_update_command }} && result=$? || result=$?
                 if test $result -ne 0; then

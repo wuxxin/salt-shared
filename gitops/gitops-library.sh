@@ -184,7 +184,7 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
     local gitops_run_rev gitops_current_rev gitops_failed_rev sentrycat
 
     topic=$1; msg=$2; level=${3:-error}; extra=${4:-\{\}}
-    gitops_run_rev=$(cat "{{ settings.src_dir }}/GIT_REV" 2> /dev/null || echo "invalid")
+    gitops_run_rev=$(cat "{{ settings.src_dir }}/.git/refs/heads/{{ settings.git.branch }}" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
     gitops_failed_rev=$(get_tag gitops_failed_rev "invalid")
     gitops_sentry_dsn="{{ settings.sentry.dsn|d('') }}"
