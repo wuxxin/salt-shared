@@ -18,7 +18,6 @@ zone-{{ targetpath }}-{{ zone.domain }}:
     - defaults:
         domain: zone.domain
         common: {{ common }}
-        autoserial: {{ salt['cmd.run_stdout']('date +%y%m%d%H%M') }}
     {%- if zone.context is defined %}
     - context: {{ zone.context }}
     {%- endif %}
@@ -35,7 +34,7 @@ zone-{{ targetpath }}-{{ zone.domain }}:
 {% macro write_config(profilename, settings, log_default, template_default) %}
 /etc/knot/knot{{ '' if not profilename else '-'+ profilename }}.conf:
   file.managed:
-    - source: salt://knot/knot.jinja
+    - source: salt://knot/knot-template.conf.jinja
     - template: jinja
     - makedirs: true
     - user: knot
@@ -58,27 +57,10 @@ zone-{{ targetpath }}-{{ zone.domain }}:
   {% if profilename %}
 /etc/systemd/system/knot-{{ profilename }}.service:
   file.managed:
-    - contents: |
-        [Unit]
-        Description=Knot DNS server - {{ profilename }}
-        Wants=network-online.target
-        After=network-online.target
-        Documentation=man:knotd(8) man:knot.conf(5) man:knotc(8)
-
-        [Service]
-        Type=notify
-        User=knot
-        Group=knot
-        CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_SETPCAP
-        AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_SETPCAP
-        ExecStartPre=/usr/sbin/knotc -c /etc/knot/knot-{{ profilename }}.conf conf-check
-        ExecStart=/usr/sbin/knotd -c /etc/knot/knot-{{ profilename }}.conf
-        ExecReload=/usr/sbin/knotc -c /etc/knot/knot-{{ profilename }}.conf reload
-        Restart=on-abort
-        LimitNOFILE=1048576
-
-        [Install]
-        WantedBy=multi-user.target
+    - source: salt://knot/knot-template.service
+    - template: jinja
+    - defaults:
+      profilename: {{ profilename }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
