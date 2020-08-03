@@ -1,6 +1,6 @@
 # Knot DNS server
 
-+ pillar
++ knot config in pillar
     + relaxed (does not matter) order of knot.conf yaml
     + set pillar['knot:enabled']= false to disable a configured knot
     + configure additional knot instances
@@ -13,16 +13,14 @@
         + common.* from defaults.jinja
         + custom additional context vars: add context data to zone
 
-+ logging: if empty will use defaults.jinja:log_default
-+ examples: see example.pillar.yaml, example.zone.jinja
-
-+ secrets
-    + Warning: key:secret (hmac-sha256) must generated as 256bit base64 encoded
++ secrets: key:secret (hmac-sha256) must generated as 256bit base64 encoded
     + eg. `openssl rand -base64 32`
     + eg. `keymgr -t test hmac-sha256 256`
 
-+ Default Server
-    + use pillar "knot"
++ Default Server use pillar "knot",
+    + additional Server one per pillar list: "knot:profile:[{'name': 'profilename', }]"
 
-+ Additional Server
-    + one per pillar list: "knot:profile:[{'name': 'profilename', }]"
++ default template config: see defaults.jinja:template_default
++ logging: if empty will use defaults.jinja:log_default
+
++ examples: see example.pillar.yaml, example.zone.jinja

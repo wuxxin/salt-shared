@@ -39,8 +39,8 @@ knot:
       address: 192.168.4.1
       key: update_key
   zone:
-    - domain: domain.in.sub.domain
-      source: "salt://hosts/host/knot/domain.in.sub.domain.yml"
+    - domain: domain.top
+      source: "salt://example.zone.jinja"
       context:
           network:
               bridge_ip: 1.2.3.4
@@ -49,18 +49,14 @@ knot:
       acl:
         - slave1_transfer
         - update1_update
-    - domain: another.in.sub.domain
+    - domain: another.sub.domain
       contents: |
           $TTL {{ common.ttl }}
-          @ IN SOA ns.domain.top. postmaster.domain.top. (
-            1204162300 ; serial (YYMMDDHHMM)
-            {{ common.refresh }} {{ common.retry }} {{ common.expire }} {{ common.nxdomain }}
-          )
-          @   IN NS ns.domain.top.
-          ns  IN A {{ network.bridge_ip }}
-
+          @ IN SOA ns.domain.top. postmaster.domain.top. 1 {{ common.refresh }} {{ common.retry }} {{ common.expire }} {{ common.nxdomain }}
+          @       NS    ns.domain.top.
+          ns      A     {{ network.bridge_ip }}
           {%- for i in range(2,255) %}
-          res{{ i }} IN A 10.9.139.{{ i }}
+          res{{ i }}  A    10.9.138.{{ i }}
           {%- endfor %}
 
     - domain: slave.in.other.domain

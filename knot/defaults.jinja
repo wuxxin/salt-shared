@@ -23,9 +23,9 @@ profile:
 id: default
 storage: {{ def_storage_path }}
 semantic-checks: on
-# do not touch source zone files, keep dnssec and ddns entries in journal
+# zonefile-sync: -1 do not touch source zone files, keep dnssec and ddns entries in journal
 zonefile-sync: -1
-# ignore serial, only look if file has changed, add changes
+# difference-no-serial: ignore serial, only look if file has changed
 zonefile-load: difference-no-serial
 journal-content: changes
 file: '%s.zone'
