@@ -55,7 +55,6 @@ echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin --days="$daysvalid" \
         --req-cn="$certname" \
         --subject-alt-name="email:$email${additional_san}" \
-        --copy-ext \
         --req-org="{{ settings.domain }} Client Cert CA" \
         build-client-full "$certname"
 
