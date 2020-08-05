@@ -1,3 +1,3 @@
-mat:
+mat2:
   pkg:
     - installed
