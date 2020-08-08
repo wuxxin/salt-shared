@@ -45,7 +45,7 @@ postgresql:
 /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf:
   file.replace:
     - pattern: |
-        ^host.*{{ listen_answer.listen }}.*
+        ^host.*{{ listen_answer.answer }}.*
     - repl: |
         host    all             all             {{ listen_answer.answer }}          md5
     - append_if_not_found: true
