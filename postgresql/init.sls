@@ -44,7 +44,7 @@ postgresql:
   {% for listen_answer in settings.additional_adresses %}
 "postgresql_{{ settings.pgmajor }}_pg_hba_{{ listen_answer.answer }}":
   file.replace:
-    - name: /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf:
+    - name: /etc/postgresql/{{ settings.pgmajor }}/main/pg_hba.conf
     - pattern: |
         ^host.*{{ listen_answer.answer }}.*
     - repl: |
