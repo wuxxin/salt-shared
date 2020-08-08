@@ -6,7 +6,7 @@ include:
 android-tools:
   pkg.installed:
     - pkgs:
-{%- if grains['osmajorrelease']|int < 18 %}
+{%- if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 18 %}
       - android-tools-adb
       - android-tools-fastboot
 {%- else %}

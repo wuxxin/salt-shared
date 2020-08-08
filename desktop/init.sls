@@ -25,11 +25,11 @@ include:
   - python.dev
   - python.scientific
   - tools.extra
+  - android
   - .homeshick
   - .atom
   - .code
   - .emulation
-  - .android
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
