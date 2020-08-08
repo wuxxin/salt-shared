@@ -1,11 +1,13 @@
 {% load_yaml as defaults %}
 additional_adresses: []
-# list of additional allowed ip network ranges to listen and answer to queries after auth
+# list of additional allowed ip network ranges for listen and answer to queries
+# listen entry is optional, answer entry is mandatory
 # example:
 #   - listen: 1.2.3.4
 #     answer: 1.2.3.0/24
 #   - listen: 2.3.4.9
 #     answer: 2.3.5.9/32
+#   - answer: 3.4.5.6/24
 
 extensions:
   - pg_stat_statements

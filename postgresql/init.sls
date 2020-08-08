@@ -35,8 +35,10 @@ postgresql:
 
 {% if settings.additional_adresses %}
   {% for addr in settings.additional_adresses  %}
-    {% set new_listen = ns.listen+ ','+ addr.listen %}
-    {% set ns.listen = new_listen %}
+    {% if addr.listen is defined %}
+      {% set new_listen = ns.listen+ ','+ addr.listen %}
+      {% set ns.listen = new_listen %}
+    {% endif %}
   {% endfor %}
 
   {% for listen_answer in settings.additional_adresses %}
@@ -45,7 +47,7 @@ postgresql:
     - pattern: |
         ^host.*{{ listen_answer.listen }}.*
     - repl: |
-        host    all             all             {{ listen_answer.answer|d(listen_answer.listen~"/32") }}          md5
+        host    all             all             {{ listen_answer.answer }}          md5
     - append_if_not_found: true
     - require:
       - pkg: postgresql
