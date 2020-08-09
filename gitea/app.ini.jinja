@@ -1,6 +1,6 @@
 {%- if entry.global is defined %}
   {%- for key,value in entry.global.items() %}
-{{ key|upper }}={{ value }}
+{{ key|upper() }}={{ value }}
   {%- endfor %}
 {%- endif %}
 {%- for key,value in entry.items() %}
