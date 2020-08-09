@@ -5,7 +5,7 @@ After=network.target
 {%- if entry.database.db_type == 'mysql' %}
 Requires=mariadb.service
 {%- elif entry.database.db_type == 'postgres' %}
-Requires=postgresql.service
+Requires=postgresql@12-main.service
 {%- endif %}
 
 [Service]
