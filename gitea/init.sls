@@ -136,6 +136,8 @@ gitea_{{ entry.name }}.service:
     - source: salt://gitea/gitea.service
     - name: /etc/systemd/system/gitea_{{ entry.name }}.service
     - template: jinja
+    - defaults:
+        entry: {{ entry }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
