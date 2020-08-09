@@ -43,7 +43,6 @@ global:
 gpg:
   key: ""
 salt: {}
-
 database:
   db_type: sqlite3
 server:
@@ -54,8 +53,11 @@ repository: {}
 oauth2: {}
 picture:
   disable_gravatar: "true"
-security:
+service:
   disable_registration: "true"
+  show_registration_button: "false"
+  require_signin_view: "true"
+security:
   install_lock: "true"
   min_password_length: 12
   password_complexity: "off"
