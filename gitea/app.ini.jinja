@@ -3,7 +3,7 @@
 {%- endfor %}
 {%- for key,value in entry.items() %}
   {%- if key not in ['name', 'global', 'gpg', 'salt'] %}
-[{{ key|upper }}]
+[{{ key }}]
     {%- for subkey,subvalue in value.items() %}
       {%- if subvalue is not mapping %}
 {{ subkey|upper }} = {{ subvalue }}
@@ -11,7 +11,7 @@
     {%- endfor %}
     {%- for subkey,subvalue in value.items() %}
       {%- if subvalue is mapping %}
-[{{ key|upper }}.{{ subkey|upper }}]
+[{{ key }}.{{ subkey }}]
         {%- for subsubkey,subsubvalue in subvalue.items() %}
 {{ subsubkey|upper }} = {{ subsubvalue }}
         {%- endfor %}
