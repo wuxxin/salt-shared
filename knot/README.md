@@ -12,8 +12,12 @@
     + jinja templating in source file with prefilled context var
         + common.* from defaults.jinja
         + custom additional context vars: add context data to zone
+    + knot is configured to not touch source zone files
+    + zone serial is handled by knot, serial-policy: unixtime
+    + journal-content: changes and dnssec
 
-+ secrets: key:secret (hmac-sha256) must generated as 256bit base64 encoded
++ generate DNS secrets
+    + secret (hmac-sha256) must generated as 256bit base64 encoded characters
     + eg. `openssl rand -base64 32`
     + eg. `keymgr -t test hmac-sha256 256`
 
