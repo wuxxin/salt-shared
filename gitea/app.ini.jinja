@@ -1,17 +1,21 @@
-{%- for k,v in entry.global.items() %}
-{{ k|upper }} = {{ v }}
+{%- for key,value in entry.global.items() %}
+{{ key|upper }} = {{ value }}
 {%- endfor %}
-{%- for k,v in entry.items() %}
-  {%- if k not in ['name', 'global', 'gpg', 'salt'] %}
-[{{ k }}]
-    {%- for subkey,subvalue in v.items()|select("mapping", False) %}
+{%- for key,value in entry.items() %}
+  {%- if key not in ['name', 'global', 'gpg', 'salt'] %}
+[{{ key|upper }}]
+    {%- for subkey,subvalue in value.items() %}
+      {%- if not mapping(subvalue) %}
 {{ subkey|upper }} = {{ subvalue }}
+      {%- endif %}
     {%- endfor %}
-    {%- for subkey,subvalue in value.items()|select("mapping", True) %}
-[{{ k }}.{{ subkey }}]
-      {%- for subsubkey,subsubvalue in subvalue.items() %}
+    {%- for subkey,subvalue in value.items() %}
+      {%- if mapping(subvalue) %}
+[{{ key|upper }}.{{ subkey|upper }}]
+        {%- for subsubkey,subsubvalue in subvalue.items() %}
 {{ subsubkey|upper }} = {{ subsubvalue }}
-      {%- endfor %}
+        {%- endfor %}
+      {%- endif %}
     {%- endfor %}
   {%- endif %}
 {%- endfor %}
