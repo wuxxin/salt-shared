@@ -19,7 +19,7 @@ gitea_archive:
     - source_hash: {{ external.gitea_binary_xz.hash_url }}
     - name: {{ gitea_local_archive }}
 gitea_binary:
-  cmd.run:
+  cmd.wait:
     - name: xz -d < {{ gitea_local_archive }} > {{ gitea_local_binary }} && chmod +x {{ gitea_local_binary }}
     - onchange:
       - file: gitea_archive
