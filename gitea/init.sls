@@ -119,7 +119,10 @@ gitea_ggp_user_{{ entry.name }}:
 gitea_{{ entry.name }}_app.ini:
   file.managed:
     - source: salt://gitea/app.ini.jinja
-    - name: /etc/gitea_{{ entry.name }}_app.ini
+    - name: {{ entry.salt.home_dir }}/gitea_{{ entry.name }}_app.ini
+    - mode: "0640"
+    - user: {{ entry.global.run_user }}
+    - group: {{ entry.global.run_user }}
     - template: jinja
     - defaults:
         entry: {{ entry }}
