@@ -122,7 +122,7 @@ gitea_{{ entry.name }}_app.ini:
     - name: /etc/gitea_{{ entry.name }}_app.ini
     - template: jinja
     - defaults:
-          entry: {{ entry }}
+        entry: {{ entry }}
     - require:
       - file: gitea_home_dir_{{ entry.name }}
       - file: gitea_.ssh_dir_{{ entry.name }}
