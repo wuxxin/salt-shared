@@ -31,42 +31,50 @@ update_image_{{ pod.image }}:
     - name: podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
     {%- endif %}
     - require_in:
-      - file: {{ service_name }}.service
+      - file: {{ pod.name }}.service
   {%- endif %}
 
-{{ pod.container_name }}.env:
+{{ pod.name }}.env:
   file.managed:
-    - name: /etc/{{ pod.container_name }}.env
+    - name: /etc/{{ pod.name }}.env
     - mode: 0600
     - contents: |
   {%- for key,value in pod.environment.items() %}
         {{ key }}={{ value }}
   {%- endfor %}
 
-{{ pod.container_name }}.service:
+{{ pod.name }}.service:
   file.managed:
     - source: salt://containers/podman-container-template.service
-    - name: /etc/systemd/system/{{ pod.container_name }}.service
+    - name: /etc/systemd/system/{{ pod.name }}.service
     - template: jinja
     - defaults:
         pod: {{ pod }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: {{ pod.container_name }}.service
+      - file: {{ pod.name }}.service
   {%- if pod.enabled %}
+    {%- if pod.type == 'oneshot' %}
+  service.enabled:
+    {%- else %}
   service.running:
     - enable: true
+    {%- endif %}
   {%- else %}
+    {%- if pod.type == 'oneshot' %}
+  service.disabled:
+    {%- else %}
   service.dead:
     - enable: false
+    {%- endif %}
   {%- endif %}
-    - name: {{ pod.container_name }}.service
+    - name: {{ pod.name }}.service
     - watch:
-      - file: {{ pod.container_name }}.env
-      - file: {{ pod.container_name }}.service
+      - file: {{ pod.name }}.env
+      - file: {{ pod.name }}.service
     - require:
-      - cmd: {{ pod.container_name }}.service
+      - cmd: {{ pod.name }}.service
 {% endmacro %}
 
 

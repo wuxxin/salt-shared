@@ -47,22 +47,34 @@ policy: |
 {% endload %}
 
 {% load_yaml as default_container %}
-# container name
-container_name:
+# name of the container pod and name of the controlling systemd service
+name:
 
-# name of the container image: x/y[:z]
-image:
-# optional tag, will be appended to image and on build
-tag:
-# build: build container from source
-build: false
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
 # update: if set true: container image will be pulled/build on every service start
 update: true
 # ephemeral: if set true, container will be removed on stop
 ephemeral: true
+# build: build container from source
+build: false
 
+# systemd service options
+# systemd type: "exec" or "oneshot" or advanced types: "simple, forking, dbus, notify, idle"
+type: exec
+# systemd restart: "no", "on-failure" or
+# advanced: "on-success, on-abnormal, on-watchdog, on-abort, or always"
+# default: no if type oneshot, on-failure else
+restart:
+# after, requires, wants: equal to systemd config
+after:
+requires:
+wants:
+
+# name of the container image: x/y[:z]
+image:
+# optional tag, will be appended to image and on build
+tag:
 # environment: dict: {key: value,} add environment data
 environment: {}
 # label: dict: {key: value,} add label to container
@@ -71,8 +83,6 @@ labels: {}
 volumes: []
 # ports: list
 ports: []
-
-
 # command: if set, will replace default command
 command: ""
 # args: if set, will add args for command, command must also be set
@@ -84,7 +94,7 @@ options: {}
 
 
 {% load_yaml as default_compose %}
-service_name:
+name:
 composefile:
 workingdirectory:
 environment: {}

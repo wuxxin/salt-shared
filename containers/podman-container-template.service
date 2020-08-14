@@ -1,11 +1,22 @@
 [Unit]
-Description=Systemd service for podman container {{ pod.container_name }}
-After=network-online.target
+Description=Systemd service for podman container {{ pod.name }}
+After=network-online.target {{ pod.after }}
+{% if pod.wants %}Wants={{ pod.wants }}{% endif %}
+{% if pod.requires %}Requires={{ pod.requires }}{% endif %}
 StartLimitBurst=5
 StartLimitIntervalSec=100
 
 [Service]
-Restart=always
+Type={{ pod.type }}
+{%- if not pod.restart %}
+  {%- if pod.type == 'oneshot' %}
+Restart="no"
+  {%- else %}
+Restart=on-failure
+  {%- endif %}
+{%- else %}
+Restart={{ pod.restart }}
+{%- endif %}
 {%- if pod.update %}
   {%- if pod.build %}
 ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
@@ -14,19 +25,19 @@ ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
   {%- endif %}
 {%- endif %}
 {%- if pod.ephemeral %}
-ExecStartPre=-podman rm -f {{ pod.container_name }}
+ExecStartPre=-podman rm -f {{ pod.name }}
 {%- endif %}
-# RuntimeDirectory will create /run/{{ pod.container_name }} for pid, socket files
-RuntimeDirectory={{ pod.container_name }}
+# RuntimeDirectory will create /run/{{ pod.name }} for pid, socket files
+RuntimeDirectory={{ pod.name }}
 # contents of Environmentfile will be passed to container using --env-host
-EnvironmentFile=/etc/{{ pod.container_name }}.env
+EnvironmentFile=/etc/{{ pod.name }}.env
 
 {%- if pod.enabled %}
 ExecStart=podman run \
   {%- if pod.ephemeral %}
   --rm \
   {%- endif %}
-  --name={{ pod.container_name }} \
+  --name={{ pod.name }} \
   --env-host \
   {%- for key,value in pod.options.items() %}
   --{{ key }}={{ value }} \
@@ -47,7 +58,7 @@ ExecStart=podman run \
 ExecStart=/usr/bin/false
 {%- endif %}
 
-ExecStop=podman stop {{ pod.container_name }}
+ExecStop=podman stop {{ pod.name }}
 
 [Install]
 WantedBy=multi-user.target

@@ -8,11 +8,11 @@ include:
 {% endfor %}
 
 {% for name,pod in salt['pillar.get']('podman:container', {}).items() %}
-{% set dummy = pod.__setitem__('container_name', name) %}
+{% set dummy = pod.__setitem__('name', name) %}
 {{ podman_container(pod) }}
 {% endfor %}
 
 {% for name,compose in salt['pillar.get']('podman:compose', {}).items() %}
-{% set dummy = compose.__setitem__('service_name', name) %}
+{% set dummy = compose.__setitem__('name', name) %}
 {{ podman_compose(compose) }}
 {% endfor %}
