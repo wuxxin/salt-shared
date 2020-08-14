@@ -2,6 +2,9 @@
 {% load_yaml as defaults %}
 
 user: {{ salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('gitops') }}
+src_dir: {{ grains['project_basepath'] }}
+env_file: /etc/gitops.env
+var_dir: /var/lib/gitops
 
 timer:
   enabled: false
@@ -31,10 +34,14 @@ git:
 sentry:
   dsn:
 
-update_automatic_reboot: true
 maintenance_template: /var/lib/gitops/maintenance.template.html
 maintenance_target: /var/lib/gitops/maintenance/503.html
 
+{# onfailure_service: List of systemd service names (without ".service")
+   to be added as onfailure to gitops-service-failed #}
+onfailure_service: []
+
+update_automatic_reboot: true
 pre_update_command: /usr/bin/true
 update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate
 post_update_command: /usr/bin/true
@@ -53,10 +60,6 @@ post_update_command: /usr/bin/bash -c '. /usr/local/lib/gitops-library.sh;
 finish_update_command: /usr/bin/systemctl start --no-block xyz
 ```
 #}
-
-env_file: /etc/gitops.env
-var_dir: /var/lib/gitops
-src_dir: {{ grains['project_basepath'] }}
 
 {% endload %}
 

@@ -171,6 +171,26 @@ trust_gpg_id:
       - cmd: add_gpg_id
 {% endif %}
 
+/etc/systemd/system/gitops-service-failed@.service:
+  file.managed:
+    - source: salt://gitops/gitops-service-failed@.service
+    - template: jinja
+    - defaults:
+      settings: {{ settings }}
+
+{% for service in settings.onfailure_service %}
+/etc/systemd/system/{{ service }}.service.d/onfailure.conf:
+  file.managed:
+    - makedirs: true
+    - contents: |
+        [Unit]
+        OnFailure=gitops-service-failed@%n.service
+    - require:
+      - file: /etc/systemd/system/gitops-service-failed@.service
+    - onchanges_in:
+      - cmd: gitops-update
+{% endfor %}
+
 gitops-update:
   file.managed:
     - name: /etc/systemd/system/gitops-update.service
@@ -183,5 +203,7 @@ gitops-update:
     - onchanges:
       - file: gitops-update
   service.enabled:
+    - watch:
+      - file: gitops-update
     - require:
       - cmd: gitops-update
