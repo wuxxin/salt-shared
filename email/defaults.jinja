@@ -1,6 +1,6 @@
 {% load_yaml as defaults %}
-domain: {{ grains['fqdn'] }}
 hostname: {{ grains['fqdn'] }}
+domain: {{ grains['fqdn'] }}
 allowed_domains: []
 
 aliases:
@@ -8,7 +8,10 @@ aliases:
 
 incoming:
   enabled: true
-  getmail: []
+  listen:
+    - all
+  trusted_networks:
+    - 127.0.0.0/8
 
 outgoing:
   enabled: true
@@ -19,18 +22,45 @@ outgoing:
     username:
     password:
 
-internal:
-  listen: []
-  answer: []
+dkim:
+  enabled: false
+  sign: {}
+  {#
+    domainname:
+      selector:
+      secret:
+      public:
+  #}
 
+mail_spool_directory: /var/mail/
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
 dhparam: /etc/ssl/private/dhparam
 
-dkim:
-  enabled: false
-  secret:
-  public:
+{# set postfix to use VERTP, and use python library to parse bounce messages
+https://gitlab.com/warsaw/flufl.bounce #}
+
+bounces:
+  temporary:
+  permanent:
+
+getmail:
+{#
+  - name: getfx
+    user: getfx_sys
+    enabled: true
+    config: |
+        [options]
+        delete = true
+        [retriever]
+        type = SimpleIMAPSSLRetriever
+        server = imap.dom.name
+        username = userfx
+        password = passfx
+        [destination]
+        type = Maildir
+        path = ~/Maildir/shlhetal
+#}
 
 {% endload %}
 

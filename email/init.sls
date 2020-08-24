@@ -2,7 +2,7 @@
 
 include:
   - email.opendkim
-  - email.getmail
+  # - email.getmail disabled, because needs rewrite
 
 {# create /var/mail/root Maildir directory, overwrite in case it is mbox file #}
 {%- for v in ['', '/cur', '/new', '/tmp',] %}

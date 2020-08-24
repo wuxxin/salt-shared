@@ -3,7 +3,7 @@ compatibility_level=2
 myhostname = {{ settings.hostname }}
 mydomain = {{ settings.domain }}
 mydestination = $myhostname, localhost
-mynetworks = 127.0.0.0/8 {% for network in settings.internal.answer %} {{ network }} {% endfor %}
+mynetworks = {% for network in settings.trusted_networks %} {{ network }} {% endfor %}
 
 # only use ipv4, because ipv6 fails under some circumstances
 inet_protocols = ipv4
@@ -28,11 +28,10 @@ default_transport = error: outside mail is not deliverable
 smtpd_banner = $myhostname ESMTP $mail_name
 smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination
 {%- if settings.incoming.enabled %}
-# accept incoming mail from all interfaces
-inet_interfaces = all
+# accept incoming mail the following interfaces
+inet_interfaces = {% for ip in settings.incoming.listen %} {{ ip }} {% endfor %}
 {%- else %}
-# accept incoming mail only from internal interfaces
-inet_interfaces = 127.0.0.1 {% for ip in settings.internal.listen %} {{ ip }} {% endfor %}
+inet_interfaces =
 {%- endif %}
 
 # enable sasl client auth, but add smtp_sasl_password_maps,
@@ -55,7 +54,7 @@ biff = no
 # home_mailbox path is relative to user's home directory
 # resolution order is home_mailbox then mail_spool_directory
 home_mailbox =
-mail_spool_directory = /var/mail/
+mail_spool_directory = {{ settings.mail_spool_directory }}
 
 # ### filter
 # connect postfix with opendkim milter
