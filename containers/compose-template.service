@@ -1,0 +1,28 @@
+[Unit]
+Description=Systemd service for podman-compose {{ compose.name }}
+After=network-online.target {{ compose.after }}
+{% if compose.wants %}Wants={{ compose.wants }}{% endif %}
+{% if compose.requires %}Requires={{ compose.requires }}{% endif %}
+StartLimitBurst=5
+StartLimitIntervalSec=100
+
+[Service]
+Type=exec
+Restart={{ compose.restart }}
+
+WorkingDirectory={{ compose.workdir }}
+# RuntimeDirectory will create /run/{{ compose.name }} for pid, socket files
+RuntimeDirectory={{ compose.name }}
+
+{%- if compose.update %}
+  {%- if compose.build %}
+ExecStartPre=podman-compose build
+  {%- else %}
+ExecStartPre=podman-compose pull
+  {%- endif %}
+{%- endif %}
+ExecStart=podman-compose up --abort-on-container-exit
+ExecStop=podman-compose down
+
+[Install]
+WantedBy=default.target

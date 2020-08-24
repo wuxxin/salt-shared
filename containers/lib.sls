@@ -1,5 +1,5 @@
 
-{% macro podman_volume(name, labels=[], driver='local', opts=[]) %}
+{% macro volume(name, labels=[], driver='local', opts=[]) %}
   {%- set labels_string = '' if not labels else '-l ' ~ labels|join(' -l ') %}
   {%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
 containers_volume_{{ name }}:
@@ -9,14 +9,15 @@ containers_volume_{{ name }}:
 {% endmacro %}
 
 
-{% macro podman_image(name, tag='') %}
-podman_image_{{ name }}:
+{% macro image(name, tag='') %}
+containers_image_{{ name }}:
   cmd.run:
     - name: podman xxxx
     - unless: podman xxxx ls -q | grep -q {{ name }}
 {% endmacro %}
 
-{% macro podman_container(container_definition) %}
+
+{% macro container(container_definition) %}
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set pod= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
@@ -36,7 +37,7 @@ update_image_{{ pod.image }}:
 
 {{ pod.name }}.env:
   file.managed:
-    - name: /etc/{{ pod.name }}.env
+    - name: {{ settings.container.service_basepath }}/{{ pod.name }}.env
     - mode: 0600
     - contents: |
   {%- for key,value in pod.environment.items() %}
@@ -78,30 +79,126 @@ update_image_{{ pod.image }}:
 {% endmacro %}
 
 
-{% macro podman_compose(compose_definition) %}
+{% macro compose(compose_definition) %}
   {%- from "containers/defaults.jinja" import settings, default_compose with context %}
-  {%- set compose= salt['grains.filter_by']({'default': default_compose},
+  {%- set entry= salt['grains.filter_by']({'default': default_compose},
     grain='default', default= 'default', merge=compose_definition) %}
-  {%- set composetarget= "/etc/containers/podman-compose/"+ compose.service_name+ "/docker-compose.yml" %}
-{{ compose.service_name }}.compose:
-  file.managed:
-    - source: {{ compose.composefile }}
-    - name: {{ composetarget }}
+
+  {%- if not entry.workdir %}
+    {%- do entry.update({ 'workdir': settings.compose.workdir_basepath ~ '/' ~ entry.name }) %}
+  {%- endif %}
+
+  {%- set composefile= entry.workdir ~ "/" ~ settings.compose.base_filename %}
+  {%- set overridefile= entry.workdir ~ "/" ~ settings.compose.override_filename %}
+
+{# create workdir #}
+{{ entry.name }}.workdir:
+  file.directory:
+    - name: {{ entry.workdir }}
     - makedirs: true
-{{ compose.service_name }}.service:
+    - mode: "0750"
+
+{# create compose,override files,
+  fill with source,config or config,none if source empty #}
+  {%- if entry.source %}
+{{ entry.name }}.compose:
   file.managed:
-    - source: salt://containers/podman/podman-compose-template.service
-    - name: /etc/systemd/system/{{ compose.service_name }}.service
+    - source: {{ entry.source }}
+    - name: {{ composefile }}
+    - require:
+      - file: {{ entry.name }}.workdir
+{{ entry.name }}.override:
+    {%- if entry.config %}
+  file.managed:
+    - contents: |
+{{ entry.config|yaml(False)|indent(8,True) }}
+    {%- else %}
+  file.absent:
+    {%- endif %}
+    - name: {{ overridefile }}
+    - require:
+      - file: {{ entry.name }}.workdir
+  {%- else %}
+{{ entry.name }}.compose:
+  file.managed:
+    - contents: |
+{{ entry.config|yaml(False)|indent(8,True) }}
+    - name: {{ composefile }}
+    - require:
+      - file: {{ entry.name }}.workdir
+{{ entry.name }}.override:
+  file.absent:
+    - name: {{ overridefile }}
+  {%- endif %}
+
+{# write files to workdir:
+  if source then template jinja and environment else contents #}
+  {%- for fname, fdata in entry.files.items() %}
+{{ entry.name }}.files.{{ fname }}:
+  file.managed:
+    - name: {{ entry.workdir ~ "/" ~ fname }}
+    - makedirs: true
+    {%- if fdata.source is defined %}
+    - source: {{ fdata.source }}
     - template: jinja
     - defaults:
-        compose: {{ compose }}
+      {%- for key,value in entry.environment.items() %}
+        {{ key }}:{{ value }}
+      {%- endfor %}
+    {%- elif fdata.contents is defined %}
+    - contents: |
+{{ fdata.contents|indent(8,True) }}
+    {%- endif %}
+    {%- for k,v in fdata.items() %}
+      {%- if k not in ['contents', 'source',] %}
+    - {{ k }}: {{ v }}
+      {%- endif %}
+    {%- endfor %}
+    - watch_in:
+      - service: {{ entry.name }}
+    - require:
+      - file: {{ entry.name }}.workdir
+  {%- endfor %}
+
+{# write environment: to workdir #}
+{{ entry.name }}.env:
+  file.managed:
+    - name: {{ entry.workdir ~ "/.env" }}
+    - mode: 0600
+    - contents: |
+        # environment for {{ entry.name }}
+  {%- for key,value in entry.environment.items() %}
+        {{ key }}={{ value }}
+  {%- endfor %}
+    - require:
+      - file: {{ entry.name }}.workdir
+
+{# write, (re)load and start service #}
+{{ entry.name }}.service:
+  file.managed:
+    - source: salt://containers/compose-template.service
+    - name: /etc/systemd/system/{{ entry.name }}.service
+    - template: jinja
+    - defaults:
+        compose: {{ entry }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: {{ compose.service_name }}.service
+      - file: {{ entry.name }}.service
+  {%- if entry.enabled %}
   service.running:
-    - name: {{ compose.service_name }}.service
     - enable: true
+  {%- else %}
+  service.dead:
+    - enable: false
+  {%- endif %}
+    - name: {{ entry.name }}.service
     - require:
-      - cmd: {{ compose.service_name }}.service
+      - cmd: {{ entry.name }}.service
+    - watch:
+      - file: {{ entry.name }}.compose
+      - file: {{ entry.name }}.override
+      - file: {{ entry.name }}.env
+
+
 {% endmacro %}

@@ -14,21 +14,30 @@ include:
 /etc/containers:
   file:
     - directory
+
+{{ settings.container.service_basepath }}:
+  file:
+    - directory
+    - mode: "0750"
+
+{{ settings.compose.workdir_basepath }}:
+  file:
+    - directory
+    - mode: "0750"
+
+/etc/containers/containers.conf:
   cmd.run:
     - name: rm /etc/containers/containers.conf && cp /usr/share/containers/containers.conf /etc/containers/containers.conf
     - onlyif: test -L /etc/containers/containers.conf
     - require:
       - file: /etc/containers
-
-/etc/containers/containers.conf:
   file.serialize:
     - dataset:
         engine: {{ settings.engine }}
     - formatter: toml
     - merge_if_exists: True
     - require:
-      - file: /etc/containers
-      - cmd: /etc/containers
+      - cmd: /etc/containers/containers.conf
 
 /etc/containers/storage.conf:
   file.serialize:
@@ -38,7 +47,6 @@ include:
     - merge_if_exists: True
     - require:
       - file: /etc/containers
-      - cmd: /etc/containers
 
 /etc/containers/mounts.conf:
   file.managed:

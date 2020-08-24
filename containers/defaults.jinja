@@ -1,4 +1,14 @@
 {% load_yaml as defaults %}
+
+# used in init.sls and lib.sls
+container:
+  service_basepath: /etc/containers/podman.service
+compose:
+  workdir_basepath: /etc/containers/podman-compose.service
+  base_filename: docker-compose.yml
+  override_filename: docker-compose.override.yml
+  env_filename: .env
+
 # part of /etc/containers/containers.conf:[engine]
 engine:
   # Container Runtime: ["runc"(default), "crun"]
@@ -45,6 +55,7 @@ policy: |
     }
 
 {% endload %}
+
 
 {% load_yaml as default_container %}
 # name of the container pod and name of the controlling systemd service
@@ -94,11 +105,32 @@ options: {}
 
 
 {% load_yaml as default_compose %}
+# name of the compose sevice and name of the controlling systemd service
 name:
-composefile:
-workingdirectory:
+
+# systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
+restart: on-failure
+# after, requires, wants: equal to systemd config
+after:
+requires:
+wants:
+
+# environment to be placed as ".env" file inside workdir
 environment: {}
-environmentfile:
+
+# compose source config and compose overrides config
+source:
+config: {}
+
+# workdir: if empty will use settings.compose.workdir_basepath+ "/"+ compose.name
+workdir:
+
+# files to be placed inside workdir
+files: {}
+
+# enabled: if false, service will not get started and will be stopped if running
+enabled: true
+# update: if true: container image will be pulled/build on every service start
 update: true
 build: false
 {% endload %}
