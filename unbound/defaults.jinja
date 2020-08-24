@@ -1,6 +1,15 @@
 {% load_yaml as defaults %}
 enabled: false
-redirect_host_dns: true
+# logging verbosity
+verbosity: 1
+listen: []
+answer: []
+authorative:
+  unsigned: {}
+  signed: {}
+# if redirect_host_dns is true, modify host to use unbound service for resolving dns
+redirect_host_dns: false
+# if query_localhost is true, unbound will query local host addresses as authoritative targets
 query_localhost: true
 {% endload %}
 
