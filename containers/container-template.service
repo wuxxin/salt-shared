@@ -1,14 +1,14 @@
 [Unit]
 Description=Systemd service for podman container {{ pod.name }}
-After=network-online.target {{ pod.after }}
-{% if pod.wants %}Wants={{ pod.wants }}{% endif %}
-{% if pod.requires %}Requires={{ pod.requires }}{% endif %}
+After=network-online.target {{ pod.after if pod.after is not none else "" }}
+{% if pod.wants is not none %}Wants={{ pod.wants }}{% endif %}
+{% if pod.requires is not none %}Requires={{ pod.requires }}{% endif %}
 StartLimitBurst=5
 StartLimitIntervalSec=100
 
 [Service]
 Type={{ pod.type }}
-{%- if not pod.restart %}
+{%- if pod.restart is not none %}
   {%- if pod.type == 'oneshot' %}
 Restart="no"
   {%- else %}
