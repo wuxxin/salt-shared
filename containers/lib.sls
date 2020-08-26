@@ -200,5 +200,4 @@ update_image_{{ pod.image }}:
       - file: {{ entry.name }}.override
       - file: {{ entry.name }}.env
 
-
 {% endmacro %}
