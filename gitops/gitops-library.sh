@@ -179,11 +179,11 @@ EOF
 
 
 # ### sentry error reporting ###
-sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
-    local topic msg level extra tags
+sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}], [$5=logger=app-status]
+    local topic msg level extra logger tags
     local gitops_run_rev gitops_current_rev gitops_failed_rev sentrycat
 
-    topic=$1; msg=$2; level=${3:-error}; extra=${4:-\{\}}
+    topic=$1; msg=$2; level=${3:-error}; extra=${4:-\{\}}; logger=${5:-app.status}
     gitops_run_rev=$(cat "{{ settings.src_dir }}/.git/refs/heads/{{ settings.git.branch }}" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
     gitops_failed_rev=$(get_tag gitops_failed_rev "invalid")
@@ -197,12 +197,12 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
         \"gitops_failed_rev\": \"$gitops_failed_rev\" \
         }"
 
-    printf "Sentry Entry: Level: %s Topic: %s Message: %s Extra: %s" "$level" "$topic" "$msg" "$extra" 1>&2
+    printf "Sentry Entry: Level: %s Topic: %s Message: %s Extra: %s Logger: %s" "$level" "$topic" "$msg" "$extra" "$logger" 1>&2
 
     if test -n "gitops_sentry_dsn" -a -e "$sentrycat"; then
         SENTRY_DSN="$gitops_sentry_dsn" "$sentrycat" \
             --release "$gitops_current_rev" \
-            --logger app.status \
+            --logger "$logger" \
             --level "$level" \
             --culprit "${UNITNAME:-shellscript}" \
             --server_name "${DOMAIN:-$(hostname -f)}"  \
