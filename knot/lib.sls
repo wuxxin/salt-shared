@@ -1,4 +1,4 @@
-{% macro write_zone(zone, common, targetpath, watch_in='') %}
+{% macro write_zone(zone, common, targetpath, watch_in='', onchanges_in='') %}
   {%- set targetfile = targetpath+ '/'+ zone.domain+ '.zone' %}
 
 zone-{{ targetpath }}-{{ zone.domain }}:
@@ -9,8 +9,10 @@ zone-{{ targetpath }}-{{ zone.domain }}:
     - group: knot
     - mode: "0640"
   {%- if watch_in %}
-    - require_in: {{ watch_in }}
     - watch_in: {{ watch_in }}
+  {% endif %}
+  {%- if onchanges_in %}
+    - onchanges_in: {{ onchanges_in }}
   {% endif %}
   {%- if zone.source is defined %}
     - template: jinja

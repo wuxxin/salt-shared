@@ -19,7 +19,7 @@ knot-config-check:
   file.managed:
     - name: /usr/local/sbin/knot-config-check
     - contents: |
-        #!/bin/sh
+        #!/usr/bin/sh
         /usr/sbin/knotc -c $1 conf-check
         exit $?
     - mode: "0755"
@@ -55,22 +55,34 @@ knot_default_{{ settings.database.storage }}/{{ i }}:
   {%- for zone in settings.zone %}
     {%- set targetpath= settings.template|d([template_default])|selectattr('id', 'equalto',
         zone.template|d('default'))|map(attribute='storage')|first %}
-{{ write_zone(zone, settings.common, targetpath, watch_in="knot.service") }}
+{{ write_zone(zone, settings.common, targetpath,
+              watch_in="knot.service", onchanges_in="knot.reload") }}
   {%- endfor %}
 
 knot.service:
   service.running:
     - enable: true
+    - reload: true
     - require:
       - pkg: knot-package
     - watch:
       - file: /etc/default/knot
       - file: /etc/knot/knot.conf
 
+knot.reload:
+  cmd.run:
+    - name: /usr/sbin/knotc -b zone-reload
+    - require:
+      - service: knot.service
+
 {%- else %}
 knot.service:
   service.dead:
     - disable: true
+
+knot.reload:
+  cmd.run:
+    - name: /usr/bin/true
 
 {%- endif %}
 
@@ -138,22 +150,34 @@ profile_{{ name }}_{{ i }}:
         {%- endif %}
         {%- set targetpath=  merged_config.template|selectattr('id', 'equalto',
             zone.template|d('default'))|map(attribute='storage')|first %}
-{{ write_zone(zone, merged_config.common, targetpath, watch_in="knot-{{ name }}.service") }}
+{{ write_zone(zone, merged_config.common, targetpath,
+              watch_in="knot-{{ name }}.service", onchanges_in="knot-{{ name}}.reload") }}
       {%- endfor %}
 
 knot-{{ name }}.service:
   service.running:
     - enable: true
+    - reload: true
     - require:
       - pkg: knot-package
     - watch:
       - file: /etc/default/knot-{{ name }}
       - file: /etc/knot/knot-{{ name }}.conf
 
+knot-{{ name }}.reload:
+  cmd.run:
+    - name: /usr/sbin/knotc -b -c /etc/knot/knot-{{ name}}.conf zone-reload
+    - require:
+      - service: knot-{{ name }}.service
+
     {%- else %}
 knot-{{ name }}.service:
   service.dead:
     - disable: true
+
+knot.reload:
+  cmd.run:
+    - name: /usr/bin/true
 
     {%- endif %}
   {% endfor %}
