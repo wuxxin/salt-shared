@@ -87,4 +87,11 @@ podman:
       - skopeo
       - fuse-overlayfs
 
+# snapshot (2020/08/26) from: https://raw.githubusercontent.com/flobz/podman-compose/devel/podman_compose.py
+podman_compose.py:
+  file.managed:
+    - source: salt://containers/podman_compose.py
+    - name: /usr/local/bin/podman-compose
+    - mode: "0755"
+
 {% endif %}
