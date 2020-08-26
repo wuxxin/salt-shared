@@ -39,6 +39,7 @@ unbound:
   file:
   {%- if settings.redirect_host_dns %}
     - managed
+    - makedirs: true
     - contents: |
         [Resolve]
         DNS={{ settings.listen[0] }}
@@ -46,7 +47,7 @@ unbound:
     - absent
   {%- endif %}
   cmd.run:
-    - name: systemctl restart resolved
+    - name: systemctl restart systemd-resolved
     - onchange:
       - file: /etc/systemd/resolved.conf.d/dns_servers.conf
 
