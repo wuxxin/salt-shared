@@ -3,10 +3,10 @@ include:
   - containers
   - android.emulator-container
 
-{% from "containers/lib.sls" import podman_volume, podman_container, podman_compose %}
+{% from "containers/lib.sls" import volume, container, compose %}
 
-{{ podman_volume(name) }}
-{{ podman_container(pod) }}
+{{ volume(name) }}
+{{ container(pod) }}
 
 download_whatsapp_apk:
   cmd.run:
