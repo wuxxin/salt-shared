@@ -155,7 +155,7 @@ update_image_{{ pod.image }}:
       {%- endif %}
     {%- endfor %}
     - watch_in:
-      - service: {{ entry.name }}
+      - service: {{ entry.name }}.service
     - require:
       - file: {{ entry.name }}.workdir
   {%- endfor %}
