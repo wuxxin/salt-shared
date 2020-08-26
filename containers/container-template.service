@@ -8,7 +8,7 @@ StartLimitIntervalSec=100
 
 [Service]
 Type={{ pod.type }}
-{%- if pod.restart|length %}
+{%- if not pod.restart|length %}
   {%- if pod.type == 'oneshot' %}
 Restart="no"
   {%- else %}
