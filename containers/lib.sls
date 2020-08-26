@@ -71,9 +71,11 @@ update_image_{{ pod.image }}:
     {%- endif %}
   {%- endif %}
     - name: {{ pod.name }}.service
+  {%- if pod.type != 'oneshot' %}
     - watch:
       - file: {{ pod.name }}.env
       - file: {{ pod.name }}.service
+  {%- endif %}
     - require:
       - cmd: {{ pod.name }}.service
 {% endmacro %}
