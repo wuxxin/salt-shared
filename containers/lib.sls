@@ -143,7 +143,7 @@ update_image_{{ pod.image }}:
     - template: jinja
     - defaults:
       {%- for key,value in entry.environment.items() %}
-        {{ key }}:{{ value }}
+        {{ key }}: {{ value }}
       {%- endfor %}
     {%- elif fdata.contents is defined %}
     - contents: |
