@@ -10,9 +10,9 @@ StartLimitIntervalSec=100
 Type={{ pod.type }}
 {%- if not pod.restart|length %}
   {%- if pod.type == 'oneshot' %}
-Restart="no"
+Restart=no
   {%- else %}
-Restart="on-failure"
+Restart=on-failure
   {%- endif %}
 {%- else %}
 Restart={{ pod.restart }}
