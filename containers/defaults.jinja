@@ -76,11 +76,11 @@ type: exec
 # systemd restart: "no", "on-failure" or
 # advanced: "on-success, on-abnormal, on-watchdog, on-abort, or always"
 # default: no if type oneshot, on-failure else
-restart:
+restart: ""
 # after, requires, wants: equal to systemd config
-after:
-requires:
-wants:
+after: ""
+requires: ""
+wants: ""
 
 # name of the container image: x/y[:z]
 image:
@@ -111,9 +111,9 @@ name:
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
 restart: on-failure
 # after, requires, wants: equal to systemd config
-after:
-requires:
-wants:
+after: ""
+requires: ""
+wants: ""
 
 # environment to be placed as ".env" file inside workdir
 environment: {}
