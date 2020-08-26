@@ -46,7 +46,7 @@ update_image_{{ pod.image }}:
 
 {{ pod.name }}.service:
   file.managed:
-    - source: salt://containers/podman-container-template.service
+    - source: salt://containers/container-template.service
     - name: /etc/systemd/system/{{ pod.name }}.service
     - template: jinja
     - defaults:
