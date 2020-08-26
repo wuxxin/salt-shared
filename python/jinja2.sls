@@ -15,6 +15,11 @@ jinja2-req:
   pkg.installed:
     - name: python3-markupsafe
 
+yamllint:
+  pkg.installed:
+    - require:
+      - pkg: jinja2-cli-req
+
 {# get jinja from pypi, because > 2.9 < 2.11 is broken for saltstack
  additional patch: https://github.com/saltstack/salt/pull/56860/files
 #}
