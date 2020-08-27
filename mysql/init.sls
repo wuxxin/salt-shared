@@ -41,19 +41,32 @@ mariadb:
     - require:
       - pkg: mariadb
 
+{# generate all database users #}
 {% for user in settings.user %}
-mariadb_user_{{ user.name }}:
+
+  {%- if user.host|d(false) %}
+    {%- set hosts= [user.host] %}
+  {%- else %}
+    {%- set hosts= user.hosts|d(['localhost']) %}
+  {%- endif %}
+
+  {%- for host in hosts %}
+mariadb_user_{{ user.name }}@{{ host }}:
   mysql_user.present:
     - name: {{ user.name }}
-  {%- for key,value in user.items() %}
-    {%- if key not in ['name',]%}
+    - host: {{ host }}
+    {%- for key,value in user.items() %}
+      {%- if key not in ['name', 'host', 'hosts']%}
     - {{ key }}: {{ value }}
-    {%- endif %}
-  {%- endfor %}
+      {%- endif %}
+    {%- endfor %}
     - require:
       - service: mariadb
+  {%- endfor %}
 {% endfor %}
 
+
+{# generate all databases #}
 {% for database in settings.database %}
 mariadb_database_{{ database.name }}:
   mysql_database.present:
@@ -61,20 +74,27 @@ mariadb_database_{{ database.name }}:
     - character_set: {{ database.character_set|d(settings.character_set) }}
     - collate: {{ database.collate|d(settings.collate) }}
   {%- for key,value in database.items() %}
-    {%- if key not in ['name', 'character_set', 'collate', 'owner', 'grant',] %}
+    {%- if key not in ['name', 'character_set', 'collate', 'owner', 'owners', 'grant',] %}
     - {{ key }}: {{ value }}
     {%- endif %}
   {%- endfor %}
     - require:
       - service: mariadb
-  {%- if database.owner is defined %}
-mariadb_database_owner_{{ database.name }}:
+
+  {# set owner of databases #}
+  {%- if database.owner|d(false) %}
+    {%- set owners= [database.owner] %}
+  {%- else %}
+    {%- set owners= database.owners|d([]) %}
+  {%- endif %}
+  {%- for owner in owners %}
+mariadb_database_{{ database.name }}_owner_{{ owner }}:
   mysql_grants.present:
     - grant: "{{ database.grant|d('all privileges') }}"
     - database: "{{ database.name }}.*"
-    - user: {{ database.owner.split("@")[0] }}
-    - host: {{ database.owner.split("@")[1]|d('localhost') }}
+    - user: {{ owner.split("@")[0] }}
+    - host: {{ owner.split("@")[1]|d('localhost') }}
     - require:
       - mysql_database: mariadb_database_{{ database.name }}
-  {%- endif %}
+  {%- endfor %}
 {% endfor %}
