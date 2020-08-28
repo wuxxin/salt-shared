@@ -16,7 +16,7 @@ geoip_database:
     - source_hash: sha256={{ external.hash }}
   cmd.run:
   {%- if config.transform == 'gzip' %}
-    - name: gzip < {{ external.target }} > {{ config.database }}
+    - name: gzip -d -c {{ external.target }} > {{ config.database }}
   {%- else %}
     - name: cp {{ external.target }} {{ config.database }}
   {%- endif %}
