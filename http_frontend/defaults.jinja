@@ -60,10 +60,10 @@ default_header:
   {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy #}
   X-Content-Type-Options: '"nosniff" always'
 
-{# headers to be inserted for the main domain:
-  will use default_header if not existing or empty,
-  Use Boolean false to not set any default header #}
+{# dict of header vars to be inserted for the main domain;
+will use default_header if header does not exist
 header: {}
+#}
 
 {#
 upstream: # [] # list of {name, server}
