@@ -73,7 +73,10 @@ location:
   - source: /hooks/
     target: proxy_pass http://webhooks
   - source: /
-    target: root /var/www/main.domain/
+    keep_header: true
+    target: |
+        add_header X-Whatever-Type easy;
+        root /var/www/main.domain/
 host:
   - domain: another.domain
     client_cert_verify: false,true
@@ -81,6 +84,7 @@ host:
     header: {}
     location:
       - source: /
+        keep_header: true
         target: root /var/www/another.domain/
 #}
 
