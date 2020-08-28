@@ -109,9 +109,15 @@ geoip_provider:
     transform: gzip
     database: /usr/local/lib/dbip-city.mmdb
     fields:
-      geoip2_data_country_code: ['country iso_code', 'X-Country-Code']
-      geoip2_data_country_name: ['country names en', 'X-Country-Name']
-      geoip2_data_city_name: ['city names en', 'X-City-Name']
+      geoip2_data_country_code:
+        select: country iso_code
+        header: X-Country-Code
+      geoip2_data_country_name:
+        select: country names en
+        header: X-Country-Name
+      geoip2_data_city_name:
+        select: city names en
+        header: X-City-Name
 
 main_endpoint: "127.0.0.1:8443"
 alpn_proxy: "127.0.0.1:9443"
