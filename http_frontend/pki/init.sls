@@ -1,7 +1,5 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
 
-{% set easyrsa_local_file= "/usr/local/"+ settings.external.easy_rsa_tar_gz.target+ "/easy_rsa.tar.gz" %}
-
 include:
   - http_frontend.dirs
 
@@ -32,12 +30,12 @@ pki_requisites:
 # install miniature pki cmdline tool
 easyrsa:
   file.managed:
-    - name: {{ easyrsa_local_file }}
+    - name: {{ settings.external.easy_rsa_tar_gz.target }}
     - source: {{ settings.external.easy_rsa_tar_gz.download }}
     - source_hash: sha256={{ settings.external.easy_rsa_tar_gz.hash }}
   archive.extracted:
     - name: {{ settings.cert_dir }}/easyrsa
-    - source: {{ easyrsa_local_file }}
+    - source: {{ settings.external.easy_rsa_tar_gz.target }}
     - archive_format: tar
     - user: {{ settings.user }}
     - group: {{ settings.user }}

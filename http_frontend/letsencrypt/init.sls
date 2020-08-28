@@ -4,7 +4,6 @@ include:
 
 {% from "http_frontend/defaults.jinja" import settings with context %}
 {% set tlsport= settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1') %}
-{% set acme_sh_local_file= "/usr/local/"+ settings.external.acme_sh_tar_gz.target+ "/acme_sh.tar.gz" %}
 
 {% macro issue_cert(domain, san_list) %}
 {# issue new cert, if not already available or SAN list != expected SAN list #}
@@ -70,14 +69,14 @@ acme.sh:
       - openssl
       - socat
   file.managed:
-    - name: {{ acme_sh_local_file}}
+    - name: {{ settings.external.acme_sh_tar_gz.target }}
     - source: {{ settings.external.acme_sh_tar_gz.download }}
     - source_hash: sha256={{ settings.external.acme_sh_tar_gz.hash }}
     - require:
       - pkg: acme.sh
   archive.extracted:
     - name: {{ settings.cert_dir }}/acme.sh
-    - source: {{ acme_sh_local_file }}
+    - source: {{ settings.external.acme_sh_tar_gz.target }}
     - archive_format: tar
     - user: {{ settings.user }}
     - group: {{ settings.user }}

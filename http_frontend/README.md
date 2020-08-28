@@ -23,6 +23,8 @@ letsencrypt: default true
 client_cert_verify: default false, true will make optional client certificate verification
 client_cert_mandatory: default false, true will make mandatory client certificate verification
 cert_dir: {{ user_home }}/ssl
+geoip:
+  enabled: true
 upstream: # [] # list of {name, server}
   - name: webhooks
     server: "127.0.0.1:5555"

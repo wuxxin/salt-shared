@@ -1,8 +1,8 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
 include:
   - http_frontend.dirs
-  - http_frontend.ssl
   - http_frontend.pki
+  - http_frontend.ssl
 
 create_http_frontend_maintenance_target_dir:
   file.directory:
