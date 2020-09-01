@@ -37,6 +37,7 @@ ExecStart=podman run \
   --rm \
   {%- endif %}
   --name={{ pod.name }} \
+  --userns={{ pod.userns }} \
   --env-host \
   {%- for key,value in pod.options.items() %}
   --{{ key }}={{ value }} \

@@ -69,6 +69,8 @@ update: true
 ephemeral: true
 # build: build container from source
 build: false
+# Set the user namespace mode for the container. valid options are "auto","host","private"
+userns: host
 
 # systemd service options
 # systemd type: "exec" or "oneshot" or advanced types: "simple, forking, dbus, notify, idle"
@@ -133,6 +135,8 @@ enabled: true
 # update: if true: container image will be pulled/build on every service start
 update: true
 build: false
+# Set the user namespace mode for the container. valid options are "auto","host","private"
+userns: host
 {% endload %}
 
 
