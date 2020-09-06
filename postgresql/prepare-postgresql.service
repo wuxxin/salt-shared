@@ -6,8 +6,12 @@ Before=postgresql@{{ settings.pgmajor }}-main.service
 
 [Service]
 Type=oneshot
-{% if settings.pgtune %}
-ExecStart=/usr/local/bin/pgtune.sh update /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf --reserve {{ settings.pgtune_reserve_mem_general }} {{ settings.pgtune_reserve_mem_per_core }}
+{% if settings.pgtune.enabled %}
+ExecStart=/usr/local/bin/pgtune.sh update /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf \
+  {%- if settings.pgtune.cores not in ['all', '', '0', '-1', 0, -1] %}
+    --cores {{ settings.pgtune.cores }} \
+  {%- endif %}
+    --{{ settings.pgtune.strategy }} {{ settings.pgtune.memory }}
 {% else %}
 ExecStart=/usr/bin/true
 {% endif %}

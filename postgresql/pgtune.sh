@@ -2,14 +2,12 @@
 set -eo pipefail
 # set -x
 
-default_reserve_general=1024
-default_reserve_per_core=250
 
 config_template=$(cat << EOF
 ### PGTUNE-CONFIG-BEGIN ###
-# bash subset reimplementation of http://pgtune.leopard.in.ua/ postgresql 10, linux, web
+# simple reimplementation of http://pgtune.leopard.in.ua/ postgresql 12, linux, web
 # https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
-# https://www.postgresql.org/docs/10/static/runtime-config-resource.html
+# https://www.postgresql.org/docs/12/static/runtime-config-resource.html
 max_connections = ##MAX_CONNECTIONS##
 shared_buffers = ##SHARED_BUFFERS##
 work_mem = ##WORK_MEM##
@@ -20,47 +18,46 @@ EOF
 
 usage(){
     cat << EOF
-Usage:  $0 update path/to/postgresql.conf [reserve]
-           show [--no-marker] [reserve]
+Usage:  $0 update postgresql.conf [--cores x] (--leave mainmb percoremb|--use mb)
+           show [--no-marker]     [--cores x] (--leave mainmb percoremb|--use mb)
 
-reserve:
-    [--reserve  <general-mb:default=$default_reserve_general>
-                <per-core-mb:default=$default_reserve_per_core>]
+update:     read/modify/write postgresql config if different values
+show:       show postgresql config snippet, with or without (--no-marker) begin and end marker
 
-    general-mb : reserved memory in megabyte unavailable to postgresql tuning
-    per-core-mb: additional reserved memory in megabyte per cpu core
+--cores     <overwrite the actual number of cores of the machine, default to:\$(nproc)>
+--leave     <main-mb> <per-core-mb>
+            main-mb : eg. "1024", reserved memory in megabyte unavailable to postgresql tuning
+            per-core-mb: eg. "256", additional reserved memory in megabyte per cpu core
+--use       <total-available-mb-for-postgresql> eg. "4096"
+
+either "use" or "leave" must be specified.
+in case of leave, total-available-mb-for-postgresql = Total-Mem - (leave.general + leave.percore * cores)
 EOF
     exit 1
 }
 
 calculate_values () {
-    # args: $1= reserved memory in megabyte in general
-    # args: $2= additional reserved memory in megabyte per core
+    # args: $1= memory available in megabyte for postgresql tuning
+    # args: $2= number of cores for tuning
     # globals MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE
-    local res_mem_general_mb res_mem_core_mb mem_kb mem_mb pg_mb cores
-
-    res_mem_general_mb="$1"
-    res_mem_core_mb="$2"
-
-    # tune postgresql to current vm memory and cores
-    mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
-    mem_mb=$((mem_kb / 1024))
-    cores=$(nproc)
+    local pg_mb cores
+    pg_mb=$1
+    cores=$2
 
     # memory available for postgresql tuning calculation
     #   we reserve res_mem_general_mb plus res_mem_core_mb per core out of scope
     #   for postgres because of other apps
     #   Range: 512MB < pg_mb
-    pg_mb=$((mem_mb - res_mem_general_mb - cores * res_mem_core_mb))
     if test $pg_mb -le 512; then pg_mb=512; fi
 
     # max_connections: default = 100
-    #   Range: 16 (1 core)<= MAX_CONNECTIONS <= 78 (32 cores)
-    MAX_CONNECTIONS=$((14 + cores * 2))
+    #   Range: 20 (1 core)<= MAX_CONNECTIONS <= 113 (32 cores)
+    MAX_CONNECTIONS=$((17 + cores * 3))
 
     # shared_buffers: default = 128MB
     #   with 1GB or more of RAM, a reasonable starting value for shared_buffers
     #   is 25% of the memory in your system. This buffer directly affects the cache hit ratio
+    #   Range: 128MB < SHARED_BUFFERS
     SHARED_BUFFERS=$((pg_mb / 4))
 
     # work_mem: default = 4MB
@@ -70,17 +67,14 @@ calculate_values () {
     #   if a query involves doing merge sorts of 8 tables, that requires 8 times work_mem.
     #   Calculation is 4mb at 512pg_mb (which translates to 96 available work_mem buffers)
     #   Range: 4MB < WORK_MEM < 64MB
-    WORK_MEM=$(((pg_mb - SHARED_BUFFERS) * 1024 / 96 / cores))
+    WORK_MEM=$(((pg_mb - SHARED_BUFFERS) * 1024 / (MAX_CONNECTIONS*2) / cores))
     if test $WORK_MEM -lt 4096; then WORK_MEM=4096; fi
     if test $WORK_MEM -gt 65536; then WORK_MEM=65536; fi
 
     # effective_cache_size: default= 4GB
-    #   Setting effective_cache_size to 1/2 of total memory
-    #   would be a normal conservative setting, and 3/4 of memory is a more
-    #   aggressive but still reasonable amount.
-    #   Range: 2048MB < EFFECTIVE_CACHE_SIZE
-    EFFECTIVE_CACHE_SIZE=$((3 * pg_mb / 4))
-    if test $EFFECTIVE_CACHE_SIZE -lt 2048; then EFFECTIVE_CACHE_SIZE=2048; fi
+    #   Range: 384MB < EFFECTIVE_CACHE_SIZE
+    EFFECTIVE_CACHE_SIZE=$((pg_mb - SHARED_BUFFERS))
+    if test $EFFECTIVE_CACHE_SIZE -lt 384; then EFFECTIVE_CACHE_SIZE=384; fi
 
     # typify values
     SHARED_BUFFERS="${SHARED_BUFFERS}MB"
@@ -92,8 +86,9 @@ calculate_values () {
 # main
 show_marker=true
 config_filename=""
-reserve_general=$default_reserve_general
-reserve_per_core=$default_reserve_per_core
+cores=$(nproc)
+mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
+mem_mb=$((mem_kb / 1024))
 
 # parse args
 if test "$1" != "update" -a "$1" != "show"; then usage; fi
@@ -107,23 +102,27 @@ if test "$command" = "update"; then
     fi
     shift
 else
-    if test "$1" = "--no-marker"; then
-        show_marker=false
-        shift
-    fi
+    if test "$1" = "--no-marker"; then show_marker=false; shift; fi
 fi
-if test "$1" = "--reserve"; then
-    if test "$3" = ""; then
-        echo "Error: --reserve needs two arguments"
-        usage
-    fi
-    reserve_general=$2
-    reserve_per_core=$3
+if test "$1" = "--cores"; then
+    if test "$2" = ""; then echo "Error: --cores needs one argument"; usage; fi
+    cores=$2
+    shift 2
+fi
+if test "$1" = "--leave"; then
+    if test "$3" = ""; then echo "Error: --leave needs two arguments"; usage; fi
+    pg_mb=$((mem_mb - $2 - cores * $3))
     shift 3
+elif test "$1" = "--use"; then
+    if test "$2" = ""; then echo "Error: --use needs one argument"; usage; fi
+    pg_mb=$2
+    shift 2
 fi
 
+
 # calculate settings, write to template block
-calculate_values "$reserve_general" "$reserve_per_core"
+calculate_values "$pg_mb" "$cores"
+
 block_output=$(printf "%s\n" "$config_template" |
     sed -r "s/##MAX_CONNECTIONS##/$MAX_CONNECTIONS/g;s/##EFFECTIVE_CACHE_SIZE##/$EFFECTIVE_CACHE_SIZE/g" |
     sed -r "s/##WORK_MEM##/$WORK_MEM/g;s/##SHARED_BUFFERS##/$SHARED_BUFFERS/g")

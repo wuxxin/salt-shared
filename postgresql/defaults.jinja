@@ -13,15 +13,36 @@ extensions:
   - pg_stat_statements
 
 user: []
-database: []
+# - name: ''
+#   password: ''
+#   encrypted: true
+#   login: true
 
-{# pgtune: true: let postgresql take all usable memory (- memory to be reserved)  #}
-pgtune: false
-{# memory mb not available to pgtune #}
-pgtune_reserve_mem_general: 1024
-{# memory mb per core not available to pgtune #}
-pgtune_reserve_mem_per_core: 256
-{# internal, major postgresql version, be careful on change #}
+database: []
+# - name: ''
+#   encoding: ''
+#   template: ''
+#   owner: ''
+#   extensions: []
+
+# defaults
+default_encoding: UTF8
+default_template: template0
+
+# pgtune:
+pgtune:
+  # enabled:true let postgresql tune its memory needs
+  enabled: false
+  # strategy: may be "use" or "leave"
+  strategy: use
+  # value, strategy: "use":   define memory mb available to pgtune
+  # value, strategy: "leave": define memory mb not available to pgtune: <general> <per-core>
+  memory: 4096
+  # memory: 1024 256
+  # how many cores (0-9+,all) are used for calculation
+  cores: all
+
+# internal, major postgresql version, be careful on change
 pgmajor: 12
 {% endload %}
 

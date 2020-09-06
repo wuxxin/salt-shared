@@ -17,6 +17,20 @@ prepare-postgresql.service:
     - onchanges:
       - file: prepare-postgresql.service
 
+/etc/systemd/system/postgresql@{{ settings.pgmajor }}-main.service.d/limits.conf:
+  file:
+{%- if settings.pgtune.enabled and settings.pgtune.cores not in ['all', '', '0', '-1', 0, -1] %}
+    - managed
+    - makedirs: true
+    - contents: |
+        [Service]
+        AllowedCPUs=0-{{ settings.pgtune.cores - 1 }}
+{%- else %}
+    - absent
+{%- endif %}
+    - watch_in:
+      - service: postgresql
+
 postgresql:
   pkg.installed:
     - pkgs:
@@ -85,8 +99,9 @@ pg_user_{{ user.name }}:
   postgres_user.present:
     - name: {{ user.name }}
     - login: {{ user.login|d('true') }}
+    - encrypted: {{ user.encrypted|d('true') }}
   {%- for key,value in user.items() %}
-    {%- if key not in ['name', 'login']%}
+    {%- if key not in ['name', 'login', 'encrypted']%}
     - {{ key }}: {{ value }}
     {%- endif %}
   {%- endfor %}
@@ -98,8 +113,8 @@ pg_user_{{ user.name }}:
 pg_database_{{ database.name }}:
   postgres_database.present:
     - name: {{ database.name }}
-    - encoding: {{ database.encoding|d('UTF8') }}
-    - template: {{ database.template|d('template0') }}
+    - encoding: {{ database.encoding|d(settings.default_encoding) }}
+    - template: {{ database.template|d(settings.default_template) }}
   {%- for key,value in database.items() %}
     {%- if key not in ['name', 'encoding', 'template', 'extensions']%}
     - {{ key }}: {{ value }}
