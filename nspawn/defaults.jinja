@@ -1,0 +1,64 @@
+{% load_yaml as defaults %}
+container: /var/lib/machines
+{% endload %}
+
+{% load_yaml as container_defaults %}
+# name of the nspawn container and name of the controlling systemd service
+name:
+
+# enabled: if false, service will not get started and will be stopped if running
+enabled: true
+
+# volatile: can be "true, false, overlay, state, copy"
+# if "true" or "overlay", container is run with --volatile:overlay overlayfs which is later discarded
+# if "copy", container ir run with --ephemeral, wich creates a temporary snapshot before starting
+volatile: false
+
+# command: if set, will replace default command which is "--boot" instead of command
+command: ""
+# args: if set, will add args for command, if command is not set or "--boot" args are used as boot cmdline
+args: ""
+
+# environment: dict: {key: value,} add environment data
+environment: {}
+
+# Set the user namespace mode for the container. valid options are "pick","true",""
+"private-users": pick
+"private-users-chown": true
+# user namespace network stack
+"private-network": true
+
+# systemctl set-property
+properties: {}
+#  MemoryLow:
+#  MemoryHigh:
+#  MemoryMax:
+#  AllowedCPUs: 0-4
+
+# bind mount files and directories into container
+volumes: []
+#  - volumename:/path/in/guest[:ro]
+#  - /absolute/path:/path/in/guest[:ro]
+#  - +/path/in/guest:/another/path/in/guest[:ro]
+
+# define network interfaces available in container
+networks: []
+#  - type: [interface,macvlan,ipvlan,veth,bridge,zone]
+#    name: ""
+# ports: define port redirections: list: - "portnr:portnr"
+ports: []
+
+# systemd restart: "no", "on-failure" (default) or
+# advanced: "on-success, on-abnormal, on-watchdog, on-abort, or always"
+restart: ""
+# after, requires, wants: equal to systemd config
+after: ""
+requires: ""
+wants: ""
+
+# options: dict: {key: value,} container options parameter for nspawn
+options: {}
+{% endload %}
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('nspawn', {})) %}
