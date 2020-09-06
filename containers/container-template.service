@@ -17,6 +17,9 @@ Restart=on-failure
 {%- else %}
 Restart={{ pod.restart }}
 {%- endif %}
+{%- for k,v in pod.properties.items() %}
+{{ k }}={{ v }}
+{%- endif %}
 {%- if pod.update %}
   {%- if pod.build %}
 ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}

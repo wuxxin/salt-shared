@@ -83,6 +83,8 @@ restart: ""
 after: ""
 requires: ""
 wants: ""
+# additional systemd properties
+properties: {}
 
 # name of the container image: x/y[:z]
 image:
@@ -92,6 +94,8 @@ tag:
 environment: {}
 # label: dict: {key: value,} add label to container
 labels: {}
+# storage: create volumes from list: - {name: volume_name, labels=[], driver: local, opts=[]}
+storage: []
 # volume: list: - [source-volume|host-dir:]container-dir[:options]
 volumes: []
 # ports: list
@@ -116,6 +120,8 @@ restart: on-failure
 after: ""
 requires: ""
 wants: ""
+# additional systemd properties
+properties: {}
 
 # environment to be placed as ".env" file inside workdir
 environment: {}

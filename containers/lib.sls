@@ -22,6 +22,17 @@ containers_image_{{ name }}:
   {%- set pod= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
 
+  {# create volumes if defined via storage: #}
+  {# - {name: volume_name, labels=[], driver: local, opts=[]} #}
+  {%- for def in pod.storage %}
+    {%- set labels_string = '' if not def.labels else '-l ' ~ def.labels|join(' -l ') %}
+    {%- set opts_string = '' if not def.opts else '-o ' ~ def.opts|join(' -o ') %}
+sttorage_containers_volume_{{ def.name }}:
+  cmd.run:
+    - name: podman volume create --driver {{ def.driver|d('local') }} {{ labels_string }} {{ opts_string }} {{ def.name }}
+    - unless: podman volume ls -q | grep -q {{ def.name }}
+  {%- endfor %}
+
   {# if not update on every container start, update now on install state #}
   {%- if not pod.update %}
 update_image_{{ pod.image }}:

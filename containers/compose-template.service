@@ -9,7 +9,9 @@ StartLimitIntervalSec=100
 [Service]
 Type=exec
 Restart={{ compose.restart }}
-
+{%- for k,v in compose.properties.items() %}
+{{ k }}={{ v }}
+{%- endif %}
 WorkingDirectory={{ compose.workdir }}
 # RuntimeDirectory will create /run/{{ compose.name }} for pid, socket files
 RuntimeDirectory={{ compose.name }}
