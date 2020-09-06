@@ -71,8 +71,8 @@ mariadb_user_{{ user.name }}@{{ host }}:
 mariadb_database_{{ database.name }}:
   mysql_database.present:
     - name: {{ database.name }}
-    - character_set: {{ database.character_set|d(settings.character_set) }}
-    - collate: {{ database.collate|d(settings.collate) }}
+    - character_set: {{ database.character_set|d(settings.default_character_set) }}
+    - collate: {{ database.collate|d(settings.default_collate) }}
   {%- for key,value in database.items() %}
     {%- if key not in ['name', 'character_set', 'collate', 'owner', 'owners', 'grant',] %}
     - {{ key }}: {{ value }}

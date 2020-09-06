@@ -3,8 +3,8 @@
 listen: 127.0.0.1
 user: []
 database: []
-character_set: utf8mb4
-collate: utf8mb4_general_ci
+default_character_set: utf8mb4
+default_collate: utf8mb4_general_ci
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
