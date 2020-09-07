@@ -1,4 +1,4 @@
-{% from "email/defaults.jinja" import settings with context %}
+{% from "getmail/defaults.jinja" import settings with context %}
 
 getmail:
   pkg:

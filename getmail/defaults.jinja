@@ -1,0 +1,26 @@
+{% load_yaml as defaults %}
+
+profile: {}
+
+{#
+profile:
+  - name: getfx
+    user: getfx_sys
+    enabled: true
+    options:
+      delete: true
+    retriever:
+      type: SimpleIMAPSSLRetriever
+      server: imap.dom.name
+      username: userfx
+      password: passfx
+    destination:
+      type: Maildir
+      path: ~/Maildir/somebox
+#}
+
+{% endload %}
+
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('getmail', {})) %}
