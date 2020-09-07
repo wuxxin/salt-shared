@@ -1,0 +1,33 @@
+{% load_yaml as defaults %}
+enabled: false
+listen: 127.0.0.1:8081
+cookie_secret: ""
+email_domains: '["example.com"]'
+cookie_secure: false
+{# # Required so cookie can be read on all subdomains. #}
+cookie_domains: '[".localtest.me"]'
+{# # Required to allow redirection back to original requested target. #}
+whitelist_domains: '[".localtest.me"]'
+# keycloak provider
+provider="oidc"
+provider_display_name="Keycloak"
+client_secret=""
+client_id="oauth2-proxy"
+redirect_url="http://oauth2-proxy.localtest.me:4180/oauth2/callback"
+# in this case oauth2-proxy is going to visit
+# http://keycloak.localtest.me:9080/auth/realms/master/.well-known/openid-configuration for configuration
+oidc_issuer_url="http://keycloak.localtest.me:9080/auth/realms/master"
+
+{% endload %}
+
+
+{% load_yaml as oauth2proxy_container %}
+name: oauth2proxy
+requires: keycloak.service
+image: quay.io/oauth2-proxy/oauth2-proxy
+tag: latest
+ports:
+  - {{ settings.oauth2proxy.listen }}:8081
+environment:
+  OAUTH2_PROXY_XXX: yyy
+{% endload %}
