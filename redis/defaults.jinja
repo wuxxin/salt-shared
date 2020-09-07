@@ -1,11 +1,56 @@
 {% load_yaml as defaults %}
+enabled: false
 listen_ip:
   - localhost
-
+listen_port: 6379
+databases: 16
+memory:
+policy:
 user: []
-database: []
 
+profile: []
+
+{#
+    - name: recently
+      policy: allkeys-lru
+      listen_port: 6380
+      memory: 256MB
+
+    - name: frequently
+      policy: allkeys-lfu
+      listen_port: 6381
+      memory: 128MB
+
+    - name: ttl
+      policy: volatile-ttl
+      listen_port: 6382
+      memory: 256MB
+
+    - name: permanent
+      policy: noeviction
+      listen_port: 6383
+#}
 {% endload %}
+
+{% load_yaml as profile_defaults %}
+name: ""
+enabled: true
+listen_ip: []
+listen_port:
+databases: 8
+memory: 128mb
+policy: volatile-lru
+# noeviction: return errors when the memory limit was reached and the client is trying to execute commands that could result in more memory to be used (most write commands, but DEL and a few more exceptions).
+# allkeys-lru: evict keys by trying to remove the less recently used (LRU) keys first
+# allkeys-lfu: evict any key using approximated LFU.
+# allkeys-random: evict keys randomly in order to make space for the new data added.
+# volatile-lru: evict keys by trying to remove the less recently used (LRU) keys first, but only among keys that have an expire set, in order to make space for the new data added.
+# volatile-lfu: evict using approximated LFU, only keys with an expire set.
+# volatile-random: evict keys randomly in order to make space for the new data added, but only evict keys with an expire set.
+# volatile-ttl: evict keys with an expire set, and try to evict keys with a shorter time to live (TTL) first, in order to make space for the new data added.
+user: []
+{% endload %}
+
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('redis', {})) %}
