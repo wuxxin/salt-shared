@@ -2,7 +2,6 @@
 
 include:
   - email.opendkim
-  # - email.getmail disabled, because needs rewrite
 
 {# create /var/mail/root Maildir directory, overwrite in case it is mbox file #}
 {%- for v in ['', '/cur', '/new', '/tmp',] %}
@@ -23,8 +22,9 @@ include:
 {# authentification for relayhost, file must exist but can be empty #}
 /etc/postfix/sasl_passwd:
   file.managed:
+    - mode: "0640"
     - contents: |
-        # destination= host[:port]      credentials= username:password
+        # <destination=host[:port]> <credentials=username:password>
 {%- if settings.outgoing.relay.enabled %}
         [{{ settings.outgoing.relay.host }}]:{{ settings.outgoing.relay.port }} {{ settings.outgoing.relay.username }}:{{ settings.outgoing.relay.password }}
 {% endif %}
@@ -58,6 +58,7 @@ postfix:
     - pkgs:
       - postfix
       - mutt
+      - swaks
     - require:
       - file: /etc/postfix/main.cf
   service.running:

@@ -2,12 +2,28 @@
 compatibility_level=2
 myhostname = {{ settings.hostname }}
 mydomain = {{ settings.domain }}
-mydestination = $myhostname, localhost
-mynetworks = {% for network in settings.trusted_networks %} {{ network }} {% endfor %}
+mydestination = {% for destination in settings.allowed_domains %} {{ destination }} {% endfor %}
+mynetworks = {% for network in settings.incoming.trusted_networks %} {{ network }} {% endfor %}
 
-# only use ipv4, because ipv6 fails under some circumstances
+# only use ipv4 for now, ipv6 outbound fails sometimes
 inet_protocols = ipv4
 smtp_address_preference = ipv4
+
+
+# ### filter
+# connect postfix with opendkim milter
+milter_default_action = accept
+milter_protocol   = 6
+{%- if settings.dkim.enabled %}
+# use opendkim to sign outgoing mail
+smtpd_milters     = {{ settings.dkim.listen }}
+non_smtpd_milters = {{ settings.dkim.listen }}
+# pass bounces through the milters as well
+internal_mail_filter_classes = bounce
+{%- else %}
+# do not use opendkim for dkim signing of outgoing mails
+{%- endif %}
+
 
 # ### outgoing mail
 {%- if settings.outgoing.enabled %}
@@ -23,6 +39,22 @@ default_transport = smtp
 # do not deliver outgoing mail at all
 default_transport = error: outside mail is not deliverable
 {%- endif %}
+{%- if settings.outgoing.ratelimit.enabled %}
+# limiting only works with minimum of 2
+smtp_destination_concurrency_limit = 2
+smtp_extra_recipient_limit = 1
+smtp_destination_rate_delay = {{ settings.outgoing.ratelimit.delay }}
+{%- endif %}
+
+{%- if settings.delivery_status_report.enabled %}
+bounce_notice_recipient = {{ settings.delivery_status_report.bounce_recipient }}
+delay_notice_recipient = {{ settings.delivery_status_report.delay_recipient }}
+error_notice_recipient = {{ settings.delivery_status_report.error_recipient }}
+# notify_classes: default: resource software
+# notify_classes: one to many of: bounce, delay, policy, protocol, resource, software
+notify_classes: {{ settings.delivery_status_report.enabled_classes }}
+{%- endif %}
+
 
 # ### incoming mail
 smtpd_banner = $myhostname ESMTP $mail_name
@@ -33,12 +65,15 @@ inet_interfaces = {% for ip in settings.incoming.listen %} {{ ip }} {% endfor %}
 {%- else %}
 inet_interfaces =
 {%- endif %}
+smtpd_authorized_verp_clients = $mynetworks
 
+# ### authentification
 # enable sasl client auth, but add smtp_sasl_password_maps,
 # so only server listed there will use sasl authentification
 smtp_sasl_auth_enable = yes
 smtp_sasl_tls_security_options = noanonymous
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+
 
 # ### mailboxes and recipient configuration
 # recipient_delimiter = + (default: empty)
@@ -56,17 +91,6 @@ biff = no
 home_mailbox =
 mail_spool_directory = {{ settings.mail_spool_directory }}
 
-# ### filter
-# connect postfix with opendkim milter
-milter_default_action = accept
-milter_protocol   = 6
-{%- if settings.dkim.enabled %}
-# use opendkim to sign outgoing mail
-smtpd_milters     = inet:localhost:12345
-non_smtpd_milters = inet:localhost:12345
-{%- else %}
-# do not use opendkim for dkim signing of outgoing mails
-{%- endif %}
 
 # ### TLS
 # 2019-11-08 mixture of:

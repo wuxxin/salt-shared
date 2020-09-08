@@ -9,15 +9,11 @@ opendkim_masked:
     service.masked:
       - name: opendkim
 
-/etc/dkimkeys/dkim.key:
-  file:
-    - absent
-
 {% else %}
 
 /etc/opendkim.conf:
   file.managed:
-    - source: salt://app/email/opendkim.conf
+    - source: salt://email/opendkim.conf
     - template: jinja
     - defaults:
         settings: {{ settings }}
@@ -30,16 +26,37 @@ opendkim_masked:
     - require:
       - user: opendkim
 
-/etc/dkimkeys/dkim.key:
+{%- for domain, config in settings.dkim.sign.items() %}
+/etc/dkimkeys/{{ domain }}_{{ config.selector }}.key:
   file.managed:
     - user: opendkim
     - group: opendkim
     - mode: "0600"
     - contents: |
-{{ settings.dkim.secret|indent(8,True) }}
+{{ config.secret|indent(8,True) }}
     - require:
       - file: /etc/dkimkeys
-      - user: opendkim
+    - watch_in:
+      - service: opendkim
+{%- endfor %}
+
+/etc/dkimkeys/keytable.txt:
+  file.managed:
+    - contents: |
+{%- for domain, config in settings.dkim.sign.items() %}
+        {{ config.selector }}._domainkey.{{ domain }} {{ domain }}:{{ config.selector }}:/etc/dkimkeys/{{ domain }}_{{ config.selector }}.key
+{%- endfor %}
+    - require:
+      - file: /etc/dkimkeys
+
+/etc/dkimkeys/signingtable.txt:
+  file.managed:
+    - contents: |
+{%- for domain, config in settings.dkim.sign.items() %}
+        *@{{ domain }} {{ config.selector }}._domainkey.{{ domain }}
+{%- endfor %}
+    - require:
+      - file: /etc/dkimkeys
 
 opendkim:
   user.present:
@@ -51,16 +68,13 @@ opendkim:
     - pkgs:
       - opendkim
       - opendkim-tools
-    - require:
-      - sls: app.network
-      - sls: app.ssl
 
 /etc/default/opendkim:
   file.replace:
     - pattern: |
         ^SOCKET=.+
     - repl: |
-        SOCKET=inet:12345@localhost
+        SOCKET={{ settings.dkim.opendkim_listen }}
     - append_if_not_found: true
     - require:
       - pkg: opendkim
@@ -78,6 +92,7 @@ opendkim.service:
     - watch:
       - file: /etc/default/opendkim
       - file: /etc/opendkim.conf
-      - file: /etc/dkimkeys/dkim.key
+      - file: /etc/dkimkeys/keytable.txt
+      - file: /etc/dkimkeys/signingtable.txt
 
 {% endif %}

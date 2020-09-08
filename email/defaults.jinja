@@ -1,7 +1,10 @@
 {% load_yaml as defaults %}
 hostname: {{ grains['fqdn'] }}
 domain: {{ grains['fqdn'] }}
-allowed_domains: []
+allowed_domains:
+  - {{ grains['fqdn'] }}
+  - localhost
+virtual_domains: []
 
 aliases:
   postmaster: root
@@ -22,8 +25,22 @@ outgoing:
     username:
     password:
 
+  ratelimit:
+    # enabled: all mail is send sequential, and after each mail, delay seconds are waited
+    enabled: false
+    # delay: seconds to wait
+    delay: 1s
+
 dkim:
   enabled: false
+  # listen: listen config in postfix smtpd_milters format:
+  #  ("unix:/path/to/socket"  | "inet:1.2.3.4:5678")
+  # will be translated for opendkim:
+  #  ("local:/path/to/socket" | "inet:5678@1.2.3.4")
+  listen: unix:/run/opendkim/opendkim.sock
+  signaturealgorithm: rsa-sha256
+  canonicalization: relaxed/relaxed
+  oversignheaders: From
   sign: {}
   {#
     domainname:
@@ -32,38 +49,31 @@ dkim:
       public:
   #}
 
+rspamd:
+  enabled: false
+  listen: unix:/run/rspamd/rspamd.sock
+
+delivery_status_report:
+  enabled: false
+  bounce_recipient: postmaster
+  delay_recipient: postmaster
+  error_recipient: postmaster
+  enabled_classes: resource software bounce delay
+
 mail_spool_directory: /var/mail/
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
 dhparam: /etc/ssl/private/dhparam
-
-{# set postfix to use VERTP, and use python library to parse bounce messages
-https://gitlab.com/warsaw/flufl.bounce #}
-
-bounces:
-  temporary:
-  permanent:
-
-getmail:
-{#
-  - name: getfx
-    user: getfx_sys
-    enabled: true
-    config: |
-        [options]
-        delete = true
-        [retriever]
-        type = SimpleIMAPSSLRetriever
-        server = imap.dom.name
-        username = userfx
-        password = passfx
-        [destination]
-        type = Maildir
-        path = ~/Maildir/shlhetal
-#}
 
 {% endload %}
 
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('email', {})) %}
+
+{%- if settings.dkim.listen.startswith('inet') %}
+  {%- set opendkim_listen= dkim_listen|regex_replace('^([^:]+):([^:]+):(.+)', '\\1:\\3@\\2') %}
+{%- else %}
+  {%- set opendkim_listen= settings.dkim.listen|regex_replace('unix', 'local') %}
+{%- endif %}
+{% do settings.dkim.update({ 'opendkim_listen': opendkim_listen }) %}
