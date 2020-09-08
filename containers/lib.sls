@@ -123,6 +123,7 @@ update_image_{{ pod.image }}:
 {{ entry.name }}.override:
     {%- if entry.config %}
   file.managed:
+    - mode: "0600"
     - contents: |
 {{ entry.config|yaml(False)|indent(8,True) }}
     {%- else %}
