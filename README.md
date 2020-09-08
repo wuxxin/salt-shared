@@ -10,47 +10,51 @@ some states have a documentation README.md
     * To bootstrap a machine from scratch with a custom storage setup, see:
       [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
-* Features to look at:
+* Features
     * [node](node): basic machine setup (hostname, locale, network, storage)
-    * [hardware](hardware): hardware setup
-    * [kernel](kernel): kernel- image,headers,tools, modification for running on big machines
-    * [tools](tools): command line tools
     * [gitops](gitops): deploy and update machines from git, with webhook support
-    * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
+    * [hardware](hardware): hardware setup
+    * [kernel](kernel): kernel- image,headers,tools, modifications for running on big hosts
+    * [tools](tools): command line tools
+        * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
+    * [python Language Support](python)
 
     * Desktop
         * [desktop](desktop): everything wanted for a desktop installation
 
     * Network
-        * [http_frontend](http_frontend): simple modern https frontend using nginx, acme.sh and easyrsa
         * [http_proxy](http_proxy):
-            * [.server](http_proxy/server.sls): install trafficserver
+            * [.server](http_proxy/server.sls): trafficserver as internal caching http_proxy server
             * [.client_use_proxy](http_proxy/client_use_proxy.sls)
             * [.client_no_proxy](http_proxy/client_no_proxy.sls)
         * [unbound](unbound): caching recursive dns resolver
         * [knot](knot): authoritative dnsec capable dns server
         * [coturn](coturn): STUN (Session Traversal Utilities for NAT) and TURN (Traversal Using Relays
  around NAT)
-        * [syncthing](syncthing): network file syncronisation
-        * [unison](unison): Unison File Sync
-        * [strongswan](strongswan): IPsec VPN
         * [wireguard](wireguard): Wireguard VPN
+        * [strongswan](strongswan): IPsec VPN
+        * [unison](unison): Unison File Sync
+        * [syncthing](syncthing): network file syncronisation
+
+    * Web
+        * [http_frontend](http_frontend): modern https frontend using nginx, acme.sh and easyrsa
+
+    * Email
+        * [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
+        * [getmail](getmail): fetchmail alternative
 
     * Virtual Machines
-        * [libvirt](libvirt): libvirt/qemu/kvm setup
-        * [lxc](lxc): lxc production installation
+        * [libvirt](libvirt): libvirt, qemu/kvm full virtualization
+        * [systemd nspawn](nspawn): leightweight machine virtualization
+        * [lxc](lxc): lxc leightweight machine virtualization
         * [vagrant](vagrant): vagrant virtual machine manager for libvirt, lxc, lxd, a.o.
 
     * Container Management
         * [containers](containers): (OCI) Containers and Container Images Runtime including podman
-        * [k3s](k3s): small footprint Kubernetes Distribution
         * [docker](docker): Legacy Docker Containers and Container Images Runtime
+        * [k3s](k3s): small footprint Kubernetes Distribution
 
     * Database
-      * [postgresql](postgresql): Postgresql Database
-      * [mysql](mysql) MariaDB (mysql compatible) Database
-
-    * Language Support
-        * [python](python)
-        * [java](java)
-        * [latex](latex)
+        * [postgresql](postgresql): Postgresql Database
+        * [mysql](mysql): MariaDB (mysql compatible) Database
+        * [redis](redis): one or more Redis (Key/Value Store) Instances
