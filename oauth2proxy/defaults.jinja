@@ -17,8 +17,24 @@ redirect_url="http://oauth2-proxy.localtest.me:4180/oauth2/callback"
 # in this case oauth2-proxy is going to visit
 # http://keycloak.localtest.me:9080/auth/realms/master/.well-known/openid-configuration for configuration
 oidc_issuer_url="http://keycloak.localtest.me:9080/auth/realms/master"
-
 {% endload %}
+
+{% load_yaml as external %}
+oauth2_proxy_tar_gz:
+  version: 6.1.1
+  latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/oauth2-proxy/oauth2-proxy/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+  download: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.tar.gz"
+  target: /usr/local/lib/oauth2-proxy.tar.gz
+  fixme: shasum file is hash of included binary, not the downloaded tar.gz :-()
+  hash_url: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.sha256sum.txt"
+{% endload %}
+{# expand ##version## in field external.*.[download, hash_url] #}
+{% for n,v in external.items() %}
+  {% set dummy=external[n].__setitem__('download',
+        v['download']|regex_replace('##version##', v.version)) %}
+  {% set dummy=external[n].__setitem__('hash_url',
+        v['hash_url']|regex_replace('##version##', v.version)) %}
+{% endfor %}
 
 
 {% load_yaml as oauth2proxy_container %}
