@@ -37,7 +37,8 @@ relayhost =
 default_transport = smtp
 {%- else %}
 # do not deliver outgoing mail at all
-default_transport = error: outside mail is not deliverable
+default_transport = error
+relay_transport = error
 {%- endif %}
 {%- if settings.outgoing.ratelimit.enabled %}
 # limiting only works with minimum of 2
