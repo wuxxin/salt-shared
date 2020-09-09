@@ -1,11 +1,23 @@
+{%- macro env_repl(data, env={}) -%}
+{%- set repl_ns= namespace(data= data) -%}
+{%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
+{%- if repl_names != None -%}
+  {%- for varname in repl_names -%}
+    {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', env[varname]) -%}
+  {%- endfor -%}
+{%- endif -%}
+{{ repl_ns.data }}
+{%- endmacro -%}
 
-{% macro volume(name, labels=[], driver='local', opts=[]) %}
-  {%- set labels_string = '' if not labels else '-l ' ~ labels|join(' -l ') %}
-  {%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
-containers_volume_{{ name }}:
+
+{% macro volume(name, opts=[], driver='local', labels=[], env={}) %}
+  {%- set name_str = env_repl(name, env) %}
+  {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
+  {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
+containers_volume_{{ name_str }}:
   cmd.run:
-    - name: podman volume create --driver {{ driver }} {{ labels_string }} {{ opts_string }} {{ name }}
-    - unless: podman volume ls -q | grep -q {{ name }}
+    - name: podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ name_str }}
+    - unless: podman volume ls -q | grep -q {{ name_str }}
 {% endmacro %}
 
 
@@ -22,15 +34,10 @@ containers_image_{{ name }}:
   {%- set pod= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
 
-  {# create volumes if defined via storage: #}
-  {# - {name: volume_name, labels=[], driver: local, opts=[]} #}
+  {# create volumes if defined via storage #}
   {%- for def in pod.storage %}
-    {%- set labels_string = '' if not def.labels else '-l ' ~ def.labels|join(' -l ') %}
-    {%- set opts_string = '' if not def.opts else '-o ' ~ def.opts|join(' -o ') %}
-sttorage_containers_volume_{{ def.name }}:
-  cmd.run:
-    - name: podman volume create --driver {{ def.driver|d('local') }} {{ labels_string }} {{ opts_string }} {{ def.name }}
-    - unless: podman volume ls -q | grep -q {{ def.name }}
+    {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
+              labels=def.labels|d([]), env=pod.environment) }}
   {%- endfor %}
 
   {# if not update on every container start, update now on install state #}

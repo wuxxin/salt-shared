@@ -1,3 +1,14 @@
+{%- macro env_repl(data, env={}) -%}
+{%- set repl_ns= namespace(data= data) -%}
+{%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
+{%- if repl_names != None -%}
+  {%- for varname in repl_names -%}
+    {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', env[varname]) -%}
+  {%- endfor -%}
+{%- endif -%}
+{{ repl_ns.data }}
+{%- endmacro -%}
+
 [Unit]
 Description=Systemd service for podman container {{ pod.name }}
 After=network-online.target {{ pod.after }}
@@ -19,7 +30,7 @@ Restart={{ pod.restart }}
 {%- endif %}
 {%- for k,v in pod.properties.items() %}
 {{ k }}={{ v }}
-{%- endif %}
+{%- endfor %}
 {%- if pod.update %}
   {%- if pod.build %}
 ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
@@ -49,10 +60,12 @@ ExecStart=podman run \
   --label={{ key }}={{ value }} \
   {%- endfor %}
   {%- for vol in pod.volumes %}
-  --volume={{ vol }} \
+    {%- set vol_str = env_repl(vol, pod.environment) %}
+  --volume={{ vol_str }} \
   {%- endfor %}
   {%- for publish in pod.ports %}
-  --publish={{ publish }} \
+    {%- set publish_str = env_repl(publish, pod.environment) %}
+  --publish={{ publish_str }} \
   {%- endfor %}
   {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
   {{ pod.command }} {{ pod.args }}
