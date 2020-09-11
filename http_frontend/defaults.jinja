@@ -202,13 +202,13 @@ external:
     target: /usr/local/lib/easy_rsa.tar.gz
     hash: 157d2e8c115c3ad070c1b2641a4c9191e06a32a8e50971847a718251eeb510a8
   dbip_city_mmdb_gz:
-    version: 2020-08
+    version: "2020-08"
     latest: echo "{{ date_time[:7] }}"
     download: "https://download.db-ip.com/free/dbip-city-lite-##version##.mmdb.gz"
     target: /usr/local/lib/dbip-city.mmdb.gz
     hash: 55262b3e545c392df46ca8f019c484ef36bf12ad10e118a4a3014d6060a7280f
   nginx_lua_prometheus_tar_gz:
-    version: 0.20200523
+    version: "0.20200523"
     latest: curl -L -s "https://github.com/knyar/nginx-lua-prometheus/releases" | hxwls | grep "/releases/tag/" | head -n 1 | sed -r "s/.*\/([^\/]+)$/\1/g"
     download: "https://codeload.github.com/knyar/nginx-lua-prometheus/tar.gz/##version##"
     target: /usr/local/lib/nginx-lua-prometheus.tar.gz
