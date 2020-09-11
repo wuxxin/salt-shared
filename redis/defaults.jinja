@@ -3,11 +3,11 @@ enabled: false
 listen_ip:
   - localhost
 listen_port: 6379
+listen_socket: /run/redis/redis.sock
 databases: 16
-memory:
-policy:
+memory: ""
+policy: volatile-lru
 user: []
-
 profile: []
 
 {#
@@ -15,17 +15,14 @@ profile: []
       policy: allkeys-lru
       listen_port: 6380
       memory: 256MB
-
     - name: frequently
       policy: allkeys-lfu
       listen_port: 6381
       memory: 128MB
-
     - name: ttl
       policy: volatile-ttl
       listen_port: 6382
       memory: 256MB
-
     - name: permanent
       policy: noeviction
       listen_port: 6383
@@ -36,7 +33,9 @@ profile: []
 name: ""
 enabled: true
 listen_ip: []
-listen_port:
+listen_port: 0
+# unixsocket: /tmp/redis.sock
+# unixsocketperm: 700
 databases: 8
 memory: 128mb
 policy: volatile-lru
