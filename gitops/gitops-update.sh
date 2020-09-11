@@ -23,6 +23,7 @@ fi
 main () {
     start_epoch_ms="$(date +%s)000"
     need_service_restart="false"
+    custom_args=""
     result=0
 
     if flag_is_set gitops.update.failed; then
@@ -45,6 +46,7 @@ main () {
     current_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
     /usr/local/sbin/from-git.sh pull --url "$src_url" --branch "$src_branch" --user "$src_user" --git-dir "$src_dir"
     latest_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
+    latest_commit_msg=$(gosu "$src_user" git -C "$src_dir" log -1 --pretty=format:%B)
 
     if test "$latest_origin_rev" != "$current_origin_rev" -o \
         "$latest_origin_rev" != "$(get_tag gitops_current_rev "invalid")" -o \
@@ -54,6 +56,9 @@ main () {
         msg="Updating app from $current_origin_rev to $latest_origin_rev"
         if test "$current_origin_rev" = "$latest_origin_rev"; then
             msg="Reapplying Update $latest_origin_rev"
+        fi
+        if (echo "$latest_commit_msg" | grep -s "#test=true"); then
+            msg=" (commit flags custom args: test=true)"; custom_args="test=true"
         fi
         if test -e "{{ settings.var_dir }}/flags/gitops.update.force"; then
             rm "{{ settings.var_dir }}/flags/gitops.update.force"
@@ -66,25 +71,35 @@ main () {
         echo "calling pre_update_command"
         {{ settings.pre_update_command }} && result=$? || result=$?
         if test $result -ne 0; then
-            extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
             gitops_error "Gitops Error" \
-                "pre_update_command failed with error $result" error "$extra"
+                "pre_update_command failed with error $result" \
+                error "$(systemd_json_status "$UNITNAME")"
         else
+            if test "$custom_args" = "test=true"; then
+                echo "calling update_command with test=true"
+                {{ settings.update_command }} "$custom_args" && result=$? || result=$?
+                if test $result -ne 0; then
+                    gitops_error "Gitops Error" \
+                        "update test=true command failed with error $result" \
+                        error "$(systemd_json_status "$UNITNAME")"
+                fi
+            fi
             echo "calling update_command, defaults to execute-saltstack.sh"
             {{ settings.update_command }} && result=$? || result=$?
+
             if test $result -ne 0; then
                 set_tag gitops_failed_rev "$latest_origin_rev"
-                extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
                 gitops_error "Gitops Error" \
-                    "update command failed with error $result" error "$extra"
+                    "update command failed with error $result" \
+                    error "$(systemd_json_status "$UNITNAME")"
             else
                 set_tag gitops_current_rev "$latest_origin_rev"
                 echo "calling post_update_command"
                 {{ settings.post_update_command }} && result=$? || result=$?
                 if test $result -ne 0; then
-                    extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
                     gitops_error "Gitops Error" \
-                        "post_update_command failed with error $result" error "$extra"
+                        "post_update_command failed with error $result" \
+                        error "$(systemd_json_status "$UNITNAME")"
                 fi
             fi
         fi
@@ -109,9 +124,9 @@ main () {
         echo "calling finish_update_command"
         {{ settings.finish_update_command }} && result=$? || result=$?
         if test $result -ne 0; then
-            extra=$(systemctl status -l -q --no-pager -n 10 "$UNITNAME" | text2json_status)
             gitops_error "Gitops Error" \
-                "finish_update_command failed with error $result" error "$extra"
+                "finish_update_command failed with error $result" \
+                error "$(systemd_json_status "$UNITNAME")"
         fi
     fi
 

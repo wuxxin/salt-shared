@@ -19,27 +19,27 @@ yaml2json() { # filter pipe
     python3 -c "import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, sort_keys=True)"
 }
 
-json_dict_get() { # $1=entry, [$2..$x=subentry] , eg. gitops git source
+json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
 }
 
-yaml_dict_get() { # $1=entry, [$2..$x=subentry] , eg. gitops git source
+yaml_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, yaml, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)))" $@
 }
 
-systemd_json_status() { # $1= systemdservice
-    systemctl status -l -q --no-pager -n 15 "$@" | text2json_status
+systemd_json_status() { # $1=unitname
+    systemctl status -l -q --no-pager -n 25 "$@" | text2json_status
 }
 
-text2json_status() { # $1=text , output=json dict {'status': [text.split] }
+text2json_status() { # $1=text , return json dict {'status': [text.split] }
     python3 -c "import sys, json; d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
 }
 
-is_truestr() { # $1= boolstring , return true if lower($1) = "true"
+is_truestr() { # $1=boolstring , return true if lower($1) = "true"
     test "$(printf "%s" "$1" | tr A-Z a-z)" = "true"
 }
 
-is_falsestr() { # $1= boolstring , return true if lower($1) != "true"
+is_falsestr() { # $1=boolstring , return true if lower($1) != "true"
     test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
 }
 
@@ -138,7 +138,7 @@ EOF
     fi
 }
 
-metric_save() { # $1= metric-output-name, $2..$x= metric data
+metric_save() { # $1=metric-output-name $2..$x=metric data
     local metric outputname
     metric="$1"
     shift
@@ -153,7 +153,7 @@ metric_save() { # $1= metric-output-name, $2..$x= metric data
     mv "${outputname}" "$(dirname "${outputname}")/${metric}.prom"
 }
 
-metric_pipe_save() { # $1= metric-output-name, STDIN= metric-data
+metric_pipe_save() { # $1=metric-output-name STDIN=metric-data
     local metric outputname
     metric="$1"
     outputname="{{ settings.var_dir }}/metrics/${metric}.temp"
@@ -179,11 +179,12 @@ EOF
 
 
 # ### sentry error reporting ###
-sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}], [$5=logger=app-status]
-    local topic msg level extra logger tags
+sentry_entry() { # $1=topic $2=message [$3=level=error [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
+    local topic msg level culprit extra logger tags
     local gitops_run_rev gitops_current_rev gitops_failed_rev sentrycat
 
     topic=$1; msg=$2; level=${3:-error}; extra=${4:-\{\}}; logger=${5:-app.status}
+    culprit=${UNITNAME:-shellscript}
     gitops_run_rev=$(cat "{{ settings.src_dir }}/.git/refs/heads/{{ settings.git.branch }}" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
     gitops_failed_rev=$(get_tag gitops_failed_rev "invalid")
@@ -197,14 +198,14 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}], [$5=lo
         \"gitops_failed_rev\": \"$gitops_failed_rev\" \
         }"
 
-    printf "Sentry Entry: Level: %s Topic: %s Message: %s Extra: %s Logger: %s" "$level" "$topic" "$msg" "$extra" "$logger" 1>&2
+    printf "Sentry Entry: Level: %s Topic: %s Culprit: %s Message: %s Extra: %s Logger: %s" "$level" "$topic" "$culprit" "$msg" "$extra" "$logger" 1>&2
 
     if test -n "gitops_sentry_dsn" -a -e "$sentrycat"; then
         SENTRY_DSN="$gitops_sentry_dsn" "$sentrycat" \
             --release "$gitops_current_rev" \
             --logger "$logger" \
             --level "$level" \
-            --culprit "${UNITNAME:-shellscript}" \
+            --culprit "$culprit" \
             --server_name "${DOMAIN:-$(hostname -f)}"  \
             --tags "$tags" \
             --extra "$extra" \
@@ -216,7 +217,7 @@ sentry_entry() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}], [$5=lo
 
 
 # ### gitops maintenance ###
-gitops_maintenance() { # $1=topic|--clear, $2=message
+gitops_maintenance() { # $1="--clear" | $1=topic $2=message
     # $1=--clear" to delete maintenance file and let frontend serve application
     local templatefile="{{ settings.maintenance_template }}"
     local resultfile="{{ settings.maintenance_target }}"
@@ -235,13 +236,13 @@ gitops_maintenance() { # $1=topic|--clear, $2=message
     fi
 }
 
-gitops_error() { # $1=topic, $2=message, [$3=level=error], [$4=extra={}]
+gitops_error() { # $1=topic $2=message [$3=level=error [$4=extra={} [$5=logger=app-status]]]
     gitops_maintenance "$1" "$2"
-    sentry_entry "$1" "$2" "$3" "$4"
+    sentry_entry "$1" "$2" "$3" "$4" "$5"
 }
 
-gitops_failed() { # $1=topic, $2=message, [$3=level=critical], [$4=extra={}]
+gitops_failed() { # $1=topic $2=message [$3=level=critical [$4=extra={} [$5=logger=app-status]]]
     gitops_maintenance "$1" "$2"
-    sentry_entry "$1" "$2" critical "$4"
+    sentry_entry "$1" "$2" critical "$4" "$5"
     set_flag gitops.update.failed
 }
