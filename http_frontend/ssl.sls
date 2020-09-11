@@ -122,7 +122,7 @@ generate_invalid:
   {% for i in [settings.ssl_chain_cert, settings.ssl_cert] %}
 {{ settings.cert_dir }}/{{ i }}:
   file.copy:
-    - source: {{ ssl_snakeoil_cert_path }}
+    - source: {{ settings.ssl_snakeoil_cert_path }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - mode: "0640"
