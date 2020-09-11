@@ -134,8 +134,10 @@ acme-register-account:
       - file: {{ settings.cert_dir }}/acme.sh/account.conf
 
 {{ issue_cert(settings.domain, settings.allowed_hosts) }}
-  {% for domain in settings.isolated_hosts %}
-{{ issue_cert(domain, [domain]) }}
+  {% for vh_domainstr in settings.virtual_hosts %}
+    {%- set vh_domain = vh_domainstr.split(' ')|first %}
+    {%- set vh_allowed_list = vh_domainstr.split(' ')[1:] %}
+{{ issue_cert(vh_domain, vh_allowed_list }}
   {% endfor %}
 
 

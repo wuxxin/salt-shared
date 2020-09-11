@@ -28,13 +28,14 @@ https_port: 443
 http://nginx.org/en/docs/http/ngx_http_realip_module.html before changing this #}
 set_real_ip_from: "127.0.0.1"
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
-client_max_body_size: 0
+client_max_body_size: 10M
 
 domain: {{ domain }}
 {# allowed_hosts: List of expected hostnames (SAN's), must include domain as first entry #}
 allowed_hosts: []
-{# isolated_hosts: List of additional hostnames, will need/create one cert per hostname #}
-isolated_hosts: []
+{# virtual_hosts: List of additional hostnames, will need/create one cert per hostname #}
+virtual_hosts: []
+
 {# use letsencrypt to gather certificates #}
 letsencrypt: true
 {# key: | # key, pem encoded ssl key, default empty #}
@@ -48,8 +49,15 @@ cert_dir: {{ user_home }}/ssl
 on_ssl_renew:
   - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
 
-{# filepath, if exists will be displayed instead of normal operation#}
+{# filepath, if exists will be displayed instead of normal operation #}
 maintenance_target: /var/lib/http_frontend/www/503.html
+
+{#
+# response header
+# dict of header vars to be inserted for the main domain;
+# will use default_header if header does not exist
+header: {}
+#}
 
 {# response headers to be inserted, if header or host:header is not present or empty dict. #}
 default_header:
@@ -60,15 +68,16 @@ default_header:
   {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy #}
   X-Content-Type-Options: '"nosniff" always'
 
-{# dict of header vars to be inserted for the main domain;
-will use default_header if header does not exist
-header: {}
-#}
-
-{#
-upstream: # [] # list of {name, server}
+upstream: []
+{# upstream connections
+upstream: # list of {name, server}
   - name: webhooks
     server: "127.0.0.1:5555"
+#}
+
+location: []
+{#
+# main server location
 location:
   - source: /hooks/
     target: proxy_pass http://webhooks
@@ -77,30 +86,60 @@ location:
     target: |
         add_header X-Whatever-Type easy;
         root /var/www/main.domain/
+#}
+
+host: []
+{#
+# vhost declaration
 host:
   - domain: another.domain
     client_cert_verify: false,true
     client_cert_mandatory: false,true
+    # additional customization of nginx configuration, can be multiline yaml like "|"
+    custom: ''
     header: {}
+    oauth2proxy:
+      enabled: true
+      path: /oauth2proxy
+      upstream: oauth2proxy
     location:
       - source: /
-        keep_header: true
+        oauth2proxy_auth_request: true
         target: root /var/www/another.domain/
 #}
 
-{# additional customization of  nginx configuration, strings can be multiline yaml like "|" #}
+{# nginx additional customization, can be multiline yaml like "|" #}
 custom:
   nginx:
     global: ""
     stream: ""
     http: ""
-    host:
-      default: ""
-      {# any.other.vhost.name: string #}
+    host: ""
 
+{# geoip support #}
 geoip:
   enabled: false
+  global: true
+  host: true
+  {# individual vhosts can enable geoip in host via geoip:true #}
   provider: dbip_city
+
+{# rate limit support #}
+ratelimit:
+  enabled: false
+  global: false
+  host: true
+  {# individual vhosts can enable rate limit in host via ratelimit:true #}
+  reqs_per_second: 15
+  burst_per_second: 15
+  reqs_per_minute: 200
+  burst_per_minute: 100
+  conn_per_ip: 20
+
+{# metric support #}
+metrics:
+  buildin: true
+  prometheus: false
 
 {# mostly internal settings #}
 geoip_provider:
@@ -132,6 +171,7 @@ main_endpoint: "127.0.0.1:8443"
 alpn_proxy: "127.0.0.1:9443"
 alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
+prometheus_endpoint: "127.0.0.1:9145;
 
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
@@ -140,6 +180,13 @@ ssl_chain_cert: server.chain.cert.pem
 ssl_full_cert: server.chain.cert.dhparam.pem
 ssl_client_ca: client-ca.cert.pem
 ssl_client_crl: client-ca.crl.pem
+
+ssl_invalid_cert_path: /etc/ssl/certs/ssl-cert-invalid.pem
+ssl_invalid_key_path: /etc/ssl/private/ssl-cert-invalid.key
+ssl_invalid_full_cert_path: /etc/ssl/certs/ssl-cert-invalid-full.pem
+
+ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
+ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
 
 external:
   acme_sh_tar_gz:
@@ -160,6 +207,12 @@ external:
     download: "https://download.db-ip.com/free/dbip-city-lite-##version##.mmdb.gz"
     target: /usr/local/lib/dbip-city.mmdb.gz
     hash: 55262b3e545c392df46ca8f019c484ef36bf12ad10e118a4a3014d6060a7280f
+  nginx_lua_prometheus_tar_gz:
+    version: 0.20200523
+    latest: curl -L -s "https://github.com/knyar/nginx-lua-prometheus/releases" | hxwls | grep "/releases/tag/" | head -n 1 | sed -r "s/.*\/([^\/]+)$/\1/g"
+    download: "https://codeload.github.com/knyar/nginx-lua-prometheus/tar.gz/##version##"
+    target: /usr/local/lib/nginx-lua-prometheus.tar.gz
+    hash: "6e71dee6f4985bbba5d0c373457db4e6aa04520530b875a5792fc0b75e02083a"
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

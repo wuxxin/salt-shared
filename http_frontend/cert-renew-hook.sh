@@ -18,8 +18,8 @@ else
 fi
 
 if test "{{ settings.domain }}" != "$DOMAIN"; then
-    subpath="$DOMAIN/"
-    mkdir -m 0750 -p "{{ settings.cert_dir }}/$DOMAIN"
+    subpath="vhost/$DOMAIN/"
+    mkdir -m 0750 -p "{{ settings.cert_dir }}/vhost/$DOMAIN"
 fi
 simple_metric ssl_cert_renew counter \
     "timestamp of last cert-renew incovation" "$(date +%s)000"

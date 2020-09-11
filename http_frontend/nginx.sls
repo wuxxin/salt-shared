@@ -57,6 +57,18 @@ create_http_frontend_maintenance_target_dir:
       - file: /etc/nginx/proxy_params
       - file: /etc/nginx/uwsgi_params
 
+
+{% set lua_prometheus = settings.external["nginx_lua_prometheus_tar_gz"] %}
+lua_prometheus_module:
+  file.managed:
+    - name: {{ lua_prometheus.target }}
+    - source: {{ lua_prometheus.download }}
+    - source_hash: sha256={{ lua_prometheus.hash }}
+  archive.extracted:
+    - target: /etc/nginx/lua_prometheus
+    - onchanges:
+      - file: lua_prometheus_module
+
 /var/cache/nginx:
   file.directory:
     - user: www-data
@@ -84,6 +96,7 @@ nginx:
       - file: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
       - file: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
       - file: create_http_frontend_maintenance_target_dir
+      - archive: lua_prometheus_module
     - watch:
       - file: /etc/nginx/nginx.conf
       - file: /etc/nginx/proxy_params

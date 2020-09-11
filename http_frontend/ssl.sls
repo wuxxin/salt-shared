@@ -5,16 +5,11 @@ include:
 
 # order is important: ssl -> nginx -> letsencrypt
 
-# regenerate snakeoil if not existing or cn != settings.domain
-generate_snakeoil:
+ssl_requisites:
   pkg.installed:
-    - name: ssl-cert
-  cmd.run:
-    - name: make-ssl-cert generate-default-snakeoil --force-overwrite
-    - onlyif: |
-        test ! -e /etc/ssl/private/ssl-cert-snakeoil.key -o "$(openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -noout -text | grep Subject: | sed -re 's/.*Subject: .*CN=([^,]+).*/\1/')" != "{{ settings.domain }}"
-    - require:
-      - pkg: generate_snakeoil
+    - pkgs:
+      - openssl
+      - ssl-cert
 
 # regenerate dhparam if not existing or smaller than 2048 Bit
 {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}:
@@ -23,6 +18,7 @@ generate_snakeoil:
     - onlyif: if test ! -e {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}; then true; elif test $(stat -L -c %s {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}) -lt 256; then true; else false; fi
     - require:
       - sls: http_frontend.dirs
+      - pkg: ssl_requisites
   file.managed:
     - user: {{ settings.user }}
     - group: {{ settings.user }}
@@ -30,6 +26,45 @@ generate_snakeoil:
     - replace: false
     - require:
       - cmd: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
+
+# regenerate snakeoil if not existing or cn != settings.domain
+generate_snakeoil:
+  cmd.run:
+    - name: make-ssl-cert generate-default-snakeoil --force-overwrite
+    - onlyif: |
+        test ! -e {{ settings.ssl_snakeoil_key_path }} -o "$(openssl x509 -in {{ settings.ssl_snakeoil_cert_path }} -noout -text | grep Subject: | sed -re 's/.*Subject: .*CN=([^,]+).*/\1/')" != "{{ settings.domain }}"
+    - require:
+      - pkg: ssl_requisites
+
+generate_invalid:
+  cmd.run:
+    - name: |
+        set -eo pipefail
+        HostName="invalid"
+        SubjectAltName="DNS:$HostName"
+        template="/usr/share/ssl-cert/ssleay.cnf"
+        TMPFILE="$(mktemp)" || exit 1
+        TMPOUT="$(mktemp)"  || exit 1
+        trap "rm -f $TMPFILE $TMPOUT" EXIT
+        sed -e s#@HostName@#"$HostName"# -e s#@SubjectAltName@#"$SubjectAltName"# $template > $TMPFILE
+        if ! openssl req -config $TMPFILE -new -x509 -days 3650 -nodes -sha256 \
+            -out {{ settings.ssl_invalid_cert_path }} \
+            -keyout {{ settings.ssl_invalid_key_path }} > $TMPOUT 2>&1
+        then
+            echo Could not create certificate. Openssl output was: >&2
+            cat $TMPOUT >&2
+            exit 1
+        fi
+        chmod 644 {{ settings.ssl_invalid_cert_path }}
+        chmod 640 {{ settings.ssl_invalid_key_path }}
+        chown root:ssl-cert {{ settings.ssl_invalid_key_path }}
+        # append dhparam
+        cat {{ settings.ssl_invalid_cert_path }} {{ settings.cert_dir }}/{{ settings.ssl_dhparam }} > {{ settings.ssl_invalid_full_cert_path }}
+        chmod 644 {{ settings.ssl_invalid_full_cert_path }}
+    - onlyif: test ! -e {{ settings.ssl_invalid_key_path }}
+    - require:
+      - pkg: ssl_requisites
+      - file: { settings.cert_dir }}/{{ settings.ssl_dhparam }}
 
 {{ settings.cert_dir }}/cert-renew-hook.sh:
   file.managed:
@@ -76,7 +111,7 @@ generate_snakeoil:
 # use snakeoil cert/key
 {{ settings.cert_dir }}/{{ settings.ssl_key }}:
   file.copy:
-    - source: /etc/ssl/private/ssl-cert-snakeoil.key
+    - source: {{ ssl_snakeoil_key_path }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - mode: "0640"
@@ -87,7 +122,7 @@ generate_snakeoil:
   {% for i in [settings.ssl_chain_cert, settings.ssl_cert] %}
 {{ settings.cert_dir }}/{{ i }}:
   file.copy:
-    - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
+    - source: {{ ssl_snakeoil_cert_path }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - mode: "0640"
@@ -112,22 +147,23 @@ generate_snakeoil:
     - require:
       - cmd: {{ settings.cert_dir }}/{{ settings.ssl_full_cert }}
 
-# copy snakeoil to every isolated host as default, will not get copied if target already existing
-{%- for vhost in settings.isolated_hosts %}
-{{ settings.cert_dir }}/{{ vhost }}:
+# copy snakeoil to every virtual host as default, will not get copied if target already existing
+{%- for vhost in settings.virtual_hosts %}
+  {%- set vhost_domain= vhost.split(' ')|first %}
+{{ settings.cert_dir }}/vhost/{{ vhost_domain }}:
   file.directory:
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - makedirs: true
     - mode: "0750"
-{{ settings.cert_dir }}/{{ vhost }}/{{ settings.ssl_chain_cert }}:
+{{ settings.cert_dir }}/vhost/{{ vhost_domain }}/{{ settings.ssl_chain_cert }}:
   file.copy:
     - source: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - makedirs: true
     - mode: "0640"
-{{ settings.cert_dir }}/{{ vhost }}/{{ settings.ssl_key }}:
+{{ settings.cert_dir }}/vhost/{{ vhost_domain }}/{{ settings.ssl_key }}:
   file.copy:
     - source: {{ settings.cert_dir }}/{{ settings.ssl_key }}
     - user: {{ settings.user }}
