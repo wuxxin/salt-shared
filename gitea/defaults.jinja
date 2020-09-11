@@ -118,7 +118,7 @@ gitea_binary_xz:
       {% do entry.server.update({ 'http_addr': '/run/' ~ entry.global.run_user ~ '/gitea.sock'}) %}
     {% endif %}
   {% endif %}
-  {% do pns.plist.append(entry)
+  {% do pns.plist.append(entry) %}
 {% endfor %}
 
 
