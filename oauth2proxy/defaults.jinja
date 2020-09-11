@@ -1,49 +1,51 @@
 {% load_yaml as defaults %}
 enabled: false
 listen: 127.0.0.1:8081
+
 cookie_secret: ""
-email_domains: '["example.com"]'
 cookie_secure: false
+
+email_domains: '["example.com"]'
 {# # Required so cookie can be read on all subdomains. #}
 cookie_domains: '[".localtest.me"]'
 {# # Required to allow redirection back to original requested target. #}
 whitelist_domains: '[".localtest.me"]'
+
 # keycloak provider
 provider="oidc"
 provider_display_name="Keycloak"
+
 client_secret=""
 client_id="oauth2-proxy"
 redirect_url="http://oauth2-proxy.localtest.me:4180/oauth2/callback"
 # in this case oauth2-proxy is going to visit
 # http://keycloak.localtest.me:9080/auth/realms/master/.well-known/openid-configuration for configuration
 oidc_issuer_url="http://keycloak.localtest.me:9080/auth/realms/master"
+
+container:
+  name: oauth2proxy
+  requires: keycloak.service
+  image: quay.io/oauth2-proxy/oauth2-proxy
+  tag: latest
+  ports:
+    - 127.0.0.1:8081
+  environment: {}
+
+external:
+  oauth2_proxy_tar_gz:
+    version: 6.1.1
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/oauth2-proxy/oauth2-proxy/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.tar.gz"
+    target: /usr/local/lib/oauth2-proxy.tar.gz
+    hash: a661d59c55cfcc2b46ae1f0b24a3e8a2ced5413f931b8b05f7bf4e867c70d912
+
 {% endload %}
 
-{% load_yaml as external %}
-oauth2_proxy_tar_gz:
-  version: 6.1.1
-  latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/oauth2-proxy/oauth2-proxy/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-  download: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.tar.gz"
-  target: /usr/local/lib/oauth2-proxy.tar.gz
-  fixme: shasum file is hash of included binary, not the downloaded tar.gz :-()
-  hash_url: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.sha256sum.txt"
-{% endload %}
-{# expand ##version## in field external.*.[download, hash_url] #}
-{% for n,v in external.items() %}
-  {% set dummy=external[n].__setitem__('download',
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('oauth2proxy', {})) %}
+
+{# expand ##version## in field external.*.download #}
+{% for n,v in settings.external.items() %}
+  {% set dummy=settings.external[n].__setitem__('download',
         v['download']|regex_replace('##version##', v.version)) %}
-  {% set dummy=external[n].__setitem__('hash_url',
-        v['hash_url']|regex_replace('##version##', v.version)) %}
 {% endfor %}
-
-
-{% load_yaml as oauth2proxy_container %}
-name: oauth2proxy
-requires: keycloak.service
-image: quay.io/oauth2-proxy/oauth2-proxy
-tag: latest
-ports:
-  - {{ settings.oauth2proxy.listen }}:8081
-environment:
-  OAUTH2_PROXY_XXX: yyy
-{% endload %}
