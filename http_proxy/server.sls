@@ -32,7 +32,7 @@ trafficserver:
 # limit idle cpu usage via epoll_wait timeout in ms (default 10)
 # limit threads to 4 (default cores*1.5)
 # limit hostdb size to 8mb
-# main memory used for cache
+# main memory used for cache index
 #}
 {% set ip_list=[settings.listen_ip,] if settings.listen_ip is string else settings.listen_ip %}
 {% set config_list= [
@@ -44,7 +44,7 @@ trafficserver:
   ('CONFIG', 'proxy.config.http.cache.heuristic_min_lifetime INT', '604800'),
   ('CONFIG', 'proxy.config.http.cache.heuristic_max_lifetime INT', '2419200'),
   ('CONFIG', 'proxy.config.net.connections_throttle INT', '1000'),
-  ('CONFIG', 'proxy.config.net.poll_timeout INT', '100'),
+  ('CONFIG', 'proxy.config.net.poll_timeout INT', '250'),
   ('CONFIG', 'proxy.config.exec_thread.autoconfig INT', '0'),
   ('CONFIG', 'proxy.config.exec_thread.limit INT', '4'),
   ('CONFIG', 'proxy.config.hostdb.max_size INT', '8M'),
