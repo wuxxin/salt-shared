@@ -175,7 +175,7 @@ knot-{{ name }}.service:
   service.dead:
     - disable: true
 
-knot.reload:
+knot-{{ name }}.reload:
   cmd.run:
     - name: /usr/bin/true
 
