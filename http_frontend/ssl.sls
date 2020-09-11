@@ -111,7 +111,7 @@ generate_invalid:
 # use snakeoil cert/key
 {{ settings.cert_dir }}/{{ settings.ssl_key }}:
   file.copy:
-    - source: {{ ssl_snakeoil_key_path }}
+    - source: {{ settings.ssl_snakeoil_key_path }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
     - mode: "0640"

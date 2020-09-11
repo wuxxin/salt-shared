@@ -135,7 +135,7 @@ acme-register-account:
 
 {{ issue_cert(settings.domain, settings.allowed_hosts) }}
   {% for vh_domain_str in settings.virtual_hosts %}
-    {%- set vh_domain_list = vh_domainstr.split(' ') %}
+    {%- set vh_domain_list = vh_domain_str.split(' ') %}
 {{ issue_cert(vh_domain_list[0], vh_domain_list[1:]) }}
   {% endfor %}
 
