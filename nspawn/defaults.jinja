@@ -4,7 +4,7 @@ container: /var/lib/machines
 
 {% load_yaml as container_defaults %}
 # name of the nspawn container and name of the controlling systemd service
-name:
+name: ""
 
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
@@ -22,10 +22,10 @@ args: ""
 # environment: dict: {key: value,} add environment data
 environment: {}
 
-# Set the user namespace mode for the container. valid options are "pick","true",""
+# user namespace mode, valid options are: "pick","true",""
 "private-users": pick
 "private-users-chown": true
-# user namespace network stack
+# private network stack
 "private-network": true
 
 # systemctl set-property
