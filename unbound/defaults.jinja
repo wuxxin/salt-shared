@@ -11,19 +11,21 @@ authorative:
 redirect_host_dns: false
 # if query_localhost is true, unbound will query local host addresses as authoritative targets
 query_localhost: true
+profile: []
 {% endload %}
 
-{% load_yaml as example %}
-verbosity: 3
-listen:
-  - 127.0.0.1
-answer:
-  - 127.0.0.1/8
+{% load_yaml as profile_defaults %}
+name: ""
+enabled: false
+verbosity: 1
+listen: []
+answer: []
 authorative:
-  unsigned:
-    "local": "127.0.1.1"
-    "0.0.127.in.addr.arpa": "127.0.1.1"
+  unsigned: {}
+  signed: {}
+query_localhost: true
 {% endload %}
+
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('unbound', {})) %}
