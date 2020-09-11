@@ -1,5 +1,6 @@
 {#
-# to define a gitea instance, set pillar:
+
+# to define a gitea instance, set pillar
 gitea:
   profile:
     - name: profilename
@@ -21,19 +22,21 @@ gitea:
       any_section_from_app_ini:
           # app.ini sections, all keys are lowercase
 
-# profile modifications
-#   + the profile_defaults will be merged with the defined profile
-#   + global:run_user if not defined will be set to gitea_<profile:name>
-#   + repository:root if not defined will be set to ~/repos
-#   + GITEA_WORK_DIR will be set to salt:work_dir (defaults to ~/work)
-#   + GITEA_CUSTOM will be set to salt:custom_dir (defaults to ~/custom)
-#   + oauth2:enable will be set to false if oauth2:jwt_secret is not set
-#   + server:lfs_start_server will be set to false if server:lfs_jwt_secret is not set
-#   + server:http_addr if not defined and
-#     + server:protocol == unix, it will be set to /run/gitea_<profile:name>/gitea.sock
-#     + server:protocol == http, it will be set to 127.0.0.1
+# for each profile
+  + the profile_defaults will be merged with the defined profile
+  + global:run_user if not defined will be set to gitea_<profile:name>
+  + salt:home_dir (home of run_user) if not defined will be set to /home/'+ global.run_user
+  + repository:root if not defined will be set to ~/repos
+  + GITEA_WORK_DIR will be set to salt:work_dir (defaults to ~/work)
+  + GITEA_CUSTOM will be set to salt:custom_dir (defaults to ~/custom)
+  + oauth2:enable will be set to false if oauth2:jwt_secret is not set
+  + server:lfs_start_server will be set to false if server:lfs_jwt_secret is not set
+  + server:http_addr if not defined and
+    + server:protocol == unix, it will be set to /run/gitea_<profile:name>/gitea.sock
+    + server:protocol == http, it will be set to 127.0.0.1
 
 #}
+
 
 {% load_yaml as profile_defaults %}
 name: default
@@ -64,15 +67,15 @@ security:
 {% endload %}
 
 
+{# gitea binary release download url #}
 {% load_yaml as external %}
 gitea_binary_xz:
   version: 1.12.3
   latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/go-gitea/gitea/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
   download: "https://github.com/go-gitea/gitea/releases/download/v##version##/gitea-##version##-linux-amd64.xz"
-  target: lib
+  target: /usr/local/lib/gitea.xz
   hash_url: https://github.com/go-gitea/gitea/releases/download/v##version##/gitea-##version##-linux-amd64.xz.sha256
 {% endload %}
-
 {# expand ##version## in field external.*.[download, hash_url] #}
 {% for n,v in external.items() %}
   {% set dummy=external[n].__setitem__('download',
@@ -80,3 +83,43 @@ gitea_binary_xz:
   {% set dummy=external[n].__setitem__('hash_url',
         v['hash_url']|regex_replace('##version##', v.version)) %}
 {% endfor %}
+
+
+{# expand profile entries #}
+{% set pns= namespace(plist=[]) %}
+{% for raw_entry in salt['pillar.get']('gitea:profile', []) %}
+  {% set entry=salt['grains.filter_by']({'default': profile_defaults},
+    grain='default', default= 'default', merge= raw_entry) %}
+  {% if entry.global.run_user is not defined %}
+    {% do entry.global.update({ 'run_user': 'gitea_' ~ entry.name }) %}
+  {% endif %}
+  {% if entry.salt.home_dir is not defined %}
+    {% do entry.salt.update({ 'home_dir': '/home/' ~ entry.global.run_user }) %}
+  {% endif %}
+  {% if entry.repository.root is not defined %}
+    {% do entry.repository.update({ 'root': entry.salt.home_dir ~ '/repos' }) %}
+  {% endif %}
+  {% if entry.salt.custom_dir is not defined %}
+    {% do entry.salt.update({ 'custom_dir': entry.salt.home_dir ~ '/custom' }) %}
+  {% endif %}
+  {% if entry.salt.work_dir is not defined %}
+    {% do entry.salt.update({ 'work_dir': entry.salt.home_dir ~ '/work' }) %}
+  {% endif %}
+  {% if entry.oauth2.jwt_secret is not defined %}
+    {% do entry.oauth2.update({ 'enable': 'false'}) %}
+  {% endif %}
+  {% if entry.server.lfs_jwt_secret is not defined %}
+    {% do entry.server.update({ 'lfs_start_server': 'false'}) %}
+  {% endif %}
+  {% if entry.server.http_addr is not defined %}
+    {% if entry.server.protocol == 'http' %}
+      {% do entry.server.update({ 'http_addr': '127.0.0.1'}) %}
+    {% elif entry.server.protocol == 'unix' %}
+      {% do entry.server.update({ 'http_addr': '/run/' ~ entry.global.run_user ~ '/gitea.sock'}) %}
+    {% endif %}
+  {% endif %}
+  {% do pns.plist.append(entry)
+{% endfor %}
+
+
+{% set settings = {"profile": pns.plist, "external": external} %}
