@@ -1,4 +1,3 @@
-
 {% load_yaml as defaults %}
 
 user: {{ salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('gitops') }}
@@ -41,25 +40,13 @@ maintenance_target: /var/lib/gitops/maintenance/503.html
    to be added as onfailure to gitops-service-failed #}
 onfailure_service: []
 
-update_automatic_reboot: true
-pre_update_command: /usr/bin/true
-update_command: /usr/local/sbin/execute-saltstack.sh . state.highstate
-post_update_command: /usr/bin/true
-finish_update_command: /usr/bin/true
-
-{#
-+ pre_update: is executed before update but only if update would run
-+ update: is executed if pre_update was sucessful and update would run
-+ post_update is executed after update did run sucessful
-+ finish_update is executed after post_update was sucessful and machine does not need a reboot
-example:
-```
-pre_update_command: /usr/bin/systemctl stop xyz
-post_update_command: /usr/bin/bash -c '. /usr/local/lib/gitops-library.sh;
-    simple_metric test_update_run counter "timestamp of update run" "$(date +%s)000"'
-finish_update_command: /usr/bin/systemctl start --no-block xyz
-```
-#}
+update:
+  automatic_reboot: true
+  validate_cmd: "/usr/local/sbin/execute-saltstack.sh . state.show_highstate > /dev/null"
+  before_cmd: /usr/bin/true
+  update_cmd: "/usr/local/sbin/execute-saltstack.sh . state.highstate"
+  after_cmd: /usr/bin/true
+  finish_cmd: /usr/bin/true
 
 {% endload %}
 
