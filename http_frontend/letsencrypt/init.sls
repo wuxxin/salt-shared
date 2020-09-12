@@ -5,8 +5,9 @@ include:
 {% from "http_frontend/defaults.jinja" import settings with context %}
 {% set tlsport= settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1') %}
 
-{% macro issue_cert(domain, san_list) %}
+{% macro issue_cert(san_list) %}
 {# issue new cert, if not already available or SAN list != expected SAN list #}
+{% set domain= san_list[0] %}
 {% set domain_dir = settings.cert_dir+ '/acme.sh/' + domain %}
 acme-issue-cert-{{ domain }}:
   cmd.run:
@@ -117,7 +118,6 @@ acme.sh:
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         TLSPORT={{ tlsport }}
-        # DOMAIN={{ settings.domain }}
     - require:
       - file: {{ settings.cert_dir }}/acme.sh
 
@@ -133,10 +133,10 @@ acme-register-account:
       - file: {{ settings.cert_dir }}/acme.sh/acme.sh.env
       - file: {{ settings.cert_dir }}/acme.sh/account.conf
 
-{{ issue_cert(settings.domain, settings.allowed_hosts) }}
+{{ issue_cert(settings.allowed_hosts) }}
   {% for vh_domain_str in settings.virtual_hosts %}
     {%- set vh_domain_list = vh_domain_str.split(' ') %}
-{{ issue_cert(vh_domain_list[0], vh_domain_list[1:]) }}
+{{ issue_cert(vh_domain_list) }}
   {% endfor %}
 
 
