@@ -62,7 +62,7 @@ opendkim:
   user.present:
     - name: opendkim
     - shell: /usr/sbin/nologin
-    - home: /var/run/opendkim
+    - home: /run/opendkim
     - system: True
   pkg.installed:
     - pkgs:
