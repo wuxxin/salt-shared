@@ -37,7 +37,7 @@ dkim:
   #  ("unix:/path/to/socket"  | "inet:1.2.3.4:5678")
   # will be translated for opendkim:
   #  ("local:/path/to/socket" | "inet:5678@1.2.3.4")
-  listen: unix:/run/opendkim/opendkim.sock
+  listen: "unix:/run/opendkim/opendkim.sock"
   signaturealgorithm: rsa-sha256
   canonicalization: relaxed/relaxed
   oversignheaders: From
