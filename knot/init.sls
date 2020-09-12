@@ -71,7 +71,7 @@ knot.service:
 
 knot.reload:
   cmd.run:
-    - name: /usr/sbin/knotc -b zone-reload
+    - name: /usr/sbin/knotc -b zone-reload; /usr/sbin/knotc -b zone-retransfer
     - require:
       - service: knot.service
 
@@ -166,7 +166,9 @@ knot-{{ name }}.service:
 
 knot-{{ name }}.reload:
   cmd.run:
-    - name: /usr/sbin/knotc -b -c /etc/knot/knot-{{ name}}.conf zone-reload
+    - name: |
+        /usr/sbin/knotc -b -c /etc/knot/knot-{{ name}}.conf zone-reload;
+        /usr/sbin/knotc -b -c /etc/knot/knot-{{ name}}.conf zone-retransfer
     - require:
       - service: knot-{{ name }}.service
 
