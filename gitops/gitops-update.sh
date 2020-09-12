@@ -64,7 +64,7 @@ main () {
         cd $src_dir
 
         echo "calling validate_cmd"
-        {{ settings.update.validate_cmd }} && result=$? || result=$?
+        {{ settings['update']['validate_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
             gitops_error "Gitops Error" "validate_cmd failed with error $result" \
                 error "$(systemd_json_status "$UNITNAME")"
@@ -74,13 +74,13 @@ main () {
             need_service_restart="true"
 
             echo "calling before_cmd"
-            {{ settings.update.before_cmd }} && result=$? || result=$?
+            {{ settings['update']['before_cmd'] }} && result=$? || result=$?
             if test $result -ne 0; then
                 gitops_error "Gitops Error" "before_cmd failed with error $result" \
                     error "$(systemd_json_status "$UNITNAME")"
             else
                 echo "calling update_cmd"
-                {{ settings.update.update_cmd }} && result=$? || result=$?
+                {{ settings['update']['update_cmd'] }} && result=$? || result=$?
                 if test $result -ne 0; then
                     set_tag gitops_failed_rev "$latest_origin_rev"
                     gitops_error "Gitops Error" "update_cmd failed with error $result" \
@@ -88,7 +88,7 @@ main () {
                 else
                     set_tag gitops_current_rev "$latest_origin_rev"
                     echo "calling after_cmd"
-                    {{ settings.update.after_cmd }} && result=$? || result=$?
+                    {{ settings['update']['after_cmd'] }} && result=$? || result=$?
                     if test $result -ne 0; then
                         gitops_error "Gitops Error" "after_cmd failed with error $result" \
                             error "$(systemd_json_status "$UNITNAME")"
@@ -115,7 +115,7 @@ main () {
 
     if test "$need_service_restart" = "true" -a "$result" = "0"; then
         echo "calling finish_cmd_command"
-        {{ settings.update.finish_cmd }} && result=$? || result=$?
+        {{ settings['update']['finish_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
             gitops_error "Gitops Error" "finish_cmd failed with error $result" \
                 error "$(systemd_json_status "$UNITNAME")"

@@ -90,7 +90,7 @@ create_gitops_maintenance_target_dir:
 
 {{ settings.var_dir }}/flags/reboot.automatic.disable:
   file:
-{% if settings.update_automatic_reboot %}
+{% if settings['update']['automatic_reboot'] %}
     - absent
 {% else %}
     - managed
