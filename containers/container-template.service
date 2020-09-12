@@ -45,34 +45,29 @@ ExecStartPre=-podman rm -f {{ pod.name }}
 RuntimeDirectory={{ pod.name }}
 # ? sure? contents of Environmentfile will be passed to container using --env-host
 EnvironmentFile=/etc/containers/podman.service/{{ pod.name }}.env
-{%- if pod.enabled %}
 ExecStart=podman run \
-  {%- if pod.ephemeral %}
+{%- if pod.ephemeral %}
   --rm \
-  {%- endif %}
+{%- endif %}
   --name={{ pod.name }} \
   --userns={{ pod.userns }} \
   --env-host \
-  {%- for key,value in pod.options.items() %}
+{%- for key,value in pod.options.items() %}
   --{{ key }}={{ value }} \
-  {%- endfor %}
-  {%- for key,value in pod.labels.items() %}
+{%- endfor %}
+{%- for key,value in pod.labels.items() %}
   --label={{ key }}={{ value }} \
-  {%- endfor %}
-  {%- for vol in pod.volumes %}
-    {%- set vol_str = env_repl(vol, pod.environment) %}
+{%- endfor %}
+{%- for vol in pod.volumes %}
+  {%- set vol_str = env_repl(vol, pod.environment) %}
   --volume={{ vol_str }} \
-  {%- endfor %}
-  {%- for publish in pod.ports %}
-    {%- set publish_str = env_repl(publish, pod.environment) %}
+{%- endfor %}
+{%- for publish in pod.ports %}
+  {%- set publish_str = env_repl(publish, pod.environment) %}
   --publish={{ publish_str }} \
-  {%- endfor %}
+{%- endfor %}
   {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
   {{ pod.command }} {{ pod.args }}
-  {% endif %}
-{%- else %}
-ExecStart=/usr/bin/false
-{%- endif %}
 {%- if pod.type != 'oneshot' %}
 ExecStop=podman stop {{ pod.name }}
 
