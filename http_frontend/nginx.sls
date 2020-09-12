@@ -65,7 +65,13 @@ lua_prometheus_module:
     - source: {{ lua_prometheus.download }}
     - source_hash: sha256={{ lua_prometheus.hash }}
   archive.extracted:
-    - target: /etc/nginx/lua_prometheus
+    - source: {{ lua_prometheus.target }}
+    - name: /etc/nginx/lua_prometheus
+    - archive_format: tar
+    - enforce_toplevel: false
+    - overwrite: true
+    - clean: true
+    - options: --strip-components 1
     - onchanges:
       - file: lua_prometheus_module
 
