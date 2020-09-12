@@ -51,7 +51,7 @@ generate_invalid_cert:
     - require:
       - pkg: ssl_requisites
       - file: /usr/local/sbin/make-invalid-ssl-cert.sh
-      - file: { settings.cert_dir }}/{{ settings.ssl_dhparam }}
+      - file: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
 
 {{ settings.cert_dir }}/cert-renew-hook.sh:
   file.managed:
