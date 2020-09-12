@@ -3,16 +3,18 @@ bionic:
   desktop:
     xserver: xserver-xorg-hwe-18.04
     xwayland: xwayland-hwe-18.04
-  update_automatic_reboot: true
-  update_allowed_origins: []
+  update:
+    automatic_reboot: true
+    allowed_origins: []
   reporting: false
   snapd: false
 generic:
   desktop:
     xserver: xserver-xorg
     xwayland: xwayland
-  update_automatic_reboot: true
-  update_allowed_origins: []
+  update:
+    automatic_reboot: true
+    allowed_origins: []
   reporting: false
   snapd: false
 {% endload %}
