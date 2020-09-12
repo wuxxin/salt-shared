@@ -120,7 +120,7 @@ update_image_{{ pod.image }}:
 
 {# create compose,override files,
   fill with source,config or config,none if source empty #}
-  {%- if entry.source %}
+  {%- if entry.source != None %}
 {{ entry.name }}.compose:
   file.managed:
     - source: {{ entry.source }}
