@@ -14,7 +14,7 @@ ssl_requisites:
 /usr/local/sbin/make-invalid-ssl-cert.sh:
   file.managed:
     - mode: "0755"
-    - name: salt://http_frontend/make-invalid-ssl-cert.sh
+    - source: salt://http_frontend/make-invalid-ssl-cert.sh
     - template: jinja
     - defaults:
         settings: {{ settings }}
