@@ -3,13 +3,21 @@ include:
   - http_frontend.dirs
   - http_frontend.pki
 
-# order is important: ssl -> nginx -> letsencrypt
+# XXX order is important: ssl -> nginx -> letsencrypt
 
 ssl_requisites:
   pkg.installed:
     - pkgs:
       - openssl
       - ssl-cert
+
+/usr/local/sbin/make-invalid-ssl-cert.sh:
+  file.managed:
+    - mode: "0755"
+    - name: salt://http_frontend/make-invalid-ssl-cert.sh
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
 
 # regenerate dhparam if not existing or smaller than 2048 Bit
 {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}:
@@ -28,7 +36,7 @@ ssl_requisites:
       - cmd: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
 
 # regenerate snakeoil if not existing or cn != settings.domain
-generate_snakeoil:
+generate_snakeoil_cert:
   cmd.run:
     - name: make-ssl-cert generate-default-snakeoil --force-overwrite
     - onlyif: |
@@ -36,34 +44,13 @@ generate_snakeoil:
     - require:
       - pkg: ssl_requisites
 
-generate_invalid:
+generate_invalid_cert:
   cmd.run:
-    - name: |
-        set -eo pipefail
-        HostName="invalid"
-        SubjectAltName="DNS:$HostName"
-        template="/usr/share/ssl-cert/ssleay.cnf"
-        TMPFILE="$(mktemp)" || exit 1
-        TMPOUT="$(mktemp)"  || exit 1
-        trap "rm -f $TMPFILE $TMPOUT" EXIT
-        sed -e s#@HostName@#"$HostName"# -e s#@SubjectAltName@#"$SubjectAltName"# $template > $TMPFILE
-        if ! openssl req -config $TMPFILE -new -x509 -days 3650 -nodes -sha256 \
-            -out {{ settings.ssl_invalid_cert_path }} \
-            -keyout {{ settings.ssl_invalid_key_path }} > $TMPOUT 2>&1
-        then
-            echo Could not create certificate. Openssl output was: >&2
-            cat $TMPOUT >&2
-            exit 1
-        fi
-        chmod 644 {{ settings.ssl_invalid_cert_path }}
-        chmod 640 {{ settings.ssl_invalid_key_path }}
-        chown root:ssl-cert {{ settings.ssl_invalid_key_path }}
-        # append dhparam
-        cat {{ settings.ssl_invalid_cert_path }} {{ settings.cert_dir }}/{{ settings.ssl_dhparam }} > {{ settings.ssl_invalid_full_cert_path }}
-        chmod 644 {{ settings.ssl_invalid_full_cert_path }}
+    - name: /usr/local/sbin/make-invalid-ssl-cert.sh
     - onlyif: test ! -e {{ settings.ssl_invalid_key_path }}
     - require:
       - pkg: ssl_requisites
+      - file: /usr/local/sbin/make-invalid-ssl-cert.sh
       - file: { settings.cert_dir }}/{{ settings.ssl_dhparam }}
 
 {{ settings.cert_dir }}/cert-renew-hook.sh:
@@ -117,7 +104,7 @@ generate_invalid:
     - mode: "0640"
     - require:
       - sls: http_frontend.dirs
-      - cmd: generate_snakeoil
+      - cmd: generate_snakeoil_cert
 
   {% for i in [settings.ssl_chain_cert, settings.ssl_cert] %}
 {{ settings.cert_dir }}/{{ i }}:
@@ -128,7 +115,7 @@ generate_invalid:
     - mode: "0640"
     - require:
       - sls: http_frontend.dirs
-      - cmd: generate_snakeoil
+      - cmd: generate_snakeoil_cert
   {% endfor %}
 {% endif %}
 

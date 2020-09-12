@@ -8,11 +8,18 @@
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
 + **configuration** using **pillar:nginx**, for details see defaults.jinja
 
-+ ssl Features
-    + main domain can use cert from pillar data (cert+key), letsencrypt, or selfsigned
++ Ssl Features
+    + main domain can use cert from pillar (cert+key), letsencrypt or selfsigned
     + main domain and other virtual domains can have multiple letsencrypt SAN's
-    + unknown domains or requests with an invalid sni will return a certificate for the domain "invalid" and return 404
-    + manual virtual domains (where letsencrypt is not used) must be set up by copying certificates to disk structure
+    + unknown domains or requests with an invalid sni will
+        return a certificate for the domain "invalid" and return 404
+    + manual virtual domains (where letsencrypt is not used) must be set up by
+        copying certificates to disk structure
+
++ Proxy Features
+    + pass request headers from downstream
+    + set HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
+    + defaults to proxy_http_version 1.1 , set "proxy_http_version 1.0;" if upstream does not speak HTTP 1.1
 
 #### example, for details see defaults.jinja
 
