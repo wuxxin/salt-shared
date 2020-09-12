@@ -43,7 +43,6 @@ ExecStartPre=-podman rm -f {{ pod.name }}
 {%- endif %}
 # RuntimeDirectory will create /run/{{ pod.name }} for pid, socket files
 RuntimeDirectory={{ pod.name }}
-# ? sure? contents of Environmentfile will be passed to container using --env-host
 EnvironmentFile=/etc/containers/podman.service/{{ pod.name }}.env
 ExecStart=podman run \
 {%- if pod.ephemeral %}
@@ -68,6 +67,7 @@ ExecStart=podman run \
 {%- endfor %}
   {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
   {{ pod.command }} {{ pod.args }}
+{% endif %}
 {%- if pod.type != 'oneshot' %}
 ExecStop=podman stop {{ pod.name }}
 
