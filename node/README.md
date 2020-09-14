@@ -11,7 +11,7 @@ Configures hostname, users, groups, locales, timezone, network, storage
 
 ```yaml
 node:
-  hostname: unsethostname
+  hostname: myshinyhostname.domain
   users:
     - name: XX
       # additional parameter according to saltstack state.user
