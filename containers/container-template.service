@@ -55,7 +55,7 @@ ExecStart=podman run \
   --gidmap=0:{{ startid }}:65536 \
 {%- else %}
   --userns={{ pod.userns }} \
-{%- fi %}
+{%- endif %}
   --env-host \
 {%- for key,value in pod.options.items() %}
   --{{ key }}={{ value }} \
