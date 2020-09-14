@@ -1,6 +1,5 @@
 {% from "nsapwn/defaults.jinja" import settings with context %}
 
-{# modify kernel for production http://lxd.readthedocs.io/en/latest/production-setup/ #}
 include:
   - kernel.server
 
@@ -11,4 +10,5 @@ nspawn_requisites:
       - bridge-utils
       - ebtables
       - uidmap
+    - require:
       - sls: kernel.server
