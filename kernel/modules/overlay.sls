@@ -1,6 +1,6 @@
 {% from "kernel/defaults.jinja" import settings with context %}
 
-{% if grains['virtual'] != 'LXC' %}
+{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 
 /etc/modprobe.d/overlay.conf:
   file.managed:

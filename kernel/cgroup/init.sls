@@ -3,7 +3,7 @@ cgroup:
     - pkgs:
       - cgroup-tools
 
-{% if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
+{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 
 {# it's 2020, enable cgroup v2 only hierachy #}
 cgroup-grub-settings:

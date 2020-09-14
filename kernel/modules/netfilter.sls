@@ -14,7 +14,7 @@
 - xt_conntrack
 {% endload %}
 
-{% if grains['virtual'] != 'LXC' %}
+{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 /etc/modules-load.d/netfilter.conf:
   file.managed:
     - contents: |

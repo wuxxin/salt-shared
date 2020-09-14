@@ -1,4 +1,4 @@
-{%- if salt['grains.get']('virtual', 'unknown') != 'LXC' %}
+{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 include:
   - .big-inotify
   - .big-ipv4-arp-cache
@@ -6,7 +6,7 @@ include:
   - .big-max-map-count
   - .big-max-keys
   - .restrict-dmesg
-{%- endif %}
+{% endif %}
 
 sysctl_nop:
   test:
