@@ -49,7 +49,14 @@ ExecStart=podman run \
   --rm \
 {%- endif %}
   --name={{ pod.name }} \
+{%- if pod.userns = 'pick' %}
+  {# 15 bit container crc="0000" + 16bitsubid="0000" #  16Bit, lower values are ok range: 65536  #}
+  {%- set startid = salt['cmd.run_stdout']('python -c "import binascii;id=(binascii.crc_hqx(b\"' ~ pod.name ~ '\", 0) & 0x7fff); print(\"{:d}\".format((id+ 0x4000 if id <=8 else id) << 16))"') %}
+  --uidmap=0:{{ startid }}:65536 \
+  --gidmap=0:{{ startid }}:65536 \
+{%- else -%}
   --userns={{ pod.userns }} \
+{%- fi %}
   --env-host \
 {%- for key,value in pod.options.items() %}
   --{{ key }}={{ value }} \

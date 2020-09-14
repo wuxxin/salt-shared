@@ -15,7 +15,7 @@ Restart={{ compose.restart }}
 WorkingDirectory={{ compose.workdir }}
 # RuntimeDirectory will create /run/{{ compose.name }} for pid, socket files
 RuntimeDirectory={{ compose.name }}
-Environment=PODMAN_USERNS={{ compose.userns }}
+# Environment=PODMAN_USERNS={{ compose.userns }}
 
 {%- if compose.update %}
   {%- if compose.build %}
