@@ -8,7 +8,7 @@ from shlex import quote
 try:
     import yaml
 except ImportError as e:
-    print('ERROR: fatal, could not import yaml: {0}, try "apt install python3-yaml"'.format(e))
+    print('ERROR: could not import yaml: {0}, try "apt install python3-yaml"'.format(e))
     sys.exit(1)
 
 
@@ -59,10 +59,13 @@ output sorted keys assigned with "=" to value on stdout as
     parser.add_argument("--combine", default="_")
     parser.add_argument("--assign", default="=")
     parser.add_argument("--root", default="")
-    parser.add_argument("--file", default=sys.stdin,
-                        nargs="?", type=argparse.FileType("r"),
-                        help="file to read or stdin if not defined",
-                        )
+    parser.add_argument(
+        "--file",
+        default=sys.stdin,
+        nargs="?",
+        type=argparse.FileType("r"),
+        help="file to read or stdin if not defined",
+    )
     parser.add_argument("key", help='comma seperated list of keynames or "." for all')
     args = parser.parse_args()
 
@@ -84,7 +87,8 @@ output sorted keys assigned with "=" to value on stdout as
             continue
 
         for key, value in sorted(result):
-            print("{prefix}{key}{assign}{value}{postfix}".format(
+            print(
+                "{prefix}{key}{assign}{value}{postfix}".format(
                     prefix=args.prefix,
                     key=keyroot + key.upper(),
                     assign=args.assign,
