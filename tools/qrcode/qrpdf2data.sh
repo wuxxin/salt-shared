@@ -10,20 +10,16 @@ example:
 
 input linked qrcode pictures or a pdf with linked qrcodes.
 decode the qrcodes and base32 decode the resulting output.
-input order of pictures is not relevant for the output.
-
+input order of pictures is not relevant for correct output.
 EOF
     exit 1
 }
 
 if test "$2" = ""; then usage; fi
 if test ! -f $1; then usage; fi
-
 if ! which zbarimg > /dev/null; then
-    echo "error, no zbarimg found. try 'apt install zbar-tools'"
-    exit 1
+    echo "error, no zbarimg found. try 'apt install zbar-tools'"; exit 1
 fi
-
 # get last parameter and remove from args
 outputfile=${@:${#@}}
 set -- "${@:1:$(($#-1))}"
