@@ -19,6 +19,10 @@ yaml2json() { # filter pipe
     python3 -c "import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, sort_keys=True)"
 }
 
+text2json() { # $1=dictvarname, STDIN=text , return STDOUT=json dict {'varname': [text.split] }
+    python3 -c "import sys, json; d={\"$1\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
+}
+
 json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
 }
@@ -27,12 +31,12 @@ yaml_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, yaml, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)))" $@
 }
 
-systemd_json_status() { # $1=unitname
-    systemctl status -l -q --no-pager -n 25 "$@" | text2json_status
+unit_status() { # $UNITNAME
+    systemctl status -l -q --no-pager -n 15 "$UNITNAME"
 }
 
-text2json_status() { # $1=text , return json dict {'status': [text.split] }
-    python3 -c "import sys, json; d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
+systemd_json_status() { # $1=unitname
+    systemctl status -l -q --no-pager -n 15 "$@" | text2json status
 }
 
 is_truestr() { # $1=boolstring , return true if lower($1) = "true"
@@ -179,11 +183,11 @@ EOF
 
 
 # ### sentry error reporting ###
-sentry_entry() { # $1=topic $2=message [$3=level=error [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
+sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
     local topic msg level culprit extra logger tags
     local gitops_run_rev gitops_current_rev gitops_failed_rev sentrycat
 
-    topic=$1; msg=$2; level=${3:-error}; extra=${4:-\{\}}; logger=${5:-app.status}
+    level=${1}; topic=$2; msg=$3; extra=${4:-\{\}}; logger=${5:-app.status}
     culprit=${UNITNAME:-shellscript}
     gitops_run_rev=$(cat "{{ settings.src_dir }}/.git/refs/heads/{{ settings.git.branch }}" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
@@ -225,7 +229,7 @@ gitops_maintenance() { # $1="--clear" | $1=topic $2=message
     if test "$1" = "--clear"; then
         if test -e "$resultfile"; then
             rm -f "$resultfile"
-            sentry_entry "Gitops Execution" "Frontend Ready" "info"
+            sentry_entry info "Gitops Execution" "Frontend Ready"
         fi
     else
         topic="$(printf "%s" "$1" | xmlstarlet esc)"
@@ -236,13 +240,13 @@ gitops_maintenance() { # $1="--clear" | $1=topic $2=message
     fi
 }
 
-gitops_error() { # $1=topic $2=message [$3=level=error [$4=extra={} [$5=logger=app-status]]]
-    gitops_maintenance "$1" "$2"
-    sentry_entry "$1" "$2" "$3" "$4" "$5"
+gitops_error() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
+    gitops_maintenance "$1" "$(echo "$2" | head -n 1)"
+    sentry_entry error "$1" "$2" "$3" "$4"
 }
 
-gitops_failed() { # $1=topic $2=message [$3=level=critical [$4=extra={} [$5=logger=app-status]]]
-    gitops_maintenance "$1" "$2"
-    sentry_entry "$1" "$2" critical "$4" "$5"
+gitops_failed() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
+    gitops_maintenance "$1" "$(echo "$2" | head -n 1)"
+    sentry_entry critical "$1" "$2" "$3" "$4"
     set_flag gitops.update.failed
 }

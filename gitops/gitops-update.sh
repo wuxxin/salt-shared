@@ -66,8 +66,8 @@ main () {
         echo "calling validate_cmd: {{ settings['update']['validate_cmd'] }}"
         {{ settings['update']['validate_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
-            gitops_error "Gitops Error" "validate_cmd failed with error $result" \
-                error "$(systemd_json_status "$UNITNAME")"
+            gitops_error "Gitops Error" \
+                "validate_cmd failed with error $result\n$(unit_status)"
         else
             echo "validation successful, display gitops maintenance information"
             gitops_maintenance "Gitops Update" "$msg"
@@ -76,22 +76,22 @@ main () {
             echo "calling before_cmd: {{ settings['update']['before_cmd'] }}"
             {{ settings['update']['before_cmd'] }} && result=$? || result=$?
             if test $result -ne 0; then
-                gitops_error "Gitops Error" "before_cmd failed with error $result" \
-                    error "$(systemd_json_status "$UNITNAME")"
+                gitops_error "Gitops Error" \
+                    "before_cmd failed with error $result\n$(unit_status)"
             else
                 echo "calling update_cmd: {{ settings['update']['update_cmd'] }}"
                 {{ settings['update']['update_cmd'] }} && result=$? || result=$?
                 if test $result -ne 0; then
                     set_tag gitops_failed_rev "$latest_origin_rev"
-                    gitops_error "Gitops Error" "update_cmd failed with error $result" \
-                        error "$(systemd_json_status "$UNITNAME")"
+                    gitops_error "Gitops Error" \
+                        "update_cmd failed with error $result\n$(unit_status)"
                 else
                     set_tag gitops_current_rev "$latest_origin_rev"
                     echo "calling after_cmd: {{ settings['update']['after_cmd'] }}"
                     {{ settings['update']['after_cmd'] }} && result=$? || result=$?
                     if test $result -ne 0; then
-                        gitops_error "Gitops Error" "after_cmd failed with error $result" \
-                            error "$(systemd_json_status "$UNITNAME")"
+                        gitops_error "Gitops Error" \
+                            "after_cmd failed with error $result\n$(unit_status)"
                     fi
                 fi
             fi
@@ -101,7 +101,7 @@ main () {
     if test -e /run/reboot-required; then
         if flag_is_set reboot.automatic.disable; then
             echo "Warning: reboot of system required, but automatic reboot not allowed; contacting admin"
-            sentry_entry "Gitops Attention" "node needs reboot, human attention required" error
+            sentry_entry error "Gitops Attention" "node needs reboot, human attention required"
         else
             echo "Warning: reboot of system required, initiating automatic reboot"
             simple_metric update_duration_sec gauge \
@@ -117,8 +117,8 @@ main () {
         echo "calling finish_cmd: {{ settings['update']['finish_cmd'] }}"
         {{ settings['update']['finish_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
-            gitops_error "Gitops Error" "finish_cmd failed with error $result" \
-                error "$(systemd_json_status "$UNITNAME")"
+            gitops_error "Gitops Error" \
+                "finish_cmd failed with error $result\n$(unit_status)"
         fi
     fi
 
