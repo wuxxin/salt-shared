@@ -1,0 +1,37 @@
+[Unit]
+Description=oauth2-proxy %I daemon service
+After=network.target
+Documentation=https://github.com/oauth2-proxy/oauth2-proxy
+After=syslog.target network.target
+StartLimitBurst=5
+StartLimitIntervalSec=100
+
+[Service]
+User=oauth2proxy
+Group=oauth2proxy
+KillMode=process
+Restart=always
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2proxy_%i.cfg
+ExecReload=/usr/bin/kill -HUP $MAINPID
+RuntimeDirectory=oauth2proxy_%i
+RuntimeDirectoryMode=2755
+
+UMask=007
+LimitNOFILE=65535
+ReadOnlyDirectories=/
+ProtectSystem=full
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectHome=yes
+NoNewPrivileges=true
+MemoryDenyWriteExecute=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+CapabilityBoundingSet=CAP_SETGID CAP_SETUID CAP_SYS_RESOURCE
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

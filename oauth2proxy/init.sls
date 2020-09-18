@@ -10,3 +10,9 @@ oauth2proxy_archive:
   archive.extracted:
     - source: {{ external.target }}
     - dest: {{ local_binary }}
+
+
+{% for entry in settings.profile %}
+
+
+{% endfor %}
