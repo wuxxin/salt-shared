@@ -27,12 +27,14 @@ enabled: true
 config:
   client_id: "oauth2-proxy"
   client_secret: ""
+  {# cookie_secret: the seed string for secure cookies; should be 16, 24, or 32 bytes #}
   cookie_secret: ""
-
+  cookie_secure: "true"
   {# the following values are calculated per profile if empty:
-  http_address: unix:///run/oauth2proxy/oauth2proxy.sock
   cookie_name: "_oauth2_proxy"
+  http_address: unix:///run/oauth2proxy/oauth2proxy.sock
   #}
+  reverse_proxy: "true"
 
   provider: oidc
   {# provider_display_name="Keycloak" #}
@@ -42,11 +44,8 @@ config:
   validate_url: "https://keycloak.localhost/realms/yourrealm/protocol/openid-connect/userinfo"
   {# keycloak groups are trees, so prepend "/" to it #}
   {# keycloak_group: /all #}
-
-  cookie_secure: "true"
-  reverse_proxy: "true"
-  {# cookie_domains: '[".localtest.me"]' #}
   {# email_domains: '["example.com"]' #}
+
 {% endload %}
 
 
