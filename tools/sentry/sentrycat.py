@@ -40,13 +40,13 @@ class MLStripper(HTMLParser):
         self.fed.append(d)
 
     def handle_entityref(self, name):
-        self.fed.append('&%s;' % name)
+        self.fed.append("&%s;" % name)
 
     def handle_charref(self, name):
-        self.fed.append('&#%s;' % name)
+        self.fed.append("&#%s;" % name)
 
     def get_data(self):
-        return ''.join(self.fed)
+        return "".join(self.fed)
 
 
 def _strip_once(value):
@@ -64,7 +64,7 @@ def strip_tags(value):
     # Note: in typical case this loop executes _strip_once once. Loop condition
     # is redundant, but helps to reduce number of executions of _strip_once.
     value = str(value)
-    while '<' in value and '>' in value:
+    while "<" in value and ">" in value:
         new_value = _strip_once(value)
         if len(new_value) >= len(value):
             # _strip_once was not able to detect more tags
@@ -77,7 +77,9 @@ def html2text(htmltext):
     text = html.unescape(strip_tags(htmltext))
     text = "\n\n".join(re.split(r"\s*\n\s*\n\s*", text))
     text = re.sub(r"\s\s\s+", " ", text)
-    wrapper = textwrap.TextWrapper(replace_whitespace=False, drop_whitespace=False, width=72)
+    wrapper = textwrap.TextWrapper(
+        replace_whitespace=False, drop_whitespace=False, width=72
+    )
     return "\n".join(wrapper.wrap(text))
 
 
@@ -85,7 +87,9 @@ def _get_content(message_part):
     payload = message_part.get_payload(decode=True)
     if message_part.get_content_charset() is None:
         charset = chardet.detect(payload)["encoding"]
-        logger.debug("no content charset declared, detection result: {0}".format(charset))
+        logger.debug(
+            "no content charset declared, detection result: {0}".format(charset)
+        )
     else:
         charset = message_part.get_content_charset()
 
@@ -94,8 +98,11 @@ def _get_content(message_part):
         logger.debug("aliasing charset iso-8859-8 for {0}".format(charset))
         charset = "iso-8859-8"
 
-    logger.debug("message-part: type: {0} charset: {1}".format(
-                message_part.get_content_type(), charset))
+    logger.debug(
+        "message-part: type: {0} charset: {1}".format(
+            message_part.get_content_type(), charset
+        )
+    )
     content = str(payload, charset, "replace")
     return content
 
@@ -134,6 +141,9 @@ def send_message(args):
         if margs.get("email", False):
             email_address = margs.pop("email")
             local_scope.user = {"email": email_address}
+        if margs.get("fingerprint", False):
+            fingerprint = margs.pop("fingerprint")
+            local_scope.fingerprint = fingerprint
         eventid = sentry_sdk.capture_event(margs)
 
     if args.get("verbose", True):
@@ -159,7 +169,6 @@ def send_mailbox(mbox, args):
             .isoformat()
         )
         margs["logger"] = "mailbox.send_mailbox"
-        margs["message"] = mailentry["Subject"]
         plain = ""
         html = ""
         if args.get("verbose", True):
@@ -178,7 +187,11 @@ def send_mailbox(mbox, args):
                 continue
 
         text = plain or html
-        margs["extra"] = {"content": [a for a in text.splitlines() if a.strip()]}
+        margs["fingerprint"] = [
+            mailentry["Subject"],
+        ]
+        margs["message"] = mailentry["Subject"] + "\n" + text
+        margs["extra"]["Message-Id"] = mailentry["Message-Id"]
         eventid = send_message(margs)
         if eventid:
             sent_mails.append(key)
@@ -187,7 +200,7 @@ def send_mailbox(mbox, args):
 
     for key in reversed(sent_mails):
         if args.get("verbose", True):
-            print('remove Email ID: {}'.format(mbox.get(key)["Message-Id"]))
+            print("remove Email ID: {}".format(mbox.get(key)["Message-Id"]))
         mbox.discard(key)
 
 
@@ -229,8 +242,10 @@ class JsonAction(argparse.Action):
         try:
             values = json.loads(values)
         except ValueError:
-            print("Invalid JSON for option {}.  Received: {}".format(
-                    option_strings, values), file=sys.stderr)
+            print(
+                "Invalid JSON for option {}: {}".format(option_strings, values),
+                file=sys.stderr,
+            )
             raise
         setattr(namespace, self.dest, values)
 
@@ -242,7 +257,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="grouping by sentry uses the first line of the message",
+        epilog="fingerprinting uses first line of the message, or the subject line if mail",
     )
 
     parser.add_argument("--verbose", action="store_true", default=False)
@@ -251,24 +266,49 @@ def main():
     parser.add_argument("--culprit", default="sentrycat.send_message")
     parser.add_argument("--server_name", default=socket.getfqdn())
     parser.add_argument("--release", default="")
-    parser.add_argument("--extra", default={}, action=JsonAction,
-                        help="a json dictionary of extra data")
-    parser.add_argument("--tags", default={}, action=JsonAction,
-                        help="a json dictionary listening tag name and value")
-    parser.add_argument("--request", default={}, action=JsonAction,
-                        help="a json dictionary of the request")
-    parser.add_argument("--dsn", action=EnvDefault, envvar="SENTRY_DSN", required=True,
-                        help="specify a sentry dsn, will use env SENTRY_DSN if unset")
+    parser.add_argument(
+        "--extra", default={}, action=JsonAction, help="a json dictionary of extra data"
+    )
+    parser.add_argument(
+        "--tags",
+        default={},
+        action=JsonAction,
+        help="a json dictionary listening tag name and value",
+    )
+    parser.add_argument(
+        "--request",
+        default={},
+        action=JsonAction,
+        help="a json dictionary of the request",
+    )
+    parser.add_argument(
+        "--dsn",
+        action=EnvDefault,
+        envvar="SENTRY_DSN",
+        required=True,
+        help="specify a sentry dsn, will use env SENTRY_DSN if unset",
+    )
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--mbox-message", type=exist_file, metavar="FILE",
-                        help="mbox filename to parse and send all")
-    group.add_argument("--maildir-message", type=exist_dir, metavar="DIR",
-                        help="maildir directory to parse and send all")
-    group.add_argument("--message", type=argparse.FileType(mode="r", encoding="utf-8"),
-                        dest="message_file", metavar="FILE",
-                        help='filename to read message from, use "-" for stdin',
-                        )
+    group.add_argument(
+        "--mbox-message",
+        type=exist_file,
+        metavar="FILE",
+        help="mbox filename to parse and send all",
+    )
+    group.add_argument(
+        "--maildir-message",
+        type=exist_dir,
+        metavar="DIR",
+        help="maildir directory to parse and send all",
+    )
+    group.add_argument(
+        "--message",
+        type=argparse.FileType(mode="r", encoding="utf-8"),
+        dest="message_file",
+        metavar="FILE",
+        help='filename to read message from, use "-" for stdin',
+    )
     group.add_argument("message", nargs="?", help="the message string to be sent")
 
     args = parser.parse_args().__dict__
@@ -305,14 +345,19 @@ def main():
     if args.get("mbox_message"):
         mbox_name = args.pop("mbox_message")
         send_mbox(mbox_name, args)
+
     elif args.get("maildir_message"):
         mbox_name = args.pop("maildir_message")
         send_maildir(mbox_name, args)
+
     else:
         if args.get("message_file"):
             msgfile_obj = args.pop("message_file")
             args["message"] = msgfile_obj.read()
 
+        args["fingerprint"] = [
+            args["message"].splitlines()[0].strip(),
+        ]
         eventid = send_message(args)
         sys.exit(0 if eventid else 1)
 
