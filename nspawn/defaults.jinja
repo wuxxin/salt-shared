@@ -10,8 +10,8 @@ name: ""
 enabled: true
 
 # volatile: can be "true, false, overlay, state, copy"
-# if "true" or "overlay", container is run with --volatile:overlay overlayfs which is later discarded
-# if "copy", container ir run with --ephemeral, wich creates a temporary snapshot before starting
+# if "true" or "overlay", runs container with --volatile:overlay fs which is later discarded
+# if "copy", container is run with --ephemeral, wich creates a temporary snapshot before starting
 volatile: false
 
 # command: if set, will replace default command which is "--boot" instead of command

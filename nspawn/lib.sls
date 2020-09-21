@@ -22,7 +22,7 @@ nspawn_image_{{ name }}:
   {%- set this= salt['grains.filter_by']({'default': machine_defaults},
     grain='default', default= 'default', merge=machine_definition) %}
 
-  {%- if not this.update %}
+  {%- if not this['update'] %}
 update_image_{{ this.image }}:
   cmd.run:
     - name: /usr/bin/true
