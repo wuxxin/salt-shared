@@ -56,6 +56,18 @@ hooks:
           fi
           mv "${dbdump}.new" "${dbdump}"
 
+external:
+  rclone_zip
+    version: 1.50.2
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/rclone/rclone/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/rclone/rclone/releases/download/v##version##/rclone-v##version##-linux-amd64.zip"
+    target: /usr/local/lib/rclone.zip
+  name: restic_bz2
+    version: 0.9.6
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/restic/restic/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/restic/restic/releases/download/v##version##/restic_##version##_linux_amd64.bz2"
+    target: /usr/local/lib/restic.bz2
+
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
