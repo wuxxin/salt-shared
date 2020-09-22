@@ -15,7 +15,7 @@ engine:
   # crun: alternative OCI runtime with support for cgroup V2
   runtime: "crun"
   # Directory for libpod named volumes. Default:
-  # volume_path = "/var/lib/containers/storage/volumes"
+  volume_path = "/var/lib/containers/storage/volumes"
 
 # part of /etc/containers/storage.conf
 storage:
@@ -26,7 +26,7 @@ storage:
   graphroot: "/var/lib/containers/storage"
 
   # Storage path for rootless users
-  # rootless_storage_path : "$HOME/.local/share/containers/storage"
+  rootless_storage_path : "$HOME/.local/share/containers/storage"
 
   # storage options
   options:
@@ -63,17 +63,25 @@ name:
 
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
+# absent: if enabled is false and absent is true, remove config and service files
+absent: false
 # update: if set true: container image will be pulled/build on every service start
 update: true
-# ephemeral: if set true, container will be removed on stop
+# ephemeral: if set true, existing container will be removed on start
 ephemeral: true
-# build: build container from source
-build: false
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is in analogy to systemd nspawn, and will compute starting host_uid based on the container name hash
+# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: host
+# options: dict: {key: value,} container options parameter for podman run
+options: {}
 
-# systemd service options
+instance:
+  # commands run before the first time ever the service is started
+  firstrun: []
+  # commands run after updating image to newer image, before starting new image
+  udpaterun: []
+
+# ### systemd service options
 # systemd type: "exec" or "oneshot" or advanced types: "simple, forking, dbus, notify, idle"
 type: exec
 # systemd restart: "no", "on-failure" or
@@ -93,6 +101,7 @@ image:
 tag:
 # environment: dict: {key: value,} add environment data
 environment: {}
+# environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
 # label: dict: {key: value,} add label to container
 labels: {}
 # storage: create volumes from list: - {name: volume_name, labels=[], driver: local, opts=[]}
@@ -106,8 +115,11 @@ command: ""
 # args: if set, will add args for command, command must also be set
 args: ""
 
-# options: dict: {key: value,} container options parameter for podman run
-options: {}
+# build: build container from source
+build: false
+build_source: ""
+build_args: {}
+
 {% endload %}
 
 
@@ -115,6 +127,23 @@ options: {}
 # name of the compose sevice and name of the controlling systemd service
 name:
 
+# enabled: if false, service will not get started and will be stopped if running
+enabled: true
+# absent: if enabled is false and absent is true, remove config and service files
+absent: false
+# update: if true: container image will be pulled/build on every service start
+update: true
+# Set the user namespace mode for the container. options are "pick","auto","host","private"
+# pick is in analogy to systemd nspawn, and will compute starting host_uid based on the container name hash
+userns: host
+
+instance:
+  # commands run before the first time ever the service is started
+  firstrun: []
+  # commands run after updating image to newer image, before starting new image
+  udpaterun: []
+
+# ### systemd service options
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
 restart: on-failure
 # after, requires, wants: equal to systemd config
@@ -136,15 +165,20 @@ workdir:
 
 # files to be placed inside workdir
 files: {}
-
-# enabled: if false, service will not get started and will be stopped if running
-enabled: true
-# update: if true: container image will be pulled/build on every service start
-update: true
-build: false
-# Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is in analogy to systemd nspawn, and will compute starting host_uid based on the container name hash
-userns: host
+{#
+  test.file:
+    source: salt://containers/test.file
+    # will automatically get rendered via jinja, with environment put into context
+    # files will support any file.managed attribute to be specified
+  another.file:
+    mode: "600"
+    contents: |
+      this is the content
+  still.some.file:
+    source: salt://containers/still.jinja
+    defaults:
+      custom: this is a custom var that will be available in the jinja context
+#}
 {% endload %}
 
 
