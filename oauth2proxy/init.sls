@@ -5,11 +5,15 @@
 oauth2proxy_archive:
   file.managed:
     - source: {{ external.download }}
-    - hash: {{ external.hash }}
+    - source_hash: sha256={{ external.hash }}
     - name: {{ external.target }}
   archive.extracted:
     - source: {{ external.target }}
-    - dest: {{ local_binary }}
+    - name: /usr/local/bin
+    - archive_format: tar
+    - enforce_toplevel: false
+    - overwrite: true
+    - options: --strip-components 1 --wildcards "*/oauth2-proxy"
     - onchanges:
       - file: oauth2proxy_archive
 
@@ -41,6 +45,11 @@ home_dir_{{ settings.username }}:
     - require:
       - user: user_{{ settings.username }}
 
+oauth2proxy_config_directory:
+  file.directory:
+    - name: /etc/oauth2proxy
+    - mode: "750"
+
 oauth2proxy@.service:
   file.managed:
     - source: salt://oauth2proxy/oauth2proxy@.service
@@ -50,42 +59,49 @@ oauth2proxy@.service:
         settings: {{ settings }}
     - require:
       - file: home_dir_{{ settings.username }}
+      - file: oauth2proxy_config_directory
+  cmd.run:
+    - name: systemctl daemon-reload
+    - require:
+      - file: oauth2proxy@.service
+    - onchanges:
+      - file: oauth2proxy@.service
 
 {% for entry in settings.profile %}
 
 oauth2proxy_{{ entry.name }}.cfg:
-  file.managed:
-    - source: salt://oauth2proxy/oauth2proxy.defaults.cfg
-    - name: {{ settings.home_dir }}/oauth2proxy_{{ entry.name }}.cfg
+  file:
+  {%- if entry.enabled %}
+    - managed
+    - source: salt://oauth2proxy/oauth2proxy.cfg
     - mode: "0640"
     - user: {{ settings.username }}
     - group: {{ settings.username }}
-    - template: jinja
-    - defaults:
-        entry: {{ entry }}
+    - contents: |
+        ## OAuth2 Proxy Config File
+        ## https://github.com/oauth2-proxy/oauth2-proxy
+    {%- for key,value in entry.config.items() %}
+        {{ key|upper }} = {{ value }}
+    {%- endfor %}
+  {%- else %}
+    - absent
+  {%- endif %}
+    - name: /etc/oauth2proxy/oauth2proxy_{{ entry.name }}.cfg
     - require:
-      - file: home_dir_{{ settings.username }}
+      - file: oauth2proxy_config_directory
 
 oauth2proxy@{{ entry.name }}.service:
-  file.managed:
-    - name: /etc/systemd/system/oauth2proxy@{{ entry.name }}.service
-    - template: jinja
-    - defaults:
-        entry: {{ entry }}
-    - require:
-      - file: oauth2proxy@.service
-  cmd.run:
-    - name: systemctl daemon-reload
-    - onchanges:
-      - file: oauth2proxy@{{ entry.name }}.service
+  {%- if entry.enabled %}
   service.running:
     - enable: true
+  {%- else %}
+  service.dead:
+    - enable: false
+  {%- endif %}
     - require:
       - cmd: oauth2proxy_binary
+      - cmd: oauth2proxy@.service
       - file: oauth2proxy_{{ entry.name }}.cfg
-      - file: oauth2proxy@{{ entry.name }}.service
     - watch:
       - file: oauth2proxy_{{ entry.name }}.cfg
-      - file: oauth2proxy@{{ entry.name }}.service
-
 {% endfor %}

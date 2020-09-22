@@ -1,5 +1,4 @@
 {% load_yaml as defaults %}
-
 username: oauth2proxy
 home_dir: /var/lib/oauth2proxy
 
@@ -30,14 +29,16 @@ enabled: true
 config:
   client_id: "oauth2-proxy"
   client_secret: ""
-  {# cookie_secret: the seed string for secure cookies; should be 16, 24, or 32 bytes #}
+  {# cookie_secret: the seed string for secure cookies;
+   should be 16, 24, or 32 bytes, eg. eg. openssl rand -base64 24  #}
   cookie_secret: ""
   cookie_secure: "true"
-  {# the following values are calculated per profile if empty:
-  cookie_name: "_oauth2_proxy"
-  http_address: unix:///run/oauth2proxy/oauth2proxy.sock
-  #}
   reverse_proxy: "true"
+
+  {# calculated values using profile name if empty:
+  cookie_name: "_oauth2_default_proxy"
+  http_address: unix:///run/oauth2proxy_default/oauth2proxy.sock
+  #}
 
   provider: oidc
   {# provider_display_name="Keycloak" #}
@@ -48,7 +49,6 @@ config:
   {# keycloak groups are trees, so prepend "/" to it #}
   {# keycloak_group: /all #}
   {# email_domains: '["example.com"]' #}
-
 {% endload %}
 
 
@@ -75,4 +75,4 @@ config:
   {% do pns.plist.append(entry) %}
 {% endfor %}
 
-{% set settings.update({"profile": pns.plist}) %}
+{% do settings.update({"profile": pns.plist}) %}
