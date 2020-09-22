@@ -16,7 +16,7 @@
 
 
 {%- macro volume_path(name, user="root") -%}
-{%- from "containers/defaults.jinja" import settings with context %}
+{%- from "containers/defaults.jinja" import settings with context -%}
 {{ settings.engine.volume_path ~ "/" ~ name ~ "/_data" }}
 {%- endmacro -%}
 
