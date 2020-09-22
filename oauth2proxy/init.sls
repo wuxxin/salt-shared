@@ -73,7 +73,6 @@ oauth2proxy_{{ entry.name }}.cfg:
   file:
   {%- if entry.enabled %}
     - managed
-    - source: salt://oauth2proxy/oauth2proxy.cfg
     - mode: "0640"
     - user: {{ settings.username }}
     - group: {{ settings.username }}
