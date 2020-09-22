@@ -133,6 +133,8 @@ enabled: true
 absent: false
 # update: if true: container image will be pulled/build on every service start
 update: true
+# build: build container from source
+build: false
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
 # pick is in analogy to systemd nspawn, and will compute starting host_uid based on the container name hash
 userns: host
