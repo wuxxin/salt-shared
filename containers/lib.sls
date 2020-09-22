@@ -1,4 +1,4 @@
-{%- macro env_repl(data, env={}) -%}
+{% macro env_repl(data, env={}) -%}
 {%- set repl_ns= namespace(data= data) -%}
 {%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
 {%- if repl_names != None -%}
@@ -7,7 +7,18 @@
   {%- endfor -%}
 {%- endif -%}
 {{ repl_ns.data }}
-{%- endmacro -%}
+{% endmacro -%}
+
+
+{% macro usernsid_fromstr(name) -%}
+{{ salt['cmd.run_stdout']('python -c "import binascii;id=(binascii.crc_hqx(b\'' ~ name ~ '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }}
+{% endmacro -%}
+
+
+{% macro volume_path(name, user="root") -%}
+{%- from "containers/defaults.jinja" import settings with context %}
+{{ settings.engine.volume_path ~ "/" ~ name ~ "/_data" }}
+{% endmacro -%}
 
 
 {% macro volume(name, opts=[], driver='local', labels=[], env={}) %}
@@ -33,34 +44,43 @@ containers_image_{{ name }}:
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set pod= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
+  {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
+  {%- do pod.environment.update({'SERVICE_NAME': pod.name}) %}
 
-  {# create volumes if defined via storage #}
-  {%- for def in pod.storage %}
-    {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-              labels=def.labels|d([]), env=pod.environment) }}
-  {%- endfor %}
+  {%- if pod.enabled %}
+    {# create volumes if defined via storage #}
+    {%- for def in pod.storage %}
+{{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
+          labels=def.labels|d([]), env=pod.environment) }}
+    {%- endfor %}
 
-  {# if not update on every container start, update now on install state #}
-  {%- if not pod.update %}
+    {# if not update on every container start, update now on install state #}
+    {%- if not pod['update'] %}
 update_image_{{ pod.image }}:
   cmd.run:
-    {%- if pod.build %}
+      {%- if pod.build %}
     - name: podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
-    {%- else %}
+      {%- else %}
     - name: podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
-    {%- endif %}
+      {%- endif %}
     - require_in:
       - file: {{ pod.name }}.service
+    {%- endif %}
   {%- endif %}
 
 {{ pod.name }}.env:
-  file.managed:
-    - name: {{ settings.container.service_basepath }}/{{ pod.name }}.env
+  file:
+  {%- if pod.enabled %}
+    - managed
     - mode: 0600
     - contents: |
-  {%- for key,value in pod.environment.items() %}
+    {%- for key,value in pod.environment.items() %}
         {{ key }}={{ value }}
-  {%- endfor %}
+    {%- endfor %}
+  {%- else %}
+    - absent
+  {%- endif %}
+    - name: {{ settings.container.service_basepath }}/{{ pod.name }}.env
 
 {{ pod.name }}.service:
   file.managed:
@@ -107,7 +127,6 @@ update_image_{{ pod.image }}:
   {%- if not entry.workdir %}
     {%- do entry.update({ 'workdir': settings.compose.workdir_basepath ~ '/' ~ entry.name }) %}
   {%- endif %}
-
   {%- set composefile= entry.workdir ~ "/" ~ settings.compose.base_filename %}
   {%- set overridefile= entry.workdir ~ "/" ~ settings.compose.override_filename %}
 
@@ -159,19 +178,22 @@ update_image_{{ pod.image }}:
   file.managed:
     - name: {{ entry.workdir ~ "/" ~ fname }}
     - makedirs: true
-    {%- if fdata.source is defined %}
-    - source: {{ fdata.source }}
-    - template: jinja
+    {%- if fdata.contents is defined %}
+    - contents: |
+{{ fdata.contents|indent(8,True) }}
+    {%- else %}
     - defaults:
       {%- for key,value in entry.environment.items() %}
         {{ key }}: {{ value }}
       {%- endfor %}
-    {%- elif fdata.contents is defined %}
-    - contents: |
-{{ fdata.contents|indent(8,True) }}
+      {%- if fdata.defaults is defined %}
+        {%- for key,value in fdata.defaults.items() %}
+        {{ key }}: {{ value }}
+        {%- endfor %}
+      {%- endif %}
     {%- endif %}
     {%- for k,v in fdata.items() %}
-      {%- if k not in ['contents', 'source',] %}
+      {%- if k not in ['contents', 'defaults', ] %}
     - {{ k }}: {{ v }}
       {%- endif %}
     {%- endfor %}
