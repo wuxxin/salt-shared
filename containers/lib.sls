@@ -1,4 +1,4 @@
-{% macro env_repl(data, env={}) -%}
+{%- macro env_repl(data, env={}) -%}
 {%- set repl_ns= namespace(data= data) -%}
 {%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
 {%- if repl_names != None -%}
@@ -7,18 +7,18 @@
   {%- endfor -%}
 {%- endif -%}
 {{ repl_ns.data }}
-{% endmacro -%}
+{%- endmacro -%}
 
 
-{% macro usernsid_fromstr(name) -%}
+{%- macro usernsid_fromstr(name) -%}
 {{ salt['cmd.run_stdout']('python -c "import binascii;id=(binascii.crc_hqx(b\'' ~ name ~ '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }}
-{% endmacro -%}
+{%- endmacro -%}
 
 
-{% macro volume_path(name, user="root") -%}
+{%- macro volume_path(name, user="root") -%}
 {%- from "containers/defaults.jinja" import settings with context %}
 {{ settings.engine.volume_path ~ "/" ~ name ~ "/_data" }}
-{% endmacro -%}
+{%- endmacro -%}
 
 
 {% macro volume(name, opts=[], driver='local', labels=[], env={}) %}
