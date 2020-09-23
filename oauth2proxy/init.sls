@@ -81,6 +81,7 @@ oauth2proxy_{{ entry.name }}.cfg:
         ## OAuth2 Proxy Config File
         ## https://github.com/oauth2-proxy/oauth2-proxy
     {%- for key,value in entry.config.items() %}
+      {%- if value is string %}{%- set value = '"' ~ value ~ '"' %}{% endif %}
         {{ key|upper }} = {{ value }}
     {%- endfor %}
   {%- else %}
