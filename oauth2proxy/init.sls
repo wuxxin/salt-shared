@@ -49,6 +49,7 @@ oauth2proxy_config_directory:
   file.directory:
     - name: /etc/oauth2proxy
     - mode: "750"
+    - group: {{ settings.username }}
 
 oauth2proxy@.service:
   file.managed:
