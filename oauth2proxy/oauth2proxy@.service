@@ -11,7 +11,7 @@ User=oauth2proxy
 Group=oauth2proxy
 KillMode=process
 Restart=always
-ExecStart=/usr/local/bin/oauth2-proxy --config={{ settings.home_dir }}/oauth2proxy_%i.cfg
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2proxy/oauth2proxy_%i.cfg
 ExecReload=/usr/bin/kill -HUP $MAINPID
 RuntimeDirectory=oauth2proxy_%i
 RuntimeDirectoryMode=2755
