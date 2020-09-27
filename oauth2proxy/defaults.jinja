@@ -40,8 +40,8 @@ config:
   whitelist_domains:
     - ".domain.org"
   #}
-  set_authorization_header: true
-  skip_provider_button: false
+  set_authorization_header: "true"
+  skip_provider_button: "false"
   {# groups in keycloak are trees, so prepend "/" to it #}
   {# keycloak_group: /all #}
   {# allowed_group: "all" #}
@@ -57,8 +57,8 @@ config:
   cookie_name: "_oauth2_default_proxy"
   http_address: unix:///run/oauth2proxy_default/oauth2proxy.sock
   #}
-  cookie_secure: true
-  reverse_proxy: true
+  cookie_secure: "true"
+  reverse_proxy: "true"
 {% endload %}
 
 
