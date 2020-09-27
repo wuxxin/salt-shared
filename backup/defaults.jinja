@@ -1,15 +1,15 @@
 {% load_yaml as defaults %}
 repository:
-repository_maxsize: -1
 repository_password:
+user:
 env: {}
 includes: []
 excludes: []
 timer: *-*-* 00:30:00
 # max time for fullbackup, eg: 5hours (equal 350GB using 20mb per Second)
 maxruntime: 300min
+repository_maxsize: -1
 cleanup_interval_days: 7
-user:
 
 systemd:
   after:
