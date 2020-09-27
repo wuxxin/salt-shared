@@ -29,26 +29,36 @@ enabled: true
 config:
   client_id: "oauth2-proxy"
   client_secret: ""
-  {# cookie_secret: the seed string for secure cookies;
-   should be 16, 24, or 32 bytes, eg. eg. openssl rand -base64 24  #}
+  {# redirect_url: "", defaults to "https://" + requested host header + "/oauth2/callback" #}
+  {# cookie_secret: seed for secure cookies, 16, 24 or 32 byte, eg. openssl rand -base64 24  #}
   cookie_secret: ""
-  cookie_secure: "true"
-  reverse_proxy: "true"
+
+  {# allowed domains for email address for login, defaults to "*" for all #}
+  email_domains:
+    - "*"
+  {# allowed domains for redirection, no default, prefix with "." for subdomains eg.:
+  whitelist_domains:
+    - ".domain.org"
+  #}
+  set_authorization_header: true
+  skip_provider_button: false
+  {# groups in keycloak are trees, so prepend "/" to it #}
+  {# keycloak_group: /all #}
+  {# allowed_group: "all" #}
+
+  provider: keycloak
+  {# provider_display_name="Keycloak" #}
+  scope: openid email profile
+  login_url: "https://keycloak.localhost/auth/realms/yourrealm/protocol/openid-connect/auth"
+  redeem_url: "https://keycloak.localhost/auth/realms/yourrealm/protocol/openid-connect/token"
+  validate_url: "https://keycloak.localhost/auth/realms/yourrealm/protocol/openid-connect/userinfo"
 
   {# calculated values using profile name if empty:
   cookie_name: "_oauth2_default_proxy"
   http_address: unix:///run/oauth2proxy_default/oauth2proxy.sock
   #}
-
-  provider: oidc
-  {# provider_display_name="Keycloak" #}
-  oidc_issuer_url: "https://keycloak.localhost/auth/realms/yourrealm"
-  login_url: "https://keycloak.localhost/realms/yourrealm/protocol/openid-connect/auth"
-  redeem_url: "https://keycloak.localhost/realms/yourrealm/protocol/openid-connect/token"
-  validate_url: "https://keycloak.localhost/realms/yourrealm/protocol/openid-connect/userinfo"
-  {# keycloak groups are trees, so prepend "/" to it #}
-  {# keycloak_group: /all #}
-  {# email_domains: '["example.com"]' #}
+  cookie_secure: true
+  reverse_proxy: true
 {% endload %}
 
 

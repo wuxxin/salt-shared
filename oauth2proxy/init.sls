@@ -26,6 +26,8 @@ oauth2proxy_binary:
 user_{{ settings.username }}:
   group.present:
     - name: {{ settings.username }}
+    - addusers:
+      - "www-data"
     - system: true
   user.present:
     - name: {{ settings.username }}
@@ -82,7 +84,7 @@ oauth2proxy_{{ entry.name }}.cfg:
         ## https://github.com/oauth2-proxy/oauth2-proxy
     {%- for key,value in entry.config.items() %}
       {%- if value is string %}{%- set value = '"' ~ value ~ '"' %}{% endif %}
-        {{ key|upper }} = {{ value }}
+        {{ key }} = {{ value }}
     {%- endfor %}
   {%- else %}
     - absent
