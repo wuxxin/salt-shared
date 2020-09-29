@@ -31,10 +31,6 @@ yaml_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
     python3 -c "import sys, yaml, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)))" $@
 }
 
-unit_status() { # $UNITNAME
-    systemctl status -l -q --no-pager -n 15 "$UNITNAME"
-}
-
 unit_json_status() { # $UNITNAME
     status=$(systemctl status -l -q --no-pager -n 0 "$UNITNAME"| text2json status)
     log=$(journalctl -l -q --no-pager -n 15 -u "$UNITNAME" | text2json log)
@@ -204,7 +200,7 @@ sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-stat
         \"gitops_failed_rev\": \"$gitops_failed_rev\" \
         }"
 
-    printf "Sentry Entry: Level: %s Topic: %s Culprit: %s Message: %s Extra: %s Logger: %s" "$level" "$topic" "$culprit" "$msg" "$extra" "$logger" 1>&2
+    printf "Sentry Entry: Level: %s Topic: '%s' Culprit: '%s' Message: '%s' Logger: '%s' Extra: '%s'" "$level" "$topic" "$culprit" "$msg" "$logger" "$extra" 1>&2
 
     if test -n "gitops_sentry_dsn" -a -e "$sentrycat"; then
         SENTRY_DSN="$gitops_sentry_dsn" "$sentrycat" \
