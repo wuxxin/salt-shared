@@ -23,7 +23,7 @@ hooks:
       cmd: |
           if grep -q "{{ settings.media_dir }}" /etc/fstab; then
               if ! mountpoint -q "{{ settings.media_dir }}"; then
-                  sentry_entry "App Backup" "backup error: Mount at Mountpoint {{ settings.media_dir }} is not mounted"
+                  sentry_entry error "App Backup" "backup error: Mount at Mountpoint {{ settings.media_dir }} is not mounted"
                   exit 1
               fi
           fi
@@ -31,7 +31,7 @@ hooks:
       cmd: |
           files_found=$(find "{{ settings.media_dir }}" -mindepth 1 -path "{{ settings.media_dir }}/lost+found" -prune -o -type f -exec echo true \; -quit)
           if test "$files_found" != "true"; then
-              sentry_entry "App Backup" "backup error: media_dir {{ settings.media_dir }} is empty"
+              sentry_entry error "App Backup" "backup error: media_dir {{ settings.media_dir }} is empty"
               exit 1
           fi
     - name: assure database exists
@@ -39,7 +39,7 @@ hooks:
           for i in
           psql -lqt | cut -d \| -f 1 | grep -qw "$DATABASE" && err=$? || err=$?
           if test $err -ne 0; then
-              sentry_entry "App Backup" "backup error: Database $DATABASE does not exist"
+              sentry_entry error "App Backup" "backup error: Database $DATABASE does not exist"
               exit 1
           fi
     - name: dump database
@@ -50,8 +50,8 @@ hooks:
               /bin/gzip --rsyncable > "${dbdump}.new" && err=$? || err=$?
           duration_pg_dump=$(( $(date +%s) - duration_start ))
           if test "$err" -ne 0; then
-              sentry_entry "App Backup" "backup error: could not create database dump" \
-                  "error" "$(systemd_json_status app-backup.service)"
+              sentry_entry error "App Backup" "backup error: could not create database dump" \
+                  $(unit_json_status)"
               exit 1
           fi
           mv "${dbdump}.new" "${dbdump}"

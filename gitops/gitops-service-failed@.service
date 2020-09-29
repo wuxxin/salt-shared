@@ -9,5 +9,5 @@ Environment=UNITNAME=%i
 EnvironmentFile={{ settings.env_file }}
 PassEnvironment=UNITNAME SENTRY_DSN
 ExecStart=/bin/bash -c '. /usr/local/lib/gitops-library.sh; \
-    sentry_entry error "Service Error" \
-        "Service ($UNITNAME) failed\n$(unit_status)" "{}" "gitops-service-failed"'
+    sentry_entry error "Service Error" "Service ($UNITNAME) failed" \
+        "$(unit_json_status)" "gitops-service-failed"'

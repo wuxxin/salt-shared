@@ -27,7 +27,7 @@ fi
 # assure tag app_backup_id is set
 expected_id=$(get_tag app_backup_id invalid)
 if test "$expected_id" = "invalid"; then
-    sentry_entry "App Backup" \
+    sentry_entry error "App Backup" \
         "backup error: repository id at $(get_tag_fullpath app_backup_id) is missing or invalid.\n create/update repository id by using scripts/app-restic.sh)"
     exit 1
 fi
@@ -35,13 +35,13 @@ fi
 # assure expected_id matches actual_id
 duration_start=$(date +%s)
 if ! { read actual_id < <(restic cat config --json| json_dict_get id); }; then
-    sentry_entry "App Backup" "backup error: could not get repository id from remote" \
-        "error" "$(systemd_json_status app-backup.service)"
+    sentry_entry "error" "App Backup" "backup error: could not get repository id from remote" \
+        "$(unit_json_status)"
     exit 1
 fi
 duration_config=$(( $(date +%s) - duration_start ))
 if test "$expected_id" != "$actual_id"; then
-    sentry_entry "App Backup" \
+    sentry_entry "error" "App Backup" \
         "backup error: repository id missmatch\nexpected: $expected_id\nactual: $actual_id"
     exit 1
 fi
@@ -59,8 +59,8 @@ duration_start=$(date +%s)
 restic backup {{ backup_excludes }} {{ backup_list|join(" ") }} && err=$? || err=$?
 duration_backup=$(( $(date +%s) - duration_start ))
 if test "$err" -ne "0"; then
-    sentry_entry "App Backup" "backup error: backup failed with error $err" \
-        "error" "$(systemd_json_status app-backup.service)"
+    sentry_entry "error" "App Backup" "backup error: backup failed with error $err" \
+        "$(unit_json_status)"
     exit 1
 fi
 
@@ -75,24 +75,24 @@ if test "true" = "true"; then
     restic forget --keep-within 1y6m && err=$? || err=$?
     duration_forget=$(( $(date +%s) - duration_start ))
     if test "$err" -ne "0"; then
-        sentry_entry "App Backup" "backup error: forget returned error" \
-            "error" "$(systemd_json_status app-backup.service)"
+        sentry_entry "error" "App Backup" "backup error: forget returned error" \
+            "$(unit_json_status)"
     fi
 
     duration_start=$(date +%s)
     restic prune && err=$? || err=$?
     duration_prune=$(( $(date +%s) - duration_start ))
     if test "$err" -ne "0"; then
-        sentry_entry "App Backup" "backup error: prune returned error" \
-            "error" "$(systemd_json_status app-backup.service)"
+        sentry_entry "error" "App Backup" "backup error: prune returned error" \
+            "$(unit_json_status)"
     fi
 
     duration_start=$(date +%s)
     restic check && err=$? || err=$?
     duration_check=$(( $(date +%s) - duration_start ))
     if test "$err" -ne "0"; then
-        sentry_entry "App Backup" "backup error: repository check returned error" \
-            "error" "$(systemd_json_status app-backup.service)"
+        sentry_entry "error" "App Backup" "backup error: repository check returned error" \
+            "$(unit_json_status)"
     fi
 fi
 
@@ -101,8 +101,8 @@ duration_start=$(date +%s)
 restic cache --cleanup && err=$? || err=$?
 duration_cleanup=$(( $(date +%s) - duration_start ))
 if test "$err" -ne "0"; then
-    sentry_entry "App Backup" "backup warning: cache --cleanup returned error" \
-        "warning" "$(systemd_json_status app-backup.service)"
+    sentry_entry "warning" "App Backup" "backup warning: cache --cleanup returned error" \
+        "$(unit_json_status)"
 fi
 
 # calculate used space on backup storage
@@ -110,8 +110,8 @@ backup_used_size_kb=0
 duration_start=$(date +%s)
 if ! { read backup_used_size < <(restic stats --mode raw-data --json | \
     json_dict_get total_size); }; then
-    sentry_entry "App Backup" "backup warning: stats returned error" \
-        "warning" "$(systemd_json_status app-backup.service)"
+    sentry_entry "warning" "App Backup" "backup warning: stats returned error" \
+        "$(unit_json_status)"
 else
     backup_used_size_kb=$(( backup_used_size/1024 ))
 fi

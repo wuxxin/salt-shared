@@ -28,7 +28,8 @@ check_validity() { # $1=days $2=issue(warning,error)
     openssl x509 -in "$certfile" -checkend $((min_days * 86400)) -noout > /dev/null && res=$? || res=$?
     if test $res -ne 0; then
         echo "${issue}: SSL certificate is less than $min_days days valid (until $valid_until)"
-        sentry_entry "SSL ${issue}" "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until\n" "$issue"
+        sentry_entry "$issue" "SSL ${issue}" \
+            "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
     fi
     return $res
 }

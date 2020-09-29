@@ -10,6 +10,7 @@ gitop-requisites:
       - git
       - gnupg
       - git-crypt
+      - jq
 
 /usr/local/lib/gitops-library.sh:
   file.managed:

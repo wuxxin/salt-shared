@@ -35,8 +35,10 @@ unit_status() { # $UNITNAME
     systemctl status -l -q --no-pager -n 15 "$UNITNAME"
 }
 
-systemd_json_status() { # $1=unitname
-    systemctl status -l -q --no-pager -n 15 "$@" | text2json status
+unit_json_status() { # $UNITNAME
+    status=$(systemctl status -l -q --no-pager -n 0 "$UNITNAME"| text2json status)
+    log=$(journalctl -l -q --no-pager -n 15 -u "$UNITNAME" | text2json log)
+    printf "%s\n%s" "$status" "$log" | jq -s '.[0] + .[1]'
 }
 
 is_truestr() { # $1=boolstring , return true if lower($1) = "true"
