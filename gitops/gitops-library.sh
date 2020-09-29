@@ -33,7 +33,7 @@ yaml_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
 
 unit_json_status() { # $UNITNAME
     status=$(systemctl status -l -q --no-pager -n 0 "$UNITNAME"| text2json status)
-    log=$(journalctl -l -q --no-pager -n 15 -u "$UNITNAME" | text2json log)
+    log=$(journalctl -l -q --no-pager -n 10 -e -u "$UNITNAME" | text2json log)
     printf "%s\n%s" "$status" "$log" | jq -s '.[0] + .[1]'
 }
 
@@ -200,8 +200,7 @@ sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-stat
         \"gitops_failed_rev\": \"$gitops_failed_rev\" \
         }"
 
-    printf "Sentry Entry: Level: %s Topic: '%s' Culprit: '%s' Message: '%s' Logger: '%s' Extra: '%s'" "$level" "$topic" "$culprit" "$msg" "$logger" "$extra" 1>&2
-
+    # printf "Sentry Entry: Level: %s Topic: '%s' Culprit: '%s' Message: '%s' Logger: '%s'" "$level" "$topic" "$culprit" "$msg" "$logger" 1>&2
     if test -n "gitops_sentry_dsn" -a -e "$sentrycat"; then
         SENTRY_DSN="$gitops_sentry_dsn" "$sentrycat" \
             --release "$gitops_current_rev" \
@@ -232,7 +231,6 @@ gitops_maintenance() { # $1="--clear" | $1=topic $2=message
     else
         topic="$(printf "%s" "$1" | xmlstarlet esc)"
         text="$(printf "%s" "$2" | xmlstarlet esc)"
-        echo "INFO: gitops status: $topic : $text"
         /usr/local/bin/jinja2 -D topic="$topic" -D text="$text" "$templatefile"  > "$resultfile"
         chown_to_user "$resultfile"
     fi
