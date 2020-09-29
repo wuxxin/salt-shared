@@ -1,0 +1,1 @@
+gitops/from-git.sh

@@ -28,7 +28,7 @@ webhook_secret=$(openssl rand -base64 16)
 
 # adding webhook secret
 printf "webhook_url=%s\nwebhook_secret=%s\n" "$webhook_url" "$webhook_secret" \
-    > config/gitops.webhook-secret.env
+    > config/gitops.${gitreponame}.webhook-secret.env
 git add .
 git commit -v -m "add webhook config"
 

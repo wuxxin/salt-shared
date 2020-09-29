@@ -4,27 +4,35 @@ set -x
 
 self_path=$(dirname "$(readlink -e "$0")")
 
+basepath=""
+gitreponame=""
+gitserver=""
+gituser=""
+gitgpguser=""
+hostname=""
+
 firstuser=gitops
 gitserver_sshport=22
 authorized_keys="~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub"
 
-gitserver=
-gitserver_sshport=
-gituser=
-gitgpguser=
-gitreponame=
-basepath=
-hostname=
+do_gitcrypt_setup="true"
+do_machine_setup="true"
+do_saltstack_setup="true"
+do_remote_setup="true"
+do_only_remote_setup="false"
+
 
 usage(){
     cat << EOF
-Usage: $0 basepath reponame gitserver gituser creator-gpgid hostname
-    [--firstuser username #default=$firstuser] [--git-port gitsshport #default=$gitserver_sshport]
-    [--authorized-keys authorized_keys #default="$authorized_keys"]
-    [--machine-bootstrap] [--no-saltstack] [--no-remote|--only-remote]
+Usage: $0 <basepath> <reponame> <githost> <gituser> <creator-gpgid> <hostname>
+    [--firstuser <username:default=$firstuser>]
+    [--git-port <gitsshport:default=$gitserver_sshport>]
+    [--authorized-keys <authorized_keys:default="$authorized_keys">]
+    [--no-git-crypt] [--no-machine] [--no-saltstack] [--no-remote|--only-remote]
 
---machine-bootstrap: add machine-bootstrap repository setup for hardware install
---no-saltstack     : do not add gitops saltstack repository setup
+--no-gitcrypt      : do not add git-crypt repository setup
+--no-machine       : do not add hardware (machine-bootstrap) repository setup
+--no-saltstack     : do not add gitops (saltstack) repository setup
 --no-remote        : do not execute remote calls
 --only-remote      : only execute remote calls
 
@@ -44,17 +52,22 @@ to the gituser API token, eg. Authorization="token hexdigits".
 + Example
 ```sh
 Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" \
-    $0 ~/work repository.name git.server.domain gituser gpguserid full.machine.hostname \
+    $0 ~/work repository.name git.server gituser gpguserid full.machine.hostname \
         --git-port 10023 --authorized_keys ~/work/id_rsa
 ```
 EOF
 }
 
+for i in git git-crypt gpg ssh-keyscan ssh-keygen http; do if ! which $i > /dev/null; then
+    echo "error, missing command $i; try 'apt-get install git git-crypt gnupg openssh-client httpie'"
+    exit 1
+fi; done
 
 # create and enter source directory, make git repository
 mkdir -p $basepath/$gitreponame
 cd $basepath/$gitreponame
-git init
+git init || echo "could not init git, already a git repository ?"
+
 # create first config files
 mkdir -p config log run
 printf "# ignores\n/log\n/run\n" > .gitignore
@@ -66,6 +79,7 @@ printf "hostname=%s\nfirstuser=%s\ngitops_user=%s\ngitops_target=%s\ngitops_sour
 # copy current user ssh public key as authorized_keys
 cat ~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub \
     > config/authorized_keys
+# commit to repo
 git add .
 git commit -v -m "initial config"
 
@@ -106,6 +120,7 @@ ssh-keygen -q -t ed25519 -N "" -C "$gitreponame" -f config/gitops.id_ed25519
 git add .
 git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
 
+
 # add saltstack
 mkdir -p salt/custom
 pushd salt
@@ -137,11 +152,14 @@ chmod +x bootstrap.sh
 git add .
 git commit -v -m "add saltstack skeleton"
 
+
 # add machine-bootstrap
 fixme add machine bootstrap and make symlink on saltstack
 
+
 # add origin to upstream
 git remote add origin ssh://git@${gitserver}:${gitserver_sshport}/${gituser}/${gitreponame}.git
+
 
 # remote configuration, currently using the gogs api
 # create origin repo on server

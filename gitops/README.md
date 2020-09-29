@@ -1,22 +1,31 @@
 # Gitops State
 
-+ Flags recognized
+## bootstrap a gitops install
+
+```sh
+/path/to/create-gitops-repo.sh ~/work mymachine \
+    git.server.domain gituser user@email mymachine.domain.name --no-remote
+```
+
+## Flags, Tags, Metrics, Sentry Messages
+
+### Flags recognized
   + gitops.update.failed
   + gitops.update.disable
   + gitops.update.force
   + reboot.automatic.disable
 
-+ Tags recognized
+### Tags recognized
   + gitops_failed_rev
   + gitops_current_rev
 
-+ Metrics written
+### Metrics written
   + update_start_timestamp counter "timestamp-epoch-seconds since last update to app"
   + update_duration_sec gauge "number of seconds for a update run"
   + update_reboot_timestamp counter "timestamp-epoch-seconds since update requested reboot"
   + ssl_cert_valid_until gauge "timestamp of certificate validity end date"
 
-+ Sentry Messages send
+### Sentry Messages send
   + "Gitops Execution" "Frontend Ready" "info"
   + "Gitops Attention" "node needs reboot, human attention required" "error"
   + "Gitops Error" "(validate_cmd|before_cmd|update_cmd|after_cmd|finish_cmd) failed with error $result" "error"
