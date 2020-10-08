@@ -6,7 +6,6 @@ include:
   - .big-max-map-count
   - .big-max-keys
   - .restrict-dmesg
-  - .tcp-bbr
 {% endif %}
 
 sysctl_nop:

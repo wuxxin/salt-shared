@@ -10,7 +10,10 @@ e.g., up to one or two maps per allocation.
 
 needed for kubernet workloads, eg. elasticsearch.
 
-Elasticsearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts is likely to be too low, which may result in out of memory exceptions. 
+Elasticsearch uses a mmapfs directory by default to store its indices.
+The default operating system limits on mmap counts is likely to be too low,
+which may result in out of memory exceptions.
+
 #}
 
 vm.max_map_count:
