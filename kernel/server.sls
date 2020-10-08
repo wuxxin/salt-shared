@@ -1,9 +1,9 @@
 include:
   - kernel.running
+  - kernel.modules
   - kernel.sysctl
   - kernel.cgroup
   - kernel.limits
-  - kernel.modules
   - kernel.swappiness
   - systemd.cgroup-accounting
 
