@@ -5,7 +5,7 @@ cgroup:
 
 {% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 
-{# it's 2020, enable cgroup v2 only hierachy #}
+{# it's 2020, enable cgroup v2 only hierachy managed by systemd #}
 cgroup-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/cgroup.cfg
@@ -17,7 +17,7 @@ cgroup-grub-settings:
     - watch:
       - file: cgroup-grub-settings
 
-{# allow normal users to run unprivileged containers #}
+{# also, allow normal users setup cgroup v2 recursive userns #}
 kernel.unprivileged_userns_clone:
   sysctl.present:
     - value: 1 {# 0 #}
