@@ -1,21 +1,21 @@
 #!/usr/bin/bash
 set -eo pipefail
-#set -x
+set -x
 
 self_path=$(dirname "$(readlink -e "$0")")
 
-build_from_lp_usage() { # $1=source $2=dest
+usage() {
     cat <<EOF
 Usage: $0 <pkgname> <target-dir> [--source distro] [--dest distro]
-        [--debbuildopts <options>] [--version-postfix <postfix>] [<patch-file>*]
+        [--debbuildopts <options>] [--ver-suffix <suffix>] [<patch-file>*]
 
 pkgname         = source package name from launchpad
 target-dir      = directory where the resulting packages should be stored as apt archive
 --source distro = defines the launch-pad branch to use, will default to "$1"
 --dest   distro = build for distribution codename eg. "bionic", default=running system ($2)
 --debbuildopts  = DEB_BUILD_OPTIONS for builder, eg. "nocheck"
---version-postfix postfix
-                = text to appended to version nr, defaults to "custom"
+--ver-suffix suffix
+                = text to appended to version nr, eg. "~prebuild.1"
 patch-file      = zero or more patch files to be applied via quilt before building source
 
 EOF
@@ -25,24 +25,24 @@ EOF
 
 build_from_lp() {
     # <pkgname> <target-dir> [--source distro] [--dest distro]
-    # [--debbuildopts <options>] [--version-postfix <postfix>] [<patch-file>*]
-    local source dest verpostfix pkgname targetdir cowbasedir i need_install
-    local basedir changes current_version new_version debbuildopts dscfile
+    # [--debbuildopts <options>] [--ver-suffix <suffix>] [<patch-file>*]
+    local source dest versuffix pkgname targetdir cowbasedir i need_install
+    local basedir changes current_version new_version debbuildopts dsc_name dsc_file
     # defaults
     source=groovy
     dest="$(lsb_release -c -s)"
-    verpostfix="custom"
+    versuffix=""
     debbuildopts=""
 
     # parse args
-    if test "$2" = "" -o "$1" = "--help" -o "$1" = "-h"; then build_from_lp_usage $source $dest; fi
+    if test "$2" = "" -o "$1" = "--help" -o "$1" = "-h"; then usage $source $dest; fi
     pkgname=$1
     targetdir=$2
     shift 2
     if test "$1" = "--source"; then source=$2; shift 2; fi
     if test "$1" = "--dest"; then dest=$2; shift 2; fi
     if test "$1" = "--debbuildopts"; then debbuildopts="$2"; shift 2; fi
-    if test "$1" = "--version-postfix"; then verpostfix=$2; shift 2; fi
+    if test "$1" = "--ver-suffix"; then versuffix=$2; shift 2; fi
     cowbasedir="/var/cache/pbuilder/base-$dest.cow"
 
     for i in $@; do
@@ -60,6 +60,12 @@ build_from_lp() {
     if $need_install; then
         DEBIAN_FRONTEND=noninteractive sudo apt-get update --yes
         DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes cowbuilder ubuntu-dev-tools
+    fi
+    if ! grep -q "bionic" /usr/share/distro-info/ubuntu.csv; then
+        sudo /usr/bin/bash -c 'echo "18.04 LTS,Bionic Beaver,bionic,2017-10-19,2018-04-26,2023-04-26,2023-04-26,2028-04-26" >> /usr/share/distro-info/ubuntu.csv'
+    fi
+    if ! grep -q "cosmic" /usr/share/distro-info/ubuntu.csv; then
+        sudo /usr/bin/bash -c 'echo "18.10,Cosmic Cuttlefish,cosmic,2018-04-26,2018-10-18,2019-07-18" >> /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "disco" /usr/share/distro-info/ubuntu.csv; then
         sudo /usr/bin/bash -c 'echo "19.04,Disco Dingo,disco,2018-10-18,2019-04-18,2020-01-18" >> /usr/share/distro-info/ubuntu.csv'
@@ -82,7 +88,7 @@ build_from_lp() {
     # create build directories
     basedir="$(mktemp -d)"
     mkdir -p "$basedir/build"
-    cd "$basedir"
+    pushd "$basedir"
 
     # get source
     pull-lp-source "$pkgname" "$source"
@@ -99,21 +105,23 @@ build_from_lp() {
 
         # update changelog
         current_version=$(head -1 debian/changelog | sed -r "s/[^(]+\(([^)]+)\).+/\1/g");
-        new_version=${current_version:0:-1}$(( ${current_version: -1} +1 ))${verpostfix};
-        debchange -v "$new_version" --distribution $source "experimental: $changes"
+        new_version=${current_version:0:-1}$(( ${current_version: -1} +1 ))${versuffix};
+        debchange -v "$new_version" --distribution $dest "experimental: $changes"
         # generate new source archive
         dpkg-source -b .
         cd ..
+        dsc_name="${pkgname}*${versuffix}.dsc"
+        versuffix=""
     else
-        # without patches, dont use version postfix, because it is the original source
-        verpostfix=""
+        # without patches, dont use version suffix in dsc_name, because nothing changed
+        dsc_name="${pkgname}*.dsc"
     fi
 
     # build generated source
-    dscfile=$(find . -type f -name "${pkgname}*${verpostfix}.dsc" -print -quit)
+    dsc_file=$(find . -type f -name "$dsc_name" -print -quit)
     DEB_BUILD_OPTIONS="$debbuildopts" BASEPATH="$cowbasedir" backportpackage \
         -d "$dest" --builder=cowbuilder --dont-sign --build --workdir=build \
-        $dscfile
+        $(if test "$versuffix" != ""; then echo "-S $versuffix"; fi) $dsc_file
 
     # generate local apt archive files
     cd build/buildresult
@@ -129,6 +137,8 @@ build_from_lp() {
     mkdir -p "$targetdir"
     mv -t "$targetdir" $basedir/build/buildresult/*
     rm -rf "$basedir"
+    popd
 }
+
 
 build_from_lp "$@"
