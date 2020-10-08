@@ -1,63 +1,39 @@
-{% load_yaml as settings %}
-emulator:
-  channel: canary
-  version: 30.0.24
-  url: https://dl.google.com/android/repository/emulator-linux-6723027.zip
-system:
-  api: P
-  variant: google_apis
-  abi: 28
-  url: https://dl.google.com/android/repository/sys-img/google_apis/x86_64-28_r10.zip
-{% endload %}
+{% from "android/defaults.jinja" import settings with context %}
+{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, container, compose %}
 
 include:
   - python
-  - desktop.android.tools
+  - android.tools
+  - containers
+  - containers.gui
 
-download_emulator_zip:
-  file.managed:
-    - source: {{ settings.emulator.url }}
-    - name:
+{# download emulator container image #}
+{{ image(settings.emulator.image, settings.emulator.tag) }}
 
-download_system_image_zip:
-  file.managed:
-    - source: {{ settings.system.url }}
-    - name:
-
-android_emulator_container_scripts:
-  user:
-    - name: androidemubuild
-  pkg.installed:
-    - pkgs:
-      - libprotobuf-dev
-      - libprotoc-dev
-      - protobuf-compiler
-  git.latest:
-    - user: androidemubuild
-    - source: https://github.com/google/android-emulator-container-scripts.git
+set_latest_android_emulator_unmodified:
   cmd.run:
-    - runas: androidemubuild
-    - name: |
-        python3 -m venv venv
-        ./venv/bin/pip install --upgrade pip
-        ./venv/bin/pip install --upgrade setuptools
-        . ./venv/bin/activate; python3 setup.py develop
-        . ./venv/bin/activate; emu-docker licenses --accept
-    - cwd: sourcedir
-    - onchange:
-      - git: android_emulator_container_scripts
+    - name: podman image tag {{ settings.emulator.image }}:{{ settings.emulator.tag }} \
+        localhost/android-emulator-unmodified:latest
+    - onchanges:
+      - cmd: containers_image_{{ settings.emulator.image }}
 
-create_android_container:
-  cmd.run:
-    - runas: androidemubuild
-    - name: . ./venv/bin/activate; emu-docker create [-h] [--extra EXTRA]
-     [--dest DEST] [--tag TAG] [--repo REPO] [--push] [--gpu] [--metrics] [--no-metrics] [--start] emuzip imgzip
-    - onchange:
-      - cmd: android_emulator_container_scripts
+{% load_yaml as android_emulator_container %}
+name: android-emulator
+image: localhost/android-emulator
+tag: latest
+type: build
+build:
+  source: .
+files:
+  build/Dockerfile:
+    contents: |
+      FROM localhost/android-emulator-unmodified:latest
 
-build_android_container:
-  cmd.run:
-    - name: podman build .
-    - cwd: destcontainer
-    - onchange:
-      - cmd: create_android_container
+      # start signal
+      CMD signal-desktop
+  build/launch-emulator.sh:
+    source: salt://android/launch-emulator.sh
+{% endload %}
+
+{# create modified emulator (to also work with gui) #}
+{{ container(android_emulator_container) }}
