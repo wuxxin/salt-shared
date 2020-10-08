@@ -29,11 +29,15 @@ files:
     contents: |
       FROM localhost/android-emulator-unmodified:latest
 
-      # start signal
-      CMD signal-desktop
+      COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
+      RUN chmod +x /android/sdk/launch-emulator.sh
+
   build/launch-emulator.sh:
     source: salt://android/launch-emulator.sh
 {% endload %}
+
+{# for launch parameter of emulator see
+  https://developer.android.com/studio/run#startup-options #}
 
 {# create modified emulator (to also work with gui) #}
 {{ container(android_emulator_container) }}
