@@ -1,6 +1,6 @@
 {% from "kernel/defaults.jinja" import settings with context %}
 
-{% load_yaml as netfilter_list %}
+{% load_yaml as network_list %}
 - br_netfilter
 - ip6_tables
 - ip_tables
@@ -15,17 +15,17 @@
 {% endload %}
 
 {% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
-/etc/modules-load.d/netfilter.conf:
+/etc/modules-load.d/network.conf:
   file.managed:
     - contents: |
-  {%- for i in netfilter_list %}
+  {%- for i in network_list %}
         {{ i }}
   {%- endfor %}
 
-netfilter-kernel-modules:
+network-kernel-modules:
     kmod.present:
       - mods:
-  {%- for i in netfilter_list %}
+  {%- for i in network_list %}
         - {{ i }}
   {%- endfor %}
 
