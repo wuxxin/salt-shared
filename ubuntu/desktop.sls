@@ -11,6 +11,8 @@ install_desktop:
     - pkgs:
       - {{ settings.desktop.xwayland }}
       - {{ settings.desktop.xserver }}
+      - xserver-xephyr
+      - xvfb
       - gnome
       - gnome-core
       - vanilla-gnome-desktop
