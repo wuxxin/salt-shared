@@ -20,7 +20,7 @@
 + kernel.limits
     + expand max open files
 + kernel.sysctl
-    + expand max for kernel keys, inotify entries, memory mapped areas, ipv4 and ipv6 arp cache
+    + expand max for kernel keys, inotify entries, memory mapped areas, ipv4 and ipv6 arp cache, tcp bbr congestion control
 + kernel.module
     + activate typical used netfilter kernel modules
     + activate and configure kernel overlay fs module
