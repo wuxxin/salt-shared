@@ -16,12 +16,12 @@ video-player:
     - require:
       - sls: desktop.video.base
 
-{# Video/Audio downloader from webportals, eg. youtube #}
+{# Video/Audio downloader from webportals, eg. youtube
+    install distro package and then update with the pip version #}
 youtube-dl:
   pkg:
     - installed
 
-{# install distro package and then update pip version #}
 {{ pip3_install('youtube-dl', require='pkg: youtube-dl') }}
 
 

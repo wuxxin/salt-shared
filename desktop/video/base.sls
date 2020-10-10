@@ -14,7 +14,6 @@ video-packages:
       - ffmpeg
       - libavcodec-extra
       - frei0r-plugins
-      - v4l2loopback-dkms
       - gst123
 {# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-pipewire gstreamer1.0-opencv baresip-gstreamer #}
 
@@ -27,20 +26,11 @@ v4l2-tools:
       - yavta       {# test Video4Linux2 devices #}
       - fswebcam    {# Tiny and flexible webcam program #}
 
-{% if grains['lsb_distrib_codename'] == 'trusty' %}
-dvd-css-support:
-  cmd.run:
-    - name: /usr/share/doc/libdvdread4/install-css.sh
-    - unless: dpkg-query -s libdvdcss2
-    - require:
-      - pkg: video-packages
-{% else %}
 dvd-css-support:
   pkg.installed:
     - name: libdvd-pkg
     - require:
       - pkg: video-packages
-{% endif %}
 
 video-creation-conversion:
   pkg.installed:
