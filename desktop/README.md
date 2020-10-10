@@ -2,6 +2,17 @@
 
 Installs and configures features usually wanted for a working desktop
 
+## Pillar Settings
+
+desktop:
+  development:
+    enabled:   *false|true      # also installs developer packages
+  video:
+    loopback:
+      enabled: *false|true      # also install video4linux2 loopback kernel modules
+  proprietary:
+    enabled:   *false|true      # also install signal and skype
+
 ## Main Features
 
 * graphics:
@@ -17,7 +28,7 @@ Installs and configures features usually wanted for a working desktop
 
 * voice: mumble, linphone, skype (if enabled)
 * chat: riot, signal, optional: pidgin
-* video: vlc, gstreamer and codecs
+* video: vlc, gstreamer and codecs, video loopback devices (if enabled)
 * security:
     * tor browser bundle
     * keychain/keyring support packages
@@ -48,15 +59,4 @@ needs desktop:development:enabled: true
 * android: tools
 * emulation:
   * qemu/kvm, libvirt, virt-manager
-  * lxd, vagrant, vagrant-libvirt, vagrant-lxd, tools
-
-* optional
-    * android: sdk & ndk
-    * gcloud: installs google cloud SDK
-    * ubuntu.dev: Cubic (Custom Ubuntu ISO Creator)
-
-## Pillar-Example
-
-desktop:
-  development:enabled: true    # installs developer packages
-vagrant.virtualbox: true       # installs virtualbox if desktop.development
+  * vagrant, vagrant-libvirt, tools
