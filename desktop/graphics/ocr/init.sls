@@ -8,4 +8,4 @@ ocr:
       - unpaper
       - poppler-utils
 
-# remember to look at !!! TODO, FIXME  https://github.com/fritz-hh/OCRmyPDF
+# remember to look at !!! TODO https://github.com/fritz-hh/OCRmyPDF
