@@ -24,8 +24,6 @@ install_{{ user }}_{{ identifier }}:
       - pkg: libreoffice
 {% endmacro %}
 
-{# -  unless: unopkg list | grep -q "{{ identifier }}"  #}
-
 {{ user_install_oxt(user, "org.openoffice.languagetool",
   "https://languagetool.org/download/LanguageTool-stable.oxt"
   ) }}
