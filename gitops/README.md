@@ -41,11 +41,11 @@ Execute the following steps, any step that fails stops executing later steps:
   + after:    executed after "update" did run sucessful, eg. for metric processing
   + finish:   is executed after "after" was sucessful and machine does not need a reboot
               eg. to restart services that got stopped
-example:
-```
+
+Example:
+```yaml
 update:
   before_cmd: /usr/bin/systemctl stop xyz
   after_cmd: /usr/bin/bash -c '. /usr/local/lib/gitops-library.sh; simple_metric test_update_run counter "timestamp of update run" "$(date +%s)000"'
   finish_cmd: /usr/bin/systemctl start --no-block xyz
 ```
-#}
