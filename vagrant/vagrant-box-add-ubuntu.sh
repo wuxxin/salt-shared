@@ -183,7 +183,7 @@ download_convert_lxcd() {
     echo "information: download ubuntu lxd container"
     mkdir -p $lxcdir $lxddir
     #lxc image export ubuntu:$codename/$arch $basedir
-    echo "xxx todo fixme: write checksum, redownload when ?"
+    echo "xxx todo: write checksum, redownload when ?"
 
     echo "information: convert lxd container to vagrant lxd friendly layout"
     fakeroot -- bash -c "\
