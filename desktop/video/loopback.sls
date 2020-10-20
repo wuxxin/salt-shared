@@ -17,6 +17,16 @@ v4l2loopback:
     - require:
       - pkg: kernel_module_requirements
 
+/etc/modules-load.d/v4l2loopback.conf:
+  file.managed:
+    - contents: |
+        v4l2loopback
+
+/etc/modprobe.d/v4l2loopback.conf:
+  file.managed:
+    - contents: |
+        options v4l2loopback devices=1 exclusive_caps=1 video_nr=7 card_label="v4l2loopback"
+
 {% load_yaml as settings %}
 external:
   akvcam_tar_gz:
