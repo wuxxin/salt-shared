@@ -1,67 +1,73 @@
-{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, container, compose %}
+{% from "containers/lib.sls" import env_repl, usernsid_fromstr %}
 [Unit]
-Description=Systemd service for podman container {{ pod.name }}
-After=network-online.target {{ pod.after }}
-{% if pod.wants|length %}Wants={{ pod.wants }}{% endif %}
-{% if pod.requires|length %}Requires={{ pod.requires }}{% endif %}
+Description=Systemd service for podman container {{ entry.name }}
+After=network-online.target {{ entry.after }}
+{% if entry.wants|length %}Wants={{ entry.wants }}{% endif %}
+{% if entry.requires|length %}Requires={{ entry.requires }}{% endif %}
 StartLimitBurst=5
 StartLimitIntervalSec=100
 
 [Service]
-Type={{ pod.type }}
-{%- if not pod.restart|length %}
-  {%- if pod.type == 'oneshot' %}
+Type={{ entry.type }}
+{%- if not entry.restart|length %}
+  {%- if entry.type == 'oneshot' %}
 Restart=no
   {%- else %}
 Restart=on-failure
   {%- endif %}
 {%- else %}
-Restart={{ pod.restart }}
+Restart={{ entry.restart }}
 {%- endif %}
-{%- for k,v in pod.properties.items() %}
+{%- for k,v in entry.properties.items() %}
 {{ k }}={{ v }}
 {%- endfor %}
-{%- if pod.update %}
-  {%- if pod.build %}
-ExecStartPre=podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
+{%- if entry.update %}
+  {%- if entry.build.source != '' %}
+ExecStartPre=/bin/bash -c 'cd {{ entry.build.builddir }} && entry.an build \
+    {{ '--tag='+ entry.tag if entry.tag }} \
+    {%- for key,value in entry.build.args.items() %}
+    {{ '--build-arg=' ~ key ~ '=' ~ value }} \
+    {%- endfor %}
+    {{ entry.build.source }}'
   {%- else %}
-ExecStartPre=podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
+ExecStartPre=entry.an pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
   {%- endif %}
 {%- endif %}
-{%- if pod.ephemeral %}
-ExecStartPre=-podman rm -f {{ pod.name }}
+{%- if entry.ephemeral %}
+ExecStartPre=-entry.an rm -f {{ entry.name }}
 {%- endif %}
-# RuntimeDirectory will create /run/{{ pod.name }} for pid, socket files
-RuntimeDirectory={{ pod.name }}
-EnvironmentFile=/etc/containers/podman.service/{{ pod.name }}.env
-ExecStart=podman run \
-  --name={{ pod.name }} \
-{%- if pod.userns == 'pick' %}
-  --uidmap=0:{{ usernsid_fromstr(pod.name) }}:65536 \
-  --gidmap=0:{{ usernsid_fromstr(pod.name) }}:65536 \
+# RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
+RuntimeDirectory={{ entry.name }}
+WorkingDirectory={{ entry.workdir }}
+EnvironmentFile={{ entry.workdir }}.env
+ExecStart=entry.an run \
+  --name={{ entry.name }} \
+{%- if entry.userns == 'pick' %}
+  --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
+  --gidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
 {%- else %}
-  --userns={{ pod.userns }} \
+  --userns={{ entry.userns }} \
 {%- endif %}
   --env-host \
-{%- for key,value in pod.options.items() %}
+{%- for key,value in entry.options.items() %}
   --{{ key }}={{ value }} \
 {%- endfor %}
-{%- for key,value in pod.labels.items() %}
+{%- for key,value in entry.labels.items() %}
   --label={{ key }}={{ value }} \
 {%- endfor %}
-{%- for vol in pod.volumes %}
-  {%- set vol_str = env_repl(vol, pod.environment) %}
+{%- for vol in entry.volumes %}
+  {%- set vol_str = env_repl(vol, entry.environment) %}
   --volume={{ vol_str }} \
 {%- endfor %}
-{%- for publish in pod.ports %}
-  {%- set publish_str = env_repl(publish, pod.environment) %}
+{%- for publish in entry.ports %}
+  {%- set publish_str = env_repl(publish, entry.environment) %}
   --publish={{ publish_str }} \
 {%- endfor %}
-  {{ pod.image }}{{ ":"+ pod.tag if pod.tag }} {% if pod.command %} \
-  {{ pod.command }} {{ pod.args }}
+  {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} {% if entry.command %} \
+  {{ entry.command }} {{ entry.args }}
 {% endif %}
-{%- if pod.type != 'oneshot' %}
-ExecStop=podman stop {{ pod.name }}
+{%- if entry.type != 'oneshot' %}
+ExecStop=entry.an stop {{ entry.name }}
 
 [Install]
 WantedBy=multi-user.target

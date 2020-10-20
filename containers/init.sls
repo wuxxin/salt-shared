@@ -15,15 +15,13 @@ include:
   file:
     - directory
 
-{{ settings.container.service_basepath }}:
+{% for dirname in [settings.container.service_basepath, settings.container.build_basepath,
+    settings.compose.service_basepath, settings.compose.build_basepath] %}
+{{ dirname }}:
   file:
     - directory
     - mode: "0750"
-
-{{ settings.compose.workdir_basepath }}:
-  file:
-    - directory
-    - mode: "0750"
+{% endfor %}
 
 /etc/containers/containers.conf:
   cmd.run:

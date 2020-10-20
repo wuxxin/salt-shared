@@ -1,13 +1,32 @@
 {% load_yaml as defaults %}
 
-# used in init.sls and lib.sls
+# used in containers/init.sls and containers/lib.sls
 container:
   service_basepath: /etc/containers/podman.service
+  build_basepath: /var/lib/containers/podman-build
+  user_service_basepath: ""
+  user_build_basepath: ""
+
 compose:
-  workdir_basepath: /etc/containers/podman-compose.service
-  base_filename: docker-compose.yml
+  service_basepath: /etc/containers/podman-compose.service
+  build_basepath: /var/lib/containers/podman-compose-build
+  compose_filename: docker-compose.yml
   override_filename: docker-compose.override.yml
   env_filename: .env
+
+desktop:
+  default:
+    - --podman
+    - --xpra
+  host:
+    - --podman
+    - --cap-default
+    - --hostdisplay
+    - --clipboard
+    - --gpu
+    - --hostipc
+    # - --verbose
+    # - --webcam
 
 # part of /etc/containers/containers.conf:[engine]
 engine:
@@ -60,33 +79,30 @@ policy: |
 {% load_yaml as default_container %}
 # name of the container pod and name of the controlling systemd service
 name:
-
-# enabled: if false, service will not get started and will be stopped if running
+# enabled: if false, service will be stopped, config files are removed, but service is kept
 enabled: true
-# absent: if enabled is false and absent is true, remove config and service files
+# absent: if absent is true also remove systemd service files
 absent: false
-# update: if set true: container image will be pulled/build on every service start
+# update: if true, container image will be pulled/build on every service start
 update: true
 # ephemeral: if set true, existing container will be removed on start
 ephemeral: true
-# Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
-userns: host
-# options: dict: {key: value,} container options parameter for podman run
-options: {}
 
-instance:
-  # commands run before the first time ever the service is started
-  firstrun: []
-  # commands run after updating image to newer image, before starting new image
-  udpaterun: []
-
-# ### systemd service options
-# systemd type: "exec" or "oneshot" or advanced types: "simple, forking, dbus, notify, idle"
+# type: "build", "exec", "oneshot" or "desktop"
+# build = will build or pull image only, will not generate a systemd service
+# exec = start command as a systemd service, oneshot = execute script as systemd oneshot
 type: exec
-# systemd restart: "no", "on-failure" or
-# advanced: "on-success, on-abnormal, on-watchdog, on-abort, or always"
-# default: no if type oneshot, on-failure else
+# type: desktop
+# # install desktop files for user to call as user application
+# # desktop:user is mandatory, desktop options are passed to x11docker, defaulting to desktop.default
+desktop:
+  # user: username
+  options: []
+  entry: {}
+
+# ### systemd service options (if type = exec|oneshot)
+# systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
+# default: "no" if type oneshot, else "on-failure"
 restart: ""
 # after, requires, wants: equal to systemd config
 after: ""
@@ -97,8 +113,36 @@ properties: {}
 
 # name of the container image: x/y[:z]
 image:
-# optional tag, will be appended to image and on build
+# optional tag, will be appended to image and on build time
 tag:
+# build: if source != "", build container with args using "podman build <source>"
+build:
+  source: ""
+  args: {}
+  # builddir: automatical set at buildtime to directory where build files are located
+# files to be placed inside workdir, which will be available via "./"
+files: {}
+{# Example:
+  test.file:
+    mode: "600"
+    contents: |
+      this is the content
+  still.some.file:
+    source: salt://containers/test.file
+    template: jinja
+    # specify any file.managed attribute, environment will be put into context
+    defaults:
+      custom: this is a custom var that will be available in the jinja context
+#}
+# exec:firstrun: commands run if type=exec before the first time the service is started
+# exec:updaterun commands run if type=exec after updating image to newer image before starting new image
+exec:
+  firstrun: []
+  udpaterun: []
+# Set the user namespace mode for the container. options are "pick","auto","host","private"
+# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
+userns: host
+
 # environment: dict: {key: value,} add environment data
 environment: {}
 # environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
@@ -114,11 +158,8 @@ ports: []
 command: ""
 # args: if set, will add args for command, command must also be set
 args: ""
-
-# build: build container from source
-build: false
-build_source: ""
-build_args: {}
+# options: dict: {key: value,} container options parameter for podman run
+options: {}
 
 {% endload %}
 
@@ -127,23 +168,14 @@ build_args: {}
 # name of the compose sevice and name of the controlling systemd service
 name:
 
-# enabled: if false, service will not get started and will be stopped if running
+# enabled: if false, service will be stopped, config files are removed, but service is kept
 enabled: true
-# absent: if enabled is false and absent is true, remove config and service files
+# absent: if absent is true also remove systemd service files
 absent: false
 # update: if true: container image will be pulled/build on every service start
 update: true
-# build: build container from source
-build: false
-# Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is in analogy to systemd nspawn, and will compute starting host_uid based on the container name hash
-userns: host
-
-instance:
-  # commands run before the first time ever the service is started
-  firstrun: []
-  # commands run after updating image to newer image, before starting new image
-  udpaterun: []
+# config type: must be "compose", to make compose/container missmatch detectable
+type: compose
 
 # ### systemd service options
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
@@ -157,30 +189,23 @@ properties: {}
 
 # environment to be placed as ".env" file inside workdir
 environment: {}
-
 # compose source config and compose overrides config
 source:
 config: {}
-
-# workdir: if empty will use settings.compose.workdir_basepath+ "/"+ compose.name
+# workdir: if empty will use settings.compose.service_basepath+ "/"+ compose.name
 workdir:
-
+# builddir: automatical set at buildtime to directory where build files are located
 # files to be placed inside workdir
 files: {}
-{#
-  test.file:
-    source: salt://containers/test.file
-    # will automatically get rendered via jinja, with environment put into context
-    # files will support any file.managed attribute to be specified
-  another.file:
-    mode: "600"
-    contents: |
-      this is the content
-  still.some.file:
-    source: salt://containers/still.jinja
-    defaults:
-      custom: this is a custom var that will be available in the jinja context
-#}
+{# Examples: see container_defaults #}
+# exec:firstrun: commands run if type=exec before the first time the service is started
+# exec:updaterun commands run if type=exec after updating image to newer image before starting new image
+exec:
+  firstrun: []
+  udpaterun: []
+# Set the user namespace mode for the container. options are "pick","auto","host","private"
+# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
+userns: host
 {% endload %}
 
 

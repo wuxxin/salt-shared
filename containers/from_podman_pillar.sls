@@ -1,7 +1,7 @@
 include:
   - containers
 
-{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, container, compose %}
+{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, image, container, compose %}
 
 {% for vol in salt['pillar.get']('podman:volume', []) %}
 {{ volume(vol.name) }}

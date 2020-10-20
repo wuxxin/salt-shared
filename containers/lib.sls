@@ -21,6 +21,135 @@
 {%- endmacro -%}
 
 
+{% macro create_directories(entry) %}
+{# create workdir, builddir #}
+{{ entry.name }}.workdir:
+  file.directory:
+    - name: {{ entry.workdir }}
+    - makedirs: true
+    - mode: "0750"
+{{ entry.name }}.builddir:
+  file.directory:
+    - name: {{ entry.builddir }}
+    - makedirs: true
+{{ entry.name }}.workdir.builddir.symlink:
+  file.symlink:
+    - name: {{ entry.workdir }}/build
+    - target: {{ entry.builddir }}
+    - require:
+      - file: {{ entry.name }}.workdir
+      - file: {{ entry.name }}.builddir
+{% endmacro %}
+
+
+{% macro write_files(entry) %}
+{# if entry.enabled, write files to workdir,
+  if source defined and is template, template context will have environment populated #}
+  {%- for fname, fdata in entry.files.items() %}
+{{ entry.name }}.files.{{ fname }}:
+  file:
+    {%- if not entry.enabled %}
+    - absent
+    - name: {{ entry.workdir ~ "/" ~ fname }}
+    {%- else %}
+    - managed
+    - name: {{ entry.workdir ~ "/" ~ fname }}
+    - makedirs: true
+      {%- if fdata.contents is defined %}
+    - contents: |
+{{ fdata.contents|indent(8,True) }}
+      {%- else %}
+    - defaults:
+        {%- for key,value in entry.environment.items() %}
+        {{ key }}: {{ value }}
+        {%- endfor %}
+        {%- if fdata.defaults is defined %}
+          {%- for key,value in fdata.defaults.items() %}
+        {{ key }}: {{ value }}
+          {%- endfor %}
+        {%- endif %}
+      {%- endif %}
+      {%- for k,v in fdata.items() %}
+        {%- if k not in ['contents', 'defaults', ] %}
+    - {{ k }}: {{ v }}
+        {%- endif %}
+      {%- endfor %}
+      {%- if entry.type != 'build' %}
+    - watch_in:
+      - service: {{ entry.name }}.service
+      {%- endif %}
+    - require:
+      - file: {{ entry.name }}.workdir
+      - file: {{ entry.name }}.builddir
+    {%- endif %}
+  {%- endfor %}
+{% endmacro %}
+
+
+{% macro write_env(entry) %}
+{# write environment to workdir if entry.enabled, else remove file #}
+{{ entry.name }}.env:
+  file:
+  {%- if entry.enabled %}
+    - managed
+    - mode: 0600
+    - contents: |
+        # environment for {{ entry.name }}
+    {%- for key,value in entry.environment.items() %}
+        {{ key }}={{ value }}
+    {%- endfor %}
+  {%- else %}
+    - absent
+  {%- endif %}
+    - name: {{ entry.workdir }}.env
+{% endmacro %}
+
+
+{% macro write_service(entry) %}
+{{ entry.name }}.service:
+  file:
+    {%- if entry.absent %}
+    - absent
+    {%- else %}
+    - managed
+    - source: salt://containers/container-template.service
+    - template: jinja
+    - defaults:
+        entry: {{ entry }}
+        settings: {{ settings }}
+    {%- endif %}
+    - name: /etc/systemd/system/{{ entry.name }}.service
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: {{ entry.name }}.service
+    {%- if entry.enabled and not entry.absent %}
+      {%- if entry.type == 'oneshot' %}
+  service.enabled:
+      {%- else %}
+  service.running:
+    - enable: true
+      {%- endif %}
+    {%- else %}
+      {%- if entry.type == 'oneshot' %}
+  service.disabled:
+      {%- else %}
+  service.dead:
+    - enable: false
+      {%- endif %}
+    {%- endif %}
+    - name: {{ entry.name }}.service
+    {%- if entry.type != 'oneshot' and not entry.absent %}
+    - watch:
+      - file: {{ entry.name }}.env
+      - file: {{ entry.name }}.service
+    {%- endif %}
+    - require:
+      - cmd: {{ entry.name }}.service
+  {%- endif %}
+{% endmacro %}
+
+
 {% macro volume(name, opts=[], driver='local', labels=[], env={}) %}
   {%- set name_str = env_repl(name, env) %}
   {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
@@ -32,114 +161,96 @@ containers_volume_{{ name_str }}:
 {% endmacro %}
 
 
-{% macro image(name, tag='') %}
+{% macro image(name, tag='', build={'source': '', 'args': {}}, builddir= '', require_in='') %}
 containers_image_{{ name }}:
   cmd.run:
-    - name: podman xxxx
-    - unless: podman xxxx ls -q | grep -q {{ name }}
+  {%- if builddir == '' or build.source == '' %}
+    - name: podman image pull {{ name }}{{ ':' ~ tag if tag != '' else '' }}
+    - unless: podman image exists {{ name }}{{ ':' ~ tag if tag != '' else '' }}
+  {%- else %}
+    - cwd: {{ builddir }}
+    - name: |
+        podman build {{ '--tag='~ name~ ':' ~ tag|d('latest') }} \
+        {%- for key,value in build.args.items() %}
+          {{ '--build-arg=' ~ key ~ '=' ~ value }} \
+        {%- endfor %}
+          {{ build.source }}
+    {%- if require_in != '' %}
+    - require_in:
+      - {{ require_in }}
+    {%- endif %}
+  {%- endif %}
 {% endmacro %}
 
 
 {% macro container(container_definition) %}
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
-  {%- set pod= salt['grains.filter_by']({'default': default_container},
+  {%- set entry= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
   {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
-  {%- do pod.environment.update({'SERVICE_NAME': pod.name}) %}
+  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) %}
+  {# add workdir and builddir to entry #}
+  {%- do entry.update({'workdir': settings.container.service_basepath ~ '/' ~ entry.name }) %}
+  {%- do entry.update({'builddir': settings.container.build_basepath ~ '/' ~ entry.name }) %}
 
-  {%- if pod.enabled %}
+{{ create_directories(entry) }}
+{{ write_files(entry) }}
+{{ write_env(entry) }}
+
+  {%- if entry.enabled %}
     {# create volumes if defined via storage #}
-    {%- for def in pod.storage %}
+    {%- for def in entry.storage %}
 {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), env=pod.environment) }}
+          labels=def.labels|d([]), env=entry.environment) }}
     {%- endfor %}
 
     {# if not update on every container start, update now on install state #}
-    {%- if not pod['update'] %}
-update_image_{{ pod.image }}:
-  cmd.run:
-      {%- if pod.build %}
-    - name: podman build {{ pod.build }} {{ "--tag="+ pod.tag if pod.tag }}
+    {%- if not entry['update'] or entry.type == 'build' %}
+      {%- if entry.type == 'build' %}
+{{ image(entry.image, entry.tag, entry.build, entry.builddir) }}
       {%- else %}
-    - name: podman pull {{ pod.image }}{{ ":"+ pod.tag if pod.tag }}
+{{ image(entry.image, entry.tag, entry.build, entry.builddir,
+    require_in='file: ' ~ entry.name~ '.service') }}
       {%- endif %}
-    - require_in:
-      - file: {{ pod.name }}.service
     {%- endif %}
   {%- endif %}
 
-{{ pod.name }}.env:
-  file:
-  {%- if pod.enabled %}
-    - managed
-    - mode: 0600
-    - contents: |
-    {%- for key,value in pod.environment.items() %}
-        {{ key }}={{ value }}
-    {%- endfor %}
-  {%- else %}
-    - absent
+  {%- if entry.type != 'build' %}
+{{ write_service(entry) }}
   {%- endif %}
-    - name: {{ settings.container.service_basepath }}/{{ pod.name }}.env
 
-{{ pod.name }}.service:
-  file.managed:
-    - source: salt://containers/container-template.service
-    - name: /etc/systemd/system/{{ pod.name }}.service
-    - template: jinja
-    - defaults:
-        pod: {{ pod }}
-  cmd.run:
-    - name: systemctl daemon-reload
-    - onchanges:
-      - file: {{ pod.name }}.service
-  {%- if pod.enabled %}
-    {%- if pod.type == 'oneshot' %}
-  service.enabled:
-    {%- else %}
-  service.running:
-    - enable: true
-    {%- endif %}
-  {%- else %}
-    {%- if pod.type == 'oneshot' %}
-  service.disabled:
-    {%- else %}
-  service.dead:
-    - enable: false
-    {%- endif %}
-  {%- endif %}
-    - name: {{ pod.name }}.service
-  {%- if pod.type != 'oneshot' %}
-    - watch:
-      - file: {{ pod.name }}.env
-      - file: {{ pod.name }}.service
-  {%- endif %}
-    - require:
-      - cmd: {{ pod.name }}.service
 {% endmacro %}
 
 
 {% macro compose(compose_definition) %}
+
   {%- from "containers/defaults.jinja" import settings, default_compose with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_compose},
     grain='default', default= 'default', merge=compose_definition) %}
-
   {%- if not entry.workdir %}
-    {%- do entry.update({ 'workdir': settings.compose.workdir_basepath ~ '/' ~ entry.name }) %}
+    {%- do entry.update({'workdir': settings.compose.service_basepath ~ '/' ~ entry.name }) %}
   {%- endif %}
-  {%- set composefile= entry.workdir ~ "/" ~ settings.compose.base_filename %}
+  {%- if not entry.builddir %}
+    {%- do entry.update({'builddir': settings.compose.build_basepath ~ '/' ~ entry.name }) %}
+  {%- endif %}
+  {%- set composefile= entry.workdir ~ "/" ~ settings.compose.compose_filename %}
   {%- set overridefile= entry.workdir ~ "/" ~ settings.compose.override_filename %}
 
-{# create workdir #}
-{{ entry.name }}.workdir:
-  file.directory:
-    - name: {{ entry.workdir }}
-    - makedirs: true
-    - mode: "0750"
+{{ create_directories(entry) }}
+{{ write_files(entry) }}
+{{ write_env(entry) }}
 
 {# create compose,override files,
   fill with source,config or config,none if source empty #}
-  {%- if entry.source != None %}
+  {%- if not entry.enabled %}
+{{ entry.name }}.compose:
+  file.absent:
+    - name: {{ composefile }}
+{{ entry.name }}.override:
+  file.absent:
+    - name: {{ overridefile }}
+  {%- else %}
+    {%- if entry.source != None %}
 {{ entry.name }}.compose:
   file.managed:
     - source: {{ entry.source }}
@@ -147,18 +258,18 @@ update_image_{{ pod.image }}:
     - require:
       - file: {{ entry.name }}.workdir
 {{ entry.name }}.override:
-    {%- if entry.config %}
+      {%- if entry.config %}
   file.managed:
     - mode: "0600"
     - contents: |
 {{ entry.config|yaml(False)|indent(8,True) }}
-    {%- else %}
+      {%- else %}
   file.absent:
-    {%- endif %}
+      {%- endif %}
     - name: {{ overridefile }}
     - require:
       - file: {{ entry.name }}.workdir
-  {%- else %}
+    {%- else %}
 {{ entry.name }}.compose:
   file.managed:
     - contents: |
@@ -169,66 +280,27 @@ update_image_{{ pod.image }}:
 {{ entry.name }}.override:
   file.absent:
     - name: {{ overridefile }}
-  {%- endif %}
-
-{# write files to workdir:
-  if source then template jinja and environment else contents #}
-  {%- for fname, fdata in entry.files.items() %}
-{{ entry.name }}.files.{{ fname }}:
-  file.managed:
-    - name: {{ entry.workdir ~ "/" ~ fname }}
-    - makedirs: true
-    {%- if fdata.contents is defined %}
-    - contents: |
-{{ fdata.contents|indent(8,True) }}
-    {%- else %}
-    - defaults:
-      {%- for key,value in entry.environment.items() %}
-        {{ key }}: {{ value }}
-      {%- endfor %}
-      {%- if fdata.defaults is defined %}
-        {%- for key,value in fdata.defaults.items() %}
-        {{ key }}: {{ value }}
-        {%- endfor %}
-      {%- endif %}
     {%- endif %}
-    {%- for k,v in fdata.items() %}
-      {%- if k not in ['contents', 'defaults', ] %}
-    - {{ k }}: {{ v }}
-      {%- endif %}
-    {%- endfor %}
-    - watch_in:
-      - service: {{ entry.name }}.service
-    - require:
-      - file: {{ entry.name }}.workdir
-  {%- endfor %}
-
-{# write environment: to workdir #}
-{{ entry.name }}.env:
-  file.managed:
-    - name: {{ entry.workdir ~ "/.env" }}
-    - mode: 0600
-    - contents: |
-        # environment for {{ entry.name }}
-  {%- for key,value in entry.environment.items() %}
-        {{ key }}={{ value }}
-  {%- endfor %}
-    - require:
-      - file: {{ entry.name }}.workdir
+  {%- endif %}
 
 {# write, (re)load and start service #}
 {{ entry.name }}.service:
-  file.managed:
+  file:
+    {%- if entry.absent %}
+    - absent
+    {%- else %}
+    - managed
     - source: salt://containers/compose-template.service
-    - name: /etc/systemd/system/{{ entry.name }}.service
     - template: jinja
     - defaults:
-        compose: {{ entry }}
+        entry: {{ entry }}
+    {%- endif %}
+    - name: /etc/systemd/system/{{ entry.name }}.service
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: {{ entry.name }}.service
-  {%- if entry.enabled %}
+  {%- if entry.enabled and not entry.absent %}
   service.running:
     - enable: true
   {%- else %}
@@ -238,9 +310,83 @@ update_image_{{ pod.image }}:
     - name: {{ entry.name }}.service
     - require:
       - cmd: {{ entry.name }}.service
+  {%- if not entry.absent %}
     - watch:
       - file: {{ entry.name }}.compose
       - file: {{ entry.name }}.override
       - file: {{ entry.name }}.env
+  {%- endif %}
 
+{% endmacro %}
+
+
+
+{% macro desktop_application(application_definition) %}
+
+  {%- from "containers/defaults.jinja" import settings, default_container with context %}
+  {%- set entry= salt['grains.filter_by']({'default': default_container},
+    grain='default', default= 'default', merge=application_definition) %}
+  {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
+  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) %}
+  {# add workdir and builddir to entry #}
+  {%- do entry.update({'workdir': settings.container.service_basepath ~ '/' ~ entry.name }) %}
+  {%- do entry.update({'builddir': settings.container.build_basepath ~ '/' ~ entry.name }) %}
+
+{{ create_directories(entry) }}
+{{ write_files(entry) }}
+{{ write_env(entry) }}
+
+  {%- if entry.enabled %}
+    {# create volumes if defined via storage #}
+    {%- for def in entry.storage %}
+{{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
+          labels=def.labels|d([]), env=entry.environment) }}
+    {%- endfor %}
+{{ image(entry.image, entry.tag, entry.build, entry.builddir) }}
+  {%- endif %}
+
+~/.local/share/applications/android-{{ name }}.desktop:
+  file.managed:
+    - contents: |
+        [Desktop Entry]
+        Type=Application
+        Name=Android-Emulator-{{ name }}
+        Comment=Android Emulator Desktop Version
+        Exec=android-{{ name }}.sh
+        Terminal=true
+        Icon=applications-internet
+        Categories=Network;
+        Keywords=android;emulator;
+
+~/.local/bin/android-{{ name }}.sh:
+  file.managed:
+    - contents: |
+      #!/usr/bin/bash
+      exec x11docker \
+  {%- for k,v in profile.x11docker %}
+        {{ k,v }}
+  {%- endfor %}
+        -- \
+  {%- for k,v in profile.environment %}
+        -e {{ k }}={{ v }} \
+  {%- endfor %}
+        -- \
+        localhost/android-emulator:latest
+{#
+x11docker \
+  --verbose --podman --cap-default \
+  --hostdisplay --clipboard --gpu --hostipc \
+  --webcam -- \
+    -e EMULATOR_PARAMS="-gpu swiftshader_indirect -accel on -no-boot-anim -memory 2048 -camera-front webcam1" \
+    -e ADBKEY="$(cat ~/.android/adbkey)" \
+    -e NO_FORWARD_LOGGERS=true \
+    -e NO_PULSE_AUDIO=true \
+    -e "AVD_CONFIG=disk.dataPartition.size = 768m" \
+    --volume android-emulator:/android-home \
+    --device /dev/kvm \
+    --publish 8554:8554/tcp  \
+    --publish 5555:5555/tcp \
+    -- \
+      localhost/android-emulator:latest
+  #}
 {% endmacro %}
