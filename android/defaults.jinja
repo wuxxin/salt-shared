@@ -1,10 +1,114 @@
 {% load_yaml as defaults %}
+
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
   tag: 30.1.2
-sdk:
-  image:
-  tag:
+
+default_args:
+
+  emulator:
+    - -accel on
+    - -no-boot-anim
+    - -gpu swiftshader_indirect
+    - -memory 2048
+    # - -netdelay umts
+    # - -netspeed hsdpa
+    # - -no-snapshot
+    # - -verbose
+    # - -camera-front webcam1
+
+  avd:
+    # 1gb = 1073741824
+    disk.dataPartition.size: 1073741824
+
+  x11docker:
+    - --podman
+    - --cap-default
+    - --hostdisplay
+    - --clipboard
+    - --gpu
+    - --hostipc
+    # - --verbose
+    # - --webcam
+
+container:
+  emulator_build:
+    name: android-emulator
+    image: localhost/android-emulator
+    tag: latest
+    type: build
+    build:
+      source: .
+    files:
+      build/Dockerfile:
+        contents: |
+          FROM localhost/android-emulator-unmodified:latest
+
+          COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
+          RUN chmod +x /android/sdk/launch-emulator.sh
+          RUN mv /android-home /android-home-default
+          RUN sed -r -i -e "s/^disk.dataPartition.size=.+//g" /android-home-default/Pixel2.avd/config.ini
+          RUN install -o 1000 -g 1000 -m "777" -d /android-home
+
+      build/launch-emulator.sh:
+        source: salt://android/launch-emulator.sh
+
+  emulator_desktop:
+    name: android-emulator-desktop
+    image: localhost/android-emulator
+    tag: latest
+    type: desktop
+    desktop:
+      user:
+      options: []
+      entry:
+        Comment: Android Emulator Desktop Version
+        Terminal: "true"
+        Icon: applications-internet
+        Categories: Network;
+        Keywords: android;emulator;
+    environment:
+      ANDROID_DATA_VOLUME: android-emulator-desktop
+      NO_FORWARD_LOGGERS: "true"
+      NO_PULSE_AUDIO: "false"
+      AVD_CONFIG: ""
+      EMULATOR_PARAMS: ""
+      ADD_EMULATOR_PARAMS: ""
+    volumes:
+      - $ANDROID_DATA_VOLUME/user:/home/user/
+      - $ANDROID_DATA_VOLUME/android-home:/android-home
+    publish:
+      - 127.0.0.1:8554:8554/tcp
+      - 127.0.0.1:5555:5555/tcp
+    options:
+      - --device /dev/kvm
+
+  emulator_headless_service:
+    name: android-emulator-headless
+    image: localhost/android-emulator
+    tag: latest
+    type: service
+    environment:
+      ANDROID_DATA_VOLUME: android-emulator-headless
+      NO_FORWARD_LOGGERS: "true"
+      NO_PULSE_AUDIO: "true"
+      AVD_CONFIG: ""
+      EMULATOR_PARAMS: ""
+      ADD_EMULATOR_PARAMS: "-nowindow"
+    volumes:
+      - $ANDROID_DATA_VOLUME/user:/home/user/
+      - $ANDROID_DATA_VOLUME/android-home:/android-home
+    publish:
+      - 127.0.0.1:8554:8554/tcp
+      - 127.0.0.1:5555:5555/tcp
+    options:
+      - --device /dev/kvm
+
+  emulator_webrtc_service:
+    name: android-emulator-webrtc
+    image: localhost/android-emulator
+    tag: latest
+    type: compose
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},

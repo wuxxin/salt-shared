@@ -1,5 +1,5 @@
 {% from "android/defaults.jinja" import settings with context %}
-{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, image, container, compose %}
+{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, image, container, compose, desktop_application %}
 
 include:
   - python
@@ -10,6 +10,7 @@ include:
 {# download emulator container image #}
 {{ image(settings.emulator.image, settings.emulator.tag) }}
 
+{# tag emulator container #}
 set_latest_android_emulator_unmodified:
   cmd.run:
     - name: podman image tag {{ settings.emulator.image }}:{{ settings.emulator.tag }} \
@@ -17,27 +18,19 @@ set_latest_android_emulator_unmodified:
     - onchanges:
       - cmd: containers_image_{{ settings.emulator.image }}
 
-{% load_yaml as android_emulator_container %}
-name: android-emulator
-image: localhost/android-emulator
-tag: latest
-type: build
-build:
-  source: .
-files:
-  build/Dockerfile:
-    contents: |
-      FROM localhost/android-emulator-unmodified:latest
-
-      COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
-      RUN chmod +x /android/sdk/launch-emulator.sh
-
-  build/launch-emulator.sh:
-    source: salt://android/launch-emulator.sh
-{% endload %}
+{# create modified emulator (to also work with gui) #}
+{{ container(settings.container.emulator_build) }}
 
 {# for launch parameter of emulator see
-  https://developer.android.com/studio/run#startup-options #}
+  https://developer.android.com/studio/run/emulator-commandline
+#}
 
-{# create modified emulator (to also work with gui) #}
-{{ container(android_emulator_container) }}
+{% macro android_emulator_desktop(profile_definition) %}
+{{ desktop_application(profile_definition) }}
+{% endmacro %}
+
+{% macro android_emulator_headless_service(profile_definition) %}
+{% endmacro %}
+
+{% macro android_emulator_webrtc_service(profile_definition) %}
+{% endmacro %}
