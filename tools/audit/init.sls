@@ -6,6 +6,7 @@ forensic-packages:
       - cabextract  {# extract MS cab files #}
       - pff-tools   {# export PAB,PST and OST files (MS Outlook) #}
       - mmdb-bin    {# IP geolocation lookup command-line tool #}
+      - fcrackzip   {# password cracker for zip archives #}
 
 {# - volatility  advanced memory forensics framework #}
 {% from 'python/lib.sls' import pip3_install %}
