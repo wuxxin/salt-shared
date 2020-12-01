@@ -1,5 +1,5 @@
 {% from "android.emulator-container.sls" import android_emulator_desktop %}
-{% from "android.defaults.jinja" import settings with context %}
+{% from "containers/defaults.jinja" import settings as container_settings with context %}
 
 include:
   - android.emulator-container
@@ -9,11 +9,11 @@ name: whatsapp-container
 environment:
   ANDROID_DATA_VOLUME: android-whatsapp
   ADD_EMULATOR_PARAMS: "-netdelay umts -netspeed hsdpa -camera-front webcam1"
-x11docker: {{ settings.default_args.x11docker + ['--webcam'] }}
+desktop:
+  options: {{ container_settings.desktop.host + ['--webcam'] }}
 {% endload %}
 
-{{ android_emulator_desktop(user, whatsapp_emulator_definition) }}
-
+{{ android_emulator_desktop(whatsapp_emulator_definition, user) }}
 
 {#
 download-whatsapp.apk:

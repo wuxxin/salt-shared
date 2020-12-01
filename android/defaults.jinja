@@ -3,10 +3,8 @@
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
   tag: 30.1.2
-
-default_args:
-
-  emulator:
+  
+  default_args:
     - -accel on
     - -no-boot-anim
     - -gpu swiftshader_indirect
@@ -16,20 +14,14 @@ default_args:
     # - -no-snapshot
     # - -verbose
     # - -camera-front webcam1
-
   avd:
-    # 1gb = 1073741824
-    disk.dataPartition.size: 1073741824
+    default_args:
+      # 1gb = 1073741824
+      disk.dataPartition.size: 1073741824
 
-  x11docker:
-    - --podman
-    - --cap-default
-    - --hostdisplay
-    - --clipboard
-    - --gpu
-    - --hostipc
-    # - --verbose
-    # - --webcam
+image_build:
+  default_args:
+    CUSTOM_PACKAGES: GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension
 
 container:
   emulator_build:
@@ -59,7 +51,6 @@ container:
     tag: latest
     type: desktop
     desktop:
-      user:
       options: []
       entry:
         Comment: Android Emulator Desktop Version
@@ -108,7 +99,28 @@ container:
     name: android-emulator-webrtc
     image: localhost/android-emulator
     tag: latest
-    type: compose
+    type: service
+
+  lineage_image_build:
+    name: lineage-cicd
+    image: lineageos4microg/docker-lineage-cicd
+    tag: latest
+    type: script
+    environment:
+      BUILD_DATA_VOLUME: android-build-data
+      BRANCH_NAME: lineage-17.1
+      DEVICE_LIST: sailfish
+      SIGN_BUILDS: true
+      SIGNATURE_SPOOFING: restricted
+      CUSTOM_PACKAGES: ""
+    volumes:
+      - ${BUILD_DATA_VOLUME}/src:/srv/src
+      - ${BUILD_DATA_VOLUME}/zips:/srv/zips
+      - ${BUILD_DATA_VOLUME}/logs:/srv/logs
+      - ${BUILD_DATA_VOLUME}/ccache:/srv/ccache
+      - ${BUILD_DATA_VOLUME}/keys:/srv/keys
+      - ${BUILD_DATA_VOLUME}/manifests:/srv/local_manifests
+
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},
