@@ -1,6 +1,7 @@
 include:
   - python
   - java
+  - android
   - .ubuntu
   - .user
   - .audio
@@ -25,7 +26,7 @@ include:
   - python.dev
   - python.scientific
   - tools.extra
-  - android
+  - android.emulator-container
   - .homeshick
   - .atom
   - .code
