@@ -12,11 +12,11 @@ usage () {
 # save script start time ms
 start_epoch_ms="$(date +%s)000"
 start_epoch_seconds=$(date +%s)
-duration_config=0; duration_pg_dump=0; duration_backup=0; duration_cleanup=0
-duration_forget=0; duration_prune=0; duration_check=0; duration_stats=0
+duration_config=0; duration_hook=0; duration_backup=0; duration_cleanup=0; duration_forget=0
+duration_prune=0; duration_check=0; duration_stats=0
 
 # ###
-# pre backup hooks
+# pre backup steps
 
 # assure be called as {{ settings.user }} with param --from-systemd-service
 if test "$(id -u -n)" != "{{ settings.user }}" -o "$1" != "--from-systemd-service"; then
@@ -46,15 +46,23 @@ if test "$expected_id" != "$actual_id"; then
     exit 1
 fi
 
+# execute each prebackup hook
+backup_hook_metrics=""
 {% for hook in settings.prebackup %}
-# {{ hook.name }}
+duration_start=$(date +%s)
+# {{ hook.name }} - {{ hook.description|d('') }}
 {{ hook.cmd }}
+duration_hook=$(( $(date +%s) - duration_start ))
+backup_hook_metrics="$backup_hook_metrics
+$(mk_metric backup_hook_{{ hook.name }}_duration_sec gauge "Duration for {{ hook.description|d('') }}" $duration_hook)
+"
 {% endfor %}
+metric_save backup_hook "$backup_hook_metrics"
 
 # ###
-# all prebackup hooks passed, begin backup work
+# all prebackup steps passed, begin backup work
 
-# backup to thirdparty storage
+# backup to thirdparty storage using restic
 duration_start=$(date +%s)
 restic backup {{ backup_excludes }} {{ backup_list|join(" ") }} && err=$? || err=$?
 duration_backup=$(( $(date +%s) - duration_start ))
@@ -66,10 +74,15 @@ fi
 
 
 # ###
-# post backup
+# post backup steps
 
-# TODO house cleaning: call restic forget, prune and check, once a week
-if test "true" = "true"; then
+# house keeping: call restic forget, prune and check, once every housekeeping interval
+last_housekeeping=$(get_tag backup_housekeeping_timestamp 0)
+oldest_expected_housekeeping=$(( start_epoch_seconds - housekeeping_interval_days * 60*60*24 ))
+
+if test "$last_housekeeping" -le "$oldest_expected_housekeeping"; then
+    set_tag backup_housekeeping_timestamp $start_epoch_seconds
+
     # XXX keep all snapshots from now to 1,5 years back, forget and prune older snapshots
     duration_start=$(date +%s)
     restic forget --keep-within 1y6m && err=$? || err=$?
@@ -134,7 +147,6 @@ metric_save backup \
 
 metric_save backup_ext \
     "$(mk_metric backup_config_duration_sec gauge "The duration in number of seconds of the backup config run" $duration_config)" \
-    "$(mk_metric backup_pg_dump_duration_sec gauge "The duration in number of seconds of the database dump run" $duration_pg_dump)" \
     "$(mk_metric backup_backup_duration_sec gauge "The duration in number of seconds of the actual backup run" $duration_backup)" \
     "$(mk_metric backup_forget_duration_sec gauge "The duration in number of seconds of the backup forget run" $duration_forget)" \
     "$(mk_metric backup_prune_duration_sec gauge "The duration in number of seconds of the backup prune run" $duration_prune)" \

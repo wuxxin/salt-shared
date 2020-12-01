@@ -5,56 +5,21 @@ user:
 env: {}
 includes: []
 excludes: []
-timer: *-*-* 00:30:00
-# max time for fullbackup, eg: 5hours (equal 350GB using 20mb per Second)
-maxruntime: 300min
-repository_maxsize: -1
-cleanup_interval_days: 7
+timer: *-*-* 23:30:00
+
+# max time for fullbackup, eg: 8hours equals 562GB using 20mb/s
+max_job_runtime: 480min
+# CAP_DAC_READ_SEARCH
+readall_privilege: false
+max_backup_storage: -1
+housekeeping_interval_days: 7
+forget: keep-within 1y6m
 
 systemd:
   after:
   wants:
   requires:
   onfailure:
-
-hooks:
-  prebackup:
-    - name: assure app media_dir is mounted if media_dir is external mount
-      cmd: |
-          if grep -q "{{ settings.media_dir }}" /etc/fstab; then
-              if ! mountpoint -q "{{ settings.media_dir }}"; then
-                  sentry_entry error "App Backup" "backup error: Mount at Mountpoint {{ settings.media_dir }} is not mounted"
-                  exit 1
-              fi
-          fi
-    - name: assure app media_dir is non empty
-      cmd: |
-          files_found=$(find "{{ settings.media_dir }}" -mindepth 1 -path "{{ settings.media_dir }}/lost+found" -prune -o -type f -exec echo true \; -quit)
-          if test "$files_found" != "true"; then
-              sentry_entry error "App Backup" "backup error: media_dir {{ settings.media_dir }} is empty"
-              exit 1
-          fi
-    - name: assure database exists
-      cmd: |
-          for i in
-          psql -lqt | cut -d \| -f 1 | grep -qw "$DATABASE" && err=$? || err=$?
-          if test $err -ne 0; then
-              sentry_entry error "App Backup" "backup error: Database $DATABASE does not exist"
-              exit 1
-          fi
-    - name: dump database
-      cmd: |
-          dbdump="{{ settings.pgdump_dir }}/$DATABASE.pgdump.gz"
-          duration_start=$(date +%s)
-          /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d "$DATABASE" | \
-              /bin/gzip --rsyncable > "${dbdump}.new" && err=$? || err=$?
-          duration_pg_dump=$(( $(date +%s) - duration_start ))
-          if test "$err" -ne 0; then
-              sentry_entry error "App Backup" "backup error: could not create database dump" \
-                  $(unit_json_status)"
-              exit 1
-          fi
-          mv "${dbdump}.new" "${dbdump}"
 
 external:
   rclone_zip
@@ -67,7 +32,6 @@ external:
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/restic/restic/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
     download: "https://github.com/restic/restic/releases/download/v##version##/restic_##version##_linux_amd64.bz2"
     target: /usr/local/lib/restic.bz2
-
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
