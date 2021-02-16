@@ -1,13 +1,13 @@
 {% from "kernel/defaults.jinja" import settings with context %}
 
 {% if settings.keep_current|d(false) or
-    grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
+    grains['virtual']|lower() in ['lxc', 'systemd-nspawn'] %}
 
 include:
   - kernel.running
 
 {% else %}
-  {%- set flavor='virtual' if grains['virtual'] != "physical" else 'generic '%}
+  {%- set flavor='virtual' if grains['virtual'] != "physical" else 'generic' %}
 
 linux-image:
   pkg.installed:
