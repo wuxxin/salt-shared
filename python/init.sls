@@ -1,3 +1,5 @@
+{% from 'python/lib.sls' import pip3_install %}
+
 python:
   pkg.installed:
     - pkgs:
@@ -23,9 +25,12 @@ pip3-chain:
       - cmd: pip3-upgrade
 
 {# unconditionaly set python to python3 #}
-update_python_alternative:
+update-python-alternative:
   cmd.run:
     - name: update-alternatives --install /usr/bin/python python /usr/bin/python3 50
     - unless: test $(readlink -f /usr/bin/python) = $(readlink -f /usr/bin/python3)
     - require:
       - pkg: python
+
+{# Install and Run Python Applications in Isolated Environments #}
+{{ pip3_install('pipx') }}

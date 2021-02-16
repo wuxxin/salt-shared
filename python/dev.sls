@@ -11,9 +11,6 @@ python-dev:
     - require:
       - sls: python
 
-{# Install and Run Python Applications in Isolated Environments #}
-{{ pip3_install('pipx') }}
-
 python-tools:
   pkg.installed:
     - pkgs:
@@ -37,19 +34,16 @@ python-tools:
 {%- endif %}
 
 {# black - opinionated python source code formating #}
-black:
+black-req:
   pkg.installed:
     - pkgs:
       - python3-appdirs
       - python3-attr {# XXX python package is named attrs not attr #}
       - python3-click {# # elegant cmdline parsing #}
       - python3-toml
-{{ pip3_install('black', require='pkg: black') }}
-
-{#
-python shell stuff
-pip install sh        # very elegant python shell
-pip install sarge     # python shell execute with "; &  | && || <>"
-https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
-pip install requests  # Python HTTP Requests for Humans
-#}
+      - python3-pathspec
+      - python3-regex
+      - python3-typed-ast
+      - python3-typing-extensions
+      - python3-mypy-extensions
+{{ pip3_install('black', require='pkg: black-req') }}
