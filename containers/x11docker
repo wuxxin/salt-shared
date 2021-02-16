@@ -11,7 +11,7 @@
 # Run 'x11docker --help' or scroll down to read usage information.
 # More documentation at:  https://github.com/mviereck/x11docker
 
-Version="6.6.3-beta"
+Version="6.7.0-beta"
 
 # --enforce-i: Enforce running in interactive mode to allow commands tty and weston-launch in special setups.
 grep -q -- "--enforce-i" <<< "$*" && case $- in
@@ -36,9 +36,10 @@ To run only an empty new X server:
   x11docker [OPTIONS] --xonly
 
 x11docker always runs a fresh container from image and discards it afterwards.
+Runs on Linux and (with some restrictions) on MS Windows. Not adapted for macOS.
 
 Optional features:
-  * GPU hardware accelerated graphics
+  * GPU hardware acceleration
   * Sound with pulseaudio or ALSA
   * Clipboard sharing
   * Printer access
@@ -46,17 +47,17 @@ Optional features:
   * Persistent home folder
   * Wayland support
   * Language locale creation
-  * Several init systems in container
-  * DBus in container
-  * Support of different container runtimes
+  * Several init systems and DBus in container
+  * Support of several container runtimes
 Focus on security:
   * Avoids X security leaks using additional X servers.
   * Container user is same as host user to avoid root in container.
   * Restricts container capabilities to bare minimum.
 
-Note that some applications might behave different than with a regular
-'docker run' command due to security restrictions set by x11docker.
-Unrestricted container setup is possible with --cap-default and/or --user=root
+x11docker sets up an unprivileged container user with password 'x11docker'
+and restricts container capabilities. Some applications might behave different
+than with a regular 'docker run' command due to these security restrictions.
+Achieve a less restricted setup with --cap-default, --sudouser or --user=root.
 
 Dependencies on host:
   For core functionality x11docker only needs bash, docker and an X server.
@@ -64,7 +65,7 @@ Dependencies on host:
   It checks for them on startup and shows messages if some are missing.
   Core list of recommended tools:
    * Recommended to allow security and convenience:
-       X servers: Xephyr xpra nxagent
+       X servers: xpra Xephyr nxagent
        X tools:   xauth xclip xrandr xhost xinit
    * Advanced GPU support: weston Xwayland xpra xdotool
   See also: https://github.com/mviereck/x11docker/wiki/Dependencies
@@ -76,25 +77,39 @@ Dependencies in image:
    --printer: Needs cups on host and cups client libs in image.
   See also: https://github.com/mviereck/x11docker/wiki/Dependencies
 
-
 Options: (short options do not accept arguments)
      --help            Display this message and exit.
- -e, --exe             Execute host application instead of docker command.
+ -e, --exe             Execute host application instead of docker container.
      --xonly           Only create empty X server.
 
-Basic settings: (especially influencing automatical choice of X server)
- -d, --desktop         Indicate desktop environment in image.
+Basic settings:
+ -d, --desktop         Indicate a desktop environment in image.
+                       In that case important for automatical X server choice.
+ -i, --interactive     Run with an interactive tty to allow shell commands.
+                       Useful with commands like bash.
+
+Host integration:
+     --alsa [=ALSA_CARD]  Sound with ALSA. You can define a desired sound card
+                       with ALSA_CARD. List of available sound cards: aplay -l
+ -c, --clipboard       Share clipboard. Graphical clips with --xpra only.
  -g, --gpu             GPU access for hardware accelerated OpenGL rendering.
                        Works best with open source drivers on host and in image.
                        For closed source nvidia drivers regard terminal output.
- -w, --wm [=ARG]       Provide a window manager to container applications.
-                       If available, image x11docker/openbox will be used.
-                       Otherwise x11docker looks for a host window manager.
-                       Possible ARG:
-                         host: Enforce autodetection of a host window manager.
-                         COMMAND: COMMAND can be a desired host window manager.
-                         IMAGE: IMAGE can be a local docker image with a WM.
-                         none: Run without a window manager. Same as --desktop.
+ -I, --network [=NET]  Allow internet access. (Currently enabled by default,
+                       will change in future.)
+                       For optional argument NET see Docker documentation
+                       of docker run option --network.
+                       --network=none disables internet access. (future default)
+ -l, --lang [=LOCALE]  Set language variable LANG=LOCALE in container.
+                       Without arg LOCALE host variable --lang=\$LANG is used.
+                       If LOCALE is missing in image, x11docker generates it
+                       with 'localedef' in container (needs 'locales' package).
+                       Examples for LOCALE: ru, en, de, zh_CN, cz, fr, fr_BE.
+ -P, --printer [=MODE] Share host printers through CUPS server.
+                       Optional MODE can be 'socket' or 'tcp'. Default: socket
+ -p, --pulseaudio [=MODE]  Sound with pulseaudio. Needs 'pulseaudio' on host
+                       and in image. Optional arg MODE can be 'socket' or 'tcp'.
+     --webcam          Share host webcam device files.
 
 Shared host folders or Docker volumes:
  -m, --home [=ARG]     Create a persistant HOME folder for data storage.
@@ -106,43 +121,28 @@ Shared host folders or Docker volumes:
                        Device files in /dev can be shared, too.
                        ARG can also be a Docker volume instead of a host folder.
 
-Host integration:
- -c, --clipboard       Share clipboard. Graphical clips with --xpra only.
- -p, --pulseaudio [=MODE]  Sound with pulseaudio. Needs 'pulseaudio' on host
-                       and in image. Optional arg MODE can be 'socket' or 'tcp'.
-     --alsa [=CARDNAME]   Sound with ALSA. You can define a desired sound card
-                       with CARDNAME. List of available sound cards: aplay -l
- -l, --lang [=LOCALE]  Set language variable LANG=LOCALE in container.
-                       Without LOCALE host variable --lang=\$LANG is used.
-                       If LOCALE is missing in image, x11docker generates it
-                       with 'localedef' in container (needs 'locales' package).
-                       LOCALE can be e.g. ru, en, de, zh_CN, cz, fr, fr_BE.
- -P, --printer [=MODE] Share host printers through CUPS server.
-                       Optional MODE can be 'socket' or 'tcp'. Default: socket
-     --webcam          Share host webcam device files.
-
 X server options:
-     --auto            Auto choose X server (default).
-                       (Regards options --desktop, --gpu, --wayland and --wm).
- -a, --xpra            Nested X server supporting seamless and --desktop mode.
- -y, --xephyr          Nested X server for --desktop mode. Without --desktop,
-                       a host window manager will be provided (option --wm).
- -n, --nxagent         Nested X server supporting seamless and --desktop mode.
-                       Faster than --xpra and more flexible than --xephyr, but
-                       some compositing applications have issues.
- -A, --xpra-xwayland   Like --xpra, but supports option --gpu.
- -Y, --weston-xwayland Desktop mode like --xephyr, but supports option --gpu.
-                       Runs from console, within X and within Wayland.
+     --auto            Automatically choose X server (default). Influenced
+                       noteable by options --desktop, --gpu, --wayland, --wm.
  -h, --hostdisplay     Share host display :0. Quite bad container isolation!
                        Least overhead of all X server options.
                        Some apps may fail due to restricted untrusted cookies.
                        Remove restrictions with option --clipboard.
+ -n, --nxagent         Nested X server supporting seamless and --desktop mode.
+                       Faster than --xpra, but can have compositing issues.
+ -Y, --weston-xwayland Desktop mode like --xephyr, but supports option --gpu.
+                       Runs from console, within X and within Wayland.
+ -y, --xephyr          Nested X server for --desktop mode. Without --desktop
+                       a host window manager will be provided (option --wm).
  -x, --xorg            Core Xorg server. Runs ootb from console.
-                       Switch tty with <CTRL><ALT><F1>....<F12>.
+                       Switch tty with <CTRL><ALT><F1>....<F12>. Always switch
+                       to a black tty before switching to X to avoid crashes.
+ -a, --xpra            Nested X server supporting seamless and --desktop mode.
+ -A, --xpra-xwayland   Like --xpra, but supports option --gpu.
 
 Special X server options:
      --kwin-xwayland   Like --weston-xwayland, but using kwin_wayland
- -t, --tty             TTY only. Do not provide any X or Wayland server.
+ -t, --tty             Terminal only mode. Does not run an X or Wayland server.
      --xdummy          Invisible X server using dummy video driver.
      --xvfb            Invisible X server using Xvfb.
                        --xdummy and --xvfb can be used for custom  VNC access.
@@ -162,22 +162,30 @@ Wayland instead of X:
  -H, --hostwayland     Share host Wayland without X for pure Wayland apps.
 
 X and Wayland appearance options:
-     --border [=COLOR] Draw a colored border in windows from --xpra[-xwayland].
-                       Optional COLOR can be e.g. 'orange' or '#F00'. Thickness
+     --border [=COLOR] Draw a colored border in windows of --xpra[-xwayland].
+                       Argument COLOR can be e.g. 'orange' or '#F00'. Thickness
                        can be specified, too, e.g. 'red,3'. Default: 'blue,1'
-     --dpi N           dpi value (dots per inch) to submit to clients.
+     --dpi N           dpi value (dots per inch) to submit to X clients.
                        Influences font size of some applications.
  -f, --fullscreen      Run in fullscreen mode.
+     --output-count N  Multiple virtual monitors for Weston, KWin or Xephyr.
+     --rotate N        Rotate display (--xorg, --weston and --weston-xwayland)
+                       Allowed values: 0, 90, 180, 270, flipped, flipped-90,
+                       flipped-180, flipped-270.  (flipped means mirrored)
      --scale N         Scale/zoom factor N for xpra, Xorg or Weston.
                        Allowed for --xpra, --xorg --xpra-xwayland: 0.25...8.0.
                        Allowed for --weston and --weston-xwayland: 1...9.
                        (Mismatching font sizes can be adjusted with --dpi).
                        Odd resolutions with --xorg might need --scale=1.
-     --size XxY        Screen size of new X server (e.g. 800x600).
-     --output-count N  Multiple virtual monitors for Weston, KWin or Xephyr.
-     --rotate N        Rotate display (--xorg, --weston and --weston-xwayland)
-                       Allowed values: 0, 90, 180, 270, flipped, flipped-90,
-                       flipped-180, flipped-270.  (flipped means mirrored)
+     --size WxH        Screen size of new X server (e.g. 800x600).
+ -w, --wm [=ARG]       Provide a window manager to container applications.
+                       If available, image x11docker/openbox will be used.
+                       Otherwise x11docker looks for a host window manager.
+                       Possible ARG:
+                         host: Enforce autodetection of a host window manager.
+                         COMMAND: COMMAND can be a desired host window manager.
+                         IMAGE: IMAGE can be a local docker image with a WM.
+                         none: Run without a window manager. Same as --desktop.
  -F, --xfishtank       Show fish tank on new X server.
 
 X and Wayland special configuration:
@@ -196,74 +204,27 @@ X and Wayland special configuration:
                        --xpra, --xvfb and --xdummy, no for other X servers.
                        Needed to allow custom access with xpra.
 
-Special options:
-     --env VAR=value   Set custom environment variable VAR=value
- -i, --interactive     Run with an interactive tty to allow shell commands.
-     --mobyvm          Use MobyVM (for WSL2 only that defaults to linux docker).
-     --name NAME       Specify container name NAME.
-     --no-internet     Disable internet access for container.
-     --no-entrypoint   Disable ENTRYPOINT in image to allow other commands, too
-     --enforce-i       Run x11docker in interactive bash mode to allow tty
-                       access. Can help to run weston-launch on special systems.
-     --pull [=ask|yes|no|always]  Behaviour if image is missing on host.
-                       ask: Ask in terminal, timeout after 60s (default).
-                       yes: Allow docker pull (default for --pull).
-                       no: Do not run or ask for 'docker pull'
-                       always: Always run 'docker pull'. Download only if
-                       newer image is available. Allows sort of auto-update.
-     --pw FRONTEND     Choose frontend for password prompt. Possible FRONTEND:
-                         su sudo gksu gksudo lxsu lxsudo kdesu kdesudo
-                         pkexec beesu none
-     --runfromhost CMD Run host command CMD on new X server (you may need & ).
-     --runasroot CMD   Run command CMD as root in container on startup.
-                       Caution: Runs with --privileged host access.
-     --runtime RUNTIME Specify docker runtime. Known by x11docker:
-                         runc:         Docker default runtime.
-                         crun:         Fast replacement for runc written in C.
-                         nvidia:       Runtime for nvidia/nvidia-docker images.
-                         kata-runtime: Runtime using a qemu VM.
-     --shell SHELL     Set preferred user shell. Example: --shell=/bin/zsh
-     --stdin           Forward stdin of x11docker to container command.
-     --workdir DIR     Set working directory DIR.
-
-User settings:
+Container user settings:
+     --group-add GROUP Add container user to group GROUP.
+     --hostuser USER   Run X (and container user) as user USER. Default is
+                       result of \$(logname). (x11docker must run as root).
      --sudouser        Allow su and sudo for container user. Use with care,
                        severe reduction of default x11docker security!
-                         Password:  x11docker
      --user N          Create container user N (N=name or N=uid). Default:
                        same as host user. N can also be an unknown user id.
                        You can specify a group id with N being 'user:gid'.
                        Special case: --user=RETAIN keeps image user settings.
-     --hostuser USER   Run X (and container user) as user USER. Default is
-                       result of \$(logname). (x11docker must run as root).
-     --group-add GROUP Add container user to group GROUP.
-
-Init system, elogind and DBus daemon:
-     --init [=INITSYSTEM] Run an init system as PID 1 in container. Solves the
-                       zombie reaping issue. INITSYSTEM can be:
-                         tini: Default. Mostly present as docker-init on host.
-                         none: No init system, container command will be PID 1.
-                       Others: systemd, sysvinit, runit, openrc, s6-overlay.
-     --sharecgroup     Share /sys/fs/cgroup. Allows elogind in container if
-                       used with one of --init=openrc|runit|sysvinit
-     --dbus [=system]  Run DBus user session daemon for container command.
-                       With argument 'system' also run a DBus system daemon.
-                       (Rather use one of --init=systemd|openrc|runit|sysvinit
-                        to run the DBus system daemon.)
-     --hostdbus        Connect to DBus user session from host.
 
 Container capabilities:
   In most setups x11docker sets --cap-drop=ALL --security-opt=no-new-privileges
   and shows warnings if doing otherwise.
   Custom capabilities can be added with --cap-add=CAP after  --
      --cap-default     Allow default docker container capabilities.
-                       Includes --newprivileges=yes. Discouraged.
+                       Includes --newprivileges=yes.
      --hostipc         Sets docker option --ipc=host. Disables IPC namespacing.
                        Severe reduction of container isolation! Shares
                        host interprocess communication and shared memory.
                        Allows MIT-SHM extension of X servers.
-     --hostnet         Set docker run option --network=host. Disables network
-                       namespacing. Severe reduction of container isolation!
      --limit [=FACTOR] Limit CPU and RAM usage of container to
                        currently free RAM x FACTOR and available CPUs x FACTOR.
                        Allowed range is 0 < FACTOR <= 1.
@@ -272,44 +233,91 @@ Container capabilities:
                        --security-opt=no-new-privileges. Default with no
                        argument is 'yes'. Default for most cases is 'no'.
 
+Container init system, elogind and DBus daemon:
+     --dbus [=system]  Run DBus user session daemon for container command.
+                       With argument 'system' also run a DBus system daemon.
+                       (To run a DBus system daemon rather use one of
+                        --init=systemd|openrc|runit|sysvinit )
+     --hostdbus        Connect to DBus user session from host.
+     --init [=INITSYSTEM] Run an init system as PID 1 in container. Solves the
+                       zombie reaping issue. INITSYSTEM can be:
+                         tini: Default. Mostly present as docker-init on host.
+                         none: No init system, container command will be PID 1.
+                       Others: systemd, sysvinit, runit, openrc, s6-overlay.
+     --sharecgroup     Share /sys/fs/cgroup. Allows elogind in container if
+                       used with one of --init=openrc|runit|sysvinit
+
+Container special configuration:
+     --env VAR=value   Set custom environment variable VAR=value
+     --name NAME       Specify container name NAME.
+     --no-entrypoint   Disable ENTRYPOINT in image to allow other commands, too
+     --runtime RUNTIME  Specify docker runtime. Known by x11docker:
+                         runc:         Docker default runtime.
+                         crun:         Fast replacement for runc written in C.
+                         nvidia:       Runtime for nvidia/nvidia-docker images.
+                         kata-runtime: Runtime using a QEMU VM.
+     --shell SHELL     Set preferred user shell. Example: --shell=/bin/zsh
+     --stdin           Forward stdin of x11docker to container command.
+     --workdir DIR     Set working directory DIR.
+
+Additional commands: (You might need to move them to background with 'CMD &'.)
+     --runasroot CMD   Run command CMD as root in container.
+                       Caution: Runs with --privileged host access.
+     --runasuser CMD   Run command CMD with user privileges in container
+                       before running image command.
+     --runfromhost CMD Run host command CMD on new X server.
+
 Miscellaneous:
-     --cleanup         Clean up orphaned containers and cache files.
-                       Terminates currently running x11docker containers, too.
      --cachebasedir DIR  Custom base folder for cache files.
      --homebasedir DIR   Custom base folder for option --home.
-     --launcher        Create application launcher on desktop and exit.
-                       You can move the created .desktop file to
-                       ~/.local/share/applications to get a menu entry.
-     --license         Show license of x11docker (MIT) and exit.
+     --enforce-i       Run x11docker in interactive bash mode to allow tty
+                       access. Can help to run weston-launch on special systems.
+     --fallback [yes|no]  Allow or deny fallbacks if a chosen option cannot
+                       be fulfilled. By default fallbacks are allowed.
+     --launcher        Create application launcher with current options
+                       on desktop and exit. You can get a menu entry moving
+                       the created .desktop file to ~/.local/share/applications
+     --mobyvm          Use MobyVM (for WSL2 only that defaults to linux Docker).
      --preset FILE     Read a set of predefined options stored in file FILE.
+                       Useful to shortcut often used option combinations.
                        FILE is searched in directory /etc/x11docker/preset,
                        or in directory ~/.config/x11docker/preset or absolute.
                        Multiple lines in FILE are allowed.
                        Comment lines must begin with #
+     --pull [=ask|yes|no|always]  Behaviour if image is missing on host.
+                       ask: Ask in terminal, timeout after 60s (default).
+                       yes: Allow docker pull (default for --pull without arg).
+                       no: Do not run or ask for 'docker pull'
+                       always: Always run 'docker pull'. Download only if
+                       newer image is available. Allows sort of auto-update.
+     --pw FRONTEND     Choose frontend for password prompt. Possible FRONTEND:
+                         su sudo gksu gksudo lxsu lxsudo kdesu kdesudo
+                         pkexec beesu none
 
 Output of parseable information on stdout:
-  Get output with e.g.:  read id < <(x11docker --showid x11docker/check)
-     --showenv         Echo new \$DISPLAY, \$XAUTHORITY and \$WAYLAND_DISPLAY.
-                       For custom access to new X server. Get environment with:
-                         read xenv < <(x11docker --showenv [...])
-     --showid          Echo container ID on stdout.
-     --showinfofile    Echo path to internal x11docker info storage file.
-     --showpid1        Echo host PID of container PID 1 on stdout.
+  Get output e.g. with:  read xenv < <(x11docker --showenv x11docker/check)
+     --showenv         Print new \$DISPLAY, \$XAUTHORITY and \$WAYLAND_DISPLAY.
+     --showid          Print container ID.
+     --showinfofile    Print path to internal x11docker info storage file.
+     --showpid1        Print host PID of container PID 1.
 
 Verbosity options:
- -v, --verbose         Be verbose. Output of x11docker.log on stderr.
- -V                    Be verbose with colored output.
  -D, --debug           Debug mode: Show some less verbose debug output
                        and enable rigorous error control.
  -q, --quiet           Suppress x11docker terminal messages.
+ -v, --verbose         Be verbose. Output of x11docker.log on stderr.
+ -V                    Be verbose with colored output.
 
-Installation options (need root permissions):
+Installation options (need root permissions), license and cleanup:
      --install         Install x11docker and x11docker-gui from current folder.
                        Useful to install from an extracted zip file.
      --update          Download and install latest release from github.
      --update-master   Download and install latest master version from github.
-     --remove          Remove x11docker from your system.
+     --remove          Remove x11docker from your system. Includes --cleanup.
                        Preserves ~/.local/share/x11docker from option --home.
+     --license         Show license of x11docker (MIT) and exit.
+     --cleanup         Clean up orphaned containers and cache files.
+                       Terminates currently running x11docker containers, too.
 
 Exit codes:
   0:     Success
@@ -324,7 +332,7 @@ Please report issues and get help at: https://github.com/mviereck/x11docker
 license() {                     # --license: show license (MIT)
 echo 'MIT License
 
-Copyright (c) 2015, 2016, 2017, 2018, 2019, 2020 Martin Viereck
+Copyright (c) 2015, 2016, 2017, 2018, 2019, 2020, 2021 Martin Viereck
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -599,6 +607,12 @@ finish() {                      # trap EXIT routine to clean up background proce
     x11docker --cleanup"
       Preservecachefiles="yes"
     } || debugnote "finish(): Container terminated successfully"
+  }
+
+  # remove container
+  [ "$Preservecachefiles" = "no" ] && [ "$Containername" ] && {
+    debugnote "Removing container $Containername
+    $($Dockerexe rm -f "$Containername" 2>&1)"
   }
 
   # Check if 'docker logs' is still running
@@ -1225,12 +1239,12 @@ $Orphanedfolders"
 
     for Line in $Orphanedfolders ; do
       [ -d "$Cachebasefolder/$Line/share" ] && [ ! -s "$Cachebasefolder/$Line/share/timetosaygoodbye" ] && {
-        note "Found possibly active container $Line.
+        note "Found possibly active container for cache dir $Line.
   Will summon it to terminate itself."
         echo timetosaygoodbye >> "$Cachebasefolder/$Line/share/timetosaygoodbye"
-        sleep 2
       }
     done
+    [ -n "$Orphanedfolders" ] && sleep 3
 
     [ -n "$Orphanedcontainers" ] && {
       note "Removing containers with: $Dockerexe rm -f $Orphanedcontainers"
@@ -1518,6 +1532,7 @@ check_windowmanager() {         # option --wm: search a host window manager
         note "Option --wm: With option --exe
   x11docker does not support a containerized window manager yet.
   Fallback: Setting --wm=host"
+        check_fallback
         Windowmanagermode="host"
       }
     ;;
@@ -1540,6 +1555,7 @@ check_windowmanager() {         # option --wm: search a host window manager
             Hostwindowmanager=""
             note "Option --wm: No host window manager found.
   Fallback: Setting --wm=none"
+            check_fallback
             Windowmanagermode="none"
           }
         ;;
@@ -1611,6 +1627,7 @@ setup_clipboard() {             # option --clipboard: create shareclipboard scri
     --tty|--weston|--hostwayland|--kwin)
       warning "Option --clipboard is not supported for $Xserver.
   Fallback: Disabling option --clipboard."
+      check_fallback
       Shareclipboard="no"
       return 1
     ;;
@@ -1630,11 +1647,13 @@ setup_clipboard() {             # option --clipboard: create shareclipboard scri
         note "Option --clipboard: Need either xclip or xsel
   for clipboard sharing with X server $Xserver.
   Fallback: Disabling option --clipboard."
+        check_fallback
         Shareclipboard="no"
       }
       [ -z "$Hostdisplay" ] && {
         note "Option --clipboard: No host display DISPLAY found
   to share clipboard. Fallback: Disabling option --clipboard"
+        check_fallback
         Shareclipboard="no"
       }
 
@@ -1697,7 +1716,7 @@ setup_gpu() {                   # option --gpu: share /dev/dri and check nvidia 
   # check device files
   while read -r Gpudevice ; do
     store_runoption volume "$Gpudevice"
-  done < <(find /dev/dri /dev/nvidia* /dev/vga_arbiter -maxdepth 0 2>/dev/null ||:)
+  done < <(find /dev/dri /dev/nvidia* /dev/vga_arbiter /dev/nvhost* /dev/nvmap -maxdepth 0 2>/dev/null ||:)
 
   [ -z "$Nvidiaversion" ] && return 0
 
@@ -1775,10 +1794,10 @@ setup_hostdbus() {              # option --hostdbus: connect to host DBus sessio
     store_runoption env "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS"
     [ "${DBUS_SESSION_BUS_PID:-}" ]      && store_runoption env  "${DBUS_SESSION_BUS_PID:-}"
     [ "${DBUS_SESSION_BUS_WINDOWID:-}" ] && store_runoption env  "${DBUS_SESSION_BUS_WINDOWID:-}"
-    Sharehostnet="yes"
+    Network="host"
     warning "Option --hostdbus: Did not find a DBus session socket file
   but an abstract unix socket. To allow access for container,
-  x11docker sets docker run option '--network=host' (option --hostnet).
+  x11docker sets option '--network=host'.
   This degrades container isolation. Container shares host network stack."
   }
   return 0
@@ -1849,6 +1868,15 @@ setup_sound_alsa() {            # option --alsa: share sound devices
     return 1
   }
 
+  [ -s "$Pulseaudioconf" ] || echo "# Connect to host pulseaudio server using mounted UNIX socket
+default-server = none
+# Prevent a server running in container
+autospawn = no
+daemon-binary = /bin/true
+# Prevent use of shared memory
+enable-shm = false
+" >> $Pulseaudioconf
+
   [ "$Sharealsa" = "yes" ] && Containerusergroups="$Containerusergroups audio"
 
   return 0
@@ -1889,6 +1917,7 @@ setup_sound_pulseaudio() {      # option --pulseaudio: set up pulseaudio connect
         note "Option --pulseaudio: command pactl failed.
   Is pulseaudio running at all on your host?
   Fallback: Enabling option --alsa"
+        check_fallback
         Pulseaudiomode=""
         Sharealsa="yes"
       }
@@ -2355,7 +2384,7 @@ check_xdepends() {              # check dependencies on host for X server option
         Return=1
       } ;;
   esac
-  case $Xserver in
+  case ${1:-} in
     --xpra|--xpra-xwayland)
       [ "$Return" = "1" ] || {
         # check xpra version
@@ -2395,7 +2424,7 @@ check_xdepends() {              # check dependencies on host for X server option
         }
       } || {
         [ "$Hostdisplay" ] || {
-          $Message "${1:-} needs a running X server. DISPLAY is empty. Wayland support is experimental only."
+          $Message "${1:-} needs a running X server. DISPLAY is empty. Wayland support is experimental option."
           Return=1
         }
       }
@@ -2457,7 +2486,7 @@ check_xdepends() {              # check dependencies on host for X server option
       --hostdisplay|--xorg|--xpra-xwayland|--weston-xwayland|--kwin-xwayland|--xdummy-xwayland|--xwayland|--xwin|--runx) ;;
       --weston|--kwin|--hostwayland) ;;
       *)
-        $Message "${1:-} does not support hardware acceleration (--gpu)."
+        $Message "${1:-} does not support hardware acceleration (option --gpu)."
         Return=1
       ;;
     esac
@@ -2466,7 +2495,10 @@ check_xdepends() {              # check dependencies on host for X server option
   Return="${Return:-"0"}"
   debugnote "Dependency check for ${1:-}: $Return"
 
-  [ "$Return" = "1" ] && Autochooseserver="yes"
+  [ "$Return" = "1" ] && {
+    check_fallback
+    Autochooseserver="yes"
+  }
 
   Lastcheckedxserver="${1:-}"
   Lastcheckedxserverresult="$Return"
@@ -2512,32 +2544,30 @@ check_xserver() {               # check chosen X server, auto-choose X server
     [ "$Runtime" = "kata-runtime" ] && {
       note "Option --gpu: Hardware acceleration with --runtime=kata-runtime
   is not supported. Fallback: Disabling option --gpu."
+      check_fallback
       Sharegpu="no"
     }
     case $Xserver in
       --xpra)
         note "Option --xpra does not support GPU access.
   Fallback: Will try to use option --xpra-xwayland."
+        check_fallback
         Xserver="--xpra-xwayland"
       ;;
       --xephyr)
         note "Option --xephyr does not support GPU access.
   Fallback: Will try to use option --weston-xwayland."
+        check_fallback
         Xserver="--weston-xwayland"
       ;;
       --nxagent)
         case "$Desktopmode" in
-          yes)
-            note "Option --nxagent does not support GPU access.
-  Fallback: Will try to use option --weston-xwayland."
-            Xserver="--weston-xwayland"
-          ;;
-          no)
-            note "Option --nxagent does not support GPU access.
-  Fallback: Will try to use option --xpra-xwayland."
-            Xserver="--xpra-xwayland"
-          ;;
+          yes) Xserver="--weston-xwayland" ;;
+          no)  Xserver="--xpra-xwayland" ;;
         esac
+        note "Option --nxagent does not support GPU access.
+  Fallback: Will try to use option $Xserver."
+        check_fallback
       ;;
       --xdummy|--xvfb)
         note "Using special setup with Weston, Xwayland and xdotool
@@ -2545,6 +2575,25 @@ check_xserver() {               # check chosen X server, auto-choose X server
         Xserver="--xdummy-xwayland"
       ;;
     esac
+  }
+
+  grep -q -i "GNOME" <<< "$XDG_CURRENT_DESKTOP" && {
+    Gnomeversion="$(gnome-shell --version)"
+    [ "$Gnomeversion" ] && verlt "$Gnomeversion" "GNOME Shell 3.38" && {
+      case $Xserver in
+        --hostdisplay) ;;
+        *)
+          warning "You are running GNOME desktop in outdated version
+  $Gnomeversion
+  This might cause issues with host applications if using additional X servers.
+  It is recommended to use another desktop environment or GNOME >= 3.38.
+  Only otherwise discouraged option --hostdisplay might work as expected."
+          case $Autochooseserver in
+            yes) Xserver="--hostdisplay" ;;
+          esac
+        ;;
+      esac
+    }
   }
 
   # X over TCP
@@ -2678,7 +2727,10 @@ check_xserver() {               # check chosen X server, auto-choose X server
   return 0
 }
 create_xcommand() {             ### create command to start X server and/or Wayland compositor
-  local Xserveroptions= Xpraoptions= Nxagentoptions= Compositorpid= Weston= Westonoutput= Count= Envvar=
+  local Xserveroptions_custom= Xpraoptions= Nxagentoptions= Compositorpid= Weston= Westonoutput= Count= Envvar=
+
+  Xserveroptions_custom="$Xserveroptions"
+  Xserveroptions=""
 
   #### General X server options
   case $Xserver in
@@ -2786,6 +2838,7 @@ create_xcommand() {             ### create command to start X server and/or Wayl
   due to xpra bug #1605. Need at least xpra v2.1-r16547 or one of 2.0 series.
   This affects option --scale, too, leading to wrong font sizes.
   Fallback: disabling dpi settings."
+        check_fallback
         Dpi="-1"
       } ;;
   esac
@@ -2861,8 +2914,6 @@ create_xcommand() {             ### create command to start X server and/or Wayl
       [ -n "$Dpi" ] && verlt "$Xpraversion" "v2.1-r16547" && ! verlt "$Xpraversion" "v2.1" &&  Dpi=""
       [ -n "$Dpi" ] && Xpraservercommand="$Xpraservercommand \\
   $(check_xpraoption --dpi="'$Dpi'")"
-      debugnote "Xpra server command:
-  $Xpraservercommand"
 
       # xpra client command
       Xpraclientcommand="xpra attach :$Newdisplaynumber $Xpraoptions \\
@@ -2888,11 +2939,9 @@ create_xcommand() {             ### create command to start X server and/or Wayl
   $(check_xpraoption --title="'@title@ [in container]'")" ;;
         esac
       }
-      debugnote "Xpra client command:
-  $Xpraclientcommand"
 
       # xpra environment variables
-      for Line in $Xpraenvvars; do
+      for Line in $Xpracontainerenv; do
         store_runoption env "$Line"
       done
     ;;
@@ -2971,17 +3020,19 @@ startup-animation=fade
     --xephyr)
       command -v Xephyr >/dev/null && {
         Xserveroptions="$Xserveroptions \\
+  -resizeable \\
   -noxv"
 #        Xserveroptions="$Xserveroptions \\
 #  -glamor"  # disabled because of lagginess reported in #196
         case $Fullscreen in
           yes)
             Xserveroptions="$Xserveroptions \\
-  -fullscreen" ;;
+  -fullscreen"
+          ;;
           no)
-            for ((Count=0 ; Count<$Outputcount ; Count++)) ; do Xserveroptions="$Xserveroptions \\
+            grep -q -- "-output " <<< "$Xserveroptions_custom" || Xserveroptions="$Xserveroptions \\
   -screen $Screensize"
-            done ;;
+          ;;
         esac
         Xcommand="$(command -v Xephyr) :$Newdisplaynumber $Xserveroptions"
       } || {
@@ -2995,6 +3046,7 @@ startup-animation=fade
   For example, it misses RandR and Composite extensions and fullscreen mode.
   It is recommended to install 'Xephyr'.
   $Wikipackages"
+        check_fallback
       }
     ;;
 
@@ -3096,7 +3148,6 @@ mode=$Screensize
 
       Xserveroptions="$Xserveroptions \\
   -norootlessexit \\
-  -verbose \\
   -ac \\
   -options $Nxagentoptionsfile \\
   -keystrokefile $NXAGENT_KEYSTROKEFILE"
@@ -3255,6 +3306,10 @@ esac
       esac
     ;;
   esac
+
+  # --xopt
+  Xcommand="$Xcommand \\
+  $Xserveroptions_custom"
 
   case $Xserver in
     --weston|--kwin|--hostwayland|--hostdisplay|--tty) Xcommand="" ;;
@@ -3574,11 +3629,11 @@ create_xinitrc() {              # create xinitrc: set up X environment, create c
             echo     "  warning 'Memory access failures and rendering glitches
   may occure due to unrestricted cookie.
   Avoid them with isolation breaking option --hostipc,
-  or use another X server option like --xpra or --nxagent.'"
+  or use another X server option like --nxagent or --xpra.'"
           }
           echo       "  [ '$Trusted' = 'untrusted' ] && warning 'SECURITY RISK! Keylogging and remote host control "
           echo       "  may be possible! Better avoid using option --hostdisplay,"
-          echo       "  rather use --xpra or --nxagent.'"
+          echo       "  rather use --nxagent or --xpra.'"
           echo       "  cp $Hostxauthority $Xclientcookie"
         }
         echo         "}"
@@ -3661,6 +3716,7 @@ create_xinitrc() {              # create xinitrc: set up X environment, create c
   Recommended: Downgrade to xpra v2.2.5, upgrade to at least r19606,
   or use another X server option.
   Fallback: Setting 'xhost +SI:localuser:$Containeruser'"
+        check_fallback
         echo         "xhost +SI:localuser:$Containeruser"
         echo         ""
       } ;;
@@ -3828,6 +3884,7 @@ check_containerhome() {         # options --home, --homedir, --homebasedir: chec
       warning "Option --homebasedir: Specified path does not exist:
   $Hosthomebasefolder
   Fallback: Using default home base directory."
+      check_fallback
       Hosthomebasefolder=""
     }
   }
@@ -3848,11 +3905,12 @@ check_containerhome() {         # options --home, --homedir, --homebasedir: chec
     host)
       case $Createcontaineruser in
         no)
-          note "Option --home or --home=dir is not supported
+          note "Option --home or --home=DIR is not supported
   with option --user=RETAIN.
   Alternatively, specify a docker volume with --home=VOLUME.
   Also you can use option --share to share host directories.
   Fallback: Disabling option --home."
+          check_fallback
           Sharehome="no"
         ;;
         yes)
@@ -3861,6 +3919,7 @@ check_containerhome() {         # options --home, --homedir, --homebasedir: chec
   for container users that also exist on host.
   You can use a docker volume with --home=VOLUME instead.
   Fallback: Disabling option --home."
+            check_fallback
             Sharehome="no"
           }
         ;;
@@ -3892,6 +3951,10 @@ check_containerhome() {         # options --home, --homedir, --homebasedir: chec
   esac
   Containeruserhome="${Containeruserhome:-$Containeruserhomebasefolder/$Containeruser}"
 
+  case "$Createcontaineruser" in
+    no)  store_runoption env "HOME=/tmp" ;;
+  esac
+
   case $Sharehome in
     host)
       # if no home folder on host is specified (--home=DIR), create a standard one in ~/.local/share/x11docker
@@ -3899,7 +3962,7 @@ check_containerhome() {         # options --home, --homedir, --homebasedir: chec
         [ "$Startuser" = "root" ] && su $Containeruser -c "mkdir -p '$Persistanthomevolume'"
         [ "$Containeruser" = "$Hostuser" ] && unpriv "mkdir -p '$Persistanthomevolume'" && {
           # create symbolic link to ~/x11docker
-          echo "$Persistanthomevolume" | grep -q .local/share/x11docker && [ ! -e "$Containeruserhome/x11docker" ] && unpriv "ln -s '$Hosthomebasefolder' '$Containeruserhome/x11docker'" ||:
+          echo "$Persistanthomevolume" | grep -q .local/share/x11docker && [ ! -e "$Hostuserhome/x11docker" ] && unpriv "ln -s '$Hosthomebasefolder' '$Hostuserhome/x11docker'" ||:
         }
       }
       [ -d "$Persistanthomevolume" ] || error "Option --home: Could not create persistent home folder for
@@ -3955,11 +4018,16 @@ check_containeruser() {         # check container user and shared home folder (a
     Sudouser="yes" && note "Option --user=root: Enabling option --sudouser."
   }
 
+  store_runoption env "USER=$Containeruser"
   debugnote "container user: $Containeruser $Containeruseruid:$Containerusergid $Containeruserhosthome"
 
   case $X11dockermode in
-   run) store_runoption env "XDG_RUNTIME_DIR=/tmp/XDG_RUNTIME_DIR" ;;
-   exe) store_runoption env "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" ;;
+   run)
+     case $Containersetup in
+       no)  store_runoption env "XDG_RUNTIME_DIR=/tmp" ;;
+     esac
+   ;;
+   exe)     store_runoption env "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" ;;
   esac
   return 0
 }
@@ -3967,8 +4035,8 @@ create_dockercommand() {        ### create command to run docker
   local Line= Memory Tini=
 
   Dockercommand="$Dockerexe run --tty"
-  Wmdockercommand="$Dockerexe run --rm --detach"
-  [ "$Preservecachefiles" = "no" ] && Dockercommand="$Dockercommand --rm"
+  Wmdockercommand="$Dockerexe run --detach"
+  #[ "$Preservecachefiles" = "no" ] && Dockercommand="$Dockercommand --rm"
   case $Interactive in
     yes) Dockercommand="$Dockercommand --interactive" ;;
     no)  Dockercommand="$Dockercommand --detach" ;;
@@ -3995,12 +4063,10 @@ create_dockercommand() {        ### create command to run docker
       case $Switchcontaineruser in
         no)
           [ "$Createcontaineruser" = "yes" ] && Dockercommand="$Dockercommand \\
-  --user $Containeruseruid:$Containerusergid \\
-  --env USER=$Containeruser"
-        ;;
-        yes) Dockercommand="$Dockercommand \\
-  --user root \\
-  --env USER=root" ;;
+  --user $Containeruseruid:$Containerusergid" ;;
+        yes)
+          Dockercommand="$Dockercommand \\
+  --user root" ;;
       esac
     ;;
     systemd|runit|openrc|sysvinit|s6-overlay)
@@ -4041,6 +4107,14 @@ create_dockercommand() {        ### create command to run docker
     Dockercommand="$Dockercommand \\
   --runtime='$Runtime'"
   }
+
+  # option --hostipc
+  [ "$Sharehostipc" = "yes" ]      && Dockercommand="$Dockercommand \\
+  --ipc host"
+
+  # option --network
+  [ "$Network" ] && Dockercommand="$Dockercommand \\
+  --network $Network"
 
   # capabilities
   [ "$Capdropall" = "yes" ] && Dockercommand="$Dockercommand \\
@@ -4126,7 +4200,7 @@ create_dockercommand() {        ### create command to run docker
       *)
         case "$(cut -c1-5 <<< "$Line")" in
           "/dev/")
-            Dockercommand="$Dockercommand \\
+             Dockercommand="$Dockercommand \\
   --device $(convertpath volume "$Line")"
             warning "Sharing device file: $Line"
           ;;
@@ -4175,17 +4249,10 @@ create_dockercommand() {        ### create command to run docker
     esac
   }
 
-  ## options --hostipc and --hostnet
-  [ "$Sharehostipc" = "yes" ]      && Dockercommand="$Dockercommand \\
-  --ipc host"
-  [ "$Sharehostnet" = "yes" ]      && Dockercommand="$Dockercommand \\
-  --network host"
-  ## option --no-internet
-  [ "$Internetaccess" = "no" ]     && Dockercommand="$Dockercommand \\
-  --net none"
-  ## option --pulseaudio
-  [ "$Pulseaudiomode" = "socket" ] && Dockercommand="$Dockercommand \\
+  ## options --pulseaudio, --alsa
+  { [ "$Pulseaudiomode" = "socket" ] || [ "$Sharealsa" = "yes" ] ; } && Dockercommand="$Dockercommand \\
   --volume $Pulseaudioconf:/etc/pulse/client.conf:ro"
+
   ## option --workdir or /tmp
   case $Containersetup in
     yes)
@@ -4338,7 +4405,9 @@ setup_initsystem() {            # option init: set up capabilities, check or cre
       note "Option --init: Unknown init system $Initsystem
   Possible: tini systemd sysvinit openrc runit s6-overlay none
   Fallback: Using --init=tini instead."
-      Initsystem="tini" ;;
+      check_fallback
+      Initsystem="tini"
+    ;;
   esac
 
   # --init in Mobyvm. /usr/bin/docker-init is not available in MSYS2/Cygwin/WSL1
@@ -4354,6 +4423,7 @@ setup_initsystem() {            # option init: set up capabilities, check or cre
         *)
           note "Option --init: Only --init[=tini] or --init=none are
   supported with option --exe. Fallback: Setting option --init=tini"
+          check_fallback
           Initsystem="tini"
         ;;
       esac
@@ -4651,6 +4721,27 @@ create_containerrootrc() {      ### create containerrootrc: This script runs as 
   }
   echo ""
 
+  [ "$Screensize" ] && {
+    echo "# workaround: autostart of xrandr for some desktops like deepin, cinnamon and gnome to fix wrong autoresize"
+    echo "echo '#! /bin/sh
+Output=\$(xrandr | grep ' connected' | cut -d\" \" -f1)
+Mode=$Screensize
+xrandr --output \$Output --mode \$Mode\n\
+' > /usr/local/bin/x11docker-xrandr"
+    echo "chmod +x /usr/local/bin/x11docker-xrandr"
+    echo "mkdir -p /etc/xdg/autostart"
+    echo "echo '[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=x11docker-xrandr
+Comment=
+Exec=/usr/local/bin/x11docker-xrandr
+' > /etc/xdg/autostart/x11docker-xrandr.desktop"
+  }
+  echo ""
+
+
   echo "# Time zone"
   [ "$Hostlocaltimefile" ] && {
     echo '[ ! -d /usr/share/zoneinfo ] && [ "$Containerlibc" = "'$Hostlibc'" ] && {'
@@ -4717,6 +4808,7 @@ create_containerrootrc() {      ### create containerrootrc: This script runs as 
       echo "[ -e /etc/sudoers.d ] && rm -v -R /etc/sudoers.d"
       echo "[ -e /etc/sudoers ]   && rm -v /etc/sudoers"
       echo "echo '# /etc/sudoers created by x11docker' > /etc/sudoers"
+      echo "echo 'Defaults	env_reset'                >> /etc/sudoers"
       echo "echo 'root ALL=(ALL) ALL'                 >> /etc/sudoers"
       [ "$Sudouser" = "yes" ] && echo "echo '$Containeruser ALL=(ALL) ALL' >> /etc/sudoers"
       echo ""
@@ -4917,6 +5009,8 @@ halt -f
               display-manager.service
               fprintd.service
               gdm3.service
+              gvfs-udisks2-volume-monitor.service
+              hwclock_stop.service
               lastore-daemon.service
               lastore-update-metadata-info.service
               lightdm.service
@@ -4928,6 +5022,13 @@ halt -f
               rtkit-daemon.service
               sddm.service
               systemd-localed.service
+              systemd-hostnamed.service
+              tracker-extract.service
+              tracker-miner-fs.service
+              tracker-store.service
+              tracker-writeback.service
+              udisks2.service
+              upower.service
               '"
       echo "for Service in \$(find /lib/systemd/system/* /usr/lib/systemd/user/* /etc/systemd/system/* /etc/systemd/user/*) ; do"
       echo '  echo "$Unservicelist" | grep -q "$(basename $Service)" && {'
@@ -4935,6 +5036,8 @@ halt -f
       echo '    rm $Service'
       echo '  }'
       echo "done"
+      echo "# Fix for Gnome 3"
+      echo 'sed -i "s/ProtectHostname=yes/ProtectHostname=no/" /lib/systemd/system/systemd-logind.service'
     ;;
     runit)
       echo "# --init=runit"
@@ -5062,25 +5165,26 @@ exit 0\" >> /etc/rc.local"
       echo     '  Unservicelist="
                     org.bluez
                     org.bluez.obex
-                    org.freedesktop.UPower
-                    org.freedesktop.resolve1
+                    org.freedesktop.hostname1
                     org.freedesktop.network1
+                    org.freedesktop.resolve1
+                    org.freedesktop.secrets
+                    org.freedesktop.systemd1
                     org.freedesktop.timedate1
                     org.freedesktop.Tracker1
                     org.freedesktop.Tracker1.Miner.Extract
-                    org.freedesktop.secrets
+                    org.freedesktop.UDisks2
+                    org.freedesktop.UPower
+                    org.gtk.vfs.UDisks2VolumeMonitor
                     org.opensuse.CupsPkHelper.Mechanism
-                    com.deepin.daemon.Audio
                     com.deepin.daemon.Bluetooth
                     com.deepin.daemon.Grub2
-                    com.deepin.daemon.InputDevices
-                    com.deepin.daemon.Network
                     com.deepin.daemon.Power
+                    com.deepin.lastore
+                    com.deepin.lastore.Smartmirror
                     com.deepin.sync.Daemon
                     com.deepin.sync.Helper
-                    com.deepin.daemon.Timedate
-                    com.deepin.dde.Welcome
-                    com.deepin.lastore
+                    com.deepin.userexperience.Daemon
                     "'
       echo     '  for Service in /usr/share/dbus-1/system-services/* /usr/share/dbus-1/services/*; do' # find is not available on fedora
       echo     '    Name="$(cat $Service | grep Name= | cut -d= -f2)"'
@@ -5255,18 +5359,20 @@ reload() {
   echo "rocknroll || exit 64"
   echo ""
 
-  [ "$Langwunsch" ] && {
+  # --lang
+  while read Line; do
     echo "# --lang: Language locale"
-    echo "verbose \"Searching for language locale matching $Langwunsch\""
+    echo "verbose \"Searching for language locale matching $Line\""
     echo "Locales=\"\$(locale -a)\""
     echo "Langall=\"\$(cat /usr/share/i18n/SUPPORTED | grep -E 'UTF-8|utf8' | cut -d' ' -f1 | cut -d. -f1 | cut -d@ -f1 | sort | uniq)\""
-    echo "Langland=\"\$(echo $Langwunsch | cut -d. -f1)\""
+    echo "Langland=\"\$(echo $Line | cut -d. -f1)\""
+    echo "Langcontainer=''"
     echo ""
     echo "echo \"\$Langland\" | grep -q '_' || {"
     echo "  Langland=\"\$(echo \$Langland | tr '[:upper:]' '[:lower:]')_\$(echo \$Langland | tr '[:lower:]' '[:upper:]')\""
     echo "  echo \"\$Langall\" | grep -q \"\$Langland\" || {"
-    echo "    echo \"\$Langall\" | grep -i -q \"$Langwunsch\" && {"
-    echo "      Langland=\"\$(echo \"\$Langall\" | grep -i -m1 \"$Langwunsch\")\""
+    echo "    echo \"\$Langall\" | grep -i -q \"$Line\" && {"
+    echo "      Langland=\"\$(echo \"\$Langall\" | grep -i -m1 \"$Line\")\""
     echo "    }"
     echo "  }"
     echo "}"
@@ -5302,8 +5408,10 @@ reload() {
     echo "[ \"\$Langcontainer\" ] && {"
     echo '  storeinfo locale="$Langcontainer"'
     echo "  echo \"LANG=\$Langcontainer\" > /etc/default/locale"
-    echo "} || note 'Option --lang: Desired locale for '$Langwunsch' not found and not generated.'"
+    echo "} || note 'Option --lang: Desired locale for '$Line' not found and not generated.'"
     echo ""
+  done < <(tac <<< "$Langwunsch" | grep . ||:)
+  [ "$Langwunsch" ] && {
     echo "debugnote \"Option --lang: Output of locale -a:"
     echo "\$(locale -a)\""
     echo ""
@@ -5373,7 +5481,7 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
   # create containerrc -> runs as unprivileged user in container
   # check and set up cgroup on host for systemd or elogind
   # run docker
-  local Line= Wantcgroup= Path=
+  local Line= Wantcgroup= Path= Ungrep=
 
   echo "#! /usr/bin/env bash"
   echo ""
@@ -5591,6 +5699,7 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
   To allow this ENTRYPOINT, run x11docker with option --init=none.\""
           echo "  Entrypoint="
           echo "}"
+          #echo "Exec=exec"
         ;;
         s6-overlay)
           echo "[ \"\$Entrypoint\" = '/init' ] && {"
@@ -5667,7 +5776,7 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
     echo "echo '# Environment variables found in image:'   >> $Containerrc"
     echo "IFS=$'\n'"
     echo "while read -r Line; do"
-    echo   "  echo \"export \$(escapestring \"\$Line\")\"  >> $Containerrc"
+    echo "  echo \"export \$(escapestring \"\$Line\")\"  >> $Containerrc"
     echo "done < <($Dockerexe run --rm --entrypoint env $Imagename env 2>>$Containerlogfile | rmcr | grep -v 'HOSTNAME=' )"
     echo "IFS=$' \t\n'"
   }
@@ -5703,8 +5812,27 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
   echo     "  echo '[ -e /run/user/\$Containeruseruid ] && ln -s /run/user/\$Containeruseruid \$XDG_RUNTIME_DIR || mkdir -p -m700 \$XDG_RUNTIME_DIR'"
   echo     "  echo ''"
 
+  while read -r Line; do
+    Path="$(convertpath container "$Line")"
+    [ "$(cut -c1-5 <<< "$Line")" != "/dev/" ] && {
+      case "$Line" in
+        "$Containeruserhosthome")
+          echo "  echo '# --share: create soft link of shared $Containeruserhosthome to container home'"
+          echo "  echo 'Homesoftlink=\"\$Containeruserhome/home.host.$Containeruser\"'"
+          echo "  echo '[ -e \"\$Containeruserhome/home.host.$Containeruser\" ] || ln -s \"/home.host/\$Containeruser\" \"\$Homesoftlink\"'"
+          echo "  echo ''"
+          Ungrep="$Ungrep|home.host.$Containeruser"
+        ;;
+        *)
+          Line="$(convertpath container "$Line")"
+          [ "${Line#$Containeruserhome}" = "$Line" ] || Ungrep="$Ungrep|$(basename "$Line")"
+        ;;
+      esac
+    }
+  done < <(store_runoption dump volume)
+
   echo     "  echo '# Copy files from /etc/skel into empty HOME'"
-  echo     "  echo '[ -d /etc/skel ] && [ -z \"\$(ls -A \"\$Containeruserhome\" 2>/dev/null | grep -v gnupg)\" ] && {'"
+  echo     "  echo '[ -d /etc/skel ] && [ -z \"\$(ls -A \"\$Containeruserhome\" 2>/dev/null | grep -v -E \"gnupg$Ungrep\")\" ] && {'"
   echo     "  echo '  debugnote \"$(basename $Containerrc): HOME is empty. Copying from /etc/skel\"'"
   echo     "  echo '  cp -n -R /etc/skel/. \$Containeruserhome'"
   echo     "  echo '  :'"
@@ -5712,27 +5840,6 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
   echo     "  echo '  debugnote \"$(basename $Containerrc): HOME is not empty. Not copying from /etc/skel\"'"
   echo     "  echo '}'"
   echo     "  echo ''"
-
-  while read -r Line; do
-    Path="$(convertpath container "$Line")"
-      [ "$(cut -c1-5 <<< "$Line")" != "/dev/" ] && {
-      case "$Line" in
-        "$Containeruserhosthome")
-          echo "  echo '# --share: create soft link of shared file/folder/volume $(basename "$Line") to container home'"
-          echo "  echo 'ln -s \"/home.host/\$Containeruser\" \"\$Containeruserhome/home.host.$Containeruser\"'"
-          echo "  echo ''"
-        ;;
-        *)
-          Line="$(convertpath container "$Line")"
-          [ "${Line#$Containeruserhome}" = "$Line" ] && {
-            echo "  echo '# --share: create soft link of shared file/folder/volume $(basename "$Line") to container home'"
-            echo "  echo 'ln -s '$Line' \"\$Containeruserhome\"'"
-            echo "  echo ''"
-          }
-        ;;
-      esac
-    }
-  done < <(store_runoption dump volume)
 
   [ -n "$Newdisplay" ] && {
     echo   "  echo '# Create softlink to X unix socket'"
@@ -5803,29 +5910,57 @@ create_dockerrc() {             ### create dockerrc: This script runs as root (o
     echo   "  echo ''"
   }
 
-  echo     "  echo \"debugnote \\\"$(basename $Containerrc): Running container command:
-  \\\$Dbus \$Entrypoint \$Containercommand
-  \\\"\""
-  echo     "  echo ''"
-
-#  echo     "  echo 'exec 1>&6 2>&7 6>&- 7>&-'"
   case $Interactive in
     no)
       echo "  echo 'tail -f $(convertpath share $Cmdstdoutlogfile)     2>/dev/null &'"
       echo "  echo 'tail -f $(convertpath share $Cmdstderrlogfile) >&2 2>/dev/null &'"
-      echo "  echo \"\$Exec \\\$Dbus \$Entrypoint \$Containercommand $( [ "$Forwardstdin" = "yes" ] && echo "<$(convertpath share $Cmdstdinfifo)") >>$(convertpath share $Cmdstdoutlogfile) 2>>$(convertpath share $Cmdstderrlogfile)\""
+      echo "  echo \"exec \\\$Dbus sh $(convertpath share $Cmdrc) >>$(convertpath share $Cmdstdoutlogfile) 2>>$(convertpath share $Cmdstderrlogfile)\""
     ;;
     yes)
       echo "  echo \"\$Exec \\\$Dbus \$Entrypoint \$Containercommand\""
     ;;
   esac
-  echo     "  echo \"storeinfo cmdexitcode=\\\$?\""
   echo     "} >> $Containerrc"
   echo     "######## End of containerrc ########"
   echo ""
 
   echo "# Write containerrc into x11docker.log"
   echo "nl -ba >> $Logfile < $Containerrc"
+  echo ""
+
+
+
+  echo     "######## Create $(basename $Cmdrc) ########"
+  echo     "{ echo '#! /bin/sh'"
+  echo     "  echo '# Created startscript for cmdrc containing final container command'"
+  echo     "  echo ''"
+  echo     "  echo '$(declare -f storeinfo)'"
+  echo     "  echo '$Messagefifofuncs'"
+  echo     "  echo 'Messagefile=$(convertpath share $Messagefifo)'"
+  # --runasuser commands added here
+  [ "$Runasuser" ] && {
+    echo   "  echo '# Custom daemon commands added with option --runasuser'"
+    for Line in "$Runasuser"; do
+    echo   "  echo 'debugnote \"$(basename $Cmdrc): Adding command:
+  $Line\"'"
+      echo "  echo '$Line'"
+    done
+    echo   "  echo ''"
+  }
+  echo     "  echo \"debugnote \\\"$(basename $Cmdrc): Running container command:
+  \$Entrypoint \$Containercommand
+  \\\"\""
+  echo     "  echo ''"
+  echo     "  echo \"\$Entrypoint \$Containercommand $( [ "$Forwardstdin" = "yes" ] && echo "<$(convertpath share $Cmdstdinfifo)" ) \""
+  echo     "  echo ''"
+  echo     "  echo '[ -h \"\$Homesoftlink\" ] && rm \$Homesoftlink'"
+  echo     "  echo \"storeinfo cmdexitcode=\\\$?\""
+  echo     "} >> $Cmdrc"
+  echo     "######## End of cmdrc ########"
+  echo ""
+
+  echo "# Write cmdrc into x11docker.log"
+  echo "nl -ba >> $Logfile < $Cmdrc"
   echo ""
 
 
@@ -5980,6 +6115,7 @@ $Wmdockercommand"'
   echo "  rocknroll || exit 64"
   echo "  mysleep 0.1"
   echo "done"
+  echo '[ "$Pid1pid" = "0" ] && Pid1pid=""'
 
   echo '[ -z "$Pid1pid" ] && error "dockerrc(): Did not receive PID of PID1 in container.
   Maybe the container immediately stopped for unknown reasons.
@@ -6006,16 +6142,16 @@ $(rmcr < '$Containerlogfile' | uniq )"'
 \$Failure
 
   Last lines of logfile:
-$(tail $Containerlogfile)\""
+\$(tail $Containerlogfile)\""
   echo "}"
   echo ""
 
-  [ "$Switchcontaineruser" = "no" ] && {
+  [ "$Switchcontaineruser" = "no" ] && [ "$Containersetup" = "yes" ] && {
     echo "debugnote 'dockerrc(): Starting containerrootrc with privileged docker exec'"
     echo "# copy containerrootrc inside of container to avoid possible noexec of host home."
-    echo "$Dockerexe exec --privileged --tty $Containername sh -c 'cp $(convertpath share $Containerrootrc) /tmp/containerrootrc ; chmod 644 /tmp/containerrootrc' 2>&1 | rmcr >>$Containerlogfile"
+    echo "$Dockerexe exec --privileged $Containername sh -c 'cp $(convertpath share $Containerrootrc) /tmp/containerrootrc ; chmod 644 /tmp/containerrootrc' 2>&1 | rmcr >>$Containerlogfile"
     echo "# run container root setup. containerrc will wait until setup script is ready."
-    echo "$Dockerexe exec --privileged --tty -u root $Containername /bin/sh /tmp/containerrootrc 2>&1 | rmcr >>$Containerlogfile"
+    echo "$Dockerexe exec --privileged -u root $Containername /bin/sh /tmp/containerrootrc 2>&1 | rmcr >>$Containerlogfile"
     echo ""
   }
 
@@ -6204,23 +6340,41 @@ start_pulseaudiotcp() {         # option --pulseaudio=tcp: load Pulseaudio TCP m
   return 0
 }
 start_xpra() {                  # options --xpra / --xpra-xwayland: start and watch xpra server and xpra client
-  local Xpraserverpid Xpraclientpid
+  local Xpraserverpid Xpraclientpid Xpraenv
 
-  debugnote "Running Xpra server"
+  Xpraenv="  NO_AT_BRIDGE=1 \\
+  XPRA_EXPORT_ICON_DATA=0 \\
+  XPRA_EXPORT_XDG_MENU_DATA=0 \\
+  XPRA_ICON_OVERLAY=0 \\
+  XPRA_MENU_ICONS=0 \\
+  XPRA_UINPUT=0 \\
+  XPRA_XDG_EXPORT_ICONS=0 \\
+  XPRA_XDG_LOAD_GLOB=0 \\
+  $(verlt $Xpraversion v2.1 && echo XPRA_OPENGL_DOUBLE_BUFFERED=1 ||:)"
 
+  # xpra server
+  Xpraservercommand="env XAUTHORITY=$Xclientcookie \\
+  GDK_BACKEND=x11 \\
+$Xpraenv $Xpraservercommand"
+  debugnote "Running xpra server:
+$Xpraservercommand"
   echo "x11docker [$(timestamp)]: Starting Xpra server" >> $Xpraserverlogfile
-  unpriv "env $Newxenv GDK_BACKEND=x11 XPRA_UINPUT=0 $Xpraservercommand ||:" >> $Xpraserverlogfile 2>&1 &
+  unpriv "$Xpraservercommand ||:" >> $Xpraserverlogfile 2>&1 &
   Xpraserverpid=$!
-  storepid $! xpraserver
+  storepid $Xpraserverpid xpraserver
+
   verlt "$Xprarelease" "r23060" && waitforlogentry "xpra server" $Xpraserverlogfile 'xpra is ready'
   rocknroll || return 64
 
-  debugnote "Running Xpra client"
-
+  # xpra client
+  Xpraclientcommand="env $Hostxenv \\
+$Xpraenv $Xpraclientcommand"
+  debugnote "Running xpra client:
+$Xpraclientcommand"
   echo "x11docker [$(timestamp)]: Starting Xpra client" >> $Xpraclientlogfile
-  unpriv "env $Hostxenv NO_AT_BRIDGE=1 XPRA_EXPORT_ICON_DATA=0 XPRA_ICON_OVERLAY=0 XPRA_MENU_ICONS=0 $(verlt $Xpraversion v2.1 && echo XPRA_OPENGL_DOUBLE_BUFFERED=1) $Xpraclientcommand ||:" >> $Xpraclientlogfile 2>&1 &
+  unpriv "$Xpraclientcommand ||:" >> $Xpraclientlogfile 2>&1 &
   Xpraclientpid=$!
-  storepid $! xpraclient
+  storepid $Xpraclientpid xpraclient
 
   # catch possible xpra crashes
   while rocknroll; do
@@ -6263,6 +6417,13 @@ $(tail $Compositorlogfile)")"
 }
 
 #### main init routines
+check_fallback() {
+  # Option --fallback
+  case $Fallback in
+    no) error "Option --fallback=no: Fallbacks are disabled.
+    x11docker cannot fulfil an option you have chosen, see message above." ;;
+  esac
+}
 check_host() {                  # check host environment
   local Drive
 
@@ -6342,20 +6503,22 @@ check_host() {                  # check host environment
   # Check host IP. Needed for --pulseaudio=tcp, --printer=tcp, --xoverip and --xwin
   case $Winsubsystem in
     "")
-      case $Sharehostnet in
-        yes) Hostip="127.0.0.1" ;;
-        no)
-                           Hostip="$(ip -4 -o a | grep 'docker0' | awk '{print $4}' | cut -d/ -f1 | grep 172.17.0.1)"
+      case $Network in
+        host) Hostip="127.0.0.1" ;;
+        *)
+          #Hostip="$(hostname -I | cut -d' ' -f1)"
+          [ "$Hostip" ] || Hostip="$(ip -4 -o a | grep 'docker0' | awk '{print $4}' | cut -d/ -f1 | grep    "172.17.0.1" ||: )"
           #[ "$Hostip" ] || Hostip="$($Dockerexe network inspect bridge --format='{{.IPAM.Config}}' 2>/dev/null | awk '{print $2}')"
           [ "$Hostip" ] || Hostip="$(ip -4 -o a | grep 'docker0' | awk '{print $4}' | cut -d/ -f1 | head -n1)"
-          [ "$Hostip" ] || Hostip="$(ip -4 -o a |                  awk '{print $4}' | cut -d/ -f1 | grep -v 127.0.0.1 | head -n1)"
+          [ "$Hostip" ] || Hostip="$(ip -4 -o a |                  awk '{print $4}' | cut -d/ -f1 | grep    "^192\.168\.*" | head -n1)"
+          [ "$Hostip" ] || Hostip="$(ip -4 -o a |                  awk '{print $4}' | cut -d/ -f1 | grep -v "127.0.0.1" | head -n1)"
         ;;
       esac
     ;;
     *)
-                       Hostip="$(ipconfig.exe | rmcr | grep -A6 'DockerNAT' | grep 'IPv4' | rev | cut -d' ' -f1 | rev)"
-      [ "$Hostip" ] || Hostip="$(ipconfig.exe | rmcr | grep 'IPv4'          | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | grep "^10\.0\.*" )"
-      [ "$Hostip" ] || Hostip="$(ipconfig.exe | rmcr | grep 'IPv4'          | head -n1 | rev | cut -d' ' -f1 | rev)"
+                       Hostip="$(ipconfig.exe | rmcr | grep 'IPv4' | grep -o '192\.168\.[0-9]*\.[0-9]*'       | head -n1 )"
+      [ "$Hostip" ] || Hostip="$(ipconfig.exe | rmcr | grep 'IPv4' | grep -o '10\.0\.[0-9]*\.[0-9]*'          | head -n1 )"
+      [ "$Hostip" ] || Hostip="$(ipconfig.exe | rmcr | grep 'IPv4' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -n1 )"
     ;;
   esac
 
@@ -6468,6 +6631,7 @@ check_hostuser() {              # check for unprivileged host user
     warning "Could not read your home directory from /etc/passwd for user '$Hostuser'.
   Please set \$HOME with a valid path.
   Fallback: setting HOME=$Hostuserhome"
+    check_fallback
   }
   debugnote "host user: $Hostuser $Hostuseruid:$Hostusergid $Hostuserhome"
 
@@ -6602,6 +6766,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         note "Option --hostdisplay: You host X server seems to run
   without cookie authentication. Cannot set up a cookie for X access.
   Fallback: Enabling option --no-auth."
+        check_fallback
         Xauthentication="no"
       }
       case $Xtest in
@@ -6624,6 +6789,7 @@ check_option_interferences() {  # check multiple option interferences, change se
           warning "Your xpra version has a cookie authentication issue.
   also, 'xhost' is not available on your host.
   Fallback: Disabling cookie authentication on new X server."
+          check_fallback
           Xauthentication="no"
         }
       } ;;
@@ -6676,6 +6842,7 @@ check_option_interferences() {  # check multiple option interferences, change se
   Securing X access with cookie authentication is not possible.
   Fallback: Disabling X authentication protocol. (option --no-auth)
   $Wikipackages"
+          check_fallback
           ;;
         esac
         Xauthentication="no"
@@ -6694,9 +6861,9 @@ check_option_interferences() {  # check multiple option interferences, change se
   and GPU rootkits (compare proof of concept: jellyfish)."
     case $Xoverip in
       yes)
-        [ "$Sharehostnet" = "no" ] && note "Option --gpu: With X over IP the host network stack must
-  be shared to allow GPU access. Enabling option --hostnet."
-        Sharehostnet="yes"
+        [ "$Network" != "host" ] && note "Option --gpu: With X over IP the host network stack must
+  be shared to allow GPU access. Enabling option --network=host."
+        Network="host"
       ;;
     esac
   }
@@ -6710,12 +6877,12 @@ check_option_interferences() {  # check multiple option interferences, change se
 
   # --hostdisplay with SSH
   [ "$Xserver" = "--hostdisplay" ] && [ "$Runsoverssh" = "yes" ] && {
-    [ "$Trusted" = "no" ] || [ "$Sharehostnet" = "no" ]  && {
+    [ "$Trusted" = "no" ] || [ "$Network" != "host" ]  && {
       note "For SSH connection with option --hostdisplay
-  x11docker must enable option --hostnet and allow trusted cookies.
+  x11docker must enable option --network=host and allow trusted cookies.
   It is recommended to use other X server options
   like --xpra, --xephyr or --nxagent."
-      Sharehostnet="yes"
+      Network="host"
       Trusted="yes"
     }
   }
@@ -6766,9 +6933,9 @@ check_option_interferences() {  # check multiple option interferences, change se
         none|tini) ;;
         *) note "Option --no-setup: Option --init is not supported" ;;
       esac
-      Initsystem=""
+      Initsystem="none"
       Dbusrunsession="no"
-      Createcontaineruser="no"
+      #Createcontaineruser="no"
       Langwunsch=""
       Noentrypoint="no"
       Runasroot=""
@@ -6790,6 +6957,7 @@ check_option_interferences() {  # check multiple option interferences, change se
     *)
       note "Option --dbus: Unknown argument '$Dbusrunsession'.
   Fallback: Enabling --dbus user session."
+      check_fallback
       Dbusrunsession="yes"
     ;;
   esac
@@ -6813,6 +6981,7 @@ check_option_interferences() {  # check multiple option interferences, change se
     *)
       note "Option --newprivileges: Unknown argument '$Allownewprivileges'.
   Fallback: Setting --newprivileges=auto"
+      check_fallback
       Allownewprivileges="auto"
     ;;
   esac
@@ -6825,15 +6994,6 @@ check_option_interferences() {  # check multiple option interferences, change se
     Sharehostipc="yes"
   }
 
-  # --hostnet --no-internet
-  [ "$Sharehostnet" = "yes" ] && [ "$Internetaccess" = "no" ] && {
-    note "You have chosen --hostnet and --no-internet. That does not work.
-  You can not share host network stack (--hostnet) and forbid internet access
-  at the same time (except you disconnect your host from internet).
-  Fallback: disabling option --hostnet, keeping --no-internet."
-    Sharehostnet="no"
-  }
-
   # --scale
   [ "$Scaling" ] && {
     case $Xserver in
@@ -6842,6 +7002,7 @@ check_option_interferences() {  # check multiple option interferences, change se
           note "The scale factor for option $Xserver must be
   one of   1  2  3  4  5  6  7  8  9
   Fallback: disabling option --scale"
+          check_fallback
           Scaling=""
         }
       ;;
@@ -6849,6 +7010,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         isnum $Scaling || {
           note "Option --scale needs a number. '$Scaling' is not allowed.
   Fallback: disabling option --scale"
+          check_fallback
           Scaling=""
         }
       ;;
@@ -6857,6 +7019,7 @@ check_option_interferences() {  # check multiple option interferences, change se
   Available for --xpra, --xpra-xwayland and --xorg (float values possible)
   and for --weston and --weston-xwayland (full integer values only).
   Fallback: disabling option --scale"
+        check_fallback
         Scaling=""
       ;;
     esac
@@ -6866,6 +7029,7 @@ check_option_interferences() {  # check multiple option interferences, change se
           note "Your xpra version is quite old and does not support --scale.
   You need at least xpra version 0.16
   Fallback: disabling option --scale"
+          check_fallback
           Scaling=""
         }
       ;;
@@ -6885,6 +7049,7 @@ check_option_interferences() {  # check multiple option interferences, change se
             note "Option --xpra-xwayland needs weston
   for scale factor smaller than 1.
   Fallback: disabling option --scale"
+            check_fallback
             Scaling=""
           }
         }
@@ -6904,6 +7069,7 @@ check_option_interferences() {  # check multiple option interferences, change se
           note "Unsupported value '$Rotation' for option --rotate.
   Must be one of 0 90 180 270 flipped flipped-90 flipped-180 flipped-270
   Fallback: disabling option --rotate"
+          check_fallback
           Rotation=""
         }
       ;;
@@ -6911,6 +7077,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         note "Option $Xserver does not support option --rotate.
   Rotation is possible for --xorg, --weston and --weston-xwayland.
   Fallback: disabling option --rotate"
+        check_fallback
         Rotation=""
       ;;
     esac
@@ -6946,6 +7113,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         [ "$Runsonconsole" = "yes" ] && {
           note "Option --outputcount only works in nested/windowed mode,
   but not on tty. Fallback: disabling --outputcount"
+          check_fallback
           Outputcount="1"
         }
       ;;
@@ -6998,6 +7166,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         note "Option --init=systemd is not supported with MobyVM.
   You can try another init option instead, e.g. --init=openrc.
   Fallback: Disabling option --init=systemd"
+        check_fallback
         Initsystem="tini"
       }
       [ "$Sharecgroup" = "yes" ] && {
@@ -7012,6 +7181,7 @@ check_option_interferences() {  # check multiple option interferences, change se
       [ "$Pulseaudiomode" ] && {
         note "Option --pulseaudio is not supported on MS Windows.
   Fallback: Disabling option --pulseaudio"
+        check_fallback
         Pulseaudiomode=""
       }
       case $Xserver in
@@ -7042,6 +7212,7 @@ check_option_interferences() {  # check multiple option interferences, change se
   for X server option $Xserver.
   You can try --weston, --kwin or --hostwayland instead.
   Fallback: Disabling option --wayland."
+      check_fallback
       Setupwayland="no"
     ;;
   esac
@@ -7075,12 +7246,14 @@ check_option_interferences() {  # check multiple option interferences, change se
       [ "$Forwardstdin" = "yes" ] && {
         note "You cannot use --stdin along with --interactive.
   Fallback: Disabling option --stdin."
+        check_fallback
         Forwardstdin="no"
       }
       [ "$Runsinteractive" = "yes" ] && {
         note "Option -i, --interactive: Does not work in interactive
   bash mode (option --enforce-i).
   Fallback: Disabling option --interactive."
+        check_fallback
         Interactive="no"
       }
       case $Initsystem in
@@ -7098,6 +7271,7 @@ check_option_interferences() {  # check multiple option interferences, change se
       warning "Option --limit: Specified value $Limitresources is out of range.
   Allowed is a factor greater than 0 and less than or equal to 1.  0<FACTOR<=1
   Fallback: Setting limit factor to --limit=0.5"
+      check_fallback
       Limitresources="0.5"
     }
     note "Option --limit does not avoid possibly flooding the hard disk
@@ -7127,6 +7301,7 @@ check_option_interferences() {  # check multiple option interferences, change se
         note "Option --pulseaudio: pactl not found.
   Is pulseaudio installed and running on your host system?
   Fallback: Disabling --pulseaudio, enabling option --alsa"
+        check_fallback
         Pulseaudiomode=""
         Sharealsa="yes"
       }
@@ -7135,6 +7310,7 @@ check_option_interferences() {  # check multiple option interferences, change se
       note "Option --pulseaudio: Unknown pulseaudio mode: $Pulseaudiomode
   Allowed are --pulseaudio=socket, --pulseaudio=tcp or --pulseaudio=auto.
   Fallback: Enabling --pulseaudio=auto"
+      check_fallback
       Pulseaudiomode="auto"
     ;;
   esac
@@ -7148,7 +7324,9 @@ check_option_interferences() {  # check multiple option interferences, change se
     ;;
     ""|socket|tcp) ;;
     *)
-      note "Option --printer: Invalid argument $Sharecupsmode"
+      note "Option --printer: Invalid argument $Sharecupsmode
+  Fallback: Setting --printer=socket"
+      check_fallback
       Sharecupsmode="socket"
     ;;
   esac
@@ -7158,7 +7336,9 @@ check_option_interferences() {  # check multiple option interferences, change se
     yes|no|always|ask) ;;
     *) note "Option --pull: Invalid argument: $Pullimage
   Allowed arguments: yes|no|always|ask
-  Fallback: Setting --pull=ask" ;;
+  Fallback: Setting --pull=ask"
+      check_fallback
+    ;;
   esac
 
   case "$Runtime" in
@@ -7177,12 +7357,14 @@ check_option_interferences() {  # check multiple option interferences, change se
       [ "$Sharewebcam" = "yes" ] && {
         note "Option --webcam: Webcam support does not work with
   --runtime=kata-runtime. Fallback: Disabling option --webcam."
+        check_fallback
         Sharewebcam="no"
       }
-      [ "$Sharehostnet" = "yes" ] && {
-        note "Option --hostnet: Sharing host network stack does not work with
-  --runtime=kata-runtime. Fallback: Disabling option --hostnet."
-        Sharehostnet="no"
+      [ "$Network" = "host" ] && {
+        note "Option --network=host: Sharing host network stack does not work
+  with --runtime=kata-runtime. Fallback: Setting --network=bridge."
+        check_fallback
+        Network="bridge"
       }
       [ "$Sharehostipc" = "yes" ] && {
         note "Option --hostipc: Only IPC of the the qemu VM is shared with
@@ -7191,6 +7373,17 @@ check_option_interferences() {  # check multiple option interferences, change se
     ;;
     *)
       note "Option --runtime: x11docker does not know runtime: $Runtime"
+    ;;
+  esac
+
+  case "$Podman" in
+    yes)
+      # /proc/sys/kernel/unprivileged_userns_clone might exist on debian only.
+      # https://github.com/mviereck/x11docker/issues/255#issuecomment-758014962
+      [ "$(cat /proc/sys/kernel/unprivileged_userns_clone)" = "0" ] && error "Option --podman: Linux kernel disallows unprivileged
+  user namespace setup. Please run as root:
+    sysctl -w kernel.unprivileged_userns_clone=1"
+      store_runoption cap "CHOWN"
     ;;
   esac
 
@@ -7260,6 +7453,7 @@ check_passwordfrontend() {      # check password prompt frontend (pkexec, su, su
     command -v $(echo $Passwordcommand|cut -d' ' -f1) >/dev/null || {
       warning "Password prompt frontend $(echo $Passwordcommand|cut -d' ' -f1) not found.
   Fallback: using no password prompt (--pw=none)."
+      check_fallback
                Passwordcommand="bash -c" ; Passwordfrontend="none" ; Passwordneeded="no" ; Passwordterminal="bash -c"
     }
   }
@@ -7437,6 +7631,7 @@ $Hostuserhome/.cache/x11docker/symlink
   Xtermrc="$Cachefolder/$Xtermrc"                                   && mkfile $Xtermrc
 
   # Files in $Sharefolder: shared to /x11docker in container
+  Cmdrc="$Sharefolder/$Cmdrc"                                       && mkfile $Cmdrc
   Cmdstderrlogfile="$Sharefolder/$Cmdstderrlogfile"                 && mkfile $Cmdstderrlogfile 666
   Cmdstdinfifo="$Sharefolder/$Cmdstdinfifo"
   Cmdstdoutlogfile="$Sharefolder/$Cmdstdoutlogfile"                 && mkfile $Cmdstdoutlogfile 666
@@ -7496,9 +7691,6 @@ drop_cachefiles() {             # remove some cache files that are not needed in
     --nxagent) ;;
     *) rm $Nxagentclientrc $Nxagentkeysfile $Nxagentoptionsfile ;;
   esac
-  case $Pulseaudiomode in
-    "") rm $Pulseaudioconf ;;
-  esac
   case $Xserver in
     --xdummy) ;;
     --xpra) [ "$Xpravfb" = "Xdummy" ] || rm $Xdummyconf $Xorgwrapper ;;
@@ -7539,7 +7731,7 @@ option_messages() {             # some messages depending on options, but not ch
       case "$Trusted" in
         no)
           warning "Option --hostdisplay provides only low container isolation!
-  It is recommended to use another X server option like --xpra or --nxagent.
+  It is recommended to use another X server option like --nxagent or --xpra.
 
   To improve security with --hostdisplay x11docker uses untrusted cookies.
   This can lead to strange behaviour of some applications.
@@ -7552,7 +7744,7 @@ option_messages() {             # some messages depending on options, but not ch
       QUITE BAD CONTAINER ISOLATION !
   Keylogging and controlling host applications is possible!
   Clipboard sharing is enabled (option --cliboard).
-  It is recommended to use another X server option like --xpra or --nxagent." ;;
+  It is recommended to use another X server option like --nxagent or --xpra." ;;
             MSYS2) ;;
             CYGWIN) warning "Option --hostdisplay allows less security hardening.
   It is recommended to use option --xwin instead." ;;
@@ -7610,12 +7802,14 @@ option_messages() {             # some messages depending on options, but not ch
       [ "$Sharegpu" = "yes" ] && note "If performance of GPU acceleration with $Xserver
   is not satisfying, you can try insecure '--hostdisplay --gpu'."
       note "Option --xpra: If you encounter issues with xpra,
-  you can try --nxagent instead."
+  you can try --nxagent instead.
+  Rather use xpra from www.xpra.org than from distribution repositories."
     ;;
 
-    --xephyr) note "Xephyr is a quite stable nested X server.
-  Less stable, but resizeable is nxagent with option --nxagent."
-    ;;
+  #  --xephyr) note "Xephyr is a quite stable nested X server.
+  #Less stable, but directly resizeable is nxagent with option --nxagent.
+  #Resizing of the Xephyr window is possible with xrandr, arandr or lxrandr."
+  #  ;;
 
     --nxagent)
       [ "$Hostsystem" = "mageia" ] && {
@@ -7642,7 +7836,8 @@ option_messages() {             # some messages depending on options, but not ch
   # NVIDIA without --gpu
   [ "$Nvidiaversion" ] && [ "$Sharegpu" = "no" ] && case $Xserver in
     --hostdisplay|--xorg) note "Option $Xserver may fail with proprietary NVIDIA driver
-  on host. In that case try other X server options like --xpra or --xephyr." ;;
+  on host. In that case try other X server options like
+  --nxagent, --xpra or --xephyr." ;;
   esac
 
   # --fullscreen
@@ -7671,11 +7866,13 @@ option_messages() {             # some messages depending on options, but not ch
   [ "$Sharehostipc" = "yes" ] && warning "Option --hostipc severely degrades
   container isolation. IPC namespace remapping is disabled."
 
-  # --hostnet
-  [ "$Sharehostnet" = "yes" ] && warning "Option --hostnet severly degrades
+  # --network
+  [ "$Network" = "host" ] && warning "Option --network=host severly degrades
   container isolation. Network namespacing is disabled.
-  Container shares host network stack. Spying on network traffic may be possible.
-  Access to host X server $Hostdisplay may be possible through abstract unix socket."
+  Container shares host network stack.
+  Spying on network traffic may be possible.
+  Access to host X server $Hostdisplay may be possible
+  through abstract unix socket."
 
   # --webcam
   [ "$Sharewebcam" = "yes" ] && warning "Option --webcam: Container applications might look
@@ -7691,19 +7888,42 @@ option_messages() {             # some messages depending on options, but not ch
     ;;
   esac
 
+  [ "$Sudouser" = "yes" ] && [ "$Containeruseruid" != "0" ] && [ "$Network" != "host" ] && [ -z "$Xoverip" ] && note "Option --sudouser: If you want to run GUI application
+  with su or sudo, you might need to add either option --xoverip
+  or (discouraged) option --network=host."
+
   [ "$Customdockeroptions" ] && {
     warning "Found custom DOCKER_RUN_OPTIONS.
   x11docker will add them to 'docker run' command without
   a serious check for validity or security. Found options:
   $Customdockeroptions"
-    grep -q -- '--privileged' <<< "$Customdockeroptions" && warning "Found option --privileged
+    grep -q -- '--privileged'           <<< "$Customdockeroptions" && warning "Found option --privileged
   in custom docker run options. That is A VERY BAD IDEA.
   A privileged setup allows unrestriced access from container to host.
   Malicious applications can cause arbitrary harm."
-    grep -q -- '--entrypoint' <<< "$Customdockeroptions" && warning "Found option --entrypoint
+    grep -q -i -- '--cap-add.ALL'       <<< "$Customdockeroptions" && warning "Found option --cap-add=ALL
+  in custom docker run options. That is A VERY BAD IDEA.
+  That is a very privileged setup.
+  Malicious applications may harm to the host."
+    grep -q -i -- '--cap-add.SYS_ADMIN' <<< "$Customdockeroptions" && warning "Found option --cap-add=SYS_ADMIN
+  in custom docker run options. That is A VERY BAD IDEA.
+  That is a very privileged setup.
+  Malicious applications may harm to the host."
+    grep -q -- '--entrypoint'           <<< "$Customdockeroptions" && warning "Found option --entrypoint
   in custom docker run options. x11docker uses this option, too.
   This setup will probably fail. Use x11docker option --no-entrypoint instead
   and add desired command as container command after the image name."
+    grep -q -- "--user"                 <<< "$Customdockeroptions" && warning "Found option --user in custom DOCKER_RUN_OPTIONS.
+  This might lead to errors or unexpected behaviour.
+  Please use x11docker option --user instead."
+    grep -q -- "--runtime"              <<< "$Customdockeroptions" && note "Found option --runtime in custom DOCKER_RUN_OPTIONS.
+  Please use x11docker option --runtime instead."
+    grep -q -- "--network"              <<< "$Customdockeroptions" && note "Found option --network in custom DOCKER_RUN_OPTIONS.
+  Please use x11docker option --network instead."
+    grep -q -- "--name"                 <<< "$Customdockeroptions" && note "Found option --name in custom DOCKER_RUN_OPTIONS.
+  Please use x11docker option --name instead."
+    grep -q -- "--group-add"            <<< "$Customdockeroptions" && note "Found option --group-add in custom DOCKER_RUN_OPTIONS.
+  Please use x11docker option --group-add instead."
   }
 
   return 0
@@ -7845,6 +8065,7 @@ declare_variables() {           # declare global variables
   PATH="$(check_envvar -w "${PATH:-}")"
   WAYLAND_DISPLAY=$(check_envvar "${WAYLAND_DISPLAY:-}")
   XAUTHORITY=$(check_envvar "${XAUTHORITY:-}")
+  XDG_CURRENT_DESKTOP=$(check_envvar "${XDG_CURRENT_DESKTOP:-}")
   XDG_RUNTIME_DIR=$(check_envvar "${XDG_RUNTIME_DIR:-}")
   XDG_VTNR=$(check_envvar "${XDG_VTNR:-}")
 
@@ -7887,7 +8108,8 @@ declare_variables() {           # declare global variables
 
   # Generated scripts
   Clipboardrc="clipboardrc"                       # --clipboard: Generated script for text clipboard sharing
-  Containerrc="containerrc"                       # Generated script starting container command
+  Cmdrc="cmdrc"                                   # Generated script starting container command
+  Containerrc="containerrc"                       # Generated script starting cmdrc
   Containerrootrc="containerrootrc"               # Generated script to set up container, e.g. user creation. Runs as root in container.
   Dockerrc="dockerrc"                             # Generated script to check image, set up host and create $Containerrc
   Xinitrc="xinitrc"                               # Generated script to set up X, e.g. cookie and xrandr
@@ -8028,7 +8250,7 @@ declare_variables() {           # declare global variables
   Xiniterrorcodes="xinit: giving up|unable to connect to X server|Connection refused|server error|Only console users are allowed"
   Xlegacywrapper=""                               # --xorg: /etc/X11/Xwrapper.config is configured to run within X yes/no
   Xpraborder=""                                   # --border: Colored border for xpra clients
-  Xpraenvvars="UBUNTU_MENUPROXY= QT_X11_NO_NATIVE_MENUBAR=1 MWNOCAPTURE=true MWNO_RIT=true MWWM=allwm GTK_OVERLAY_SCROLLING=0 GTK_CSD=0 NO_AT_BRIDGE=1" # environment variables
+  Xpracontainerenv="UBUNTU_MENUPROXY= QT_X11_NO_NATIVE_MENUBAR=1 MWNOCAPTURE=true MWNO_RIT=true MWWM=allwm GTK_OVERLAY_SCROLLING=0 GTK_CSD=0 NO_AT_BRIDGE=1" # environment variables
   Xprahelp=""                                     # Output of 'xpra --help'
   Xprarelease=""                                  # Release number from $Xpraversion
   Xprashm=""                                      # Content XPRA_XSHM=0 disables usage of MIT-SHM in xpra
@@ -8036,6 +8258,7 @@ declare_variables() {           # declare global variables
   Xpravfb=""                                      # --xpra, --xdummy, --xvfb: vfb for --xpra: Xdummy or Xvfb
   Xserver=""                                      # X server option to use
   Xoverip=""                                      # --xoverip: Connect to X over TCP yes/no
+  Xserveroptions=""                               # --xopt: Custom X server options
   Xtest=""                                        # --xtest: Enable extension Xtest yes/no. If empty, yes for --xpra/--xdummy/--xvfb, otherwise no
   Yaxis=""                                        # Virtual screen height
 
@@ -8056,8 +8279,7 @@ declare_variables() {           # declare global variables
 
   # Host integration
   Alsacard="$ALSA_CARD"                           # --alsa: Specified ALSA card
-  Hosthomebasefolder=""                               # --homebasedir: Base directory for container home with --home
-  Internetaccess="yes"                            # --no-internet: Disable internet access
+  Hosthomebasefolder=""                           # --homebasedir: Base directory for container home with --home
   Langwunsch=""                                   # --lang: Search or create UTF-8 locale in container and set LANG
   Pulseaudioconf="pulseaudio.client.conf"         # --pulseaudio: Client config in container
   Pulseaudiocookie="pulseaudio.cookie"            # --pulseaudio: possible pulse cookie from host to share
@@ -8090,11 +8312,11 @@ declare_variables() {           # declare global variables
   Imagename=""                                    # Image to run
   Interactive="no"                                # --interactive: Run docker with interactive tty yes/no
   Limitresources=""                               # --limit: Limit access to CPU and RAM, 0.1 ... 1.0
+  Network=""                                      # --network
   Noentrypoint="no"                               # --no-entrypoint: Disable entrypoint in image yes/no
   Podman="no"                                     # --podman: Use podman instead of docker
   Runtime=""                                      # Runtime to use. runc|nvidia|kata-runtime|crun
   Sharehostipc="no"                               # --hostipc: Set --ipc=host.
-  Sharehostnet="no"                               # --hostnet: Set --network=host
   Stopsignal=""                                   # Signal to send on 'docker stop'
   Sudouser="no"                                   # --sudouser: Create user with sudo permissions and root user with password 'x11docker'
   Switchcontaineruser="no"                        # --init=systemd|openrc|runit|sysvinit: User switching to trigger login services yes/no
@@ -8123,6 +8345,7 @@ declare_variables() {           # declare global variables
   Sudo=""                                         # "sudo", "sudo -n", or empty. Added as prefix to some privileged commands, especially docker.
 
   # Custom additional commands
+  Runasuser=""                                       # --runasuser: Add container command to containerrc
   Runasroot=""                                    # --runasroot: Add container command to container setup script running as root
   Runfromhost=""                                  # --runfromhost: Add host command to xinitrc
 
@@ -8131,6 +8354,7 @@ declare_variables() {           # declare global variables
   [ -z "$Cachenumber" ] && Cachenumber="$(makecookie)"
   Codename=""                                     # created from image name and command without special chars for use with container name and cache folder
   Dockerexe=""                                    # Can be docker.exe on MS Windows
+  Fallback="yes"                                  # --fallback: Allow or deny fallbacks for failing options.
   Hostexe=""                                      # --exe: Host command
   Imagebasename=""                                # Image name without tags and / replaced with -. For use of --home folders.
   Parsedoptions_global=""                         # Parsed options
@@ -8228,7 +8452,7 @@ stdout() {
 }
 parse_options() {               # parse cli options
   local Shortoptions Longoptions Parsedoptions Presetoptions Presetfile Parsererror Parsererrorfile
-  Shortoptions="aAcdDefFghHiKlmnpPqtTvVwWxXyY"
+  Shortoptions="aAcdDefFghHiIKlmnpPqtTvVwWxXyY"
   Longoptions="exe,xonly"                                                                                                  # Alternate setups of x11docker
   Longoptions="$Longoptions,auto,desktop,tty,wayland,wm::"                                                                 # Influencing auto-setup of X/Wayland/x11docker
   Longoptions="$Longoptions,hostdisplay,nxagent,xdummy,xephyr,xpra,xorg,xvfb,xwin"                                         # X servers
@@ -8240,18 +8464,18 @@ parse_options() {               # parse cli options
   Longoptions="$Longoptions,cachebasedir:,home::,homebasedir:,share:"                                                      # Host folders
   Longoptions="$Longoptions,alsa::,clipboard,gpu,lang::,printer::,pulseaudio::,webcam"                                     # Host integration features
   Longoptions="$Longoptions,env:,mobyvm,name:,no-entrypoint,runtime:,workdir:"                                             # Container config
-  Longoptions="$Longoptions,cap-default,hostipc,hostnet,limit::,newprivileges::,no-internet"                               # Container capabilities
+  Longoptions="$Longoptions,cap-default,hostipc,limit::,newprivileges::,network::"                                         # Container capabilities
   Longoptions="$Longoptions,group-add:,hostuser:,sudouser,user:,shell:"                                                    # Container user
   Longoptions="$Longoptions,dbus::,init::,hostdbus,sharecgroup"                                                            # Container init and DBus
   Longoptions="$Longoptions,stdin,interactive"                                                                             # Container interaction
-  Longoptions="$Longoptions,runfromhost:,runasroot:"                                                                       # Additional commands to execute
+  Longoptions="$Longoptions,runasuser:,runfromhost:,runasroot:"                                                            # Additional commands to execute
   Longoptions="$Longoptions,showenv,showid,showinfofile,showpid1,showcache"                                                # Output of vars on stdout
   Longoptions="$Longoptions,debug,quiet,verbose"                                                                           # Verbose options
   Longoptions="$Longoptions,cleanup,help,launcher,licence,license,version,wmlist"                                          # Special options without starting X or container
   Longoptions="$Longoptions,install,remove,update,update-master"                                                           # Installation
   #
-  Longoptions="$Longoptions,iglx,keepcache,no-setup,podman,xcomposite,xorgconf:,runx"                                      # Experimental
-  Longoptions="$Longoptions,dbus-system,homedir:,no-xhost,sharedir:,sharessh,systemd"                                      # Deprecated
+  Longoptions="$Longoptions,iglx,keepcache,no-setup,podman,xcomposite,xopt:,xorgconf:,runx"                                # Experimental
+  Longoptions="$Longoptions,dbus-system,homedir:,hostnet,no-internet,no-xhost,sharedir:,sharessh,systemd"                  # Deprecated
   Longoptions="$Longoptions,cachedir:,no-init,nothing,no-xtest,openrc,ps,runit,silent,starter,stderr,stdout"               # Removed
   Longoptions="$Longoptions,sys-admin,sysvinit,tini,trusted,untrusted,vcxsrv"                                              # Removed
 
@@ -8312,7 +8536,7 @@ parse_options() {               # parse cli options
                               Presetoptions="$(sed '/^#/d' < "$Presetfile" | tr '\n' ' ')"
                               debugnote "--preset ${2:-}:
   $Presetoptions"
-                              [ "$Presetoptions" ] && parse_options $Presetoptions
+                              [ "$Presetoptions" ] && eval parse_options $Presetoptions
                               shift ;;
 
      #### Choice of X servers and Wayland compositors
@@ -8386,11 +8610,13 @@ parse_options() {               # parse cli options
          --alsa)              Sharealsa="yes"                        # ALSA sound (shares /dev/snd)
                               Alsacard="${2:-$Alsacard}" ; shift ;;
       -c|--clipboard)         Shareclipboard="yes"  ;;               # Clipboard sharing
-      -l)                     Langwunsch="${LANG:-}" ;               # Locale/language setting
+      -l)                     Langwunsch="$Langwunsch
+${LANG:-}"                                                           # Locale/language setting
                               Langwunsch="${Langwunsch:-$LC_ALL}"
                               [ "$Langwunsch" ] || note "Option --lang: Environment variable \$LANG is empty.
   Please specify desired language locale with e.g. --lang=en_US or --lang=zh_CN." ;;
-         --lang)              Langwunsch="${2:-${LANG:-}}" ; shift   # Locale/language setting
+         --lang)              Langwunsch="$Langwunsch
+${2:-${LANG:-}}" ; shift                                             # Locale/language setting
                               Langwunsch="${Langwunsch:-$LC_ALL}"
                               [ "$Langwunsch" ] || note "Option --lang: Environment variable \$LANG is empty.
   Please specify desired language locale with e.g. --lang=en_US or --lang=zh_CN." ;;
@@ -8406,6 +8632,9 @@ parse_options() {               # parse cli options
          --pw)                Passwordfrontend="${2:-}" ; shift ;;   # Password prompt frontend
          --runasroot)         Runasroot="$Runasroot
 ${2:-}"                       ; shift ;;                             # Add custom root command in container setup script
+         --runasuser)         Runasuser="$Runasuser
+${2:-}"
+                              shift ;;                               # Add custom user command in cmdrc
          --runfromhost)       Runfromhost="$Runfromhost
 ${2:-}"                       ; shift ;;                             # Add custom host command in xinitrc
 
@@ -8429,13 +8658,13 @@ ${2:-}"                       ; shift ;;                             # Add custo
          --env)               store_runoption env "${2:-}"           # Set container environment variables
                               shift ;;
          --hostipc)           Sharehostipc="yes" ;;                  # docker run option --ipc=host
-         --hostnet)           Sharehostnet="yes" ;;                  # docker run option --network=host
          --limit)             Limitresources="${2:-0.5}" ; shift ;;  # Limited CPU and RAM access
          --mobyvm)            Mobyvm="yes" ;;                        # Use MobyVM in WSL2
          --name)              Containername="${2:-}" ; shift ;;      # Set container name
+      -I)                     Network="" ;;
+         --network)           Network="${2:-}" ; shift ;;
          --newprivileges)     Allownewprivileges="${2:-yes}" ; shift ;; # [Don't] set --security-opt=no-new-privileges
          --no-entrypoint)     Noentrypoint="yes" ;;                  # Disable ENTRYPOINT of image
-         --no-internet)       Internetaccess="no" ;;                 # Disallow internet access
          --runtime)           Runtime="${2:-}" ; shift               # Runtime=runc|nvidia|kata-runtime|crun
                               [ "$Runtime" = "kata" ] && Runtime="kata-runtime" ;;
          --stdin)             Forwardstdin="yes" ;;                  # Forward stdin to container command
@@ -8471,19 +8700,28 @@ ${2:-}"                       ; shift ;;                             # Add custo
          --launcher)          Createlauncher="yes" ;;                # Create application launcher on desktop and exit
 
      #### Experimental options
-         --iglx)              Iglx="yes" ;               note "Option --iglx: experimental only." ;;            # Indirect rendering; broken since Xorg ~18.2
-         --keepcache)         Preservecachefiles="yes" ; note "Option --keepcache: experimental only." ;;
-         --no-setup)          Containersetup="no" ;      note "Option --no-setup: experimental only." ;;
-         --podman)            Podman="yes" ;             note "Option --podman: experimental only." ;;
-         --xcomposite)        Xcomposite="yes" ;         note "Option --xcomposite: experimental only." ;;      # Enable X extension COMPOSITE
-         --xorgconf)          Xorgconf="${2:-}" ;        note "Option --xorgconf: eperimental only" ; shift ;;  # Custom xorg.conf
+         --iglx)              Iglx="yes" ;               note "Option --iglx: experimental option." ;;              # Indirect rendering; broken since Xorg ~18.2
+         --keepcache)         Preservecachefiles="yes" ; note "Option --keepcache: experimental option." ;;
+         --no-setup)          Containersetup="no" ;      note "Option --no-setup: experimental option." ;;
+         --podman)            Podman="yes" ; note "Option --podman: experimental option.
+  Please report issues at: https://github.com/mviereck/x11docker/issues/255" ;;
+         --xcomposite)        Xcomposite="yes" ;         note "Option --xcomposite: experimental option." ;;        # Enable X extension COMPOSITE
+         --xopt)              Xserveroptions="${2:-}" ;  note "Option --xopt: experimental option." ; shift ;;      # Custom X server options
+         --xorgconf)          Xorgconf="${2:-}" ;        note "Option --xorgconf: experimental option." ; shift ;;  # Custom xorg.conf
 
      #### Deprecated options
          --dbus-system)       note "Option --dbus-system is deprecated.
   Please use one of --init=systemd|openrc|runit|sysvinit instead.
   Fallback: Enabling options --dbus=system --cap-default"
+                              check_fallback
                               Dbusrunsession="system"
                               Capdropall="no" ;;
+         --hostnet)           Network="host"
+                              note "Option --hostnet is deprecated.
+  Please use --network=host instead." ;;
+         --no-internet)       Network="none"
+                              note "Option --no-internet is deprecated.
+  Please use --network=none instead." ;;
          --sharessh)          [ -e "${SSH_AUTH_SOCK:-}" ] && {       # SSH socket sharing
                                 store_runoption volume "$(dirname $SSH_AUTH_SOCK)"
                                 store_runoption env "SSH_AUTH_SOCK=$(escapestring "${SSH_AUTH_SOCK:-}")"
@@ -8530,12 +8768,12 @@ ${2:-}"                       ; shift ;;                             # Add custo
     shift
   done
 
+  Customdockeroptions="$(sed "s/--cap-add' '/--cap-add=/" <<< "$Customdockeroptions")"
+  Customdockeroptions="$(sed "s/--runtime' '/--runtime=/" <<< "$Customdockeroptions")"
   grep -q -- "--runtime.kata"   <<< "$Customdockeroptions" && Runtime="kata-runtime"
   grep -q -- "--runtime.nvidia" <<< "$Customdockeroptions" && Runtime="nvidia"
   grep -q -- "--runtime.runc"   <<< "$Customdockeroptions" && Runtime="runc"
   grep -q -- "--runtime.crun"   <<< "$Customdockeroptions" && Runtime="crun"
-  grep -q -- "--runtime"        <<< "$Customdockeroptions" && note "Found option --runtime in custom DOCKER_RUN_OPTIONS.
-  Please use x11docker option --runtime instead."
 
   [ -n "$Xserver" ] && Autochooseserver="no"
 
@@ -8663,9 +8901,11 @@ $(nl -ba <$Dockerrc)"
     ## containerrootrc runs as root in container.
     # Main jobs: create unprivileged container user, disable possible privilege leaks, set local time.
     # Optional jobs: run init system, run DBus daemon, install nvidia driver, create language locale.
-    create_containerrootrc
-    verbose "Generated containerrootrc:
+    [ "$Containersetup" = "yes" ] && {
+      create_containerrootrc
+      verbose "Generated containerrootrc:
 $(nl -ba <$Containerrootrc)"
+    }
     create_xtermrc              # xtermrc to prompt for password if needed.
   }
 
