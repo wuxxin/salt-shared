@@ -20,7 +20,7 @@ email:
 
 ### parse all currently available new DSR's of a users mailbox via a cronjob
 ```sh
-/usr/local/bin/dsr-hook.sh --format sendgrid --url https://localhost:1234/webhook/sendgrid \
+/usr/local/bin/dsr-hook.sh --format sendgrid --post https://localhost:1234/webhook/sendgrid \
     --from-maildir /var/lib/mail/{{ settings.delivery_status_report.user }}
 ```
 
@@ -33,8 +33,8 @@ transport_maps: |
 master_cf: |
   dsr_delivery_sendgrid  unix -       n       n       -       -       pipe
       flags=FRq user={{ settings.delivery_status_report.user }}
-      argv=/usr/local/bin/dsr-hook.sh --format zonemta --dest https://127.0.0.1:8855/zone-mta
-        --from-stdin --to-maildir /var/mail/{{ settings.delivery_status_report.user }}
+      argv=/usr/local/bin/dsr-hook.sh --format zonemta --post https://127.0.0.1:8855/zone-mta
+        --from-stdin --save-on-fail /var/mail/{{ settings.delivery_status_report.user }}
         --sender ${sender} --recipient ${recipient}
 ```
 
@@ -44,7 +44,7 @@ master_cf: |
 [filter-1]
 type = Filter_classifier
 path = /usr/local/bin/dsr-hook.sh
-arguments = ("--format", "sendgrid", "--url", "https://localhost:1234/webhook/sendgrid")
+arguments = ("--format", "sendgrid", "--post", "https://localhost:1234/webhook/sendgrid" , "--from-stdin")
 exitcodes_drop = (0,)
 [destination]
 ```

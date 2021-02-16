@@ -4,7 +4,7 @@ set -e
 usage () {
     cat <<EOF
 Usage:
-    $0 --format <format> --post <url> --from-stdin --save <maildir>
+    $0 --format <format> --post <url> --from-stdin [--save-on-fail <maildir>]
     $0 --format <format> --post <url> --from-maildir <maildir>
 
 Parse and convert freeform "Delivery Status Reports" Mails into json for posting it to a webserver.
@@ -12,17 +12,16 @@ Parse and convert freeform "Delivery Status Reports" Mails into json for posting
 Can be used to scan through an existing set of mails inside a maildir,
 or as a local mail delivery agent in postfix or getmail.
 
-
---format
-    webhook format: sendgrid, zone-mta, file
---post
-    http(s) post url, or local filename in case of format=file
+--format <format>
+    webhook format: sendgrid, zonemta
+--post <url>
+    http(s) post url, or local directory name prefixed with file://
 
 --from-stdin
-    read one message from stdin
---save <maildir>
+    read one message from stdin, parse, post dsr, exit
+--save-on-fail <maildir>
     if message was not dsr or could not get converted, or the webhook didnt return 200 OK
-    save mail to maildir
+    save original mail contents to maildir
 
 --from-maildir <maildir>
     read all new messages of configured maildir, process them,
@@ -30,7 +29,7 @@ or as a local mail delivery agent in postfix or getmail.
 
 EOF
 }
-if test "$format" = "file"; then
+if test "$url" beginswith FIXME = "file"; then
     perl -MSisimai -lE 'print Sisimai->dump(STDIN)' | \
     /usr/local/bin/sisimai_transform.py --format "$format" >> "$url"
 else
