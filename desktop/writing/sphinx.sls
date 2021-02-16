@@ -2,7 +2,7 @@ include:
   - vcs
   - python
   - latex
-  - desktop.spellcheck
+  - desktop.language.spellcheck
 
 sphinx:
   pkg.installed:

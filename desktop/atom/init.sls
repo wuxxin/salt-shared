@@ -1,6 +1,6 @@
 include:
   - desktop.code
-  - desktop.spellcheck
+  - desktop.language.spellcheck
 {% if grains['os'] == 'Ubuntu' %}
   - ubuntu
 {% endif %}

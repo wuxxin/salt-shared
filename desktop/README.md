@@ -2,16 +2,18 @@
 
 Installs and configures features usually wanted for a working desktop
 
+**Note**: Lists are not up2date
+
 ## Pillar Settings
 
 desktop:
   development:
-    enabled:   *false|true      # also installs developer packages
+    enabled:   *false|true      # install developer packages
   video:
     loopback:
-      enabled: *false|true      # also install video4linux2 loopback kernel modules
+      enabled: *false|true      # install video4linux2 loopback kernel modules
   proprietary:
-    enabled:   *false|true      # also install signal and skype
+    enabled:   *false|true      # install signal and skype
 
 ## Main Features
 
@@ -27,8 +29,11 @@ desktop:
     * dtp software: scribus
 
 * voice: mumble, linphone, skype (if enabled)
+
 * chat: riot, signal, optional: pidgin
+
 * video: vlc, gstreamer and codecs, video loopback devices (if enabled)
+
 * security:
     * tor browser bundle
     * keychain/keyring support packages
@@ -38,8 +43,8 @@ desktop:
 * browser:
     * firefox, chromium browser
 
-* electronic signing:
-    * jre, Java Webstart (icedtea-netx), chipcard daemon
+* hardware support:
+    * electronic signing chipcard daemon
 
 * ubuntu:
     * /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie

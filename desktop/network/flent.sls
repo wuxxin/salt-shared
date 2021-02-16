@@ -7,23 +7,37 @@ include:
   - desktop.network.irtt
   - desktop.network.netperf
 
-http-getter:
+flent-tools-req:
   pkg.installed:
     - pkgs:
       - build-essential
       - cmake
       - libcurl4-openssl-dev
+
+http-getter:
   git.latest:
     - name: https://github.com/tohojo/http-getter.git
     - target: /usr/local/src/http-getter
     - require:
-      - pkg: http-getter
+      - pkg: flent-tools-req
   cmd.run:
     - name: make all install
     - cwd: /usr/local/src/http-getter
     - onchanges:
       - git: http-getter
-  
+
+traffic-gen:
+  git.latest:
+    - name: https://github.com/tohojo/traffic-gen.git
+    - target: /usr/local/src/traffic-gen
+    - require:
+      - pkg: flent-tools-req
+  cmd.run:
+    - name: cmake . && make && cp traffic-gen /usr/local/bin
+    - cwd: /usr/local/src/traffic-gen
+    - onchanges:
+      - git: traffic-gen
+
 flent-req:
   pkg.installed:
     - pkgs:
@@ -37,32 +51,34 @@ flent-req:
 
 {% if grains['os'] == 'Ubuntu' %}
   {%- if grains['osmajorrelease']|int >= 19 %}
-    {# flent is broken with newer pyqt5, 
+
+    {%- set flent_giturl='https://github.com/tohojo/flent.git@v2.0.0#egg=flent' %}
+    {# flent is broken with newer pyqt5,
         git master @2020-01-30 has pyside2 support which is working #}
 {{ pip3_install('shiboken2', require='pkg: flent-req') }}
 {{ pip3_install('pyside2', require='pip: shiboken2') }}
 {{ pip3_install('qtpy', require='pip: pyside2') }}
-{{ pip3_install('git+https://github.com/tohojo/flent.git#egg=flent', require=['pkg: flent-req', 'pip: qtpy']) }}
+{{ pip3_install('git+'+ flent_giturl, require=['pkg: flent-req', 'pip: qtpy']) }}
 
-flent: 
+flent:
   pkg.installed:
     - pkgs:
       - fping
     - require:
       - pkg: flent-req
-      - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
+      - pip: python3-git+{{ flent_giturl }}
   cmd.run:
     - name: make all install
     - cwd: /usr/local/share/doc/flent/misc
     - onchanges:
-      - pip: python3-git+https://github.com/tohojo/flent.git#egg=flent
+      - pip: python3-git+{{ flent_giturl }}
 
   {%- else %}
 
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("flent_ppa", "tohojo/flent", require_in= "pkg: flent") }}
 
-flent: 
+flent:
   pkg.installed:
     - pkgs:
       - fping

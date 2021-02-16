@@ -1,4 +1,5 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'python/lib.sls' import pipx_install %}
 
 include:
   - python.dev
@@ -6,11 +7,7 @@ include:
 
 {# poetry - Python packaging and dependency management made easy #}
 {# install poetry as pipx user package, so its isolated from others #}
-poetry:
-  cmd.run:
-    - name: pipx install poetry
-    - unless: pipx list | grep poetry -q
-    - runas: {{ user }}
+{{ pipx_install('poetry', user) }}
 
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:
@@ -30,3 +27,11 @@ pyenv_bashrc:
     - content: |
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
+
+{#
+python shell stuff
+pip install sh        # very elegant python shell
+pip install sarge     # python shell execute with "; &  | && || <>"
+https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
+pip install requests  # Python HTTP Requests for Humans
+#}

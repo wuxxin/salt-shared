@@ -1,5 +1,5 @@
 include:
-  - desktop.spellcheck
+  - desktop.language.spellcheck
   - .libreoffice
   - .sphinx
   - .publishing

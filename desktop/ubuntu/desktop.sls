@@ -25,6 +25,9 @@ desktop-fonts:
       - fonts-ubuntu
       - fonts-liberation2
       - fonts-droid-fallback
+      - fonts-noto-core
+      - fonts-noto-mono
+      - fonts-noto-ui-core
       - fonts-lmodern
       - fonts-larabie-deco
       - fonts-larabie-straight

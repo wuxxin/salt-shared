@@ -12,13 +12,13 @@ include:
   - .ftp
   - .flatpak
   - .graphics
-  - .health
+  - .language
   - .music
   - .network
   - .security
-  - .spellcheck
   - .terminal
   - .video
+  - .workrave
   - .writing
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
