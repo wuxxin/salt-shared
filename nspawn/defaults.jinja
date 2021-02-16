@@ -9,10 +9,11 @@ name: ""
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
 
-# volatile: can be "true, false, overlay, state, copy"
+# volatile: can be "true, false", overlay, state"
 # if "true" or "overlay", runs container with --volatile:overlay fs which is later discarded
-# if "copy", container is run with --ephemeral, wich creates a temporary snapshot before starting
 volatile: false
+# ephemeral: if set true, container is run with --ephemeral, wich creates a temporary snapshot before starting
+ephemeral: false
 
 # command: if set, will replace default command which is "--boot" instead of command
 command: ""
@@ -48,6 +49,9 @@ networks: []
 # ports: define port redirections: list: - "portnr:portnr"
 ports: []
 
+# options: dict: {key: value,} container options parameter for nspawn
+options: {}
+
 # systemd restart: "no", "on-failure" (default) or
 # advanced: "on-success, on-abnormal, on-watchdog, on-abort, or always"
 restart: ""
@@ -56,8 +60,6 @@ after: ""
 requires: ""
 wants: ""
 
-# options: dict: {key: value,} container options parameter for nspawn
-options: {}
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
