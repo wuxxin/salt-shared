@@ -1,0 +1,11 @@
+{% load_yaml as defaults %}
+packages:
+  update:
+    automatic: false
+pipx:
+  update:
+    automatic: false
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+    grain='default', default= 'default', merge= salt['pillar.get']('python', {})) %}
