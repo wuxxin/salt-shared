@@ -11,6 +11,7 @@ ocr:
       - ocrmypdf
       - pdfsandwich
       - paperworks
+      - pdfsam
 
 tesseract-dicts:
   pkg.installed:

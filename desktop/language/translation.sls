@@ -5,4 +5,4 @@ include:
   - python.dev
 
 {# install argostranslate as pipx user package, so its isolated from others #}
-{{ pipx_install(argostranslate, user) }}
+{{ pipx_install('argostranslate', user=user) }}
