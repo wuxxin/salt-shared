@@ -2,14 +2,14 @@ include:
   - python
 
 {% macro pip_install(package_or_packagelist, version="3", kwargs={}) %}
+  {% from "python/defaults.jinja" import settings as python_settings %}
 "python{{ version }}-{{ package_or_packagelist }}":
   pip.installed:
   {%- if package_or_packagelist is iterable and package_or_packagelist is not string %}
-    - pkgs: {{ package_or_packagelist}}
+    - pkgs: {{ package_or_packagelist }}
   {%- else %}
     - name: {{ package_or_packagelist }}
   {%- endif %}
-  {% from "python/defaults.jinja" import settings as python_settings %}
   {% if 'upgrade' in kwargs %}
     - upgrade: {{ kwargs['upgrade'] }}
   {% elif python_settings['packages']['update']['automatic'] %}
@@ -45,6 +45,7 @@ include:
   {%- endfor %}
 {% endmacro %}
 
+
 {% macro pix_install(package, user, kwargs={}) %}
   {% from "python/defaults.jinja" import settings as python_settings %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
@@ -78,6 +79,20 @@ pipx_{{ package }}:
       {%- endif %}
     {%- endif %}
   {%- endfor %}
+{% endmacro %}
+
+{% macro pix_inject(package, package_or_packagelist, user, kwargs={}) %}
+pipx_inject_{{ package }}_{{ hash(package_or_packagelist) }}:
+  cmd.run:
+    - name: pipx install {{ '-U' if upgrade }}{{ package }}
+    - unless: |
+        pipx list | grep {{ package }} -q &&
+        pipx list |
+    - runas: {{ user }}
+    - require:
+      - pip: pipx
+--include-apps
+
 {% endmacro %}
 
 {% macro pip3_install(package_or_packagelist) %}
