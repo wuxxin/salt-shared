@@ -21,6 +21,7 @@ base-tools:
       {# compression #}
       - bzip2           {# bzip2 is a patent free, high-quality data compressor #}
       - xz-utils        {# command line tools for working with XZ compression #}
+      - zstd            {# Zstandard, is a fast lossless compression algorithm #}
       {# conversion/transformation/querying #}
       - sqlite3         {# A command line interface for SQLite version 3 #}
       - jq              {# Command-line JSON processor #}
