@@ -1,5 +1,5 @@
 
-{% macro volume(name, labels=[], driver='local', opts=[]) %}
+{% macro volume(name, labels=[], opts=[]) %}
   {%- set labels_string = '' if not labels else '-l ' ~ labels|join(' -l ') %}
   {%- set opts_string = '' if not opts else '-o ' ~ opts|join(' -o ') %}
 nspawn_volume_{{ name }}:
