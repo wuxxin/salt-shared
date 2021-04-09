@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Android-Emulator-{{ name }}
+Comment=Android Emulator Desktop Version
+Exec=android-{{ name }}.sh
+Exec=env LANG=he_IL.UTF-8 abiword %U
+Terminal=true
+Icon=applications-internet
+Categories=Network;
+Keywords=android;emulator;

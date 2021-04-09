@@ -1,20 +1,79 @@
 {% load_yaml as defaults %}
 
+conf:
+  # /etc/containers/containers.conf
+  containers:
+    containers:
+      default_capabilities:
+        - "CHOWN"
+        - "DAC_OVERRIDE"
+        - "FOWNER"
+        - "FSETID"
+        - "KILL"
+        - "NET_BIND_SERVICE"
+        - "SETFCAP"
+        - "SETGID"
+        - "SETPCAP"
+        - "SETUID"
+        - "SYS_CHROOT"
+      default_sysctls:
+        - "net.ipv4.ping_group_range=0 0"
+    engine:
+      # Container Runtime: ["crun", "runc", "kata"]
+      # crun: OCI runtime with support for cgroup V2
+      runtime: "crun"
+
+  # /etc/containers/storage.conf
+  storage:
+    storage:
+      # Primary storage driver
+      driver: "overlay"
+
+      # storage options
+      options:
+        overlay:
+          mount_program: "/usr/bin/fuse-overlayfs"
+
+  # /etc/containers/mounts.conf
+  mounts:
+    # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
+    # one mount per line. For example, a mounts.conf with the line
+    # - "/usr/share/secrets:/run/secrets"
+    # would cause the contents of the /usr/share/secrets directory on the host
+    # to be mounted on the /run/secrets directory inside the container.
+    # Setting mountpoints allows containers to use the files of the host.
+    mounts: []
+
+  # /etc/containers/policy.json
+  policy:
+    # Policy: Manages which registries you trust as a source of container images based on its location.
+    # The location is determined by the transport and the registry host of the image.
+    # Using this container image docker://docker.io/library/busybox as an example,
+    #   docker is the transport and docker.io is the registry host.
+    default:
+      - type: insecureAcceptAnything
+    transports:
+      "docker-daemon":
+        "":
+          - type: insecureAcceptAnything
+
 # used in containers/init.sls and containers/lib.sls
-container:
+podman:
   service_basepath: /etc/containers/podman.service
   build_basepath: /var/lib/containers/podman-build
-  user_service_basepath: ""
-  user_build_basepath: ""
+  user_service_basepath: "${HOME}/.config/podman.service"
+  user_build_basepath: "${HOME}/.local/lib/podman-build"
 
 compose:
   service_basepath: /etc/containers/podman-compose.service
   build_basepath: /var/lib/containers/podman-compose-build
+  user_service_basepath: "${HOME}/.config/podman-compose.service"
+  user_build_basepath: "${HOME}/.local/lib/podman-compose-build"
   compose_filename: docker-compose.yml
   override_filename: docker-compose.override.yml
   env_filename: .env
 
-desktop:
+x11docker:
   default:
     - --podman
     - --xpra
@@ -28,79 +87,53 @@ desktop:
     # - --verbose
     # - --webcam
 
-# part of /etc/containers/containers.conf:[engine]
-engine:
-  # Container Runtime: ["runc"(default), "crun"]
-  # crun: alternative OCI runtime with support for cgroup V2
-  runtime: "crun"
-  # Directory for libpod named volumes. Default:
-  volume_path: "/var/lib/containers/storage/volumes"
-
-# part of /etc/containers/storage.conf
-storage:
-  # Primary storage driver
-  driver: "overlay"
-
-  # Primary Read/Write location of container storage
-  graphroot: "/var/lib/containers/storage"
-
-  # Storage path for rootless users
-  rootless_storage_path : "$HOME/.local/share/containers/storage"
-
-  # storage options
-  options:
-    overlay:
-      mount_program: "/usr/bin/fuse-overlayfs"
-
-# part of /etc/containers/mounts.conf
-# Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
-# one mount per line. For example, a mounts.conf with the line
-# - "/usr/share/secrets:/run/secrets"
-# would cause the contents of the /usr/share/secrets directory on the host
-# to be mounted on the /run/secrets directory inside the container.
-# Setting mountpoints allows containers to use the files of the host.
-mounts: []
-
-# /etc/containers/policy.json
-# Policy: Manages which registries you trust as a source of container images based on its location.
-# The location is determined by the transport and the registry host of the image.
-# Using this container image docker://docker.io/library/busybox as an example,
-#   docker is the transport and docker.io is the registry host.
-policy: |
-    { "default": [ { "type": "insecureAcceptAnything" } ],
-      "transports": {
-        "docker-daemon": { "": [{"type":"insecureAcceptAnything"}] }
-      }
-    }
-
 {% endload %}
 
 
 {% load_yaml as default_container %}
-# name of the container pod and name of the controlling systemd service
+# name of the container pod, systemd service, systemd oneshot, script, desktop app
 name:
-# enabled: if false, service will be stopped, config files are removed, but service is kept
+
+# type: "build", "service", "oneshot", "command", "desktop"
+# build   = build or pull image only, will not generate a systemd service
+# service = create and start command as a systemd service
+# oneshot = create a systemd oneshot execute script
+# command = create a command script in "/usr/local/bin" or "~/.local/bin"
+# desktop = create a desktop gui application via x11docker
+#   if type "desktop", user becomes mandatory
+type: service
+
+# enabled: if false, service will be stopped, config files are removed
 enabled: true
-# absent: if absent is true also remove systemd service files
-absent: false
 # update: if true, container image will be pulled/build on every service start
 update: true
-# ephemeral: if set true, existing container will be removed on start
+# ephemeral (service, oneshot, command, desktop): remove existing container before start
 ephemeral: true
+# absent (service, oneshot): if true also remove systemd service files
+absent: false
+# Set the user namespace mode for the container. options are "pick","auto","host","private"
+# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
+userns: auto
 
-# type: "build", "exec", "oneshot" or "desktop"
-# build = will build or pull image only, will not generate a systemd service
-# exec = start command as a systemd service, oneshot = execute script as systemd oneshot
-type: exec
-# type: desktop
-# # install desktop files for user to call as user application
-# # desktop:user is mandatory, desktop options are passed to x11docker, defaulting to desktop.default
 desktop:
-  # user: username
+  # template: group of options passed to x11docker:  ['default', 'host']
+  template: default
+  # options: list of string for additional options for x11docker
   options: []
+  # entry: desktop entry is used for .desktop file
   entry: {}
+  # type: Application
+  # name: Android-Emulator
+  # comment: Android Emulator Desktop Version
+  # exec: env LANG=de_DE.UTF-8 android-emulator.sh
+  # terminal: "true"
+  # icon: applications-internet
+  # categories: Network;
+  # keywords: android;emulator;
 
-# ### systemd service options (if type = exec|oneshot)
+# type service, oneshot
+# absent: if absent is true also remove systemd service files
+absent: false
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
 # default: "no" if type oneshot, else "on-failure"
 restart: ""
@@ -119,7 +152,6 @@ tag:
 build:
   source: ""
   args: {}
-  # builddir: automatical set at buildtime to directory where build files are located
 # files to be placed inside workdir, which will be available via "./"
 files: {}
 {# Example:
@@ -134,14 +166,6 @@ files: {}
     defaults:
       custom: this is a custom var that will be available in the jinja context
 #}
-# exec:firstrun: commands run if type=exec before the first time the service is started
-# exec:updaterun commands run if type=exec after updating image to newer image before starting new image
-exec:
-  firstrun: []
-  udpaterun: []
-# Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
-userns: host
 
 # environment: dict: {key: value,} add environment data
 environment: {}
@@ -161,6 +185,14 @@ args: ""
 # options: dict: {key: value,} container options parameter for podman run
 options: {}
 
+# additional commands run on first or update executions
+setup:
+  initial:    # commands run before the first time the service is started
+    environment: {}
+    command: ""
+  update: []  # commands run after updating image to newer image before starting new image
+    environment: {}
+    command: ""
 {% endload %}
 
 
@@ -168,18 +200,25 @@ options: {}
 # name of the compose sevice and name of the controlling systemd service
 name:
 
-# enabled: if false, service will be stopped, config files are removed, but service is kept
-enabled: true
-# absent: if absent is true also remove systemd service files
-absent: false
-# update: if true: container image will be pulled/build on every service start
-update: true
-# config type: must be "compose", to make compose/container missmatch detectable
-type: compose
+# type: "service", "oneshot", "command"
+# service = make and start command as a systemd service
+# oneshot = make a systemd oneshot execute script
+# command = make a "oneshot" /usr/local/bin , ~/.local/bin script
+type: service
 
-# ### systemd service options
+# enabled: if false, service will be stopped, config files are removed
+enabled: true
+# update: if true, container image will be pulled/build on every service start
+update: true
+# absent (service, oneshot): if absent is true also remove systemd service files
+absent: false
+# Set the user namespace mode for the container. options are "pick","auto","host","private"
+# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
+userns: auto
+
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
-restart: on-failure
+# default: "no" if type oneshot, else "on-failure"
+restart: ""
 # after, requires, wants: equal to systemd config
 after: ""
 requires: ""
@@ -192,20 +231,21 @@ environment: {}
 # compose source config and compose overrides config
 source:
 config: {}
-# workdir: if empty will use settings.compose.service_basepath+ "/"+ compose.name
-workdir:
+# workdir: will use settings.compose.service_basepath+ "/"+ compose.name
 # builddir: automatical set at buildtime to directory where build files are located
 # files to be placed inside workdir
 files: {}
 {# Examples: see container_defaults #}
-# exec:firstrun: commands run if type=exec before the first time the service is started
-# exec:updaterun commands run if type=exec after updating image to newer image before starting new image
-exec:
-  firstrun: []
-  udpaterun: []
-# Set the user namespace mode for the container. options are "pick","auto","host","private"
-# pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
-userns: host
+
+# additional commands run on first or update executions
+setup:
+  initial:    # commands run before the first time the service is started
+    environment: {}
+    command: ""
+  update: []  # commands run after updating image to newer image before starting new image
+    environment: {}
+    command: ""
+
 {% endload %}
 
 

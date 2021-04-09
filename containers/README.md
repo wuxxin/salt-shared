@@ -1,31 +1,27 @@
-# Podman Containers
+# Podman Containers on Ubuntu/Debian
 
-+ podman (buildah, crun, skopeo, fuse-overlayfs), podman-compose, x11docker
-podman_compose_version = '0.1.7dev'
-x11docker_version = '6.7.0-beta'
+uses: podman (buildah, crun, skopeo, fuse-overlayfs), podman-compose, x11docker
 
 ## Functions
 
-+ volume(name, opts=[], driver='local', labels=[], env={},     user='', remote='')
-+ image(name, tag='', source: '', buildargs= {}, builddir= '', user='', remote='')
-+ container(container_definition, user='', remote='')
-+ compose(compose_definition,     user='', remote='')
++ volume(name, opts=[], driver='local', labels=[], env={}, user='')
++ image(name, tag='', source: '', buildargs= {}, builddir= '', user='')
++ container(container_definition, user='')
++ compose(compose_definition, user='')
 
-+ user    != '': execute as user, use rootless podman
-+ remote  != '': use url to connect to podman (implies podman --remote flag)
-+ CONTAINER_HOST is of the format <schema>://[<user[:<password>]@]<host>[:<port>][<path>]
++ user != '': execute as user, use rootless podman
 
-### volume(name, opts=[], driver='local', labels=[], env={},     user='', remote='')
+### volume(name, opts=[], driver='local', labels=[], env={}, user='')
 
 + create a named volume
 
-### image(name, tag='', source: '', buildargs= {}, builddir= '', user='', remote='')
+### image(name, tag='', source: '', buildargs= {}, builddir= '', user='')
 
 + pull or build an image
 
 ### container(container_definition, user='')
 
-+ pull/build container
++ pull or build a container
 + start a container as systemd service/oneshot
 + create a terminal script, gui start script
 
@@ -39,20 +35,23 @@ x11docker_version = '6.7.0-beta'
 
 ### compose(compose_definition, user='')
 
-+ create pull/build and start a systemd service of the compose file
++ create, pull or build and start a systemd service of the compose file
 
 + compose_definition
   + type: "service", "oneshot", "command"
 
-## Customize
+## Customize container
 
-environment:
-  k: v
++ see default_container and default_compose in defaults.jinja
++ Examples:
+```yaml
 desktop:
+  template: host
   options:
-    - x11 docker option
-  entry:
-    k:v
+    - "--webcam"
+environment:
+  NO_PULSE_AUDIO: "false"
+```
 
 ### remarks
 
@@ -63,4 +62,6 @@ desktop:
 + Podman with the crun OCI runtime now supports a new option to podman run and podman create, --cgroup-conf, which allows for advanced configuration of cgroups on cgroups v2 systems.
 
 + Podman can be easily run as a normal user, without requiring a setuid binary. When run without root, Podman containers use user namespaces to set root in the container to the user running Podman. Rootless Podman runs locked-down containers with no privileges that the user running the container does not have. Some of these restrictions can be lifted (via --privileged, for example), but rootless containers will never have more privileges than the user that launched them. If you run Podman as your user and mount in /etc/passwd from the host, you still won't be able to change it, since your user doesn't have permission to do so.
-+
+
++ remote  != '': use url to connect to podman (implies podman --remote flag)
++ CONTAINER_HOST is of the format <schema>://[<user[:<password>]@]<host>[:<port>][<path>]

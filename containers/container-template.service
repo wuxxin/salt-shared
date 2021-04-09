@@ -23,24 +23,24 @@ Restart={{ entry.restart }}
 {%- endfor %}
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
-ExecStartPre=/bin/bash -c 'cd {{ entry.build.builddir }} && entry.an build \
+ExecStartPre=/bin/bash -c 'cd {{ entry.builddir }} && podman build \
     {{ '--tag='+ entry.tag if entry.tag }} \
     {%- for key,value in entry.build.args.items() %}
     {{ '--build-arg=' ~ key ~ '=' ~ value }} \
     {%- endfor %}
     {{ entry.build.source }}'
   {%- else %}
-ExecStartPre=entry.an pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
+ExecStartPre=podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
   {%- endif %}
 {%- endif %}
 {%- if entry.ephemeral %}
-ExecStartPre=-entry.an rm -f {{ entry.name }}
+ExecStartPre=-podman rm -f {{ entry.name }}
 {%- endif %}
 # RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
 RuntimeDirectory={{ entry.name }}
 WorkingDirectory={{ entry.workdir }}
 EnvironmentFile={{ entry.workdir }}.env
-ExecStart=entry.an run \
+ExecStart=podman run \
   --name={{ entry.name }} \
 {%- if entry.userns == 'pick' %}
   --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
@@ -67,7 +67,7 @@ ExecStart=entry.an run \
   {{ entry.command }} {{ entry.args }}
 {% endif %}
 {%- if entry.type != 'oneshot' %}
-ExecStop=entry.an stop {{ entry.name }}
+ExecStop=podman stop {{ entry.name }}
 
 [Install]
 WantedBy=multi-user.target

@@ -1,9 +1,14 @@
-{%- macro env_repl(data, env={}) -%}
+{%- macro env_repl(data, env={}, user='') -%}
+{%- if user != '' -%}
+{%- set repl_env= env + {'USER': user, 'HOME': salt['user.info'](user)['home'] } -%}
+{%- else -%}
+{%- set repl_env= env -%}
+{%- endif -%}
 {%- set repl_ns= namespace(data= data) -%}
 {%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
 {%- if repl_names != None -%}
   {%- for varname in repl_names -%}
-    {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', env[varname]) -%}
+    {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', repl_env[varname]) -%}
   {%- endfor -%}
 {%- endif -%}
 {{ repl_ns.data }}
@@ -15,9 +20,23 @@
 {%- endmacro -%}
 
 
-{%- macro volume_path(name, user="root") -%}
+{%- macro build_path(name, user='') -%}
 {%- from "containers/defaults.jinja" import settings with context -%}
-{{ settings.engine.volume_path ~ "/" ~ name ~ "/_data" }}
+{%- if user != '' -%}
+{{ env_repl(settings.podman.user_build_basepath ~ '/' ~ name, {}, user) }}
+{%- else -%}
+{{ settings.podman.build_basepath ~ '/' ~ name }}
+{%- endif -%}
+{%- endmacro -%}
+
+
+{%- macro service_path(name, user='') -%}
+{%- from "containers/defaults.jinja" import settings with context -%}
+{%- if user != '' -%}
+{{ env_repl(settings.podman.user_service_basepath ~ '/' ~ name, {}, user) }}
+{%- else -%}
+{{ settings.podman.service_basepath ~ '/' ~ name }}
+{%- endif -%}
 {%- endmacro -%}
 
 
@@ -43,7 +62,7 @@
 
 
 {% macro write_files(entry) %}
-{# if entry.enabled, write files to workdir,
+{# if entry.enabled, write files to workdir else delete files from workdir,
   if source defined and is template, template context will have environment populated #}
   {%- for fname, fdata in entry.files.items() %}
 {{ entry.name }}.files.{{ fname }}:
@@ -74,7 +93,7 @@
     - {{ k }}: {{ v }}
         {%- endif %}
       {%- endfor %}
-      {%- if entry.type != 'build' %}
+      {%- if entry.type in ['service', 'oneshot'] %}
     - watch_in:
       - service: {{ entry.name }}.service
       {%- endif %}
@@ -106,6 +125,7 @@
 
 
 {% macro write_service(entry) %}
+{# write systemd service file and start service if service, remove service if entry.absent #}
 {{ entry.name }}.service:
   file:
     {%- if entry.absent %}
@@ -150,48 +170,74 @@
 {% endmacro %}
 
 
-{% macro volume(name, opts=[], driver='local', labels=[], env={}) %}
-  {%- set name_str = env_repl(name, env) %}
-  {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
-  {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
-containers_volume_{{ name_str }}:
-  cmd.run:
-    - name: podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ name_str }}
-    - unless: podman volume ls -q | grep -q {{ name_str }}
+{% macro write_desktop(entry, user='') %}
+  {%- if user != '' -%}
+  {{ env_repl(settings.podman.user_build_basepath ~ '/' ~ name, {}, user) }}
+  {%- else -%}
+  {%- endif %}
+{# write desktop environment files (either for everyone or for one user) #}
+{#
+/usr/local
+~/.local
+/share/applications/android-{{ name }}.desktop:
+/usr/local
+~/.local
+/bin/android-{{ name }}.sh:
+#}
 {% endmacro %}
 
 
-{% macro image(name, tag='', build={'source': '', 'args': {}}, builddir= '', require_in='') %}
-containers_image_{{ name }}:
+{% macro volume(name, opts=[], driver='local', labels=[], env={}, user='') %}
+  {%- set name_str = env_repl(name, env, user) %}
+  {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
+  {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
+  {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
+containers_volume_{{ user }}_{{ name_str }}:
   cmd.run:
-  {%- if builddir == '' or build.source == '' %}
-    - name: podman image pull {{ name }}{{ ':' ~ tag if tag != '' else '' }}
-    - unless: podman image exists {{ name }}{{ ':' ~ tag if tag != '' else '' }}
+    - name: {{ gosu_user }} podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ name_str }}
+    - unless: {{ gosu_user }} podman volume ls -q | grep -q {{ name_str }}
+{% endmacro %}
+
+
+{% macro image(name, tag='', source: '', buildargs= {}, builddir= '', user='') %}
+  {%- set tag_opt = '' if tag == '' else ':' ~ tag %}
+containers_image_{{ user }}_{{ name }}:
+  cmd.run:
+  {%- if builddir == '' or source == '' %}
+    - name: {{ gosu_user }} podman image pull {{ name }}{{ tag_opt }}
+    - unless: {{ gosu_user }} podman image exists {{ name }}{{ tag_opt }}
   {%- else %}
     - cwd: {{ builddir }}
     - name: |
-        podman build {{ '--tag='~ name~ ':' ~ tag|d('latest') }} \
-        {%- for key,value in build.args.items() %}
+        {{ gosu_user }} podman build {{ '--tag='~ name~ ':' ~ tag|d('latest') }} \
+        {%- for key,value in buildargs.items() %}
           {{ '--build-arg=' ~ key ~ '=' ~ value }} \
         {%- endfor %}
-          {{ build.source }}
-    {%- if require_in != '' %}
-    - require_in:
-      - {{ require_in }}
-    {%- endif %}
+          {{ source }}
   {%- endif %}
 {% endmacro %}
 
 
-{% macro container(container_definition) %}
+{% macro container(container_definition, user='') %}
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
+
   {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
   {%- do entry.environment.update({'SERVICE_NAME': entry.name}) %}
-  {# add workdir and builddir to entry #}
-  {%- do entry.update({'workdir': settings.container.service_basepath ~ '/' ~ entry.name }) %}
-  {%- do entry.update({'builddir': settings.container.build_basepath ~ '/' ~ entry.name }) %}
+  {%- if user != '' %}
+    {%- do entry.environment.update({
+        'USER': user, 'HOME': salt['user.info'](user)['home'] }) %}
+    {%- do entry.update({
+        'workdir': env_repl(settings.podman.user_service_basepath ~ '/' ~ entry.name, entry.environment),
+        'builddir': env_repl(settings.podman.user_build_basepath ~ '/' ~ entry.name, entry.environment),
+      }) %}
+  {%- else %}
+    {%- do entry.update(
+      { 'workdir': settings.podman.service_basepath ~ '/' ~ entry.name,
+        'builddir': settings.podman.build_basepath ~ '/' ~ entry.name
+      }) %}
+  {%- endif %}
 
 {{ create_directories(entry) }}
 {{ write_files(entry) }}
@@ -201,44 +247,71 @@ containers_image_{{ name }}:
     {# create volumes if defined via storage #}
     {%- for def in entry.storage %}
 {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), env=entry.environment) }}
+          labels=def.labels|d([]), env=entry.environment, user=user, remote=remote) }}
     {%- endfor %}
 
     {# if not update on every container start, update now on install state #}
     {%- if not entry['update'] or entry.type == 'build' %}
       {%- if entry.type == 'build' %}
-{{ image(entry.image, entry.tag, entry.build, entry.builddir) }}
+{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user, remote=remote) }}
       {%- else %}
-{{ image(entry.image, entry.tag, entry.build, entry.builddir,
+{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user, remote=remote,
     require_in='file: ' ~ entry.name~ '.service') }}
       {%- endif %}
     {%- endif %}
   {%- endif %}
 
-  {%- if entry.type != 'build' %}
+  {%- if entry.type in ['service', 'oneshot'] %}
 {{ write_service(entry) }}
+  {%- elif entry.type == 'desktop' %}
+{{ write_desktop(entry) }}
   {%- endif %}
 
 {% endmacro %}
 
 
-{% macro compose(compose_definition) %}
+{%- macro container_volume_path(volume_name, container_definition, user='') -%}
+{%- from "containers/defaults.jinja" import settings, default_container with context -%}
+{%- set entry= salt['grains.filter_by']({'default': default_container},
+  grain='default', default= 'default', merge=container_definition) -%}
+{%- do entry.environment.update({'SERVICE_NAME': entry.name}) -%}
+{%- if user != '' -%}
+{{ env_repl(settings.storage.rootless_storage_path ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
+{%- else -%}
+{{ env_repl(settings.storage.graphroot ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
+{%- endmacro -%}
 
+
+{% macro compose(compose_definition, user='', remote='') %}
   {%- from "containers/defaults.jinja" import settings, default_compose with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_compose},
     grain='default', default= 'default', merge=compose_definition) %}
-  {%- if not entry.workdir %}
-    {%- do entry.update({'workdir': settings.compose.service_basepath ~ '/' ~ entry.name }) %}
+
+  {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
+  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) %}
+  {%- if user != '' %}
+    {%- do entry.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) %}
+    {%- if not entry.workdir %}
+      {%- do entry.update({'workdir':
+        env_repl(settings.compose.user_service_basepath ~ '/' ~ entry.name, entry.environment)}) %}
+    {%- endif %}
+    {%- if not entry.builddir %}
+      {%- do entry.update({'builddir':
+        env_repl(settings.compose.user_build_basepath ~ '/' ~ entry.name, entry.environment)}) %}
+    {%- endif %}
+  {%- else %}
+    {%- if not entry.workdir %}
+      {%- do entry.update({'workdir':
+        env_repl(settings.compose.service_basepath ~ '/' ~ entry.name)}) %}
+    {%- endif %}
+    {%- if not entry.builddir %}
+      {%- do entry.update({'builddir':
+        env_repl(settings.compose.build_basepath ~ '/' ~ entry.name)}) %}
+    {%- endif %}
   {%- endif %}
-  {%- if not entry.builddir %}
-    {%- do entry.update({'builddir': settings.compose.build_basepath ~ '/' ~ entry.name }) %}
-  {%- endif %}
+
   {%- set composefile= entry.workdir ~ "/" ~ settings.compose.compose_filename %}
   {%- set overridefile= entry.workdir ~ "/" ~ settings.compose.override_filename %}
-
-{{ create_directories(entry) }}
-{{ write_files(entry) }}
-{{ write_env(entry) }}
 
 {# create compose,override files,
   fill with source,config or config,none if source empty #}
@@ -317,76 +390,4 @@ containers_image_{{ name }}:
       - file: {{ entry.name }}.env
   {%- endif %}
 
-{% endmacro %}
-
-
-
-{% macro desktop_application(application_definition) %}
-
-  {%- from "containers/defaults.jinja" import settings, default_container with context %}
-  {%- set entry= salt['grains.filter_by']({'default': default_container},
-    grain='default', default= 'default', merge=application_definition) %}
-  {# add SERVICE_NAME to environment, so volume, storage, ports can pick it up #}
-  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) %}
-  {# add workdir and builddir to entry #}
-  {%- do entry.update({'workdir': settings.container.service_basepath ~ '/' ~ entry.name }) %}
-  {%- do entry.update({'builddir': settings.container.build_basepath ~ '/' ~ entry.name }) %}
-
-{{ create_directories(entry) }}
-{{ write_files(entry) }}
-{{ write_env(entry) }}
-
-  {%- if entry.enabled %}
-    {# create volumes if defined via storage #}
-    {%- for def in entry.storage %}
-{{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), env=entry.environment) }}
-    {%- endfor %}
-{{ image(entry.image, entry.tag, entry.build, entry.builddir) }}
-  {%- endif %}
-
-~/.local/share/applications/android-{{ name }}.desktop:
-  file.managed:
-    - contents: |
-        [Desktop Entry]
-        Type=Application
-        Name=Android-Emulator-{{ name }}
-        Comment=Android Emulator Desktop Version
-        Exec=android-{{ name }}.sh
-        Terminal=true
-        Icon=applications-internet
-        Categories=Network;
-        Keywords=android;emulator;
-
-~/.local/bin/android-{{ name }}.sh:
-  file.managed:
-    - contents: |
-      #!/usr/bin/bash
-      exec x11docker \
-  {%- for k,v in profile.x11docker %}
-        {{ k,v }}
-  {%- endfor %}
-        -- \
-  {%- for k,v in profile.environment %}
-        -e {{ k }}={{ v }} \
-  {%- endfor %}
-        -- \
-        localhost/android-emulator:latest
-{#
-x11docker \
-  --verbose --podman --cap-default \
-  --hostdisplay --clipboard --gpu --hostipc \
-  --webcam -- \
-    -e EMULATOR_PARAMS="-gpu swiftshader_indirect -accel on -no-boot-anim -memory 2048 -camera-front webcam1" \
-    -e ADBKEY="$(cat ~/.android/adbkey)" \
-    -e NO_FORWARD_LOGGERS=true \
-    -e NO_PULSE_AUDIO=true \
-    -e "AVD_CONFIG=disk.dataPartition.size = 768m" \
-    --volume android-emulator:/android-home \
-    --device /dev/kvm \
-    --publish 8554:8554/tcp  \
-    --publish 5555:5555/tcp \
-    -- \
-      localhost/android-emulator:latest
-  #}
 {% endmacro %}

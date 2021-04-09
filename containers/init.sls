@@ -15,7 +15,7 @@ include:
   file:
     - directory
 
-{% for dirname in [settings.container.service_basepath, settings.container.build_basepath,
+{% for dirname in [settings.podman.service_basepath, settings.podman.build_basepath,
     settings.compose.service_basepath, settings.compose.build_basepath] %}
 {{ dirname }}:
   file:
@@ -30,8 +30,7 @@ include:
     - require:
       - file: /etc/containers
   file.serialize:
-    - dataset:
-        engine: {{ settings.engine }}
+    - dataset: {{ settings.conf.containers }}
     - formatter: toml
     - merge_if_exists: True
     - require:
@@ -39,8 +38,7 @@ include:
 
 /etc/containers/storage.conf:
   file.serialize:
-    - dataset:
-        storage: {{ settings.storage }}
+    - dataset: {{ settings.conf.storage }}
     - formatter: toml
     - merge_if_exists: True
     - require:
@@ -50,8 +48,8 @@ include:
   file.managed:
     - contents: |
         # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST
-  {%- if settings.mounts|d([]) %}
-    {%- for mount in settings.mounts %}
+  {%- if settings.conf.mounts.mounts|d([]) %}
+    {%- for mount in settings.conf.mounts.mounts %}
         {{ mount }}
     {%- endfor %}
   {%- endif %}
@@ -61,7 +59,7 @@ include:
 /etc/containers/policy.json:
   file.managed:
     - contents: |
-{{ settings.policy|indent(8,True) }}
+{{ settings.conf.policy|json|indent(8,True) }}
     - require:
       - file: /etc/containers
 
@@ -85,7 +83,7 @@ podman:
       - skopeo
       - fuse-overlayfs
 
-# snapshot (2020/08/26) from: https://raw.githubusercontent.com/flobz/podman-compose/devel/podman_compose.py
+# snapshot from: https://raw.githubusercontent.com/containers/podman-compose/devel/podman_compose.py
 podman_compose.py:
   file.managed:
     - source: salt://containers/podman_compose.py
