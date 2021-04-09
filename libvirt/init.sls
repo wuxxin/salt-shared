@@ -1,22 +1,5 @@
 include:
-  - kernel
-  - kernel.cgroup
-  - kernel.swappiness
-
-qemu:
-  pkg.installed:
-    - pkgs:
-      - qemu-block-extra
-      - qemu-kvm
-      - qemu-system
-      - qemu-system-x86
-      - qemu-user
-      - qemu-user-binfmt
-      - qemu-utils
-      - ovmf
-      - libosinfo-bin
-    - require:
-      - sls: kernel.cgroup
+  - kernel.kvm
 
 libvirt:
   pkg.installed:
@@ -30,7 +13,7 @@ libvirt:
       - libvirt-daemon-driver-storage-zfs
 {%- endif %}
     - require:
-      - pkg: qemu
+      - sls: kernel.kvm
   service.running:
 {%- if grains['osmajorrelease']|int < 18 %}
     - name: libvirt-bin

@@ -5,7 +5,7 @@ cgroup:
 
 {% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 
-{# it's 2020, enable cgroup v2 only hierachy managed by systemd #}
+{# it's past 2020, enable cgroup v2 only hierachy managed by systemd #}
 cgroup-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/cgroup.cfg

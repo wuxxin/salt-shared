@@ -37,7 +37,7 @@ keep_current: false
 # if virtual_extra, install additional extra modules
 virtual_extra: true
 package: {{ salt['grains.filter_by'](package_defaults,
-  grain= 'lsb_distrib_codename', default= 'generic',
+  grain= 'oscodename', default= 'generic',
   merge= salt['pillar.get']('kernel:package', {})) }}
 overlay:
   redirect_dir: "on"

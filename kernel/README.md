@@ -8,13 +8,13 @@
 + https://nateware.com/2013/04/06/linux-network-tuning-for-2013/
 
 ### state: kernel
-+ install matching kernel-image, headers and tools, depending os-version.
-+ if "kernel:keep_current:True" (default=False)
-  or if instance running on shared kernel (eg. LXC, LXD, NSPAWN)
-      + install only matching kernel- headers and tools of the running kernel
++ install matching kernel-image, headers and tools, depending os-version
++ if "kernel:keep_current:True" (default=False) or
+    if instance running on shared kernel (eg. LXC, LXD, NSPAWN):
+    + install only matching kernel- headers and tools of the running kernel
 
 ### state: kernel.server
-target: big machine setup, many open files, network connections, processes, containers, etc.
++ target: big machine setup, many open files, network connections, processes, containers, etc.
 
 + kernel.running
     + make kernel headers of running kernel available, in case dkms modules need them
@@ -33,6 +33,8 @@ target: big machine setup, many open files, network connections, processes, cont
 + kernel.module
     + activate typical used network kernel modules
     + activate and configure kernel overlay fs module
++ kernel.kvm
+    + install qemu and all support files for kvm powered virtualization
 
 ### state: sysctl.tcp-bbr
 + install tcp bbr congestion control instead of kernel default (usually cubic)
