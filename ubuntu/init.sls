@@ -20,11 +20,11 @@ ppa_ubuntu_installer:
       - update-notifier-common
 {%- if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
   '"http://ppa.launchpad.net/'+ ppaname+ '/ubuntu/dists/'+
-  grains['lsb_distrib_codename']+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
+  grains['oscodename']+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
   pkgrepo.managed:
     - ppa: {{ ppaname }}
     - file: /etc/apt/sources.list.d/{{ statename }}.list
-    - dist: {{ grains['lsb_distrib_codename'] }}
+    - dist: {{ grains['oscodename'] }}
     - require:
       - pkg: {{ statename }}
   {%- if kwargs['require_in']|d(None) %}

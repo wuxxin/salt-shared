@@ -3,7 +3,7 @@ include:
 
 virtualbox:
   pkgrepo.managed:
-    - name: deb https://download.virtualbox.org/virtualbox/debian {{ grains['lsb_distrib_codename'] }} contrib
+    - name: deb https://download.virtualbox.org/virtualbox/debian {{ grains['oscodename'] }} contrib
     - key_url: https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
     - file: /etc/apt/sources.list.d/virtualbox_ppa.list
     - require:
