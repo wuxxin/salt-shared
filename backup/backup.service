@@ -18,6 +18,5 @@ Environment=UNITNAME=%n
 Environment=HOME={{ settings.home_dir }}
 Environment=USER={{ settings.user }}
 EnvironmentFile={{ settings.backup_env }}
-PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD REPOSITORY_MAXSIZE {% if env %}{% for k,v in env.items() %}{{ k }} {% endfor %}{% endif %}
 WorkingDirectory={{ settings.home_dir }}
 ExecStart=/usr/local/bin/app-backup.sh --from-systemd-service
