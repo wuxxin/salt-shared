@@ -2,8 +2,6 @@
 
 Installs and configures features usually wanted for a working desktop
 
-**Note**: Lists are not up2date
-
 ## Pillar Settings
 
 desktop:
@@ -57,11 +55,8 @@ desktop:
 needs desktop:development:enabled: true
 
 * editor: atom
-* revision control systems & tools
-    * git-crypt, homeshick
+* revision control systems & tools, git-crypt, homeshick
 * python development
-* python sci-py distribution
-* android: tools
-* emulation:
-  * qemu/kvm, libvirt, virt-manager
-  * vagrant, vagrant-libvirt, tools
+* scientific python
+* android tools
+* emulation/virtualization: qemu/kvm, libvirt, lxc, vagrant, nspawn

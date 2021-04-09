@@ -18,19 +18,21 @@ include:
   - .security
   - .terminal
   - .video
-  - .workrave
   - .writing
 
 {% if salt['pillar.get']('desktop:development:enabled', false) == true %}
   - vcs
-  - python.dev
-  - python.scientific
   - tools.extra
-  - android.emulator-container
   - .homeshick
-  - .atom
+  - .python
+  - .python.scipy
+  - .python.jupyter
+  - .python.fastai
+  - .python.neurodsp
   - .code
+  - .atom
   - .emulation
+  - android.emulator-container
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
