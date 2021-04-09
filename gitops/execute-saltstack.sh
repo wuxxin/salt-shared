@@ -60,9 +60,9 @@ salt_install() { # no parameter
     os_architecture=$(dpkg --print-architecture)
 
     if test "$os_architecture" = "amd64"; then
-        if [[ "$os_codename" =~ ^(xenial|bionic|focal|stretch|buster)$ ]]; then
+        if [[ "$os_codename" =~ ^(bionic|focal|stretch|buster)$ ]]; then
             echo "installing saltstack ($salt_major_version) for python 3 from ppa"
-            salt_major_version="3001"
+            salt_major_version="3003"
             prefixdir="py3"
             wget -O - "https://repo.saltstack.com/${prefixdir}/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version}/SALTSTACK-GPG-KEY.pub" | apt-key add -
             echo "deb [arch=${os_architecture}] http://repo.saltstack.com/${prefixdir}/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version} ${os_codename} main" > /etc/apt/sources.list.d/saltstack.list
