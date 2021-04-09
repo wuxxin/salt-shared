@@ -2,7 +2,7 @@ include:
   - vcs
   - python
   - python.ipython
-  - latex
+  - desktop.writing.latex
   - desktop.writing.libreoffice
 
 prereq_doconce:
@@ -26,7 +26,7 @@ prereq_doconce:
     - require:
       - sls: vcs
       - sls: python
-      - sls: latex
+      - sls: desktop.writing.latex
       - sls: desktop.writing.libreoffice
 
 {% load_yaml as pip_list %}
