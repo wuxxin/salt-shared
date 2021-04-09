@@ -3,7 +3,7 @@
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
   tag: 30.1.2
-  
+
   default_args:
     - -accel on
     - -no-boot-anim
@@ -51,7 +51,8 @@ container:
     tag: latest
     type: desktop
     desktop:
-      options: []
+      options:
+        - "--group-add kvm"
       entry:
         Comment: Android Emulator Desktop Version
         Terminal: "true"

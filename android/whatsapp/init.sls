@@ -10,7 +10,9 @@ environment:
   ANDROID_DATA_VOLUME: android-whatsapp
   ADD_EMULATOR_PARAMS: "-netdelay umts -netspeed hsdpa -camera-front webcam1"
 desktop:
-  options: {{ container_settings.desktop.host + ['--webcam'] }}
+  template: host
+  options:
+    - "--webcam"
 {% endload %}
 
 {{ android_emulator_desktop(whatsapp_emulator_definition, user) }}
