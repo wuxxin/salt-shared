@@ -5,19 +5,26 @@ some states have a documentation README.md
 
 ### What can you do with it
 
-* Target Platforms: Ubuntu Focal 20.04 LTS
-    * many states also work with older/newer ubuntu and other debian based distros.
-    * To bootstrap a machine from scratch with a custom storage setup, see:
-      [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
+* Target Platform: Ubuntu Focal 20.04 LTS
+    * many states also work with older/newer ubuntu/debian based distros
+
+* To bootstrap a machine from scratch (including a custom storage setup), see:
+    * [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
 * Features
-    * [node](node): basic machine setup (hostname, locale, network, storage)
-    * [gitops](gitops): deploy and update machines from git, with webhook support
-    * [hardware](hardware): hardware setup
-    * [kernel](kernel): kernel- image,headers,tools, modifications for running on big hosts
-    * [tools](tools): command line tools
+    * Machine
+        * [node](node): basic machine setup (hostname, locale, network, storage)
+        * [kernel](kernel): kernel- image,headers,tools, modifications for running on big hosts
+        * [hardware](hardware): hardware setup
+        * [gitops](gitops): deploy and update machines from git, with webhook support#
+        * [ubuntu](ubuntu): disable or enable ubuntu specifics
+
+    * Admin
+        * [tools](tools): command line tools
         * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
-    * [python Language Support](python)
+        * [ssh](ssh):
+        * [zfs](zfs):
+        * [python Language Support](python)
 
     * Desktop
         * [desktop](desktop): everything wanted for a desktop installation
@@ -38,23 +45,28 @@ some states have a documentation README.md
 
     * Web
         * [http_frontend](http_frontend): modern https frontend using nginx, acme.sh and easyrsa
+        * [oauth2proxy](oauth2proxy): OAuth2Proxy for Oauth2/oidc Authentification
 
     * Email
         * [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
         * [getmail](getmail): fetchmail alternative
 
-    * Virtual Machines
-        * [libvirt](libvirt): libvirt, qemu/kvm full virtualization
-        * [systemd nspawn](nspawn): leightweight machine virtualization
-        * [lxc](lxc): lxc leightweight machine virtualization
-        * [vagrant](vagrant): vagrant virtual machine manager for libvirt, lxc, lxd, a.o.
+    * Android
+        * [android](android): tools and android emulator container for desktop and headless emulator
 
-    * Container Management
+    * Virtual Machines
+        * [kvm+qemu](kernel/kvm): qemu/kvm full virtualization
+        * [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
+        * [lxc](lxc): lxc leightweight machine virtualization
+        * [systemd nspawn](nspawn): leightweight machine container manager
+        * [vagrant](vagrant): vagrant virtual machine manager (libvirt, lxc, a.o.)
+        * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
+
+    * Container
         * [containers](containers): (OCI) Containers and Container Images Runtime including podman
-        * [docker](docker): Legacy Docker Containers and Container Images Runtime
-        * [k3s](k3s): small footprint Kubernetes Distribution
+        * [k3s](k3s): selfcontained, small footprint Kubernetes Distribution
 
     * Database
         * [postgresql](postgresql): Postgresql Database
         * [mysql](mysql): MariaDB (mysql compatible) Database
-        * [redis](redis): one or more Redis (Key/Value Store) Instances
+        * [redis](redis): Redis (Key/Value Store) Instances
