@@ -1,5 +1,6 @@
 include:
   - desktop.language.spellcheck
   - .libreoffice
+  - .latex
   - .sphinx
-  - .publishing
+  - .scribus

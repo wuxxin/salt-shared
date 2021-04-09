@@ -1,7 +1,7 @@
 include:
   - desktop.language.spellcheck
 
-publishing:
+scribus:
   pkg.installed:
     - pkgs:
       - scribus

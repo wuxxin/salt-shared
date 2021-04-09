@@ -2,9 +2,9 @@
 pdfutils:
   pkg.installed:
     - pkgs:
-      - pdftk
-      - qpdf
       - ghostscript
+      - qpdf
+      - pdftk-java
 
 latex:
   pkg.installed:

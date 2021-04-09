@@ -1,8 +1,13 @@
 include:
   - vcs
   - python
-  - latex
+  - desktop.writing.latex
   - desktop.language.spellcheck
+
+pipx_install('sphinx')
+pipx_inject('sphinx', ['sphinxcontrib.actdiag', 'sphinxcontrib.blockdiag',
+  'sphinxcontrib.nwdiag', 'sphinxcontrib.seqdiag', 'sphinxcontrib.spelling'])
+
 
 sphinx:
   pkg.installed:
