@@ -1,10 +1,11 @@
 
-# journald: triple the default RateLimitBurst, appliance startup is noisy
-# journald: do not forward to syslog for storing, because we let journald store on disk
+# journald: triple the default RateLimitBurst, startup is noisy
 {% for p,r in [
   ("RateLimitBurst", "RateLimitBurst=3000"),
   ] %}
+
 {#
+# journald: do not forward to syslog for storing, because we let journald store on disk
 ("ForwardToSyslog", "ForwardToSyslog=No"),
 ("Storage", "Storage=persistent"),
 #}

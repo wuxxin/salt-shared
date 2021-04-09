@@ -3,4 +3,3 @@
 systemd_reload:
   cmd.run:
     - name: systemctl daemon-reload
-    - order: last
