@@ -1,4 +1,4 @@
 include:
-  - .python
-  - .shell
-  - .search
+  - desktop.python
+  - desktop.code.shell
+  - desktop.code.search

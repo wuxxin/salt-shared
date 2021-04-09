@@ -5,6 +5,7 @@ shellcheck:
     - installed
 
 {# shfmt - shell parser, formatter, and interpreter (sh/bash/mksh) #}
+{# FIXME unverified archive from github #}
 {% set base= "https://github.com/mvdan/sh" %}
 {% set version= salt['cmd.run_stdout'](
   'curl -L -s -o /dev/null -w "%{url_effective}" "'+ base+ '/releases/latest"'+
@@ -25,4 +26,3 @@ shfmt:
 /usr/local/bin/shfmt:
   file.symlink:
     - target: {{ target }}
-    
