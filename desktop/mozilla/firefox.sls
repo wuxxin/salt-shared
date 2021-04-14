@@ -1,5 +1,5 @@
 {% if grains['os'] == 'Ubuntu' %}
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("mozillateam_firefox_beta_ppa",
   "mozillateam/firefox-next", require_in= "pkg: firefox") }}
 {% endif %}

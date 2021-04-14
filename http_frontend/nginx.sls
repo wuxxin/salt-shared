@@ -83,7 +83,7 @@ lua_prometheus_module:
 
 {% if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 20 %}
 {# bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("nginx_ppa", "nginx/mainline", require_in= "pkg: nginx") }}
 nginx:
   pkg.installed:

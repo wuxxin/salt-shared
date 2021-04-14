@@ -1,4 +1,4 @@
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 
 music-cd-ripper:
   pkg.installed:

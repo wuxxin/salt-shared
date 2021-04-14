@@ -2,7 +2,7 @@
 {% from "knot/defaults.jinja" import defaults, log_default, template_default %}
 {% from "knot/lib.sls" import write_zone, write_config %}
 
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {# knot from ppa is newer for almost any distro #}
 {{ apt_add_repository("knot_ppa", "cz.nic-labs/knot-dns-latest",
   require_in = "pkg: knot-package") }}

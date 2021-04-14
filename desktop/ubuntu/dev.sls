@@ -4,7 +4,7 @@ ubuntu-dev-tools:
       - devscripts
       - ubuntu-dev-tools
 
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("cubic_ppa", "cubic-wizard/release",
   require_in = "pkg: cubic") }}
 

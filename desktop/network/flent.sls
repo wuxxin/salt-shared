@@ -75,7 +75,7 @@ flent:
 
   {%- else %}
 
-{% from "ubuntu/init.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("flent_ppa", "tohojo/flent", require_in= "pkg: flent") }}
 
 flent:
