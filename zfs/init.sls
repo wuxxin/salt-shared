@@ -1,21 +1,21 @@
 {% from "zfs/defaults.jinja" import settings with context %}
 
 include:
-  - nfs.server
+  - kernel.nfs.server
   - zfs.autosnapshot
 
 zfsutils-linux:
   pkg.installed:
     - require:
-      - sls: nfs.server
+      - sls: kernel.nfs.server
 
 /etc/modprobe.d/zfs.conf:
   file.managed:
     - contents: |
-        options zfs zfs_vdev_scheduler={{ settings.vdev_scheduler }}
         options zfs zfs_arc_max={{ settings.arc_max_bytes }}
 
 {#
+options zfs zfs_vdev_scheduler={{ settings.vdev_scheduler }}
 
 {% for f in ['build_from_lp.sh', 'customize-running-system.sh'] %}
 /etc/recovery/zfs/{{ f }}:

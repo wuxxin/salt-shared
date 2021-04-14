@@ -12,8 +12,7 @@ Usage: $0 --yes [--with-recovery] [optional args to build-custom-zfs.sh]
 build and install a custom zfs version for:
 + the running system
 + the initrd of the running system
-+ if "--with-recovery"
-    + the recovery squashfs
++ if "--with-recovery", the recovery squashfs
 
 for activation a reboot is needed after execution.
 

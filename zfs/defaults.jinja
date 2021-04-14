@@ -4,9 +4,6 @@ origin: system
 custom_src_dist: focal
 custom_apply_patches: true
 
-# use cfq i/o scheduler for cgroup i/o quota support
-vdev_scheduler: cfq
-
 # use up to x % of memory for arc
 arc_max_percent: 25
 # arc_max_bytes will be computed from arc_max_percent if unset
@@ -14,7 +11,7 @@ arc_max_percent: 25
 # enable cyclic rotating filesystem snapshots
 # any fs where "com.sun:auto-snapshot" is not false and
 # "com.sun:auto-snapshot:<interval>" is not false, a rotating snapshot will be taken
-autosnapshot: true
+autosnapshot: false
 
 # rotation intervals: keep x snapshots per interval
 keep_frequent: 4 {# 15min  intervals for the last hour #}
