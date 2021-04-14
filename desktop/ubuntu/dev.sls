@@ -1,6 +1,3 @@
-include:
-  - ubuntu
-
 ubuntu-dev-tools:
   pkg.installed:
     - pkgs:
