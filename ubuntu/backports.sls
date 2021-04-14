@@ -1,6 +1,3 @@
-include:
-  - ubuntu
-
 backport_repository:
   file.replace:
     - name: /etc/apt/sources.list
@@ -13,4 +10,3 @@ backport_repository:
     - name: pkg.refresh_db
     - watch:
       - file: backport_repository
-

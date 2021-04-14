@@ -1,9 +1,8 @@
 {% from "ubuntu/defaults.jinja" import settings with context %}
 
 include:
-  - ubuntu
   - ubuntu.snapd
-  - ubuntu.reporting
+  - ubuntu.telemetry
   - ubuntu.hibernate
 
 install_desktop:
@@ -18,7 +17,7 @@ install_desktop:
       - vanilla-gnome-desktop
     - require:
       - sls: ubuntu.snapd
-      - sls: ubuntu.reporting
+      - sls: ubuntu.telemetry
 
 cups-browsed:
   file.replace:

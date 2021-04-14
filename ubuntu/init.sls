@@ -1,21 +1,9 @@
-ppa_ubuntu_installer:
-  pkg.installed:
-    - pkgs:
-{% if grains['osrelease_info'][0]|int <= 18 %}
-      - apt-transport-https
-{% endif %}
-      - software-properties-common
-      - update-notifier-common
-    - order: 1
 
 {% macro apt_add_repository(statename, ppaname) %}
 
 {{ statename }}:
   pkg.installed:
     - pkgs:
-{%- if grains['osrelease_info'][0]|int <= 18 %}
-      - apt-transport-https
-{%- endif %}
       - software-properties-common
       - update-notifier-common
 {%- if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+

@@ -1,5 +1,4 @@
 include:
-  - ubuntu
   - ubuntu.snapd
-  - ubuntu.reporting
+  - ubuntu.telemetry
   - ubuntu.update
