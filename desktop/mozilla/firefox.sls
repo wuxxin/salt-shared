@@ -8,7 +8,9 @@ firefox:
   pkg.installed:
     - pkgs:
       - firefox
-{%- if grains['osmajorrelease']|int >= 18 and grains['osrelease'] != '18.04' %}
+{%- if grains['os'] == 'Ubuntu' and
+    grains['osmajorrelease']|int >= 18 and
+    grains['osrelease'] != '18.04' %}
       - webext-ublock-origin
       - webext-privacy-badger
       - webext-form-history-control

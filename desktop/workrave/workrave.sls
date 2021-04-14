@@ -1,5 +1,4 @@
 {% if grains['os'] == 'Ubuntu' %}
-
 {% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("workrave_ppa",
   "rob-caelers/workrave", require_in= "pkg: workrave") }}

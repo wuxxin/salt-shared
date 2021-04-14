@@ -1,6 +1,5 @@
 include:
   - .openssl        {# #}
-  - .unison         {# #}
   - .tmux           {# #}
   - .gnupg          {# #}
   - python          {# #}

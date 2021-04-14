@@ -1,9 +1,10 @@
 {% from "unbound/defaults.jinja" import settings with context %}
 
+{% if grains['os'] == 'Ubuntu' %}
 {% if grains['osrelease_info'][0]|int <= 18 %}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
-{{ apt_add_repository("unbound_ppa", "ondrej/unbound",
-  require_in = "pkg: unbound") }}
+{{ apt_add_repository("unbound_ppa", "ondrej/unbound", require_in = "pkg: unbound") }}
+{% endif %}
 {% endif %}
 
 unbound:

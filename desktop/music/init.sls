@@ -44,6 +44,7 @@ rhythmbox-plugins:
   "sonic-pi/ppa", require_in= "pkg: sonic-pi") }}
   {% endif %}
 {% endif %}
+
 sonic-pi:
   pkg.installed:
     - pkgs:

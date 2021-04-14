@@ -2,10 +2,12 @@
 {% from "knot/defaults.jinja" import defaults, log_default, template_default %}
 {% from "knot/lib.sls" import write_zone, write_config %}
 
+{% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
 {# knot from ppa is newer for almost any distro #}
 {{ apt_add_repository("knot_ppa", "cz.nic-labs/knot-dns-latest",
   require_in = "pkg: knot-package") }}
+{% endif %}
 
 knot-package:
   pkg.installed:
@@ -38,7 +40,7 @@ knot_default_{{ settings.database.storage }}:
     - require:
       - pkg: knot-package
 
-{% for i in ['journal', 'keys', 'timers'] %}
+  {% for i in ['journal', 'keys', 'timers'] %}
 knot_default_{{ settings.database.storage }}/{{ i }}:
   file.directory:
     - name: {{ settings.database.storage }}/{{ i }}
@@ -49,7 +51,7 @@ knot_default_{{ settings.database.storage }}/{{ i }}:
       - file: knot_default_{{ settings.database.storage }}
     - require_in:
       - service: knot.service
-{%- endfor %}
+  {%- endfor %}
 
 {{ write_config('', settings, log_default, template_default) }}
   {%- for zone in settings.zone %}

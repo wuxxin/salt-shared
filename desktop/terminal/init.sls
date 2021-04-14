@@ -22,7 +22,7 @@ other-terminal:
       - lxterminal
 
 {% if grains['os'] == 'Ubuntu' %}
-  {% from "ubuntu/lib.sls" import apt_add_repository %}
+{% from "ubuntu/lib.sls" import apt_add_repository %}
 {{ apt_add_repository("alacritty_ppa", "mmstick76/alacritty", require_in= "pkg: alacritty") }}
 
 alacritty:
