@@ -27,16 +27,12 @@ vagrant-libvirt:
     - libvirt-dev
   sls:
     - libvirt
-    - nfs.common
-    - nfs.server
+    - kernel.nfs.common
+    - kernel.nfs.server
 
 vagrant-lxc:
   sls:
-    - lxc
-
-vagrant-lxd:
-  sls:
-    - lxd
+    - kernel.lxc
 
 {% endload %}
 
