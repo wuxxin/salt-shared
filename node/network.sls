@@ -2,7 +2,7 @@
 
 include:
   - ssh
-  - nfs.common
+  - kernel.nfs.common
 
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
   {% if salt['cmd.retcode']('which netplan') == 0 %}
@@ -62,7 +62,7 @@ nfs.common_after_bridge:
     - require:
       - cmd: bridge_{{ settings.network.internal_name }}
     - require_in:
-      - sls: nfs.common
+      - sls: kernel.nfs.common
 
 {# write if not empty, remove if empty #}
 default_netplan:
@@ -80,4 +80,4 @@ default_netplan:
     - onchanges:
       - file: default_netplan
     - require_in:
-      - sls: nfs.common
+      - sls: kernel.nfs.common
