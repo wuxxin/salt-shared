@@ -1,3 +1,23 @@
+{% load_yaml as postgresql_per_codename %}
+xenial:
+  pgmajor: "9.5"
+bionic:
+  pgmajor: "10"
+focal:
+  pgmajor: "12"
+hirsute:
+  pgmajor: "13"
+stretch:
+  pgmajor: "9.6"
+buster:
+  pgmajor: "11"
+bullseye:
+  pgmajor: "13"
+default:
+  pgmajor: "12"
+{% endload %}
+
+
 {% load_yaml as defaults %}
 additional_adresses: []
 # list of additional allowed ip network ranges for listen and answer to queries
@@ -31,20 +51,22 @@ default_template: template0
 
 # pgtune:
 pgtune:
-  # enabled:true let postgresql tune its memory needs
+  # enabled: true: let postgresql tune its memory needs
   enabled: false
-  # strategy: may be "use" or "leave"
+  # strategy: "use" or "leave"
   strategy: use
-  # value, strategy: "use":   define memory mb available to pgtune
-  # value, strategy: "leave": define memory mb not available to pgtune: <general> <per-core>
-  memory: 4096
-  # memory: 1024 256
-  # how many cores (0-9+,all) are used for calculation
+  # memory (strategy "use"):   <general> memory mb available to pgtune
+  # memory (strategy "leave"): <general> <per-core> memory mb not available to pgtune
+  memory: "1024"
+  # memory: "1024 256"
+  # cores: how many cores (0-9+,all) are used for calculation
   cores: all
 
-# internal, major postgresql version, be careful on change
-pgmajor: 12
+# postgresql major version, dependend on distribution
+pgmajor: {{ salt['grains.filter_by'](postgresql_per_codename,
+  grain='oscodename', default= 'default').pgmajor }}
+
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('postgresql', {})) %}
+  grain='default', default='default', merge= salt['pillar.get']('postgresql', {})) %}

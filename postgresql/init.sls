@@ -36,6 +36,7 @@ postgresql:
     - pkgs:
       - postgresql
       - postgresql-{{ settings.pgmajor }}
+      - postgresql-contrib
   service.running:
     - enable: true
     - require:
