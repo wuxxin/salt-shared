@@ -3,6 +3,7 @@ include:
   - kernel.swappiness
   - kernel.cgroup
   - systemd.cgroup-accounting
+  - kernel.network
 
 qemu:
   pkg.installed:
@@ -16,5 +17,3 @@ qemu:
       - qemu-utils
       - ovmf
       - libosinfo-bin
-    - require:
-      - sls: kernel.cgroup

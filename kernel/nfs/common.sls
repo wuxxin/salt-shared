@@ -1,4 +1,4 @@
-{% from "nfs/defaults.jinja" import settings %}
+{% from "kernel.nfs/defaults.jinja" import settings %}
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
@@ -182,28 +182,3 @@ nfs-common:
        rpc.lockd       32768/udp                       # RPC lockd/nlockmgr
        rpc.quotad      32769/tcp                       # RPC quotad
        rpc.quotad      32769/udp                       # RPC quotad
-
-{#
-+ sysctl
-('fs.nfs.nfs_callback_tcpport', 32764),
-('fs.nfs.nlm_tcpport', 32768),
-('fs.nfs.nlm_udpport', 32768),]
-+ /usr/lib/systemd/scripts/nfs-utils_env.sh creates /run/sysconfig/nfs-utils
-+ /etc/default/nfs-common
-  + rpc.statd: --no-notify $STATDARGS=\"$STATDOPTS\"
-+ /etc/default/nfs-kernel-server
-  + rpc.nfsd: RPCNFSDARGS=\"$RPCNFSDOPTS ${RPCNFSDCOUNT:-8}\"
-  + rpc.mountd: $RPCMOUNTDARGS=\"$RPCMOUNTDOPTS\"
-  + rpc.svcgssd: $SVCGSSDARGS=\"$RPCSVCGSSDOPTS\"
-+ supported but not exposed from nfs-utils_env.sh:
-  + sm-notify: SMNOTIFYARGS=\"$SMNOTIFYARGS\"
-  + rpc.idmapd: RPCIDMAPDARGS=\"$RPCIDMAPDARGS\"
-  + blkmapd: BLKMAPDARGS=\"$BLKMAPDARGS\"
-+ uses tcp_wrapper for access control
-  + /etc/hosts.deny:
-    rpcbind mountd nfsd statd lockd rquotad portmap: ALL
-  + /etc/hosts.allow:
-    rpcbind mountd nfsd statd lockd rquotad portmap: 127.0.0.1/24
-    # nur fuer die IP 192.168.1.13: portmap: 192.168.1.13
-    # fuer das gesamte LAN Zugriff: portmap: 192.168.1. oder portmap: 192.168.1.0/24
-#}

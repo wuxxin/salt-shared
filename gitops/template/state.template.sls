@@ -14,8 +14,8 @@ base:
   'P@virtual:(?!LXC)':
     - match: compound
     - kernel
+    - kernel.acpi
     - kernel.entropy
-    - kernel.power
 
   # if on lxc/lxd install headers and tools for the running host kernel version
   'virtual:LXC':

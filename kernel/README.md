@@ -35,6 +35,10 @@
     + activate and configure kernel overlay fs module
 + kernel.kvm
     + install qemu and all support files for kvm powered virtualization
++ kernel.lxc
+    + install cgroup tools and support files for lxc powered virtualization
++ kernel.nfs
++ kernel.network
 
 ### state: sysctl.tcp-bbr
 + install tcp bbr congestion control instead of kernel default (usually cubic)

@@ -6,7 +6,9 @@ include:
   - kernel.swappiness
   - kernel.cgroup
   - systemd.cgroup-accounting
+  - kernel.network
   - kernel.kvm
+  - kernel.lxc
 
 kernel_server_nop:
   test:

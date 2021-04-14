@@ -1,7 +1,7 @@
-{% from "nfs/defaults.jinja" import settings %}
+{% from "kernel.nfs/defaults.jinja" import settings %}
 
 include:
-  - nfs.common
+  - kernel.nfs.common
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
@@ -13,7 +13,7 @@ include:
 nfs-kernel-server:
   pkg.installed:
     - require:
-      - sls: nfs.common
+      - sls: kernel.nfs.common
   service.running:
     - enable: True
     - require:
