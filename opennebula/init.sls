@@ -3,39 +3,50 @@
 include:
   - kernel.server
   - kernel.kvm
+  - kernel.lxc
+  - kernel.network
+  - libvirt
 
-opennebula:
-https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-source /etc/os-release
-echo "deb https://deb.nodesource.com/node_12.x ${VERSION_CODENAME} main" >/etc/apt/sources.list.d/nodesource.list
-apt-get update
+opennebula-ppa:
+  pkgrepo.managed:
+    - name: deb http://downloads.opennebula.org/repo/6.0/{{ grains['os'] }}/{{ grains['osrelease'] }} stable opennebula
+    - key: https://downloads.opennebula.io/repo/repo.key
 
-opennebula-node-req:
+opennebula-frontend:
   pkg.installed:
     - pkgs:
-      - bridge-utils
-      - ebtables
-
-opennebula-lxc-req:
-  pkg.installed:
-    - pkgs:
-      - uidmap
-      - lxc-utils
-      - lxc-templates
+      - opennebula
+      - opennebula-sunstone
+      - opennebula-fireedge
+      - opennebula-gate
+      - opennebula-flow
+      - opennebula-provision
     - require:
-      - sls: kernel.server
+      - pkgrepo: opennebula-ppa
 
 opennebula-node-kvm:
   pkg.installed:
     - pkgs:
-      -
+      - opennebula-node-kvm
+    - require:
+      - pkgrepo: opennebula-ppa
+      - sls: kernel.network
+      - sls: libvirt
 
 opennebula-node-lxc:
   pkg.installed:
     - pkgs:
-      -
+      - opennebula-node-lxc
+    - require:
+      - pkgrepo: opennebula-ppa
+      - sls: kernel.network
+      - sls: kernel.lxc
 
 opennebula-node-firecracker:
   pkg.installed:
     - pkgs:
-      -
+      - opennebula-node-firecracker
+    - require:
+      - pkgrepo: opennebula-ppa
+      - sls: kernel.network
+      - sls: kernel.kvm
