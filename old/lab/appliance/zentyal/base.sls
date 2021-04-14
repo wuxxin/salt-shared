@@ -1,7 +1,6 @@
 {% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - ubuntu
   - python
   - appliance
 
@@ -32,7 +31,7 @@ zentyal-admin-user:
   file.managed:
     - source: salt://old/lab/appliance/zentyal/files/hooks/{{ n }}.postsetconf
     - template: jinja
-    - defaults: 
+    - defaults:
         settings: {{ settings }}
     - mode: "755"
     - makedirs: true
@@ -64,7 +63,7 @@ zentyal-admin-user:
         iptables_log_drops = yes
         # Extra iptables modules to load
         # Each module should be sperated by a comma, you can include module parameters
-        iptables_modules = 
+        iptables_modules =
         # Enable source NAT, if your router does NAT you can disable it
         nat_enabled = no
         # Uncomment the following to show the from External to Internal section
@@ -88,7 +87,7 @@ samba-network:
             bridge_ports none
             bridge_stp off
             bridge_maxwait 0
-            
+
     - require:
       - pkg: samba-network
   cmd.run:
@@ -102,7 +101,7 @@ sogo-tmpreaper:
   file.managed:
     - name: /etc/tmpreaper.conf
     - contents: |
-        # tmpreaper.conf                                 
+        # tmpreaper.conf
         # - local configuration for tmpreaper's daily run
         SHOWWARNING=false
         TMPREAPER_PROTECT_EXTRA=''

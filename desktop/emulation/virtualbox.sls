@@ -1,13 +1,8 @@
-include:
-  - ubuntu
-
 virtualbox:
   pkgrepo.managed:
     - name: deb https://download.virtualbox.org/virtualbox/debian {{ grains['oscodename'] }} contrib
     - key_url: https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
     - file: /etc/apt/sources.list.d/virtualbox_ppa.list
-    - require:
-      - pkg: ppa_ubuntu_installer
     - require_in:
       - pkg: virtualbox
   pkg.installed:

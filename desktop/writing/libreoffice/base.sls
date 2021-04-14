@@ -1,5 +1,4 @@
 include:
-  - ubuntu
   - desktop.graphics.clipart.big
   - desktop.language.spellcheck
 

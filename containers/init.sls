@@ -1,7 +1,6 @@
 {% from "containers/defaults.jinja" import settings with context %}
 
 include:
-  - ubuntu
   - kernel.server
 
 {% set baseurl =

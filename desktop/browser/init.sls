@@ -2,9 +2,7 @@ include:
   - java.browser
   - desktop.mozilla.firefox
 
-{# since 19.10 chromium is no longer available as deb package from ubuntu,
-    therefore get from ppa #}
-
+{# since 19.10 chromium is no longer available as deb package from ubuntu, therefore get from ppa #}
 {%- set baseurl =
 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Ubuntu_'+
 grains['oscodename'].title() %}
@@ -13,7 +11,6 @@ grains['oscodename'].title() %}
     salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 "'+
       baseurl+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"',
       python_shell=true) == 0 %}
-  - ubuntu
 
 chromium_ppa:
   pkgrepo.managed:

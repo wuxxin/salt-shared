@@ -1,6 +1,3 @@
-include:
-  - ubuntu
-
 {%- if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
   '"https://riot.im/packages/debian/dists/'+ grains['oscodename']+
   '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
@@ -10,8 +7,6 @@ riot:
     - name: deb https://riot.im/packages/debian/ {{ grains['oscodename'] }} main
     - key_url: https://riot.im/packages/debian/repo-key.asc
     - file: /etc/apt/sources.list.d/riot.im_ppa.list
-    - require:
-      - pkg: ppa_ubuntu_installer
     - require_in:
       - pkg: riot
   pkg.installed:

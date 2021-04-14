@@ -1,0 +1,2 @@
+include:
+  - ubuntu.server

@@ -1,11 +1,5 @@
 {% from "old/roles/salt/defaults.jinja" import settings as s with context %}
 
-{% if grains['os'] == 'Ubuntu' %}
-include:
-  - ubuntu
-{% endif %}
-
-
 {% if grains['os'] == 'Debian' %}
 salt_ppa:
   pkgrepo.managed:
