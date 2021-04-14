@@ -57,7 +57,7 @@ some states have a documentation README.md
     * Virtual Machines
         * [kvm+qemu](kernel/kvm): qemu/kvm full virtualization
         * [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
-        * [lxc](lxc): lxc leightweight machine virtualization
+        * [lxc](kernel/lxc): lxc leightweight machine virtualization
         * [systemd nspawn](nspawn): leightweight machine container manager
         * [vagrant](vagrant): vagrant virtual machine manager (libvirt, lxc, a.o.)
         * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
