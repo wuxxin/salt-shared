@@ -1,11 +1,11 @@
 # http_frontend
 
-+ ssl termination, stream switching, rate limiting, proxing, static webserver using nginx
-+ **letsencrypt certificates** via **ALPN on https** port using acme.sh
-+ extended **prometheus stats** using lua_nginx_prometheus
+* stream switching, ssl termination, rate limiting, proxying, static webserver using nginx
++ letsencrypt **host certificates** via **ALPN on https** port using acme.sh
 + pki management for easy **client certificates** support and administration using easy-rsa
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
++ extended **prometheus stats** using lua_nginx_prometheus
 + **configuration** using **pillar:nginx**, for details see defaults.jinja
 
 + Ssl Features
@@ -59,4 +59,40 @@ host:
     location:
       - source: /
         target: root /var/www/another.domain/
+```
+
+#### TODO: add custom build nginx
+
+```
+  {% if settings.nginx_custom_build %}
+    {%- set patch_list= ['ipscrub.patch', ] %}
+    {%- set patch_dir='/usr/local/src/nginx-custom-patches' %}
+    {%- set patches_string= patch_dir+ '/'+ patch_list|join(' '+ patch_dir+ '/') %}
+    {%- set custom_archive= '/usr/local/lib/nginx-custom-archive' %}
+
+    {% for p in patch_list %}
+add-patch-{{ p }}:
+  file.managed:
+    - source: salt://http_frontend/nginx/{{ p }}
+    - name: {{ patch_dir }}/{{ p }}
+    - makedirs: true
+    - require_in:
+      - cmd: nginx-custom-build
+    {% endfor %}
+
+nginx-custom-build:
+  cmd.run:
+    - name: /usr/local/sbin/build-from-lp.sh {{ custom_archive }} "ipscrub" {{ patches_string }}
+    - require:
+      - sls: ubuntu.build-from-lp
+
+nginx-custom-repo:
+  pkgrepo.managed:
+    - name: 'deb [ trusted=yes ] file:{{ custom_archive }} ./'
+    - file: /etc/apt/sources.list.d/local-nginx-custom.list
+    - require_in:
+      - pkg: nginx
+    - require:
+      - cmd: nginx-custom-build
+  {% endif %}
 ```

@@ -15,6 +15,7 @@ create_http_frontend_maintenance_target_dir:
     - contents: |
         # general proxy header settings
         proxy_pass_request_headers on;  # default on, pass header downstream
+        proxy_http_version 1.1;  # default 1.0, can be overwritten to 1.0 if needed
         # set both Real-IP and Forwarded-For, we dont trust client headers
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -81,7 +82,7 @@ lua_prometheus_module:
     - group: www-data
 
 {% if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 20 %}
-{# xenial 1.10, bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
+{# bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
 {% from "ubuntu/init.sls" import apt_add_repository %}
 {{ apt_add_repository("nginx_ppa", "nginx/mainline", require_in= "pkg: nginx") }}
 nginx:
