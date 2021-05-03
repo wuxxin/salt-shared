@@ -4,48 +4,41 @@ import subprocess
 
 try:
     from bitstring import BitStream
-except ImportError as e:
+except ImportError:
     print("error: you need to install python package bitstring")
     raise
 
 """
-human friendly passwort generator:
+human friendly passwort generator
 
-  Final Product:
+Produced Password Characteristics:
+    + Password Size: 16 Character lowercase alphabet
+    + Expected Entropy: 58 Bits= 4,25 * 11 + 2,25 * 5
+    + Vowels Placing at Character: 2,5,8,11,14
 
-    Password Size: 16 Character lowercase alphabet
-    Expected Entropy: 58 Bits= 4,25 * 11 + 2,25 * 5
-    Vowels Placing at Character: 2,5,8,11,14
-
-  Execution:
-
-    + Generate enough quality entropy:
-        + ~ 72 Bit = 9 Bytes source entropy needed
-        + openssl rand is used for entropy gathering
-
-    + Generate
-    11 Chars of Base 21 ([a-z] - [a,e,i,o,u])
+Execution:
+    + openssl rand is used for entropy gathering
+    + Generate enough quality entropy (72 Bit = 9 Bytes source entropy)
+    + Generate 11 Chars of Base 21 ([a-z] - [a,e,i,o,u])
         + using (5 Bit MOD 21 ) per char
         + Used Entropy Bits: 55 Bit
-
     + Generate 5 Chars of Base 5 ([a,e,i,o,u])
         + using (3 Bit MOD 5) per Char
         + Used Entropy Bits: 15 Bit
-
     + Total source entropy used: 70 out of 72 Bit
 
-  Personal Metrics:
-
-    memorize   : ++ (i can pronounce and hear the sound of it, no numbers, only lowercase)
-    security   : + (58Bit if schema and implementation is correct)
-    target
-      area     : disk key, ssh secret key, keychain-master key, gnupg key password
-      hardware : touchscreen, mobile, keyboard
-    convinience
-      general  : - (16 Chars)
-      mobile   : + (only lowercase alphabet)
-    out of scope:
-      any password that can be stored in a password manager that is encrypted with a master password. (use random 64 to 120 Bit Entropy 13-24 Chars base32 output instead)
+Personal Metrics:
+    + memorize: ++ (pronounceable, no numbers, only lowercase)
+    + security: + (58Bit if schema and implementation is correct)
+    + usage target: disk key, ssh secret key, keychain-master key, gnupg password
+    + usage hardware: touchscreen, mobile, keyboard
+    + convinience:
+        + general: - (16 Chars)
+        + mobile:  + (only lowercase alphabet)
+    + out of scope:
+        any password that can be stored in a password manager that is encrypted
+        with a master password.
+        (use 64-120 Bit Entropy eq. 13-24 Chars base32 instead)
 
 """
 
