@@ -18,6 +18,7 @@ shfmt:
   file.managed:
     - name: {{ target }}
     - source: {{ source }}
+    - mode: "0755"
     - skip_verify: true
     - makedirs: true
     - unless:
