@@ -38,14 +38,3 @@ include:
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
   - .emulation.games
 {% endif %}
-
-{#
-tts: ppa:msclrhd-gmail/cainteoir
-
-sysdig:
-  pkg:
-    - installed
-minidlna:
-  pkg:
-    - installed
-#}
