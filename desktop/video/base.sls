@@ -9,13 +9,14 @@ video-packages:
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-libav
       - gstreamer1.0-vaapi
+      - gstreamer1.0-pipewire
       - vainfo
       - lame
       - ffmpeg
       - libavcodec-extra
       - frei0r-plugins
       - gst123
-{# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-pipewire gstreamer1.0-opencv baresip-gstreamer #}
+{# gstreamer1.0-rtsp gstreamer1.0-plugins-rtp gstreamer1.0-espeak gstreamer1.0-gtk3 gstreamer1.0-opencv baresip-gstreamer #}
 
 v4l2-tools:
   pkg.installed:
