@@ -1,13 +1,17 @@
-audio-packages:
+audio-tools:
+  pkg.installed:
+    - pkgs:
+      - sox
+      - lame
+      - pipewire
+
+pulseaudio-tools:
   pkg.installed:
     - pkgs:
       - paprefs
       - pavucontrol
       - pavumeter
-      - sox
       - libsox-fmt-pulse
-      - lame
-      {# pulseaudio-dlna  only available in bionic #}
 
 audio-editor:
   pkg.installed:
