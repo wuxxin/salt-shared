@@ -28,6 +28,8 @@ codename2version() {
         eoan)  echo "19.10" ;;
         focal) echo "20.04" ;;
         groovy) echo "20.10" ;;
+        hirsute) echo "21.04" ;;
+        impish) echo "21.10" ;;
     esac
 }
 
