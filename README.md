@@ -40,7 +40,6 @@ some states have a documentation README.md
  around NAT)
         * [wireguard](wireguard): Wireguard VPN
         * [strongswan](strongswan): IPsec VPN
-        * [unison](unison): Unison File Sync
         * [syncthing](syncthing): network file syncronisation
 
     * Web
