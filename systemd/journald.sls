@@ -1,5 +1,5 @@
 
-# journald: triple the default RateLimitBurst, startup is noisy
+# journald: triple the default RateLimitBurst, startup is usually more noisy
 {% for p,r in [
   ("RateLimitBurst", "RateLimitBurst=3000"),
   ] %}

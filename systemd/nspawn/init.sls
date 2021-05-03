@@ -1,4 +1,4 @@
-{% from "nspawn/defaults.jinja" import settings with context %}
+{% from "systemd/nspawn/defaults.jinja" import settings with context %}
 {% from 'python/lib.sls' import pip3_install %}
 
 include:

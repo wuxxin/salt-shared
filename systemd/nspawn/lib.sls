@@ -18,7 +18,7 @@ nspawn_image_{{ name }}:
 
 
 {% macro machine(machine_definition) %}
-  {%- from "nspawn/defaults.jinja" import settings, machine_defaults with context %}
+  {%- from "systemd/nspawn/defaults.jinja" import settings, machine_defaults with context %}
   {%- set this= salt['grains.filter_by']({'default': machine_defaults},
     grain='default', default= 'default', merge=machine_definition) %}
 
@@ -41,7 +41,7 @@ update_image_{{ this.image }}:
 
 {{ this.name }}.service:
   file.managed:
-    - source: salt://nspawn/machine-template.service
+    - source: salt://systemd/nspawn/machine-template.service
     - name: /etc/systemd/system/{{ this.name }}.service
     - template: jinja
     - defaults:
