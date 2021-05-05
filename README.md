@@ -11,18 +11,19 @@ some states have a documentation README.md
 
 ### Features
 
-* Machine / Hardware / Storage / Distro
+* Machine / Hardware / Distro
     * [node](node): basic machine setup (hostname, locale, network, storage)
     * [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     * [hardware](hardware): hardware related packages and setup
     * [ubuntu](ubuntu): disable or enable ubuntu specifics
-    * [zfs](zfs): OpenZFS is an advanced file system and volume manager
+    * [desktop](desktop): everything wanted for a desktop installation
 
 * Deployment / Admin
     * [gitops](gitops): deploy and update machines from git, with webhook support
     * [tools](tools): useful set of command line tools
     * [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
     * [python Language Support](python)
+    * [zfs](zfs): OpenZFS is an advanced file system and volume manager
 
 * Network
     * [http_frontend](http_frontend): modern https frontend using nginx, acme.sh and easyrsa
@@ -64,6 +65,3 @@ some states have a documentation README.md
 
 * Android
     * [android](android): tools and android emulator container for desktop and headless emulator
-
-* Desktop
-    * [desktop](desktop): everything wanted for a desktop installation
