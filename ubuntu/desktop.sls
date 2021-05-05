@@ -4,12 +4,15 @@ include:
   - ubuntu.snapd
   - ubuntu.telemetry
   - ubuntu.hibernate
+{%- if settings.backports %}
+  - ubuntu.backports
+{%- endif %}
 
 install_desktop:
   pkg.installed:
     - pkgs:
-      - {{ settings.desktop.xwayland }}
-      - {{ settings.desktop.xserver }}
+      - xwayland
+      - xserver-xorg
       - xserver-xephyr
       - xvfb
       - gnome

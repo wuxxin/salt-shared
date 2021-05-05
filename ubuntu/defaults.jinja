@@ -1,24 +1,14 @@
 {% load_yaml as defaults %}
-bionic:
-  desktop:
-    xserver: xserver-xorg-hwe-18.04
-    xwayland: xwayland-hwe-18.04
-  update:
-    automatic_reboot: true
-    allowed_origins: []
-  telemetry: false
-  snapd: false
-generic:
-  desktop:
-    xserver: xserver-xorg
-    xwayland: xwayland
-  update:
-    automatic_reboot: true
-    allowed_origins: []
-  telemetry: false
-  snapd: false
+# switches applied to both states desktop and server
+telemetry: false
+snapd: false
+backports: false
+
+# switches only applied on state server
+update:
+  automatic_reboot: true
+  allowed_origins: []
 {% endload %}
 
-{% set settings = salt['grains.filter_by'](defaults,
-  grain= 'oscodename', default= 'generic',
-  merge= salt['pillar.get']('ubuntu', {})) %}
+{% set settings=salt['grains.filter_by']({'none': defaults},
+  grain='none', default= 'none', merge= salt['pillar.get']('ubuntu', {})) %}
