@@ -1,9 +1,10 @@
 {% from "unbound/defaults.jinja" import settings with context %}
 
 {% if grains['os'] == 'Ubuntu' %}
-{% if grains['osrelease_info'][0]|int <= 18 %}
+{% if grains['oscodename'] in ['xenial','bionic','focal'] %}
+{# unbound 1.12 is available as backport for xenial, bionic, focal #}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
-{{ apt_add_repository("unbound_ppa", "ondrej/unbound", require_in = "pkg: unbound") }}
+{{ apt_add_repository("unbound_ppa", "emetriq/unbound-backport", require_in = "pkg: unbound") }}
 {% endif %}
 {% endif %}
 
@@ -11,7 +12,7 @@ unbound:
   pkg:
     - installed
   service:
-{% if settings.enabled|d(false) %}
+{% if settings.enabled %}
     - running
 {%- else %}
     - dead
@@ -31,22 +32,18 @@ unbound:
     - require:
       - pkg: unbound
 
-{% if settings.enabled|d(false) %}
-
-/etc/systemd/resolved.conf.d/dns_servers.conf:
+/etc/systemd/resolved.conf.d/unbound_dns_server.conf:
   file:
-  {%- if settings.redirect_host_dns %}
+{%- if settings.enabled and settings.redirect_host_dns %}
     - managed
     - makedirs: true
     - contents: |
         [Resolve]
         DNS={{ settings.listen[0] }}
-  {%- else %}
+{%- else %}
     - absent
-  {%- endif %}
+{%- endif %}
   cmd.run:
     - name: systemctl restart systemd-resolved
     - onchange:
       - file: /etc/systemd/resolved.conf.d/dns_servers.conf
-
-{% endif %}
