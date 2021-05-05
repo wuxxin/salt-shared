@@ -29,7 +29,7 @@ build_from_lp() {
     local source dest versuffix pkgname targetdir cowbasedir i need_install
     local basedir changes current_version new_version debbuildopts dsc_name dsc_file
     # defaults
-    source=groovy
+    source=hirsute
     dest="$(lsb_release -c -s)"
     versuffix=""
     debbuildopts=""
@@ -37,7 +37,7 @@ build_from_lp() {
     # parse args
     if test "$2" = "" -o "$1" = "--help" -o "$1" = "-h"; then usage $source $dest; fi
     pkgname=$1
-    targetdir=$2
+    targetdir=$(readlink -f $2)
     shift 2
     if test "$1" = "--source"; then source=$2; shift 2; fi
     if test "$1" = "--dest"; then dest=$2; shift 2; fi
@@ -78,6 +78,12 @@ build_from_lp() {
     fi
     if ! grep -q "groovy" /usr/share/distro-info/ubuntu.csv; then
         sudo /usr/bin/bash -c 'echo "20.10,Groovy Gorilla,groovy,2020-04-23,2020-10-22,2021-07-22" >>  /usr/share/distro-info/ubuntu.csv'
+    fi
+    if ! grep -q "hirsute" /usr/share/distro-info/ubuntu.csv; then
+        sudo /usr/bin/bash -c 'echo "21.04,Hirsute Hippo,hirsute,2020-10-22,2021-04-22,2022-01-22" >>  /usr/share/distro-info/ubuntu.csv'
+    fi
+    if ! grep -q "impish" /usr/share/distro-info/ubuntu.csv; then
+        sudo /usr/bin/bash -c 'echo "21.10,Impish Indri,impish,2021-04-22,2021-10-14,2022-07-14" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if test ! -e "$cowbasedir"; then
         sudo cowbuilder --create --distribution "$dest" --basepath "$cowbasedir"
