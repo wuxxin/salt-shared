@@ -30,7 +30,8 @@ nnn (n³) is a full-featured terminal file manager. It's tiny and nearly 0-confi
 
 ## routing
 + FRR (https://frrouting.org/) and configured BGP EVPN extensions for VXLAN networks
-
+  (up2date fork of quaqua)
+  
 ## virtualization
 
 + KATA containers
