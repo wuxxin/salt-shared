@@ -1,5 +1,5 @@
 include:
-  - desktop.video.base
+  - desktop.video.framework
 
 {% if grains['os'] == 'Ubuntu' %}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
@@ -13,4 +13,4 @@ video-recording-streaming:
       - openshot-qt
       - obs-studio
     - require:
-      - sls: desktop.video.base
+      - sls: desktop.video.framework

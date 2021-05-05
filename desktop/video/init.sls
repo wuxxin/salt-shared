@@ -1,6 +1,10 @@
 include:
-  - desktop.video.base
-  - desktop.video.player
-  - desktop.video.streaming
-  - desktop.video.editor
-  - desktop.video.loopback
+  - .framework
+  - .loopback
+  - .player
+  - .streaming
+  - .editor
+
+desktop_video:
+  test:
+    - nop

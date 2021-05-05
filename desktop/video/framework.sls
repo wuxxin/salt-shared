@@ -1,15 +1,18 @@
+include:
+  - desktop.audio.framework
+
 video-packages:
   pkg.installed:
     - pkgs:
-      - gstreamer1.0-pulseaudio
       - gstreamer1.0-alsa
+      - gstreamer1.0-libav
+      - gstreamer1.0-vaapi
+      - gstreamer1.0-pulseaudio
+      - gstreamer1.0-pipewire
       - gstreamer1.0-plugins-base
       - gstreamer1.0-plugins-good
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-plugins-ugly
-      - gstreamer1.0-libav
-      - gstreamer1.0-vaapi
-      - gstreamer1.0-pipewire
       - vainfo
       - lame
       - ffmpeg
@@ -32,9 +35,3 @@ dvd-css-support:
     - name: libdvd-pkg
     - require:
       - pkg: video-packages
-
-video-creation-conversion:
-  pkg.installed:
-    - pkgs:
-      - mkvtoolnix-gui
-      - handbrake

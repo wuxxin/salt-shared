@@ -1,8 +1,8 @@
 {% from 'python/lib.sls' import pip3_install %}
 
 include:
-  - desktop.video.base
   - python
+  - desktop.video.framework
 
 video-player:
   pkg.installed:
@@ -14,7 +14,7 @@ video-player:
       - vlc-bin
 {%- endif %}
     - require:
-      - sls: desktop.video.base
+      - sls: desktop.video.framework
 
 {# Video/Audio downloader from webportals, eg. youtube
     install distro package and then update with the pip version #}
