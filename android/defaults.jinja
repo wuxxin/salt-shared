@@ -1,5 +1,25 @@
 {% load_yaml as defaults %}
 
+image_build:
+  name: lineage-build
+  image: lineageos4microg/docker-lineage-cicd
+  tag: latest
+  type: script
+  environment:
+    BUILD_DATA_VOLUME: android-build-data
+    BRANCH_NAME: lineage-17.1
+    DEVICE_LIST: sailfish
+    SIGN_BUILDS: true
+    SIGNATURE_SPOOFING: restricted
+    CUSTOM_PACKAGES: GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension
+  volumes:
+    - ${BUILD_DATA_VOLUME}/src:/srv/src
+    - ${BUILD_DATA_VOLUME}/zips:/srv/zips
+    - ${BUILD_DATA_VOLUME}/logs:/srv/logs
+    - ${BUILD_DATA_VOLUME}/ccache:/srv/ccache
+    - ${BUILD_DATA_VOLUME}/keys:/srv/keys
+    - ${BUILD_DATA_VOLUME}/manifests:/srv/local_manifests
+
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
   tag: 30.1.2
@@ -19,108 +39,83 @@ emulator:
       # 1gb = 1073741824
       disk.dataPartition.size: 1073741824
 
-image_build:
-  default_args:
-    CUSTOM_PACKAGES: GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension
+emulator_build:
+  name: android-emulator
+  image: localhost/android-emulator
+  tag: latest
+  type: build
+  build:
+    source: .
+  files:
+    build/Dockerfile:
+      contents: |
+        FROM localhost/android-emulator-unmodified:latest
 
-container:
-  emulator_build:
-    name: android-emulator
-    image: localhost/android-emulator
-    tag: latest
-    type: build
-    build:
-      source: .
-    files:
-      build/Dockerfile:
-        contents: |
-          FROM localhost/android-emulator-unmodified:latest
+        COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
+        RUN chmod +x /android/sdk/launch-emulator.sh
+        RUN mv /android-home /android-home-default
+        RUN sed -r -i -e "s/^disk.dataPartition.size=.+//g" /android-home-default/Pixel2.avd/config.ini
+        RUN install -o 1000 -g 1000 -m "777" -d /android-home
 
-          COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
-          RUN chmod +x /android/sdk/launch-emulator.sh
-          RUN mv /android-home /android-home-default
-          RUN sed -r -i -e "s/^disk.dataPartition.size=.+//g" /android-home-default/Pixel2.avd/config.ini
-          RUN install -o 1000 -g 1000 -m "777" -d /android-home
+    build/launch-emulator.sh:
+      source: salt://android/launch-emulator.sh
 
-      build/launch-emulator.sh:
-        source: salt://android/launch-emulator.sh
-
-  emulator_desktop:
-    name: android-emulator-desktop
-    image: localhost/android-emulator
-    tag: latest
-    type: desktop
-    desktop:
-      options:
-        - "--group-add kvm"
-      entry:
-        Comment: Android Emulator Desktop Version
-        Terminal: "true"
-        Icon: applications-internet
-        Categories: Network;
-        Keywords: android;emulator;
-    environment:
-      ANDROID_DATA_VOLUME: android-emulator-desktop
-      NO_FORWARD_LOGGERS: "true"
-      NO_PULSE_AUDIO: "false"
-      AVD_CONFIG: ""
-      EMULATOR_PARAMS: ""
-      ADD_EMULATOR_PARAMS: ""
-    volumes:
-      - $ANDROID_DATA_VOLUME/user:/home/user/
-      - $ANDROID_DATA_VOLUME/android-home:/android-home
-    publish:
-      - 127.0.0.1:8554:8554/tcp
-      - 127.0.0.1:5555:5555/tcp
+emulator_desktop:
+  name: android-emulator-desktop
+  image: localhost/android-emulator
+  tag: latest
+  type: desktop
+  desktop:
     options:
-      - --device /dev/kvm
+      - "--group-add kvm"
+    entry:
+      Comment: Android Emulator Desktop Version
+      Terminal: "true"
+      Icon: applications-internet
+      Categories: Network;
+      Keywords: android;emulator;
+  environment:
+    ANDROID_DATA_VOLUME: android-emulator-desktop
+    NO_FORWARD_LOGGERS: "true"
+    NO_PULSE_AUDIO: "false"
+    AVD_CONFIG: ""
+    EMULATOR_PARAMS: ""
+    ADD_EMULATOR_PARAMS: ""
+  volumes:
+    - $ANDROID_DATA_VOLUME/user:/home/user/
+    - $ANDROID_DATA_VOLUME/android-home:/android-home
+  publish:
+    - 127.0.0.1:8554:8554/tcp
+    - 127.0.0.1:5555:5555/tcp
+  options:
+    - --device /dev/kvm
 
-  emulator_headless_service:
-    name: android-emulator-headless
-    image: localhost/android-emulator
-    tag: latest
-    type: service
-    environment:
-      ANDROID_DATA_VOLUME: android-emulator-headless
-      NO_FORWARD_LOGGERS: "true"
-      NO_PULSE_AUDIO: "true"
-      AVD_CONFIG: ""
-      EMULATOR_PARAMS: ""
-      ADD_EMULATOR_PARAMS: "-nowindow"
-    volumes:
-      - $ANDROID_DATA_VOLUME/user:/home/user/
-      - $ANDROID_DATA_VOLUME/android-home:/android-home
-    publish:
-      - 127.0.0.1:8554:8554/tcp
-      - 127.0.0.1:5555:5555/tcp
-    options:
-      - --device /dev/kvm
+emulator_headless_service:
+  name: android-emulator-headless
+  image: localhost/android-emulator
+  tag: latest
+  type: service
+  environment:
+    ANDROID_DATA_VOLUME: android-emulator-headless
+    NO_FORWARD_LOGGERS: "true"
+    NO_PULSE_AUDIO: "true"
+    AVD_CONFIG: ""
+    EMULATOR_PARAMS: ""
+    ADD_EMULATOR_PARAMS: "-nowindow"
+  volumes:
+    - $ANDROID_DATA_VOLUME/user:/home/user/
+    - $ANDROID_DATA_VOLUME/android-home:/android-home
+  publish:
+    - 127.0.0.1:8554:8554/tcp
+    - 127.0.0.1:5555:5555/tcp
+  options:
+    - --device /dev/kvm
 
-  emulator_webrtc_service:
-    name: android-emulator-webrtc
-    image: localhost/android-emulator
-    tag: latest
-    type: service
-
-  lineage_image_build:
-    name: lineage-cicd
-    image: lineageos4microg/docker-lineage-cicd
-    tag: latest
-    type: script
-    environment:
-      BUILD_DATA_VOLUME: android-build-data
-      BRANCH_NAME: lineage-17.1
-      DEVICE_LIST: sailfish
-      SIGN_BUILDS: true
-      SIGNATURE_SPOOFING: restricted
-      CUSTOM_PACKAGES: ""
-    volumes:
-      - ${BUILD_DATA_VOLUME}/src:/srv/src
-      - ${BUILD_DATA_VOLUME}/zips:/srv/zips
-      - ${BUILD_DATA_VOLUME}/logs:/srv/logs
-      - ${BUILD_DATA_VOLUME}/ccache:/srv/ccache
-      - ${BUILD_DATA_VOLUME}/keys:/srv/keys
-      - ${BUILD_DATA_VOLUME}/manifests:/srv/local_manifests
+emulator_webrtc_service:
+  name: android-emulator-webrtc
+  image: localhost/android-emulator
+  tag: latest
+  type: service
 
 {% endload %}
 

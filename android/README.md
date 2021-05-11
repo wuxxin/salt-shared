@@ -6,7 +6,7 @@
 + android_emulator_headless_service()
 + android_emulator_webrtc_service()
 
-## Configure
+### Configure
 
 environment:
   ANDROID_DATA_VOLUME: name-of-instance-data-volume
@@ -16,3 +16,7 @@ environment:
 desktop:
   options:
     k:v of x11docker options
+
+## Build an android lineage version
+
++ android_image_build()

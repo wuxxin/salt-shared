@@ -6,4 +6,4 @@ include:
   - containers
 
 {# download android lineage image builder container image #}
-{{ image(settings.lineage_image_build.image, settings.lineage_image_build.tag) }}
+{{ image(settings.image_builder.image, settings.image_builder.tag) }}
