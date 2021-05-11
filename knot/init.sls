@@ -3,10 +3,9 @@
 {% from "knot/lib.sls" import write_zone, write_config %}
 
 {% if grains['os'] == 'Ubuntu' %}
+{# knot from ppa is newer for almost any distro version #}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
-{# knot from ppa is newer for almost any distro #}
-{{ apt_add_repository("knot_ppa", "cz.nic-labs/knot-dns-latest",
-  require_in = "pkg: knot-package") }}
+{{ apt_add_repository("knot_ppa", "cz.nic-labs/knot-dns-latest", require_in = "pkg: knot-package") }}
 {% endif %}
 
 knot-package:
