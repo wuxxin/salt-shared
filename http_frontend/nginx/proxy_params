@@ -1,0 +1,9 @@
+# general proxy header settings
+proxy_pass_request_headers on;  # default on, pass header downstream
+proxy_http_version 1.1;  # default 1.0, can be overwritten to 1.0 if needed
+# set both Real-IP and Forwarded-For, we dont trust client headers
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Host $host;
+proxy_set_header X-Forwarded-Proto $scheme;
