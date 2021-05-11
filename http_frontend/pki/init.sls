@@ -21,8 +21,8 @@ pki_requisites:
 
 {{ settings.cert_dir }}/easyrsa:
   file.directory:
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - dir_mode: 770
     - file_mode: 660
     - makedirs: true
@@ -37,8 +37,8 @@ easyrsa:
     - name: {{ settings.cert_dir }}/easyrsa
     - source: {{ settings.external.easy_rsa_tar_gz.target }}
     - archive_format: tar
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - enforce_toplevel: false
     - overwrite: true
     - clean: false
@@ -52,8 +52,8 @@ easyrsa:
 easyrsa_vars:
   file.managed:
     - name: {{ settings.cert_dir }}/easyrsa/vars
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - contents: |
         set_var EASYRSA_CRL_DAYS 3650
         set_var EASYRSA_CERT_EXPIRE 1095
@@ -61,6 +61,8 @@ easyrsa_vars:
 # Generate initial CA for client certificates
 easyrsa_build_ca:
   cmd.run:
+    - runas: {{ settings.cert_user }}
+    - cwd: {{ settings.cert_dir }}/easyrsa
     - name: |
         if test -f {{ settings.cert_dir }}/easyrsa/pki/ca.crt; then
           rm -r {{ settings.cert_dir }}/easyrsa/pki
@@ -70,8 +72,6 @@ easyrsa_build_ca:
           --subject-alt-name="DNS:{{ settings.domain }}" \
           --req-org="{{ settings.domain }} Client Cert CA" \
           build-ca nopass
-    - runas: {{ settings.user }}
-    - cwd: {{ settings.cert_dir }}/easyrsa
     - unless: |
         result="false"
         if test -f {{ settings.cert_dir }}/easyrsa/pki/ca.crt; then
@@ -92,9 +92,9 @@ easyrsa_build_ca:
 # create revocation list if index is newer than list or list is not existing
 easyrsa_gen_crl:
   cmd.run:
-    - name: ./easyrsa --batch gen-crl
-    - runas: {{ settings.user }}
+    - runas: {{ settings.cert_user }}
     - cwd: {{ settings.cert_dir }}/easyrsa
+    - name: ./easyrsa --batch gen-crl
     - onlyif: test ! -e {{ settings.cert_dir }}/easyrsa/pki/crl.pem -o {{ settings.cert_dir }}/easyrsa/pki/crl.pem -ot {{ settings.cert_dir }}/easyrsa/pki/index.txt
     - require:
       - cmd: easyrsa_build_ca
@@ -103,8 +103,8 @@ easyrsa_gen_crl:
 {{ settings.cert_dir }}/{{ settings.ssl_client_ca }}:
   file.copy:
     - source: {{ settings.cert_dir }}/easyrsa/pki/ca.crt
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - mode: "0640"
     - force: true
     - onchanges:
@@ -113,8 +113,8 @@ easyrsa_gen_crl:
 {{ settings.cert_dir }}/{{ settings.ssl_client_crl }}:
   file.copy:
     - source: {{ settings.cert_dir }}/easyrsa/pki/crl.pem
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - mode: "0640"
     - force: true
     - onchanges:

@@ -41,7 +41,7 @@ if test "$1" = "--san" -a "$2" != ""; then
 fi
 call_prefix=""
 if test "$(id -u)" = "0"; then
-    call_prefix="gosu {{ settings.user }}"
+    call_prefix="gosu {{ settings.cert_user }}"
     echo "debug: called as root, using $call_prefix"
 fi
 
@@ -65,7 +65,7 @@ echo -e "$randpass\n$randpass\n$randpass\n$randpass" | \
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
-install -o "{{ settings.user }}" -g "{{ settings.user }}" -m "0640" -T \
+install -o "{{ settings.cert_user }}" -g "{{ settings.cert_user }}" -m "0640" -T \
         "{{ settings.cert_dir }}/easyrsa/pki/crl.pem" \
         "{{ settings.cert_dir }}/{{ settings.ssl_client_crl }}"
 
