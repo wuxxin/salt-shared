@@ -11,13 +11,14 @@ include:
 {% set domain_dir = settings.cert_dir+ '/acme.sh/' + domain %}
 acme-issue-cert-{{ domain }}:
   cmd.run:
+    - env:
+      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
+    - cwd: {{ settings.cert_dir }}/acme.sh
     - name: |
-        gosu {{ settings.user }} ./acme.sh --issue \
+        gosu {{ settings.cert_user }} ./acme.sh --issue \
         {% for i in san_list %}-d {{ i }} {% endfor %} \
         --alpn --tlsport {{ tlsport }} \
         --renew-hook '{{ settings.cert_dir }}/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
-    - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
     - unless: |
         result="false"
         if test -f "{{ domain_dir }}/fullchain.cer"; then
@@ -34,7 +35,6 @@ acme-issue-cert-{{ domain }}:
           fi
         fi
         $result
-    - cwd: {{ settings.cert_dir }}/acme.sh
     - require:
       - cmd: acme-register-account
       - service: nginx
@@ -42,16 +42,16 @@ acme-issue-cert-{{ domain }}:
 {# DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}" #}
 acme-deploy-{{ domain }}:
   cmd.run:
+    - env:
+      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
+    - cwd: {{ settings.cert_dir }}/acme.sh
     - name: |
-        gosu {{ settings.user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
+        gosu {{ settings.cert_user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
         "{{ settings.domain }}" \
         "{{ domain_dir }}/{{ domain }}.key" \
         "{{ domain_dir }}/{{ domain }}.cer" \
         "{{ domain_dir }}/fullchain.cer" \
         "{{ domain_dir }}/ca.cer"
-    - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
-    - cwd: {{ settings.cert_dir }}/acme.sh
     - onchanges:
       - cmd: acme-issue-cert-{{ domain }}
 {% endmacro %}
@@ -59,8 +59,8 @@ acme-deploy-{{ domain }}:
 
 {{ settings.cert_dir }}/acme.sh:
   file.directory:
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - require:
       - sls: http_frontend.dirs
 
@@ -79,8 +79,8 @@ acme.sh:
     - name: {{ settings.cert_dir }}/acme.sh
     - source: {{ settings.external.acme_sh_tar_gz.target }}
     - archive_format: tar
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - enforce_toplevel: false
     - overwrite: true
     - clean: false
@@ -94,8 +94,8 @@ acme.sh:
 {{ settings.cert_dir }}/acme.sh/acme.sh.env:
   file.managed:
     - mode: "0644"
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - contents: |
         export LE_WORKING_DIR="{{ settings.cert_dir }}/acme.sh"
         alias acme.sh="{{ settings.cert_dir }}/acme.sh/acme.sh"
@@ -109,8 +109,8 @@ acme.sh:
 {{ settings.cert_dir }}/acme.sh/account.conf:
   file.managed:
     - mode: "0644"
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.cert_user }}
+    - group: {{ settings.cert_user }}
     - contents: |
         #LOG_FILE="{{ settings.cert_dir }}/acme.sh/acme.sh.log"
         #LOG_LEVEL=1
@@ -123,7 +123,7 @@ acme.sh:
 
 acme-register-account:
   cmd.run:
-    - name: gosu {{ settings.user }} ./acme.sh  --register-account
+    - name: gosu {{ settings.cert_user }} ./acme.sh  --register-account
     - env:
       - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
     - cwd: {{ settings.cert_dir }}/acme.sh
