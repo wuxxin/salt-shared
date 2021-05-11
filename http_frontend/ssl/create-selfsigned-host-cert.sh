@@ -1,13 +1,19 @@
 #!/usr/bin/bash
 set -eo pipefail
 
-HostName="invalid"
+if test "$3" = ""; then
+    cat << EOF
+Usage: $0 keyfile_target certfile_target domain
+EOF
+    exit 1
+fi
+
+key_path="$1"
+cert_path="$2"
+shift 2
+HostName="$1"
 SubjectAltName="DNS:$HostName"
 template="/usr/share/ssl-cert/ssleay.cnf"
-cert_path="{{ settings.ssl_invalid_cert_path }}"
-full_cert_path="{{ settings.ssl_invalid_full_cert_path }}"
-key_path="{{ settings.ssl_invalid_key_path }}"
-dhparam_path="{{ settings.cert_dir }}/{{ settings.ssl_dhparam }}"
 TMPFILE="$(mktemp)" || exit 1
 TMPOUT="$(mktemp)"  || exit 1
 trap "rm -f $TMPFILE $TMPOUT" EXIT
@@ -23,5 +29,3 @@ fi
 chmod 644 "$cert_path"
 chmod 640 "$key_path"
 chown root:ssl-cert "$key_path"
-cat "$cert_path" "$dhparam_path" > "$full_cert_path"
-chmod 644 "$full_cert_path"
