@@ -9,6 +9,12 @@ zfsutils-linux:
     - require:
       - sls: kernel.nfs.server
 
+zfs-support-libvirt:
+  pkg.installed:
+    - name: libvirt-daemon-driver-storage-zfs
+    - require:
+      - pkg: zfsutils-linux
+
 /etc/modprobe.d/zfs.conf:
   file.managed:
     - contents: |
