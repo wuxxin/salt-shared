@@ -10,7 +10,6 @@ libvirt:
       - libvirt-clients
       - libvirt-daemon
       - libvirt-daemon-system
-      - libvirt-daemon-driver-storage-zfs
       - augeas-tools
 {%- endif %}
     - require:
