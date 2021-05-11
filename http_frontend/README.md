@@ -1,42 +1,44 @@
-# http_frontend
+# http_frontend (nginx with some glue)
 
-* stream switching, ssl termination, rate limiting, proxying, static webserver using nginx
-+ letsencrypt **host certificates** via **ALPN on https** port using acme.sh
-+ pki management for easy **client certificates** support and administration using easy-rsa
+* stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
++ letsencrypt **host certificates** via **ALPN on https** port using **acme.sh**
++ pki management for easy **client certificates** support and administration using **easy-rsa**
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
 + extended **prometheus stats** using lua_nginx_prometheus
 + **configuration** using **pillar:nginx**, for details see defaults.jinja
-
 + Ssl Features
-    + main domain can use cert from pillar (cert+key), letsencrypt or selfsigned
-    + main domain and other virtual domains can have multiple letsencrypt SAN's
-    + unknown domains or requests with an invalid sni will
-        return a certificate for the domain "invalid" and return 404
-    + manual virtual domains (where letsencrypt is not used) must be set up by
-        copying certificates to disk structure
-
-+ Proxy Features
-    + pass request headers from downstream
+    + domains can use cert from pillar (cert+key), letsencrypt or be selfsigned
+    + domains can have multiple SAN's
+    + unknown domains or requests with an invalid sni will return a certificate
+        for the domain "hostname.invalid" and return 404
++ Downstream proxy support with PROXY protocol, eg. haproxy, envoy
+    + configurable set_real_ip_from to add addresses of trusted downstream proxies
++ Upstream Proxy http_proxy
     + set HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
-    + defaults to proxy_http_version 1.1 , set "proxy_http_version 1.0;" if upstream does not speak HTTP 1.1
+    + defaults to proxy_http_version 1.1 , set "proxy_http_version 1.0;" if required
++ Upstream UWSGI proxy
 
-#### example, for details see defaults.jinja
+### TODO
+
++ FIXME: make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.letsencrypt
++ FIXME: make letsencrypt of vhosts honour additional SANS
++ TODO: make create-selfsigned-host-cert honour additional SANS
+
+### example, for details see defaults.jinja
 
 ```yaml
-user: {{ user }}
 listen_ip:
   - default-route-ip
-domain: hostname.if.empty
-allowed_hosts:
-  - hostname.if.empty
-  - localhost.if.empty
+listen_service:
+  - https
+server_name: hostname.something another.something
 virtual_hosts:
-  - another.domain
-  - multi.domain other.san.name another.name.san
-letsencrypt: default true
-client_cert_verify: default false, true will make optional client certificate verification
-client_cert_mandatory: default false, true will make mandatory client certificate verification
+  - name: another.domain
+    letsencrypt: false
+  - name: multi.domain other.san.name another.name.san
+letsencrypt: true
+cert_user: {{ user }}
 cert_dir: {{ user_home }}/ssl
 geoip:
   enabled: true
@@ -54,14 +56,14 @@ location:
   - source: /
     target: root /var/www/main.domain/
 host:
-  - domain: another.domain
-    client_cert_verify: true
+  - name: another.domain yet.another.domain
+    client_cert_mandatory: true
     location:
       - source: /
         target: root /var/www/another.domain/
 ```
 
-#### TODO: add custom build nginx
+### snippets
 
 ```
   {% if settings.nginx_custom_build %}
