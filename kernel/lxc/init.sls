@@ -1,4 +1,4 @@
-{% from "kernel.lxc/defaults.jinja" import settings with context %}
+{% from "kernel/defaults.jinja" import settings with context %}
 
 {# modify kernel for production http://lxd.readthedocs.io/en/latest/production-setup/ #}
 include:
@@ -11,6 +11,7 @@ include:
   - systemd.cgroup-accounting
   - kernel.network
 
+{#
 /etc/default/lxc:
   file.managed:
     - source: salt://lxc/default-lxc
@@ -18,6 +19,7 @@ include:
 /etc/default/lxc-net:
   file.managed:
     - source: salt://lxc/default-lxc-net
+#}
 
 lxc:
   pkg.installed:

@@ -27,10 +27,12 @@ virtual_extra: true
 package: {{ salt['grains.filter_by'](package_defaults,
   grain= 'oscodename', default= 'generic',
   merge= salt['pillar.get']('kernel:package', {})) }}
-overlay:
-  redirect_dir: "on"
-  xino_auto: "on"
-  metacopy: "off"
+module:
+  # options for kernel modules, currently only overlay is parsed
+  overlay: {}
+    # redirect_dir: "on"
+    # xino_auto: "on"
+    # metacopy: "off"
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
