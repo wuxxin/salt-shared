@@ -146,25 +146,19 @@ def fix_mount_dict(mount_dict, proj_name, srv_name):
 # ${VARIABLE?err} raise error if not set
 # $$ means $
 
-var_re = re.compile(r'\$(\{(?:[^\s\$:\-\}]+)\}|(?:[^\s\$\{\}]+))')
-var_def_re = re.compile(r'\$\{([^\s\$:\-\}]+)(:)?-([^\}]*)\}')
-var_err_re = re.compile(r'\$\{([^\s\$:\-\}]+)(:)?\?([^\}]*)\}')
-
-def dicts_get(dicts, key, fallback='', fallback_empty=False):
-    """
-    get the given key from any dict in dicts, trying them one by one
-    if not found in any, then use fallback, if fallback is Exception raise is
-    """
-    value = None
-    for d in dicts:
-        value = d.get(key, None)
-        if value is not None: break
-    if not value:
-        if fallback_empty or value is None:
-            value = fallback
-        if isinstance(value, Exception):
-            raise value
-    return value
+var_re = re.compile(r"""
+    \$(?:
+        (?P<escaped>\$) |
+        (?P<named>[_a-zA-Z][_a-zA-Z0-9]*) |
+        (?:{
+            (?P<braced>[_a-zA-Z][_a-zA-Z0-9]*)
+            (?:
+                (?::?-(?P<default>[^}]+)) |
+                (?::?\?(?P<err>[^}]+))
+            )?
+        })
+    )
+""", re.VERBOSE)
 
 def rec_subs(value, dicts):
     """
@@ -173,13 +167,18 @@ def rec_subs(value, dicts):
     if is_dict(value):
         value = dict([(k, rec_subs(v, dicts)) for k, v in value.items()])
     elif is_str(value):
-        value = var_re.sub(lambda m: dicts_get(dicts, m.group(1).strip('{}')), value)
-        sub_def = lambda m: dicts_get(dicts, m.group(1), m.group(3), m.group(2) == ':')
-        value = var_def_re.sub(sub_def, value)
-        sub_err = lambda m: dicts_get(dicts, m.group(1), RuntimeError(m.group(3)),
-                                      m.group(2) == ':')
-        value = var_err_re.sub(sub_err, value)
-        value = value.replace('$$', '$')
+        def convert(m):
+            if m.group("escaped") is not None:
+                return "$"
+            name = m.group("named") or m.group("braced")
+            for d in dicts:
+                value = d.get(name)
+                if value is not None:
+                    return "%s" % value
+            if m.group("err") is not None:
+                raise RuntimeError(m.group("err"))
+            return m.group("default") or ""
+        value = var_re.sub(convert, value)
     elif hasattr(value, "__iter__"):
         value = [rec_subs(i, dicts) for i in value]
     return value
@@ -387,7 +386,7 @@ def assert_volume(compose, mount_dict):
     # podman volume list --format '{{.Name}}\t{{.MountPoint}}' -f 'label=io.podman.compose.project=HERE'
     try: out = compose.podman.output(["volume", "inspect", vol_name]).decode('utf-8')
     except subprocess.CalledProcessError:
-        compose.podman.output(["volume", "create", "--label", "io.podman.compose.project={}".format(proj_name), vol_name])
+        compose.podman.output(["volume", "create", "--label", "io.podman.compose.project={}".format(proj_name), "--label", "com.docker.compose.project={}".format(proj_name), vol_name])
         out = compose.podman.output(["volume", "inspect", vol_name]).decode('utf-8')
 
 def mount_desc_to_mount_args(compose, mount_desc, srv_name, cnt_name):
@@ -490,7 +489,7 @@ def get_mount_args(compose, cnt, volume):
             size = tmpfs_opts.get("size", None)
             if size: opts.append('size={}'.format(size))
             mode = tmpfs_opts.get("mode", None)
-            if mode: opts.append('mode={}'.format(size))
+            if mode: opts.append('mode={}'.format(mode))
             if opts: args += ':' + ','.join(opts)
             return ['--tmpfs', args]
         else:
@@ -518,6 +517,9 @@ def container_to_args(compose, cnt, detached=True, podman_command='run'):
     sec = norm_as_list(cnt.get("security_opt", None))
     for s in sec:
         podman_args.extend(['--security-opt', s])
+    ann = norm_as_list(cnt.get("annotations", None))
+    for a in ann:
+        podman_args.extend(['--annotation', a])
     if cnt.get('read_only', None):
         podman_args.append('--read-only')
     for i in cnt.get('labels', []):
@@ -565,6 +567,8 @@ def container_to_args(compose, cnt, detached=True, podman_command='run'):
         podman_args.extend(['--shm-size', '{}'.format(cnt['shm_size'])])
     if cnt.get('stdin_open', None):
         podman_args.append('-i')
+    for i in cnt.get('sysctls', []):
+        podman_args.extend(['--sysctl', i])
     if cnt.get('tty', None):
         podman_args.append('--tty')
     if cnt.get('privileged', None):
@@ -691,7 +695,7 @@ class Podman:
         cmd = [self.podman_path]+podman_args
         return subprocess.check_output(cmd)
 
-    def run(self, podman_args, wait=True, sleep=1):
+    def run(self, podman_args, wait=True, sleep=1, obj=None):
         podman_args_str = [str(arg) for arg in podman_args]
         print("podman " + " ".join(podman_args_str))
         if self.dry_run:
@@ -700,7 +704,11 @@ class Podman:
         # subprocess.Popen(args, bufsize = 0, executable = None, stdin = None, stdout = None, stderr = None, preexec_fn = None, close_fds = False, shell = False, cwd = None, env = None, universal_newlines = False, startupinfo = None, creationflags = 0)
         p = subprocess.Popen(cmd)
         if wait:
-            print(p.wait())
+            exit_code = p.wait()
+            print(exit_code)
+            if obj is not None:
+                obj.exit_code = exit_code
+            
         if sleep:
             time.sleep(sleep)
         return p
@@ -788,6 +796,7 @@ def resolve_extends(services, service_names, dotenv_dict):
 
 class PodmanCompose:
     def __init__(self):
+        self.exit_code = None
         self.commands = {}
         self.global_args = None
         self.project_name = None
@@ -832,6 +841,10 @@ class PodmanCompose:
         cmd = args.command
         if not args.file:
             args.file = list(filter(os.path.exists, [
+                "compose.yaml",
+                "compose.yml",
+                "compose.override.yaml",
+                "compose.override.yml",
                 "docker-compose.yml",
                 "docker-compose.yaml",
                 "docker-compose.override.yml",
@@ -843,7 +856,7 @@ class PodmanCompose:
             ]))
         files = args.file
         if not files:
-            print("no docker-compose.yml or container-compose.yml file found, pass files with -f")
+            print("no compose.yaml, docker-compose.yml ot container-compose.yml file found, pass files with -f")
             exit(-1)
         ex = map(os.path.exists, files)
         missing = [ fn0 for ex0, fn0 in zip(ex, files) if not ex0 ]
@@ -851,6 +864,7 @@ class PodmanCompose:
             print("missing files: ", missing)
             exit(1)
         # make absolute
+        relative_files = files
         files = list(map(os.path.realpath, files))
         filename = files[0]
         project_name = args.project_name
@@ -875,7 +889,7 @@ class PodmanCompose:
 
 
         dotenv_path = os.path.join(dirname, ".env")
-        if os.path.exists(dotenv_path):
+        if os.path.isfile(dotenv_path):
             with open(dotenv_path, 'r') as f:
                 dotenv_ls = [l.strip() for l in f if l.strip() and not l.startswith('#')]
                 dotenv_dict = dict([l.split("=", 1) for l in dotenv_ls if "=" in l])
@@ -909,7 +923,7 @@ class PodmanCompose:
         if services is None:
             services = {}
             print("WARNING: No services defined")
-
+		
         # NOTE: maybe add "extends.service" to _deps at this stage
         flat_deps(services, with_extends=True)
         service_names = sorted([ (len(srv["_deps"]), name) for name, srv in services.items() ])
@@ -927,6 +941,9 @@ class PodmanCompose:
             "io.podman.compose.config-hash=123",
             "io.podman.compose.project=" + project_name,
             "io.podman.compose.version=0.0.1",
+            "com.docker.compose.project=" + project_name,
+            "com.docker.compose.project.working_dir=" + dirname,
+            "com.docker.compose.project.config_files=" + ','.join(relative_files),
         ]
         # other top-levels:
         # networks: {driver: ...}
@@ -1177,7 +1194,8 @@ def compose_up(compose, args):
     threads = []
     for cnt in compose.containers:
         # TODO: remove sleep from podman.run
-        thread = Thread(target=compose.podman.run, args=[['start', '-a', cnt['name']]], daemon=True)
+        obj = compose if args.get(exit_code_from, None) == cnt['name'] else None
+        thread = Thread(target=compose.podman.run, args=[['start', '-a', cnt['name']], obj], daemon=True, name=cnt['name'])
         thread.start()
         threads.append(thread)
         time.sleep(1)
@@ -1187,7 +1205,8 @@ def compose_up(compose, args):
             if not thread.is_alive():
                 threads.remove(thread)
                 if args.abort_on_container_exit:
-                    exit(-1)
+                    exit_code = compose.exit_code if compose.exit_code is not None else -1
+                    exit(exit_code)
 
 @cmd_run(podman_compose, 'down', 'tear down entire stack')
 def compose_down(compose, args):
@@ -1215,7 +1234,6 @@ def compose_ps(compose, args):
 @cmd_run(podman_compose, 'run', 'create a container similar to a service to run a one-off command')
 def compose_run(compose, args):
     create_pods(compose, args)
-    print(args)
     container_names=compose.container_names_by_service[args.service]
     container_name=container_names[0]
     cnt = compose.container_by_name[container_name]
@@ -1229,6 +1247,11 @@ def compose_run(compose, args):
     if args.entrypoint: cnt["entrypoint"] = args.entrypoint
     if args.user: cnt["user"] = args.user
     if args.workdir: cnt["working_dir"] = args.workdir
+    env = dict(cnt.get('environment', {}))
+    if args.env:
+        additional_env_vars = dict(map(lambda each: each.split('='), args.env))
+        env.update(additional_env_vars)
+        cnt['environment'] = env
     if not args.service_ports:
         for k in ("expose", "publishall", "ports"):
             try: del cnt[k]
@@ -1245,6 +1268,27 @@ def compose_run(compose, args):
         podman_args.insert(1, '-i')
         if args.rm:
             podman_args.insert(1, '--rm')
+    compose.podman.run(podman_args, sleep=0)
+
+@cmd_run(podman_compose, 'exec', 'execute a command in a running container')
+def compose_exec(compose, args):
+    container_names=compose.container_names_by_service[args.service]
+    container_name=container_names[args.index - 1]
+    cnt = compose.container_by_name[container_name]
+    podman_args = ['exec', '--interactive']
+    if args.privileged: podman_args += ['--privileged']
+    if args.user: podman_args += ['--user', args.user]
+    if args.workdir: podman_args += ['--workdir', args.workdir]
+    if not args.T: podman_args += ['--tty']
+    env = dict(cnt['environment'])
+    if args.env:
+        additional_env_vars = dict(map(lambda each: each.split('='), args.env))
+        env.update(additional_env_vars)
+    for name, value in env.items():
+        podman_args += ['--env', "%s=%s" % (name, value)]
+    podman_args += [container_name]
+    if args.cnt_command is not None and len(args.cnt_command) > 0:
+        podman_args += args.cnt_command
     compose.podman.run(podman_args, sleep=0)
 
 
@@ -1342,7 +1386,7 @@ def compose_run_parse(parser):
         help="Assign a name to the container")
     parser.add_argument("--entrypoint", type=str, default=None,
         help="Override the entrypoint of the image.")
-    parser.add_argument('-e', metavar="KEY=VAL", action='append',
+    parser.add_argument('-e',  '--env', metavar="KEY=VAL", action='append',
         help="Set an environment variable (can be used multiple times)")
     parser.add_argument('-l', '--label', metavar="KEY=VAL", action='append',
         help="Add or override a label (can be used multiple times)")
@@ -1366,6 +1410,28 @@ def compose_run_parse(parser):
         help='service name')
     parser.add_argument('cnt_command', metavar='command', nargs=argparse.REMAINDER,
         help='command and its arguments')
+
+@cmd_parse(podman_compose, 'exec')
+def compose_run_parse(parser):
+    parser.add_argument("-d", "--detach", action='store_true',
+        help="Detached mode: Run container in the background, print new container name.")
+    parser.add_argument("--privileged", action='store_true', default=False,
+        help="Give the process extended Linux capabilities inside the container")
+    parser.add_argument("-u", "--user", type=str, default=None,
+        help="Run as specified username or uid")
+    parser.add_argument("-T", action='store_true',
+        help="Disable pseudo-tty allocation. By default `podman-compose run` allocates a TTY.")
+    parser.add_argument("--index", type=int, default=1,
+        help="Index of the container if there are multiple instances of a service")
+    parser.add_argument('-e', '--env', metavar="KEY=VAL", action='append',
+        help="Set an environment variable (can be used multiple times)")
+    parser.add_argument("-w", "--workdir", type=str, default=None,
+        help="Working directory inside the container")
+    parser.add_argument('service', metavar='service', nargs=None,
+        help='service name')
+    parser.add_argument('cnt_command', metavar='command', nargs=argparse.REMAINDER,
+        help='command and its arguments')
+
 
 @cmd_parse(podman_compose, ['down', 'stop', 'restart'])
 def compose_parse_timeout(parser):

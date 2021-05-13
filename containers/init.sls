@@ -14,8 +14,8 @@ include:
   file:
     - directory
 
-{% for dirname in [settings.podman.service_basepath, settings.podman.build_basepath,
-    settings.compose.service_basepath, settings.compose.build_basepath] %}
+{% for dirname in [settings.podman.workdir_basepath, settings.podman.build_basepath,
+    settings.compose.workdir_basepath, settings.compose.build_basepath] %}
 {{ dirname }}:
   file:
     - directory
@@ -29,7 +29,7 @@ include:
     - require:
       - file: /etc/containers
   file.serialize:
-    - dataset: {{ settings.conf.containers }}
+    - dataset: {{ settings.config.containers }}
     - formatter: toml
     - merge_if_exists: True
     - require:
@@ -37,7 +37,7 @@ include:
 
 /etc/containers/storage.conf:
   file.serialize:
-    - dataset: {{ settings.conf.storage }}
+    - dataset: {{ settings.config.storage }}
     - formatter: toml
     - merge_if_exists: True
     - require:
@@ -47,8 +47,8 @@ include:
   file.managed:
     - contents: |
         # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST
-  {%- if settings.conf.mounts.mounts|d([]) %}
-    {%- for mount in settings.conf.mounts.mounts %}
+  {%- if settings.config.mounts.mounts|d([]) %}
+    {%- for mount in settings.config.mounts.mounts %}
         {{ mount }}
     {%- endfor %}
   {%- endif %}
@@ -58,7 +58,7 @@ include:
 /etc/containers/policy.json:
   file.managed:
     - contents: |
-{{ settings.conf.policy|json|indent(8,True) }}
+{{ settings.config.policy|json|indent(8,True) }}
     - require:
       - file: /etc/containers
 
@@ -67,20 +67,21 @@ podman:
     - name: deb {{ baseurl }}/ /
     - key_url: {{ baseurl }}/Release.key
     - file: /etc/apt/sources.list.d/podman_ppa.list
-    - require:
-      - pkg: ppa_ubuntu_installer
     - require_in:
       - pkg: podman
   pkg.installed:
     - pkgs:
-      - podman
-      - buildah
+      - uidmap
+      - criu
       - crun
-      - slirp4netns
       - cri-o-runc
       - cri-tools
-      - skopeo
+      - containernetworking-plugins
+      - slirp4netns
       - fuse-overlayfs
+      - skopeo
+      - buildah
+      - podman
 
 # snapshot from: https://raw.githubusercontent.com/containers/podman-compose/devel/podman_compose.py
 podman_compose.py:
@@ -88,5 +89,13 @@ podman_compose.py:
     - source: salt://containers/podman_compose.py
     - name: /usr/local/bin/podman-compose
     - mode: "0755"
+
+{% for archive in ['containerd.tar.gz', 'cri-containerd-cni.tar.gz'] %}
+{{ archive }}:
+  file.managed:
+    - source: {{ settings.external[archive]['download'] }}
+    - source_hash: {{ settings.external[archive]['hash_url'] }}
+    - name: {{ settings.external[archive]['target'] }}
+{% endfor %}
 
 {% endif %}

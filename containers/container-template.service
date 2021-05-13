@@ -23,8 +23,8 @@ Restart={{ entry.restart }}
 {%- endfor %}
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
-ExecStartPre=/bin/bash -c 'cd {{ entry.builddir }} && podman build \
-    {{ '--tag='+ entry.tag if entry.tag }} \
+ExecStartPre=/bin/bash -c 'cd {{ entry.builddir }} && \
+    podman build {{ '--tag='+ entry.tag if entry.tag }} \
     {%- for key,value in entry.build.args.items() %}
     {{ '--build-arg=' ~ key ~ '=' ~ value }} \
     {%- endfor %}
@@ -42,6 +42,7 @@ WorkingDirectory={{ entry.workdir }}
 EnvironmentFile={{ entry.workdir }}.env
 ExecStart=podman run \
   --name={{ entry.name }} \
+  --cgroups=split \
 {%- if entry.userns == 'pick' %}
   --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
   --gidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
