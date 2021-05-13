@@ -90,12 +90,10 @@ podman_compose.py:
     - name: /usr/local/bin/podman-compose
     - mode: "0755"
 
-{% for archive in ['containerd.tar.gz', 'cri-containerd-cni.tar.gz'] %}
-{{ archive }}:
+cri-containerd-cni.tar.gz:
   file.managed:
-    - source: {{ settings.external[archive]['download'] }}
-    - source_hash: {{ settings.external[archive]['hash_url'] }}
-    - name: {{ settings.external[archive]['target'] }}
-{% endfor %}
+    - source: {{ settings.external['cri-containerd-cni.tar.gz']['download'] }}
+    - source_hash: {{ settings.external['cri-containerd-cni.tar.gz']['hash_url'] }}
+    - name: {{ settings.external['cri-containerd-cni.tar.gz']['target'] }}
 
 {% endif %}
