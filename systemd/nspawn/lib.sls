@@ -32,20 +32,20 @@ update_image_{{ this.image }}:
 
 {{ this.name }}.env:
   file.managed:
-    - name: {{ settings.service_basepath }}/{{ this.name }}.env
+    - name: {{ settings.env_basepath }}/{{ this.name }}.env
     - mode: 0600
     - contents: |
   {%- for key,value in this.environment.items() %}
         {{ key }}={{ value }}
   {%- endfor %}
 
-{{ this.name }}.service:
+{{ this.name }}.nspawn:
   file.managed:
     - source: salt://systemd/nspawn/machine-template.service
-    - name: /etc/systemd/system/{{ this.name }}.service
+    - name: /etc/systemd/system/nspawn/{{ this.name }}.nspawn
     - template: jinja
     - defaults:
-        pod: {{ pod }}
+        machine: {{ this }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
