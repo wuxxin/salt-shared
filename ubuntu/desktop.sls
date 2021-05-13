@@ -18,6 +18,7 @@ install_desktop:
       - gnome
       - gnome-core
       - vanilla-gnome-desktop
+      - xdg-desktop-portal-gtk
     - require:
       - sls: ubuntu.snapd
       - sls: ubuntu.telemetry
