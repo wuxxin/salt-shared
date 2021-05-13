@@ -10,8 +10,6 @@ zentyal:
     - name: deb http://archive.zentyal.org/zentyal 5.1 main
     - file: /etc/apt/sources.list.d/zentyal-xenial.list
     - key_url: salt://old/lab/appliance/zentyal/files/zentyal-5.1-archive.asc
-    - require:
-      - pkg: ppa_ubuntu_installer
     - require_in:
       - pkg: zentyal
 
@@ -55,14 +53,14 @@ mask-system-nginx:
   service.masked:
     - name: nginx
 
-{# ### apache #}  
+{# ### apache #}
 {# XXX activate needed apache modules, so apache is config is valid, and service is available for letsencrypt #}
 /etc/apache2/mods-available/ssl.conf:
   file.managed:
     - source: salt://old/lab/appliance/zentyal/files/ssl.conf
     - require_in:
       - file: zentyal-apache-enable-ssl.conf
- 
+
 {% for i in ['proxy.conf', 'proxy.load', 'proxy_http.load', 'rewrite.load',
   'socache_shmcb.load', 'ssl.conf', 'ssl.load', 'headers.load'] %}
 zentyal-apache-enable-{{ i }}:
@@ -98,10 +96,10 @@ adding-salt-master-to-hosts:
     - append_if_not_found: true
     - pattern: |
         ^.*{{ saltshort }}.*{{ saltshort }}.*
-  
+
     - repl: |
         {{ saltip[0] }} {{ saltmaster }} {{ saltshort }}
-  
+
       {% endif %}
     {% endfor %}
   {% endif %}
@@ -123,7 +121,7 @@ temporary-shutdown-docker:
   service.dead:
     - name: docker
     - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
-    
+
 temporary-shutdown-other-interfaces:
   cmd.run:
     - name: for a in $(ifquery --list); do if test "$a" != "lo" -a "$a" != "eth0"; then ifdown $a; fi; done
@@ -138,7 +136,7 @@ zentyal-interfaces:
         # zentyal hardcoded interface list
         auto lo {{ gwdev }}
         iface lo inet loopback
-        
+
         iface {{ gwdev }} inet static
             address {{ address }}
             netmask {{ netmask }}
@@ -146,9 +144,9 @@ zentyal-interfaces:
             gateway {{ gwip }}
             dns-nameservers {{ dns_nameservers|join(' ') }}
             dns-search {{ dns_search|join(' ') }}
-            
+
         EOF
-  
+
     - onlyif: grep -q "source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces
     - require:
       - cmd: temporary-shutdown-other-interfaces
@@ -172,11 +170,11 @@ bind9-disable-resolvconf-addition:
         # XXX do not set bind9 as local dns resolver, zentyal grabs basedomain from hostname as own domain for kerberus/ldap dns stuff
         [Service]
         ExecStart=
-        ExecStop= 
-  
+        ExecStop=
+
     - onchanges_in:
       - cmd: systemd_reload
-  
+
 {# XXX write out a customized zentyal redis config setter #}
 /usr/local/sbin/prepare-zentyal-config.sh:
   file.managed:
@@ -195,4 +193,3 @@ bind9-disable-resolvconf-addition:
     - mode: "755"
     - onlyif: test -e /var/lib/zentyal/.first
     - unless: test -e /usr/local/sbin/prepare-zentyal-config.sh
-

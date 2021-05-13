@@ -13,8 +13,6 @@ chromium_ppa:
     - name: deb {{ baseurl }}/ /
     - key_url: {{ baseurl }}/Release.key
     - file: /etc/apt/sources.list.d/chromium_ppa.list
-    - require:
-      - pkg: ppa_ubuntu_installer
     - require_in:
       - pkg: chromium-browser
 
