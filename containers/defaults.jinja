@@ -57,7 +57,7 @@ config:
         "":
           - type: insecureAcceptAnything
 
-# used in containers/init.sls and containers/lib.sls
+# used in containers/podman/init.sls and containers/podman/lib.sls
 podman:
   workdir_basepath: /etc/containers/podman.service
   build_basepath: /var/lib/containers/podman-build

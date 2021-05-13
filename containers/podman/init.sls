@@ -86,14 +86,8 @@ podman:
 # snapshot from: https://raw.githubusercontent.com/containers/podman-compose/devel/podman_compose.py
 podman_compose.py:
   file.managed:
-    - source: salt://containers/podman_compose.py
+    - source: salt://containers/podman/podman_compose.py
     - name: /usr/local/bin/podman-compose
     - mode: "0755"
-
-cri-containerd-cni.tar.gz:
-  file.managed:
-    - source: {{ settings.external['cri-containerd-cni.tar.gz']['download'] }}
-    - source_hash: {{ settings.external['cri-containerd-cni.tar.gz']['hash_url'] }}
-    - name: {{ settings.external['cri-containerd-cni.tar.gz']['target'] }}
 
 {% endif %}

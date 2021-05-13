@@ -1,8 +1,17 @@
-# Podman Containers on Ubuntu/Debian
+# modern containers for Ubuntu/Debian using podman and containerd
 
-uses podman, buildah, crun, skopeo, fuse-overlayfs, podman-compose, x11docker
++ uses ppa for podman, crun, buildah, skopeo, fuse-overlayfs
++ uses snapshotted versions of podman-compose, x11docker
++ uses github download for containerd and cri_containerd_cni
 
-## Functions
+
+## Containerd
+
++ include: containers.containerd
+
+## Podman
+
+### Functions
 
 + create a named volume
   + volume(name, opts=[], driver='local', labels=[], env={}, user='')
@@ -13,7 +22,7 @@ uses podman, buildah, crun, skopeo, fuse-overlayfs, podman-compose, x11docker
 + start a systemd service,oneshot by pulling/building and starting a compose structure
   + compose(definition, user='')
 
-## Definition
+### Definition
 
 + container_definition
   + type: "build", "service", "oneshot"
@@ -24,6 +33,7 @@ uses podman, buildah, crun, skopeo, fuse-overlayfs, podman-compose, x11docker
   + type: "service", "oneshot"
 + user != '': execute as user using rootless podman
 + for details and comments of options see default_container and default_compose in defaults.jinja
+
 
 ### remarks
 

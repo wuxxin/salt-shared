@@ -16,7 +16,9 @@
 
 
 {%- macro usernsid_fromstr(name) -%}
-{{ salt['cmd.run_stdout']('python -c "import binascii;id=(binascii.crc_hqx(b\'' ~ name ~ '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }}
+{{ salt['cmd.run_stdout'](
+  'python -c "import binascii;id=(binascii.crc_hqx(b\'' ~
+  name ~ '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }}
 {%- endmacro -%}
 
 
@@ -33,15 +35,15 @@
 {%- macro service_path(name, user='') -%}
 {%- from "containers/defaults.jinja" import settings with context -%}
 {%- if user != '' -%}
-{{ env_repl(settings.podman.user_service_basepath ~ '/' ~ name, {}, user) }}
+{{ env_repl(settings.podman.user_workdir_basepath ~ '/' ~ name, {}, user) }}
 {%- else -%}
-{{ settings.podman.service_basepath ~ '/' ~ name }}
+{{ settings.podman.workdir_basepath ~ '/' ~ name }}
 {%- endif -%}
 {%- endmacro -%}
 
 
 {% macro create_directories(entry) %}
-{# create workdir, builddir #}
+{# create workdir, builddir and a symlink in workdir/build pointing to builddir #}
 {{ entry.name }}.workdir:
   file.directory:
     - name: {{ entry.workdir }}
@@ -138,7 +140,7 @@
         entry: {{ entry }}
         settings: {{ settings }}
     {%- endif %}
-    - name: /etc/systemd/system/{{ entry.name }}.service
+    - name: {{ entry.servicedir }}/{{ entry.name }}.service
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
@@ -167,23 +169,6 @@
     - require:
       - cmd: {{ entry.name }}.service
   {%- endif %}
-{% endmacro %}
-
-
-{% macro write_desktop(entry, user='') %}
-  {%- if user != '' -%}
-  {{ env_repl(settings.podman.user_build_basepath ~ '/' ~ name, {}, user) }}
-  {%- else -%}
-  {%- endif %}
-{# write desktop environment files (either for everyone or for one user) #}
-{#
-/usr/local
-~/.local
-/share/applications/android-{{ name }}.desktop:
-/usr/local
-~/.local
-/bin/android-{{ name }}.sh:
-#}
 {% endmacro %}
 
 
@@ -229,13 +214,15 @@ containers_image_{{ user }}_{{ name }}:
     {%- do entry.environment.update({
         'USER': user, 'HOME': salt['user.info'](user)['home'] }) %}
     {%- do entry.update({
-        'workdir': env_repl(settings.podman.user_service_basepath ~ '/' ~ entry.name, entry.environment),
+        'workdir': env_repl(settings.podman.user_workdir_basepath ~ '/' ~ entry.name, entry.environment),
         'builddir': env_repl(settings.podman.user_build_basepath ~ '/' ~ entry.name, entry.environment),
+        'servicedir': env_repl(settings.podman.user_service_basepath ~ '/' ~ entry.name, entry.environment),
       }) %}
   {%- else %}
     {%- do entry.update(
-      { 'workdir': settings.podman.service_basepath ~ '/' ~ entry.name,
-        'builddir': settings.podman.build_basepath ~ '/' ~ entry.name
+      { 'workdir': settings.podman.workdir_basepath ~ '/' ~ entry.name,
+        'builddir': settings.podman.build_basepath ~ '/' ~ entry.name,
+        'servicedir': settings.podman.service_basepath ~ '/' ~ entry.name,
       }) %}
   {%- endif %}
 
@@ -247,15 +234,15 @@ containers_image_{{ user }}_{{ name }}:
     {# create volumes if defined via storage #}
     {%- for def in entry.storage %}
 {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), env=entry.environment, user=user, remote=remote) }}
+          labels=def.labels|d([]), env=entry.environment, user=user) }}
     {%- endfor %}
 
     {# if not update on every container start, update now on install state #}
     {%- if not entry['update'] or entry.type == 'build' %}
       {%- if entry.type == 'build' %}
-{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user, remote=remote) }}
+{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user) }}
       {%- else %}
-{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user, remote=remote,
+{{ image(entry.image, entry.tag, entry.build.source, entry.build.args, entry.builddir, user=user,
     require_in='file: ' ~ entry.name~ '.service') }}
       {%- endif %}
     {%- endif %}
@@ -263,8 +250,6 @@ containers_image_{{ user }}_{{ name }}:
 
   {%- if entry.type in ['service', 'oneshot'] %}
 {{ write_service(entry) }}
-  {%- elif entry.type == 'desktop' %}
-{{ write_desktop(entry) }}
   {%- endif %}
 
 {% endmacro %}
@@ -282,7 +267,7 @@ containers_image_{{ user }}_{{ name }}:
 {%- endmacro -%}
 
 
-{% macro compose(compose_definition, user='', remote='') %}
+{% macro compose(compose_definition, user='') %}
   {%- from "containers/defaults.jinja" import settings, default_compose with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_compose},
     grain='default', default= 'default', merge=compose_definition) %}
@@ -293,7 +278,7 @@ containers_image_{{ user }}_{{ name }}:
     {%- do entry.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) %}
     {%- if not entry.workdir %}
       {%- do entry.update({'workdir':
-        env_repl(settings.compose.user_service_basepath ~ '/' ~ entry.name, entry.environment)}) %}
+        env_repl(settings.compose.user_workdir_basepath ~ '/' ~ entry.name, entry.environment)}) %}
     {%- endif %}
     {%- if not entry.builddir %}
       {%- do entry.update({'builddir':
@@ -302,7 +287,7 @@ containers_image_{{ user }}_{{ name }}:
   {%- else %}
     {%- if not entry.workdir %}
       {%- do entry.update({'workdir':
-        env_repl(settings.compose.service_basepath ~ '/' ~ entry.name)}) %}
+        env_repl(settings.compose.workdir_basepath ~ '/' ~ entry.name)}) %}
     {%- endif %}
     {%- if not entry.builddir %}
       {%- do entry.update({'builddir':
