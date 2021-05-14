@@ -1,14 +1,20 @@
 {% set user= 'k3s' %}
 {% set home= '/home/'+ user %}
+{% set route_ip= salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
 
 {% load_yaml as defaults %}
-k3s_version: '1.18.3+k3s1'
-rio_version: '0.8.0-rc1'
-helm_version: '3.2.3'
-helmdiff_version: '3.1.1'
-user: {{ user }}
-home: {{ home }}
-route_ip: {{ salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) }}
+version:
+  k3s: '1.18.3+k3s1'
+install:
+  options: --no-deploy=traefik --node-ip {{ route_ip }}
+  {% if settings.external_ip|d(false) %}{{ '--node-external-ip '+ settings.external_ip }}{% endif %}
+admin:
+  user: {{ user }}
+  home: {{ home }}
+
+external:
+  
+sha256sum-amd64.txt
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},

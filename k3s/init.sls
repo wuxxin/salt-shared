@@ -2,10 +2,12 @@
 
 include:
   - kernel.server
+  - kernel.nfs.server
   - containerd
   {# use external containerd so we can use zfs as snapshot fs #}
 
-{% if grains['virtual'] == 'LXC' %}
+{% if grains['virtual']|lower in ['lxc', 'systemd-nspawn'] %}
+{# lxc and nspawn do not have kmsg available, symlink to console #}
 /etc/tmpfiles.d/kmsg.conf:
   file.managed:
     - contents: |
@@ -19,6 +21,19 @@ include:
       - cmd: k3s
 {% endif %}
 
+{# override k3s service to include external container runtime endpoint #}
+/etc/systemd/system/k3s.service.d/override.conf:
+  file.managed:
+    - contents: |
+        [Service]
+        ExecStart=
+        ExecStart=-/usr/bin/k3s server --container-runtime-endpoint /run/containerd/containerd.sock
+
+k3s-tools:
+  pkg.installed:
+    - pkgs:
+      - kubetail
+
 k3s-install:
   file.managed:
     - name: /usr/local/sbin/k3s-install.sh
@@ -27,9 +42,6 @@ k3s-install:
     - mode: "755"
 
 k3s:
-  pkg.installed:
-    - pkgs:
-      - kubetail
   file.managed:
     - name: /usr/local/bin/k3s
     - source: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/k3s
@@ -49,21 +61,21 @@ k3s:
       - sls: kernel.server
 
 {% for d in ['.kube', '.local/bin', '.local/share'] %}
-{{ settings.home }}/{{ d }}:
+{{ settings.admin.home }}/{{ d }}:
   file.directory:
     - makedirs: true
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - user: {{ settings.admin.user }}
+    - group: {{ settings.admin.user }}
 {% endfor %}
 
 local_kube_config:
   file.copy:
     - source: /etc/rancher/k3s/k3s.yaml
-    - name: {{ settings.home }}/.kube/config
-    - user: {{ settings.user }}
-    - group: {{ settings.user }}
+    - name: {{ settings.admin.home }}/.kube/config
+    - user: {{ settings.admin.user }}
+    - group: {{ settings.admin.user }}
     - filemode: "0600"
     - force: true
     - require:
-      - file: {{ settings.home }}/.kube
+      - file: {{ settings.admin.home }}/.kube
       - cmd: k3s

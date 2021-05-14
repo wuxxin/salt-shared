@@ -1,20 +1,24 @@
-{% from "k3s/defaults.jinja" import settings %}
+{% load_yaml as settings %}
+version:
+  helm: '3.2.3'
+  helmdiff: '3.1.1'
+{% endload %}
 
 helm:
   file.managed:
     - name: /usr/local/lib/helm-linux-amd64.tar.gz
-    - source: https://get.helm.sh/helm-v{{ settings.helm_version }}-linux-amd64.tar.gz
-    - source_hash: https://get.helm.sh/helm-v{{ settings.helm_version }}-linux-amd64.tar.gz.sha256
+    - source: https://get.helm.sh/helm-v{{ settings.version.helm }}-linux-amd64.tar.gz
+    - source_hash: https://get.helm.sh/helm-v{{ settings.version.helm }}-linux-amd64.tar.gz.sha256
     - mode: "755"
   cmd.run:
-    - name: tar xzf /usr/local/lib/helm-linux-amd64.tar.gz --overwrite -C /usr/local/bin --strip-components=1 linux-amd64/helm 
+    - name: tar xzf /usr/local/lib/helm-linux-amd64.tar.gz --overwrite -C /usr/local/bin --strip-components=1 linux-amd64/helm
     - onchanges:
       - file: helm
 
 helmfile:
   file.managed:
     - name: /usr/local/bin/helmfile
-    - source: https://github.com/roboll/helmfile/releases/download/v{{ settings.helmfile_version }}/helmfile_linux_amd64
+    - source: https://github.com/roboll/helmfile/releases/download/v{{ settings.version.helmfile }}/helmfile_linux_amd64
     - skip_verify: true
     - mode: "755"
 
@@ -28,7 +32,7 @@ helm-x-bin-dir:
 helm-x.tar.gz:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-x.tar.gz
-    - source: https://github.com/mumoshu/helm-x/archive/v{{ settings.helmx_version }}.tar.gz
+    - source: https://github.com/mumoshu/helm-x/archive/v{{ settings.version.helmx }}.tar.gz
     - skip_verify: true
     - user: {{ settings.user }}
     - group: {{ settings.user }}
@@ -53,8 +57,8 @@ helm-x-symlink:
 helm-x-binary:
   file.managed:
     - name: {{ settings.home }}/.local/share/helm-x_linux_amd64.tar.gz
-    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_linux_amd64.tar.gz
-    - source_hash: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.helmx_version }}/helm-x_{{ settings.helmx_version }}_checksums.txt
+    - source: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.version.helmx }}/helm-x_{{ settings.version.helmx }}_linux_amd64.tar.gz
+    - source_hash: https://github.com/mumoshu/helm-x/releases/download/v{{ settings.version.helmx }}/helm-x_{{ settings.version.helmx }}_checksums.txt
     - require:
       - file: {{ settings.home }}/.local/share
   cmd.run:
