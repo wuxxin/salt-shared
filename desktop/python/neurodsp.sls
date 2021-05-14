@@ -2,7 +2,7 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - python.user.scipy
+  - desktop.python.scipy
 
 {{ pipx_inject('scipy', ['neurodsp',],
-  require="sls:python.user.scipy", user=user) }}
+  require="sls:desktop.python.scipy", user=user) }}

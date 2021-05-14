@@ -6,4 +6,4 @@ include:
 
 {{ pipx_inject('scipy',
   ['ipython', 'ipykernel', 'jupyter', 'jupyterlab'],
-  require='sls:python.user.scipy', user=user) }}
+  require='sls:desktop.python.scipy', user=user) }}
