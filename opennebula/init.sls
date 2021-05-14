@@ -26,8 +26,6 @@ opennebula-frontend:
       - opennebula-gate
       - opennebula-flow
       - opennebula-provision
-    - require:
-      - pkgrepo: opennebula-ppa
 
 opennebula-node-kvm:
   pkg.installed:
