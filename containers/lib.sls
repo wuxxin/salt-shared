@@ -130,45 +130,44 @@
 {# write systemd service file and start service if service, remove service if entry.absent #}
 {{ entry.name }}.service:
   file:
-    {%- if entry.absent %}
+  {%- if entry.absent %}
     - absent
-    {%- else %}
+  {%- else %}
     - managed
     - source: salt://containers/container-template.service
     - template: jinja
     - defaults:
         entry: {{ entry }}
         settings: {{ settings }}
-    {%- endif %}
+  {%- endif %}
     - name: {{ entry.servicedir }}/{{ entry.name }}.service
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: {{ entry.name }}.service
-    {%- if entry.enabled and not entry.absent %}
-      {%- if entry.type == 'oneshot' %}
+  {%- if entry.enabled and not entry.absent %}
+    {%- if entry.type == 'oneshot' %}
   service.enabled:
-      {%- else %}
+    {%- else %}
   service.running:
     - enable: true
-      {%- endif %}
-    {%- else %}
-      {%- if entry.type == 'oneshot' %}
+    {%- endif %}
+  {%- else %}
+    {%- if entry.type == 'oneshot' %}
   service.disabled:
-      {%- else %}
+    {%- else %}
   service.dead:
     - enable: false
-      {%- endif %}
     {%- endif %}
+  {%- endif %}
     - name: {{ entry.name }}.service
-    {%- if entry.type != 'oneshot' and not entry.absent %}
+  {%- if entry.type != 'oneshot' and not entry.absent %}
     - watch:
       - file: {{ entry.name }}.env
       - file: {{ entry.name }}.service
-    {%- endif %}
+  {%- endif %}
     - require:
       - cmd: {{ entry.name }}.service
-  {%- endif %}
 {% endmacro %}
 
 
@@ -184,8 +183,9 @@ containers_volume_{{ user }}_{{ name_str }}:
 {% endmacro %}
 
 
-{% macro image(name, tag='', source: '', buildargs= {}, builddir= '', user='') %}
+{% macro image(name, tag='', source='', buildargs={}, builddir= '', user='') %}
   {%- set tag_opt = '' if tag == '' else ':' ~ tag %}
+  {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
 containers_image_{{ user }}_{{ name }}:
   cmd.run:
   {%- if builddir == '' or source == '' %}
@@ -264,6 +264,7 @@ containers_image_{{ user }}_{{ name }}:
 {{ env_repl(settings.storage.rootless_storage_path ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
 {%- else -%}
 {{ env_repl(settings.storage.graphroot ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
+{%- endif %}
 {%- endmacro -%}
 
 
