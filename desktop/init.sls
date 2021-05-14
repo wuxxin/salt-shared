@@ -32,7 +32,7 @@ include:
   - .code
   - .atom
   - .emulation
-  - android.emulator-container
+  - android.emulator
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
