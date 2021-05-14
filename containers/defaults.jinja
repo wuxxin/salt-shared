@@ -1,5 +1,4 @@
 {% load_yaml as defaults %}
-
 config:
   # /etc/containers/containers.conf
   containers:
@@ -92,6 +91,9 @@ x11docker:
     # - --webcam
 
 {% endload %}
+
+{%- set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('containers', {})) %}
 
 
 {% load_yaml as default_container %}
@@ -246,17 +248,3 @@ hook:
     environment: {}
     command: ""
 {% endload %}
-
-
-{%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('containers', {})) %}
-
-{# expand ##version## in field external.*.download #}
-{% for n,v in settings.external.items() %}
-  {% set download=settings.external[n]['download']|regex_replace('##version##', v.version) %}
-  {% do settings.external[n].update( {'download': download} ) %}
-  {% if settings.external[n]['hash_url'] %}
-    {% set hash_url=settings.external[n]['hash_url']|regex_replace('##version##', v.version) %}
-    {% do settings.external[n].update( {'hash_url': hash_url} ) %}
-  {% endif %}
-{% endfor %}
