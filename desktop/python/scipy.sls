@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pipx_inject %}
+{% from 'python/lib.sls' import pipx_install, pipx_inject %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
