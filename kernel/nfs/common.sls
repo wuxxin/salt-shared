@@ -1,4 +1,4 @@
-{% from "kernel.nfs/defaults.jinja" import settings %}
+{% from "kernel/nfs/defaults.jinja" import settings %}
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
 {% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}

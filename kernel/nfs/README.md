@@ -7,7 +7,6 @@
 + add custom listen ip's by overwriting the default list in `nfs:listen_ip`
     + be sure to include '127.0.0.1' and '::1' in the list
 
-eg.
 ```yaml
 nfs:
   listen_ip:

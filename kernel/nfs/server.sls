@@ -1,4 +1,4 @@
-{% from "kernel.nfs/defaults.jinja" import settings %}
+{% from "kernel/nfs/defaults.jinja" import settings %}
 
 include:
   - kernel.nfs.common
