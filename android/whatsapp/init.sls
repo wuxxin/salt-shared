@@ -1,8 +1,8 @@
-{% from "android.emulator-container.sls" import android_emulator_desktop %}
+{% from "android/lib.sls" import android_emulator_desktop %}
 {% from "containers/defaults.jinja" import settings as container_settings with context %}
 
 include:
-  - android.emulator-container
+  - android.emulator
 
 {% load_yaml as whatsapp_emulator_definition %}
 name: whatsapp-container
