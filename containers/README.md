@@ -1,15 +1,7 @@
-# modern containers for Ubuntu/Debian using podman and containerd
+# modern containers for Ubuntu/Debian using podman
 
 + uses ppa for podman, crun, buildah, skopeo, fuse-overlayfs
 + uses snapshotted versions of podman-compose, x11docker
-+ uses github download for containerd and cri_containerd_cni
-
-
-## Containerd
-
-+ include: containers.containerd
-
-## Podman
 
 ### Functions
 

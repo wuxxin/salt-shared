@@ -57,7 +57,7 @@ config:
         "":
           - type: insecureAcceptAnything
 
-# used in containers/podman/init.sls and containers/podman/lib.sls
+# used in containers/init.sls and containers/lib.sls
 podman:
   workdir_basepath: /etc/containers/podman.service
   build_basepath: /var/lib/containers/podman-build
@@ -90,20 +90,6 @@ x11docker:
     - --hostipc
     # - --verbose
     # - --webcam
-
-external:
-  "containerd.tar.gz":
-    version: 1.5.0
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz"
-    hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz.sha256sum"
-    target: /usr/local/lib/containerd.tar.gz
-  "cri-containerd-cni.tar.gz":
-    version: 1.5.0
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz"
-    hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz.sha256sum"
-    target: /usr/local/lib/cri-containerd-cni.tar.gz
 
 {% endload %}
 
