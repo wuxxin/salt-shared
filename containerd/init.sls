@@ -8,7 +8,7 @@ include:
     - contents: |
 {{ settings.crictl|json|indent(8,True) }}
 
-/etc/containerd/containerd.conf:
+/etc/containerd/config.toml:
   file.serialize:
     - dataset: {{ settings.config }}
     - formatter: toml
