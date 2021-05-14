@@ -5,4 +5,4 @@ include:
   - python.user.scipy
 
 {{ pipx_inject('scipy', ['neurodsp',],
-  require="sls:python.user.scipy", user=user }}
+  require="sls:python.user.scipy", user=user) }}

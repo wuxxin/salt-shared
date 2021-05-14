@@ -11,4 +11,4 @@ fastprogress>=0.1.22 pillow scikit-learn scipy spacy
 
 {{ pipx_inject('scipy',
   ['fastscript', 'ndbdev', 'torch', 'torchvision', 'spacy', 'fastai'],
-  require='sls:python.user.jupyter', user=user }}
+  require='sls:python.user.jupyter', user=user) }}

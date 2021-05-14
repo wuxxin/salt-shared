@@ -5,7 +5,8 @@ include:
   - python.dev
 
 {# scientific python composed of
-numpy, scipy, matplotlib, pandas, sympy, sklearn, skimage, panel, bokeh, plotly, altair
+scipy, numpy, matplotlib, pandas, sympy, ipyton, jupyter, jupyterlab,
+sklearn, skimage, panel, bokeh, plotly, altair
 # 'imageio', 'pil', 'sphinx', 'numpydoc', 'pytest', 'nose', 'joblib', 'psutil',
 # panel needs bokeh param(0) pyviz_comms markdown pyct testpath
 # recommends holoviews notebook matplotlib pillow plotly
@@ -15,12 +16,7 @@ numpy, scipy, matplotlib, pandas, sympy, sklearn, skimage, panel, bokeh, plotly,
 {{ pipx_install('scipy', require='sls:python.dev', user=user) }}
 {{ pipx_inject('scipy', [
   'numpy', 'matplotlib', 'pandas', 'sympy', 'ipython', 'jupyter',
+  'jupyterlab',
   'skimage', 'sklearn', 'sklearn-pandas', 'auto-sklearn',
   'plotly', 'panel', 'bokeh', 'altair',
   ], user=user) }}
-
-
-scipy numpy matplotlib pandas sympy jupyter jupyterlab xeus-python
-
-  'skimage', 'sklearn', 'sklearn-pandas', 'auto-sklearn',
-  'plotly', 'panel', 'bokeh', 'altair',

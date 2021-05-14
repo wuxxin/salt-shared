@@ -16,7 +16,7 @@ python-tools:
 
 {# install the following as pipx user package, so they are isolated from others #}
 
-{# cookiecutter -  #}
+{# cookiecutter - creates projects from cookiecutters (project templates) #}
 {{ pipx_install('cookiecutter', user) }}
 
 {# black - opinionated python source code formating #}
@@ -27,30 +27,3 @@ python-tools:
 
 {# pipenv - Python Dev Workflow for Humans, to bring the best of all packaging worlds to the python world #}
 {{ pipx_install('pipenv', user) }}
-
-
-{# pyenv - easily switch between multiple versions of Python #}
-{# FIXME: uses pyenv from git #}
-pyenv:
-  git.latest:
-    - name: https://github.com/pyenv/pyenv.git
-    - target: {{ user_home }}/.pyenv
-    - user: {{ user }}
-    - submodules: True
-
-pyenv_bashrc:
-  file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
-    - name: {{ user_home }}/.bashrc
-    - marker_start: "# ### PYENV BEGIN ###"
-    - marker_end: "# ### PYENV END ###"
-    - append_if_not_found: True
-    - runas: {{ user }}
-    - content: |
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-
-{# # additional python shell packages
-sh        # very elegant python shell
-sarge     # python shell execute with "; &  | && || <>"
-https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
-#}
