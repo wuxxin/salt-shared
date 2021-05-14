@@ -2,7 +2,8 @@
 
 include:
   - kernel.server
-  - k3s.helm
+  - containerd
+  {# use external containerd so we can use zfs as snapshot fs #}
 
 {% if grains['virtual'] == 'LXC' %}
 /etc/tmpfiles.d/kmsg.conf:
@@ -28,12 +29,7 @@ k3s-install:
 k3s:
   pkg.installed:
     - pkgs:
-      - thin-provisioning-tools
-      - bridge-utils
-      - ebtables
-      - squashfs-tools
       - kubetail
-      # criu
   file.managed:
     - name: /usr/local/bin/k3s
     - source: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/k3s
@@ -71,10 +67,3 @@ local_kube_config:
     - require:
       - file: {{ settings.home }}/.kube
       - cmd: k3s
-
-rio:
-  file.managed:
-    - name: /usr/local/bin/rio
-    - source: https://github.com/rancher/rio/releases/download/v{{ settings.rio_version }}/rio-linux-amd64
-    - source_hash: https://github.com/rancher/rio/releases/download/v{{ settings.rio_version }}/sha256sum-amd64.txt
-    - mode: "755"
