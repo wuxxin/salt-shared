@@ -1,3 +1,5 @@
+{% from "ubuntu/defaults.jinja" import settings with context %}
+
 include:
   - ubuntu.snapd
   - ubuntu.telemetry
@@ -5,3 +7,7 @@ include:
 {%- if settings.backports %}
   - ubuntu.backports
 {%- endif %}
+
+ubuntu_server_nop:
+  test:
+    - nop
