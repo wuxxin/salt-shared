@@ -3,8 +3,8 @@
 
 {% load_yaml as defaults %}
 domain: turn.{{ grains['fqdn'] }}
+# auth_secret: openssl rand --hex 32
 auth_secret:
-# openssl rand  --hex 32
 listen_ip:
   - {{ def_route_ip }}
 external_ip: []
