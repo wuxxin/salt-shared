@@ -1,7 +1,7 @@
 include:
   - ubuntu.desktop
-  - .audio.framework
-  - .video.framework
+  - desktop.audio.framework
+  - desktop.video.framework
 
 additional-desktop-packages:
   pkg.installed:
