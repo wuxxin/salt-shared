@@ -7,5 +7,5 @@
 
 + install packages
 ```
-choco install mupdf firefox 7zip.install notepadplusplus.install vlc cutepdf openssh sysinternals zoom libreoffice-fresh thunderbird inkscape chromium youtube-dl qpdf audacity docker-desktop tor-browser powertoys git.install gpg4win k-litecodecpackbasic gimp
+choco install mupdf firefox 7zip.install notepadplusplus.install vlc cutepdf openssh sysinternals zoom libreoffice-fresh thunderbird inkscape chromium youtube-dl qpdf audacity audacious docker-desktop tor-browser powertoys git.install gpg4win k-litecodecpackbasic gimp
 ```
