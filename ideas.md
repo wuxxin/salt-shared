@@ -1,20 +1,13 @@
 # Ideas of Software to integrate
 
-
 ## unsorted
 
-https://qgis.org/ubuntu/dists/
-https://qgis.org/debian/
-
++ https://qgis.org/ubuntu/dists/
+  + https://qgis.org/debian/
++ sysdig: pkg.installed
++ minidlna: pkg.installed
 
 ## tools
-
-sysdig:
-  pkg:
-    - installed
-minidlna:
-  pkg:
-    - installed
 
 + https://mosh.org/
 Mosh is a replacement for interactive SSH terminals. It's more robust and responsive, especially over Wi-Fi, cellular, and long-distance links.
@@ -29,11 +22,15 @@ croc is a tool that allows any two computers to simply and securely transfer fil
 nnn (n³) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible speed.
 
 ## routing
-+ FRR (https://frrouting.org/) and configured BGP EVPN extensions for VXLAN networks
-  (up2date fork of quaqua)
-  
++ FRR https://frrouting.org/ , fork of quaqua and configured BGP EVPN extensions for VXLAN networks
+
 ## virtualization
 
 + KATA containers
     + http://download.opensuse.org/repositories/home:/katacontainers
     + https://virtio-fs.gitlab.io/howto-qemu.html
+
+## python
++ sh        # very elegant python shell
++ sarge     # python shell execute with "; &  | && || <>"
++ https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly

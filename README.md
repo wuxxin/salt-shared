@@ -50,8 +50,8 @@ some states have a documentation README.md
     * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
 
 * Container
-    * [containers](containers): (OCI) Containers Images Runtime using podman
-    * [containers kata](containers/kata): Kata Containers
+    * [containers](containers): OCI container runtime using podman
+    * [containerd](containerd): Kubernetes OCI container runtime
     * [k3s](k3s): selfcontained, small footprint Kubernetes Distribution
 
 * Database
