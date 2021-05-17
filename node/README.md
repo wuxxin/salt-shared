@@ -2,10 +2,19 @@
 
 Configures hostname, users, groups, locales, timezone, network, storage
 
-+ state network
-    + add internal bridge
-    + install and configure nfs-common (and rpcbind) to only listen to internal ip's
-        + change pillar list: nfs:listen_ip to overwrite default list
++ .locale
+  + configure locale
+  + configure timezone
++ .network
+  + add internal bridge
+  + install and configure nfs-common (and rpcbind) to only listen to internal ip's
+  + change pillar list: nfs:listen_ip to overwrite default list
++ .hostname
+  + Configures hostname
++ .accounts
+  + Configure users and groups
++ .storage
+  + configure filesystems, mounts and directories
 
 ## Example pillar
 
@@ -32,19 +41,13 @@ node:
       # gid (str), system (bool), addusers (list), delusers (list), members (list)
 
   locale:
-    lang: de:at
-    language: de_DE:de
-    additional: de:de en:us en:gb
-    posix_messages: true
+    lang: de_AT.UTF-8
+    language: de_de:de
+    additional: de_DE en_US en_GB
+    # eg. "messages: POSIX", will be written to LC_MESSAGES, set to None/false to clear LC_MESSAGES
+    messages: POSIX
     timezone: Europe/Vienna
     location: Vienna
-
-    # computed
-    # language: de_AT:de # if language is currently empty else keep current
-    language_code: de-at
-    lang_env: de_AT.UTF-8
-    lang_all: de_AT.UTF-8 de_DE.UTF-8 en_US.UTF-8 en_GB.UTF-8
-    messages_env: POSIX # POSIX if posix_messages == true else ""
 
   network:
     internal_cidr: 10.140.250.1/24

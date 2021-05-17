@@ -13,11 +13,13 @@ users:
 groups:
 
 locale:
-  lang: en:us
-  additional:
-  posix_messages: false
-  timezone: Etc/UTC
+  lang: en_US.UTF-8
+  language: en_us:en
+  messages:
+  # eg. "messages: POSIX", will be written to LC_MESSAGES
   location: World
+  timezone: UTC
+  additional: ""
 
 network:
   internal_cidr: {{ internal_cidr }}
@@ -28,27 +30,6 @@ network:
 {# merge defaults with pillar #}
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('node', {})) %}
-
-{# update settings.locale #}
-{% set lang_name= settings.locale.lang.split(':')[0] %}
-{% set lang_country= settings.locale.lang.split(':')[1] %}
-{% set lang_env= lang_name+ '_'+ lang_country|upper+ '.UTF-8' %}
-{% set tempspace = namespace({'lang_all': lang_env}) %}
-{% if settings.locale.additional %}
-  {% for x in settings.locale.additional.split(' ') %}
-    {% set l = x.split(':')[0] %}
-    {% set c = x.split(':')[1] %}
-    {% set tobeadded = l+ '_'+ c|upper()+ '.UTF-8' %}
-    {% set tempspace.lang_all= tempspace.lang_all+ ' '+ tobeadded %}
-  {% endfor %}
-{% endif %}
-{% do settings.locale.update({
-  'language': settings.locale.language|d(lang_name+ '_'+ lang_country|upper+ ':'+ lang_name),
-  'language_code': lang_name+ '-'+ lang_country,
-  'lang_env': lang_env,
-  'lang_all': tempspace.lang_all,
-  'messages_env': 'POSIX' if settings.locale.posix_messages else '',
-  }) %}
 
 {# update settings.network #}
 {% do settings.network.update({
