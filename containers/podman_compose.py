@@ -567,6 +567,16 @@ def container_to_args(compose, cnt, detached=True):
         podman_args.extend(['-w', cnt['working_dir']])
     if cnt.get('hostname', None):
         podman_args.extend(['--hostname', cnt['hostname']])
+    mem_limit = cnt.get("deploy", {}).get("resources", {}).get(
+                "limits", {}).get("memory", None)
+    if mem_limit:
+        podman_args.extend(["--memory", mem_limit.lower()])
+    mem_reservation = cnt.get("deploy", {}).get("resources", {}).get(
+                        "reservations", {}).get("memory", None)
+    if mem_reservation:
+        podman_args.extend(["--memory-reservation", mem_reservation.lower()])
+    if cnt.get('ipc', None):
+        podman_args.extend(['--ipc', cnt['ipc']])
     if cnt.get('shm_size', None):
         podman_args.extend(['--shm-size', '{}'.format(cnt['shm_size'])])
     if cnt.get('stdin_open', None):
