@@ -1,12 +1,12 @@
 {% load_yaml as defaults %}
-# origin: system (from distribution) | custom (from source, with local patches)
+# origin: system|custom
 origin: system
 custom_src_dist: focal
 custom_apply_patches: true
 
-# use up to x % of memory for arc
+# arc_max_percent: use up to x % of memory for arc
 arc_max_percent: 25
-# arc_max_bytes will be computed from arc_max_percent if unset
+# arc_max_bytes: will be computed from arc_max_percent if unset
 
 # enable cyclic rotating filesystem snapshots
 # any fs where "com.sun:auto-snapshot" is not false and
@@ -26,16 +26,21 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
   grain='default', default= 'default', merge= salt['pillar.get']('zfs', {})) %}
 
 {% if settings.arc_max_bytes is not defined %}
-  {% do settings.update({
-    'arc_max_bytes': ((grains['mem_total'] * settings.arc_max_percent / 100 ) * 1024 * 1024)|round|int,
-  }) %}
+{% do settings.update( {'arc_max_bytes':
+    ((grains['mem_total'] * settings.arc_max_percent / 100 ) * 1024 * 1024)|round|int} ) %}
 {% endif %}
 
+
 {%- macro mksnapshot(spaces, frequent=false, hourly=false, daily=false, weekly=false, monthly=false) %}
-{# fixme: implement mksnapshot #}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:frequent": "'~ frequent~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:hourly": "'~ hourly~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:daily": "'~ daily~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:weekly": "'~ weekly~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:monthly": "'~ monthly~ '"' }}
 {%- endmacro %}
 
-{% load_yaml as zfs_rpool_base %}
+
+{% load_yaml as zfs_pool_base %}
 - name: ROOT
   properties:
     canmount: off
@@ -51,8 +56,8 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
   properties:
     canmount: off
     logbias: throughput
-{{ mksnapshot(4, frequent=true) }}
     local.custom:auto-backup: false
+{{ mksnapshot(4, frequent=true) }}
 
 - name: var/lib
   properties:
@@ -69,7 +74,7 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
 {% endload %}
 
 
-{% load_yaml as zfs_rpool_defaults %}
+{% load_yaml as zfs_pool_defaults %}
 - name: data/home
   properties:
     mountpoint: /home
