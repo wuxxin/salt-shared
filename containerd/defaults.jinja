@@ -1,44 +1,65 @@
 {% load_yaml as defaults %}
 
+config: {}
+
+nerdctl: {}
+
 crictl:
   runtime-endpoint: unix:///run/containerd/containerd.sock
 
 cni:
-  "10-containerd-net.conflist":
-      cniVersion: 0.4.0
-      name: containerd-net
-      plugins:
-      - bridge: cni0
-        ipMasq: true
-        ipam:
-          ranges:
-          - - subnet: 10.88.0.0/16
-          - - subnet: 2001:4860:4860::/64
-          routes:
-          - dst: 0.0.0.0/0
-          - dst: ::/0
-          type: host-local
-        isGateway: true
-        promiscMode: true
-        type: bridge
-      - capabilities:
-          portMappings: true
-        type: portmap
+  "10-containerd-net":
+    cniVersion: 0.4.0
+    name: containerd-net
+    plugins:
+    - bridge: cni0
+      ipMasq: true
+      ipam:
+        ranges:
+        - - subnet: 10.88.0.0/16
+        - - subnet: 2001:4860:4860::/64
+        routes:
+        - dst: 0.0.0.0/0
+        - dst: ::/0
+        type: host-local
+      isGateway: true
+      promiscMode: true
+      type: bridge
+    - capabilities:
+        portMappings: true
+      type: portmap
+  "10-flannel":
+    cniVersion: 0.4.0
+    name: cbr0
+    plugins:
+    - delegate:
+        forceAddress: true
+        hairpinMode: true
+        isDefaultGateway: true
+      type: flannel
+    - capabilities:
+        portMappings: true
+      type: portmap
 
 external:
   "containerd.tar.gz":
-    version: 1.5.0
+    version: 1.5.1
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
     download: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz"
     hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz.sha256sum"
     target: /usr/local/lib/containerd.tar.gz
   "cri-containerd-cni.tar.gz":
-    version: 1.5.0
+    version: 1.5.1
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
     download: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz"
     hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz.sha256sum"
     target: /usr/local/lib/cri-containerd-cni.tar.gz
-
+  "nerdctl.tar.gz":
+    version: 0.8.1
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/nerdctl/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/containerd/nerdctl/releases/download/v##version##/nerdctl-##version##-linux-amd64.tar.gz"
+    hash_url: "https://github.com/containerd/nerdctl/releases/download/v##version##/SHA256SUMS"
+    target: /usr/local/lib/nerdctl.tar.gz
 {% endload %}
 
 
