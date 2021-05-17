@@ -21,7 +21,7 @@
 + kernel.cgroup
     + set cgroup v2 only hierachy managed by systemd
     + allow normal users to run unprivileged containers
-+ systemd.cgroup-accounting
++ systemd.cgroup
     + activate cgroup (cpu, task, memory, io) accounting
 + kernel.swappiness
     + configure swap usage, defaults to kernel default, for details read swappiness.sls

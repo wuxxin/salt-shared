@@ -1,6 +1,6 @@
 include:
   - kernel.cgroup
-  - systemd.cgroup-accounting
+  - systemd.cgroup
 
 pkg.installed:
    - name: oomd

@@ -5,7 +5,7 @@ include:
   - kernel.limits
   - kernel.swappiness
   - kernel.cgroup
-  - systemd.cgroup-accounting
+  - systemd.cgroup
   - kernel.network
   - kernel.kvm
   - kernel.lxc

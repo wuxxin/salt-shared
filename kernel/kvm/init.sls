@@ -2,7 +2,7 @@ include:
   - kernel
   - kernel.swappiness
   - kernel.cgroup
-  - systemd.cgroup-accounting
+  - systemd.cgroup
   - kernel.network
 
 qemu:

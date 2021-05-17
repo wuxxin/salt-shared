@@ -8,7 +8,7 @@ include:
   - kernel.limits
   - kernel.limits.memlock
   - kernel.cgroup
-  - systemd.cgroup-accounting
+  - systemd.cgroup
   - kernel.network
 
 {#
@@ -34,5 +34,5 @@ lxc:
       - sls: kernel.limits
       - sls: kernel.limits.memlock
       - sls: kernel.cgroup
-      - sls: systemd.cgroup-accounting
+      - sls: systemd.cgroup
       - sls: kernel.network
