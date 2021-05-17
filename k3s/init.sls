@@ -1,10 +1,9 @@
-{% from "k3s/defaults.jinja" import settings %}
+{% from "k3s/defaults.jinja" import settings with context %}
 
 include:
   - kernel.server
-  - kernel.nfs.server
-  - containerd
   {# use external containerd so we can use zfs as snapshot fs #}
+  - containerd
 
 {% if grains['virtual']|lower in ['lxc', 'systemd-nspawn'] %}
 {# lxc and nspawn do not have kmsg available, symlink to console #}
@@ -18,64 +17,82 @@ include:
     - onchanges:
       - file: /etc/tmpfiles.d/kmsg.conf
     - require_in:
-      - cmd: k3s
+      - service: k3s
 {% endif %}
 
-{# override k3s service to include external container runtime endpoint #}
-/etc/systemd/system/k3s.service.d/override.conf:
+k3s.env:
   file.managed:
+    - name: {{ settings.env_file }}
+    - mode: 600
     - contents: |
-        [Service]
-        ExecStart=
-        ExecStart=-/usr/bin/k3s server --container-runtime-endpoint /run/containerd/containerd.sock
+{%- if salt['pillar.get']('http_proxy')|d(false) %}
+        http_proxy="{{ salt['pillar.get']('http_proxy') }}"
+        HTTP_PROXY="{{ salt['pillar.get']('http_proxy') }}"
+{%- endif %}
+{%- if salt['pillar.get']('https_proxy')|d(false) %}
+        https_proxy="{{ salt['pillar.get']('https_proxy') }}"
+        HTTPS_PROXY="{{ salt['pillar.get']('https_proxy') }}"
+{%- endif %}
+{%- if salt['pillar.get']('no_proxy')|d(false) %}
+        no_proxy="{{ salt['pillar.get']('no_proxy', default_no_proxy) }}"
+        NO_PROXY="{{ salt['pillar.get']('no_proxy', default_no_proxy) }}"
+{%- endif %}
 
-k3s-tools:
+k3s.config:
+  file.serialize:
+    - name: {{ settings.config_file }}
+    - dataset: {{ settings.config }}
+    - formatter: yaml
+    - makedirs: true
+
+k3s.tools:
   pkg.installed:
     - pkgs:
       - kubetail
 
-k3s-install:
+k3s.binary:
   file.managed:
-    - name: /usr/local/sbin/k3s-install.sh
-    - source: https://raw.githubusercontent.com/rancher/k3s/master/install.sh
-    - skip_verify: true
+    - name: {{ settings.external.k3s.target }}
+    - source: {{ settings.external.k3s.download }}
+    - source_hash: {{ settings.external.k3s.hash_url }}
     - mode: "755"
-
-k3s:
-  file.managed:
-    - name: /usr/local/bin/k3s
-    - source: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/k3s
-    - source_hash: https://github.com/rancher/k3s/releases/download/v{{ settings.k3s_version }}/sha256sum-amd64.txt
-    - mode: "755"
-  cmd.run:
-    - name: /usr/local/sbin/k3s-install.sh
-    - env:
-      - INSTALL_K3S_VERSION: v{{ settings.k3s_version }}
-      - INSTALL_K3S_EXEC: server --no-deploy=traefik --node-ip {{ settings.route_ip }} {% if settings.external_ip|d(false) %}{{ '--node-external-ip '+ settings.external_ip }}{% endif %}
-    - onchanges:
-      - file: k3s
     - require:
-      - pkg: k3s
-      - file: k3s
-      - file: k3s-install
       - sls: kernel.server
+      - pkg: k3s.tools
 
-{% for d in ['.kube', '.local/bin', '.local/share'] %}
-{{ settings.admin.home }}/{{ d }}:
-  file.directory:
-    - makedirs: true
-    - user: {{ settings.admin.user }}
-    - group: {{ settings.admin.user }}
-{% endfor %}
+k3s.service:
+  file.managed:
+    - name: /etc/systemd/system/k3s.service
+    - source: salt://k3s/k3s.service
+    - defaults:
+        settings: {{ settings }}
+    - template: jinja
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: k3s.service
+  service.running:
+    - enable: true
+    - require:
+      - sls: containerd
+    - watch:
+      - file: k3s.env
+      - file: k3s.config
+      - file: k3s.binary
+      - file: k3s.service
 
-local_kube_config:
+{%- if settings.admin['copy-kubeconfig'] %}
+  {%- set admin_home= salt['user.info'](settings.admin.user)['home'] %}
+admin.kube.config:
   file.copy:
-    - source: /etc/rancher/k3s/k3s.yaml
-    - name: {{ settings.admin.home }}/.kube/config
+    - source: {{ settings.config['write-kubeconfig'] }}
+    - name: {{ admin_home }}/.kube/config
     - user: {{ settings.admin.user }}
     - group: {{ settings.admin.user }}
     - filemode: "0600"
+    - dirmode: "0700"
+    - makedirs: true
     - force: true
     - require:
-      - file: {{ settings.admin.home }}/.kube
-      - cmd: k3s
+      - service: k3s.service
+{%- endif %}

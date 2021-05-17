@@ -2,7 +2,6 @@
 
 include:
   - old.lab.appliance.zentyal.base
-  - systemd.reload
 
 {# ### install zentyal packages #}
 zentyal:
@@ -171,9 +170,10 @@ bind9-disable-resolvconf-addition:
         [Service]
         ExecStart=
         ExecStop=
-
-    - onchanges_in:
-      - cmd: systemd_reload
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: bind9-disable-resolvconf-addition
 
 {# XXX write out a customized zentyal redis config setter #}
 /usr/local/sbin/prepare-zentyal-config.sh:

@@ -1,21 +1,92 @@
-{% set user= 'k3s' %}
-{% set home= '/home/'+ user %}
-{% set route_ip= salt['cmd.run_stdout']('ip -j addr show $(ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\') | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
+{% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) %}
+{% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
+{% set admin_user= salt['cmd.run_stdout']('getent passwd 1000 | cut -d: -f1', python_shell=True)|d('k3s') %}
 
 {% load_yaml as defaults %}
-version:
-  k3s: '1.18.3+k3s1'
-install:
-  options: --no-deploy=traefik --node-ip {{ route_ip }}
-  {% if settings.external_ip|d(false) %}{{ '--node-external-ip '+ settings.external_ip }}{% endif %}
+config:
+  node-ip: {{ def_route_ip }}
+  container-runtime-endpoint: /run/containerd/containerd.sock
+  snapshotter: zfs
+  data-dir: /var/lib/rancher/k3s
+  default-local-storage-path: /opt/local-path-provisioner
+  private-registry: /etc/rancher/k3s/registries.yaml
+  write-kubeconfig: /etc/rancher/k3s/kube.config.yaml
+  write-kubeconfig-mode: 600
+
+{#
+  # server options
+  datastore-cafile: "TLS Certificate Authority file used to secure datastore backend communication"
+  datastore-certfile: "TLS certification file used to secure datastore backend communication"
+  datastore-keyfile: "TLS key file used to secure datastore backend communication"
+  datastore-endpoint: "Specify etcd, Mysql, Postgres, or Sqlite (default) data source name"
+
+  # agent options
+  data-dir: "/var/lib/rancher/k3s" or "${HOME}/.rancher/k3s" if not root # Folder to hold state
+  default-local-storage-path:  "/opt/local-path-provisioner"  # Default local storage path for local provisioner storage class
+  secrets-encryption: "Enable Secret encryption at rest"
+
+  node-ip: "IP address to advertise for node"
+  node-external-ip: "External IP address to advertise for node"
+  resolv-conf: "Kubelet resolv.conf file"
+  node-label: "Registering and starting kubelet with set of labels"
+  node-taint: "Registering kubelet with set of taints"
+  private-registry: "/etc/rancher/k3s/registries.yaml"
+
+  lb-server-port: 6444
+  # lb-server-port: Local port for supervisor client load-balancer.
+  # If the supervisor and apiserver are not colocated an additional
+  # port 1 less than this port will also be used for the apiserver client load-balancer.
+ 	bind-address: 0.0.0.0 # k3s bind address
+  https-listen-port: 6443  # HTTPS listen port
+  advertise-address: node-external-ip/node-ip
+  #	advertise-address: "IP address that apiserver uses to advertise to members of the cluster"
+  advertise-port: listen-port # Port that apiserver uses to advertise to members of the cluster
+  tls-san: "Add additional hostname or IP as a Subject Alternative Name in the TLS cert"
+
+  cluster-cidr: "10.42.0.0/16" 	# Network CIDR to use for pod IPs
+  service-cidr: "10.43.0.0/16"  # Network CIDR to use for services IPs
+  cluster-dns: "10.43.0.10"     # Cluster IP for coredns service. Should be in your service-cidr range
+  cluster-domain: "cluster.local"   # Cluster Domain
+  flannel-backend: "vxlan"      # One of ‘none’, ‘vxlan’, ‘ipsec’, ‘host-gw’, or ‘wireguard’
+
+  kube-apiserver-arg: "Customized flag for kube-apiserver process"
+  kube-scheduler-arg: "Customized flag for kube-scheduler process"
+  kube-controller-manager-arg: "Customized flag for kube-controller-manager process"
+  kube-cloud-controller-manager-arg: "Customized flag for kube-cloud-controller-manager process"
+  kubelet-arg: "Customized flag for kubelet process"
+  kube-proxy-arg: "Customized flag for kube-proxy process"
+
+#}
+
 admin:
-  user: {{ user }}
-  home: {{ home }}
+  user: {{ admin_user }}
+  "copy-kubeconfig": false
+
+symlink:
+  kubectl: true
+
+env_file: /etc/systemd/system/k3s.env
+config_file: /etc/rancher/k3s/config.yaml
+server_options: "--config /etc/rancher/k3s/config.yaml"
 
 external:
-  
-sha256sum-amd64.txt
+  k3s:
+    version: 1.21.0+k3s1
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/k3s-io/k3s/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: https://github.com/k3s-io/k3s/releases/download/v##version##/k3s
+    hash_url: https://github.com/rancher/k3s/releases/download/v##version##/sha256sum-amd64.txt
+    target: /usr/local/bin/k3s
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('k3s', {})) %}
+
+{# expand ##version## in field external.*.download #}
+{% for n,v in settings.external.items() %}
+  {% set download=settings.external[n]['download']|regex_replace('##version##', v.version) %}
+  {% do settings.external[n].update( {'download': download} ) %}
+  {% if settings.external[n]['hash_url'] %}
+    {% set hash_url=settings.external[n]['hash_url']|regex_replace('##version##', v.version) %}
+    {% do settings.external[n].update( {'hash_url': hash_url} ) %}
+  {% endif %}
+{% endfor %}

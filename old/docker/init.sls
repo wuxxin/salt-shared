@@ -4,7 +4,6 @@
 include:
   - kernel.server
   - python
-  - systemd.reload
 
 {# pin docker to x.y.* release, if requested #}
 /etc/apt/preferences.d/docker-preferences:
@@ -181,10 +180,12 @@ docker-service:
   file.managed:
     - name: /etc/systemd/system/docker.service
     - source: salt://docker/docker.service
-    - onchanges_in:
-      - cmd: systemd_reload
     - require:
       - pkg: docker
+  cmd.run:
+    - name: systemctl daemon-reload
+    - onchanges:
+      - file: docker-service
 
 custom-docker-multi-user-symlink:
   file.symlink:
