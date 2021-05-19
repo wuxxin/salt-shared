@@ -6,7 +6,7 @@ metadata:
 spec:
   rules:
   -
-    host: skooner.zap.lan
+    host: skooner.domain.name
     http:
       paths:
       -

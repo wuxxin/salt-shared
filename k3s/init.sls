@@ -2,7 +2,7 @@
 
 include:
   - kernel.server
-  {# use external containerd so we can use zfs as snapshot fs #}
+  {# use external containerd to gain more customization possibilities, eg. using zfs #}
   - containerd
 
 {% if grains['virtual']|lower in ['lxc', 'systemd-nspawn'] %}
@@ -40,7 +40,7 @@ k3s.env:
 
 k3s.config:
   file.serialize:
-    - name: {{ settings.config_file }}
+    - name: {{ settings.k3s_config_file }}
     - dataset: {{ settings.config }}
     - formatter: yaml
     - makedirs: true
