@@ -63,8 +63,8 @@ generate_invalid_cert:
   cmd.run:
     - name: |
         /usr/local/sbin/create-selfsigned-cert.sh \
-          {{ settings.ssl_invalid_key_path }} \
-          {{ settings.ssl_invalid_cert_path }} \
+          -k {{ settings.ssl_invalid_key_path }} \
+          -c {{ settings.ssl_invalid_cert_path }} \
           host.invalid
         chown {{ settings.cert_user }}:{{ settings.cert_user }} \
           {{ settings.ssl_invalid_key_path }} \
