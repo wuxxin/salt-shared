@@ -134,7 +134,7 @@
     - absent
   {%- else %}
     - managed
-    - source: salt://containers/container-template.service
+    - source: salt://containers/template/container.service
     - template: jinja
     - defaults:
         entry: {{ entry }}
@@ -204,6 +204,7 @@ containers_image_{{ user }}_{{ name }}:
 
 
 {% macro container(container_definition, user='') %}
+  FIXME
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
@@ -349,7 +350,7 @@ containers_image_{{ user }}_{{ name }}:
     - absent
     {%- else %}
     - managed
-    - source: salt://containers/compose-template.service
+    - source: salt://containers/template/compose.service
     - template: jinja
     - defaults:
         entry: {{ entry }}

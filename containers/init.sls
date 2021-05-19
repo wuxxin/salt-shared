@@ -56,9 +56,9 @@ include:
       - file: /etc/containers
 
 /etc/containers/policy.json:
-  file.managed:
-    - contents: |
-{{ settings.config.policy|json|indent(8,True) }}
+  file.serialize:
+    - dataset: {{ settings.config.policy }}
+    - formatter: json
     - require:
       - file: /etc/containers
 
@@ -83,10 +83,11 @@ podman:
       - buildah
       - podman
 
-# snapshot from: https://raw.githubusercontent.com/containers-compose/devel/podman_compose.py
+# snapshot 9317f987fc9b2b806a892ad423ee83da240702f9 + patches (own commit)
+# from: https://raw.githubusercontent.com/containers-compose/devel/podman_compose.py
 podman_compose.py:
   file.managed:
-    - source: salt://containers/podman_compose.py
+    - source: salt://containers/tools/podman_compose.py
     - name: /usr/local/bin/podman-compose
     - mode: "0755"
 

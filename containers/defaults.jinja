@@ -105,10 +105,11 @@ name:
 # builddir: will be set to settings.podman.[user_]build_basepath+ "/"+ name
 # servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
 
-# type: "build", "service", "oneshot"
+# type: "build", "service", "oneshot", "command"
 # build   = build or pull image only, will not generate a systemd service
-# service = create and start command as a systemd service
-# oneshot = create a systemd oneshot execute script
+# service = systemd service: create and start command as a systemd service
+# oneshot = systemd oneshot service: create a systemd oneshot execute service
+# command = create a shell script to call the container from the commandline
 type: service
 
 # enabled: if false, service will be stopped, config files are removed
@@ -123,6 +124,7 @@ absent: false
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: auto
 
+# ## systemd
 # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
 # default: "no" if type oneshot, else "on-failure"
 restart: ""
@@ -197,10 +199,9 @@ name:
 # builddir: will be set to settings.compose.[user_]build_basepath+ "/"+ name
 # servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
 
-# type: "service", "oneshot", "command"
+# type: "service", "oneshot"
 # service = make and start command as a systemd service
 # oneshot = make a systemd oneshot execute script
-# command = make a "oneshot" /usr/local/bin , ~/.local/bin script
 type: service
 
 # enabled: if false, service will be stopped, config files are removed

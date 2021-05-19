@@ -1,12 +1,12 @@
 {#
 + https://virtio-fs.gitlab.io/howto-qemu.html
-  + requisites
-    + kernel 5.4+
-    + QEMU 5.0+ (included in kata-containers 1.9+)
-    + kata-containers 1.9+
-    + libvirt 6.2+ if libvirt support is needed
-  + remark
-    + ppa:jacob/virtualisation has qemu 5.0 and libvirt 6.6
++ requisites
+  + kernel 5.4+
+  + QEMU 5.0+ (included in kata-containers 1.9+)
+  + kata-containers 1.9+
+  + libvirt 6.2+ if libvirt support is needed
++ remark
+  + ppa:jacob/virtualisation has qemu 5.0 and libvirt 6.6
 #}
 
 {% set branch = 'master' %}

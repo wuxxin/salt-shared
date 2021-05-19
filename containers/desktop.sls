@@ -1,5 +1,5 @@
 include:
-  - containers.podman
+  - containers
 
 x11docker-tools:
   pkg.installed:
@@ -18,7 +18,7 @@ x11docker-tools:
 # snapshot from: https://raw.githubusercontent.com/mviereck/x11docker/v6.8.0/x11docker
 x11docker:
   file.managed:
-    - source: salt://containers/desktop/x11docker
+    - source: salt://containers/tools/x11docker
     - name: /usr/local/bin/x11docker
     - mode: "755"
     - require:
