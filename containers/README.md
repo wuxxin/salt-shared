@@ -27,6 +27,20 @@
 + user != '': execute as user using rootless podman
 + for details and comments of options see default_container and default_compose in defaults.jinja
 
+### computed values
+
++ container:
+  + env: $SERVICE_NAME will be set to name
+  + workdir: will be set to settings.podman.[user_]workdir_basepath+ "/"+ name
+  + builddir: will be set to settings.podman.[user_]build_basepath+ "/"+ name
+  + servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
+
++ compose:
+  + env: $SERVICE_NAME will be set to name
+  + workdir: will be set to settings.compose.[user_]workdir_basepath+ "/"+ name
+  + builddir: will be set to settings.compose.[user_]build_basepath+ "/"+ name
+  + servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
+
 
 ### remarks
 

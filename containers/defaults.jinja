@@ -97,13 +97,8 @@ x11docker:
 
 
 {% load_yaml as default_container %}
-# name of the container pod, systemd service, systemd oneshot
+# name of the container pod, systemd service, oneshot, command
 name:
-
-# env: SERVICE_NAME will be set to name
-# workdir: will be set to settings.podman.[user_]workdir_basepath+ "/"+ name
-# builddir: will be set to settings.podman.[user_]build_basepath+ "/"+ name
-# servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
 
 # type: "build", "service", "oneshot", "command"
 # build   = build or pull image only, will not generate a systemd service
@@ -111,6 +106,11 @@ name:
 # oneshot = systemd oneshot service: create a systemd oneshot execute service
 # command = create a shell script to call the container from the commandline
 type: service
+
+# name of the container image: x/y[:z]
+image:
+# optional tag, will be appended to image and on build time
+tag:
 
 # enabled: if false, service will be stopped, config files are removed
 enabled: true
@@ -124,28 +124,31 @@ absent: false
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: auto
 
-# ## systemd
-# systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
-# default: "no" if type oneshot, else "on-failure"
-restart: ""
-# after, requires, wants: equal to systemd config
-after: ""
-requires: ""
-wants: ""
-# additional systemd properties
-properties: {}
+# systemd options
+systemd:
+  # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
+  # default: "no" if type oneshot, else "on-failure"
+  restart: ""
+  # after, requires, wants: equal to systemd config
+  after: ""
+  requires: ""
+  wants: ""
+  # additional systemd properties for the [service] section
+  service: {}
+  # additional systemd properties for the [unit] section
+  unit: {}
 
-# name of the container image: x/y[:z]
-image:
-# optional tag, will be appended to image and on build time
-tag:
-# build: if source != "", build container with args using "podman build <source>"
-build:
-  source: ""
-  args: {}
-# options: dict: {key: value,} container options parameter for podman run
-options: {}
-
+# environment: dict: {key: value,} add environment data
+# environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
+environment: {}
+# label: dict: {key: value,} add label to container
+labels: {}
+# storage: create volumes from list: - {name: volume_name, labels=[], driver: local, opts=[]}
+storage: []
+# volume: list: - [source-volume|host-dir:]container-dir[:options]
+volumes: []
+# ports: list
+ports: []
 # files to be placed inside workdir, which will be available via "./"
 files: {}
 {# Example:
@@ -161,32 +164,26 @@ files: {}
       custom: this is a custom var that will be available in the jinja context
 #}
 
-# environment: dict: {key: value,} add environment data
-# environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
-environment: {}
-# label: dict: {key: value,} add label to container
-labels: {}
-# storage: create volumes from list: - {name: volume_name, labels=[], driver: local, opts=[]}
-storage: []
-# volume: list: - [source-volume|host-dir:]container-dir[:options]
-volumes: []
-# ports: list
-ports: []
-
 # command: if set, will replace default command
 command: ""
 # args: if set, will add args for command, command must also be set
 args: ""
+# options: dict: {key: value,} container options parameter for podman run
+options: {}
+# build: if source != "", build container with args using "podman build <source>"
+build:
+  source: ""
+  args: {}
 # additional commands run on certain events
-hook:
+prepare:
   initial:
     # commands run before the first time the service is started
-    environment: {}
     command: ""
+    environment: {}
   update:
     # commands run after updating image to newer image before starting new image
-    environment: {}
     command: ""
+    environment: {}
 {% endload %}
 
 
@@ -194,58 +191,53 @@ hook:
 # name of the compose sevice and name of the controlling systemd service
 name:
 
-# env:SERVICE_NAME will be set to name
-# workdir: will be set to settings.compose.[user_]workdir_basepath+ "/"+ name
-# builddir: will be set to settings.compose.[user_]build_basepath+ "/"+ name
-# servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
-
-# type: "service", "oneshot"
-# service = make and start command as a systemd service
-# oneshot = make a systemd oneshot execute script
+# type: "service"
+# service = systemd service: create and start command as a systemd service
 type: service
 
 # enabled: if false, service will be stopped, config files are removed
 enabled: true
 # update: if true, container image will be pulled/build on every service start
 update: true
-# absent (service, oneshot): if absent is true also remove systemd service files
+# ephemeral (service, oneshot): remove existing container before start
+ephemeral: true
+# absent (service, oneshot): if true also remove systemd service files
 absent: false
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: auto
 
-# systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
-# default: "no" if type oneshot, else "on-failure"
-restart: ""
-# after, requires, wants: equal to systemd config
-after: ""
-requires: ""
-wants: ""
-# additional systemd properties
-properties: {}
+# systemd options
+systemd:
+  # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
+  # default: "no" if type oneshot, else "on-failure"
+  restart: ""
+  # after, requires, wants: equal to systemd config
+  after: ""
+  requires: ""
+  wants: ""
+  # additional systemd properties for the [service] section
+  service: {}
+  # additional systemd properties for the [unit] section
+  unit: {}
 
 # environment to be placed as ".env" file inside workdir
 environment: {}
 # compose source config and compose overrides config
 source:
 config: {}
-
-# workdir: will be set to settings.compose.[user_]workdir_basepath+ "/"+ compose.name
-# builddir: will be set to settings.compose.[user_]build_basepath+ "/"+ compose.name
-# servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
-
 # files to be placed inside workdir
 files: {}
 {# Examples: see container_defaults #}
 
-# additional commands run on first or update executions
-hook:
+# additional commands run on certain events
+prepare:
   initial:
     # commands run before the first time the service is started
-    environment: {}
     command: ""
+    environment: {}
   update:
     # commands run after updating image to newer image before starting new image
-    environment: {}
     command: ""
+    environment: {}
 {% endload %}
