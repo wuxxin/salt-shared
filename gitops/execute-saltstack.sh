@@ -54,18 +54,21 @@ EOF
 }
 
 salt_install() { # no parameter
+    local os_release os_codename os_distributor os_architecture
+    local i salt_major_version salt_repo_aptline salt_repo_keyfile
     os_release=$(lsb_release -r -s)
     os_codename=$(lsb_release -c -s)
     os_distributor=$(lsb_release  -i -s | tr '[:upper:]' '[:lower:]')
     os_architecture=$(dpkg --print-architecture)
+    salt_major_version="3003"
+    salt_repo_aptline="deb [arch=${os_architecture}] http://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version} ${os_codename} main"
+    salt_repo_keyfile="https://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version}/SALTSTACK-GPG-KEY.pub"
 
     if test "$os_architecture" = "amd64"; then
-        if [[ "$os_codename" =~ ^(bionic|focal|stretch|buster)$ ]]; then
-            echo "installing saltstack ($salt_major_version) for python 3 from ppa"
-            salt_major_version="3003"
-            prefixdir="py3"
-            curl -L -s "https://repo.saltstack.com/${prefixdir}/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version}/SALTSTACK-GPG-KEY.pub" | apt-key add -
-            echo "deb [arch=${os_architecture}] http://repo.saltstack.com/${prefixdir}/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version} ${os_codename} main" > /etc/apt/sources.list.d/saltstack.list
+        if [[ $os_codename =~ ^(bionic|focal|stretch|buster)$ ]]; then
+            echo "installing saltstack ($salt_major_version) from ppa"
+            curl -L -s "$salt_repo_keyfile" | apt-key add -
+            echo "$salt_repo_aptline" > /etc/apt/sources.list.d/saltstack.list
             DEBIAN_FRONTEND=noninteractive apt-get update --yes
         else
             echo "installing distro buildin saltstack version"
@@ -74,7 +77,8 @@ salt_install() { # no parameter
         echo "installing distro buildin saltstack version"
     fi
 
-    DEBIAN_FRONTEND=noninteractive apt-get install -y salt-minion python3-pytoml curl gosu git gnupg git-crypt
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        salt-minion python3-pytoml curl gosu git gnupg git-crypt
     echo "keep minion from running automatically"
     for i in disable stop mask; do systemctl $i salt-minion; done
 }
@@ -91,7 +95,8 @@ main() {
     shift
     if which cloud-init > /dev/null; then
         # be sure that cloud-init has finished
-        cloud-init status --wait || echo "Warning: Cloud init exited with error"
+        cloud-init status --wait || \
+            echo "Warning: Cloud init exited with error"
     fi
     if ! which salt-call > /dev/null; then
         salt_install
