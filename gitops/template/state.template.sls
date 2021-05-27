@@ -3,23 +3,20 @@ base:
   # physical machine
   'virtual:physical':
     - match: grain
+    - kernel
     - hardware
 
   # virtual machine
   'P@virtual:(?!physical)':
     - match: compound
+    - kernel
     - virtual
 
-  # any machine type with a kernel (including virtual) but not on lxc (is same kernel)
-  'P@virtual:(?!LXC)':
+  # any machine with a kernel (no container virtualization)
+  '* and not ( P@virtual:lxc or P@virtual:systemd-nspawn )':
     - match: compound
-    - kernel
     - kernel.acpi
     - kernel.entropy
-
-  # if on lxc/lxd install headers and tools for the running host kernel version
-  'virtual:LXC':
-    - kernel.running
 
   # ubuntu specific
   'os:Ubuntu':
