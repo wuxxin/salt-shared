@@ -18,10 +18,10 @@ if test "$src_user" = "" -o "$src_url" = "" -o "$src_branch" = "" -o "$src_dir" 
     usage
 fi
 
-. /usr/local/lib/gitops-library.sh
+. "/usr/local/lib/gitops-library.sh"
 
 main () {
-    start_epoch_ms="$(date +%s)000"
+    start_epoch_sec="$(date +%s)"
     need_service_restart="false"
     custom_args=""
     result=0
@@ -38,7 +38,7 @@ main () {
     if flag_is_set gitops.update.disable; then
         echo "Warning: gitops.update.disable flag is set, exit update run without update"
         simple_metric update_duration_sec gauge \
-            "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
+            "number of seconds for a update run" $(($(date +%s) - start_epoch_sec))
         exit 0
     fi
 
@@ -60,7 +60,7 @@ main () {
             rm "{{ settings.var_dir }}/flags/gitops.update.force"
         fi
         simple_metric update_start_timestamp counter \
-            "timestamp-epoch-seconds since last update to app" "$start_epoch_ms"
+            "timestamp-epoch-seconds since last update to app" "$start_epoch_sec"
         cd $src_dir
 
         echo "calling validate_cmd: {{ settings['update']['validate_cmd'] }}"
@@ -105,9 +105,9 @@ main () {
         else
             echo "Warning: reboot of system required, initiating automatic reboot"
             simple_metric update_duration_sec gauge \
-                "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
+                "number of seconds for a update run" $(($(date +%s) - start_epoch_sec))
             simple_metric update_reboot_timestamp counter \
-                "timestamp-epoch-seconds since update requested reboot" "$start_epoch_ms"
+                "timestamp-epoch-seconds since update requested reboot" "$start_epoch_sec"
             systemctl --no-block reboot
             exit 0
         fi
@@ -128,7 +128,7 @@ main () {
     fi
 
     simple_metric update_duration_sec gauge \
-        "number of seconds for a update run" $(($(date +%s)000 - start_epoch_ms))
+        "number of seconds for a update run" $(($(date +%s) - start_epoch_sec))
     exit $result
 }
 
