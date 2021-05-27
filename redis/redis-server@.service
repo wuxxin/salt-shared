@@ -1,0 +1,66 @@
+# Templated service file for redis-server(1)
+#
+#   $ systemctl start redis-server@myname.service
+#   $ redis-cli -s /run/redis-myname/redis-server.sock info
+
+[Unit]
+Description=Redis-Server (%I)
+After=network.target
+Documentation=http://redis.io/documentation, man:redis-server(1)
+
+[Service]
+Type=notify
+
+# defaults
+Environment=user=redis
+Environment=memory=128mb
+Environment=policy=volatile-lru
+Environment=databases=8
+
+Environment=working_dir=/var/lib/${user}/redis-i%
+Environment=working_perm=0750
+Environment=dbfilename=dump-%i.rdb
+Environment=runtime_name=redis-%i
+Environment=runtime_dir=/run/redis-%i
+Environment=runtime_perm=2755
+Environment=socket=/run/redis-i%/redis-server.sock
+Environment=socket_perm=700
+
+# overwrite environment from file
+EnvironmentFile=/etc/systemd/system/redis-server-i%.env
+
+ExecStartPre=/usr/bin/install -m ${working_perm} -o ${user} -g ${user} -d ${working_dir}
+ExecStart=/usr/bin/redis-server --supervised systemd --daemonize no --logfile "" \
+  --dir ${working_dir} --dbfilename ${dbfilename} --databases ${databases} \
+  --unixsocket ${socket} --unixsocketperm ${socket_perm} \
+  --maxmemory ${memory} --maxmemory-policy ${policy}
+
+Restart=always
+User=${user}
+Group=${user}
+RuntimeDirectory=${runtime_name}
+RuntimeDirectoryMode=${runtime_perm}
+WorkingDirectory=${working_dir}
+
+UMask=007
+LimitNOFILE=65535
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ReadOnlyDirectories=/
+ReadWritePaths=-${working_dir}
+ReadWritePaths=-${runtime_dir}
+
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_SETGID CAP_SETUID CAP_SYS_RESOURCE
+MemoryDenyWriteExecute=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
