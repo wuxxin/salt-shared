@@ -21,6 +21,8 @@ redis-server@{{ entry.name }}.service:
   {%- if entry.enabled|d(True) %}
     - running
     - enable: true
+    - watch:
+      - file: /etc/systemd/system/redis-server-{{ entry.name }}.env
   {%- else %}
     - dead
     - enable: false
