@@ -4,6 +4,7 @@ Installs and configures features usually wanted for a working desktop
 
 ## Pillar Settings
 
+```yaml
 desktop:
   development:
     enabled:   *false|true      # install developer packages
@@ -12,6 +13,7 @@ desktop:
       enabled: *false|true      # install video4linux2 loopback kernel modules
   proprietary:
     enabled:   *false|true      # install signal and skype
+```
 
 ## Main Features
 
