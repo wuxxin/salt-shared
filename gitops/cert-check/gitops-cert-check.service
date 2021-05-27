@@ -1,5 +1,5 @@
 [Unit]
-Description=Gitops SSL Certificates Validity Check (warning <= 28 days, error <= 3 days)
+Description=Gitops SSL Certificates Validity Check (warning <= {{ settings.cert_warn_days }} days, error <= {{ settings.cert_err_days }} days)
 After=network-online.target
 Wants=network-online.target
 
@@ -10,6 +10,13 @@ Group={{ settings.user }}
 Environment=UNITNAME=%n
 Environment=HOME="{{ settings.home_dir }}"
 Environment=USER="{{ settings.user }}"
+Environment=CERTWATCHFILE="{{ settings.cert_watchlist_target }}"
 PassEnvironment=UNITNAME HOME USER SENTRY_DSN
 WorkingDirectory={{ settings.home_dir }}
-ExecStart=/usr/local/bin/gitops-cert-check.sh {{ settings.cert_dir }}/server.cert.pem 28 3
+ExecStart=/usr/bin/bash -c \
+' \
+  for cert in $(cat $CERTWATCHFILE); do \
+    /usr/local/bin/gitops-cert-check.sh \
+      $cert {{ settings.cert_warn_days }}  {{ settings.cert_err_days }} \
+  ; done
+'

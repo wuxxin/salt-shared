@@ -6,7 +6,7 @@ set -eo pipefail
 
 usage() {
     cat << EOF
-Usage: $0 certificate.pem days-warning days-error
+Usage: $0 <certificate.pem> <days-warning> <days-error>
 
 - if certificate does not exist
     - print error, exit 1

@@ -9,6 +9,12 @@ gitops-cert-check.sh:
     - source: salt://gitops/cert-check/gitops-cert-check.sh
     - mode: "0755"
 
+gitops-add-cert-check.sh:
+  file.managed:
+    - name: /usr/local/bin/gitops-add-cert-check.sh
+    - source: salt://gitops/cert-check/gitops-add-cert-check.sh
+    - mode: "0755"
+
 gitops-cert-check.service:
   file.managed:
     - source: salt://gitops/cert-check/gitops-cert-check.service
