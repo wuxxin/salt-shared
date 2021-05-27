@@ -36,6 +36,11 @@ sentry:
 maintenance_template: /var/lib/gitops/maintenance.template.html
 maintenance_target: /var/lib/gitops/maintenance/503.html
 
+{# certfiles validity days left. added via gitops-cert-add-check.sh #}
+cert_warn_days: 28
+cert_err_days: 3
+cert_watchlist_target: /var/lib/gitops/cert_watchlist.txt
+
 {# onfailure_service: List of systemd service names (without ".service")
    to be added as onfailure to gitops-service-failed #}
 onfailure_service: []
