@@ -34,10 +34,12 @@ gitops-cert-check.timer:
     - source: salt://gitops/cert-check/gitops-cert-check.timer
     - name: /etc/systemd/system/gitops-cert-check.timer
     - require:
-      - file: gitops-cert-check.service
+      - cmd: gitops-cert-check.service
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: gitops-cert-check.timer
   service.running:
-    - enabled: true
+    - enable: true
+    - require:
+      - cmd: gitops-cert-check.timer
