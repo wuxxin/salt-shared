@@ -1,57 +1,71 @@
 {% load_yaml as defaults %}
 enabled: false
-listen_ip:
-  - 127.0.0.1
-  - ::1
-listen_port: 6379
-listen_socket: /run/redis/redis.sock
-listen_socket_perm: 700
+
+# bind: listen to selected interfaces by defining a space seperated list of one or more IP addresses
+bind: 127.0.0.1 ::1
+# port: If port 0 is specified Redis will not listen on a TCP socket.
+port: 0
+# unixsocket: path for the socket that will be used to listen for incoming connections.
+unixsocket: /run/redis/redis.sock
+unixsocketperm: 700
+
+# working directory of the redis instance for dbfilename and optional append only file
+dir /var/lib/redis
+# The name of the dumpfile (relative to working directory)
+dbfilename dump.rdb
+
+# Set the number of available databases
 databases: 8
-memory: 256MB
-# password: warning, bruteforce is possible with ~150k attempts/s. use long pwds, eg. `openssl rand -base64 20`
-password: ""
-policy: volatile-lru
-{#
-policy:
-+ noeviction= return errors when the memory limit was reached and the client is
-    trying to execute commands that could result in more memory to be used
-    (most write commands, but DEL and a few more exceptions)
-+ allkeys-lru= evict keys by trying to remove the less recently used (LRU) keys first
-+ allkeys-lfu= evict any key using approximated LFU
-+ allkeys-random= evict keys randomly in order to make space for the new data added
-+ volatile-lru= evict keys by trying to remove the less recently used (LRU) keys
-    first, but only among keys that have an expire set,
-    in order to make space for the new data added
-+ volatile-lfu= evict using approximated LFU, only keys with an expire set
-+ volatile-random= evict keys randomly in order to make space for the
-    new data added, but only evict keys with an expire set
-+ volatile-ttl= evict keys with an expire set, and try to evict keys with a shorter
-    time to live (TTL) first, in order to make space for the new data added
-#}
+
+# Set a memory usage limit to the specified amount of bytes.
+# When the memory limit is reached Redis will try to remove keys
+# according to the eviction policy selected (see maxmemory-policy).
+maxmemory: 128MB
+
+# maxmemory-policy: how Redis will select what to remove when maxmemory is reached
+# noeviction=
+#    return errors when the memory limit was reached and the client is
+#    trying to execute commands that could result in more memory to be used
+#    (most write commands, but DEL and a few more exceptions)
+# allkeys-lru=
+#    evict keys by trying to remove the less recently used (LRU) keys first
+# allkeys-lfu=
+#    evict any key using approximated LFU
+# allkeys-random=
+#    evict keys randomly in order to make space for the new data added
+# volatile-lru=
+#    evict keys by trying to remove the less recently used (LRU) keys
+#    first, but only among keys that have an expire set,
+#    in order to make space for the new data added
+# volatile-lfu=
+#    evict using approximated LFU, only keys with an expire set
+# volatile-random=
+#     evict keys randomly in order to make space for the
+#    new data added, but only evict keys with an expire set
+# volatile-ttl=
+#    evict keys with an expire set, and try to evict keys with a shorter
+#    time to live (TTL) first, in order to make space for the new data added
+maxmemory-policy: volatile-lru
+
 
 profile: []
 {#
   - name: recently
-    user: ""
-    memory: 256MB
-    policy: allkeys-lru
-    listen_port: 6380
+    maxmemory: 256MB
+    maxmemory-policy: allkeys-lru
+    port: 6380
   - name: frequently
-    user: ""
-    memory: 128MB
-    policy: allkeys-lfu
-    listen_port: 6381
+    maxmemory: 128MB
+    maxmemory-policy: allkeys-lfu
+    port: 6381
   - name: ttl
-    user: ""
-    memory: 256MB
-    policy: volatile-ttl
-    listen_port: 6382
+    maxmemory: 256MB
+    maxmemory-policy: volatile-ttl
+    port: 6382
   - name: permanent
-    user: ""
-    memory: 128MB
-    policy: noeviction
-    listen_port: 6383
-    password: "averylongrandomstring"
+    maxmemory: 128MB
+    maxmemory-policy: noeviction
+    port: 6383
 #}
 {% endload %}
 
@@ -59,24 +73,20 @@ profile: []
 {% load_yaml as profile_defaults %}
 name: ""
 enabled: true
-user: redis
-memory: 128mb
-policy: volatile-lru
-
-listen_ip: []
-listen_port: 6379
-# password: warning, bruteforce is possible with ~150k attempts/s. use long pwds, eg. `openssl rand -base64 20`
-password: ""
-
-# databases: 8
-# working_dir: /var/lib/${user}/redis-i%
-# working_perm: 0750
+# user: redis
+# bind: 127.0.0.1 ::1
+# port: 0
+# unixsocket: /run/redis-i%/redis-server.sock
+# unixsocketperm: 700
+# dir: /var/lib/${user}/redis-i%
+# dir_perm: 0750
 # dbfilename: dump-%i.rdb
+# databases: 8
+# maxmemory: 128mb
+# maxmemory-policy: volatile-lru
 # runtime_name: redis-%i
 # runtime_dir: /run/redis-%i
 # runtime_perm: 2755
-# socket: /run/redis-i%/redis-server.sock
-# socket_perm: 700
 {% endload %}
 
 

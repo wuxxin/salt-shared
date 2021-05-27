@@ -1,7 +1,7 @@
 # Templated service file for redis-server(1)
 #
-#   $ systemctl start redis-server@myname.service
-#   $ redis-cli -s /run/redis-myname/redis-server.sock info
+# $ systemctl start redis-server@myname.service
+# $ redis-cli -s /run/redis-myname/redis-server.sock info
 
 [Unit]
 Description=Redis-Server (%I)
@@ -13,34 +13,39 @@ Type=notify
 
 # defaults
 Environment=user=redis
-Environment=memory=128mb
-Environment=policy=volatile-lru
-Environment=databases=8
-
-Environment=working_dir=/var/lib/${user}/redis-i%
-Environment=working_perm=0750
+Environment=bind=127.0.0.1 ::1
+Environment=port=0
+Environment=unixsocket=/run/redis-i%/redis-server.sock
+Environment=unixsocketperm=700
+Environment=dir=/var/lib/${user}/redis-i%
+Environment=dir_perm=0750
 Environment=dbfilename=dump-%i.rdb
+Environment=databases=8
+Environment=maxmemory=128mb
+Environment=maxmemory-policy=volatile-lru
 Environment=runtime_name=redis-%i
 Environment=runtime_dir=/run/redis-%i
 Environment=runtime_perm=2755
-Environment=socket=/run/redis-i%/redis-server.sock
-Environment=socket_perm=700
 
 # overwrite environment from file
 EnvironmentFile=/etc/systemd/system/redis-server-i%.env
 
-ExecStartPre=/usr/bin/install -m ${working_perm} -o ${user} -g ${user} -d ${working_dir}
+# create working_dir
+ExecStartPre=/usr/bin/install -m ${dir_perm} -o ${user} -g ${user} -d ${dir}
+
+# start redis-server without config file, just use cmdline
 ExecStart=/usr/bin/redis-server --supervised systemd --daemonize no --logfile "" \
-  --dir ${working_dir} --dbfilename ${dbfilename} --databases ${databases} \
-  --unixsocket ${socket} --unixsocketperm ${socket_perm} \
-  --maxmemory ${memory} --maxmemory-policy ${policy}
+  --bind ${bind} --port ${port} \
+  --unixsocket ${unixsocket} --unixsocketperm ${unixsocketperm} \
+  --dir ${dir} --dbfilename ${dbfilename} --databases ${databases} \
+  --maxmemory ${maxmemory} --maxmemory-policy ${maxmemory-policy}
 
 Restart=always
 User=${user}
 Group=${user}
 RuntimeDirectory=${runtime_name}
 RuntimeDirectoryMode=${runtime_perm}
-WorkingDirectory=${working_dir}
+WorkingDirectory=${dir}
 
 UMask=007
 LimitNOFILE=65535
@@ -48,7 +53,7 @@ ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes
 ReadOnlyDirectories=/
-ReadWritePaths=-${working_dir}
+ReadWritePaths=-${dir}
 ReadWritePaths=-${runtime_dir}
 
 NoNewPrivileges=true
