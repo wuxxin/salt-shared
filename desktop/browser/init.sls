@@ -1,6 +1,6 @@
 include:
   - java.browser
-  - desktop.mozilla.firefox
+  - desktop.browser.firefox
   - desktop.browser.chromium
 
 desktop_browser:

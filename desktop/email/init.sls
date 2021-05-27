@@ -1,3 +1,6 @@
 include:
-  - desktop.mozilla.thunderbird
+  - desktop.email.thunderbird
 
+desktop_email:
+  test:
+    - nop
