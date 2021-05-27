@@ -1,4 +1,6 @@
 {% from redis/library.sls import mk_redisprofile with context %}
+include:
+  - redis.server
 
 rspamd:
   pkgrepo.managed:
@@ -10,7 +12,7 @@ rspamd:
   pkg.installed:
     - name: rspamd
   service.running:
-    - enabled: true
+    - enable: true
     - require:
       - service: redis-server@rspamd-storage.service
       - service: redis-server@rspamd-volatile.service
