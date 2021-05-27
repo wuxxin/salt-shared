@@ -14,9 +14,10 @@ node:
       use_authorized_keys: true
 
   locale:
-    lang: de:at
+    lang: de_AT.UTF-8
     language: de_de:de
-    additional: de:de en:us en:gb
+    additional: de_DE en_US en_GB
+    messages: POSIX
     timezone: Europe/Vienna
     location: Vienna
 
