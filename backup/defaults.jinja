@@ -9,10 +9,20 @@ timer: *-*-* 23:30:00
 
 # max time for fullbackup, eg: 8hours equals 562GB using 20mb/s
 max_job_runtime: 480min
-# CAP_DAC_READ_SEARCH
+
+# first job max time on new repository, eg: 48h (2880min) equals 3,4TB
+initial_job_runtime: 480min
+
+# readall_privilege = true turns on: CAP_DAC_READ_SEARCH for user
 readall_privilege: false
+
+# maximum backup storage to expect, -1 (default) to disable checking for current usage
 max_backup_storage: -1
+
+# interval in days to run restic forget,prune and check
 housekeeping_interval_days: 7
+
+# age of oldest data change to keep
 forget: keep-within 1y6m
 
 systemd:
