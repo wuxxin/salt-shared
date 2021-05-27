@@ -1,13 +1,14 @@
 #!/usr/bin/bash
 
-uplink_ip() {
+# ### tools ###
+uplink_ip() { # return STDOUT=uplink_ip
     local default_iface default_ip
     default_iface=$(ip -j route list default | sed -r 's/.+dev":"([^"]+)".+/\1/g')
     default_ip=$(ip -j addr show $default_iface | sed -r 's/.+"inet","local":"([^"]+)",.+/\1/g')
     echo "$default_ip"
 }
 
-version_gt() { # $1=version $2=version
+version_gt() { # $1=version gt $2=version return $?
     test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
 }
 
@@ -77,17 +78,9 @@ flag_is_set() { # $1=flagname
     fi
 }
 
-set_flag_and_service_enable() { # $1=flagname
-    set_flag "$1"; systemctl start "$2"
-}
-
-del_flag_and_service_disable() { # $1=flagname
-    del_flag "$1"; systemctl stop "$2"
-}
-
 
 # ### tags ###
-get_tag() { # $1=tagname $2=default if not found
+get_tag() { # $1=tagname $2=default-if-not-found
     cat "{{ settings.var_dir }}/tags/$1" 2> /dev/null || echo "$2"
 }
 
@@ -113,7 +106,7 @@ set_tag_from_file() { # $1=tagname $2=filename
 
 
 # ### prometheus "prom" file format compatible metrics ###
-mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=timestamp-epoch-ms]]
+mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=timestamp]]
     local metric value_type helptext value labels timestamp
     metric="$1"; value_type="$2"; helptext="$3"; value="$4"; labels="$5"; timestamp="$6"
     if test "$1" = ""; then
@@ -122,7 +115,7 @@ mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=t
 \$2=value_type can be one of "counter, gauge, untyped"
 \$4=value float but can have "Nan", "+Inf", and "-Inf" as valid values
 \$5=labels string [name="value"[,name="value"]*]?
-\$6=timestamp-epoch-ms int64, optional, default is empty, use "\$(date +%s)000" for now
+\$6=timestamp (epoch-ms) int64, optional, default is empty, use "\$(date +%s)000" for now
 EOF
         return
     fi
@@ -182,16 +175,17 @@ EOF
 
 # ### sentry error reporting ###
 sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
-    local topic msg level culprit extra logger tags
-    local gitops_run_rev gitops_current_rev gitops_failed_rev sentrycat
+    local topic msg level culprit extra logger tags sentrycat
+    local gitops_run_rev gitops_current_rev gitops_failed_rev
 
     level=${1}; topic=$2; msg=$3; extra=${4:-\{\}}; logger=${5:-app.status}
     culprit=${UNITNAME:-shellscript}
+    sentrycat="/usr/local/bin/sentrycat.py"
+
     gitops_run_rev=$(cat "{{ settings.src_dir }}/.git/refs/heads/{{ settings.git.branch }}" 2> /dev/null || echo "invalid")
     gitops_current_rev=$(get_tag gitops_current_rev "$gitops_run_rev")
     gitops_failed_rev=$(get_tag gitops_failed_rev "invalid")
     gitops_sentry_dsn="{{ settings.sentry.dsn|d('') }}"
-    sentrycat="/usr/local/bin/sentrycat.py"
     if test -n "$SENTRY_DSN"; then gitops_sentry_dsn="$SENTRY_DSN"; fi
 
     tags="{\"topic\": \"$topic\", \
