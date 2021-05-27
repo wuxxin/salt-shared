@@ -1,3 +1,4 @@
+{% from redis/library.sls import mk_redisprofile with context %}
 
 rspamd:
   pkgrepo.managed:
@@ -8,3 +9,28 @@ rspamd:
       - pkg: rspamd
   pkg.installed:
     - name: rspamd
+  service.running:
+    - enabled: true
+    - require:
+      - service: redis-server@rspamd-storage.service
+      - service: redis-server@rspamd-volatile.service
+
+{% load_yaml as profiles %}
+- name: rspamd-storage
+  user: rspamd
+  memory: 400mb
+  policy: volatile-ttl
+  working_dir: /var/lib/rspamd/redis-i%
+  # socket: /run/redis-i%/redis-storage.sock
+
+- name: rspamd-volatile
+  user: rspamd
+  memory: 250mb
+  policy: allkeys-lfu
+  working_dir: /var/lib/rspamd/redis-i%
+  # socket: /run/redis-i%/redis-storage.sock
+{% endload %}
+
+{% for p in profiles %}
+{{ mk_redisprofile(p) }}
+{% endfor %}
