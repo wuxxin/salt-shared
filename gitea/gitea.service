@@ -5,7 +5,7 @@ After=network.target
 {%- if entry.database.db_type == 'mysql' %}
 Requires=mariadb.service
 {%- elif entry.database.db_type == 'postgres' %}
-Requires=postgresql@12-main.service
+Requires=postgresql.service
 {%- endif %}
 StartLimitBurst=5
 StartLimitIntervalSec=100
