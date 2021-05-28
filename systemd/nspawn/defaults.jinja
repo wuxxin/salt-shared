@@ -1,72 +1,59 @@
 {% load_yaml as defaults %}
-storage: /var/lib/machines
-env_basepath: /etc/nspawn-env
+
+store:
+  nspawn_env: /etc/systemd/nspawn/
+  nspawn_config: /etc/systemd/nspawn/
+  nspawn_target: /var/lib/machines
+  nspawn_volume: /var/lib/volumes/nspawn
+  mkosi_config: /etc/mkosi
+  mkosi_cache: /var/cache/mkosi
+  mkosi_target: /var/lib/mkosi
+
+image:
+  focal:
+    mkosi:
+      Distribution:
+        Distribution: ubuntu
+        Release: focal
+        Repositories: main,universe,multiverse,restricted
+      Output:
+        Format: directory
+        Bootable: no
+        Hostname: focal
+      Packages:
+        PostInstallationScript: mkosi.postinst
+        NSpawnSettings: mkosi.nspawn
+        Packages:
+        - lsb-release
+        - tzdata
+        - iproute2
+        - iputils-ping
+        - openssh-client
+        - openssh-server
+        - python3
+      Host: {}
+      Validation: {}
+    nspawn:
+      Exec:
+        Boot: on
+        LinkJournal: try-guest
+      Files: {}
+      Network:
+        Private: on
+        VirtualEthernet: on
 {% endload %}
+
 
 {% load_yaml as machine_defaults %}
 # name of the nspawn container and name of the controlling systemd service
 name: ""
-
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
-
-Exec: {}
-{#
-  Boot:
-  Ephemeral:
-  ProcessTwo:
-
-  Parameters:
-  Environment:
-  User:
-  WorkingDirectory:
-  PivotRoot:
-
-  Hostname:
-  MachineID:
-  Personality:
-  NotifyReady:
-  KillSignal:
-  ResolvConf:
-  Timezone:
-  LinkJournal:
-
-  Capability:
-  DropCapability:
-  AmbientCapability:
-  NoNewPrivileges:
-
-  PrivateUsers:
-  SystemCallFilter:
-  LimitCPU:, LimitFSIZE:, LimitDATA:, LimitSTACK:, LimitCORE:, LimitRSS:,
-  LimitNOFILE:, LimitAS:, LimitNPROC:, LimitMEMLOCK:, LimitLOCKS:,
-  LimitSIGPENDING:, LimitMSGQUEUE:, LimitNICE:, LimitRTPRIO:, LimitRTTIME:
-  OOMScoreAdjust:
-  CPUAffinity:
-#}
-Files: {}
-{#
-  ReadOnly:
-  PrivateUsersChown:
-  Bind:
-  BindReadOnly:
-  TemporaryFileSystem:
-  Inaccessible:
-  Overlay:
-  OverlayReadOnly:
-#}
-Network: {}
-{#
-  Private:
-  VirtualEthernet:
-  VirtualEthernetExtra:
-  Interface:
-  MACVLAN:
-  IPVLAN:
-  Bridge:
-  Zone:
-  Port:
-#}
+environment: {}
+nspawn:
+  Exec: {}
+  Files: {}
+  Network: {}
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
