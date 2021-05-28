@@ -11,7 +11,7 @@ kjupyter(){ podman run -v $PWD:/tmp/working -w=/tmp/working -p 8888:8888 --rm -i
 pip install DALL-E; pip install auto-sklearn; pip install jupyter_contrib_nbextensions; pip install jupyter_nbextensions_configurator;
 
 podman run -v $PWD:/tmp/working -w=/tmp/working -p 8888:8888 --rm -it gcr.io/kaggle-images/python \
-  bash -c "jupyter contrib nbextension install --user; jupyter notebook --notebook-dir=/tmp/working --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
+  bash "jupyter contrib nbextension install --user; jupyter notebook --notebook-dir=/tmp/working --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
 
 podman run -v $PWD:/tmp/working -w=/tmp/working -p 8888:8888 \
   --rm -it -e JUPYTER_ENABLE_LAB=yes \
