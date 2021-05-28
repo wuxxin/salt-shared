@@ -62,28 +62,28 @@ build_from_lp() {
         DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes cowbuilder ubuntu-dev-tools
     fi
     if ! grep -q "bionic" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "18.04 LTS,Bionic Beaver,bionic,2017-10-19,2018-04-26,2023-04-26,2023-04-26,2028-04-26" >> /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "18.04 LTS,Bionic Beaver,bionic,2017-10-19,2018-04-26,2023-04-26,2023-04-26,2028-04-26" >> /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "cosmic" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "18.10,Cosmic Cuttlefish,cosmic,2018-04-26,2018-10-18,2019-07-18" >> /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "18.10,Cosmic Cuttlefish,cosmic,2018-04-26,2018-10-18,2019-07-18" >> /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "disco" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "19.04,Disco Dingo,disco,2018-10-18,2019-04-18,2020-01-18" >> /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "19.04,Disco Dingo,disco,2018-10-18,2019-04-18,2020-01-18" >> /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "eoan" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "19.10,Eoan Ermine,eoan,2019-04-18,2019-10-17,2020-07-17" >>  /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "19.10,Eoan Ermine,eoan,2019-04-18,2019-10-17,2020-07-17" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "focal" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "20.04 LTS,Focal Fossa,focal,2019-10-17,2020-04-23,2025-04-23,2025-04-23,2030-04-23" >>  /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "20.04 LTS,Focal Fossa,focal,2019-10-17,2020-04-23,2025-04-23,2025-04-23,2030-04-23" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "groovy" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "20.10,Groovy Gorilla,groovy,2020-04-23,2020-10-22,2021-07-22" >>  /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "20.10,Groovy Gorilla,groovy,2020-04-23,2020-10-22,2021-07-22" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "hirsute" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "21.04,Hirsute Hippo,hirsute,2020-10-22,2021-04-22,2022-01-22" >>  /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "21.04,Hirsute Hippo,hirsute,2020-10-22,2021-04-22,2022-01-22" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if ! grep -q "impish" /usr/share/distro-info/ubuntu.csv; then
-        sudo /usr/bin/bash -c 'echo "21.10,Impish Indri,impish,2021-04-22,2021-10-14,2022-07-14" >>  /usr/share/distro-info/ubuntu.csv'
+        sudo /usr/bin/bash 'echo "21.10,Impish Indri,impish,2021-04-22,2021-10-14,2022-07-14" >>  /usr/share/distro-info/ubuntu.csv'
     fi
     if test ! -e "$cowbasedir"; then
         sudo cowbuilder --create --distribution "$dest" --basepath "$cowbasedir"
