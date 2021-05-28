@@ -13,52 +13,51 @@ desktop:
       enabled: *false|true      # install video4linux2 loopback kernel modules
   proprietary:
     enabled:   *false|true      # install signal and skype
+  games:
+    enabled:   *false|true      # install Arcade-, PS2-, Nintendo64- Emulator
 ```
 
 ## Main Features
 
-* graphics:
-    * Pixel Software: gimp, krita, darktable
-    * Ocr software
-    * Vector graphics software: inkscape
-    * Clipart packages
-
-* writing:
-    * libreoffice
-    * sphinx, latex
-    * dtp software: scribus
-
-* voice: mumble, linphone, skype (if enabled)
-
-* chat: riot, signal, optional: pidgin
-
-* video: vlc, gstreamer and codecs, video loopback devices (if enabled)
-
-* security:
-    * tor browser bundle
-    * keychain/keyring support packages
-    * metadata stripper (mat)
-    * firejail restricted application jail
-
-* browser:
-    * firefox, chromium browser
-
-* hardware support:
-    * electronic signing chipcard daemon
-
-* ubuntu:
-    * /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie
-
-* optional:
-    * emulation:games: Arcade, PS2, Nintendo64 Emulator
++ Graphics
+    + Pixel Software: gimp, krita, darktable
+    + Vector graphics software: inkscape
+    + OCR packages
+    + Clipart packages
++ Writing
+    + libreoffice
+    + sphinx
+    + latex
+    + dtp software: scribus
++ Voice
+    + mumble, linphone
++ Chat
+    + Elements (matrix client)
++ Video
+    + vlc, gstreamer and codecs
+    + video loopback devices (if enabled)
++ Security
+    + tor browser bundle
+    + keychain/keyring support packages
+    + metadata stripper (mat)
+    + firejail restricted application jail
++ Browser
+    + firefox-, chromium- browser
++ Hardware support
+    + electronic signing chipcard daemon
++ Ubuntu
+    + /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie
 
 ## Development Features
 
 needs desktop:development:enabled: true
 
-* editor: atom
-* revision control systems & tools, git-crypt, homeshick
-* python development
-* jupyterlab with scientific python
-* android tools
-* emulation/virtualization: qemu/kvm, libvirt, lxc, vagrant, nspawn
++ Editor: atom
++ Revision control systems & tools, git-crypt, homeshick
++ Python development
++ Emulation/Virtualization
+  + qemu/kvm, libvirt, lxc, vagrant, nspawn
++ pipx installed jupyterlab with
+  + scientific python packages ()
+  + machinelearning packages (torch, sklearn, tensorflow, fastai, ...)
++ Android tools
