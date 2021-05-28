@@ -1,3 +1,0 @@
-openssl:
-  pkg:
-    - installed
