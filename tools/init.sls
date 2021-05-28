@@ -37,6 +37,7 @@ base-tools:
       {# network #}
       - curl            {# command line tool for transferring data with URL syntax #}
       - rsync           {# fast, versatile, remote (and local) file-copying tool #}
+      - unison          {# crossplatform file-synchronization tool written in OCaml #}
       - httpie          {# CLI, cURL-like tool for humans #}
       - pv              {# monitor the progress of data through a pipe #}
       - socat           {# multipurpose relay for bidirectional data transfer #}
