@@ -188,7 +188,7 @@ download_convert_lxcd() {
     echo "xxx todo: write checksum, redownload when ?"
 
     echo "information: convert lxd container to vagrant lxd friendly layout"
-    fakeroot -- bash -c "\
+    fakeroot -- bash "\
     if test -e temp; then rm -rf temp; fi; mkdir -p temp; \
     echo 'extract rootfs'; \
     unsquashfs -d temp/rootfs $rootfs; \
