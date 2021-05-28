@@ -1,6 +1,5 @@
 include:
   - .matrix     {# matrix protocol chat/video/voice clients # }
-  - .jami       {# decentral dht/video/voice and sip client #}
   - .mumble     {# low latency voice only client #}
 {% if salt['pillar.get']('desktop:proprietary:enabled', false) == true %}
   - .signal     {# modern chat/video/voice client #}

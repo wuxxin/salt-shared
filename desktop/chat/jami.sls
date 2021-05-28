@@ -1,4 +1,3 @@
-
 jami:
   pkgrepo.managed:
     - name: deb https://dl.jami.net/nightly/{{ grains['os']|lower }}_{{ grains['osrelease'] }}/ ring main
