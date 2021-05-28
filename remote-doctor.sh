@@ -1,0 +1,1 @@
+gitops/remote-doctor.sh
