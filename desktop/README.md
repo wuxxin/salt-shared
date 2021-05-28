@@ -59,6 +59,6 @@ needs desktop:development:enabled: true
 * editor: atom
 * revision control systems & tools, git-crypt, homeshick
 * python development
-* scientific python
+* jupyterlab with scientific python
 * android tools
 * emulation/virtualization: qemu/kvm, libvirt, lxc, vagrant, nspawn
