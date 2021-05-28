@@ -21,7 +21,7 @@ Restart={{ entry.systemd.restart }}
 {%- endif %}
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
-ExecStartPre=/bin/bash -c 'cd {{ entry.builddir }} && \
+ExecStartPre=/bin/bash 'cd {{ entry.builddir }} && \
     podman build {{ '--tag='+ entry.tag if entry.tag }} \
     {%- for key,value in entry.build.args.items() %}
     {{ '--build-arg=' ~ key ~ '=' ~ value }} \
