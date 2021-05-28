@@ -25,9 +25,9 @@ include:
   - tools.extra
   - .homeshick
   - .python
-  - .python.scipy
   - .python.jupyter
-  - .python.fastai
+  - .python.nbdev
+  - .python.machinelearning
   - .python.neurodsp
   - .code
   - .atom
