@@ -4,5 +4,5 @@
 include:
   - desktop.python.jupyter
 
-{{ pipx_inject('jupyterlab', ['neurodsp',],
-  require="sls: desktop.python.jupyter", user=user) }}
+{{ pipx_inject('jupyterlab', [ 'nbdev', ], pipx_opts='--include-apps',
+  require='sls: desktop.python.jupyter', user=user) }}
