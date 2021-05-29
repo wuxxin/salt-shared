@@ -119,12 +119,10 @@ main () {
         if test $result -ne 0; then
             gitops_error "Gitops Error" \
                 "finish_cmd failed with error: $result" "$(unit_json_status)"
+        else
+            echo "Information: all done, enable access to frontend service"
+            gitops_maintenance --clear
         fi
-    fi
-
-    if test "$need_service_restart" = "true" -a "$result" = "0"; then
-        echo "Information: all done, enable access to frontend service"
-        gitops_maintenance --clear
     fi
 
     simple_metric update_duration_sec gauge \
