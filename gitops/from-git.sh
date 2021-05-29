@@ -130,7 +130,7 @@ export_src () {
 
    # checkout specified source to target_dir
    install -o "$user" -g "$user" -d "$target_dir"
-   gosu "$user" bash -c "git -C $src_dir archive --format=tar HEAD | tar -x -C $target_dir"
+   gosu "$user" bash "git -C $src_dir archive --format=tar HEAD | tar -x -C $target_dir"
 }
 
 write_gitrev_files () {
