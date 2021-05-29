@@ -1,11 +1,11 @@
 include:
-  - python          {# basic python environment #}
-  - python.jinja2   {# Jinja2 including cli interface #}
-  - .gnupg          {# GnuPG tools for cryptographic communications and data storage #}
-  - .tmux           {# terminal multiplexer like screen #}
-  - .flatyaml       {# convert yaml to a flat key=value format #}
-  - .sentry         {# sentrycat.py error reporting to sentry #}
-  - .passgen        {# human friendly password generator #}
+  - python              {# basic python environment #}
+  - python.jinja2       {# Jinja2 including cli interface #}
+  - tools.gnupg         {# GnuPG tools for cryptographic communications and data storage #}
+  - tools.tmux          {# terminal multiplexer like screen #}
+  - tools.flatyaml      {# convert yaml to a flat key=value format #}
+  - tools.sentry        {# sentrycat.py error reporting to sentry #}
+  - tools.passgen       {# human friendly password generator #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
