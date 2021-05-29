@@ -70,10 +70,10 @@ remote_user=$gitops_user
 remote_sshlogin=$(ssh_uri ${sshlogin} ssh --user $remote_user)
 remote_src=$gitops_target/$base_name
 
-if test "$(ssh ${remote_sshlogin} "which unison")" = ""; then
-    echo "error: missing remote dependencies, try: ssh $(ssh_uri ${sshlogin}) apt-get install unison"
-    usage
-fi
+# if test "$(ssh ${remote_sshlogin} "which unison")" = ""; then
+#     echo "error: missing remote dependencies, try: ssh $(ssh_uri ${sshlogin}) apt-get install unison"
+#     usage
+# fi
 
 echo "start unison, exit with CTRL-C"
 one way only to remote, also ignore .git and probably if possible content of .gitignore
