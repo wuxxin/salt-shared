@@ -36,7 +36,7 @@ scrcpy-source:
       - pkg: scrcpy-req
       - file: scrcpy-source
 
-scrcpy-server:
+scrcpy-android-server:
   file.managed:
     - source: https://github.com/Genymobile/scrcpy/releases/download/v1.17/scrcpy-server-v1.17
     - hash_url: https://github.com/Genymobile/scrcpy/releases/download/v1.17/SHA256SUMS.txt
@@ -58,7 +58,7 @@ scrcpy-build:
         ninja
     - onchanges:
       - git: scrcpy-source
-      - file: scrcpy-server
+      - file: scrcpy-android-server
 
 scrcpy-install:
   cmd.run:

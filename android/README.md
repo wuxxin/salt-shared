@@ -8,15 +8,15 @@
 
 ## android.lib
 
-### Build an android lineage version
+### Cross-build an android lineage version for a set of target hardware
 
-+ android_image_build()
++ image_build()
 
-### Create and launch android emulator as container
+### Create and launch an android emulator (using qemu for emulation) as a container
 
-+ android_emulator_desktop()
-+ android_emulator_headless_service()
-+ android_emulator_webrtc_service()
++ emulator_desktop()
++ emulator_headless_service()
++ emulator_webrtc_service()
 
 #### Configure
 
@@ -29,11 +29,12 @@ desktop:
   options:
     k:v of x11docker options
 
-## Other Tools
+### Create and launch a (same kernel) android container using ReDroid
+
++ redroid_service()
 
 + https://github.com/remote-android/redroid-doc
   + ReDroid (Remote Android) is a GPU accelerated AIC (Android In Container) solution. You can boot many instances in Linux host or any Linux container envrionments (Docker, K8S, LXC etc.). ReDroid supports both arm64 and amd64 architectures. You can connect to ReDroid througth VNC or scrcpy / sndcpy or WebRTC (Panned) or adb shell. ReDroid is suitable for Cloud Gaming, VDI / VMI (Virtual Mobile Infurstrure), Automation Test and more.
-
 + https://github.com/Genymobile/scrcpy
   + display and control of Android devices connected on USB (or over TCP/IP). It does not require any root access
 + https://github.com/rom1v/sndcpy

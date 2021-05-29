@@ -1,11 +1,13 @@
 {# https://github.com/remote-android/redroid-doc #}
 
-{% set reddroid_module_list= ['ashmem', 'binderfs'] %}
+{% set reddroid_module_list= ['ashmem', 'binderfs', 'mac80211_hwsim'] %}
 
+{#
 /etc/modprobe.d/binderfs.conf:
   file.managed:
     - contents: |
         options binderfs devices=binder,hwbinder,vndbinder
+#}
 
 redroid-kernel-modules:
     kmod.present:
@@ -13,8 +15,6 @@ redroid-kernel-modules:
   {%- for i in reddroid_module_list %}
         - {{ i }}
   {%- endfor %}
-      - require:
-        - file: /etc/modprobe.d/binderfs.conf
 
 /etc/modules-load.d/redroid.conf:
   file.managed:

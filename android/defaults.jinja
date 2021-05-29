@@ -1,20 +1,5 @@
 {% load_yaml as defaults %}
 
-redroid:
-  name: redroid
-  image: redroid/redroid
-  tag: 10.0.0-latest
-  type: service
-  environment:
-    DATA_VOLUME: redroid-data
-  volumes:
-    - ${DATA_VOLUME}:/data
-  publish:
-    - 127.0.0.1:5555:5555/tcp
-  options:
-    - --privileged
-    - --memory-swappiness=0
-
 image_build:
   name: android-lineage-microg-build
   image: lineageos4microg/docker-lineage-cicd
@@ -26,7 +11,9 @@ image_build:
     DEVICE_LIST: sailfish
     SIGN_BUILDS: true
     SIGNATURE_SPOOFING: restricted
-    CUSTOM_PACKAGES: GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend com.google.android.maps.jar FDroid FDroidPrivilegedExtension
+    CUSTOM_PACKAGES: |
+      GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend
+      com.google.android.maps.jar FDroid FDroidPrivilegedExtension
   volumes:
     - ${BUILD_DATA_VOLUME}/src:/srv/src
     - ${BUILD_DATA_VOLUME}/zips:/srv/zips
@@ -131,6 +118,21 @@ emulator_webrtc_service:
   image: localhost/android-emulator
   tag: latest
   type: service
+
+redroid_service:
+  name: redroid
+  image: redroid/redroid
+  tag: 10.0.0-latest
+  type: service
+  environment:
+    DATA_VOLUME: redroid-data
+  volumes:
+    - ${DATA_VOLUME}:/data
+  publish:
+    - 127.0.0.1:5555:5555/tcp
+  options:
+    - --privileged
+    - --memory-swappiness=0
 
 {% endload %}
 
