@@ -3,3 +3,4 @@ include:
   - .remote
   - vagrant
   - vagrant.user
+  - android.emulator
