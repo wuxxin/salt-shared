@@ -4,7 +4,7 @@
 
 ## usage
 
-+ create image
++ create image, start test machine
 
 ```
 include:
