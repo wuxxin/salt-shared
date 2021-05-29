@@ -16,7 +16,8 @@ some states have a documentation README.md
     * [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     * [hardware](hardware): hardware related packages and setup
     * [ubuntu](ubuntu): disable or enable ubuntu specifics
-    * [desktop](desktop): everything wanted for a desktop installation
+
+* [Desktop](desktop): software for a desktop installation
 
 * Deployment / Admin
     * [gitops](gitops): deploy and update machines from git, with webhook support
