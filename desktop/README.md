@@ -20,33 +20,33 @@ desktop:
 ## Main Features
 
 + Graphics
-    + Pixel Software: gimp, krita, darktable
-    + Vector graphics software: inkscape
+    + Pixel Software: Gimp, Krita
+    + Foto Software: Darktable
+    + Vector graphics software: Inkscape
     + OCR packages
     + Clipart packages
 + Writing
-    + libreoffice
-    + sphinx
-    + latex
-    + dtp software: scribus
+    + Libreoffice
+    + Sphinx
+    + Latex
+    + Scribus (DTP)
 + Voice
     + mumble, linphone
 + Chat
-    + Elements (matrix client)
+    + Element (matrix client)
 + Video
     + vlc, gstreamer and codecs
     + video loopback devices (if enabled)
 + Security
-    + tor browser bundle
+    + Tor Browser
+    + firejail (restricted application jail)
     + keychain/keyring support packages
     + metadata stripper (mat)
-    + firejail restricted application jail
+    + chipcard hardware daemon
 + Browser
-    + firefox-, chromium- browser
-+ Hardware support
-    + electronic signing chipcard daemon
+    + Firefox- \& Chromium- Browser
 + Ubuntu
-    + /ubuntu.desktop: reenable suspend to disk, disable apport and whoopsie
+    + reenable suspend to disk, disable apport and whoopsie, a.o.
 
 ## Development Features
 
@@ -56,8 +56,6 @@ needs desktop:development:enabled: true
 + Revision control systems & tools, git-crypt, homeshick
 + Python development
 + Emulation/Virtualization
-  + qemu/kvm, libvirt, lxc, vagrant, nspawn
-+ pipx installed jupyterlab with
-  + scientific python packages ()
-  + machinelearning packages (torch, sklearn, tensorflow, fastai, ...)
-+ Android tools
+  + qemu/kvm, libvirt, lxc, vagrant, nspawn, android-emulator
++ jupyterlab with scientific and machinelearning packages
+  + (torch, sklearn, tensorflow, fastai, ...)
