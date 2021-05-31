@@ -5,5 +5,5 @@ include:
 ipython:
   pkg.installed:
     - pkgs:
-      - ipython3
-      - python3-ipdb
+      - ipython3      {# Enhanced interactive Python shell #}
+      - python3-ipdb  {# python debugger, with IPython features #}
