@@ -1,10 +1,6 @@
 
-{# shellcheck - lint tool for shell scripts #}
-shellcheck:
-  pkg:
-    - installed
+{# shell parser, formatter, and interpreter. Supports POSIX Shell, Bash, and mksh #}
 
-{# shfmt - shell parser, formatter, and interpreter (sh/bash/mksh) #}
 {# FIXME unverified archive from github #}
 {% set base= "https://github.com/mvdan/sh" %}
 {% set version= salt['cmd.run_stdout'](
