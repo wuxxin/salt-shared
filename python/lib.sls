@@ -1,6 +1,3 @@
-include:
-  - python
-
 {% macro pip_install(package_or_packagelist, version="3", kwargs={}) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
 "python{{ version }}-{{ package_or_packagelist }}":
@@ -46,16 +43,28 @@ include:
 {% endmacro %}
 
 
+{% macro pip3_install(package_or_packagelist) %}
+{{ pip_install(package_or_packagelist, '3', kwargs=kwargs) }}
+{% endmacro %}
+
+
+{% macro pip2_install(package_or_packagelist) %}
+{{ pip_install(package_or_packagelist, '2', kwargs=kwargs) }}
+{% endmacro %}
+
+
 {% macro pipx_install(package, user) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
       python_settings['pipx']['update']['automatic'] %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
+  {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
+  {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
 
 pipx_{{ package }}:
   cmd.run:
     - name: pipx install {{ pipx_opts }} {{ package }}
-    - unless: pipx list | grep package {{ package }} -q
+    - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package }}
     - runas: {{ user }}
     - require:
       - pip: pipx
@@ -95,15 +104,21 @@ pipx_upgrade_{{ package }}:
 {% macro pipx_inject(package, packagelist, user) %}
   {% set inject_hash= packagelist|join(' ')| md5 %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
+  {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
+  {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
 
 pipx_inject_{{ package }}_{{ inject_hash }}:
   cmd.run:
     - name: pipx inject {{ pipx_opts }} {{ package }} {{ packagelist|join(' ') }}
     - runas: {{ user }}
-    # FIXME make unless for injected packages working
-    # - unless: |
-    #     pipx list | grep package {{ package }} -q &&
-    #     pipx list --include-injected |
+    - unless: |
+        injected=$(pipx list --include-injected --json | \
+          {{ json2yaml }} | \
+          {{ yamlget }} venvs {{ package }} metadata injected_packages | \
+          grep -Ev "^ +" | sed -r "s/(.+):$/\1/g")
+        for i in {{ packagelist|join(' ') }}; do
+          printf "%s" "${injected}" | grep -Eq "^${i}$"
+        done
     - require:
       - cmd: pipx_{{ package }}
       - pip: pipx
@@ -129,12 +144,4 @@ pipx_inject_{{ package }}_{{ inject_hash }}:
       {%- endif %}
     {%- endif %}
   {%- endfor %}
-{% endmacro %}
-
-{% macro pip3_install(package_or_packagelist) %}
-{{ pip_install(package_or_packagelist, '3', kwargs=kwargs) }}
-{% endmacro %}
-
-{% macro pip2_install(package_or_packagelist) %}
-{{ pip_install(package_or_packagelist, '2', kwargs=kwargs) }}
 {% endmacro %}
