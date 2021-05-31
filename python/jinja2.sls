@@ -2,8 +2,14 @@
 include:
   - python
 
-{# conversion/processor #}
-{# CLI interface to Jinja2, reads yaml,xml,toml #}
+{# get jinja from pypi, because > 2.9 < 2.11 is broken for saltstack #}
+jinja2-req:
+  pkg.installed:
+    - name: python3-markupsafe
+
+{{ pip3_install('Jinja2>=2.11', require= 'pkg: jinja2-req') }}
+
+{# CLI interface to Jinja2, including yaml,xml,toml support #}
 jinja2-cli-req:
   pkg.installed:
     - pkgs:
@@ -11,17 +17,4 @@ jinja2-cli-req:
       - python3-toml
       - python3-yaml
 
-jinja2-req:
-  pkg.installed:
-    - name: python3-markupsafe
-
-yamllint:
-  pkg.installed:
-    - require:
-      - pkg: jinja2-cli-req
-
-{# get jinja from pypi, because > 2.9 < 2.11 is broken for saltstack
- additional patch: https://github.com/saltstack/salt/pull/56860/files
-#}
-{{ pip3_install('Jinja2>=2.11', require= 'pkg: jinja2-req') }}
 {{ pip3_install('jinja2-cli[yaml,toml,xml]', require= ['pip: Jinja2>=2.11', 'pkg: jinja2-cli-req']) }}
