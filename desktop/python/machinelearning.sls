@@ -8,5 +8,7 @@ include:
 {{ pipx_inject('jupyterlab', [
   'sklearn', 'sklearn-pandas', 'auto-sklearn',
   'tensorflow', 'tensorboard', 'tensorflow_hub',
-  'torch', 'torchvision', 'fastai'
+  'torch', 'torchvision', 'torchaudio', 'torchtext',
+  'fastai',
+  'statsmodels',
   ], require='sls: desktop.python.jupyter', user=user) }}

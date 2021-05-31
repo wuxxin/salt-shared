@@ -21,6 +21,9 @@ include:
 {# scientific python #}
 {{ pipx_inject('jupyterlab', [
   'scipy', 'numpy', 'matplotlib', 'plotly', 'bokeh', 'pandas',
-  'xarray', 'hvplot', 'pandas-bokeh', 'pillow', 'seaborn', 'altair', 'geoviews',
-  'datashader', 'holoviews', 'panel', 'scikit-image', 'pyviz_comms'
+  'xarray', 'hvplot', 'pandas-bokeh', 'pillow', 'seaborn', 'altair',
+  'datashader', 'holoviews', 'panel', 'scikit-image', 'pyviz-comms',
   ], user=user) }}
+
+{# other jupyterlab extensions #}
+{# jupyter labextension install @jupyterlab/shortcutui #}
