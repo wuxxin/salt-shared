@@ -33,16 +33,18 @@ set_real_ip_from: "127.0.0.1"
 {# the first name will be available as settings.domain in support files #}
 server_name: "{{ def_domain }}"
 
-{# virtual_hosts: List of additional dicts of hostnames, will need/create one cert per entry #}
-virtual_hosts: []
+{# virtual_names: List of additional dicts of hostnames, will need/create one cert per entry #}
+virtual_names: []
 {# - name: xx.aa.xx [xx.yy.yy]*
      key: | # key, pem encoded ssl key, default empty
      cert: | # crt, pem encoded ssl cert chain, default empty
      letsencrypt:
-       enabled: false (default is global)
-       dns: dnsupdate-type (no default)
-       env:
-         dns_update_env_var: value
+       # enabled: default is settings.letsencrypt.enabled
+       enabled: false
+       # challenge: default is settings.letsencrypt.challenge
+       challenge: alpn
+       # env: {} no default
+       env: {}
 #}
 
 {# host https certificate #}
@@ -51,8 +53,10 @@ virtual_hosts: []
 # key: | # key, pem encoded ssl key, default empty
 letsencrypt:
   enabled: true
-  dns:
-  # dns: eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi
+  # if host:false, dont use letsencrypt for settings.hostname
+  host: true
+  # challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi
+  challenge: alpn
   env: {}
     # KNOT_SERVER: "dns.example.com"
     # KNOT_KEY: ""
@@ -94,18 +98,17 @@ default_header:
 header: {}
 #}
 
+{# upstream connections #}
 upstream: []
-{# upstream connections
+{#
 # list of {name, server}
-upstream:
   - name: webhooks
     server: "127.0.0.1:5555"
 #}
 
+{# main server location #}
 location: []
 {#
-# main server location
-location:
   - source: /hooks/
     target: proxy_pass http://webhooks
   - source: /
@@ -115,10 +118,9 @@ location:
         root /var/www/main.domain/
 #}
 
+{# vhost declaration #}
 host: []
 {#
-# vhost declaration
-host:
   - name: another.domain yet.another.domain
     client_cert_verify: false,true
     client_cert_mandatory: false,true
@@ -171,28 +173,32 @@ metrics:
 
 {# ### internal settings #}
 
+{# user to run nginx as #}
+nginx_user: www-data
+
 {# internal endpoints #}
 alpnproxy_endpoint: "127.0.0.1:9443"
 alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
 prometheus_endpoint: "127.0.0.1:9145"
 
-{# user to run nginx as #}
-nginx_user: www-data
+{# pki config #}
+pki_algo: ed
+pki_curve: ed25519
 
-{# basenames for key,dhparam,cert,chain_cert,full_cert,client_ca,client_crl #}
+{#  key,dhparam,cert,chain_cert,full_cert #}
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
 ssl_cert: server.cert.pem
 ssl_chain_cert: server.chain.cert.pem
 ssl_full_cert: server.chain.cert.dhparam.pem
+{# client_ca,client_crl #}
 ssl_client_ca: client-ca.cert.pem
 ssl_client_crl: client-ca.crl.pem
-
 {# key,cert,full_cert of hostname.invalid #}
-ssl_invalid_cert_path: /etc/ssl/certs/ssl-cert-invalid.pem
-ssl_invalid_key_path: /etc/ssl/private/ssl-cert-invalid.key
-ssl_invalid_full_cert_path: /etc/ssl/certs/ssl-cert-invalid-full.pem
+ssl_invalid_cert: ssl-cert-invalid.pem
+ssl_invalid_key: ssl-cert-invalid.key
+ssl_invalid_full_cert: ssl-cert-invalid-full.pem
 
 {# key,cert of selfsigned domain #}
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
