@@ -36,6 +36,6 @@ simple_metric ssl_cert_valid_until gauge \
     "timestamp of certificate validity end date" \
     "$(date --date="$valid_until" +%s)000" "domain=\"$DOMAIN\""
 
-{%- for command in settings.on_ssl_renew %}
+{%- for command in settings.on_cert_renew %}
 {{ command }}
 {%- endfor %}
