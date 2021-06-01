@@ -8,6 +8,7 @@ pki_requisites:
     - pkgs:
       - bc
       - swaks
+      - gosu
 
 {% for i in ['create-client-certificate.sh', 'revoke-client-certificate.sh'] %}
 "/usr/local/bin/{{ i }}":
@@ -54,6 +55,7 @@ easyrsa_vars:
     - name: {{ settings.cert_dir }}/easyrsa/vars
     - user: {{ settings.cert_user }}
     - group: {{ settings.cert_user }}
+    - mode: "0640"
     - contents: |
         set_var EASYRSA_CRL_DAYS 3650
         set_var EASYRSA_CERT_EXPIRE 1095
@@ -68,7 +70,9 @@ easyrsa_build_ca:
           rm -r {{ settings.cert_dir }}/easyrsa/pki
         fi
         ./easyrsa --batch init-pki
-        ./easyrsa --batch --req-cn="{{ settings.domain }}" \
+        ./easyrsa --batch \
+          --use-algo={{ settings.pki_algo }} --curve={{ settings.pki_curve }} \
+          --req-cn="{{ settings.domain }}" \
           --subject-alt-name="DNS:{{ settings.domain }}" \
           --req-org="{{ settings.domain }} Client Cert CA" \
           build-ca nopass
@@ -95,7 +99,8 @@ easyrsa_gen_crl:
     - runas: {{ settings.cert_user }}
     - cwd: {{ settings.cert_dir }}/easyrsa
     - name: ./easyrsa --batch gen-crl
-    - onlyif: test ! -e {{ settings.cert_dir }}/easyrsa/pki/crl.pem -o {{ settings.cert_dir }}/easyrsa/pki/crl.pem -ot {{ settings.cert_dir }}/easyrsa/pki/index.txt
+    - onlyif: test ! -e {{ settings.cert_dir }}/easyrsa/pki/crl.pem -o \
+                {{ settings.cert_dir }}/easyrsa/pki/crl.pem -ot {{ settings.cert_dir }}/easyrsa/pki/index.txt
     - require:
       - cmd: easyrsa_build_ca
 
