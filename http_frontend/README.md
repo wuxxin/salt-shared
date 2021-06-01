@@ -20,6 +20,8 @@
 + make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.letsencrypt
 + make selfsigned virtual hosts certs with right name
 + make letsencrypt of vhosts honour additional SANS
++ make ssl, letsencrypt and pki use cert_user
+
 + FIXME: make letsencrypt use dns as alternative
 + FIXME: make letsencrypt * certificates
 
