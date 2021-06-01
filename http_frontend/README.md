@@ -1,29 +1,27 @@
-# http_frontend (nginx with some glue)
+# http_frontend (some glue around nginx)
 
 * stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
-+ letsencrypt **host certificates** via **ALPN on https** port using **acme.sh**
-+ pki management for easy **client certificates** support and administration using **easy-rsa**
++ letsencrypt **host certificates** via **ALPN on https** port or **DNS-01** using **acme.sh**
++ **pki management** for easy **client certificates** support and administration using **easy-rsa**
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
 + extended **prometheus stats** using lua_nginx_prometheus
 + **configuration** using **pillar:nginx**, for details see defaults.jinja
-+ Ssl Features
-    + domains can use cert from pillar (cert+key), letsencrypt or be selfsigned
-    + domains can have multiple SAN's
-    + unknown domains or requests with an invalid sni will return a certificate
-        for the domain "hostname.invalid" and return 404
-+ Downstream proxy support with PROXY protocol, eg. haproxy, envoy
-    + configurable set_real_ip_from to add addresses of trusted downstream proxies
-+ Upstream Proxy http_proxy
-    + set HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
-    + defaults to proxy_http_version 1.1 , set "proxy_http_version 1.0;" if required
-+ Upstream UWSGI proxy
++ Ssl domains certificates can use **certs from pillar** (cert+key), **letsencrypt** or be **selfsigned**
++ multiple virtual domains with **multiple SAN's** per domain
++ **unknown domains or invalid sni** requests will **return 404** and a **"hostname.invalid"** certificate
++ **Downstream http/https proxy** PROXY protocol support
++ configurable **set_real_ip_from** addresses of trusted downstream proxies
++ set headers HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
+  + for http **Upstreams**, use http_version 1.1 as default
 
 ### TODO
 
-+ FIXME: make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.letsencrypt
-+ FIXME: make letsencrypt of vhosts honour additional SANS
-+ TODO: make create-selfsigned-host-cert honour additional SANS
++ make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.letsencrypt
++ make selfsigned virtual hosts certs with right name
++ make letsencrypt of vhosts honour additional SANS
++ FIXME: make letsencrypt use dns as alternative
++ FIXME: make letsencrypt * certificates
 
 ### example, for details see defaults.jinja
 
@@ -33,13 +31,17 @@ listen_ip:
 listen_service:
   - https
 server_name: hostname.something another.something
-virtual_hosts:
-  - name: another.domain
-    letsencrypt: false
+virtual_names:
   - name: multi.domain other.san.name another.name.san
-letsencrypt: true
-cert_user: {{ user }}
-cert_dir: {{ user_home }}/ssl
+  - name: another.domain still.another.domain
+    letsencrypt:
+      enabled: false
+  - name: *.name.domain
+    letsencrypt:
+      challenge: dns_knot
+      env:
+        KNOT_SERVER: "dns.example.com"
+        KNOT_KEY: ""
 geoip:
   enabled: true
 ratelimit:
@@ -50,6 +52,8 @@ metrics:
 upstream: # [] # list of {name, server}
   - name: webhooks
     server: "127.0.0.1:5555"
+  - name: k3s
+    server: "10.88.0.1:8000"
 location:
   - source: /hooks/
     target: proxy_pass http://webhooks
@@ -61,9 +65,28 @@ host:
     location:
       - source: /
         target: root /var/www/another.domain/
+  - name: *.name.domain
+    target: proxy_pass http://k3s
 ```
 
 ### snippets
+
+```
+# subjectAltName=IP:192.168.7.1
+# subjectAltName=IP:13::17
+# subjectAltName=DNS:some.other.address
+# subjectAltName=email:copy,email:my@other.address,URI:http://my.url.here/
+# subjectAltName=email:my@other.address,RID:1.2.3.4
+# subjectAltName=otherName:1.2.3.4;UTF8:some other identifier
+#
+# subjectAltName=dirName:dir_sect
+#
+# [dir_sect]
+# C=UK
+# O=My Organization
+# OU=My Unit
+# CN=My Name
+```
 
 ```
   {% if settings.nginx_custom_build %}
