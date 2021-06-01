@@ -52,7 +52,9 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 
 # create cert
 echo -e "$randpass\n$randpass" | \
-    $call_prefix ./easyrsa --batch --passout=stdin --days="$daysvalid" \
+    $call_prefix ./easyrsa --batch --passout=stdin \
+        --use-algo="{{ settings.pki_algo }}" --curve="{{ settings.pki_curve }}" \
+        --days="$daysvalid" \
         --req-cn="$certname" \
         --subject-alt-name="email:$email${additional_san}" \
         --req-org="{{ settings.domain }} Client Cert CA" \
@@ -72,7 +74,7 @@ install -o "{{ settings.cert_user }}" -g "{{ settings.cert_user }}" -m "0640" -T
 # display password for user
 cat << EOF
 --------------------------------------------------------------------------
-for decryption use: $randpass
+for copy/paste use: $randpass
 for better spellout: $randspellout
 --------------------------------------------------------------------------
 EOF
@@ -80,4 +82,10 @@ randpass=""
 randspellout=""
 
 echo "sending cert to $email"
-$call_prefix swaks -n --no-hints --to "$email" --header "Subject: Client Certificate $certname for $(hostname)" --body "the p12 client certificate for $(hostname)" --attach-type "application/x-pkcs12" --attach-name "$certname.p12" --attach "{{ settings.cert_dir }}/easyrsa/pki/private/$certname.p12"
+$call_prefix swaks -n --no-hints \
+    --to "$email" \
+    --header "Subject: Client Certificate $certname for $(hostname)" \
+    --body "the p12 client certificate for $(hostname)" \
+    --attach-type "application/x-pkcs12" \
+    --attach-name "$certname.p12" \
+    --attach "{{ settings.cert_dir }}/easyrsa/pki/private/$certname.p12"
