@@ -1,5 +1,6 @@
-{% load_yaml as defaults %}
+{% import_yaml "containerd/external.yml" as containerd_external %}
 
+{% load_yaml as defaults %}
 config: {}
 
 nerdctl: {}
@@ -41,25 +42,9 @@ cni:
         portMappings: true
       type: portmap
 
-external:
-  "containerd.tar.gz":
-    version: 1.5.1
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz"
-    hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/containerd-##version##-linux-amd64.tar.gz.sha256sum"
-    target: /usr/local/lib/containerd.tar.gz
-  "cri-containerd-cni.tar.gz":
-    version: 1.5.1
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/containerd/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz"
-    hash_url: "https://github.com/containerd/containerd/releases/download/v##version##/cri-containerd-cni-##version##-linux-amd64.tar.gz.sha256sum"
-    target: /usr/local/lib/cri-containerd-cni.tar.gz
-  "nerdctl.tar.gz":
-    version: 0.8.1
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/containerd/nerdctl/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/containerd/nerdctl/releases/download/v##version##/nerdctl-##version##-linux-amd64.tar.gz"
-    hash_url: "https://github.com/containerd/nerdctl/releases/download/v##version##/SHA256SUMS"
-    target: /usr/local/lib/nerdctl.tar.gz
+{# external software #}
+external: {{ containerd_external.objects }}
+
 {% endload %}
 
 
