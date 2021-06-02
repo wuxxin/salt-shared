@@ -1,11 +1,24 @@
 # Gitops State
 
++ Systemd Service for updating software from git repository
++ timer based, webhook based, direct calling of gitops-update.service
++ defaults to saltstack as update state reconciler
++ Errors, Warnings are written to Sentry
++ some prometheus metrics about the update
++ supports secure bootstraping from
+  + ssh key accessable private git repositories
+  + git-crypt encrypted repositories
++ combine with http_frontend for webhook support
+
 ## bootstrap a gitops install
 
 ```sh
 /path/to/create-gitops-repo.sh ~/work mymachine \
     git.server.domain gituser user@email mymachine.domain.name --no-remote
 ```
+## start update
+
++ `systemctl start gitops-update`
 
 ## Flags, Tags, Metrics, Sentry Messages
 
