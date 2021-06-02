@@ -7,14 +7,16 @@ usage(){
 Usage: $0 start
 
 connects to a remote server defined in $config_file via ssh,
-does a one way sync of the underlying git repository (except .git) to
-the remote server's location of the sourcecode using unison.
+does a continous one way sync of the working copy of the git repository
+(ignoring .git) to the remote server's location of the sourcecode using unison.
 
-This does not touch the .git directory, only the working copy of the repository.
-use with care, while the sync is active, changes on the remote side are overwritten.
+This does not touch the .git directory on the remote side,
+only the working copy of the remote repository is modified.
 
-It should be useful to tryout changes without pushing it.
-This is only safe if used in the context of the gitops state, or a similar setup.
+while the sync is active, changes on the remote side working copy are overwritten.
+It should be useful to dryrun/tryout changes without pushing them first.
+once finished doctoring, assure to take care of the modified remote working copy,
+eg. by overwriting it: `git reset --hard "origin/master"`
 
 EOF
     exit 1
@@ -69,11 +71,6 @@ if test "$1" != "start"; then usage; fi
 remote_user=$gitops_user
 remote_sshlogin=$(ssh_uri ${sshlogin} ssh --user $remote_user)
 remote_src=$gitops_target/$base_name
-
-# if test "$(ssh ${remote_sshlogin} "which unison")" = ""; then
-#     echo "error: missing remote dependencies, try: ssh $(ssh_uri ${sshlogin}) apt-get install unison"
-#     usage
-# fi
 
 echo "start unison, exit with CTRL-C"
 one way only to remote, also ignore .git and probably if possible content of .gitignore
