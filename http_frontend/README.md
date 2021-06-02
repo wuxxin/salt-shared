@@ -1,19 +1,35 @@
-# http_frontend (some glue around nginx)
+# http_frontend (glue around nginx)
 
-* stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
-+ letsencrypt **host certificates** via **ALPN on https** port or **DNS-01** using **acme.sh**
++ stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
+
++ letsencrypt **host certificates** via **ALPN on https** port or **DNS-01** using **`acme.sh`**
 + **pki management** for easy **client certificates** support and administration using **easy-rsa**
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
-+ extended **prometheus stats** using lua_nginx_prometheus
-+ **configuration** using **pillar:nginx**, for details see defaults.jinja
++ extended **prometheus stats** using **lua_nginx_prometheus**
++ **configuration** using **pillar:nginx**, for details see [defaults.jinja](defaults.jinja)
 + Ssl domains certificates can use **certs from pillar** (cert+key), **letsencrypt** or be **selfsigned**
 + multiple virtual domains with **multiple SAN's** per domain
 + **unknown domains or invalid sni** requests will **return 404** and a **"hostname.invalid"** certificate
 + **Downstream http/https proxy** PROXY protocol support
 + configurable **set_real_ip_from** addresses of trusted downstream proxies
-+ set headers HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
-  + for http **Upstreams**, use http_version 1.1 as default
++ http **Upstreams**: http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
+
+### Administration
+
++ create-client-certificate.sh
+    user-email@address.domain cert_name [--days daysvalid] [--san additional-san-values]
+
+    + Creates a client certificate, and send certificate via Email
+
++ revoke-client-certificate.sh cert_name --yes
+
+    + revokes an existing client certificate
+
++ cert-renew-hook.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE
+
++ create-selfsigned-host-cert.sh
+    -k <keyfile_target> -c <certfile_target> domain [additional-domain]*
 
 ### TODO
 
@@ -25,7 +41,7 @@
 + FIXME: make letsencrypt use dns as alternative
 + FIXME: make letsencrypt * certificates
 
-### example, for details see defaults.jinja
+### example, for details see [defaults.jinja](defaults.jinja)
 
 ```yaml
 listen_ip:
