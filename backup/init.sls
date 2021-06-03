@@ -50,6 +50,15 @@ include:
       - file: /usr/local/lib/backup-service.sh
       - sls: backup.restic
 
+/etc/systemd/system/initial-backup.service:
+  file.managed:
+    - source: salt://app/backup/app-backup.service
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
+    - require:
+      - file: /etc/systemd/system/backup.service
+
 /etc/systemd/system/backup.timer:
   file.managed:
     - source: salt://backup/backup.timer

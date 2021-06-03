@@ -2,6 +2,16 @@
 Description=Backup Service using Restic
 After=network-online.target {{ settings.systemd.after }}
 Wants=network-online.target {{ settings.systemd.wants}}
+{% if instance_type = 'initial' %}
+FIXME
+  run only if backup.service not running
+  set tag in prestart: backup.initial.starttime
+  set flag in poststart: backup.initial.finished
+{% else %}
+FIXME
+  need flag backup.initial.finished to start
+  else start initial instead
+{% endif %}
 {% if settings.systemd.requires %}
 Requires={{ settings.systemd.requires }}
 {% endif %}
@@ -11,7 +21,11 @@ OnFailure={{ settings.systemd.onfailure }}
 
 [Service]
 Type=oneshot
+{% if instance_type = 'initial' %}
+TimeoutStartSec={{ settings.initial_job_runtime }}
+{% else %}
 TimeoutStartSec={{ settings.max_job_runtime }}
+{% endif %}
 User={{ settings.user }}
 Group={{ settings.user }}
 Environment=UNITNAME=%n
@@ -19,5 +33,5 @@ Environment=HOME={{ settings.home_dir }}
 Environment=USER={{ settings.user }}
 EnvironmentFile={{ settings.env_file }}
 WorkingDirectory={{ settings.home_dir }}
-PassEnvironment=UNITNAME HOME USER SENTRY_DSN RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
+PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
 ExecStart=/usr/local/lib/backup-service.sh --from-systemd-service
