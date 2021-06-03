@@ -1,48 +1,71 @@
+{% import_yaml "backup/external.yml" as backup_external %}
+
 {% load_yaml as defaults %}
-repository:
-repository_password:
-user:
+enabled: true
+# backup run user
+user: ""
+
+# backup target and secret key
+repository_url:
+repository_key:
+
+# extra env for backup call
 env: {}
+
+# if repository_url.startswith('sftp'): repository_ssh_id for ssh connection
+ssh_id: ""
+ssh_id_pub: ""
+ssh_port: 22
+
+basedir: /
 includes: []
 excludes: []
-timer: *-*-* 23:30:00
-
-# max time for fullbackup, eg: 8hours equals 562GB using 20mb/s
-max_job_runtime: 480min
-
-# first job max time on new repository, eg: 48h (2880min) equals 3,4TB
-initial_job_runtime: 480min
-
-# readall_privilege = true turns on: CAP_DAC_READ_SEARCH for user
-readall_privilege: false
 
 # maximum backup storage to expect, -1 (default) to disable checking for current usage
 max_backup_storage: -1
 
-# interval in days to run restic forget,prune and check
-housekeeping_interval_days: 7
-
 # age of oldest data change to keep
 forget: keep-within 1y6m
 
+# readall_privilege = true turns on: CAP_DAC_READ_SEARCH for user
+readall_privilege: false
+
+# first job max time on new repository, eg: 48h (2880min) equals 3,4TB
+initial_job_runtime: 480min
+
+# max time for fullbackup, eg: 8hours equals 562GB using 20mb/s
+max_job_runtime: 480min
+
+# timer based invocation default, once per day
+timer: *-*-* 23:30:00
+
+# interval in days to run restic forget,prune and check
+housekeeping_interval_days: 7
+
+# optional systemd dependencies
 systemd:
   after:
   wants:
   requires:
   onfailure:
 
-external:
-  rclone_zip
-    version: 1.50.2
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/rclone/rclone/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/rclone/rclone/releases/download/v##version##/rclone-v##version##-linux-amd64.zip"
-    target: /usr/local/lib/rclone.zip
-  name: restic_bz2
-    version: 0.9.6
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/restic/restic/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/restic/restic/releases/download/v##version##/restic_##version##_linux_amd64.bz2"
-    target: /usr/local/lib/restic.bz2
+prebackup: []
+
+{# external software #}
+external: {{ backup_external.objects }}
+
 {% endload %}
+
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('backup', {})) %}
+
+{# expand ##version## in field external.*.download #}
+{% for n,v in settings.external.items() %}
+  {% set download=settings.external[n]['download']|regex_replace('##version##', v.version) %}
+  {% do settings.external[n].update( {'download': download} ) %}
+  {% if settings.external[n]['hash_url'] %}
+    {% set hash_url=settings.external[n]['hash_url']|regex_replace('##version##', v.version) %}
+    {% do settings.external[n].update( {'hash_url': hash_url} ) %}
+  {% endif %}
+{% endfor %}

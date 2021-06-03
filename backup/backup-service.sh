@@ -64,6 +64,10 @@ metric_save backup_hook "$backup_hook_metrics"
 
 # backup to thirdparty storage using restic
 duration_start=$(date +%s)
+{% set backup_excludes=
+  '--exclude '+ settings.media_dir+ '/lost+found'+ ' '+
+  '--exclude '+ settings.media_dir+ '/temp' %}
+
 restic backup {{ backup_excludes }} {{ backup_list|join(" ") }} && err=$? || err=$?
 duration_backup=$(( $(date +%s) - duration_start ))
 if test "$err" -ne "0"; then

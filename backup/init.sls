@@ -1,18 +1,16 @@
 {% from "backup/defaults.jinja" import settings with context %}
 
-{% set default_test_repository= '/opt/app-backup-test' %}
-{% set backup_url= salt['pillar.get']('backup:repository:url') %}
-{% set backup_list= [settings.etc_dir, settings.pgdump_dir, settings.media_dir,
-                        settings.upload_dir, settings.maildir_dir] %}
-{% set backup_excludes= '--exclude '+ settings.media_dir+ '/lost+found '+
-  ' '+ '--exclude '+ settings.media_dir+ '/temp' %}
-{# set restic cache= settings.home_dir+ '/.cache/restic' #}
+{% set default_test_repository= '/opt/backup-test' %}
+
+{# exclude some files/dirs inside this directories#}
+
+{# keep all snapshots from now to backup_keep_within back, forget and prune older snapshots #}
+{% set backup_keep_within= '1y6m' %}
+
+{# restic cache= settings.home_dir+ '/.cache/restic' #}
 
 include:
-  - app.home
-  - app.scripts
-  - app.systemd.reload
-  - app.backup.restic
+  - backup.restic
 
 {# always create default backup path, so backup completes in default config #}
 {{ default_test_repository }}:
@@ -21,73 +19,51 @@ include:
     - group: {{ settings.user }}
     - dir_mode: "700"
 
-/usr/local/sbin/app-restic.sh:
+/usr/local/sbin/backup-restic.sh:
   file.managed:
-    - source: salt://app/backup/app-restic.sh
+    - source: salt://backup/backup-restic.sh
     - template: jinja
     - defaults:
         settings: {{ settings }}
     - mode: "0755"
 
-/usr/local/sbin/app-recover-from-backup.sh:
+/usr/local/lib/backup-service.sh:
   file.managed:
-    - source: salt://app/backup/app-recover-from-backup.sh
+    - source: salt://backup/backup-service.sh
     - template: jinja
     - defaults:
         settings: {{ settings }}
-        locale_lang: {{ locale_settings.lang }}
-        database: {{ salt['pillar.get']('app:database') }}
-        backup_list: {{ backup_list }}
-    - mode: "0755"
-
-/usr/local/bin/app-backup.sh:
-  file.managed:
-    - source: salt://app/backup/app-backup.sh
-    - template: jinja
-    - defaults:
-        settings: {{ settings }}
-        backup_list: {{ backup_list }}
-        backup_excludes: {{ backup_excludes }}
     - mode: "0755"
     - require:
       - sls: app.scripts
 
-/etc/systemd/system/app-backup.service:
+/etc/systemd/system/backup.service:
   file.managed:
     - source: salt://app/backup/app-backup.service
     - template: jinja
     - defaults:
         settings: {{ settings }}
-        size: {{ salt['pillar.get']('backup:repository:size', 0) }}
-        {%- if salt['pillar.get']('backup:env', false) %}
-        env:
-          {%- for k,v in salt['pillar.get']('backup:env').items() %}
-          {{ k }}: {{ v }}
-          {%- endfor %}
-        {%- else %}
-        env: false
-        {%- endif %}
     - require:
       - file: {{ default_test_repository }}
-      - file: /usr/local/bin/app-backup.sh
-      - sls: app.backup.restic
+      - file: /usr/local/lib/backup-service.sh
+      - sls: backup.restic
     - onchanges_in:
       - cmd: systemd_reload
 
-/etc/systemd/system/app-backup.timer:
+/etc/systemd/system/backup.timer:
   file.managed:
-    - source: salt://app/backup/app-backup.timer
+    - source: salt://backup/backup.timer
     - onchanges_in:
       - cmd: systemd_reload
     - require:
-      - file: /etc/systemd/system/app-backup.service
+      - file: /etc/systemd/system/backup.service
 
 
 {# if restic protocol = sftp: create ~/.ssh/config, paste ssh keys #}
-{% if backup_url.startswith('sftp:') %}
+{% if settings.repository_url.startswith('sftp:') %}
   {%- set url_regex= '(sftp):([^@]+)@([^:]+):(.+)' %}
-  {%- set backup_user= backup_url|regex_replace(url_regex, '\\2') %}
-  {%- set backup_host= backup_url|regex_replace(url_regex, '\\3') %}
+  {%- set backup_user= settings.repository_url|regex_replace(url_regex, '\\2') %}
+  {%- set backup_host= settings.repository_url|regex_replace(url_regex, '\\3') %}
 
 {{ settings.home_dir }}/.ssh/config:
   cmd.run:
@@ -101,8 +77,8 @@ include:
     - append_if_not_found: true
     - content: |
         host {{ backup_host }}
-  {%- if salt['pillar.get']('backup:repository:ssh_port', false) %}
-          Port {{ salt['pillar.get']('backup:repository:ssh_port') }}
+  {%- if salt['pillar.get']('app:backup:repository:ssh_port', false) %}
+          Port {{ salt['pillar.get']('app:backup:repository:ssh_port') }}
   {%- endif %}
           IdentityFile ~/.ssh/id_ed25519_app_backup
           IdentitiesOnly yes
@@ -118,7 +94,7 @@ include:
     - group: {{ settings.user }}
     - mode: "600"
     - contents: |
-{{ salt['pillar.get']('backup:repository:ssh_id')|indent(8,True) }}
+{{ settings.ssh_id|indent(8,True) }}
     - require:
       - sls: app.home
 
@@ -128,27 +104,27 @@ include:
     - group: {{ settings.user }}
     - mode: "600"
     - contents: |
-{{ salt['pillar.get']('backup:repository:ssh_id_pub')|indent(8,True) }}
+{{ settomgs.ssh_id_pub)|indent(8,True) }}
     - require:
       - sls: app.home
 
 {% endif %}
 
 
-{# if backup_url points to default, setup the default backup repository #}
-{% if backup_url == default_test_repository %}
+{# if settings.repository_url points to default, setup the default backup repository #}
+{% if settings.repository_url == default_test_repository %}
 create_default_test_repository:
   cmd.run:
     - name: restic init
-    - unless: test -f {{ backup_url }}/config
+    - unless: test -f {{ settings.repository_url }}/config
     - runas: {{ settings.user }}
     - cwd: {{ settings.home_dir }}
     - env:
       - HOME: {{ settings.home_dir }}
-      - RESTIC_REPOSITORY: {{ backup_url }}
-      - RESTIC_PASSWORD: {{ salt['pillar.get']('backup:key') }}
-  {%- if salt['pillar.get']('backup:env', false) %}
-    {%- for k,v in salt['pillar.get']('backup:env').items() %}
+      - RESTIC_REPOSITORY: {{ settings.settings.repository_url }}
+      - RESTIC_PASSWORD: {{ salt['pillar.get']('app:backup:key') }}
+  {%- if settings.env %}
+    {%- for k,v in settings.env.items() %}
       - {{ k }}: {{ v }}
     {%- endfor %}
   {%- endif %}
@@ -167,10 +143,10 @@ create_default_backup_id_tag:
     - cwd: {{ settings.home_dir }}
     - env:
       - HOME: {{ settings.home_dir }}
-      - RESTIC_REPOSITORY: {{ backup_url }}
-      - RESTIC_PASSWORD: {{ salt['pillar.get']('backup:key') }}
-  {%- if salt['pillar.get']('backup:env', false) %}
-    {%- for k,v in salt['pillar.get']('backup:env').items() %}
+      - RESTIC_REPOSITORY: {{ settings.repository_url }}
+      - RESTIC_PASSWORD: {{ salt['pillar.get']('app:backup:key') }}
+  {%- if settings.env %}
+    {%- for k,v in salt['pillar.get']('app:backup:env').items() %}
       - {{ k }}: {{ v }}
     {%- endfor %}
   {%- endif %}
@@ -183,7 +159,7 @@ create_default_backup_id_tag:
 
 
 app-backup.timer:
-{%- if salt['pillar.get']('backup:enabled', true) %}
+{%- if salt['pillar.get']('app:backup:enabled', true) %}
   service.running:
     - enable: true
 {%- else %}

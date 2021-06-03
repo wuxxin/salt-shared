@@ -11,12 +11,13 @@ OnFailure={{ settings.systemd.onfailure }}
 
 [Service]
 Type=oneshot
-TimeoutStartSec={{ settings.maxruntime }}
+TimeoutStartSec={{ settings.max_job_runtime }}
 User={{ settings.user }}
 Group={{ settings.user }}
 Environment=UNITNAME=%n
 Environment=HOME={{ settings.home_dir }}
 Environment=USER={{ settings.user }}
-EnvironmentFile={{ settings.backup_env }}
+EnvironmentFile={{ settings.env }}
 WorkingDirectory={{ settings.home_dir }}
-ExecStart=/usr/local/bin/app-backup.sh --from-systemd-service
+PassEnvironment=UNITNAME HOME USER SENTRY_DSN RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
+ExecStart=/usr/local/lib/backup-service.sh --from-systemd-service

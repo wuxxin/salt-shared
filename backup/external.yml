@@ -1,0 +1,13 @@
+objects:
+  restic_bz2:
+    version: 0.12.0
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/restic/restic/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/restic/restic/releases/download/v##version##/restic_##version##_linux_amd64.bz2"
+    hash: 63d13d53834ea8aa4d461f0bfe32a89c70ec47e239b91f029ed10bd88b8f4b80
+    target: /usr/local/lib/restic.bz2
+  rclone_zip:
+    version: 1.55.0
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/rclone/rclone/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/rclone/rclone/releases/download/v##version##/rclone-v##version##-linux-amd64.zip"
+    hash: 7bf403c3f26cd1d4728905738a501dc137973227c5b64eb9a54f324c96664107
+    target: /usr/local/lib/rclone.zip

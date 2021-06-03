@@ -2,7 +2,7 @@
 set -eo pipefail
 # set -x
 
-usage(){
+usage() {
     cat << EOF
 Usage:  $0 run <args>*
         $0 repository create|use-existing
@@ -47,7 +47,7 @@ fi
 # execute requested function
 if test "$1" = "run"; then
     shift
-    gosu {{ settings.user }} env $RESTIC_ENV \
+    gosu "{{ settings.user }}" env $RESTIC_ENV \
         HOME="{{ settings.home_dir }}" \
         RESTIC_PASSWORD="$RESTIC_PASSWORD" \
         RESTIC_REPOSITORY="$RESTIC_REPOSITORY" \
@@ -66,14 +66,14 @@ elif test "$1" = "repository"; then
 
     if test "$create_repository" = "true"; then
         echo "creating repository, executing restic init"
-        gosu {{ settings.user }} env $RESTIC_ENV \
+        gosu "{{ settings.user }}" env $RESTIC_ENV \
             HOME="{{ settings.home_dir }}" \
             RESTIC_PASSWORD="$RESTIC_PASSWORD" \
             RESTIC_REPOSITORY="$RESTIC_REPOSITORY" \
             restic init
     fi
     echo "get restic repository id"
-    restic_repo_id=$(gosu {{ settings.user }} env $RESTIC_ENV \
+    restic_repo_id=$(gosu "{{ settings.user }}" env $RESTIC_ENV \
         HOME="{{ settings.home_dir }}" \
         RESTIC_PASSWORD="$RESTIC_PASSWORD" \
         RESTIC_REPOSITORY="$RESTIC_REPOSITORY" \
