@@ -1,0 +1,7 @@
+objects:
+  akvcam_tar_gz:
+    version: 1.2.0
+    latest: curl -L -s "https://github.com/webcamoid/akvcam/releases" | hxwls | grep "/releases/tag/" | head -n 1 | sed -r "s/.*\/([^\/]+)$/\1/g"
+    download: "https://github.com/webcamoid/akvcam/archive/##version##.tar.gz"
+    target: /usr/local/lib/akvcam.tar.gz
+    hash: 6a6591ccde53bc47277be85c5f1a974fafd737f366c13a28b01d45611b30c0fb
