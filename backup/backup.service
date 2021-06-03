@@ -17,7 +17,7 @@ Group={{ settings.user }}
 Environment=UNITNAME=%n
 Environment=HOME={{ settings.home_dir }}
 Environment=USER={{ settings.user }}
-EnvironmentFile={{ settings.env }}
+EnvironmentFile={{ settings.env_file }}
 WorkingDirectory={{ settings.home_dir }}
 PassEnvironment=UNITNAME HOME USER SENTRY_DSN RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
 ExecStart=/usr/local/lib/backup-service.sh --from-systemd-service

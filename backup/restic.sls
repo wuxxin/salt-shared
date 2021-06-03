@@ -21,6 +21,7 @@ restic:
     - name: bzip2 -d < {{ settings.external['restic_bz2']['target'] }} > {{ restic_local_binary }}
     - onchanges:
       - file: restic
+
 restic_binary:
   file.managed:
     - name: {{ restic_local_binary }}
@@ -42,6 +43,7 @@ rclone:
             rclone-v{{ settings.external['rclone_zip']['version']-linux-amd64/rclone
     - onchanges:
       - file: rclone
+
 rclone_binary:
   file.managed:
     - name: {{ rclone_local_binary }}

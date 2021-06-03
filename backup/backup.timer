@@ -2,8 +2,7 @@
 Description=Backup Timer
 
 [Timer]
-# daily at 00:30 am
-OnCalendar=*-*-* 00:30:00
+OnCalendar={{ settings.timer }}
 
 [Install]
 WantedBy=timers.target

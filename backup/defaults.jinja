@@ -1,4 +1,5 @@
 {% import_yaml "backup/external.yml" as backup_external %}
+{% set default_test_repository= '/opt/backup-test' %}
 
 {% load_yaml as defaults %}
 enabled: true
@@ -6,7 +7,7 @@ enabled: true
 user: ""
 
 # backup target and secret key
-repository_url:
+repository_url: {{ default_test_repository }}
 repository_key:
 
 # extra env for backup call
@@ -15,10 +16,11 @@ env: {}
 # if repository_url.startswith('sftp'): repository_ssh_id for ssh connection
 ssh_id: ""
 ssh_id_pub: ""
-ssh_port: 22
 
 basedir: /
+# include the following files/dirs
 includes: []
+# exclude some files/dirs inside this directories
 excludes: []
 
 # maximum backup storage to expect, -1 (default) to disable checking for current usage
@@ -51,9 +53,12 @@ systemd:
 
 prebackup: []
 
+env_file: /etc/systemd/system/backup.env
+default_ssh_port: 22
+default_test_repository: {{ default_test_repository }}
+
 {# external software #}
 external: {{ backup_external.objects }}
-
 {% endload %}
 
 
