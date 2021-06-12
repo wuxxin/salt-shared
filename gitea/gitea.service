@@ -7,17 +7,17 @@ Requires=mariadb.service
 {%- elif entry.database.db_type == 'postgres' %}
 Requires=postgresql.service
 {%- endif %}
-StartLimitBurst=5
-StartLimitIntervalSec=100
+StartLimitBurst=3
+StartLimitIntervalSec=30
 
 [Service]
-RestartSec=2s
 Type=simple
 User={{ entry.global.run_user }}
 Group={{ entry.global.run_user }}
 WorkingDirectory={{ entry.salt.work_dir }}
 ExecStart=/usr/local/bin/gitea web --config {{ entry.salt.home_dir }}/gitea_{{ entry.name }}_app.ini
 Restart=always
+RestartSec=2s
 Environment=USER={{ entry.global.run_user }}
 Environment=HOME={{ entry.salt.home_dir }}
 Environment=GITEA_WORK_DIR={{ entry.salt.work_dir}}
