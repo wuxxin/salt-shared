@@ -5,35 +5,38 @@
 
 {% load_yaml as defaults %}
 config:
-  node-ip: {{ def_route_ip }}
-  container-runtime-endpoint: /run/containerd/containerd.sock
-  snapshotter: zfs
-  data-dir: /var/lib/rancher/k3s
-  default-local-storage-path: /opt/local-path-provisioner
-  private-registry: /etc/rancher/k3s/registries.yaml
   write-kubeconfig: /etc/rancher/k3s/kube.config.yaml
   write-kubeconfig-mode: 600
-
+  node-ip: {{ def_route_ip }}
+  data-dir: /var/lib/rancher/k3s
+  default-local-storage-path: /opt/local-path-provisioner
+  container-runtime-endpoint: /run/containerd/containerd.sock
+  snapshotter: native
+  private-registry: /etc/rancher/k3s/registries.yaml
 {#
   # server options
   datastore-cafile: "TLS Certificate Authority file used to secure datastore backend communication"
   datastore-certfile: "TLS certification file used to secure datastore backend communication"
   datastore-keyfile: "TLS key file used to secure datastore backend communication"
   datastore-endpoint: "Specify etcd, Mysql, Postgres, or Sqlite (default) data source name"
+  write-kubeconfig: "Write kubeconfig for admin client to this file"
+  write-kubeconfig-mode: "Write kubeconfig with this mode.""
 
   # agent options
-  # data-dir: Folder to hold state
-  data-dir: "/var/lib/rancher/k3s" or "${HOME}/.rancher/k3s" if not root
-  # default-local-storage-path: Default local storage path for local provisioner storage class
-  default-local-storage-path:  "/opt/local-path-provisioner"
-
   node-ip: "IP address to advertise for node"
   node-external-ip: "External IP address to advertise for node"
   resolv-conf: "Kubelet resolv.conf file"
   node-label: "Registering and starting kubelet with set of labels"
   node-taint: "Registering kubelet with set of taints"
 
-  private-registry: "/etc/rancher/k3s/registries.yaml"
+  # data-dir: Folder to hold state
+  data-dir: "/var/lib/rancher/k3s" or "${HOME}/.rancher/k3s" if not root
+  # default-local-storage-path: Default local storage path for local provisioner storage class
+  default-local-storage-path:  "/opt/local-path-provisioner"
+
+  container-runtime-endpoint: Disable embedded containerd and use alternative CRI implementation
+  snapshotter: overlayfs  # Override default (overlayfs) containerd snapshotter, eg. "native" or "zfs"
+  private-registry:	"Private registry configuration file"
   secrets-encryption: "Enable Secret encryption at rest"
 
   # lb-server-port: Local port for supervisor client load-balancer

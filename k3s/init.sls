@@ -1,8 +1,10 @@
 {% from "k3s/defaults.jinja" import settings with context %}
 
+{# modify kernel settings for server workload #}
+{# use external containerd to gain more customization possibilities, eg. using zfs #}
+
 include:
   - kernel.server
-  {# use external containerd to gain more customization possibilities, eg. using zfs #}
   - containerd
 
 {% if grains['virtual']|lower in ['lxc', 'systemd-nspawn'] %}
