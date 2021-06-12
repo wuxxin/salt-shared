@@ -5,6 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+TimeoutStartSec=10
 User={{ settings.user }}
 Group={{ settings.user }}
 Environment=UNITNAME=%n
