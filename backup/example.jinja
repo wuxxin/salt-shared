@@ -1,6 +1,6 @@
-hook:
-  prebackup:
-    - name: assure_status
+hooks:
+  pre_backup:
+    - name: assure_mounted_and_not_empty
       desc: assure app media_dir is mounted if external mount and app media_dir is non empty
       cmd: |
           if grep -q "{{ settings.media_dir }}" /etc/fstab; then
@@ -14,6 +14,7 @@ hook:
               sentry_entry error "App Backup" "backup error: media_dir {{ settings.media_dir }} is empty"
               exit 1
           fi
+
 
     - name: dump_postgres_databases
       desc: dump all postgresql databases

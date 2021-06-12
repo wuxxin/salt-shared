@@ -46,18 +46,18 @@ if test "$expected_id" != "$actual_id"; then
     exit 1
 fi
 
-# execute each prebackup hook
+# execute each entry of hooks.pre_backup
 backup_hook_metrics=""
-{% for hook in settings.prebackup %}
+{% for hook in settings.hooks.pre_backup %}
 duration_start=$(date +%s)
-# {{ hook.name }} - {{ hook.description|d('') }}
 {{ hook.cmd }}
 duration_hook=$(( $(date +%s) - duration_start ))
 backup_hook_metrics="$backup_hook_metrics
-$(mk_metric backup_hook_{{ hook.name }}_duration_sec gauge "Duration for {{ hook.description|d('') }}" $duration_hook)
+$(mk_metric backup_pre_hook_{{ hook.name }}_duration_sec \
+    gauge "Duration for {{ hook.description|d(hook.name) }}" $duration_hook)
 "
 {% endfor %}
-metric_save backup_hook "$backup_hook_metrics"
+metric_save backup_pre_hook "$backup_hook_metrics"
 
 # ###
 # all prebackup steps passed, begin backup work
@@ -138,11 +138,24 @@ duration_stats=$(( $(date +%s) - duration_start ))
 backup_data_size_kb=$(du --apparent-size --summarize --total -BK \
     {{ backup_list|join(" ") }} | grep total | sed -r "s/([0-9]+).*/\1/")
 
+# execute each entry of hooks.post_backup
+backup_hook_metrics=""
+{% for hook in settings.hooks.post_backup %}
+duration_start=$(date +%s)
+{{ hook.cmd }}
+duration_hook=$(( $(date +%s) - duration_start ))
+backup_hook_metrics="$backup_hook_metrics
+$(mk_metric backup_post_hook_{{ hook.name }}_duration_sec \
+    gauge "Duration for {{ hook.description|d(hook.name) }}" $duration_hook)
+"
+{% endfor %}
+metric_save backup_post_hook "$backup_hook_metrics"
+
 # calculate runtime
 end_epoch_seconds=$(date +%s)
 duration=$(( end_epoch_seconds - start_epoch_seconds ))
 
-# create metrics
+# create all other metrics
 metric_save backup \
     "$(mk_metric backup_start_timestamp counter "The start of the last backup run as timestamp-epoch-seconds" ${start_epoch_seconds})" \
     "$(mk_metric backup_duration_sec gauge "The duration in number of seconds of the last backup run" $duration)" \

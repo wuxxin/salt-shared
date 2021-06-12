@@ -85,10 +85,18 @@ backup_systemd_reload:
     {%- set backup_port=settings.default_ssh_port %}
   {%- endif %}
 
+{{ settings.home_dir }}/.ssh:
+  file.directory:
+    - mode: "0700"
+    - user: {{ settings.user }}
+    - group: {{ settings.user }}
+
 {{ settings.home_dir }}/.ssh/config:
   cmd.run:
     - name: install -o {{ settings.user }} -g {{ settings.user }} -m "0700" /dev/null {{ settings.home_dir }}/.ssh/config
     - unless: test -e {{ settings.home_dir }}/.ssh/config
+    - require:
+      - file: {{ settings.home_dir }}/.ssh
   file.blockreplace:
     - marker_start: |
         ### BACKUP-CONFIG-BEGIN ###
@@ -105,7 +113,6 @@ backup_systemd_reload:
           ServerAliveInterval 60
           ServerAliveCountMax 240
     - require:
-      - sls: app.home
       - cmd: {{ settings.home_dir }}/.ssh/config
 
 {{ settings.home_dir }}/.ssh/id_ed25519_app_backup:
@@ -116,7 +123,7 @@ backup_systemd_reload:
     - contents: |
 {{ settings.ssh_id|indent(8,True) }}
     - require:
-      - sls: app.home
+      - file: {{ settings.home_dir }}/.ssh
 
 {{ settings.home_dir }}/.ssh/id_ed25519_app_backup.pub:
   file.managed:
@@ -126,7 +133,7 @@ backup_systemd_reload:
     - contents: |
 {{ settomgs.ssh_id_pub)|indent(8,True) }}
     - require:
-      - sls: app.home
+      - file: {{ settings.home_dir }}/.ssh
 
 {% endif %}
 
@@ -150,8 +157,7 @@ create_default_test_repository:
   {%- endif %}
     - require:
       - file: {{ settings.default_test_repository }}
-      - sls: app.home
-      - sls: app.backup.restic
+      - sls: backup.restic
 
 create_default_backup_id_tag:
   cmd.run:
@@ -170,9 +176,6 @@ create_default_backup_id_tag:
       - {{ k }}: {{ v }}
     {%- endfor %}
   {%- endif %}
-    - require:
-      - sls: app.home
-      - sls: app.scripts
     - onchanges:
       - cmd: create_default_test_repository
 {% endif %}
