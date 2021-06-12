@@ -1,0 +1,7 @@
+objects:
+  oauth2_proxy_tar_gz:
+    version: 6.1.1
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/oauth2-proxy/oauth2-proxy/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.tar.gz"
+    target: /usr/local/lib/oauth2-proxy.tar.gz
+    hash: a661d59c55cfcc2b46ae1f0b24a3e8a2ced5413f931b8b05f7bf4e867c70d912

@@ -4,7 +4,7 @@ After=network.target
 Documentation=https://github.com/oauth2-proxy/oauth2-proxy
 After=syslog.target network.target
 StartLimitBurst=5
-StartLimitIntervalSec=100
+StartLimitIntervalSec=30
 
 [Service]
 User=oauth2proxy

@@ -1,3 +1,5 @@
+{% import_yaml "oauth2proxy/external.yml" as oauth2proxy_external %}
+
 {% load_yaml as defaults %}
 username: oauth2proxy
 home_dir: /var/lib/oauth2proxy
@@ -13,15 +15,10 @@ container:
     - 127.0.0.1:8081
   environment: {}
 
-external:
-  oauth2_proxy_tar_gz:
-    version: 6.1.1
-    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/oauth2-proxy/oauth2-proxy/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
-    download: "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v##version##/oauth2-proxy-v##version##.linux-amd64.tar.gz"
-    target: /usr/local/lib/oauth2-proxy.tar.gz
-    hash: a661d59c55cfcc2b46ae1f0b24a3e8a2ced5413f931b8b05f7bf4e867c70d912
-
+{# external software #}
+external: {{ oauth2proxy_external.objects }}
 {% endload %}
+
 
 {% load_yaml as profile_defaults %}
 name: "default"
@@ -67,8 +64,12 @@ config:
 
 {# expand ##version## in field external.*.download #}
 {% for n,v in settings.external.items() %}
-  {% set dummy=settings.external[n].__setitem__('download',
-        v['download']|regex_replace('##version##', v.version)) %}
+  {% set download=settings.external[n]['download']|regex_replace('##version##', v.version) %}
+  {% do settings.external[n].update( {'download': download} ) %}
+  {% if settings.external[n]['hash_url'] %}
+    {% set hash_url=settings.external[n]['hash_url']|regex_replace('##version##', v.version) %}
+    {% do settings.external[n].update( {'hash_url': hash_url} ) %}
+  {% endif %}
 {% endfor %}
 
 {# expand profile entries #}
