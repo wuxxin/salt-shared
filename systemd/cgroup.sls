@@ -18,7 +18,7 @@
       - cmd: cgroup-reload
 {% endfor %}
 
-{# (rootless container) Enabling nonroot user CPU, CPUSET, and I/O delegation #}
+{# Enabling nonroot user CPU, CPUSET, and I/O delegation for rootless container #}
 /etc/systemd/system/user@.service.d/delegate.conf:
   file.managed:
     - makedirs: true

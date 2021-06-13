@@ -21,24 +21,24 @@ nspawn:
 {{ pip3_install('https://github.com/systemd/mkosi/archive/refs/tags/v9.tar.gz') }}
 
 
-{{ settings.store.nspawn_env }}:
-  file:
-    - directory
-{{ settings.store.nspawn_config }}:
-  file:
-    - directory
-{{ settings.store.nspawn_volume }}:
-  file:
-    - directory
-{{ settings.store.nspawn_target }}:
-  file:
-    - directory
-{{ settings.store.mkosi_config }}:
-  file:
-    - directory
-{{ settings.store.mkosi_cache }}:
-  file:
-    - directory
-{{ settings.store.mkosi_target }}:
-  file:
-    - directory
+nspawn_env:
+  file.directory:
+    - name: {{ settings.store.nspawn_env }}
+nspawn_config:
+  file.directory:
+    - name: {{ settings.store.nspawn_config }}
+nspawn_volume:
+  file.directory:
+    - name: {{ settings.store.nspawn_volume }}
+nspawn_target:
+  file.directory:
+    - name: {{ settings.store.nspawn_target }}
+mkosi_config:
+  file.directory:
+    - name: {{ settings.store.mkosi_config }}
+mkosi_cache:
+  file.directory:
+    - name: {{ settings.store.mkosi_cache }}
+mkosi_target:
+  file.directory:
+    - name: {{ settings.store.mkosi_target }}
