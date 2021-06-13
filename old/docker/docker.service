@@ -4,6 +4,8 @@ Documentation=https://docs.docker.com
 After=network-online.target docker.socket firewalld.service
 Wants=network-online.target
 Requires=docker.socket
+StartLimitBurst=3
+StartLimitIntervalSec=60s
 
 [Service]
 EnvironmentFile=-/etc/default/docker
@@ -28,8 +30,6 @@ Delegate=yes
 KillMode=process
 # restart the docker process if it exits prematurely
 Restart=on-failure
-StartLimitBurst=3
-StartLimitInterval=60s
 
 [Install]
 WantedBy=multi-user.target
