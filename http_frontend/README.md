@@ -17,19 +17,15 @@
 
 ### Administration
 
-+ create-client-certificate.sh
-    user-email@address.domain cert_name [--days daysvalid] [--san additional-san-values]
++ Creates a client certificate, and send certificate via Email
+  + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san san-values]`
 
-    + Creates a client certificate, and send certificate via Email
++ revoke an existing client certificate
+    + `revoke-client-certificate.sh cert_name --yes`
 
-+ revoke-client-certificate.sh cert_name --yes
++ `cert-renew-hook.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE`
 
-    + revokes an existing client certificate
-
-+ cert-renew-hook.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE
-
-+ create-selfsigned-host-cert.sh
-    -k <keyfile_target> -c <certfile_target> domain [additional-domain]*
++ `create-selfsigned-host-cert.sh  -k <keyfile_target> -c <certfile_target> domain [domain]*`
 
 ### TODO
 
