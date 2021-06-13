@@ -60,21 +60,24 @@ config:
 podman:
   workdir_basepath: /etc/containers/podman.service
   build_basepath: /var/lib/containers/podman-build
+  service_basepath: /etc/systemd/system
+
   user_workdir_basepath: "${HOME}/.config/podman.service"
   user_build_basepath: "${HOME}/.local/lib/podman-build"
+  user_service_basepath: ${HOME}/.config/systemd/user
 
 compose:
   workdir_basepath: /etc/containers/podman-compose.service
   build_basepath: /var/lib/containers/podman-compose-build
+  service_basepath: /etc/systemd/system
+
   user_workdir_basepath: ${HOME}/.config/podman-compose.service
   user_build_basepath: ${HOME}/.local/lib/podman-compose-build
+  user_service_basepath: ${HOME}/.config/systemd/user
+
   compose_filename: docker-compose.yml
   override_filename: docker-compose.override.yml
   env_filename: .env
-
-systemd:
-  service_basepath: /etc/systemd/system
-  user_service_basepath: ${HOME}/.config/systemd/user
 
 x11docker:
   default:

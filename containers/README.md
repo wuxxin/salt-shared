@@ -29,6 +29,7 @@
 
 ### computed values
 
+
 + container:
   + env: $SERVICE_NAME will be set to name
   + workdir: will be set to settings.podman.[user_]workdir_basepath+ "/"+ name

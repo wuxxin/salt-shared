@@ -176,7 +176,8 @@
   {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
   {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
-containers_volume_{{ user }}_{{ name_str }}:
+  {%- set postfix_user = '' if user == '' else '_' ~ user %}
+containers_volume_{{ name_str }}{{ postfix_user }}:
   cmd.run:
     - name: {{ gosu_user }} podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ name_str }}
     - unless: {{ gosu_user }} podman volume ls -q | grep -q {{ name_str }}
@@ -186,7 +187,8 @@ containers_volume_{{ user }}_{{ name_str }}:
 {% macro image(name, tag='', source='', buildargs={}, builddir= '', user='') %}
   {%- set tag_opt = '' if tag == '' else ':' ~ tag %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
-containers_image_{{ user }}_{{ name }}:
+  {%- set postfix_user = '' if user == '' else '_' ~ user %}
+containers_image_{{ name }}{{ postfix_user }}:
   cmd.run:
   {%- if builddir == '' or source == '' %}
     - name: {{ gosu_user }} podman image pull {{ name }}{{ tag_opt }}
@@ -204,7 +206,6 @@ containers_image_{{ user }}_{{ name }}:
 
 
 {% macro container(container_definition, user='') %}
-  FIXME
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
