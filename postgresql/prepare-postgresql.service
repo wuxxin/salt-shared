@@ -6,6 +6,7 @@ Before=postgresql@{{ settings.pgmajor }}-main.service
 
 [Service]
 Type=oneshot
+TimeoutStartSec=10
 {% if settings.pgtune.enabled %}
 ExecStart=/usr/local/bin/pgtune.sh update /etc/postgresql/{{ settings.pgmajor }}/main/postgresql.conf \
   {%- if settings.pgtune.cores not in ['all', '', '0', '-1', 0, -1] %}
