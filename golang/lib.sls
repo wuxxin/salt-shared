@@ -1,27 +1,37 @@
-include:
-  - .init
-
 {% macro go_build_from_git(build_config) %}
 
 {# config:
 source:
   repo:
-  rev: 
-build: 
+  rev:
+build:
   # salt['extutils.re_replace']('([a-z]+)://[([^@]@)?([^:]:[0-9]+)?/(.+)\.git', '\\4', config.source.repo)
   name: default: last part of \\4
   dir: default: \\4
   rev: default: config.source.rev
   make: default: 'go build' + config.build.dir
-  check: 
+  check:
   bin_files: []
 target:
   versiondir: /usr/local/src
   symlinkdir: /usr/local/bin
 #}
 
+{% load_yaml as defaults %}
 
-{% from "golang/defaults.jinja" import defaults with context %}
+user: go_builder
+build:
+  name:
+  dir:
+  rev:
+  make:
+  cleanup: false
+target:
+  versiondir: /usr/local/src
+  symlinkdir: /usr/local/bin
+
+{% endload %}
+
 {% set config=salt['grains.filter_by']({'none': defaults },
   grain='none', default= 'none', merge= build_config) %}
 
@@ -105,7 +115,7 @@ go-build-{{ config.build.name }}:
 "go-deploy-{{ config.build.name }}-{{ n }}":
   cmd.run:
     - name: |
-        if test ! -d {{ target_versiondir }}; then 
+        if test ! -d {{ target_versiondir }}; then
             mkdir -p {{ target_versiondir }}
         fi
         cp -a -f -t {{ target_versiondir }} {{ gopath }}/bin/{{ n }}
@@ -118,7 +128,7 @@ go-build-{{ config.build.name }}:
 go-deploy-{{ config.build.name }}-symlinks:
   cmd.run:
     - name: |
-        for n in `ls {{ target_versiondir }}`; do 
+        for n in `ls {{ target_versiondir }}`; do
             ln -s -f -T {{ target_versiondir }}/$n {{ config.target.symlinkdir }}/$n
         done
     - watch:
