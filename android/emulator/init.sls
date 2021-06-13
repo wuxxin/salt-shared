@@ -4,7 +4,7 @@
 include:
   - android.tools
   - containers
-  - containers.gui
+  - containers.desktop
 
 {# download emulator container image #}
 {{ image(settings.emulator.image, settings.emulator.tag) }}
@@ -18,7 +18,7 @@ set_latest_android_emulator_unmodified:
       - cmd: containers_image_{{ settings.emulator.image }}
 
 {# create modified emulator (to also work with gui) #}
-{{ container(settings.container.emulator_build) }}
+{{ container(settings.emulator_build) }}
 
 {# for launch parameter of emulator see
   https://developer.android.com/studio/run/emulator-commandline
