@@ -1,7 +1,7 @@
-{%- import_yaml "oauth2proxy/external.yml" as oauth2proxy_external %}
+{%- import_yaml "desktop/video/loopback/external.yml" as loopback_external %}
 {%- load_yaml as settings %}
 {# external software #}
-external: {{ oauth2proxy_external.objects }}
+external: {{ loopback_external.objects }}
 {%- endload %}
 {# expand ##version## in field external.*.download #}
 {%- for n,v in settings.external.items() %}
