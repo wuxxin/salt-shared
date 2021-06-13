@@ -1,9 +1,10 @@
 # Transactional Email
 
 + postfix for inbound and outbound mail, SSL/TLS support and rate limiting
-+ optional outbound dkim signing using opendkim
-+ optional inbound delivery status report parsing and webhook triggering
-+ optional rspamd filtering
++ optional
+  + outbound dkim signing using opendkim
+  + inbound delivery status report parsing and webhook triggering
+  + rspamd filtering
 
 ## Example Pillar
 
