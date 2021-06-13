@@ -6,13 +6,13 @@
 ### Functions
 
 + create a named volume
-  + volume(name, opts=[], driver='local', labels=[], env={}, user='')
+  + `volume(name, opts=[], driver='local', labels=[], env={}, user='')`
 + pull or build an image
-  + image(name, tag='', source: '', buildargs= {}, builddir= '', user='')
+  + `image(name, tag='', source: '', buildargs= {}, builddir= '', user='')`
 + start as systemd service/oneshot by pulling/building and optionally starting container
-  + container(definition, user='')
+  + `container(definition, user='')`
 + start a systemd service,oneshot by pulling/building and starting a compose structure
-  + compose(definition, user='')
+  + `compose(definition, user='')`
 
 ### Definition
 
