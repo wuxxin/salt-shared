@@ -27,8 +27,16 @@ nnn (n³) is a full-featured terminal file manager. It's tiny and nearly 0-confi
 ## virtualization
 
 + KATA containers
-    + http://download.opensuse.org/repositories/home:/katacontainers
-    + https://virtio-fs.gitlab.io/howto-qemu.html
+  + http://download.opensuse.org/repositories/home:/katacontainers
+  + https://virtio-fs.gitlab.io/howto-qemu.html
+  + requisites
+    + kernel 5.4+
+    + QEMU 5.0+ (included in kata-containers 1.9+)
+    + kata-containers 1.9+
+    + libvirt 6.2+ if libvirt support is needed
+  + ppa baseurl
+    + 'http://download.opensuse.org/repositories/home:/katacontainers:/releases:/' ~
+      grains['cpuarch'] ~ ':/' ~ master ~ '/xUbuntu_' ~ grains['osrelease']
 
 ## python
 + sh        # very elegant python shell
