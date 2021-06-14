@@ -1,27 +1,28 @@
 {# mandatory context: settings, log_default, template_default #}
 {%- set dns = settings %}
 {%- if dns.log is not defined %}
-  {%- set dummy = dns.__setitem__('log', log_default) %}
+  {% do dns.update( {'log', log_default} ) %}
 {%- endif %}
 {%- if dns.template is not defined %}
-  {%- set dummy = dns.__setitem__('template', [template_default]) %}
+  {%- do dns.update( {'template', [template_default]} ) %}
 {%- endif %}
 {%- if dns.template|selectattr('id', 'equalto', 'default')|map(attribute='id')|first != 'default' %}
   {%- set template = dns.template+ [template_default] %}
-  {%- set dummy = dns.__setitem__('template', template) %}
+  {%- do dns.update( {'template', template} ) %}
 {%- endif %}
-{%- set dummy = dns.__delitem__('enabled') %}
+{%- do dns.pop('enabled') %}
 {%- for z in range(dns.zone|length) %}
   {%- if dns.zone[z].source is defined %}
-    {%- set dummy = dns.zone[z].__delitem__('source') %}
+    {%- do dns.zone[z].pop('source') %}
   {%- endif %}
   {%- if dns.zone[z].context is defined %}
-    {%- set dummy = dns.zone[z].__delitem__('context') %}
+    {%- do dns.zone[z].pop('context') %}
   {%- endif %}
   {%- if dns.zone[z].contents is defined %}
-    {%- set dummy = dns.zone[z].__delitem__('contents') %}
+    {%- do dns.zone[z].pop('contents') %}
   {%- endif %}
 {%- endfor %}
+
 {%- macro iter_first(data, section, keyname) %}
 {%- if data[section] is defined %}
 {{ section }}:
@@ -41,6 +42,7 @@
 {% endfor %}
 {%- endif %}
 {%- endmacro %}
+
 {%- if dns.server is defined %}
 server:
   {%- for k,v in dns.server.items() %}

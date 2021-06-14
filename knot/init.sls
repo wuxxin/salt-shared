@@ -1,5 +1,4 @@
-{% from "knot/defaults.jinja" import settings with context %}
-{% from "knot/defaults.jinja" import defaults, log_default, template_default %}
+{% from "knot/defaults.jinja" import settings, defaults, log_default, template_default with context %}
 {% from "knot/lib.sls" import write_zone, write_config %}
 
 {% if grains['os'] == 'Ubuntu' %}
@@ -143,11 +142,11 @@ profile_{{ name }}_{{ i }}:
 
       {%- for zone in merged_config.zone %}
         {%- if merged_config.template is not defined %}
-          {%- set dummy = merged_config.__setitem__('template', [profile_template]) %}
+          {%- do merged_config.update( {'template', [profile_template]} ) %}
         {%- endif %}
         {%- if merged_config.template|selectattr('id', 'equalto', 'default')|map(attribute='id')|first != 'default' %}
           {%- set template = merged_config.template+ [profile_template] %}
-          {%- set dummy = merged_config.__setitem__('template', template) %}
+          {%- do merged_config.update( {'template', template} ) %}
         {%- endif %}
         {%- set targetpath=  merged_config.template|selectattr('id', 'equalto',
             zone.template|d('default'))|map(attribute='storage')|first %}
