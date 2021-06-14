@@ -1,7 +1,7 @@
 # modern containers for Ubuntu/Debian using podman
 
 + uses ppa for podman, crun, buildah, skopeo, fuse-overlayfs
-+ uses downloaded snapshots of podman-compose, x11docker from source
++ uses source snapshots of podman-compose, x11docker
 
 ### Functions
 
@@ -16,25 +16,30 @@
 
 ### Definition
 
+for details and comments of options see default_container and default_compose in defaults.jinja
+
++ user != '': execute as user using rootless podman
+
 + container_definition
-  + type: "build", "service", "oneshot", "command"
+  + type: "build", "service", "oneshot", "command", "desktop"
     + build   = build or pull image only, will not generate a systemd service
     + service = make and start command as a systemd service
     + oneshot = make a systemd oneshot execute script
     + command = create a shell script to call the container from the commandline
+    + desktop = create a shell script using x11docker to call the container as a gui application
+
 + compose_definition
   + type: "service", "oneshot"
-+ user != '': execute as user using rootless podman
-+ for details and comments of options see default_container and default_compose in defaults.jinja
+
 
 ### computed values
-
 
 + container:
   + env: $SERVICE_NAME will be set to name
   + workdir: will be set to settings.podman.[user_]workdir_basepath+ "/"+ name
   + builddir: will be set to settings.podman.[user_]build_basepath+ "/"+ name
   + servicedir: will be set to /etc/systemd/system or ${HOME}/.config/systemd/user
+  + scriptdir: will be set to /usr/local/bin or ${HOME}/.local/bin
 
 + compose:
   + env: $SERVICE_NAME will be set to name

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name={{ name }}
+Comment={{ comment }}
+Exec={{ name }}.sh
+# Exec=env LANG=he_IL.UTF-8 abiword %U
+#Terminal=true
+#Icon=applications-internet
+#Categories=Network;
+#Keywords=android;emulator;

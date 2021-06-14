@@ -61,10 +61,12 @@ podman:
   workdir_basepath: /etc/containers/podman.service
   build_basepath: /var/lib/containers/podman-build
   service_basepath: /etc/systemd/system
+  script_basepath: /usr/local/bin
 
-  user_workdir_basepath: "${HOME}/.config/podman.service"
-  user_build_basepath: "${HOME}/.local/lib/podman-build"
+  user_workdir_basepath: ${HOME}/.config/podman.service
+  user_build_basepath: ${HOME}/.local/lib/podman-build
   user_service_basepath: ${HOME}/.config/systemd/user
+  user_script_basepath: ${HOME}/.local/bin
 
 compose:
   workdir_basepath: /etc/containers/podman-compose.service
@@ -85,11 +87,11 @@ x11docker:
     - --xpra
   host:
     - --backend=podman
-    - --cap-default
     - --hostdisplay
+    - --hostipc
+    - --cap-default
     - --clipboard
     - --gpu
-    - --hostipc
     # - --verbose
     # - --webcam
 
@@ -101,14 +103,15 @@ x11docker:
 
 
 {% load_yaml as default_container %}
-# name of the container pod, systemd service, oneshot, command
+# name of the container pod, systemd service, oneshot, command, desktop app
 name:
 
-# type: "build", "service", "oneshot", "command"
+# type: "build", "service", "oneshot", "command", "desktop"
 # build   = build or pull image only, will not generate a systemd service
 # service = systemd service: create and start command as a systemd service
 # oneshot = systemd oneshot service: create a systemd oneshot execute service
 # command = create a shell script to call the container from the commandline
+# desktop = create a shell script using x11docker to call the container as a gui application
 type: service
 
 # name of the container image: x/y[:z]
@@ -118,12 +121,12 @@ tag:
 
 # enabled: if false, service will be stopped, config files are removed
 enabled: true
-# update: if true, container image will be pulled/build on every service start
-update: true
-# ephemeral (service, oneshot): remove existing container before start
-ephemeral: true
 # absent (service, oneshot): if true also remove systemd service files
 absent: false
+# update: if true, container image will be pulled/build on every service start
+update: true
+# ephemeral (service, oneshot, command, desktop): remove existing container before start
+ephemeral: true
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: auto
@@ -178,6 +181,7 @@ options: {}
 build:
   source: ""
   args: {}
+
 # additional commands run on certain events
 prepare:
   initial:
@@ -201,12 +205,12 @@ type: service
 
 # enabled: if false, service will be stopped, config files are removed
 enabled: true
+# absent: if true also remove systemd service files
+absent: false
 # update: if true, container image will be pulled/build on every service start
 update: true
-# ephemeral (service, oneshot): remove existing container before start
+# ephemeral: remove existing container before start
 ephemeral: true
-# absent (service, oneshot): if true also remove systemd service files
-absent: false
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
 userns: auto
@@ -214,8 +218,7 @@ userns: auto
 # systemd options
 systemd:
   # systemd restart: "no, on-failure, on-success, on-abnormal, on-watchdog, on-abort, or always"
-  # default: "no" if type oneshot, else "on-failure"
-  restart: ""
+  restart: "on-failure"
   # after, requires, wants: equal to systemd config
   after: ""
   requires: ""

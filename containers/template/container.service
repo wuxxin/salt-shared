@@ -1,7 +1,11 @@
 {%- from "containers/lib.sls" import env_repl, usernsid_fromstr %}
 [Unit]
 Description=Systemd service for podman container {{ entry.name }}
+{%- if user = '' %}
 After=network-online.target {{ entry.systemd.after }}
+{%- else %}
+{% if entry.systemd.after|length %}After={{ entry.systemd.after }}{% endif %}
+{%- endif %}
 {% if entry.systemd.wants|length %}Wants={{ entry.systemd.wants }}{% endif %}
 {% if entry.systemd.requires|length %}Requires={{ entry.systemd.requires }}{% endif %}
 {%- for k,v in entry.systemd.unit.items() %}
@@ -19,6 +23,10 @@ Restart=on-failure
 {%- else %}
 Restart={{ entry.systemd.restart }}
 {%- endif %}
+# RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
+RuntimeDirectory={{ entry.name }}
+WorkingDirectory={{ entry.workdir }}
+EnvironmentFile={{ entry.workdir }}.env
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
 ExecStartPre=/bin/bash 'cd {{ entry.builddir }} && \
@@ -34,20 +42,16 @@ ExecStartPre=podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
 {%- if entry.ephemeral %}
 ExecStartPre=-podman rm -f {{ entry.name }}
 {%- endif %}
-# RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
-RuntimeDirectory={{ entry.name }}
-WorkingDirectory={{ entry.workdir }}
-EnvironmentFile={{ entry.workdir }}.env
 ExecStart=podman run \
   --name={{ entry.name }} \
   --cgroups=split \
+  --env-host \
 {%- if entry.userns == 'pick' %}
   --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
   --gidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}
-  --env-host \
 {%- for key,value in entry.options.items() %}
   --{{ key }}={{ value }} \
 {%- endfor %}
@@ -74,5 +78,9 @@ ExecStop=podman stop {{ entry.name }}
 
 {%- if entry.type = 'service' %}
 [Install]
+  {%- if user = '' %}
 WantedBy=multi-user.target
+  {%- else %}
+WantedBy=default.target
+  {%- endif %}
 {%- endif %}

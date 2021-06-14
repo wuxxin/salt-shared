@@ -42,28 +42,40 @@
 {%- endmacro -%}
 
 
-{% macro create_directories(entry) %}
+{% macro create_directories(entry, user='') %}
 {# create workdir, builddir and a symlink in workdir/build pointing to builddir #}
 {{ entry.name }}.workdir:
   file.directory:
     - name: {{ entry.workdir }}
     - makedirs: true
     - mode: "0750"
+  {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+  {%- endif %}
 {{ entry.name }}.builddir:
   file.directory:
     - name: {{ entry.builddir }}
     - makedirs: true
+  {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+  {%- endif %}
 {{ entry.name }}.workdir.builddir.symlink:
   file.symlink:
     - name: {{ entry.workdir }}/build
     - target: {{ entry.builddir }}
+  {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+  {%- endif %}
     - require:
       - file: {{ entry.name }}.workdir
       - file: {{ entry.name }}.builddir
 {% endmacro %}
 
 
-{% macro write_files(entry) %}
+{% macro write_files(entry, user='') %}
 {# if entry.enabled, write files to workdir else delete files from workdir,
   if source defined and is template, template context will have environment populated #}
   {%- for fname, fdata in entry.files.items() %}
@@ -76,6 +88,10 @@
     - managed
     - name: {{ entry.workdir ~ "/" ~ fname }}
     - makedirs: true
+      {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+      {%- endif %}
       {%- if fdata.contents is defined %}
     - contents: |
 {{ fdata.contents|indent(8,True) }}
@@ -107,13 +123,17 @@
 {% endmacro %}
 
 
-{% macro write_env(entry) %}
+{% macro write_env(entry, user='') %}
 {# write environment to workdir if entry.enabled, else remove file #}
 {{ entry.name }}.env:
   file:
   {%- if entry.enabled %}
     - managed
     - mode: 0600
+    {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+    {%- endif %}
     - contents: |
         # environment for {{ entry.name }}
     {%- for key,value in entry.environment.items() %}
@@ -126,7 +146,7 @@
 {% endmacro %}
 
 
-{% macro write_service(entry) %}
+{% macro write_service(entry, user='') %}
 {# write systemd service file and start service if service, remove service if entry.absent #}
 {{ entry.name }}.service:
   file:
@@ -136,9 +156,14 @@
     - managed
     - source: salt://containers/template/container.service
     - template: jinja
+    {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+    {%- endif %}
     - defaults:
         entry: {{ entry }}
         settings: {{ settings }}
+        user: {{ user }}
   {%- endif %}
     - name: {{ entry.servicedir }}/{{ entry.name }}.service
   cmd.run:
@@ -168,6 +193,11 @@
   {%- endif %}
     - require:
       - cmd: {{ entry.name }}.service
+{% endmacro %}
+
+
+{% macro write_command(entry, user='') %}
+{# write shell script file #}
 {% endmacro %}
 
 
@@ -219,18 +249,20 @@ containers_image_{{ name }}{{ postfix_user }}:
         'workdir': env_repl(settings.podman.user_workdir_basepath ~ '/' ~ entry.name, entry.environment),
         'builddir': env_repl(settings.podman.user_build_basepath ~ '/' ~ entry.name, entry.environment),
         'servicedir': env_repl(settings.podman.user_service_basepath ~ '/' ~ entry.name, entry.environment),
+        'scriptdir': env_repl(settings.podman.user_script_basepath, entry.environment),
       }) %}
   {%- else %}
     {%- do entry.update(
       { 'workdir': settings.podman.workdir_basepath ~ '/' ~ entry.name,
         'builddir': settings.podman.build_basepath ~ '/' ~ entry.name,
         'servicedir': settings.podman.service_basepath ~ '/' ~ entry.name,
+        'scriptdir': settings.podman.script_basepath,
       }) %}
   {%- endif %}
 
-{{ create_directories(entry) }}
-{{ write_files(entry) }}
-{{ write_env(entry) }}
+{{ create_directories(entry, user) }}
+{{ write_files(entry, user) }}
+{{ write_env(entry, user) }}
 
   {%- if entry.enabled %}
     {# create volumes if defined via storage #}
@@ -251,7 +283,9 @@ containers_image_{{ name }}{{ postfix_user }}:
   {%- endif %}
 
   {%- if entry.type in ['service', 'oneshot'] %}
-{{ write_service(entry) }}
+{{ write_service(entry, user) }}
+  {%- elif entry.type in ['command', 'desktop'] %}
+{{ write_command(entry, user) }}
   {%- endif %}
 
 {% endmacro %}
