@@ -83,8 +83,8 @@ podman:
       - buildah
       - podman
 
-# snapshot 9317f987fc9b2b806a892ad423ee83da240702f9 + patches (own commit)
-# from: https://raw.githubusercontent.com/containers-compose/devel/podman_compose.py
+# fork of https://github.com/containers/podman-compose + patches
+# see https://github.com/wuxxin/podman-compose
 podman_compose.py:
   file.managed:
     - source: salt://containers/tools/podman_compose.py

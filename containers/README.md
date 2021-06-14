@@ -94,3 +94,28 @@ desktop:
   # icon: applications-internet
   # categories: Network;
   # keywords: android;emulator;
+
+objects:
+  "x11docker.tar.gz":
+    version: 6.9.0
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/mviereck/x11docker/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
+    download: "https://github.com/mviereck/x11docker/archive/refs/tags/v##version##.tar.gz"
+    hash: 2206866d289e7f0e0fa710af3a62bd0afb1568f7b5510efcf1c2fd5c4f5082c8
+    target: /usr/local/lib/x11docker.tar.gz
+
+x11docker:
+  file.managed:
+    - source: {{ settings.external['x11docker.tar.gz']['download'] }}
+    - hash: sha256={{ settings.external['x11docker.tar.gz']['hash'] }}
+    - name: {{ settings.external['x11docker.tar.gz']['target'] }}
+  archive.extracted:
+    - name: /usr/local/bin
+    - source: {{ settings.external['x11docker.tar.gz']['target'] }}
+    - archive_format: tar
+
+    - enforce_toplevel: false
+    - overwrite: true
+    - clean: false
+    - onchanges:
+      - file: x11docker
+      -

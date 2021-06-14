@@ -15,7 +15,8 @@ x11docker-tools:
       - xwayland
       - xdotool
 
-# snapshot from: https://raw.githubusercontent.com/mviereck/x11docker/v6.8.0/x11docker
+# snapshot (6.9.1-beta-1) at 038af50b3389ceaecf5916b29f3bc21ae5c613de
+# https://github.com/mviereck/x11docker
 x11docker:
   file.managed:
     - source: salt://containers/tools/x11docker

@@ -581,6 +581,8 @@ def container_to_args(compose, cnt, detached=True):
         podman_args.extend(['--shm-size', '{}'.format(cnt['shm_size'])])
     if cnt.get('stdin_open', None):
         podman_args.append('-i')
+    if cnt.get('stop_signal', None):
+        podman_args.extend(['--stop-signal', cnt['stop_signal']])
     for i in cnt.get('sysctls', []):
         podman_args.extend(['--sysctl', i])
     if cnt.get('tty', None):
@@ -726,7 +728,7 @@ class Podman:
             print(exit_code)
             if obj is not None:
                 obj.exit_code = exit_code
-
+            
         if sleep:
             time.sleep(sleep)
         return p
@@ -951,7 +953,7 @@ class PodmanCompose:
         if services is None:
             services = {}
             print("WARNING: No services defined")
-
+		
         # NOTE: maybe add "extends.service" to _deps at this stage
         flat_deps(services, with_extends=True)
         service_names = sorted([ (len(srv["_deps"]), name) for name, srv in services.items() ])
@@ -1178,8 +1180,9 @@ def create_pods(compose, args):
         ]
         ports = pod.get("ports", None) or []
         for i in ports:
-            podman_args.extend(['-p', i])
+            podman_args.extend(['-p', str(i)])
         compose.podman.run([], "pod", podman_args)
+
 
 def up_specific(compose, args):
     deps = []

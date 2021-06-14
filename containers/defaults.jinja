@@ -81,10 +81,10 @@ compose:
 
 x11docker:
   default:
-    - --podman
+    - --backend=podman
     - --xpra
   host:
-    - --podman
+    - --backend=podman
     - --cap-default
     - --hostdisplay
     - --clipboard
@@ -94,6 +94,7 @@ x11docker:
     # - --webcam
 
 {% endload %}
+
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('containers', {})) %}
