@@ -1,7 +1,7 @@
 {% load_yaml as defaults %}
 
-image_build:
-  name: android-lineage-microg-build
+builder:
+  name: build-android-lineage-microg
   image: lineageos4microg/docker-lineage-cicd
   tag: latest
   type: script
@@ -71,6 +71,7 @@ emulator_desktop:
   tag: latest
   type: desktop
   desktop:
+    template: host
     options:
       - "--group-add kvm"
     entry:
