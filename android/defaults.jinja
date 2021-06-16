@@ -63,7 +63,7 @@ emulator_build:
         RUN install -o 1000 -g 1000 -m "777" -d /android-home
 
     build/launch-emulator.sh:
-      source: salt://android/launch-emulator.sh
+      source: salt://android/emulator/launch-emulator.sh
 
 emulator_desktop:
   name: android-emulator-desktop
@@ -94,7 +94,7 @@ emulator_desktop:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
   options:
-    - --device /dev/kvm
+    device: /dev/kvm
 
 emulator_headless_service:
   name: android-emulator-headless
@@ -115,7 +115,7 @@ emulator_headless_service:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
   options:
-    - --device /dev/kvm
+    device: /dev/kvm
 
 emulator_webrtc_service:
   name: android-emulator-webrtc
