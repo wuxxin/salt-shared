@@ -1,7 +1,13 @@
-{% from "containers/lib.sls" import env_repl, vol_path, usernsid_fromstr, volume, image, container, compose %}
+{% from "containers/lib.sls" import container %}
 
 include:
   - containers
+
+{#
+sudo x11docker --podman --cap-default --hostdisplay --gpu --webcam --pulseaudio \
+  --dbus --clipboard -- \
+  localhost/signal-desktop
+#}
 
 {% load_yaml as defaults %}
 name: signal-desktop-build
@@ -39,7 +45,3 @@ files:
     grain='default', default= 'default', merge= salt['pillar.get']('signal', {})) %}
 
 {{ container(settings) }}
-
-sudo x11docker --podman --cap-default --hostdisplay --gpu --webcam --pulseaudio \
-  --dbus --clipboard -- \
-  localhost/signal-desktop
