@@ -14,8 +14,13 @@ include:
   file:
     - directory
 
-{% for dirname in [settings.podman.workdir_basepath, settings.podman.build_basepath,
-    settings.compose.workdir_basepath, settings.compose.build_basepath] %}
+{% for dirname in [
+    settings.podman.system.config_basepath,
+    settings.podman.system.workdir_basepath,
+    settings.podman.system.build_basepath,
+    settings.compose.system.config_basepath,
+    settings.compose.system.workdir_basepath,
+    settings.compose.system.build_basepath] %}
 {{ dirname }}:
   file:
     - directory

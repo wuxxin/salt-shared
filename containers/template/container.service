@@ -1,6 +1,6 @@
-{%- from "containers/lib.sls" import env_repl, usernsid_fromstr %}
+{%- from "containers/lib.sls" import env_repl, name_to_usernsid %}
 [Unit]
-Description=Systemd service for podman container {{ entry.name }}
+Description={{ 'user' if user = '' }} systemd service for podman container {{ entry.name }}
 {%- if user = '' %}
 After=network-online.target {{ entry.systemd.after }}
 {%- else %}
@@ -47,8 +47,8 @@ ExecStart=podman run \
   --cgroups=split \
   --env-host \
 {%- if entry.userns == 'pick' %}
-  --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
-  --gidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
+  --uidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
+  --gidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}

@@ -1,7 +1,8 @@
 {% load_yaml as defaults %}
 config:
-  # /etc/containers/containers.conf
+
   containers:
+    # /etc/containers/containers.conf
     containers:
       default_capabilities:
         - "CHOWN"
@@ -22,8 +23,8 @@ config:
       # crun: OCI runtime with support for cgroup V2
       runtime: "crun"
 
-  # /etc/containers/storage.conf
   storage:
+    # /etc/containers/storage.conf
     storage:
       # Primary storage driver
       driver: "overlay"
@@ -33,8 +34,8 @@ config:
         overlay:
           mount_program: "/usr/bin/fuse-overlayfs"
 
-  # /etc/containers/mounts.conf
   mounts:
+    # /etc/containers/mounts.conf
     # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
     # one mount per line. For example, a mounts.conf with the line
     # - "/usr/share/secrets:/run/secrets"
@@ -43,8 +44,8 @@ config:
     # Setting mountpoints allows containers to use the files of the host.
     mounts: []
 
-  # /etc/containers/policy.json
   policy:
+    # /etc/containers/policy.json
     # Policy: Manages which registries you trust as a source of container images based on its location.
     # The location is determined by the transport and the registry host of the image.
     # Using this container image docker://docker.io/library/busybox as an example,
@@ -56,32 +57,46 @@ config:
         "":
           - type: insecureAcceptAnything
 
-# used in containers/init.sls and containers/lib.sls
+# settings for containers/init.sls and containers/lib.sls
 podman:
-  workdir_basepath: /etc/containers/podman.service
-  build_basepath: /var/lib/containers/podman-build
-  service_basepath: /etc/systemd/system
-  script_basepath: /usr/local/bin
-
-  user_workdir_basepath: ${HOME}/.config/podman.service
-  user_build_basepath: ${HOME}/.local/lib/podman-build
-  user_service_basepath: ${HOME}/.config/systemd/user
-  user_script_basepath: ${HOME}/.local/bin
+  system:
+    config_basepath: /etc/containers/podman.config
+    workdir_basepath: /etc/containers/podman.service
+    build_basepath: /var/lib/containers/podman-build
+    service_basepath: /etc/systemd/system
+    script_basepath: /usr/local/bin
+    desktop_basepath: /usr/local/share/applications/
+  user:
+    config_basepath: ${HOME}/.config/podman.config
+    workdir_basepath: ${HOME}/.config/podman.service
+    build_basepath: ${HOME}/.local/lib/podman-build
+    service_basepath: ${HOME}/.config/systemd/user
+    script_basepath: ${HOME}/.local/bin
+    desktop_basepath: ${HOME}/.local/share/applications
 
 compose:
-  workdir_basepath: /etc/containers/podman-compose.service
-  build_basepath: /var/lib/containers/podman-compose-build
-  service_basepath: /etc/systemd/system
-
-  user_workdir_basepath: ${HOME}/.config/podman-compose.service
-  user_build_basepath: ${HOME}/.local/lib/podman-compose-build
-  user_service_basepath: ${HOME}/.config/systemd/user
-
   compose_filename: docker-compose.yml
   override_filename: docker-compose.override.yml
   env_filename: .env
 
+  system:
+    config_basepath: /etc/containers/podman-compose.config
+    workdir_basepath: /etc/containers/podman-compose.service
+    build_basepath: /var/lib/containers/podman-compose-build
+    service_basepath: /etc/systemd/system
+    script_basepath: /usr/local/bin
+    desktop_basepath: /usr/local/share/applications/
+
+  user:
+    config_basepath: ${HOME}/.config/podman-compose.config
+    workdir_basepath: ${HOME}/.config/podman-compose.service
+    build_basepath: ${HOME}/.local/lib/podman-compose-build
+    service_basepath: ${HOME}/.config/systemd/user
+    script_basepath: ${HOME}/.local/bin
+    desktop_basepath: ${HOME}/.local/share/applications
+
 x11docker:
+  # default x11 docker switches
   default:
     - --backend=podman
     - --xpra
@@ -94,7 +109,6 @@ x11docker:
     - --gpu
     # - --verbose
     # - --webcam
-
 {% endload %}
 
 
@@ -144,6 +158,19 @@ systemd:
   service: {}
   # additional systemd properties for the [unit] section
   unit: {}
+
+# desktop options
+desktop:
+  # template: group of options passed to x11docker:  ['default', 'host']
+  template: default
+  # options: list of string for additional options for x11docker
+  options: []
+  # entry: desktop entry is used for .desktop file
+  entry:
+    # https://specifications.freedesktop.org/desktop-entry-spec/latest/
+    Type: Application
+    # Name: Program-Name
+    # Exec: env X=Y name.sh
 
 # environment: dict: {key: value,} add environment data
 # environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
@@ -230,8 +257,9 @@ systemd:
 
 # environment to be placed as ".env" file inside workdir
 environment: {}
-# compose source config and compose overrides config
+# compose source config
 source:
+# compose overrides config
 config: {}
 # files to be placed inside workdir
 files: {}

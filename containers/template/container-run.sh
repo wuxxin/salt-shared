@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # calling script for {{ entry.type }} container of {{ entry.name }}
-{%- from "containers/lib.sls" import env_repl, usernsid_fromstr %}
+{%- from "containers/lib.sls" import env_repl, name_to_usernsid %}
 
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
@@ -42,8 +42,8 @@ exec podman run \
   --cgroups=split \
   --env-host \
 {%- if entry.userns == 'pick' %}
-  --uidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
-  --gidmap=0:{{ usernsid_fromstr(entry.name) }}:65536 \
+  --uidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
+  --gidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}
