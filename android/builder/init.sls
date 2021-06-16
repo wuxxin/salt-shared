@@ -1,5 +1,5 @@
 {% from "android/defaults.jinja" import settings with context %}
-{% from "containers/lib.sls" import image %}
+{% from "containers/lib.sls" import image with context %}
 
 include:
   - android.tools

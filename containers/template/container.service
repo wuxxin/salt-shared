@@ -1,4 +1,4 @@
-{%- from "containers/lib.sls" import env_repl, name_to_usernsid %}
+{%- from "containers/lib.sls" import env_repl, name_to_usernsid with context %}
 [Unit]
 Description={{ 'user' if user = '' }} systemd service for podman container {{ entry.name }}
 {%- if user = '' %}

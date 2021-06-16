@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # calling script for {{ entry.type }} container of {{ entry.name }}
-{%- from "containers/lib.sls" import env_repl, name_to_usernsid %}
+{%- from "containers/lib.sls" import env_repl, name_to_usernsid with context %}
 
 # include environment
 . {{ entry.configdir }}/.env

@@ -1,6 +1,6 @@
 {% macro emulator_image() %}
 {%- from "android/defaults.jinja" import settings with context %}
-{%- from "containers/lib.sls" import image, container %}
+{%- from "containers/lib.sls" import image, container with context %}
 
 {# download emulator container image #}
 {{ image(settings.emulator.image, settings.emulator.tag) }}
@@ -20,7 +20,7 @@ tag_latest_android_emulator:
 
 {% macro emulator_desktop(profile_definition) %}
 {%- from "android/defaults.jinja" import settings with context %}
-{%- from "containers/lib.sls" import container %}
+{%- from "containers/lib.sls" import container with context %}
 {%- set entry= salt['grains.filter_by']({'default': settings.emulator_desktop},
   grain='default', default= 'default', merge=profile_definition) %}
 {%- if entry.desktop.entry.Exec is not defined %}
@@ -32,7 +32,7 @@ tag_latest_android_emulator:
 
 {% macro emulator_headless_service(profile_definition) %}
 {%- from "android/defaults.jinja" import settings with context %}
-{%- from "containers/lib.sls" import container %}
+{%- from "containers/lib.sls" import container with context %}
 {%- set entry= salt['grains.filter_by']({'default': settings.emulator_headless_service},
   grain='default', default= 'default', merge=profile_definition) %}
 {{ container(entry) }}
@@ -41,7 +41,7 @@ tag_latest_android_emulator:
 
 {% macro emulator_webrtc_service(profile_definition) %}
 {%- from "android/defaults.jinja" import settings with context %}
-{%- from "containers/lib.sls" import compose %}
+{%- from "containers/lib.sls" import compose with context %}
 {%- set entry= salt['grains.filter_by']({'default': settings.emulator_webrtc_service},
   grain='default', default= 'default', merge=profile_definition) %}
 {{ compose(entry) }}
