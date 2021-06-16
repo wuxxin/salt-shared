@@ -225,6 +225,7 @@ highlevel functions:
 
 {% macro write_script(entry, user='') %}
 {# write shell script file (either for everyone or for one user) #}
+{%- from "containers/defaults.jinja" import settings with context -%}
 {{ entry.name }}.script:
   file:
   {%- if entry.absent %}
@@ -239,6 +240,7 @@ highlevel functions:
     {%- endif %}
     - defaults:
         entry: {{ entry }}
+        settings: {{ settings }}
   {%- endif %}
     - name: {{ entry.scriptdir }}/{{ entry.name }}.sh
 {% endmacro %}

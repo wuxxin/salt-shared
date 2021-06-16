@@ -4,9 +4,6 @@ set -eo pipefail
 # calling script for {{ entry.type }} container of {{ entry.name }}
 {%- from "containers/lib.sls" import env_repl, name_to_usernsid with context %}
 
-# include environment
-. {{ entry.configdir }}/.env
-
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
 
@@ -33,7 +30,10 @@ podman rm -f {{ entry.name }} || true
 {%- if entry.type == 'desktop' %}
 # desktop container
 exec x11docker \
-  {%- for k in entry.x11docker %}
+  {%- for k in settings.x11docker[entry.desktop.template] %}
+  {{ k }} \
+  {%- endfor %}
+  {%- for k in entry.desktop.options %}
   {{ k }} \
   {%- endfor %}
   -- \
@@ -64,7 +64,7 @@ exec podman run \
   {%- set publish_str = env_repl(publish, entry.environment) %}
   --publish={{ publish_str }} \
 {%- endfor %}
-{%- for k,v in entry.environment %}
+{%- for k,v in entry.environment.items() %}
   -e {{ k }}={{ v }} \
 {%- endfor %}
   -- \
