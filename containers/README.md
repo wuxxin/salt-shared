@@ -1,7 +1,7 @@
 # modern containers using podman
 
-+ uses ppa for podman, crun, buildah, skopeo, fuse-overlayfs
-+ source snapshots of podman-compose \& x11docker
++ uses podman, crun, buildah, skopeo, fuse-overlayfs (from ppa)
++ used podman-compose \& x11docker (downloaded as source snapshots)
 + easy rootless support with user !=''
 
 ## containers.lib
@@ -21,7 +21,7 @@
 + start a systemd service,oneshot by pulling/building and starting a compose structure
   + `compose(compose_definition, user='')`
 
-### configure
+### configurey
 
 + see `defaults.jinja` for details and comments of `default_container` and `default_compose`
 + container types: "build", "service", "oneshot", "command", "desktop"

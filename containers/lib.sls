@@ -152,7 +152,7 @@ highlevel functions:
 
 
 {% macro write_env(entry, user='') %}
-{# write environment to workdir if entry.enabled, else remove file #}
+{# write environment to configdir if entry.enabled, else remove file #}
 {{ entry.name }}.env:
   file:
   {%- if entry.enabled %}
@@ -170,13 +170,12 @@ highlevel functions:
   {%- else %}
     - absent
   {%- endif %}
-    - name: {{ entry.configdir }}.env
+    - name: {{ entry.configdir }}/.env
 {% endmacro %}
 
 
 {% macro write_service(entry, source, user='') %}
   {# write systemd service file and start service if service, remove service if entry.absent #}
-  {%- from "containers/defaults.jinja" import settings with context -%}
 {{ entry.name }}.service:
   file:
   {%- if entry.absent %}
@@ -191,7 +190,6 @@ highlevel functions:
     {%- endif %}
     - defaults:
         entry: {{ entry }}
-        settings: {{ settings }}
         user: {{ user }}
   {%- endif %}
     - name: {{ entry.servicedir }}/{{ entry.name }}.service
@@ -226,20 +224,44 @@ highlevel functions:
 
 
 {% macro write_script(entry, user='') %}
-{# write shell script file #}
+{# write shell script file (either for everyone or for one user) #}
+{{ entry.name }}.script:
+  file:
+  {%- if entry.absent %}
+    - absent
+  {%- else %}
+    - managed
+    - source: salt://containers/template/container-run.sh
+    - template: jinja
+    {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+    {%- endif %}
+    - defaults:
+        entry: {{ entry }}
+  {%- endif %}
+    - name: {{ entry.scriptdir }}/{{ entry.name }}.sh
 {% endmacro %}
 
 
 {% macro write_desktop(entry, user='') %}
 {# write desktop environment files (either for everyone or for one user) #}
-{#
-/usr/local
-~/.local
-/share/applications/android-{{ name }}.desktop:
-/usr/local
-~/.local
-/bin/android-{{ name }}.sh:
-#}
+{{ entry.name }}.desktop:
+  file:
+  {%- if entry.absent %}
+    - absent
+  {%- else %}
+    - managed
+    - source: salt://containers/template/container.desktop
+    - template: jinja
+    {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+    {%- endif %}
+    - defaults:
+        entry: {{ entry }}
+  {%- endif %}
+    - name: {{ entry.desktopdir }}/{{ entry.name }}.desktop
 {% endmacro %}
 
 
@@ -329,9 +351,17 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
 
   {%- if entry.type in ['service', 'oneshot'] %}
 {{ write_service(entry, 'salt://containers/template/container.service', user) }}
+
   {%- elif entry.type in ['command', 'desktop'] %}
+    {%- if entry.desktop.entry.Name is not defined %}
+      {%- do entry.desktop.entry.update({'Name': entry.name}) %}
+    {%- endif %}
+    {%- if entry.desktop.entry.Exec is not defined %}
+      {%- do entry.desktop.entry.update({'Exec': entry.name ~ '.sh'}) %}
+    {%- endif %}
 {{ write_script(entry, user) }}
   {%- endif %}
+
 {% endmacro %}
 
 

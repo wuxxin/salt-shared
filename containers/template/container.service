@@ -26,7 +26,7 @@ Restart={{ entry.systemd.restart }}
 # RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
 RuntimeDirectory={{ entry.name }}
 WorkingDirectory={{ entry.workdir }}
-EnvironmentFile={{ entry.workdir }}.env
+EnvironmentFile={{ entry.configdir }}/.env
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
 ExecStartPre=/bin/bash 'cd {{ entry.builddir }} && \

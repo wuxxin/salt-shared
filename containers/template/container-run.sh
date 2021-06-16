@@ -4,6 +4,9 @@ set -eo pipefail
 # calling script for {{ entry.type }} container of {{ entry.name }}
 {%- from "containers/lib.sls" import env_repl, name_to_usernsid %}
 
+# include environment
+. {{ entry.configdir }}/.env
+
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
 

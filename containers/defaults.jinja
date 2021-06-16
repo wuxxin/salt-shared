@@ -167,13 +167,20 @@ desktop:
   options: []
   # entry: desktop entry is used for .desktop file
   entry:
-    # https://specifications.freedesktop.org/desktop-entry-spec/latest/
+    # # mandatory: Name, Exec
+    # # https://specifications.freedesktop.org/desktop-entry-spec/latest/
     Type: Application
     # Name: Program-Name
     # Exec: env X=Y name.sh
+    # # optional
+    # Comment=A Sentence to describe the application
+    # Terminal=true
+    # Icon=applications-internet
+    # Categories=Network;
+    # Keywords=android;emulator;
 
 # environment: dict: {key: value,} add environment data
-# environment will be populated with SERVICE_NAME which is constructed using servicename + "_" + profilename
+# environment will be populated with SERVICE_NAME and USER,HOME if user!=''
 environment: {}
 # label: dict: {key: value,} add label to container
 labels: {}
