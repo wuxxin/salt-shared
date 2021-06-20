@@ -65,7 +65,7 @@ podman:
     build_basepath: /var/lib/containers/podman-build
     service_basepath: /etc/systemd/system
     script_basepath: /usr/local/bin
-    desktop_basepath: /usr/local/share/applications/
+    desktop_basepath: /usr/local/share/applications
   user:
     config_basepath: ${HOME}/.config/podman.config
     workdir_basepath: ${HOME}/.config/podman.service
@@ -85,8 +85,7 @@ compose:
     build_basepath: /var/lib/containers/podman-compose-build
     service_basepath: /etc/systemd/system
     script_basepath: /usr/local/bin
-    desktop_basepath: /usr/local/share/applications/
-
+    desktop_basepath: /usr/local/share/applications
   user:
     config_basepath: ${HOME}/.config/podman-compose.config
     workdir_basepath: ${HOME}/.config/podman-compose.service
@@ -100,6 +99,7 @@ x11docker:
   default:
     - --backend=podman
     - --xpra
+  empty: []
   host:
     - --backend=podman
     - --hostdisplay
@@ -131,7 +131,7 @@ type: service
 # name of the container image: x/y[:z]
 image:
 # optional tag, will be appended to image and on build time
-tag:
+tag: ""
 
 # enabled: if false, service will be stopped, config files are removed
 enabled: true
@@ -161,9 +161,9 @@ systemd:
 
 # desktop options
 desktop:
-  # template: group of options passed to x11docker:  ['default', 'host']
+  # template: group of options passed to x11docker:  ['default', 'host', 'empty']
   template: default
-  # options: list of string for additional options for x11docker
+  # options: list of strings: additional options for x11docker
   options: []
   # entry: desktop entry is used for .desktop file
   entry:
@@ -172,23 +172,16 @@ desktop:
     Type: Application
     # Name: Program-Name
     # Exec: env X=Y name.sh
-    # # optional
-    # Comment=A Sentence to describe the application
-    # Terminal=true
-    # Icon=applications-internet
-    # Categories=Network;
-    # Keywords=android;emulator;
 
-# environment: dict: {key: value,} add environment data
-# environment will be populated with SERVICE_NAME and USER,HOME if user!=''
+# environment: dict: add environment data: {key: value,}
 environment: {}
-# label: dict: {key: value,} add label to container
+# label: dict: add labels to container: {key:value,}
 labels: {}
-# storage: create volumes from list: - {name: volume_name, labels=[], driver: local, opts=[]}
+# storage: list of dicts: create volumes: [{name: volume_name, labels={}, driver: local, opts=[]},]
 storage: []
-# volume: list: - [source-volume|host-dir:]container-dir[:options]
+# volume: list of strings: use volumes: ["source-volume|host-dir:]container-dir[:options]",]
 volumes: []
-# ports: list
+# ports: list of strings: expose container ports: ["[hostip]:hostport:containerport[/protocol]",]
 ports: []
 # files to be placed inside workdir, which will be available via "./"
 files: {}
@@ -205,12 +198,12 @@ files: {}
       custom: this is a custom var that will be available in the jinja context
 #}
 
-# command: if set, will replace default command
+# command: string, if set, will replace default command
 command: ""
-# args: if set, will add args for command, command must also be set
+# args: string, if set, will add args for command, command must also be set
 args: ""
-# options: dict: {key: value,} container options parameter for podman run
-options: {}
+# options: list of string: additional container options parameter for podman run
+options: []
 # build: if source != "", build container with args using "podman build <source>"
 build:
   source: ""
@@ -262,11 +255,18 @@ systemd:
   # additional systemd properties for the [unit] section
   unit: {}
 
-# environment to be placed as ".env" file inside workdir
+# desktop options
+desktop:
+  template: default
+  options: []
+  entry:
+    Type: Application
+
+# environment: dict: add environment data: {key: value,}
 environment: {}
 # compose source config
-source:
-# compose overrides config
+source: ""
+# compose overrides: dict: define or override config from source
 config: {}
 # files to be placed inside workdir
 files: {}

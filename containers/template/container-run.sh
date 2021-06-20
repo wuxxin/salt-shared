@@ -2,23 +2,23 @@
 set -eo pipefail
 
 # calling script for {{ entry.type }} container of {{ entry.name }}
-{%- from "containers/lib.sls" import env_repl, name_to_usernsid with context %}
-
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
-
 # build container
-pushd {{ entry.builddir }}
+pushd {{ entry.builddir }} > /dev/null
 podman build {{ '--tag='+ entry.tag if entry.tag }} \
     {%- for key,value in entry.build.args.items() %}
     {{ '--build-arg=' ~ key ~ '=' ~ value }} \
     {%- endfor %}
     {{ entry.build.source }}
-popd
+popd > /dev/null
   {%- else %}
 
-# pull container
-podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
+# pull container if not already pointing to localhost
+registry="{{ entry.image }}"
+if test "${registry%*/}" != "localhost"; then
+    podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
+fi
   {%- endif %}
 {%- endif %}
 
@@ -30,44 +30,41 @@ podman rm -f {{ entry.name }} || true
 {%- if entry.type == 'desktop' %}
 # desktop container
 exec x11docker \
-  {%- for k in settings.x11docker[entry.desktop.template] %}
+  {%- for k in entry.desktop.template_options %}
   {{ k }} \
   {%- endfor %}
   {%- for k in entry.desktop.options %}
   {{ k }} \
   {%- endfor %}
+  --name={{ entry.name }} \
   -- \
 {%- else %}
 # commandline container
 exec podman run \
-{%- endif %}
   --name={{ entry.name }} \
+{%- endif %}
   --cgroups=split \
+  --env-file {{ entry.configdir }}/.env \
   --env-host \
 {%- if entry.userns == 'pick' %}
-  --uidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
-  --gidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
+  --uidmap=0:{{ entry.USERNS_ID }}:65536 \
+  --gidmap=0:{{ entry.USERNS_ID }}:65536 \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}
-{%- for key,value in entry.options.items() %}
-  --{{ key }}={{ value }} \
-{%- endfor %}
 {%- for key,value in entry.labels.items() %}
   --label={{ key }}={{ value }} \
 {%- endfor %}
 {%- for vol in entry.volumes %}
-  {%- set vol_str = env_repl(vol, entry.environment) %}
-  --volume={{ vol_str }} \
+  --volume={{ vol }} \
 {%- endfor %}
 {%- for publish in entry.ports %}
-  {%- set publish_str = env_repl(publish, entry.environment) %}
-  --publish={{ publish_str }} \
+  --publish={{ publish }} \
 {%- endfor %}
-{%- for k,v in entry.environment.items() %}
-  -e {{ k }}={{ v }} \
+{%- for opt in entry.options %}
+  {{ opt }} \
 {%- endfor %}
   -- \
-  {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} {% if entry.command %} \
+  {{ entry.image }}{{ ":"~ entry.tag if entry.tag }} {% if entry.command %} \
   {{ entry.command }} {{ entry.args }}
 {% endif %}

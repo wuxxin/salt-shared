@@ -7,19 +7,31 @@
 ## containers.lib
 
 + create a named volume
-  + `volume(name, opts=[], driver='local', labels=[], env={}, user='')`
+  + volume(volume_name, opts=[], driver='local', labels={}, user='')
 
 + get full path of volume
-  + `volume_path(volume_name, container_definition, user='')`
+  + volume_path(volume_name, container_or_compose_definition, user='')
 
 + pull or build an image
-  + `image(name, tag='', source='', buildargs={}, builddir= '', user='')`
+  + image(image_name, tag='', source='', buildargs={}, builddir= '', user='')
 
 + start as systemd service/oneshot by pulling/building and optionally starting container
-  + `container(container_definition, user='')`
+  + container(container_definition, user='')
 
 + start a systemd service,oneshot by pulling/building and starting a compose structure
-  + `compose(compose_definition, user='')`
+  + compose(compose_definition, user='')
+
++ lowlevel functions:
+  + var_repl(data, env={}, user='')
+  + repl_env_json(srcdict, envdict=False, user='')
+  + repl_entry_json(entry, dirconfig=False, user='')
+
+  + create_directories(entry, user='')
+  + write_files(entry, user='')
+  + write_env(entry, user='')
+  + write_service(entry, source, user='')
+  + write_script(entry, user='')
+  + write_desktop(entry, user='')
 
 ### configurey
 
@@ -27,10 +39,20 @@
 + container types: "build", "service", "oneshot", "command", "desktop"
 + compose types: "service", "oneshot"
 + computed environment
-  + SERVICE_NAME is set to definition.name
-  + USER, HOME is set to user and homedir of user if user!=''
+  + add entry:environment:SERVICE_NAME=entry.name, USER, HOME, USERNS_ID
+  + add entry:desktop:template_options=settings.x11docker[entry.desktop.template]
+  + add entry:configdir, workdir, builddir, servicedir, scriptdir, desktopdir
+  + replace ${} vars in: environment, labels, storage, volumes, ports
 
 ### remarks
+
++ desktop.entry:
+  # optional
+  # Comment=A Sentence to describe the application
+  # Terminal=true
+  # Icon=applications-internet
+  # Categories=Network;
+  # Keywords=android;emulator;
 
 + The podman run and podman create commands now feature a --sdnotify option to control the behavior of systemd's sdnotify with containers, enabling improved support for Podman in Type=notify units.
 

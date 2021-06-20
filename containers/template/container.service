@@ -1,4 +1,3 @@
-{%- from "containers/lib.sls" import env_repl, name_to_usernsid with context %}
 [Unit]
 Description={{ 'user' if user = '' }} systemd service for podman container {{ entry.name }}
 {%- if user = '' %}
@@ -23,53 +22,65 @@ Restart=on-failure
 {%- else %}
 Restart={{ entry.systemd.restart }}
 {%- endif %}
+
 # RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
 RuntimeDirectory={{ entry.name }}
 WorkingDirectory={{ entry.workdir }}
-EnvironmentFile={{ entry.configdir }}/.env
+
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
-ExecStartPre=/bin/bash 'cd {{ entry.builddir }} && \
+# build on start
+ExecStartPre=/usr/bin/bash 'cd {{ entry.builddir }} && \
     podman build {{ '--tag='+ entry.tag if entry.tag }} \
     {%- for key,value in entry.build.args.items() %}
     {{ '--build-arg=' ~ key ~ '=' ~ value }} \
     {%- endfor %}
     {{ entry.build.source }}'
   {%- else %}
-ExecStartPre=podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
+
+# pull on start
+ExecStartPre=/usr/bin/bash 'registry="{{ entry.image }}"; \
+    if test "${registry%*/}" != "localhost"; then \
+      podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}; \
+    fi'
   {%- endif %}
 {%- endif %}
+
 {%- if entry.ephemeral %}
+# remove existing container before start
 ExecStartPre=-podman rm -f {{ entry.name }}
 {%- endif %}
+
+# start container
 ExecStart=podman run \
   --name={{ entry.name }} \
   --cgroups=split \
+  --env-file {{ entry.configdir }}/.env \
   --env-host \
 {%- if entry.userns == 'pick' %}
-  --uidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
-  --gidmap=0:{{ name_to_usernsid(entry.name) }}:65536 \
+  --uidmap=0:{{ entry.USERNS_ID }}:65536 \
+  --gidmap=0:{{ entry.USERNS_ID }}:65536 \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}
-{%- for key,value in entry.options.items() %}
-  --{{ key }}={{ value }} \
-{%- endfor %}
 {%- for key,value in entry.labels.items() %}
   --label={{ key }}={{ value }} \
 {%- endfor %}
 {%- for vol in entry.volumes %}
-  {%- set vol_str = env_repl(vol, entry.environment) %}
-  --volume={{ vol_str }} \
+  --volume={{ vol }} \
 {%- endfor %}
 {%- for publish in entry.ports %}
-  {%- set publish_str = env_repl(publish, entry.environment) %}
-  --publish={{ publish_str }} \
+  --publish={{ publish }} \
 {%- endfor %}
-  {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} {% if entry.command %} \
+{%- for opt in entry.options %}
+  {{ opt }} \
+{%- endfor %}
+  {{ entry.image }}{{ ":"~ entry.tag if entry.tag }} {% if entry.command %} \
   {{ entry.command }} {{ entry.args }}
 {% endif %}
+
 {%- if entry.type = 'service' %}
+# stop container
 ExecStop=podman stop {{ entry.name }}
 {%- endif %}
 {%- for k,v in entry.systemd.service.items() %}

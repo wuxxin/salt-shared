@@ -1,77 +1,134 @@
 {# podman containers, highlevel library #}
-{#
-lowlevel functions:
-  + env_repl(data, env={}, user='')
-  + name_to_usernsid(name)
-  + get_dirs_json(entry, config, user='')
-  + create_directories(entry, user='')
-  + write_files(entry, user='')
-  + write_env(entry, user='')
-  + write_service(entry, source, user='')
-  + write_script(entry, user='')
-  + write_desktop(entry, user='')
 
-highlevel functions:
-  + image(name, tag='', source='', buildargs={}, builddir= '', user='')
-  + volume(name, opts=[], driver='local', labels=[], env={}, user='')
-  + volume_path(volume_name, container_definition, user='')
-  + container(container_definition, user='')
-  + compose(compose_definition, user='')
-#}
-
-
-{%- macro env_repl(data, env={}, user='') -%}
-{%- if user != '' -%}
-{%- set repl_env= env + {'USER': user, 'HOME': salt['user.info'](user)['home'] } -%}
-{%- else -%}
-{%- set repl_env= env -%}
-{%- endif -%}
-{%- set repl_ns= namespace(data= data) -%}
-{%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
-{%- if repl_names != None -%}
-  {%- for varname in repl_names -%}
-    {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', repl_env[varname]) -%}
-  {%- endfor -%}
-{%- endif -%}
+{%- macro var_repl(data, envdict={}, user='') -%}
+  {%- if user != '' -%}
+    {%- do envdict.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
+  {%- endif -%}
+  {%- set repl_ns= namespace(data= data) -%}
+  {%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
+  {%- if repl_names != None -%}
+    {%- for varname in repl_names -%}
+      {%- if envdict[varname] is defined -%}
+        {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
 {{ repl_ns.data }}
 {%- endmacro -%}
 
 
-{%- macro name_to_usernsid(name) -%}
-{{ salt['cmd.run_stdout'](
-  'python -c "import binascii;id=(binascii.crc_hqx(b\'' ~
-  name ~ '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }}
+{%- macro repl_env_json(srcdict, envdict=False, user='') -%}
+  {%- if not envdict -%}{%- set envdict = srcdict -%}{%- endif -%}
+  {%- set repl_ns = namespace(to_repl=srcdict) -%}
+  {%- for k,v in repl_ns.to_repl.items() -%}
+    {% do salt.log.error("k,v:"~ k ~":"~ v) %}
+    {%- if v is string -%}
+      {%- set repl_names = v|regex_match('(?:[^$]*?\$\{([^}]+)\})+?') -%}
+      {% do salt.log.error("regex_search:"~ repl_names) %}
+      {%- if repl_names != None -%}
+        {%- for varname in repl_names -%}
+          {%- if envdict[varname] is defined -%}
+            {%- do repl_ns.to_repl.update( {k: v|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) } ) -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{{ repl_ns.to_repl|json() }}
 {%- endmacro -%}
 
 
-{%- macro get_dirs_json(entry, config, user='') -%}
-  {%- if user == '' -%}
-    {%- set dirs_dict= {
-        'configdir': config.system.config_basepath ~ '/' ~ entry.name,
-        'workdir': config.system.workdir_basepath ~ '/' ~ entry.name,
-        'builddir': config.system.build_basepath ~ '/' ~ entry.name,
-        'servicedir': config.system.service_basepath,
-        'scriptdir': config.system.script_basepath,
-        'desktopdir': config.system.desktop_basepath,
-        }
-    -%}
-  {%- else -%}
-    {%- set dirs_dict= {
-        'configdir': env_repl(config.user.config_basepath ~ '/' ~ entry.name, entry.environment),
-        'workdir': env_repl(config.user.workdir_basepath ~ '/' ~ entry.name, entry.environment),
-        'builddir': env_repl(config.user.build_basepath ~ '/' ~ entry.name, entry.environment),
-        'servicedir': env_repl(config.user.service_basepath, entry.environment),
-        'scriptdir': env_repl(config.user.script_basepath, entry.environment),
-        'desktopdir': env_repl(config.user.desktop_basepath, entry.environment),
-        }
-    -%}
+{%- macro repl_entry_json(entry, dirconfig=false, x11docker_options=[] user='') -%}
+  {%- set repl_ns= namespace(to_repl={'environment': entry.environment}) -%}
+  {# add SERVICE_NAME and USER, HOME #}
+  {%- do repl_ns.to_repl.environment.update({'SERVICE_NAME': entry.name}) -%}
+  {%- if entry.userns == 'pick' %}
+    {# add calculated user namespace id if userns=pick #}
+    {%- do repl_ns.to_repl.update({'USERNS_ID':
+      salt['cmd.run_stdout'](
+        'python -c "import binascii;id=(binascii.crc_hqx(b\'' ~
+        entry.name ~
+        '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }) -%}
   {%- endif -%}
-{{ dirs_dict|json() }}
+  {# add x11docker template_options #}
+  {%- do repl_ns.to_repl.desktop.update( {'template_options': x11docker_options} ) -%}
+  {%- if user != '' -%}
+    {# add USER and HOME if user =! '' #}
+    {%- do repl_ns.to_repl.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
+  {%- endif -%}
+  {# add *dirs to entry #}
+  {%- if dirconfig -%}
+    {%- if user == '' -%}
+      {%- set config_dict= {
+        'configdir': dirconfig.system.config_basepath ~ '/' ~ entry.name,
+        'workdir': dirconfig.system.workdir_basepath ~ '/' ~ entry.name,
+        'builddir': dirconfig.system.build_basepath ~ '/' ~ entry.name,
+        'servicedir': dirconfig.system.service_basepath,
+        'scriptdir': dirconfig.system.script_basepath,
+        'desktopdir': dirconfig.system.desktop_basepath,
+        }
+      -%}
+    {%- else -%}
+      {%- set config_dict= {
+        'configdir': dirconfig.user.config_basepath ~ '/' ~ entry.name,
+        'workdir': dirconfig.user.workdir_basepath ~ '/' ~ entry.name,
+        'builddir': dirconfig.user.build_basepath ~ '/' ~ entry.name,
+        'servicedir': dirconfig.user.service_basepath,
+        'scriptdir': dirconfig.user.script_basepath,
+        'desktopdir': dirconfig.user.desktop_basepath,
+        }
+      -%}
+    {%- endif -%}
+    {%- load_json as config_update -%}
+{{ repl_env_json(config_dict, repl_ns.to_repl.environment, user=user) }}
+    {%- endload -%}
+    {%- do repl_ns.to_repl.update(config_update) -%}
+  {%- endif -%}
+  {# repl environment #}
+  {%- load_json as env_update -%}
+{{ repl_env_json(repl_ns.to_repl.environment, user=user) }}
+  {%- endload -%}
+  {%- do repl_ns.to_repl.update( {'environment': env_update} ) -%}
+  {# repl labels #}
+  {% do salt.log.error("entry.labels:" ~ entry.labels|yaml(false)) %}
+  {%- load_json as labels_update -%}
+{{ repl_env_json(entry.labels, repl_ns.to_repl.environment, user=user) }}
+  {%- endload -%}
+  {%- do repl_ns.to_repl.update( {'labels': labels_update} ) -%}
+  {% do salt.log.error("repl_ns.to_repl.labels" ~ repl_ns.to_repl.labels|yaml(false)) %}
+  {# repl storage #}
+  {%- do repl_ns.to_repl.update({'storage': []}) -%}
+  {%- for s in entry.storage -%}
+    {%- load_json as s_entry -%}
+{{ repl_env_json(s, repl_ns.to_repl.environment, user=user) }}
+    {%- endload -%}
+    {%- do repl_ns.to_repl.storage.append(s_entry) -%}
+  {%- endfor -%}
+  {# repl volumes #}
+  {%- do repl_ns.to_repl.update({'volumes': []}) -%}
+  {%- for v in entry.volumes -%}
+    {%- do repl_ns.to_repl.volumes.append(var_repl(v, repl_ns.to_repl.environment, user)) -%}
+  {%- endfor -%}
+  {# repl ports #}
+  {%- do repl_ns.to_repl.update({'ports': []}) -%}
+  {%- for p in entry.ports -%}
+    {%- do repl_ns.to_repl.ports.append(var_repl(p, repl_ns.to_repl.environment, user)) -%}
+  {%- endfor -%}
+{{ repl_ns.to_repl|json() }}
 {%- endmacro -%}
 
 
 {% macro create_directories(entry, user='') %}
-{# create workdir, builddir and a symlink in workdir/build pointing to builddir #}
+{# create configdir, workdir, builddir and a symlink in workdir/build pointing to builddir #}
+{{ entry.name }}.configdir:
+  file.directory:
+    - name: {{ entry.configdir }}
+    - makedirs: true
+    - mode: "0750"
+  {%- if user != '' -%}
+    - user: {{ user }}
+    - group: {{ user }}
+  {%- endif %}
 {{ entry.name }}.workdir:
   file.directory:
     - name: {{ entry.workdir }}
@@ -225,7 +282,6 @@ highlevel functions:
 
 {% macro write_script(entry, user='') %}
 {# write shell script file (either for everyone or for one user) #}
-{%- from "containers/defaults.jinja" import settings with context -%}
 {{ entry.name }}.script:
   file:
   {%- if entry.absent %}
@@ -234,13 +290,13 @@ highlevel functions:
     - managed
     - source: salt://containers/template/container-run.sh
     - template: jinja
+    - mode: 755
     {%- if user != '' -%}
     - user: {{ user }}
     - group: {{ user }}
     {%- endif %}
     - defaults:
         entry: {{ entry }}
-        settings: {{ settings }}
   {%- endif %}
     - name: {{ entry.scriptdir }}/{{ entry.name }}.sh
 {% endmacro %}
@@ -267,19 +323,19 @@ highlevel functions:
 {% endmacro %}
 
 
-{% macro image(name, tag='', source='', buildargs={}, builddir= '', user='') %}
+{% macro image(image_name, tag='', source='', buildargs={}, builddir= '', user='') %}
   {%- set tag_opt = '' if tag == '' else ':' ~ tag %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
   {%- set postfix_user = '' if user == '' else '_' ~ user %}
-containers_image_{{ name }}{{ postfix_user }}:
+containers_image_{{ image_name }}{{ postfix_user }}:
   cmd.run:
   {%- if builddir == '' or source == '' %}
-    - name: {{ gosu_user }} podman image pull {{ name }}{{ tag_opt }}
-    - unless: {{ gosu_user }} podman image exists {{ name }}{{ tag_opt }}
+    - name: {{ gosu_user }} podman image pull {{ image_name }}{{ tag_opt }}
+    - unless: {{ gosu_user }} podman image exists {{ image_name }}{{ tag_opt }}
   {%- else %}
     - cwd: {{ builddir }}
     - name: |
-        {{ gosu_user }} podman build {{ '--tag='~ name~ ':' ~ tag|d('latest') }} \
+        {{ gosu_user }} podman build {{ '--tag='~ image_name~ ':' ~ tag|d('latest') }} \
         {%- for key,value in buildargs.items() %}
           {{ '--build-arg=' ~ key ~ '=' ~ value }} \
         {%- endfor %}
@@ -288,30 +344,31 @@ containers_image_{{ name }}{{ postfix_user }}:
 {% endmacro %}
 
 
-{% macro volume(name, opts=[], driver='local', labels=[], env={}, user='') %}
-  {%- set name_str = env_repl(name, env, user) %}
-  {%- set labels_str = '' if not labels else '-l ' ~ labels|join(' -l ') %}
+{% macro volume(volume_name, opts=[], driver='local', labels={}, user='') %}
+  {%- set labels_str = labels|map('method_call', 'items', k, v)|join(' -l ') %}
   {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
   {%- set postfix_user = '' if user == '' else '_' ~ user %}
-containers_volume_{{ name_str }}{{ postfix_user }}:
+containers_volume_{{ volume_name }}{{ postfix_user }}:
   cmd.run:
-    - name: {{ gosu_user }} podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ name_str }}
-    - unless: {{ gosu_user }} podman volume ls -q | grep -q {{ name_str }}
+    - name: {{ gosu_user }} podman volume create --driver {{ driver }} {{ labels_str }} {{ opts_str }} {{ volume_name }}
+    - unless: {{ gosu_user }} podman volume ls -q | grep -q {{ volume_name }}
 {% endmacro %}
 
 
 {%- macro volume_path(volume_name, container_definition, user='') -%}
-{%- from "containers/defaults.jinja" import settings, default_container with context -%}
-{%- set entry= salt['grains.filter_by']({'default': default_container},
+  {%- from "containers/defaults.jinja" import settings, default_container with context -%}
+  {%- set entry= salt['grains.filter_by']({'default': default_container},
   grain='default', default= 'default', merge=container_definition) -%}
-{%- do entry.environment.update({'SERVICE_NAME': entry.name}) -%}
-{%- if user != '' -%}
-{%- do entry.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
-{{ env_repl(settings.storage.rootless_storage_path ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
-{%- else -%}
-{{ env_repl(settings.storage.graphroot ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
-{%- endif %}
+  {%- load_json as entry_update -%}
+{{ repl_entry_json(entry, user=user) }}
+  {%- endload %}
+  {%- do entry.update(entry_update) -%}
+  {%- if user != '' -%}
+{{ var_repl(settings.storage.rootless_storage_path ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
+  {%- else -%}
+{{ var_repl(settings.storage.graphroot ~ '/volumes/' ~ volume_name ~ '/_data', entry.env, user) }}
+  {%- endif -%}
 {%- endmacro -%}
 
 
@@ -319,15 +376,11 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
   {%- from "containers/defaults.jinja" import settings, default_container with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_container},
     grain='default', default= 'default', merge=container_definition) %}
-
-  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) -%}
-  {%- if user != '' -%}
-  {%- do entry.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
-  {%- endif %}
-  {% load_json as config_update %}
-{{ get_dirs_json(entry, settings.podman, user=user) }}
+  {% load_json as entry_update %}
+{{ repl_entry_json(entry, dirconfig=settings.podman,
+  x11docker_options=settings.x11docker[entry.desktop.template], user=user) }}
   {% endload %}
-  {% do entry.update(config_update) %}
+  {% do entry.update(entry_update) %}
 
 {{ create_directories(entry, user) }}
 {{ write_files(entry, user) }}
@@ -337,7 +390,7 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
     {# create volumes if defined via storage #}
     {%- for def in entry.storage %}
 {{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), env=entry.environment, user=user) }}
+          labels=def.labels|d([]), user=user) }}
     {%- endfor %}
 
     {# if not update on every container start, update now on install state #}
@@ -353,17 +406,18 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
 
   {%- if entry.type in ['service', 'oneshot'] %}
 {{ write_service(entry, 'salt://containers/template/container.service', user) }}
-
   {%- elif entry.type in ['command', 'desktop'] %}
-    {%- if entry.desktop.entry.Name is not defined %}
-      {%- do entry.desktop.entry.update({'Name': entry.name}) %}
+{{ write_script(entry, settings, user) }}
+    {%- if entry.type == 'desktop' %}
+      {%- if entry.desktop.entry.Name is not defined %}
+        {%- do entry.desktop.entry.update({'Name': entry.name}) %}
+      {%- endif %}
+      {%- if entry.desktop.entry.Exec is not defined %}
+        {%- do entry.desktop.entry.update({'Exec': entry.name ~ '.sh'}) %}
+      {%- endif %}
+{{ write_desktop(entry, user=user) }}
     {%- endif %}
-    {%- if entry.desktop.entry.Exec is not defined %}
-      {%- do entry.desktop.entry.update({'Exec': entry.name ~ '.sh'}) %}
-    {%- endif %}
-{{ write_script(entry, user) }}
   {%- endif %}
-
 {% endmacro %}
 
 
@@ -371,21 +425,16 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
   {%- from "containers/defaults.jinja" import settings, default_compose with context %}
   {%- set entry= salt['grains.filter_by']({'default': default_compose},
     grain='default', default= 'default', merge=compose_definition) %}
-
-  {%- do entry.environment.update({'SERVICE_NAME': entry.name}) -%}
-  {%- if user != '' -%}
-  {%- do entry.environment.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
-  {%- endif %}
-  {% load_json as config_update %}
-  {{ get_dirs_json(entry, settings.compose, user=user) }}
-  {% endload %}
-  {% do entry.update(config_update) %}
+  {%- load_json as entry_update -%}
+{{ repl_entry_json(entry, dirconfig=settings.compose,
+  x11docker_options=settings.x11docker[entry.desktop.template], user=user) }}
+  {%- endload -%}
+  {%- do entry.update(entry_update) -%}
 
 {{ write_files(entry, user) }}
 {{ write_env(entry, user) }}
 
-{# create compose,override files,
-  fill with source,config or config,none if source empty #}
+  {# create compose,override files, fill with source,config or config,none if source empty #}
   {%- set composefile= entry.workdir ~ "/" ~ settings.compose.compose_filename %}
   {%- set overridefile= entry.workdir ~ "/" ~ settings.compose.override_filename %}
   {%- if not entry.enabled %}
@@ -429,7 +478,6 @@ containers_volume_{{ name_str }}{{ postfix_user }}:
     {%- endif %}
   {%- endif %}
 
-{# write, (re)load and start service #}
+  {# write, (re)load and start service #}
 {{ write_service(entry, 'salt://containers/template/compose.service', user) }}
-
 {% endmacro %}

@@ -4,6 +4,11 @@ include:
 x11docker-tools:
   pkg.installed:
     - pkgs:
+      - tini
+
+x11docker-x11-tools:
+  pkg.installed:
+    - pkgs:
       - xinit
       - xauth
       - xclip
@@ -12,6 +17,7 @@ x11docker-tools:
       - x11-xserver-utils
       - xdg-utils
       - xdotool
+      - dbus-x11
       - xpra
       - xserver-xephyr
       - weston
@@ -25,11 +31,6 @@ x11docker-gpu-tools:
       - libxv1
       - va-driver-all
 
-x11docker-dbus-tools:
-  pkg.installed:
-    - pkgs:
-      - dbus-x11
-
 # snapshot (6.9.1-beta-1) at 038af50b3389ceaecf5916b29f3bc21ae5c613de
 # https://github.com/mviereck/x11docker
 x11docker:
@@ -39,5 +40,5 @@ x11docker:
     - mode: "755"
     - require:
       - pkg: x11docker-tools
+      - pkg: x11docker-x11-tools
       - pkg: x11docker-gpu-tools
-      - pkg: x11docker-dbus-tools
