@@ -1,5 +1,4 @@
 include:
-  - java.browser
   - desktop.browser.firefox
   - desktop.browser.chromium
 
