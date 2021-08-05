@@ -1,6 +1,32 @@
 #!/usr/bin/env python3
 
-import subprocess
+"""
+speakable friendly passwort generator
+
+Produced Password Characteristics:
++ Password Size: 16 Character lowercase alphabet
++ Expected Entropy: 58 Bits= 4,25 * 11 + 2,25 * 5
++ Vowels Placing at Character: 2,5,8,11,14
++ unbiased and hopefully correct
+    https://research.kudelskisecurity.com/2020/07/28/the-definitive-guide-to-modulo-bias-and-how-to-avoid-it/
+
+Personal Metrics:
++ memorize:    ++ (pronounceable, no numbers, only lowercase)
++ security:     + (58Bit if schema and implementation is correct)
++ convinience
+    + general:  - (16 Chars)
+    + mobile:   + (only lowercase alphabet)
+
+Target Keys: disk key, ssh secret key, keychain-master key, gnupg password
+Target Hardware: touchscreen, mobile, keyboard
+
+Out of scope:
+    any password stored in a keychain/password manager
+    any machine password (use 64-120 Bit Entropy eq. 13-24 Chars base32)
+
+"""
+
+import os
 
 try:
     from bitstring import BitStream
@@ -8,59 +34,37 @@ except ImportError:
     print("error: you need to install python package bitstring")
     raise
 
-"""
-human friendly passwort generator
-
-Produced Password Characteristics:
-    + Password Size: 16 Character lowercase alphabet
-    + Expected Entropy: 58 Bits= 4,25 * 11 + 2,25 * 5
-    + Vowels Placing at Character: 2,5,8,11,14
-
-Execution:
-    + openssl rand is used for entropy gathering
-    + Generate enough quality entropy (72 Bit = 9 Bytes source entropy)
-    + Generate 11 Chars of Base 21 ([a-z] - [a,e,i,o,u])
-        + using (5 Bit MOD 21 ) per char
-        + Used Entropy Bits: 55 Bit
-    + Generate 5 Chars of Base 5 ([a,e,i,o,u])
-        + using (3 Bit MOD 5) per Char
-        + Used Entropy Bits: 15 Bit
-    + Total source entropy used: 70 out of 72 Bit
-
-Personal Metrics:
-    + memorize: ++ (pronounceable, no numbers, only lowercase)
-    + security: + (58Bit if schema and implementation is correct)
-    + usage target: disk key, ssh secret key, keychain-master key, gnupg password
-    + usage hardware: touchscreen, mobile, keyboard
-    + convinience:
-        + general: - (16 Chars)
-        + mobile:  + (only lowercase alphabet)
-    + out of scope:
-        any password that can be stored in a password manager that is encrypted
-        with a master password.
-        (use 64-120 Bit Entropy eq. 13-24 Chars base32 instead)
-
-"""
+consonants = "bcdfghjklmnpqrstvwxyz"
+consonant_bits = 5
+vowels = "aeiou"
+vowel_bits = 3
+vcc_rounds = 5
+consonant_count = vcc_rounds * 2 + 1
+vowel_count = vcc_rounds
+batch_bytes_size = 8
 
 
-def gen():
+def rand_val(bitsize, maximum, stream):
+    # reject values if over maximum to avoid modulo bias
+    valid_value = False
+    while not valid_value:
+        if (stream.len - stream.pos) < bitsize:
+            stream.append(os.urandom(batch_bytes_size))
+        data_int = stream.read("uint:{}".format(bitsize))
+        if data_int < maximum:
+            valid_value = True
+    return data_int
 
-    consonants = "bcdfghjklmnpqrstvwxyz"
-    vowels = "aeiou"
-    generated = ""
 
-    randdata = subprocess.check_output(["openssl", "rand", "9"])
-    assert len(randdata) == 9
-    bs = BitStream(randdata)
-
-    generated += consonants[bs.read("int:5") % len(consonants)]
-    for i in range(5):
-        generated += vowels[bs.read("int:3") % len(vowels)]
-        generated += consonants[bs.read("int:5") % len(consonants)]
-        generated += consonants[bs.read("int:5") % len(consonants)]
-
+def gen_phrase():
+    bs = BitStream()
+    generated = consonants[rand_val(consonant_bits, len(consonants), bs)]
+    for i in range(vcc_rounds):
+        generated += vowels[rand_val(vowel_bits, len(vowels), bs)]
+        generated += consonants[rand_val(consonant_bits, len(consonants), bs)]
+        generated += consonants[rand_val(consonant_bits, len(consonants), bs)]
     return generated
 
 
 if __name__ == "__main__":
-    print(gen())
+    print(gen_phrase())
