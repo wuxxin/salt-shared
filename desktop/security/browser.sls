@@ -1,9 +1,14 @@
-{% if grains['os'] == 'Ubuntu' %}
-{% from "ubuntu/lib.sls" import apt_add_repository %}
-{{ apt_add_repository("torbrowser_ppa", "micahflee/ppa",
-  require_in = "pkg: torbrowser-launcher") }}
-{% endif %}
+include:
+  - flatpak
 
-torbrowser-launcher:
-  pkg:
-    - installed
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
+add-flathub-repository:
+  cmd.run:
+    - runas: {{ user }}
+    - name: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+install-flatpak-torbrowser-launcher:
+  cmd.run:
+    - runas: {{ user }}
+    - name: flatpak install flathub com.github.micahflee.torbrowser-launcher
