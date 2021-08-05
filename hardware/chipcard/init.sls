@@ -1,6 +1,3 @@
-include:
-  - java.browser
-
 pcscd-prereq:
   pkg.installed:
     - pkgs:
