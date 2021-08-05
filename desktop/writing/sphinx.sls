@@ -1,23 +1,22 @@
+{% from 'python/lib.sls' import pipx_inject %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
 include:
   - vcs
   - python
   - desktop.writing.latex
   - desktop.language.spellcheck
 
-{#
-pipx_install('sphinx')
-pipx_inject('sphinx', ['sphinxcontrib.actdiag', 'sphinxcontrib.blockdiag',
-  'sphinxcontrib.nwdiag', 'sphinxcontrib.seqdiag', 'sphinxcontrib.spelling'])
-#}
-
-sphinx:
+sphinx-req:
   pkg.installed:
     - pkgs:
       - zip
-      - python3-sphinx
-      - python3-sphinxcontrib.actdiag
-      - python3-sphinxcontrib.blockdiag
-      - python3-sphinxcontrib.nwdiag
-      - python3-sphinxcontrib.seqdiag
-      - python3-sphinxcontrib.spelling
-      - python3-pil
+    - require:
+      - sls: vcs
+      - sls: python
+      - sls: desktop.writing.latex
+      - sls: desktop.language.spellcheck
+
+{{ pipx_install('sphinx', require='test: sphinx-req', user=user) }}
+{{ pipx_inject('sphinx', ['sphinxcontrib.actdiag', 'sphinxcontrib.blockdiag',
+  'sphinxcontrib.nwdiag', 'sphinxcontrib.seqdiag', 'sphinxcontrib.spelling'], user=user)
