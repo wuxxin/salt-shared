@@ -1,13 +1,14 @@
 include:
   - python
+  - nodejs
   - java
   - android
+  - hardware.chipcard
   - .ubuntu
   - .user
   - .audio
   - .browser
   - .chat
-  - .chipcard
   - .email
   - .ftp
   - .flatpak
@@ -25,14 +26,10 @@ include:
   - tools.extra
   - .homeshick
   - .python
-  - .python.jupyter
-  - .python.nbdev
-  - .python.machinelearning
-  - .python.neurodsp
+  - .python.scientific
   - .code
   - .atom
   - .emulation
-  - android.emulator
 {% endif %}
 
 {% if salt['pillar.get']('desktop:games:enabled', false) == true %}
