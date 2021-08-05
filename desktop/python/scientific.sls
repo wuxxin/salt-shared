@@ -1,8 +1,7 @@
 include:
   - .jupyter
-  - .nbdev
   - .machinelearning
-  - .neurodsp
+  - .neuro
 
 python_scientific_nop:
   test:

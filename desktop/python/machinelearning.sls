@@ -4,17 +4,27 @@
 include:
   - desktop.python.jupyter
 
+
 {# machine learning #}
 {{ pipx_inject('jupyterlab', [
   'sklearn', 'sklearn-pandas', 'auto-sklearn',
-  'tensorflow', 'tensorboard', 'tensorflow_hub',
+  'tensorflow', 'tensorflow_hub', 'tensorboard', 'jupyterlab_tensorboard',
   'torch', 'torchvision', 'torchaudio', 'torchtext',
   'fastai',
   'statsmodels',
   ], require='sls: desktop.python.jupyter', user=user) }}
 
 {#
+# machine learning frameworks
+sklearn*          #
+tensorflow*       #
+torch*            #
+
 # torch libraries
+torchvision       #
+torchaudio        #
+torchtext         #
+
 skorch            # skorch is designed to maximize interoperability between sklearn and pytorch
 kornia            # a differentiable library that allows classical computer vision to be integrated into deep learning models
 albumentations    # a library for image augmentation to create new training samples from the existing data
@@ -25,5 +35,4 @@ flair             # A very simple framework for state-of-the-art NLP. Developed 
 
 # general
 transformers      # State-of-the-art Natural Language Processing for Jax, PyTorch and TensorFlow
-
 #}
