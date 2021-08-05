@@ -2,13 +2,10 @@ include:
   - python
   - python.jinja2
 
-ipython:
+interactive-python:
   pkg.installed:
     - pkgs:
-      - ipython3      {# Enhanced interactive Python shell #}
       - python3-ipdb  {# python debugger, with IPython features #}
-
-bpython:
-  pkg.installed:
       - python3-jedi  {# autocompletion tool for Python #}
-      - bpython3      {# fancy interface to the Python interpreter #}
+      - ipython3      {# Enhanced interactive Python shell #}
+      - bpython3      {# fancy terminal interface to the Python interpreter #}
