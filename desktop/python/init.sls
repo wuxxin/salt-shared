@@ -1,5 +1,5 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
-{% from 'python/lib.sls' import pipx_install %}
+{% from 'python/lib.sls' import pipx_install, pipx_inject %}
 
 include:
   - python.dev
@@ -17,13 +17,22 @@ python-tools:
 {# install the following as pipx user package, so they are isolated from others #}
 
 {# cookiecutter - creates projects from cookiecutters (project templates) #}
-{{ pipx_install('cookiecutter', user) }}
+{{ pipx_install('cookiecutter', user=user) }}
 
 {# black - opinionated python source code formating #}
-{{ pipx_install('black', user) }}
+{{ pipx_install('black', user=user) }}
 
 {# poetry - Python packaging and dependency management made easy #}
-{{ pipx_install('poetry', user) }}
+{{ pipx_install('poetry', user=user) }}
 
 {# pipenv - Python Dev Workflow for Humans, to bring the best of all packaging worlds to the python world #}
-{{ pipx_install('pipenv', user) }}
+{{ pipx_install('pipenv', user=user) }}
+
+{# Python-powered, cross-platform, Unix-gazing shell language and command prompt #}
+{{ pipx_install('xonsh[full]', user=user) }}
+
+{# python language server plus extensions #}
+{{ pipx_install('python-lsp-server[all]', user=user) }}
+{{ pipx_inject('python-lsp-server[all]', [
+  'pyls-isort', 'python-lsp-black', 'pyls-memestra', 'mypy-ls', 'pyls-flake8',
+  ], user=user) }}
