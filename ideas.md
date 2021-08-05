@@ -1,4 +1,4 @@
-# Ideas of Software to integrate
+# Ideas of Software to take a look and maybe integrate
 
 ## unsorted
 
@@ -39,6 +39,33 @@ nnn (n³) is a full-featured terminal file manager. It's tiny and nearly 0-confi
       grains['cpuarch'] ~ ':/' ~ master ~ '/xUbuntu_' ~ grains['osrelease']
 
 ## python
++ nox
++ pre-commit
+  + pre-commit install-hooks
 + sh        # very elegant python shell
 + sarge     # python shell execute with "; &  | && || <>"
 + https://github.com/litl/rauth  # A Python library for OAuth 1.0/a, 2.0, and Ofly
+
+## salt
+
+```yaml
+A warning:
+  test.configurable_test_state:
+    - result: true
+    - changes: false
+    - warnings: Attention!
+```
+ salt.states.pip_state.uptodate(name, bin_env=None, user=None, cwd=None, use_vt=False)
+
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.loop.html
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.kernelpkg.html
+https://docs.saltproject.io/en/latest/topics/tutorials/lxc.html#tutorial-lxc-profiles-container
+https://docs.saltproject.io/en/latest/topics/cloud/config.html#salt-cloud-config
+https://docs.saltproject.io/en/latest/topics/cloud/lxc.html
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.lxc.html#module-salt.states.lxc
+
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.virtualenv_mod.html#module-salt.states.virtualenv_mod
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.virt.html#module-salt.states.virt
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.ssh_known_hosts.html#module-salt.states.ssh_known_hosts
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.pyenv.html#module-salt.states.pyenv
+https://docs.saltproject.io/en/latest/ref/states/all/salt.states.postgres_cluster.html#module-salt.states.postgres_cluster
