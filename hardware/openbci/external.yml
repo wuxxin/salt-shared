@@ -1,0 +1,7 @@
+objects:
+  openbcigui_zip:
+    version: 5.0.6
+    latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/OpenBCI/OpenBCI_GUI/releases/latest" | sed -r "s/.*\/([^\/]+)$/\1/"
+    download: "https://github.com/OpenBCI/OpenBCI_GUI/releases/download/v##version##/openbcigui_v##version##_linux64.zip"
+    target: /usr/local/lib/openbcigui.zip
+    hash: d68daa7cb9db1d1ad8e26c5eb95d1d6dbe106aea546b0511b7aee9b744552ddc
