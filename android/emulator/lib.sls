@@ -9,7 +9,7 @@
 tag_latest_android_emulator:
   cmd.run:
     - name: podman image tag {{ settings.emulator.image }}:{{ settings.emulator.tag }} \
-        localhost/android-emulator-unmodified:latest
+        localhost/android/emulator-unmodified:latest
     - onchanges:
       - cmd: containers_image_{{ settings.emulator.image }}
 

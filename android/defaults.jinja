@@ -46,7 +46,7 @@ emulator:
 
 emulator_build:
   name: android-emulator
-  image: localhost/android-emulator
+  image: localhost/android/emulator
   tag: latest
   type: build
   build:
@@ -54,7 +54,7 @@ emulator_build:
   files:
     build/Dockerfile:
       contents: |
-        FROM localhost/android-emulator-unmodified:latest
+        FROM localhost/android/emulator-unmodified
 
         COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
         RUN chmod +x /android/sdk/launch-emulator.sh
@@ -67,13 +67,12 @@ emulator_build:
 
 emulator_desktop:
   name: android-emulator-desktop
-  image: localhost/android-emulator
-  tag: latest
+  image: localhost/android/emulator
   type: desktop
   desktop:
     template: host
     options:
-      - "--group-add kvm"
+      - --group-add kvm
     entry:
       Comment: Android Emulator Desktop Version
       Terminal: "true"
@@ -81,46 +80,52 @@ emulator_desktop:
       Categories: Network;
       Keywords: android;emulator;
   environment:
-    ANDROID_DATA_VOLUME: android-emulator-desktop
+    DATA_VOLUME: data
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "false"
     AVD_CONFIG: ""
     EMULATOR_PARAMS: ""
     ADD_EMULATOR_PARAMS: ""
+  labels:
+    android: emulator
+  storage:
+    - name: ${SERVICE_NAME}_${DATA_VOLUME}
+      labels:
+        android: emulator
   volumes:
-    - $ANDROID_DATA_VOLUME/user:/home/user/
-    - $ANDROID_DATA_VOLUME/android-home:/android-home
+    - ${SERVICE_NAME}_${DATA_VOLUME}/user:/home/user/
+    - ${SERVICE_NAME}_${DATA_VOLUME}/android-home:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
   options:
-    device: /dev/kvm
+    - --device /dev/kvm
 
 emulator_headless_service:
   name: android-emulator-headless
-  image: localhost/android-emulator
-  tag: latest
+  image: localhost/android/emulator
   type: service
   environment:
-    ANDROID_DATA_VOLUME: android-emulator-headless
+    DATA_VOLUME: data
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "true"
     AVD_CONFIG: ""
     EMULATOR_PARAMS: ""
     ADD_EMULATOR_PARAMS: "-nowindow"
+  storage:
+    - name: ${SERVICE_NAME}_${DATA_VOLUME}
   volumes:
-    - $ANDROID_DATA_VOLUME/user:/home/user/
-    - $ANDROID_DATA_VOLUME/android-home:/android-home
+    - ${SERVICE_NAME}_${DATA_VOLUME}/user:/home/user/
+    - ${SERVICE_NAME}_${DATA_VOLUME}/android-home:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
   options:
-    device: /dev/kvm
+    - --device /dev/kvm
 
 emulator_webrtc_service:
   name: android-emulator-webrtc
-  image: localhost/android-emulator
-  tag: latest
+  image: localhost/android/emulator
   type: service
 
 redroid_service:
@@ -129,14 +134,16 @@ redroid_service:
   tag: 10.0.0-latest
   type: service
   environment:
-    DATA_VOLUME: redroid-data
+    DATA_VOLUME: data
+  storage:
+    - name: ${SERVICE_NAME}_${DATA_VOLUME}
   volumes:
-    - ${DATA_VOLUME}:/data
+    - ${SERVICE_NAME}_${DATA_VOLUME}:/data
   publish:
     - 127.0.0.1:5555:5555/tcp
   options:
     - --privileged
-    - --memory-swappiness=0
+    - --memory-swappiness 0
 
 {% endload %}
 

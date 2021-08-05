@@ -1,6 +1,4 @@
-# Android
-
-## android.tools
+# android.tools
 
 + adb: Android Debug Bridge
 + fastboot: flashing an Android device, boot an Android device to fastboot mode
@@ -12,12 +10,12 @@
 
 ## android.builder.lib
 
-### Cross-build an android lineage version for a set of target hardware
+### Cross-build android lineage for a set of target hardware
 
-+ build_image()
++ `build_image()`
 
 #### Configure
-
+```yaml
 environment:
   BUILD_DATA_VOLUME: android-build-data
   BRANCH_NAME: lineage-17.1
@@ -27,24 +25,28 @@ environment:
   CUSTOM_PACKAGES: |
     GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend
     com.google.android.maps.jar FDroid FDroidPrivilegedExtension
+```
 
 ## android.emulator.lib
 
-### Create and launch an android emulator (using qemu for emulation) as a container
+### Create and launch an android emulator container
+using qemu/kvm for emulation
 
-+ emulator_image()
-+ emulator_desktop()
-+ emulator_headless_service()
-+ emulator_webrtc_service()
++ `emulator_image()`
++ `emulator_desktop()`
++ `emulator_headless_service()`
++ `emulator_webrtc_service()`
 
 #### Configure
 
+```yaml
 environment:
   ANDROID_DATA_VOLUME: name-of-instance-data-volume
   AVD_CONFIG: be used instead of default_args:avd if not empty
   EMULATOR_PARAMS: be used instead of default_args:emulator if not empty
-  ADD_EMULATOR_PARAMS: additional emulator args, eg "-camera-front webcam1 -netdelay umts -netspeed hsdpa "
-  # for launch parameter of emulator see https://developer.android.com/studio/run/emulator-commandline
+  ADD_EMULATOR_PARAMS: add emulator args, eg "-camera-front webcam1 -netdelay umts -netspeed hsdpa "
+  # for emulator launch parameter see:
+  # https://developer.android.com/studio/run/emulator-commandline
 desktop:
   template: default*|host
   options:
@@ -53,6 +55,7 @@ desktop:
 options:
   - "--device /dev/kvm"
   - additional podman options
+```
 
 #### Example
 
@@ -80,7 +83,9 @@ desktop:
 
 ### Create and launch a (same kernel) android container using ReDroid
 
-+ redroid_service()
++ `redroid_service()`
+
+#### about redroid
 
 + https://github.com/remote-android/redroid-doc
   + ReDroid (Remote Android) is a GPU accelerated AIC (Android In Container) solution. You can boot many instances in Linux host or any Linux container envrionments (Docker, K8S, LXC etc.). ReDroid supports both arm64 and amd64 architectures. You can connect to ReDroid througth VNC or scrcpy / sndcpy or WebRTC (Panned) or adb shell. ReDroid is suitable for Cloud Gaming, VDI / VMI (Virtual Mobile Infurstrure), Automation Test and more.
