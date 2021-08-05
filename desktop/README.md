@@ -12,7 +12,7 @@ desktop:
     loopback:
       enabled: *false|true      # install video4linux2 loopback kernel modules
   proprietary:
-    enabled:   *false|true      # install signal and skype
+    enabled:   *false|true      # allow to install non opensource packages
   games:
     enabled:   *false|true      # install Arcade-, PS2-, Nintendo64- Emulator
 ```
@@ -34,6 +34,7 @@ desktop:
     + mumble, linphone
 + Chat
     + Element (matrix client)
+    + Signal (if proprietary is enabled)
 + Video
     + vlc, gstreamer and codecs
     + video loopback devices (if enabled)
@@ -57,5 +58,7 @@ needs desktop:development:enabled: true
 + Python development
 + Emulation/Virtualization
   + qemu/kvm, libvirt, lxc, vagrant, nspawn, android-emulator
-+ jupyterlab with scientific and machinelearning packages
-  + (torch, sklearn, tensorflow, fastai, ...)
+
++ jupyterlab with scientific python including:
+  + machinelearning:  sklearn*, tensor*, torch* and fastai
+  + neurophysiological: brainflow, pylsl, neurodsp, mne, opencv
