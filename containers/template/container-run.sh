@@ -1,7 +1,7 @@
 #!/usr/bin/bash
+# calling script for {{ entry.type }} container of {{ entry.name }}
 set -eo pipefail
 
-# calling script for {{ entry.type }} container of {{ entry.name }}
 {%- if entry.update %}
   {%- if entry.build.source != '' %}
 # build container

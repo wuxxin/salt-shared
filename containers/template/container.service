@@ -7,6 +7,7 @@ After=network-online.target {{ entry.systemd.after }}
 {%- endif %}
 {% if entry.systemd.wants|length %}Wants={{ entry.systemd.wants }}{% endif %}
 {% if entry.systemd.requires|length %}Requires={{ entry.systemd.requires }}{% endif %}
+
 {%- for k,v in entry.systemd.unit.items() %}
 {{ k }}={{ v }}
 {%- endfor %}
@@ -83,6 +84,7 @@ ExecStart=podman run \
 # stop container
 ExecStop=podman stop {{ entry.name }}
 {%- endif %}
+
 {%- for k,v in entry.systemd.service.items() %}
 {{ k }}={{ v }}
 {%- endfor %}

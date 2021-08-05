@@ -1,8 +1,8 @@
 {% load_yaml as defaults %}
 config:
-
   containers:
     # /etc/containers/containers.conf
+
     containers:
       default_capabilities:
         - "CHOWN"
@@ -25,6 +25,7 @@ config:
 
   storage:
     # /etc/containers/storage.conf
+
     storage:
       # Primary storage driver
       driver: "overlay"
@@ -36,6 +37,7 @@ config:
 
   mounts:
     # /etc/containers/mounts.conf
+
     # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
     # one mount per line. For example, a mounts.conf with the line
     # - "/usr/share/secrets:/run/secrets"
@@ -46,6 +48,7 @@ config:
 
   policy:
     # /etc/containers/policy.json
+
     # Policy: Manages which registries you trust as a source of container images based on its location.
     # The location is determined by the transport and the registry host of the image.
     # Using this container image docker://docker.io/library/busybox as an example,
@@ -56,6 +59,7 @@ config:
       "docker-daemon":
         "":
           - type: insecureAcceptAnything
+
 
 # settings for containers/init.sls and containers/lib.sls
 podman:
@@ -167,17 +171,23 @@ desktop:
   options: []
   # entry: desktop entry is used for .desktop file
   entry:
-    # # mandatory: Name, Exec
     # # https://specifications.freedesktop.org/desktop-entry-spec/latest/
+    # # mandatory entries: Name, Exec
     Type: Application
     # Name: Program-Name
     # Exec: env X=Y name.sh
+    # # optional entries
+    # Comment: A Sentence to describe the application
+    # Terminal: true
+    # Icon: applications-internet
+    # Categories: Network;
+    # Keywords: android;emulator;
 
 # environment: dict: add environment data: {key: value,}
 environment: {}
 # label: dict: add labels to container: {key:value,}
 labels: {}
-# storage: list of dicts: create volumes: [{name: volume_name, labels={}, driver: local, opts=[]},]
+# storage: list of dicts: create volumes: [{name: volume_name, opts=[], labels={}, driver: local},]
 storage: []
 # volume: list of strings: use volumes: ["source-volume|host-dir:]container-dir[:options]",]
 volumes: []
@@ -261,6 +271,7 @@ desktop:
   options: []
   entry:
     Type: Application
+    # # https://specifications.freedesktop.org/desktop-entry-spec/latest/
 
 # environment: dict: add environment data: {key: value,}
 environment: {}

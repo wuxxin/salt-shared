@@ -1,11 +1,15 @@
 {# podman containers, highlevel library #}
 
+{# i should not write complex code in a template language #}
+{# i should not write complex code in a template language #}
+{# i should not write complex code in a template language #}
+
 {%- macro var_repl(data, envdict={}, user='') -%}
   {%- if user != '' -%}
     {%- do envdict.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
   {%- endif -%}
   {%- set repl_ns= namespace(data= data) -%}
-  {%- set repl_names= repl_ns.data|regex_search('\$\{(.+)\}') -%}
+  {%- set repl_names = repl_ns.data|regex_match('(?:[^$]+|\$\{([^}]+?)\})+') -%}
   {%- if repl_names != None -%}
     {%- for varname in repl_names -%}
       {%- if envdict[varname] is defined -%}
@@ -21,14 +25,15 @@
   {%- if not envdict -%}{%- set envdict = srcdict -%}{%- endif -%}
   {%- set repl_ns = namespace(to_repl=srcdict) -%}
   {%- for k,v in repl_ns.to_repl.items() -%}
-    {% do salt.log.error("k,v:"~ k ~":"~ v) %}
-    {%- if v is string -%}
-      {%- set repl_names = v|regex_match('(?:[^$]*?\$\{([^}]+)\})+?') -%}
-      {% do salt.log.error("regex_search:"~ repl_names) %}
+    {%- if v is string and v != '' -%}
+      {%- set repl_names = v|regex_match('(?:[^$]+|\$\{([^}]+?)\})+') -%}
+      {% do salt.log.error("regex_search:"~ v ~ ":" ~ repl_names) %}
       {%- if repl_names != None -%}
         {%- for varname in repl_names -%}
           {%- if envdict[varname] is defined -%}
-            {%- do repl_ns.to_repl.update( {k: v|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) } ) -%}
+            {% do salt.log.error("regex_replace:"~ varname ~ ":" ~ envdict[varname]) %}
+            {%- do repl_ns.to_repl.update(
+              {k: v|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) } ) -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
@@ -38,7 +43,7 @@
 {%- endmacro -%}
 
 
-{%- macro repl_entry_json(entry, dirconfig=false, x11docker_options=[] user='') -%}
+{%- macro repl_entry_json(entry, dirconfig=false, x11docker_options=[], user='') -%}
   {%- set repl_ns= namespace(to_repl={'environment': entry.environment}) -%}
   {# add SERVICE_NAME and USER, HOME #}
   {%- do repl_ns.to_repl.environment.update({'SERVICE_NAME': entry.name}) -%}
@@ -51,6 +56,7 @@
         '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }) -%}
   {%- endif -%}
   {# add x11docker template_options #}
+  {%- do repl_ns.to_repl.update( {'desktop': entry.desktop} ) -%}
   {%- do repl_ns.to_repl.desktop.update( {'template_options': x11docker_options} ) -%}
   {%- if user != '' -%}
     {# add USER and HOME if user =! '' #}
@@ -344,8 +350,8 @@ containers_image_{{ image_name }}{{ postfix_user }}:
 {% endmacro %}
 
 
-{% macro volume(volume_name, opts=[], driver='local', labels={}, user='') %}
-  {%- set labels_str = labels|map('method_call', 'items', k, v)|join(' -l ') %}
+{% macro volume(volume_name, opts=[], labels={}, driver='local', user='') %}
+  {%- set labels_str = labels|method_call('items')|join('=')|join(' -l ') %}
   {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
   {%- set postfix_user = '' if user == '' else '_' ~ user %}
@@ -382,9 +388,9 @@ containers_volume_{{ volume_name }}{{ postfix_user }}:
   {% endload %}
   {% do entry.update(entry_update) %}
 
-{{ create_directories(entry, user) }}
-{{ write_files(entry, user) }}
-{{ write_env(entry, user) }}
+{{ create_directories(entry, user=user) }}
+{{ write_files(entry, user=user) }}
+{{ write_env(entry, user=user) }}
 
   {%- if entry.enabled %}
     {# create volumes if defined via storage #}
@@ -405,9 +411,9 @@ containers_volume_{{ volume_name }}{{ postfix_user }}:
   {%- endif %}
 
   {%- if entry.type in ['service', 'oneshot'] %}
-{{ write_service(entry, 'salt://containers/template/container.service', user) }}
+{{ write_service(entry, 'salt://containers/template/container.service', user=user) }}
   {%- elif entry.type in ['command', 'desktop'] %}
-{{ write_script(entry, settings, user) }}
+{{ write_script(entry, user=user) }}
     {%- if entry.type == 'desktop' %}
       {%- if entry.desktop.entry.Name is not defined %}
         {%- do entry.desktop.entry.update({'Name': entry.name}) %}
