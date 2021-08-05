@@ -1,4 +1,4 @@
-{% from "containers/lib.sls" import container %}
+{% from "containers/lib.sls" import container with context %}
 
 include:
   - containers
