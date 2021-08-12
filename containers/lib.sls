@@ -5,41 +5,39 @@
 {# i should not write complex code in a template language #}
 
 {%- macro var_repl(data, envdict={}, user='') -%}
-  {%- if user != '' -%}
-    {%- do envdict.update({'USER': user, 'HOME': salt['user.info'](user)['home'] }) -%}
-  {%- endif -%}
-  {%- set repl_ns= namespace(data= data) -%}
-  {%- set repl_names = repl_ns.data|regex_match('(?:[^$]+|\$\{([^}]+?)\})+') -%}
+  {%- set var_repl_ns= namespace(data= data) -%}
+  {%- set repl_names = var_repl_ns.data|regex_match('\$\{([^}]+?)\}') -%}
   {%- if repl_names != None -%}
     {%- for varname in repl_names -%}
       {%- if envdict[varname] is defined -%}
-        {%- set repl_ns.data = repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) -%}
+        {%- set var_repl_ns.data = var_repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) -%}
       {%- endif -%}
     {%- endfor -%}
   {%- endif -%}
-{{ repl_ns.data }}
+{{ var_repl_ns.data }}
 {%- endmacro -%}
-
 
 {%- macro repl_env_json(srcdict, envdict=False, user='') -%}
   {%- if not envdict -%}{%- set envdict = srcdict -%}{%- endif -%}
-  {%- set repl_ns = namespace(to_repl=srcdict) -%}
-  {%- for k,v in repl_ns.to_repl.items() -%}
+  {%- set repl_env_ns = namespace(to_repl=srcdict) -%}
+  {%- do salt.log.error("repl_env_json:src:" ~ repl_env_ns.to_repl) -%}
+  {%- do salt.log.error("repl_env_json:dict:" ~ envdict) -%}
+  {%- for k,v in repl_env_ns.to_repl.items() -%}
     {%- if v is string and v != '' -%}
-      {%- set repl_names = v|regex_match('(?:[^$]+|\$\{([^}]+?)\})+') -%}
-      {% do salt.log.error("regex_search:"~ v ~ ":" ~ repl_names) %}
+      {%- set repl_names = v|regex_match('\$\{([^}]+?)\}') -%}
+      {%- do salt.log.error("regex_search:"~ v ~ ":" ~ repl_names) %}
       {%- if repl_names != None -%}
         {%- for varname in repl_names -%}
           {%- if envdict[varname] is defined -%}
             {% do salt.log.error("regex_replace:"~ varname ~ ":" ~ envdict[varname]) %}
-            {%- do repl_ns.to_repl.update(
+            {%- do repl_env_ns.to_repl.update(
               {k: v|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) } ) -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
-{{ repl_ns.to_repl|json() }}
+{{ repl_env_ns.to_repl|json() }}
 {%- endmacro -%}
 
 
@@ -96,12 +94,10 @@
   {%- endload -%}
   {%- do repl_ns.to_repl.update( {'environment': env_update} ) -%}
   {# repl labels #}
-  {% do salt.log.error("entry.labels:" ~ entry.labels|yaml(false)) %}
   {%- load_json as labels_update -%}
 {{ repl_env_json(entry.labels, repl_ns.to_repl.environment, user=user) }}
   {%- endload -%}
   {%- do repl_ns.to_repl.update( {'labels': labels_update} ) -%}
-  {% do salt.log.error("repl_ns.to_repl.labels" ~ repl_ns.to_repl.labels|yaml(false)) %}
   {# repl storage #}
   {%- do repl_ns.to_repl.update({'storage': []}) -%}
   {%- for s in entry.storage -%}
@@ -351,7 +347,11 @@ containers_image_{{ image_name }}{{ postfix_user }}:
 
 
 {% macro volume(volume_name, opts=[], labels={}, driver='local', user='') %}
-  {%- set labels_str = labels|method_call('items')|join('=')|join(' -l ') %}
+  {%- set label_list = [] %}
+  {%- for key,value in labels.items() %}
+    {%- do label_list.append(' -l ' ~ key ~ '=' ~ value~ ' ') %}
+  {%- endfor %}
+  {%- set labels_str = label_list|join() %}
   {%- set opts_str = '' if not opts else '-o ' ~ opts|join(' -o ') %}
   {%- set gosu_user = '' if user == '' else 'gosu ' ~ user ~ ' ' %}
   {%- set postfix_user = '' if user == '' else '_' ~ user %}
@@ -395,8 +395,8 @@ containers_volume_{{ volume_name }}{{ postfix_user }}:
   {%- if entry.enabled %}
     {# create volumes if defined via storage #}
     {%- for def in entry.storage %}
-{{ volume(def.name, opts=def.opts|d([]), driver=def.driver|d('local'),
-          labels=def.labels|d([]), user=user) }}
+{{ volume(def.name, opts=def.opts|d([]), labels=def.labels|d({}),
+          driver=def.driver|d('local'), user=user) }}
     {%- endfor %}
 
     {# if not update on every container start, update now on install state #}
