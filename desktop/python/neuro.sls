@@ -5,26 +5,22 @@ include:
   - desktop.python.machinelearning
 
 {# working with neurophysiological data #}
+{% load_yaml as neurophysiological %}
+- pyvista
+# pyvista: 3D plotting and mesh analysis interface for the Visualization Toolkit (VTK)
+- opencv-python
+# opencv-python: Pre-built CPU-only OpenCV Open Source Computer Vision Library
+- pylsl
+# pylsl: lab streaming layer
+- neurodsp
+# neurodsp: Neuro Digital Signal Processing Toolbox
+- nilearn
+# nilearn: Statistics for NeuroImaging in Python
+- mne
+# mne: exploring, visualizing, and analyzing human neurophysiological data
+- brainflow
+# brainflow: obtain, parse and analyze EEG, EMG, ECG and other kinds of data from biosensors
+{% endload %}
 
-{# brainflow: obtain, parse and analyze
-              EEG, EMG, ECG and other kinds of data from biosensors #}
-{# pylsl:     lab streaming layer #}
-{# neurodsp:  Neuro Digital Signal Processing Toolbox #}
-{# mne:       exploring, visualizing, and analyzing human neurophysiological data:
-              MEG, EEG, sEEG, ECoG, NIRS, and more #}
-{# opencv-python:
-              Pre-built CPU-only OpenCV Open Source Computer Vision Library
-              with several hundreds of computer vision algorithms #}
-{# pyvista:   3D plotting and mesh analysis through a streamlined interface for
-              the Visualization Toolkit (VTK) #}
-{# nilearn:   Statistics for NeuroImaging in Python #}
-
-{{ pipx_inject('jupyterlab', [
-    'pyvista',
-    'pylsl',
-    'nilearn',
-    'mne',
-    'neurodsp',
-    'brainflow',
-    'opencv-python',
-  ], require="sls: desktop.python.machinelearning", user=user) }}
+{{ pipx_inject('jupyterlab', neurophysiological,
+    require="sls: desktop.python.machinelearning", user=user) }}

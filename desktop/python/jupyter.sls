@@ -10,9 +10,15 @@ include:
 {# jupyterlab kernels, widgets, extensions #}
 {{ pipx_inject('jupyterlab', [
   'jupyter', 'jupyter_server',
-  'xeus-python', 'sshkernel', 'jupyter_micropython_kernel',
-  'jupyterlab-notifications', 'jupyterlab_widgets', 'ipywebrtc',
-  'jupyterlab-git', 'jupyter-resource-usage', 'retrolab',
+  'xeus-python',
+  'sshkernel',
+  'jupyter_micropython_kernel',
+  'jupyterlab-notifications',
+  'jupyterlab_widgets',
+  'ipywebrtc',
+  'jupyterlab-git',
+  'jupyter-resource-usage',
+  'retrolab',
   'jupyterlab-tabular-data-editor',
   ], user=user) }}
 {#  'xeus-sqlite', 'xonsh[full]' #}
