@@ -312,10 +312,10 @@ lvm:
 #######
 {% macro expand_lv(item, lvtarget, size) %}
 
-  {%- set req_size=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', size) %}
-  {%- set nomination=salt['extutils.re_replace']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\2', size) %}
+  {%- set req_size=salt['extutils.re_sub']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\1', size) %}
+  {%- set nomination=salt['extutils.re_sub']('[ ]*([0-9\.]+)([^0-9\.]+)', '\\2', size) %}
   {%- set current=salt['cmd.run']('lvdisplay -C --noheadings --units '+ nomination+ ' -o size '+ lvtarget) %}
-  {%- set curr_size=salt['extutils.re_replace']('[ ]*([0-9]+).*', '\\1', current) %}
+  {%- set curr_size=salt['extutils.re_sub']('[ ]*([0-9]+).*', '\\1', current) %}
 
   {%- if req_size|int > curr_size|int %}
 "lvm-lv-expand-{{ item }}":

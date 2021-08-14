@@ -2,7 +2,7 @@
 
 ## how to use
 
-* activate extip.py (from _modules) to add additional functions
+* activate extipv4.py (from _modules) to add additional functions
 * make a pillar (see example-pillar.sls)
 * use "type: virtual" to make a interface not used for network.managed, but for other purposes (eg. net_list)
 * use lib.sls for advanced network functions like: net_addr, net_calc, net_list 

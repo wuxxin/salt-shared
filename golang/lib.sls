@@ -5,7 +5,7 @@ source:
   repo:
   rev:
 build:
-  # salt['extutils.re_replace']('([a-z]+)://[([^@]@)?([^:]:[0-9]+)?/(.+)\.git', '\\4', config.source.repo)
+  # salt['extutils.re_sub']('([a-z]+)://[([^@]@)?([^:]:[0-9]+)?/(.+)\.git', '\\4', config.source.repo)
   name: default: last part of \\4
   dir: default: \\4
   rev: default: config.source.rev
@@ -36,7 +36,7 @@ target:
   grain='none', default= 'none', merge= build_config) %}
 
 {% set gitrepo_regex='([a-z]+)://([^@]+@)?([^:/]+)(:[0-9]+)?/(.+)\.git' %}
-{% set dir_from_git= salt['extutils.re_replace'](gitrepo_regex, '\\3/\\5', config.source.repo) %}
+{% set dir_from_git= salt['extutils.re_sub'](gitrepo_regex, '\\3/\\5', config.source.repo) %}
 
 {% if config.build.dir is none %} {% do config.build.update({'dir': dir_from_git}) %}{% endif %}
 {% if config.build.name is none %}{% do config.build.update({'name': dir_from_git.split('/')[-1]}) %}{% endif %}
