@@ -6,14 +6,12 @@
 
 {%- macro var_repl(data, envdict={}, user='') -%}
   {%- set var_repl_ns= namespace(data= data) -%}
-  {%- set repl_names = var_repl_ns.data|regex_match('\$\{([^}]+?)\}') -%}
-  {%- if repl_names != None -%}
-    {%- for varname in repl_names -%}
-      {%- if envdict[varname] is defined -%}
-        {%- set var_repl_ns.data = var_repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) -%}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endif -%}
+  {%- set repl_names = salt['extutils.re_findall']('\$\{([^}]+?)\}', var_repl_ns.data) -%}
+  {%- for varname in repl_names -%}
+    {%- if envdict[varname] is defined -%}
+      {%- set var_repl_ns.data = var_repl_ns.data|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) -%}
+    {%- endif -%}
+  {%- endfor -%}
 {{ var_repl_ns.data }}
 {%- endmacro -%}
 
@@ -24,7 +22,7 @@
   {%- do salt.log.error("repl_env_json:dict:" ~ envdict) -%}
   {%- for k,v in repl_env_ns.to_repl.items() -%}
     {%- if v is string and v != '' -%}
-      {%- set repl_names = v|regex_match('\$\{([^}]+?)\}') -%}
+      {%- set repl_names = salt['extutils.re_findall']('\$\{([^}]+?)\}', v) -%}
       {%- do salt.log.error("regex_search:"~ v ~ ":" ~ repl_names) %}
       {%- if repl_names != None -%}
         {%- for varname in repl_names -%}
