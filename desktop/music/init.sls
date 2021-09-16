@@ -11,32 +11,17 @@ music-tagger:
     - pkgs:
       - picard
 
+{% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
+    '"http://ppa.launchpad.net/gnumdk/lollypop/ubuntu/dists/'+ grains['oscodename']+
+    '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
+{{ apt_add_repository("lollypop_ppa",
+    "gnumdk/lollypop", require_in= "pkg: music-player") }}
+{% endif %}
+
 music-player:
   pkg.installed:
     - pkgs:
-      - rhythmbox
       - lollypop
-
-
-{% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 '+
-  '"http://ppa.launchpad.net/fossfreedom/rhythmbox-plugins/ubuntu/dists/'+ grains['oscodename']+
-  '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
-
-{{ apt_add_repository("rhythmbox-plugins_ppa",
-  "fossfreedom/rhythmbox-plugins", require_in= "pkg: rhythmbox-plugins") }}
-
-rhythmbox-plugins:
-  pkg.installed:
-    - pkgs:
-      - rhythmbox-plugin-close-on-hide
-      - rhythmbox-plugin-countdown-playlist
-      - rhythmbox-plugin-drc
-      - rhythmbox-plugin-equalizer
-      - rhythmbox-plugin-fullscreen
-      - rhythmbox-plugin-parametriceq
-      - rhythmbox-plugin-rating-filters
-{% endif %}
-
 
 {% if grains['os'] == 'Ubuntu' %}
   {% if grains['osrelease_info'][0]|int <= 19 %}
