@@ -4,6 +4,10 @@ include:
   - python
   - desktop.video.framework
 
+dvd-css-support:
+  pkg.installed:
+    - name: libdvd-pkg
+
 video-player:
   pkg.installed:
     - pkgs:
@@ -15,6 +19,7 @@ video-player:
 {%- endif %}
     - require:
       - sls: desktop.video.framework
+      - pkg: dvd-css-support
 
 {# Video/Audio downloader from webportals, eg. youtube
     install distro package and then update with the pip version #}

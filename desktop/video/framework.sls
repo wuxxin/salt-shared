@@ -1,7 +1,8 @@
 include:
   - desktop.audio.framework
+  - python
 
-video-packages:
+gstreamer-packages:
   pkg.installed:
     - pkgs:
       - gstreamer1.0-alsa
@@ -22,24 +23,16 @@ video-packages:
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-plugins-rtp
+      - gstreamer1.0-tools
       - vainfo
-      - lame
       - ffmpeg
       - libavcodec-extra
       - frei0r-plugins
       - gst123
 
-v4l2-tools:
-  pkg.installed:
+python-gstreamer-packages:
+  - pkg.installed:
     - pkgs:
-      - qv4l2       {# Graphical Qt v4l2 control panel #}
-      - uvcdynctrl  {# Command line tool to control v4l2 devices #}
-      - v4l-utils   {# video4linux command line utilities #}
-      - yavta       {# test Video4Linux2 devices #}
-      - fswebcam    {# Tiny and flexible webcam program #}
-
-dvd-css-support:
-  pkg.installed:
-    - name: libdvd-pkg
-    - require:
-      - pkg: video-packages
+      - python3-gst-1.0
+      - gir1.2-gstreamer-1.0
+      - gir1.2-gst-plugins-base-1.0

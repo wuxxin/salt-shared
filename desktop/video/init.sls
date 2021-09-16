@@ -1,5 +1,6 @@
 include:
   - .framework
+  - .tools
   - .loopback
   - .player
   - .streaming
