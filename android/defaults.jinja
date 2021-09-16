@@ -12,8 +12,8 @@ builder:
     SIGN_BUILDS: true
     SIGNATURE_SPOOFING: restricted
     CUSTOM_PACKAGES: |
-      GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend
-      com.google.android.maps.jar FDroid FDroidPrivilegedExtension
+        GmsCore GsfProxy FakeStore MozillaNlpBackend NominatimNlpBackend
+        com.google.android.maps.jar FDroid FDroidPrivilegedExtension
   volumes:
     - ${BUILD_DATA_VOLUME}/src:/srv/src
     - ${BUILD_DATA_VOLUME}/zips:/srv/zips
@@ -41,7 +41,7 @@ emulator:
     # - -camera-front webcam1
   avd:
     default_args:
-      # 1gb = 1073741824
+      # 1gb = 1073741824b
       disk.dataPartition.size: 1073741824
 
 emulator_build:
@@ -90,8 +90,6 @@ emulator_desktop:
     android: emulator
   storage:
     - name: ${SERVICE_NAME}_${DATA_VOLUME}
-      labels:
-        android: emulator
   volumes:
     - ${SERVICE_NAME}_${DATA_VOLUME}/user:/home/user/
     - ${SERVICE_NAME}_${DATA_VOLUME}/android-home:/android-home
@@ -142,7 +140,7 @@ redroid_service:
   publish:
     - 127.0.0.1:5555:5555/tcp
   options:
-    - --privileged
+    # - --privileged
     - --memory-swappiness 0
 
 {% endload %}
