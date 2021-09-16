@@ -10,15 +10,10 @@ pipewire:
       - pipewire-locales
       - pipewire-audio-client-libraries
       - gstreamer1.0-pipewire
-
       - openaptx-utils
       - libcamera-tools
       - libspa-0.2-jack
       - libspa-0.2-bluetooth
-      - blueman-git
-
-      - pipewire-doc
-      - pipewire-tests
 
 {% else %}
 
@@ -34,12 +29,9 @@ audio-tools:
   pkg.installed:
     - pkgs:
       - sox
-      - lame
-
-pulseaudio-tools:
-  pkg.installed:
-    - pkgs:
-      - paprefs
-      - pavucontrol
-      - pavumeter
       - libsox-fmt-pulse
+      - libsox-fmt-ao
+      - libsox-fmt-alsa
+      - libsox-fmt-mp3
+      - libasound2-plugins
+      - libasound2-plugins-extra

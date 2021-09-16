@@ -1,5 +1,6 @@
 include:
   - .framework
+  - .tools
   - .editor
 
 desktop_audio:
