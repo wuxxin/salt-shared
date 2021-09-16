@@ -9,8 +9,8 @@ create_http_frontend_{{ p }}:
   file.directory:
     - name: {{ salt['file.dirname'](p) }}
     - makedirs: true
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}
     - require_in:
       - service: nginx
 {% endfor %}
@@ -83,8 +83,8 @@ nginx:
     - require:
       - pkg: nginx
       - file: /etc/nginx/nginx.conf
-      - file: {{ settings.cert_dir }}/{{ settings.ssl_chain_cert }}
-      - file: {{ settings.cert_dir }}/{{ settings.ssl_dhparam }}
+      - file: {{ settings.ssl.pki.data }}/{{ settings.ssl_chain_cert }}
+      - file: {{ settings.ssl.pki.data }}/{{ settings.ssl_dhparam }}
       - archive: lua_prometheus_module
     - watch:
       - file: /etc/nginx/nginx.conf

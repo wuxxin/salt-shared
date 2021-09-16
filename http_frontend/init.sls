@@ -5,4 +5,4 @@ include:
   - http_frontend.ssl
   - http_frontend.nginx
   - http_frontend.letsencrypt
-  {# XXX order is important: ssl -> nginx -> letsencrypt #}
+  {# XXX order is important: pki -> ssl -> nginx -> letsencrypt #}

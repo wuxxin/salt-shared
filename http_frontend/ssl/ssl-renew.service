@@ -1,8 +1,7 @@
 [Unit]
-Description=Letsencrypt Certificates Renewal
+Description=Local Certificates Renewal
 After=network-online.target
 Wants=network-online.target
-ConditionFileNotEmpty={{ settings.ssl.pki.data }}/acme.sh/account.conf
 
 [Service]
 Type=oneshot
@@ -15,5 +14,7 @@ Environment=USER="{{ settings.ssl.pki.user }}"
 PassEnvironment=UNITNAME USER
 WorkingDirectory={{ settings.ssl.pki.data }}
 ExecStart={{ settings.ssl.pki.data }}/acme.sh/acme.sh --cron --home "{{ settings.ssl.pki.data }}/acme.sh"
+make-ssl-cert generate-default-snakeoil --force-overwrite
+
 # acme.sh returns 2 when renewal is skipped (i.e. certs up to date)
 SuccessExitStatus=0 2

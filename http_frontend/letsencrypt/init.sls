@@ -9,25 +9,25 @@ include:
 {% macro issue_cert(san_list, challenge='alpn', env={}) %}
 {# issue new cert, if not already available or SAN list != expected SAN list #}
 {% set domain= san_list[0] %}
-{% set domain_dir = settings.cert_dir+ '/acme.sh/' + domain %}
+{% set domain_dir = settings.ssl.pki.data+ '/acme.sh/' + domain %}
 
 acme-issue-cert-{{ domain }}:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
+      - LE_WORKING_DIR: "{{ settings.ssl.pki.data }}/acme.sh"
   {%- for k,v in env.items() %}
       - {{ k }}: {{ v }}
   {%- endfor %}
-    - cwd: {{ settings.cert_dir }}/acme.sh
+    - cwd: {{ settings.ssl.pki.data }}/acme.sh
     - name: |
-        gosu {{ settings.cert_user }} ./acme.sh --issue \
+        gosu {{ settings.ssl.pki.user }} ./acme.sh --issue \
           {% for i in san_list %}-d {{ i }} {% endfor %} \
   {%- if callenge.startswith('dns_') %}
           --dns {{ challenge }} \
   {%- else %}
           --alpn --tlsport {{ tlsport }} \
   {%- endif %}
-          --renew-hook '{{ settings.cert_dir }}/cert-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
+          --renew-hook '{{ settings.ssl.pki.data }}/ssl-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - unless: |
         result="false"
         if test -f "{{ domain_dir }}/fullchain.cer"; then
@@ -48,10 +48,10 @@ acme-issue-cert-{{ domain }}:
 acme-deploy-{{ domain }}:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
-    - cwd: {{ settings.cert_dir }}/acme.sh
+      - LE_WORKING_DIR: "{{ settings.ssl.pki.data }}/acme.sh"
+    - cwd: {{ settings.ssl.pki.data }}/acme.sh
     - name: |
-        gosu {{ settings.cert_user }} {{ settings.cert_dir }}/cert-renew-hook.sh \
+        gosu {{ settings.ssl.pki.user }} {{ settings.ssl.pki.data }}/ssl-renew-hook.sh \
           "{{ settings.domain }}" \
           "{{ domain_dir }}/{{ domain }}.key" \
           "{{ domain_dir }}/{{ domain }}.cer" \
@@ -62,10 +62,10 @@ acme-deploy-{{ domain }}:
 {% endmacro %}
 
 
-{{ settings.cert_dir }}/acme.sh:
+{{ settings.ssl.pki.data }}/acme.sh:
   file.directory:
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}
     - mode: "0750"
     - require:
       - sls: http_frontend.dirs
@@ -83,11 +83,11 @@ acme.sh:
     - require:
       - pkg: acme.sh
   archive.extracted:
-    - name: {{ settings.cert_dir }}/acme.sh
+    - name: {{ settings.ssl.pki.data }}/acme.sh
     - source: {{ settings.external.acme_sh_tar_gz.target }}
     - archive_format: tar
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}
     - enforce_toplevel: false
     - overwrite: true
     - clean: false
@@ -95,59 +95,59 @@ acme.sh:
     - onchanges:
       - file: acme.sh
     - require:
-      - file: {{ settings.cert_dir }}/acme.sh
+      - file: {{ settings.ssl.pki.data }}/acme.sh
       - file: acme.sh
 
-{{ settings.cert_dir }}/acme.sh/acme.sh.env:
+{{ settings.ssl.pki.data }}/acme.sh/acme.sh.env:
   file.managed:
     - mode: "0640"
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}
     - contents: |
-        export LE_WORKING_DIR="{{ settings.cert_dir }}/acme.sh"
-        alias acme.sh="{{ settings.cert_dir }}/acme.sh/acme.sh"
+        export LE_WORKING_DIR="{{ settings.ssl.pki.data }}/acme.sh"
+        alias acme.sh="{{ settings.ssl.pki.data }}/acme.sh/acme.sh"
     - require:
-      - file: {{ settings.cert_dir }}/acme.sh
+      - file: {{ settings.ssl.pki.data }}/acme.sh
 
 
-{% if not settings.letsencrypt %}
+{% if not settings.ssl.host.letsencrypt %}
 {# remove account.conf, to keep other parts from assuming it is enabeld #}
-{{ settings.cert_dir }}/acme.sh/account.conf:
+{{ settings.ssl.pki.data }}/acme.sh/account.conf:
   file:
     - absent
 
 {% else %}
-{{ settings.cert_dir }}/acme.sh/account.conf:
+{{ settings.ssl.pki.data }}/acme.sh/account.conf:
   file.managed:
     - mode: "0640"
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}
     - contents: |
-        #LOG_FILE="{{ settings.cert_dir }}/acme.sh/acme.sh.log"
+        #LOG_FILE="{{ settings.ssl.pki.data }}/acme.sh/acme.sh.log"
         #LOG_LEVEL=1
         #AUTO_UPGRADE="1"
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         TLSPORT={{ tlsport }}
     - require:
-      - file: {{ settings.cert_dir }}/acme.sh
+      - file: {{ settings.ssl.pki.data }}/acme.sh
 
 acme-register-account:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.cert_dir }}/acme.sh"
-    - cwd: {{ settings.cert_dir }}/acme.sh
-    - name: gosu {{ settings.cert_user }} ./acme.sh  --register-account
-    - unless: test -f {{ settings.cert_dir }}/acme.sh/ca/acme-v02.api.letsencrypt.org/account.key
+      - LE_WORKING_DIR: "{{ settings.ssl.pki.data }}/acme.sh"
+    - cwd: {{ settings.ssl.pki.data }}/acme.sh
+    - name: gosu {{ settings.ssl.pki.user }} ./acme.sh  --register-account
+    - unless: test -f {{ settings.ssl.pki.data }}/acme.sh/ca/acme-v02.api.letsencrypt.org/account.key
     - require:
       - archive: acme.sh
-      - file: {{ settings.cert_dir }}/acme.sh/acme.sh.env
-      - file: {{ settings.cert_dir }}/acme.sh/account.conf
+      - file: {{ settings.ssl.pki.data }}/acme.sh/acme.sh.env
+      - file: {{ settings.ssl.pki.data }}/acme.sh/account.conf
 
-  {%- if settings.letsencrypt.host and not (settings.key|d(false) and settings.cert|d(false)) %}
+  {%- if settings.ssl.host.letsencrypt.host and not (settings.key|d(false) and settings.cert|d(false)) %}
     {# issue host certificate, only if not disabled and ssl cert,key pair is not defined #}
 {{ issue_cert(settings.server_name.split(' '),
-  settings.letsencrypt.challenge, settings.letsencrypt.env) }}
+  settings.ssl.host.letsencrypt.challenge, settings.ssl.host.letsencrypt.env) }}
   {%- endif %}
 
   {%- for virtual_host in settings.virtual_names %}

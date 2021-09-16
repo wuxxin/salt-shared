@@ -3,39 +3,37 @@
 + stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
 
 + letsencrypt **host certificates** via **ALPN on https** port or **DNS-01** using **`acme.sh`**
-+ **pki management** for easy **client certificates** support and administration using **easy-rsa**
++ local CA **pki management** for **client certificates**, **host certificates** using **easy-rsa**
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
 + extended **prometheus stats** using **lua_nginx_prometheus**
 + **configuration** using **pillar:nginx**, for details see [defaults.jinja](defaults.jinja)
-+ Ssl domains certificates can use **certs from pillar** (cert+key), **letsencrypt** or be **selfsigned**
-+ multiple virtual domains with **multiple SAN's** per domain
++ Ssl domains certificates can use
+  + **certs from pillar**, **letsencrypt**, be created by the **local CA** or be **selfsigned**
+  + can have multiple virtual domains with **multiple SAN's** per domain
++ Request **optional** or **mandatory client certificates**
 + **unknown domains or invalid sni** requests will **return 404** and a **"hostname.invalid"** certificate
 + **Downstream http/https proxy** PROXY protocol support
 + configurable **set_real_ip_from** addresses of trusted downstream proxies
 + http **Upstreams**: http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
 
+### TODO
++ make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.ssl.host.letsencrypt
++ make letsencrypt use dns as alternative
++ make letsencrypt * certificates
+
 ### Administration
 
 + Creates a client certificate, and send certificate via Email
-  + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san san-values]`
-
+  + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san add-san-values]`
 + revoke an existing client certificate
-    + `revoke-client-certificate.sh cert_name --yes`
-
-+ `cert-renew-hook.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE`
-
-+ `create-selfsigned-host-cert.sh  -k <keyfile_target> -c <certfile_target> domain [domain]*`
-
-### TODO
-
-+ make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.letsencrypt
-+ make selfsigned virtual hosts certs with right name
-+ make letsencrypt of vhosts honour additional SANS
-+ make ssl, letsencrypt and pki use cert_user
-
-+ FIXME: make letsencrypt use dns as alternative
-+ FIXME: make letsencrypt * certificates
+  + `revoke-client-certificate.sh cert_name --yes`
++ create a host certificate using the local CA
+  + `create-host-certificate.sh -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [domains*]`
++ create a selfsigned host certificate
+  + `create-selfsigned-host-cert.sh -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [domains*]`
++ commands configured in ssl.host.on_renew are called with
+  + `$0 DOMAIN KEYFILE CERTFILE FULLCHAINFILE`
 
 ### example, for details see [defaults.jinja](defaults.jinja)
 
@@ -92,46 +90,10 @@ host:
 # subjectAltName=email:copy,email:my@other.address,URI:http://my.url.here/
 # subjectAltName=email:my@other.address,RID:1.2.3.4
 # subjectAltName=otherName:1.2.3.4;UTF8:some other identifier
-#
 # subjectAltName=dirName:dir_sect
-#
 # [dir_sect]
 # C=UK
 # O=My Organization
 # OU=My Unit
 # CN=My Name
-```
-
-```
-  {% if settings.nginx_custom_build %}
-    {%- set patch_list= ['ipscrub.patch', ] %}
-    {%- set patch_dir='/usr/local/src/nginx-custom-patches' %}
-    {%- set patches_string= patch_dir+ '/'+ patch_list|join(' '+ patch_dir+ '/') %}
-    {%- set custom_archive= '/usr/local/lib/nginx-custom-archive' %}
-
-    {% for p in patch_list %}
-add-patch-{{ p }}:
-  file.managed:
-    - source: salt://http_frontend/nginx/{{ p }}
-    - name: {{ patch_dir }}/{{ p }}
-    - makedirs: true
-    - require_in:
-      - cmd: nginx-custom-build
-    {% endfor %}
-
-nginx-custom-build:
-  cmd.run:
-    - name: /usr/local/sbin/build-from-lp.sh {{ custom_archive }} "ipscrub" {{ patches_string }}
-    - require:
-      - sls: ubuntu.build-from-lp
-
-nginx-custom-repo:
-  pkgrepo.managed:
-    - name: 'deb [ trusted=yes ] file:{{ custom_archive }} ./'
-    - file: /etc/apt/sources.list.d/local-nginx-custom.list
-    - require_in:
-      - pkg: nginx
-    - require:
-      - cmd: nginx-custom-build
-  {% endif %}
 ```

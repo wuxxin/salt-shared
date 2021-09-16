@@ -1,7 +1,7 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
 
-{{ settings.cert_dir }}:
+{{ settings.ssl.pki.data }}:
   file.directory:
     - makedirs: true
-    - user: {{ settings.cert_user }}
-    - group: {{ settings.cert_user }}
+    - user: {{ settings.ssl.pki.user }}
+    - group: {{ settings.ssl.pki.user }}

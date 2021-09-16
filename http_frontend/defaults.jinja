@@ -8,15 +8,14 @@
 {% import_yaml "http_frontend/external.yml" as http_frontend_external %}
 
 {% load_yaml as defaults %}
+
 {# list of ip's for nginx to listen #}
 listen_ip:
   - {{ def_route_ip }}
-
 {# allowed_service for nginx to expose: ['http', 'https', 'http_proxy', 'https_proxy'] #}
 listen_service:
   - http
   - https
-
 {# default http-, https-, http_proxy-, https_proxy- ports #}
 {# http_port will serve redirection to https_port if needed, but is not needed #}
 http_port: 80
@@ -32,47 +31,58 @@ set_real_ip_from: "127.0.0.1"
 {# server_name: String of space seperated list of expected hostnames (SAN's) #}
 {# the first name will be available as settings.domain in support files #}
 server_name: "{{ def_domain }}"
-
 {# virtual_names: List of additional dicts of hostnames, will need/create one cert per entry #}
 virtual_names: []
 {# - name: xx.aa.xx [xx.yy.yy]*
      key: | # key, pem encoded ssl key, default empty
      cert: | # crt, pem encoded ssl cert chain, default empty
      letsencrypt:
-       # enabled: default is settings.letsencrypt.enabled
+       # enabled: default is settings.ssl.host.letsencrypt.enabled
        enabled: false
-       # challenge: default is settings.letsencrypt.challenge
+       # challenge: default is settings.ssl.host.letsencrypt.challenge
        challenge: alpn
        # env: {} no default
        env: {}
 #}
 
-{# host https certificate #}
-{# use cert+key if exists, use letsencrypt if enabled and successful, use selfsigned cert else #}
-# cert: | # cert, pem encoded ssl cert chain for allowed_hosts, default empty
-# key: | # key, pem encoded ssl key, default empty
-letsencrypt:
-  enabled: true
-  # if host:false, dont use letsencrypt for settings.hostname
-  host: true
-  # challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi
-  challenge: alpn
-  env: {}
-    # KNOT_SERVER: "dns.example.com"
-    # KNOT_KEY: ""
-
-{# on_cert_renew: list of commands executed after ssl certificate has changed
- # cmds are run as ssl.cert_user, available env: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
-on_cert_renew:
-  - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
-
-{# client_certificates #}
-client_cert_verify: false
-client_cert_mandatory: false
-
-{# user and path to create host and client certs #}
-cert_user: {{ def_user }}
-cert_dir: /var/lib/http_frontend/cert_dir
+{# ssl encryption parameter #}
+{# use cert+key if exists,
+else use letsencrypt if enabled and successful,
+else use local CA to create host certificate if use_local_ca == true,
+else create a selfsigned host cert
+#}
+ssl:
+  host:
+    # cert: pem encoded ssl cert chain for allowed_hosts, default empty
+    # cert: |
+    # key: pem encoded ssl key, default empty
+    # key: |
+    # use_local_ca: use local ca to create host certificates, or use selfsigned certs
+    use_local_ca: true
+    letsencrypt:
+      # if enabled:false, dont use letsencrypt for settings.hostname
+      enabled: true
+      # challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi
+      challenge: alpn
+      env: {}
+        # KNOT_SERVER: "dns.example.com"
+        # KNOT_KEY: ""
+    # on_renew: list of commands executed after ssl certificate has changed
+    # cmds are run as ssl.pki.user, available env: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE
+    on_renew:
+      - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
+    # client_cert_verify: set X-Ssl-Client-Issuer, X-Ssl-Client-Subject, X-Ssl-Client-Verify
+    client_cert_verify: false
+    # client_cert_mandatory: mandatory client certificate needed
+    client_cert_mandatory: false
+  pki:
+    # user for cert operations
+    user: {{ def_user }}
+    # path for pki and algo config
+    data: /var/lib/http_frontend/cert_dir
+    validity_days: 1095
+    algo: ed
+    curve: ed25519
 
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
 client_max_body_size: 150M
@@ -122,8 +132,8 @@ location: []
 host: []
 {#
   - name: another.domain yet.another.domain
-    client_cert_verify: false,true
-    client_cert_mandatory: false,true
+    client_cert_verify: false*,true
+    client_cert_mandatory: false*,true
     # additional customization of nginx configuration, can be multiline yaml like "|"
     custom: ''
     header: {}
@@ -182,24 +192,22 @@ alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
 prometheus_endpoint: "127.0.0.1:9145"
 
-{# pki config #}
-pki_algo: ed
-pki_curve: ed25519
-
 {#  key,dhparam,cert,chain_cert,full_cert #}
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
 ssl_cert: server.cert.pem
 ssl_chain_cert: server.chain.cert.pem
 ssl_full_cert: server.chain.cert.dhparam.pem
-{# client_ca,client_crl #}
-ssl_client_ca: client-ca.cert.pem
-ssl_client_crl: client-ca.crl.pem
+{# local_ca,local_crl #}
+ssl_local_ca: local-ca.cert.pem
+ssl_local_crl: local-ca.crl.pem
+{# key,cert,full_cert of local ca created cert domain #}
+ssl_local_ca_host_cert: ssl-cert-ca-signed-host.pem
+ssl_local_ca_host_key: ssl-cert-ca-signed-host.key
 {# key,cert,full_cert of hostname.invalid #}
 ssl_invalid_cert: ssl-cert-invalid.pem
 ssl_invalid_key: ssl-cert-invalid.key
 ssl_invalid_full_cert: ssl-cert-invalid-full.pem
-
 {# key,cert of selfsigned domain #}
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
