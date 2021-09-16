@@ -40,9 +40,10 @@ if test "$3" = ""; then usage; fi
 certfile="$1"
 warning_days="$2"
 error_days="$3"
-valid_until=$(openssl x509 -in "$certfile" -enddate -noout | sed -r 's/notAfter=(.*)/\1/g')
+valid_until=$(openssl x509 -in "$certfile" -enddate -noout \
+    | sed -r 's/notAfter=(.*)/\1/g')
 subject_cn=$(openssl x509 -text -noout -in "$certfile" \
-            | grep -E "Subject:.+CN" | sed -r 's/[[:space:]]+Subject:.+CN += +(.+)/\1/g')
+    | grep -E "Subject:.+CN" | sed -r 's/[[:space:]]+Subject:.+CN += +(.+)/\1/g')
 
 simple_metric ssl_cert_valid_until gauge \
     "timestamp of certificate validity end date" \

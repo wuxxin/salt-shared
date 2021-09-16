@@ -17,6 +17,6 @@ WorkingDirectory={{ settings.home_dir }}
 ExecStart=/usr/bin/bash '\
   for cert in $(cat $CERTWATCHFILE); do \
     /usr/local/bin/gitops-cert-check.sh \
-      $cert {{ settings.cert_warn_days }}  {{ settings.cert_err_days }} \
+      $cert {{ settings.cert_warn_days }} {{ settings.cert_err_days }} \
   ; done
 '
