@@ -18,16 +18,12 @@
 {%- macro repl_env_json(srcdict, envdict=False, user='') -%}
   {%- if not envdict -%}{%- set envdict = srcdict -%}{%- endif -%}
   {%- set repl_env_ns = namespace(to_repl=srcdict) -%}
-  {%- do salt.log.error("repl_env_json:src:" ~ repl_env_ns.to_repl) -%}
-  {%- do salt.log.error("repl_env_json:dict:" ~ envdict) -%}
   {%- for k,v in repl_env_ns.to_repl.items() -%}
     {%- if v is string and v != '' -%}
       {%- set repl_names = salt['extutils.re_findall']('\$\{([^}]+?)\}', v) -%}
-      {%- do salt.log.error("regex_search:"~ v ~ ":" ~ repl_names) %}
       {%- if repl_names != None -%}
         {%- for varname in repl_names -%}
           {%- if envdict[varname] is defined -%}
-            {% do salt.log.error("regex_replace:"~ varname ~ ":" ~ envdict[varname]) %}
             {%- do repl_env_ns.to_repl.update(
               {k: v|regex_replace('\$\{' ~ varname ~ '\}', envdict[varname]) } ) -%}
           {%- endif -%}

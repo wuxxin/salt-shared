@@ -1,4 +1,4 @@
-# modern containers using podman
+# lightweight modern containers using podman
 
 + uses podman, crun, buildah, skopeo, fuse-overlayfs (from ppa)
 + compose support via podman-compose
