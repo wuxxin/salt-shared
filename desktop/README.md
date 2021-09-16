@@ -19,6 +19,17 @@ desktop:
 
 ## Main Features
 
++ Audio
+    + pipewire as pulseaudio replacement
++ Video
+    + gstreamer and most codecs
+    + video4linux2 and (if enabled) video loopback devices
+    + vlc (videolanclient)
+    + youtube-dl
++ Voice
+    + mumble, linphone
++ Music
+    + lollypop, cdparanoia, sound-juicer, picard
 + Graphics
     + Pixel Software: Gimp, Krita
     + Foto Software: Darktable
@@ -30,14 +41,9 @@ desktop:
     + Sphinx
     + Latex
     + Scribus (DTP)
-+ Voice
-    + mumble, linphone
 + Chat
     + Element (matrix client)
     + Signal (if proprietary is enabled)
-+ Video
-    + vlc, gstreamer and codecs
-    + video loopback devices (if enabled)
 + Security
     + Tor Browser
     + firejail (restricted application jail)
