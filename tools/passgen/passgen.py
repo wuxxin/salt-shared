@@ -12,7 +12,7 @@ Produced Password Characteristics:
 
 Personal Metrics:
 + memorize:    ++ (pronounceable, no numbers, only lowercase)
-+ security:     + (58Bit if schema and implementation is correct)
++ security:     + (58 Bit if schema and implementation is correct)
 + convinience
     + general:  - (16 Chars)
     + mobile:   + (only lowercase alphabet)
