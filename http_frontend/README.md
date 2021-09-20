@@ -2,14 +2,14 @@
 
 + stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
 
-+ letsencrypt **host certificates** via **ALPN on https** port or **DNS-01** using **`acme.sh`**
++ acme **host certificates** via **ALPN on https** port or **DNS-01** using **`acme.sh`**
 + local CA **pki management** for **client certificates**, **host certificates** using **easy-rsa**
 + **geoip2** databases for augumentation of location HEADER information for upstreams
 + **oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
 + extended **prometheus stats** using **lua_nginx_prometheus**
 + **configuration** using **pillar:nginx**, for details see [defaults.jinja](defaults.jinja)
 + Ssl domains certificates can use
-  + **certs from pillar**, **letsencrypt**, be created by the **local CA** or be **selfsigned**
+  + **certs from pillar**, **acme**, be created by the **local CA** or be **selfsigned**
   + can have multiple virtual domains with **multiple SAN's** per domain
 + Request **optional** or **mandatory client certificates**
 + **unknown domains or invalid sni** requests will **return 404** and a **"hostname.invalid"** certificate
@@ -18,9 +18,20 @@
 + http **Upstreams**: http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
 
 ### TODO
-+ make letsencrypt generation honour vhost:letsencrypt:false in addition to settings.ssl.host.letsencrypt
-+ make letsencrypt use dns as alternative
-+ make letsencrypt * certificates
+
+pki -> ssl -> nginx -> acme
+
++ pki: create ca
++ ssl: create dh_param
++ ssl: regenerate snakeoil if not existing or cn != settings.domain or != valid
++ ssl: generate invalid cert if not existing, append dhparam to it
+
++ ssl: write key, cert, cert_chain, full_cert if settings.ssl.host.cert
++ ssl: or write snakeoil as full_cert
++ ssl: make full_cert by chain_chert plus dhparam
+
++ make acme use dns as alternative
++ make acme * certificates
 
 ### Administration
 
@@ -29,7 +40,7 @@
 + revoke an existing client certificate
   + `revoke-client-certificate.sh cert_name --yes`
 + create a host certificate using the local CA
-  + `create-host-certificate.sh -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [domains*]`
+  + `create-host-certificate.sh [--days daysvalid] domain [domains*]`
 + create a selfsigned host certificate
   + `create-selfsigned-host-cert.sh -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [domains*]`
 + commands configured in ssl.host.on_renew are called with
@@ -46,10 +57,10 @@ server_name: hostname.something another.something
 virtual_names:
   - name: multi.domain other.san.name another.name.san
   - name: another.domain still.another.domain
-    letsencrypt:
+    acme:
       enabled: false
   - name: *.name.domain
-    letsencrypt:
+    acme:
       challenge: dns_knot
       env:
         KNOT_SERVER: "dns.example.com"

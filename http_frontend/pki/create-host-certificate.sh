@@ -4,25 +4,32 @@ set -eo pipefail
 
 usage(){
     cat << EOF
-Usage: $0 -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [add domains*]
+Usage: $0 [--days daysvalid] domain [add domains*]
+       $0 --is-valid-and-listed domain [add domains*]
 
-Creates a host certificate.
+Creates / Renews a host certificate using the local ca.
 
 + The default certificate lifetime is $daysvalid days.
+
+        result="false"
+        if test -f "{{ domain_dir }}/fullchain.cer"; then
+          if test -f "{{ domain_dir }}/{{ domain }}.cer"; then
+            san_list=$(openssl x509 -text -noout -in "{{ domain_dir }}/{{ domain }}.cer" | \
+              awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
+              tr -d "DNS:" | tr "," "\\n" | sort)
+            exp_list=$(echo "{{ san_list|join(' ') }}" | tr " " "\\n" | sort)
+            if test "$san_list" = "$exp_list"; then result="true"; fi
+          fi
+        fi
+        $result
 
 EOF
     exit 1
 }
 
-if test "$1" != "-k" -o "$3" != "-c" -o "$5" = ""; then usage; fi
-key_path="$2"
-cert_path="$4"
 daysvalid="{{ settings.ssl.pki.validity_days }}"
-shift 4
-if test "$1" = "--days" -a "$2" != ""; then
-    daysvalid=$2
-    shift 2
-fi
+if test "$1" = "--days" -a "$2" != ""; then daysvalid=$2; shift 2; fi
+if test "$1" = ""; then usage; fi
 commonName="$1"
 subjectAltName="DNS:$commonName"
 shift
@@ -45,7 +52,7 @@ $call_prefix ./easyrsa --batch --passout=stdin \
     --req-cn="$certname" \
     --subject-alt-name="${additional_san}" \
     --req-org="{{ settings.domain }} CA Server Cert" \
-    build-host-full "$certname"
+    build-host-full "$certname" nopass
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl

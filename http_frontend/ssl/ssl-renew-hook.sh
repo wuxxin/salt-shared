@@ -3,10 +3,19 @@ set -e
 
 if test "$4" = ""; then
     cat << EOF
-Usage: $0 DOMAIN KEYFILE CERTFILE FULLCHAINFILE
+Usage: $0 [--no-hooks] DOMAIN KEYFILE CERTFILE FULLCHAINFILE
+
+installs certs into the target directories so they are picked up by eg. nginx
+
+after installation, it will call settings.ssl.host.on_renew hooks,
+    **except** on first creation (no old key file in the target directory),
+    **or** --no-hooks is specified
 EOF
     exit 1
 fi
+
+execute_hooks="true"
+if test "$1" = "--no-hooks"; then execute_hooks="false"; shift; fi
 
 DOMAIN="${1}"; KEYFILE="${2}"; CERTFILE="${3}"; FULLCHAINFILE="${4}"
 if test -e /usr/local/lib/gitops-library.sh; then
@@ -23,6 +32,9 @@ if test "{{ settings.domain }}" != "$DOMAIN"; then
 fi
 simple_metric ssl_cert_renew counter \
     "timestamp of last cert-renew incovation" "$(date +%s)000"
+if test ! -e "{{ settings.ssl.base_dir }}/${subpath}{{ settings.ssl_key }}"; then
+    execute_hooks="false"
+fi
 
 install -m "0640" -T "$KEYFILE" "{{ settings.ssl.base_dir }}/${subpath}{{ settings.ssl_key }}"
 install -m "0640" -T "$CERTFILE" "{{ settings.ssl.base_dir }}/${subpath}{{ settings.ssl_cert }}"
@@ -38,6 +50,10 @@ simple_metric ssl_cert_valid_until gauge \
     "timestamp of certificate validity end date" \
     "$(date --date="$valid_until" +%s)000" "domain=\"$DOMAIN\""
 
+if test "$execute_hooks" = "true"; then
+
 {%- for command in settings.ssl.host.on_renew %}
 {{ command }} "$DOMAIN" "$KEYFILE" "$CERTFILE" "$FULLCHAINFILE"
 {%- endfor %}
+
+fi

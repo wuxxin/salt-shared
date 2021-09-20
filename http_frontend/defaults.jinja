@@ -18,7 +18,7 @@ listen_service:
 {# default http-, https-, http_proxy-, https_proxy- ports #}
 {# http_port will serve redirection to https_port if needed, but is not needed #}
 http_port: 80
-{# https_port is required if letsencrypt certificate creation is requested and dns is not used #}
+{# https_port is required if acme certificate creation is requested and dns is not used #}
 https_port: 443
 {# http_proxy_port and https_proxy_port both expect proxy protocol #}
 http_proxy_port: 8080
@@ -26,6 +26,7 @@ https_proxy_port: 8443
 {# list of ip's allowed to set real ip proxy header. The Default is correct and safe, read
 http://nginx.org/en/docs/http/ngx_http_realip_module.html before changing this #}
 set_real_ip_from: "127.0.0.1"
+
 
 {# server_name: String of space seperated list of expected hostnames (SAN's) #}
 {# the first name will be available as settings.domain in support files #}
@@ -35,10 +36,10 @@ virtual_names: []
 {# - name: xx.aa.xx [xx.yy.yy]*
      key: | # key, pem encoded ssl key, default empty
      cert: | # crt, pem encoded ssl cert chain, default empty
-     letsencrypt:
-       # enabled: default is settings.ssl.host.letsencrypt.enabled
+     acme:
+       # enabled: default is settings.ssl.host.acme.enabled
        enabled: false
-       # challenge: default is settings.ssl.host.letsencrypt.challenge
+       # challenge: default is settings.ssl.host.acme.challenge
        challenge: alpn
        # env: {} no default
        env: {}
@@ -46,14 +47,14 @@ virtual_names: []
 
 {# ssl encryption parameter
 use cert+key if exists, else
-use letsencrypt to create host certs if letsencrypt:enabled and successful, else
-use local CA to create host certs if from_local_ca == true, else
+use acme to create host certs if acme:enabled and successful, else
+use local CA to create host certs if local_ca == true, else
 create a selfsigned host cert
 #}
 ssl:
   {# user for cert operations #}
   user: {{ def_user }}
-  {# basepath for certs, easyrsa, letsencrypt #}
+  {# basepath for certs, easyrsa, acme #}
   basedir: /var/lib/http_frontend/cert_dir
 
   host:
@@ -61,10 +62,10 @@ ssl:
     # cert: |
     {# key: pem encoded ssl key, default empty #}
     # key: |
-    {# from_local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
-    from_local_ca: true
-    letsencrypt:
-      {# if enabled:false, dont use letsencrypt for settings.hostname #}
+    {# local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
+    local_ca: true
+    acme:
+      {# if enabled:false, dont use acme for settings.hostname #}
       enabled: true
       {# challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
       challenge: alpn
@@ -201,9 +202,6 @@ ssl_full_cert: server.chain.cert.dhparam.pem
 {# local_ca,local_crl #}
 ssl_local_ca: local-ca.cert.pem
 ssl_local_crl: local-ca.crl.pem
-{# key,cert,full_cert of local ca created cert domain #}
-ssl_local_ca_host_cert: ssl-cert-ca-signed-host.pem
-ssl_local_ca_host_key: ssl-cert-ca-signed-host.key
 {# key,cert,full_cert of hostname.invalid #}
 ssl_invalid_cert: ssl-cert-invalid.pem
 ssl_invalid_key: ssl-cert-invalid.key

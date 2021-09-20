@@ -10,8 +10,10 @@ pki_requisites:
       - swaks
       - gosu
 
-{% for i in ['create-client-certificate.sh', 'create-host-certificate.sh',
-              'revoke-certificate.sh'] %}
+{% for i in [
+'create-client-certificate.sh',
+'create-host-certificate.sh',
+'revoke-certificate.sh'] %}
 "/usr/local/bin/{{ i }}":
   file.managed:
     - source: salt://http_frontend/pki/{{ i }}
@@ -61,7 +63,7 @@ easyrsa_vars:
         set_var EASYRSA_CRL_DAYS 3650
         set_var EASYRSA_CERT_EXPIRE {{ settings.ssl.pki.validity_days }}
 
-# Generate initial CA for client and host certificates
+# Generate initial CA
 easyrsa_build_ca:
   cmd.run:
     - runas: {{ settings.ssl.user }}

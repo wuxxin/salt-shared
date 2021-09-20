@@ -23,6 +23,7 @@ if test "$1" = "--days" -a "$2" != ""; then
     daysvalid=$2
     shift 2
 fi
+if test "$1" = ""; then usage; fi
 commonName="$1"
 subjectAltName="DNS:$commonName"
 shift
@@ -36,6 +37,7 @@ if test "$(id -u)" = "0"; then
     echo "debug: called as root, using $call_prefix"
 fi
 
+# main
 template="/usr/share/ssl-cert/ssleay.cnf"
 TMPFILE="$(mktemp)" || exit 1
 TMPOUT="$(mktemp)"  || exit 1
