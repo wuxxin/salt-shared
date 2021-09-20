@@ -1,5 +1,5 @@
 [Unit]
-Description=Daily Letsencrypt Certificates Renewal
+Description=Daily ACME Certificates Renewal
 
 [Timer]
 OnCalendar=daily

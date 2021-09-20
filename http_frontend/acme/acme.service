@@ -1,5 +1,5 @@
 [Unit]
-Description=Letsencrypt Certificates Renewal
+Description=ACME Certificates Renewal
 After=network-online.target
 Wants=network-online.target
 ConditionFileNotEmpty={{ settings.ssl.base_dir }}/acme.sh/account.conf

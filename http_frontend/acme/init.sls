@@ -110,7 +110,7 @@ acme.sh:
       - file: {{ settings.ssl.base_dir }}/acme.sh
 
 
-{% if not settings.ssl.host.letsencrypt %}
+{% if not settings.ssl.host.acme %}
 {# remove account.conf, to keep other parts from assuming it is enabeld #}
 {{ settings.ssl.base_dir }}/acme.sh/account.conf:
   file:
@@ -144,50 +144,52 @@ acme-register-account:
       - file: {{ settings.ssl.base_dir }}/acme.sh/acme.sh.env
       - file: {{ settings.ssl.base_dir }}/acme.sh/account.conf
 
-  {%- if settings.ssl.host.letsencrypt.host and not (settings.key|d(false) and settings.cert|d(false)) %}
+  {%- if settings.ssl.host.acme.enabled and not (settings.key|d(false) and settings.cert|d(false)) %}
     {# issue host certificate, only if not disabled and ssl cert,key pair is not defined #}
-{{ issue_cert(settings.server_name.split(' '),
-  settings.ssl.host.letsencrypt.challenge, settings.ssl.host.letsencrypt.env) }}
+{{ issue_cert(settings.server_name.split(' \t\n'),
+  settings.ssl.host.acme.challenge, settings.ssl.host.acme.env) }}
   {%- endif %}
 
   {%- for virtual_host in settings.virtual_names %}
-    {%- if virtual_host.letsencrypt.enabled|d(true) %}
+    {%- if virtual_host.acme.enabled|d(
+            settings.ssl.host.acme.enabled) %}
 {{ issue_cert(virtual_host.name.split(' '),
-    virtual_host.letsencrypt.challenge|d('alpn'),
-    virtual_host.letsencrypt.env|d({})) }}
+    virtual_host.acme.challenge|d(
+      settings.ssl.host.acme.challenge),
+    virtual_host.acme.env|d({})) }}
     {%- endif %}
   {%- endfor %}
 
 {% endif %}
 
 
-/etc/systemd/system/letsencrypt.service:
+/etc/systemd/system/acme.service:
   file.managed:
-    - source: salt://http_frontend/letsencrypt/letsencrypt.service
+    - source: salt://http_frontend/acme/acme.service
     - template: jinja
     - defaults:
         settings: {{ settings }}
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: /etc/systemd/system/letsencrypt.service
+      - file: /etc/systemd/system/acme.service
 
-/etc/systemd/system/letsencrypt.timer:
+/etc/systemd/system/acme.timer:
   file.managed:
-    - source: salt://http_frontend/letsencrypt/letsencrypt.timer
+    - source: salt://http_frontend/acme/acme.timer
     - require:
-      - file: /etc/systemd/system/letsencrypt.service
+      - file: /etc/systemd/system/acme.service
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: /etc/systemd/system/letsencrypt.timer
+      - file: /etc/systemd/system/acme.timer
 
-enable-letsencrypt-service:
+enable-acme-service:
   service.running:
-    - name: letsencrypt.timer
+    - name: acme.timer
     - enable: true
     - require:
-      - file: /etc/systemd/system/letsencrypt.service
-      - file: /etc/systemd/system/letsencrypt.timer
+      - file: /etc/systemd/system/acme.service
+      - file: /etc/systemd/system/acme.timer
     - watch:
-      - file: /etc/systemd/system/letsencrypt.timer
+      - file: /etc/systemd/system/acme.timer
