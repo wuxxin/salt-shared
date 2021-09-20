@@ -21,7 +21,7 @@ pki_requisites:
         settings: {{ settings }}
 {% endfor %}
 
-{{ settings.ssl.basedir }}/easyrsa:
+{{ settings.ssl.base_dir }}/easyrsa:
   file.directory:
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
@@ -36,7 +36,7 @@ easyrsa:
     - source: {{ settings.external.easy_rsa_tar_gz.download }}
     - source_hash: sha256={{ settings.external.easy_rsa_tar_gz.hash }}
   archive.extracted:
-    - name: {{ settings.ssl.basedir }}/easyrsa
+    - name: {{ settings.ssl.base_dir }}/easyrsa
     - source: {{ settings.external.easy_rsa_tar_gz.target }}
     - archive_format: tar
     - user: {{ settings.ssl.user }}
@@ -53,7 +53,7 @@ easyrsa:
 # config
 easyrsa_vars:
   file.managed:
-    - name: {{ settings.ssl.basedir }}/easyrsa/vars
+    - name: {{ settings.ssl.base_dir }}/easyrsa/vars
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - mode: "0640"
@@ -65,10 +65,10 @@ easyrsa_vars:
 easyrsa_build_ca:
   cmd.run:
     - runas: {{ settings.ssl.user }}
-    - cwd: {{ settings.ssl.basedir }}/easyrsa
+    - cwd: {{ settings.ssl.base_dir }}/easyrsa
     - name: |
-        if test -f {{ settings.ssl.basedir }}/easyrsa/pki/ca.crt; then
-          rm -r {{ settings.ssl.basedir }}/easyrsa/pki
+        if test -f {{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt; then
+          rm -r {{ settings.ssl.base_dir }}/easyrsa/pki
         fi
         ./easyrsa --batch init-pki
         ./easyrsa --batch \
@@ -79,9 +79,9 @@ easyrsa_build_ca:
           build-ca nopass
     - unless: |
         result="false"
-        if test -f {{ settings.ssl.basedir }}/easyrsa/pki/ca.crt; then
+        if test -f {{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt; then
           subject_cn=$(openssl x509 -text -noout \
-            -in "{{ settings.ssl.basedir }}/easyrsa/pki/ca.crt" | \
+            -in "{{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt" | \
             grep "Subject: CN" | sed -r "s/[[:space:]]+Subject: +CN += +(.+)/\\1/g")
           echo "subject_cn:$subject_cn"
           echo "domain:{{ settings.domain }}"
@@ -98,17 +98,17 @@ easyrsa_build_ca:
 easyrsa_gen_crl:
   cmd.run:
     - runas: {{ settings.ssl.user }}
-    - cwd: {{ settings.ssl.basedir }}/easyrsa
+    - cwd: {{ settings.ssl.base_dir }}/easyrsa
     - name: ./easyrsa --batch gen-crl
-    - onlyif: test ! -e {{ settings.ssl.basedir }}/easyrsa/pki/crl.pem -o \
-                {{ settings.ssl.basedir }}/easyrsa/pki/crl.pem -ot {{ settings.ssl.basedir }}/easyrsa/pki/index.txt
+    - onlyif: test ! -e {{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem -o \
+                {{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem -ot {{ settings.ssl.base_dir }}/easyrsa/pki/index.txt
     - require:
       - cmd: easyrsa_build_ca
 
 # copy ca and crl to ssl.pki.data
-{{ settings.ssl.basedir }}/{{ settings.ssl_local_ca }}:
+{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca }}:
   file.copy:
-    - source: {{ settings.ssl.basedir }}/easyrsa/pki/ca.crt
+    - source: {{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - mode: "0640"
@@ -116,9 +116,9 @@ easyrsa_gen_crl:
     - onchanges:
       - cmd: easyrsa_build_ca
 
-{{ settings.ssl.basedir }}/{{ settings.ssl_local_crl }}:
+{{ settings.ssl.base_dir }}/{{ settings.ssl_local_crl }}:
   file.copy:
-    - source: {{ settings.ssl.basedir }}/easyrsa/pki/crl.pem
+    - source: {{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - mode: "0640"

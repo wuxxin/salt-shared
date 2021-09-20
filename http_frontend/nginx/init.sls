@@ -83,8 +83,8 @@ nginx:
     - require:
       - pkg: nginx
       - file: /etc/nginx/nginx.conf
-      - file: {{ settings.ssl.basedir }}/{{ settings.ssl_chain_cert }}
-      - file: {{ settings.ssl.basedir }}/{{ settings.ssl_dhparam }}
+      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
+      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
       - archive: lua_prometheus_module
     - watch:
       - file: /etc/nginx/nginx.conf

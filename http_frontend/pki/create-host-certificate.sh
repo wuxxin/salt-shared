@@ -36,7 +36,7 @@ if test "$(id -u)" = "0"; then
 fi
 
 # main
-cd "{{ settings.ssl.basedir }}/easyrsa"
+cd "{{ settings.ssl.base_dir }}/easyrsa"
 
 # create cert
 $call_prefix ./easyrsa --batch --passout=stdin \
@@ -50,5 +50,5 @@ $call_prefix ./easyrsa --batch --passout=stdin \
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
 install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
-        "{{ settings.ssl.basedir }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.basedir }}/{{ settings.ssl_local_crl }}"
+        "{{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem" \
+        "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_crl }}"

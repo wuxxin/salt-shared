@@ -9,16 +9,16 @@ include:
 {% macro issue_cert(san_list, challenge='alpn', env={}) %}
 {# issue new cert, if not already available or SAN list != expected SAN list #}
 {% set domain= san_list[0] %}
-{% set domain_dir = settings.ssl.basedir+ '/acme.sh/' + domain %}
+{% set domain_dir = settings.ssl.base_dir+ '/acme.sh/' + domain %}
 
 acme-issue-cert-{{ domain }}:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.ssl.basedir }}/acme.sh"
+      - LE_WORKING_DIR: "{{ settings.ssl.base_dir }}/acme.sh"
   {%- for k,v in env.items() %}
       - {{ k }}: {{ v }}
   {%- endfor %}
-    - cwd: {{ settings.ssl.basedir }}/acme.sh
+    - cwd: {{ settings.ssl.base_dir }}/acme.sh
     - name: |
         gosu {{ settings.ssl.user }} ./acme.sh --issue \
           {% for i in san_list %}-d {{ i }} {% endfor %} \
@@ -27,7 +27,7 @@ acme-issue-cert-{{ domain }}:
   {%- else %}
           --alpn --tlsport {{ tlsport }} \
   {%- endif %}
-          --renew-hook '{{ settings.ssl.basedir }}/ssl-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
+          --renew-hook '{{ settings.ssl.base_dir }}/ssl-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - unless: |
         result="false"
         if test -f "{{ domain_dir }}/fullchain.cer"; then
@@ -48,10 +48,10 @@ acme-issue-cert-{{ domain }}:
 acme-deploy-{{ domain }}:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.ssl.basedir }}/acme.sh"
-    - cwd: {{ settings.ssl.basedir }}/acme.sh
+      - LE_WORKING_DIR: "{{ settings.ssl.base_dir }}/acme.sh"
+    - cwd: {{ settings.ssl.base_dir }}/acme.sh
     - name: |
-        gosu {{ settings.ssl.user }} {{ settings.ssl.basedir }}/ssl-renew-hook.sh \
+        gosu {{ settings.ssl.user }} {{ settings.ssl.base_dir }}/ssl-renew-hook.sh \
           "{{ settings.domain }}" \
           "{{ domain_dir }}/{{ domain }}.key" \
           "{{ domain_dir }}/{{ domain }}.cer" \
@@ -62,7 +62,7 @@ acme-deploy-{{ domain }}:
 {% endmacro %}
 
 
-{{ settings.ssl.basedir }}/acme.sh:
+{{ settings.ssl.base_dir }}/acme.sh:
   file.directory:
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
@@ -83,7 +83,7 @@ acme.sh:
     - require:
       - pkg: acme.sh
   archive.extracted:
-    - name: {{ settings.ssl.basedir }}/acme.sh
+    - name: {{ settings.ssl.base_dir }}/acme.sh
     - source: {{ settings.external.acme_sh_tar_gz.target }}
     - archive_format: tar
     - user: {{ settings.ssl.user }}
@@ -95,54 +95,54 @@ acme.sh:
     - onchanges:
       - file: acme.sh
     - require:
-      - file: {{ settings.ssl.basedir }}/acme.sh
+      - file: {{ settings.ssl.base_dir }}/acme.sh
       - file: acme.sh
 
-{{ settings.ssl.basedir }}/acme.sh/acme.sh.env:
+{{ settings.ssl.base_dir }}/acme.sh/acme.sh.env:
   file.managed:
     - mode: "0640"
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - contents: |
-        export LE_WORKING_DIR="{{ settings.ssl.basedir }}/acme.sh"
-        alias acme.sh="{{ settings.ssl.basedir }}/acme.sh/acme.sh"
+        export LE_WORKING_DIR="{{ settings.ssl.base_dir }}/acme.sh"
+        alias acme.sh="{{ settings.ssl.base_dir }}/acme.sh/acme.sh"
     - require:
-      - file: {{ settings.ssl.basedir }}/acme.sh
+      - file: {{ settings.ssl.base_dir }}/acme.sh
 
 
 {% if not settings.ssl.host.letsencrypt %}
 {# remove account.conf, to keep other parts from assuming it is enabeld #}
-{{ settings.ssl.basedir }}/acme.sh/account.conf:
+{{ settings.ssl.base_dir }}/acme.sh/account.conf:
   file:
     - absent
 
 {% else %}
-{{ settings.ssl.basedir }}/acme.sh/account.conf:
+{{ settings.ssl.base_dir }}/acme.sh/account.conf:
   file.managed:
     - mode: "0640"
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - contents: |
-        #LOG_FILE="{{ settings.ssl.basedir }}/acme.sh/acme.sh.log"
+        #LOG_FILE="{{ settings.ssl.base_dir }}/acme.sh/acme.sh.log"
         #LOG_LEVEL=1
         #AUTO_UPGRADE="1"
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         TLSPORT={{ tlsport }}
     - require:
-      - file: {{ settings.ssl.basedir }}/acme.sh
+      - file: {{ settings.ssl.base_dir }}/acme.sh
 
 acme-register-account:
   cmd.run:
     - env:
-      - LE_WORKING_DIR: "{{ settings.ssl.basedir }}/acme.sh"
-    - cwd: {{ settings.ssl.basedir }}/acme.sh
+      - LE_WORKING_DIR: "{{ settings.ssl.base_dir }}/acme.sh"
+    - cwd: {{ settings.ssl.base_dir }}/acme.sh
     - name: gosu {{ settings.ssl.user }} ./acme.sh  --register-account
-    - unless: test -f {{ settings.ssl.basedir }}/acme.sh/ca/acme-v02.api.letsencrypt.org/account.key
+    - unless: test -f {{ settings.ssl.base_dir }}/acme.sh/ca/acme-v02.api.letsencrypt.org/account.key
     - require:
       - archive: acme.sh
-      - file: {{ settings.ssl.basedir }}/acme.sh/acme.sh.env
-      - file: {{ settings.ssl.basedir }}/acme.sh/account.conf
+      - file: {{ settings.ssl.base_dir }}/acme.sh/acme.sh.env
+      - file: {{ settings.ssl.base_dir }}/acme.sh/account.conf
 
   {%- if settings.ssl.host.letsencrypt.host and not (settings.key|d(false) and settings.cert|d(false)) %}
     {# issue host certificate, only if not disabled and ssl cert,key pair is not defined #}
