@@ -7,13 +7,13 @@ Wants=network-online.target
 Type=oneshot
 # timeout after 5min
 TimeoutStartSec=300
-User={{ settings.ssl.pki.user }}
-Group={{ settings.ssl.pki.user }}
+User={{ settings.ssl.user }}
+Group={{ settings.ssl.user }}
 Environment=UNITNAME=%n
-Environment=USER="{{ settings.ssl.pki.user }}"
+Environment=USER="{{ settings.ssl.user }}"
 PassEnvironment=UNITNAME USER
-WorkingDirectory={{ settings.ssl.pki.data }}
-ExecStart={{ settings.ssl.pki.data }}/acme.sh/acme.sh --cron --home "{{ settings.ssl.pki.data }}/acme.sh"
+WorkingDirectory={{ settings.ssl.basedir }}
+ExecStart={{ settings.ssl.basedir }}/acme.sh/acme.sh --cron --home "{{ settings.ssl.basedir }}/acme.sh"
 make-ssl-cert generate-default-snakeoil --force-overwrite
 
 # acme.sh returns 2 when renewal is skipped (i.e. certs up to date)

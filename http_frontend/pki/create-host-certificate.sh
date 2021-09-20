@@ -4,7 +4,7 @@ set -eo pipefail
 
 usage(){
     cat << EOF
-Usage: $0 -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [additional domains*]
+Usage: $0 -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [add domains*]
 
 Creates a host certificate.
 
@@ -17,7 +17,7 @@ EOF
 if test "$1" != "-k" -o "$3" != "-c" -o "$5" = ""; then usage; fi
 key_path="$2"
 cert_path="$4"
-daysvalid={{ settings.ssl.days_valid }}
+daysvalid="{{ settings.ssl.pki.validity_days }}"
 shift 4
 if test "$1" = "--days" -a "$2" != ""; then
     daysvalid=$2
@@ -31,12 +31,12 @@ for i in $@; do
 done
 call_prefix=""
 if test "$(id -u)" = "0"; then
-    call_prefix="gosu {{ settings.ssl.pki.user }}"
+    call_prefix="gosu {{ settings.ssl.user }}"
     echo "debug: called as root, using $call_prefix"
 fi
 
 # main
-cd "{{ settings.ssl.pki.data }}/easyrsa"
+cd "{{ settings.ssl.basedir }}/easyrsa"
 
 # create cert
 $call_prefix ./easyrsa --batch --passout=stdin \
@@ -49,6 +49,6 @@ $call_prefix ./easyrsa --batch --passout=stdin \
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
-install -o "{{ settings.ssl.pki.user }}" -g "{{ settings.ssl.pki.user }}" -m "0640" -T \
-        "{{ settings.ssl.pki.data }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.pki.data }}/{{ settings.ssl_local_crl }}"
+install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
+        "{{ settings.ssl.basedir }}/easyrsa/pki/crl.pem" \
+        "{{ settings.ssl.basedir }}/{{ settings.ssl_local_crl }}"

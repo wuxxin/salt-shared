@@ -21,7 +21,7 @@ EOF
 
 randbytes=15
 base64size=$(echo "if (($randbytes * 8) > ($randbytes * 8 /6 *6)) { $randbytes * 8 /6 +1} else { $randbytes *8 /6 }" | bc)
-daysvalid={{ settings.ssl.days_valid }}
+daysvalid="{{ settings.ssl.pki.validity_days }}"
 additional_san=""
 call_prefix=""
 
@@ -38,12 +38,12 @@ if test "$1" = "--san" -a "$2" != ""; then
 fi
 call_prefix=""
 if test "$(id -u)" = "0"; then
-    call_prefix="gosu {{ settings.ssl.pki.user }}"
+    call_prefix="gosu {{ settings.ssl.user }}"
     echo "debug: called as root, using $call_prefix"
 fi
 
 # main
-cd "{{ settings.ssl.pki.data }}/easyrsa"
+cd "{{ settings.ssl.basedir }}/easyrsa"
 randpass=$(openssl rand -base64 $randbytes | cut -c -$base64size)
 randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 
@@ -64,9 +64,9 @@ echo -e "$randpass\n$randpass\n$randpass\n$randpass" | \
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
-install -o "{{ settings.ssl.pki.user }}" -g "{{ settings.ssl.pki.user }}" -m "0640" -T \
-        "{{ settings.ssl.pki.data }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.pki.data }}/{{ settings.ssl_local_crl }}"
+install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
+        "{{ settings.ssl.basedir }}/easyrsa/pki/crl.pem" \
+        "{{ settings.ssl.basedir }}/{{ settings.ssl_local_crl }}"
 
 # display password for user
 cat << EOF
@@ -85,4 +85,4 @@ $call_prefix swaks -n --no-hints \
     --body "the p12 client certificate for $(hostname)" \
     --attach-type "application/x-pkcs12" \
     --attach-name "$certname.p12" \
-    --attach "{{ settings.ssl.pki.data }}/easyrsa/pki/private/$certname.p12"
+    --attach "{{ settings.ssl.basedir }}/easyrsa/pki/private/$certname.p12"

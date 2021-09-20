@@ -8,7 +8,6 @@
 {% import_yaml "http_frontend/external.yml" as http_frontend_external %}
 
 {% load_yaml as defaults %}
-
 {# list of ip's for nginx to listen #}
 listen_ip:
   - {{ def_route_ip }}
@@ -45,41 +44,42 @@ virtual_names: []
        env: {}
 #}
 
-{# ssl encryption parameter #}
-{# use cert+key if exists,
-else use letsencrypt if enabled and successful,
-else use local CA to create host certificate if use_local_ca == true,
-else create a selfsigned host cert
+{# ssl encryption parameter
+use cert+key if exists, else
+use letsencrypt to create host certs if letsencrypt:enabled and successful, else
+use local CA to create host certs if from_local_ca == true, else
+create a selfsigned host cert
 #}
 ssl:
+  {# user for cert operations #}
+  user: {{ def_user }}
+  {# basepath for certs, easyrsa, letsencrypt #}
+  basedir: /var/lib/http_frontend/cert_dir
+
   host:
-    # cert: pem encoded ssl cert chain for allowed_hosts, default empty
+    {# cert: pem encoded ssl cert chain for allowed_hosts, default empty #}
     # cert: |
-    # key: pem encoded ssl key, default empty
+    {# key: pem encoded ssl key, default empty #}
     # key: |
-    # use_local_ca: use local ca to create host certificates, or use selfsigned certs
-    use_local_ca: true
+    {# from_local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
+    from_local_ca: true
     letsencrypt:
-      # if enabled:false, dont use letsencrypt for settings.hostname
+      {# if enabled:false, dont use letsencrypt for settings.hostname #}
       enabled: true
-      # challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi
+      {# challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
       challenge: alpn
       env: {}
         # KNOT_SERVER: "dns.example.com"
         # KNOT_KEY: ""
-    # on_renew: list of commands executed after ssl certificate has changed
-    # cmds are run as ssl.pki.user, available env: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE
+    {# on_renew: list of commands executed after ssl certificate has changed #}
+    {# cmds are run as ssl.pki.user, available env: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
     on_renew:
       - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
-    # client_cert_verify: set X-Ssl-Client-Issuer, X-Ssl-Client-Subject, X-Ssl-Client-Verify
+    {# client_cert_verify: set X-Ssl-Client-Issuer, X-Ssl-Client-Subject, X-Ssl-Client-Verify as UPSTREAM Header #}
     client_cert_verify: false
-    # client_cert_mandatory: mandatory client certificate needed
+    {# client_cert_mandatory: mandatory client certificate needed #}
     client_cert_mandatory: false
   pki:
-    # user for cert operations
-    user: {{ def_user }}
-    # path for pki and algo config
-    data: /var/lib/http_frontend/cert_dir
     validity_days: 1095
     algo: ed
     curve: ed25519
@@ -94,12 +94,12 @@ upstream_error_target: /var/lib/http_frontend/www/502.html
 {# response headers to be inserted, if header or host:header is not present or empty dict. #}
 default_header:
   {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security #}
-  Strict-Transport-Security: '"max-age=31536000"' {# 3x10^7 s ~ 1 y #}
+  Strict-Transport-Security: max-age=31536000 {# 3x10^7 s ~ 1 y #}
   {# https://scotthelme.co.uk/hardening-your-http-response-headers #}
-  X-Frame-Options: '"SAMEORIGIN"'
-  Referrer-Policy: '"strict-origin-when-cross-origin"'
-  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy #}
-  X-Content-Type-Options: '"nosniff"'
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+  X-Content-Type-Options: '"nosniff"' #}
 
 {#
 # response header

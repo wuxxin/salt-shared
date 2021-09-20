@@ -17,14 +17,14 @@ if test "$2" != "--yes"; then usage; fi
 
 call_prefix=""
 if test "$(id -u)" = "0"; then
-    call_prefix="gosu {{ settings.ssl.pki.user }}"
+    call_prefix="gosu {{ settings.ssl.user }}"
     echo "debug: called as root, using $call_prefix"
 fi
 
 # main
-cd "{{ settings.ssl.pki.data }}/easyrsa"
+cd "{{ settings.ssl.basedir }}/easyrsa"
 $call_prefix ./easyrsa --batch revoke "$certname"
 $call_prefix ./easyrsa --batch gen-crl
-install -o "{{ settings.ssl.pki.user }}" -g "{{ settings.ssl.pki.user }}" -m "0640" -T \
-        "{{ settings.ssl.pki.data }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.pki.data }}/{{ settings.ssl_local_crl }}"
+install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
+        "{{ settings.ssl.basedir }}/easyrsa/pki/crl.pem" \
+        "{{ settings.ssl.basedir }}/{{ settings.ssl_local_crl }}"
