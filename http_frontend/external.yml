@@ -1,10 +1,10 @@
 objects:
   acme_sh_tar_gz:
-    version: 2.8.9
+    version: 3.0.0
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/acmesh-official/acme.sh/releases/latest" | sed -r "s/.*\/([^\/]+)$/\1/"
     download: "https://github.com/acmesh-official/acme.sh/archive/##version##.tar.gz"
     target: /usr/local/lib/acme_sh.tar.gz
-    hash: 2b341453da63235a8a4c1649bff1a197f27ee84c7c36d8ff98b3aed261f62524
+    hash: 4292d3144f9d070f14dd27e3dab679e4ba055509fc9d4ccca9b5e189f18e7b1b
   easy_rsa_tar_gz:
     version: 3.0.8
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/OpenVPN/easy-rsa/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
@@ -12,11 +12,11 @@ objects:
     target: /usr/local/lib/easy_rsa.tar.gz
     hash: cae114c212a5be4d89f2253d36c70ab94f68d295f24e8b6711c2cab0fabf7e18
   dbip_city_mmdb_gz:
-    version: "2021-05"
+    version: "2021-09"
     latest: echo "{{ current_date_time[:7] }}"
     download: "https://download.db-ip.com/free/dbip-city-lite-##version##.mmdb.gz"
     target: /usr/local/lib/dbip-city.mmdb.gz
-    hash: 3c91d9385fc7eb0ec8c9ff56c6f6b6b35db3408379cbf8abcd1a40a8e75c4660
+    hash: da42f2f3e6962488de6b905996c043ab626354e5959684a629ce3d58c2ead48e
   nginx_lua_prometheus_tar_gz:
     version: "0.20210206"
     latest: curl -L -s "https://github.com/knyar/nginx-lua-prometheus/releases" | hxwls | grep "/releases/tag/" | head -n 1 | sed -r "s/.*\/([^\/]+)$/\1/g"
