@@ -3,8 +3,6 @@ include:
   - http_frontend.nginx
 
 {% from "http_frontend/defaults.jinja" import settings with context %}
-{% set tlsport= settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1') %}
-
 
 {% macro issue_cert(san_list, challenge='alpn', env={}) %}
 {# issue new cert, if not already available or SAN list != expected SAN list #}
@@ -20,12 +18,12 @@ acme-issue-cert-{{ domain }}:
   {%- endfor %}
     - cwd: {{ settings.ssl.base_dir }}/acme.sh
     - name: |
-        gosu {{ settings.ssl.user }} ./acme.sh --issue \
+        gosu {{ settings.ssl.user }} ./acme.sh --issue --server {{ settings.ssl_acme_service }} \
           {% for i in san_list %}-d {{ i }} {% endfor %} \
   {%- if callenge.startswith('dns_') %}
           --dns {{ challenge }} \
   {%- else %}
-          --alpn --tlsport {{ tlsport }} \
+          --alpn --tlsport {{ settings.alpn_endpoint_port }} \
   {%- endif %}
           --renew-hook '{{ settings.ssl.base_dir }}/ssl-renew-hook.sh "$Le_Domain" "$CERT_KEY_PATH" "$CERT_PATH" "$CERT_FULLCHAIN_PATH" "$CA_CERT_PATH"'
     - unless: |
@@ -110,7 +108,7 @@ acme.sh:
       - file: {{ settings.ssl.base_dir }}/acme.sh
 
 
-{% if not settings.ssl.host.acme %}
+{% if not settings.ssl.acme.enabled %}
 {# remove account.conf, to keep other parts from assuming it is enabeld #}
 {{ settings.ssl.base_dir }}/acme.sh/account.conf:
   file:
@@ -128,7 +126,13 @@ acme.sh:
         #AUTO_UPGRADE="1"
         #NO_TIMESTAMP=1
         USER_PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
-        TLSPORT={{ tlsport }}
+        TLSPORT={{ settings.alpn_endpoint_port }}
+        DEFAULT_ACME_SERVER={{ acme_service }}
+        # Do not check the server certificate, in some devices, the api server's certificate may not be trusted.
+        # HTTPS_INSECURE="1"
+        # Specifies the path to the CA certificate bundle to verify api server's certificate.
+        # CA_BUNDLE='<file>'
+        # CA_PATH='<directory>'
     - require:
       - file: {{ settings.ssl.base_dir }}/acme.sh
 
@@ -137,25 +141,25 @@ acme-register-account:
     - env:
       - LE_WORKING_DIR: "{{ settings.ssl.base_dir }}/acme.sh"
     - cwd: {{ settings.ssl.base_dir }}/acme.sh
-    - name: gosu {{ settings.ssl.user }} ./acme.sh  --register-account
-    - unless: test -f {{ settings.ssl.base_dir }}/acme.sh/ca/acme-v02.api.letsencrypt.org/account.key
+    - name: gosu {{ settings.ssl.user }} ./acme.sh --register-account --server {{ settings.ssl_acme_service }}
+    - unless: test -f {{ settings.ssl.base_dir }}/acme.sh/ca/{{ settings.ssl_acme_domain }}/account.key
     - require:
       - archive: acme.sh
       - file: {{ settings.ssl.base_dir }}/acme.sh/acme.sh.env
       - file: {{ settings.ssl.base_dir }}/acme.sh/account.conf
 
-  {%- if settings.ssl.host.acme.enabled and not (settings.key|d(false) and settings.cert|d(false)) %}
+  {%- if settings.ssl.acme.enabled and not (settings.ssl.key|d(false) and settings.ssl.cert|d(false)) %}
     {# issue host certificate, only if not disabled and ssl cert,key pair is not defined #}
 {{ issue_cert(settings.server_name.split(' \t\n'),
-  settings.ssl.host.acme.challenge, settings.ssl.host.acme.env) }}
+  settings.ssl.acme.challenge, settings.ssl.acme.env) }}
   {%- endif %}
 
   {%- for virtual_host in settings.virtual_names %}
     {%- if virtual_host.acme.enabled|d(
-            settings.ssl.host.acme.enabled) %}
+            settings.ssl.acme.enabled) %}
 {{ issue_cert(virtual_host.name.split(' '),
     virtual_host.acme.challenge|d(
-      settings.ssl.host.acme.challenge),
+      settings.ssl.acme.challenge),
     virtual_host.acme.env|d({})) }}
     {%- endif %}
   {%- endfor %}
