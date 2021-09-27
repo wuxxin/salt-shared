@@ -1,7 +1,7 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - desktop.audio.framework
+  - desktop.multimedia.pipewire
   - python.meson
 
 {% if grains['os'] == 'Ubuntu' and grains['osmajorrelease'] >= 20 %}
@@ -13,7 +13,7 @@ wireplumber-req:
       - libpipewire-0.3-dev
       - libspa-0.2-dev
     - require:
-      - sls: desktop.audio.framework
+      - sls: desktop.multimedia.pipewire
       - sls: python.meson
 
 wireplumber:

@@ -23,6 +23,11 @@ music-player:
     - pkgs:
       - lollypop
 
+{#
+download all currently cached network music files via youtube-dl
+cd ~/music/lollypop/; for i in $(find ~/.cache/lollypop/ -type f -regex ".*/[^.]+$"); do youtube-dl --download-archive ./already-downloaded.log -x "$(cat $i)"; done
+#}
+
 {% if grains['os'] == 'Ubuntu' %}
   {% if grains['osrelease_info'][0]|int <= 19 %}
 {{ apt_add_repository("sonic-pi_ppa",
