@@ -20,14 +20,12 @@
 ### TODO
 
 pki -> ssl -> nginx -> acme
-
 + pki: create ca
 + ssl: create dh_param
-+ ssl: regenerate snakeoil if not existing or cn != settings.domain or != valid
++ ssl: regenerate snakeoil if not existing or cn != settings.domain
 + ssl: generate invalid cert if not existing, append dhparam to it
 
-+ ssl: write key, cert, cert_chain, full_cert if settings.ssl.host.cert
-+ ssl: or write snakeoil as full_cert
++ ssl: write key, cert, cert_chain for host (eg. snakeoil, localca)
 + ssl: make full_cert by chain_chert plus dhparam
 
 + make acme use dns as alternative
@@ -35,14 +33,15 @@ pki -> ssl -> nginx -> acme
 
 ### Administration
 
+#### local PKI - CA
 + Creates a client certificate, and send certificate via Email
   + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san add-san-values]`
 + revoke an existing client certificate
   + `revoke-client-certificate.sh cert_name --yes`
 + create a host certificate using the local CA
   + `create-host-certificate.sh [--days daysvalid] domain [domains*]`
-+ create a selfsigned host certificate
-  + `create-selfsigned-host-cert.sh -k <keyfile_target> -c <certfile_target> [--days daysvalid] domain [domains*]`
+
+#### Hooks
 + commands configured in ssl.host.on_renew are called with
   + `$0 DOMAIN KEYFILE CERTFILE FULLCHAINFILE`
 
