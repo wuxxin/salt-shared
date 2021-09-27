@@ -1,7 +1,10 @@
 # kernel
 
 ## TODO
-
++ is this still needed for current ubuntu
+  user@ubuntu:~$ sudo vim /etc/pam.d/common-session
+  # add this line to it
+  session required pam_limits.so
 + https://wiki.archlinux.org/index.php/Talk:Sysctl
 + https://blog.cloudflare.com/path-mtu-discovery-in-practice/
 + https://blog.cloudflare.com/the-story-of-one-latency-spike/
@@ -26,7 +29,7 @@
 + kernel.swappiness
     + configure swap usage, defaults to kernel default, for details read swappiness.sls
 + kernel.limits
-    + expand max open files
+    + increase maximum open files, maximum locked-in-memory address space
 + kernel.sysctl
     + expand max for kernel keys, inotify entries, memory mapped areas, ipv4 and ipv6 arp cache
     + not included by default: sysctl.tcp-bbr

@@ -1,5 +1,3 @@
-{% from "kernel/defaults.jinja" import settings with context %}
-
 {% load_yaml as network_list %}
 - br_netfilter
 - ip6_tables
