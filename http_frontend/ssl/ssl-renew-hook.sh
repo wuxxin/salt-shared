@@ -5,9 +5,14 @@ if test "$4" = ""; then
     cat << EOF
 Usage: $0 [--no-hooks] DOMAIN KEYFILE CERTFILE FULLCHAINFILE
 
-installs certs into the target directories so they are picked up by eg. nginx
+installs certs into the target directories
+{{ settings.ssl.base_dir }}/vhost/*
+so they are picked up by eg. nginx and others.
 
-after installation, it will call settings.ssl.host.on_renew hooks,
+for the host domain ({{ settings.domain }}), the files are symlinked to
+{{ settings.ssl.base_dir }}
+
+after installation, it will call settings.ssl.on_renew hooks,
     **except** on first creation (no old key file in the target directory),
     **or** --no-hooks is specified
 EOF
@@ -26,10 +31,9 @@ else
     }
 fi
 
-if test "{{ settings.domain }}" != "$DOMAIN"; then
-    subpath="vhost/$DOMAIN/"
-    mkdir -m 0750 -p "{{ settings.ssl.base_dir }}/vhost/$DOMAIN"
-fi
+subpath="vhost/$DOMAIN/"
+mkdir -m 0750 -p "{{ settings.ssl.base_dir }}/vhost/$DOMAIN"
+
 simple_metric ssl_cert_renew counter \
     "timestamp of last cert-renew incovation" "$(date +%s)000"
 if test ! -e "{{ settings.ssl.base_dir }}/${subpath}{{ settings.ssl_key }}"; then
@@ -52,7 +56,7 @@ simple_metric ssl_cert_valid_until gauge \
 
 if test "$execute_hooks" = "true"; then
 
-{%- for command in settings.ssl.host.on_renew %}
+{%- for command in settings.ssl.on_renew %}
 {{ command }} "$DOMAIN" "$KEYFILE" "$CERTFILE" "$FULLCHAINFILE"
 {%- endfor %}
 

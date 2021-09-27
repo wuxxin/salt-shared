@@ -1,68 +1,10 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
+{% from "http_frontend/ssl/lib.sls" import
+    issue_from_pillar, issue_from_file, issue_from_local_ca, issue_self_signed %}
 
 include:
   - http_frontend.dirs
   - http_frontend.pki
-
-
-{% macro issue_selfsigned_cert(san_list) %}
-# generate a self signed cert for every virtual host
-selfsigned-deploy-{{ domain }}:
-  cmd.run:
-    - runas: {{ settings.ssl.user }}
-    - name: |
-        /usr/local/sbin/create-selfsigned-host-cert.sh \
-          -k {{ settings.ssl.base_dir }}/vhost/{{ vhost_domain }}/{{ settings.ssl_key }} \
-          -c {{ settings.ssl.base_dir }}/vhost/{{ vhost_domain }}/{{ settings.ssl_chain_cert }} \
-          {{ vhost|split(' ') }}
-    - onlyif: test ! -e {{ settings.ssl.base_dir }}/vhost/{{ vhost_domain }}/{{ settings.ssl_key }}
-    - unless: |
-        result="false"
-        if test -f "{{ domain_dir }}/fullchain.cer"; then
-          if test -f "{{ domain_dir }}/{{ domain }}.cer"; then
-            san_list=$(openssl x509 -text -noout -in "{{ domain_dir }}/{{ domain }}.cer" | \
-              awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
-              tr -d "DNS:" | tr "," "\\n" | sort)
-            exp_list=$(echo "{{ san_list|join(' ') }}" | tr " " "\\n" | sort)
-            if test "$san_list" = "$exp_list"; then result="true"; fi
-          fi
-        fi
-        $result
-  {% endfor %}
-{% endmacro %}
-
-
-{% macro issue_casigned_cert(san_list) %}
-{# issue new cert, if not already available or SAN list != expected SAN list #}
-{% set domain= san_list[0] %}
-{% set domain_dir = settings.ssl.base_dir+ '/pki/' + domain %}
-
-local-ca-deploy-{{ domain }}:
-  cmd.run:
-    - name: |
-        gosu {{ settings.ssl.user }} /usr/local/sbin/create-host-certificate.sh \
-          {{ settings.server_name.split(' \n\t')|join(' ') }}
-    - unless: |
-        gosu {{ settings.ssl.user }} /usr/local/sbin/create-host-certificate.sh --is-valid-and-listed \
-          {{ settings.server_name.split(' \n\t')|join(' ') }}
-
-{{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}:
-  cmd.run:
-    - runas: {{ settings.ssl.user }}
-    - umask: 027
-    - name: |
-        cat {{ settings.ssl.base_dir }}/easyrsa/{{ settings.ssl_chain_cert }} \
-          {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} >
-            {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
-{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca }}:
-    - require:
-      - cmd: local-ca-deploy-{{ domain }}
-
-      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
-      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
-
-{% endmacro %}
-
 
 ssl_requisites:
   pkg.installed:
@@ -103,7 +45,7 @@ ssl_requisites:
       - sls: http_frontend.dirs
       - pkg: ssl_requisites
 
-# regenerate snakeoil if not existing or cn != settings.domain or != valid
+# regenerate snakeoil if not existing or cn != settings.domain
 generate_snakeoil_cert:
   cmd.run:
     - name: make-ssl-cert generate-default-snakeoil --force-overwrite
@@ -141,67 +83,29 @@ append_dhparam_to_invalid_cert:
       - cmd: generate_invalid_cert
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
 
+# generate symlinks for host domain
+if test "{{ settings.domain }}" != "$DOMAIN"; then
+    # symlink all files of domain if domain is host domain
+    for i in "{{ settings.ssl_key }}" "{{ settings.ssl_cert }}" \
+        "{{ settings.ssl_chain_cert }}" "{{ settings.ssl_full_cert }}"; do
+        ln -s -f -r -T "{{ settings.ssl.base_dir }}/$i" "$subpath/$i"
+    done
+fi
 
-{% if settings.ssl.host.cert|d(false) and settings.ssl.host.key|d(false) %}
+{% if settings.ssl.cert|d(false) and settings.ssl.key|d(false) %}
 # 1. use static cert/key for base host
-{{ settings.ssl.base_dir }}/{{ settings.ssl_key }}:
-  file.managed:
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "0640"
-    - contents: |
-{{ settings.ssl.host.key|indent(8, True) }}
-    - require:
-      - sls: http_frontend.dirs
-
-  {% for i in [settings.ssl_cert, settings.ssl_chain_cert] %}
-{{ settings.ssl.base_dir }}/{{ i }}:
-  file.managed:
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "0640"
-    - contents: |
-{{ settings.ssl.host.cert|indent(8, True) }}
-    - require:
-      - sls: http_frontend.dirs
-  {% endfor %}
-
+{{ issue_from_pillar(settings.server_name.split(' \n\t'),
+  settings.ssl.key, settings.ssl.cert) }}
 {% else %}
-  {% if settings.ssl.host.local_ca %}
+  {% if settings.ssl.local_ca %}
 # 2. use local ca to create host cert
-{{ pki_issue_host_cert(settings.server_name.split(' \n\t')) }}
-
-deploy
-  gosu {{ settings.ssl.user }} {{ settings.ssl.base_dir }}/ssl-renew-hook.sh \
-    "{{ settings.domain }}" \
-    "{{ domain_dir }}/{{ domain }}.key" \
-    "{{ domain_dir }}/{{ domain }}.cer" \
-    "{{ domain_dir }}/fullchain.cer" \
-    "{{ domain_dir }}/ca.cer"
-
+{{ issue_from_local_ca(settings.server_name.split(' \n\t')) }}
   {% else %}
 # 3. use snakeoil cert/key for base host
-{{ settings.ssl.base_dir }}/{{ settings.ssl_key }}:
-  file.copy:
-    - source: {{ settings.ssl_snakeoil_key_path }}
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "0640"
-    - require:
-      - sls: http_frontend.dirs
-      - cmd: generate_snakeoil_cert
-
-    {% for i in [settings.ssl_cert, settings.ssl_chain_cert] %}
-{{ settings.ssl.base_dir }}/{{ i }}:
-  file.copy:
-    - source: {{ settings.ssl_snakeoil_cert_path }}
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "0640"
-    - require:
-      - sls: http_frontend.dirs
-      - cmd: generate_snakeoil_cert
-    {% endfor %}
+{{ issue_from_file(settings.server_name.split(' \n\t'),
+  settings.ssl_snakeoil_key_path,
+  settings.ssl_snakeoil_cert_path,
+  settings.ssl_snakeoil_cert_path) }}
   {% endif %}
 {% endif %}
 
@@ -226,17 +130,18 @@ deploy
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - makedirs: true
-    - mode: "0750"
+    - mode: "0750"k
 
   {%- if virtual_host.key|d(false) and virtual_host.cert|d(false)) %}
-  # just put key/cert into target files
-  {%- elif virtual_host.acme.enabled|d(
-              settings.ssl.host.acme.enabled) %}
-  # if no old acme key/certs are available, generate a selfsigned
+# put key/cert into target files
+{{ issue_from_pillar(virtual_host.name.split(' \t\n'),
+  virtual_host.key, virtual_host.cert) }}
+  {%- elif settings.ssl.acme.enabled and virtual_host.acme.enabled|d(
+              settings.ssl.acme.enabled) %}
+# if no old acme key/certs are available, generate a selfsigned cert
   {%- elif settings.host.local_ca %}
-  # nomal local ca sign cert
+# local ca sign cert
   {%- else %}
-  # normal selfsign
-  {% endif %}
-
+# selfsign
+  {%- endif %}
 {%- endfor %}
