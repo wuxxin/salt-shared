@@ -5,7 +5,8 @@ set -eo pipefail
 usage(){
     cat << EOF
 Usage: $0 [--days daysvalid] domain [add domains*]
-       $0 --is-valid-and-listed domain [add domains*]
+       $0 --is-listed domain [add domains*]
+       $0 --renew domain
 
 Creates / Renews a host certificate using the local ca.
 
@@ -27,7 +28,7 @@ EOF
     exit 1
 }
 
-daysvalid="{{ settings.ssl.pki.validity_days }}"
+daysvalid="{{ settings.ssl_pki_validity_days }}"
 if test "$1" = "--days" -a "$2" != ""; then daysvalid=$2; shift 2; fi
 if test "$1" = ""; then usage; fi
 commonName="$1"
@@ -47,7 +48,8 @@ cd "{{ settings.ssl.base_dir }}/easyrsa"
 
 # create cert
 $call_prefix ./easyrsa --batch --passout=stdin \
-    --use-algo="{{ settings.ssl.pki.algo }}" --curve="{{ settings.ssl.pki.curve }}" \
+    --use-algo="{{ settings.ssl_pki_algo }}" \
+    --curve="{{ settings.ssl_pki_curve }}" \
     --days="$daysvalid" \
     --req-cn="$certname" \
     --subject-alt-name="${additional_san}" \

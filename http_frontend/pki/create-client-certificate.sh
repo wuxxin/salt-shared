@@ -21,7 +21,7 @@ EOF
 
 randbytes=15
 base64size=$(echo "if (($randbytes * 8) > ($randbytes * 8 /6 *6)) { $randbytes * 8 /6 +1} else { $randbytes *8 /6 }" | bc)
-daysvalid="{{ settings.ssl.pki.validity_days }}"
+daysvalid="{{ settings.ssl_pki_validity_days }}"
 additional_san=""
 call_prefix=""
 
@@ -50,7 +50,7 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 # create cert
 echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin \
-        --use-algo="{{ settings.ssl.pki.algo }}" --curve="{{ settings.ssl.pki.curve }}" \
+        --use-algo="{{ settings.ssl_pki_algo }}" --curve="{{ settings.ssl_pki_curve }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
         --subject-alt-name="email:$email${additional_san}" \
