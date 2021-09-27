@@ -27,19 +27,18 @@ https_proxy_port: 8443
 http://nginx.org/en/docs/http/ngx_http_realip_module.html before changing this #}
 set_real_ip_from: "127.0.0.1"
 
-
 {# server_name: String of space seperated list of expected hostnames (SAN's) #}
 {# the first name will be available as settings.domain in support files #}
 server_name: "{{ def_domain }}"
 {# virtual_names: List of additional dicts of hostnames, will need/create one cert per entry #}
 virtual_names: []
 {# - name: xx.aa.xx [xx.yy.yy]*
-     key: | # key, pem encoded ssl key, default empty
+     key: | # key, pem encoded ssl key,needed default empty
      cert: | # crt, pem encoded ssl cert chain, default empty
      acme:
-       # enabled: default is settings.ssl.host.acme.enabled
+       # enabled: default is settings.ssl.acme.enabled
        enabled: false
-       # challenge: default is settings.ssl.host.acme.challenge
+       # challenge: default is settings.ssl.acme.challenge
        challenge: alpn
        # env: {} no default
        env: {}
@@ -54,36 +53,36 @@ create a selfsigned host cert
 ssl:
   {# user for cert operations #}
   user: {{ def_user }}
-  {# basepath for certs, easyrsa, acme #}
-  basedir: /var/lib/http_frontend/cert_dir
-
-  host:
-    {# cert: pem encoded ssl cert chain for allowed_hosts, default empty #}
-    # cert: |
-    {# key: pem encoded ssl key, default empty #}
-    # key: |
-    {# local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
-    local_ca: true
-    acme:
-      {# if enabled:false, dont use acme for settings.hostname #}
-      enabled: true
-      {# challenge: alpn(default)|dns_*), eg. dns_knot, see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
-      challenge: alpn
-      env: {}
-        # KNOT_SERVER: "dns.example.com"
-        # KNOT_KEY: ""
-    {# on_renew: list of commands executed after ssl certificate has changed #}
-    {# cmds are run as ssl.pki.user, available env: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
-    on_renew:
-      - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
-    {# client_cert_verify: set X-Ssl-Client-Issuer, X-Ssl-Client-Subject, X-Ssl-Client-Verify as UPSTREAM Header #}
-    client_cert_verify: false
-    {# client_cert_mandatory: mandatory client certificate needed #}
-    client_cert_mandatory: false
-  pki:
-    validity_days: 1095
-    algo: ed
-    curve: ed25519
+  {# basepath for certs and keys, easyrsa, acme #}
+  base_dir: /var/lib/http_frontend/cert_dir
+  {# on_renew: list of commands executed after ssl certificate has changed
+      cmds are runas ssl.user, env vars set: DOMAIN, KEYFILE, CERTFILE, FULLCHAINFILE #}
+  on_renew:
+    - /usr/bin/sudo /usr/bin/systemctl reload-or-restart nginx
+  {# client_cert_verify: set X-Ssl-Client-Issuer, X-Ssl-Client-Subject, X-Ssl-Client-Verify as UPSTREAM Header #}
+  client_cert_verify: false
+  {# client_cert_mandatory: a valid client certificate is mandatory #}
+  client_cert_mandatory: false
+  {# cert: pem encoded ssl cert chain for allowed_hosts, default empty #}
+  # cert: |
+  {# key: pem encoded ssl key, default empty #}
+  # key: |
+  {# local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
+  local_ca: true
+  acme:
+  {# if enabled:false, dont use acme for ANY certificate #}
+    enabled: true
+    global: true
+    {# if host:false, dont use acme for settings.hostname #}
+    host: true
+    {# challenge: alpn(default)|dns_*), eg. dns_knot,
+        see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
+    challenge: alpn
+    service: https://acme-v02.api.letsencrypt.org/directory
+    # service: https://acme-staging-v02.api.letsencrypt.org/directory
+    env: {}
+      # KNOT_SERVER: "dns.example.com"
+      # KNOT_KEY: ""
 
 {# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
 client_max_body_size: 150M
@@ -193,7 +192,7 @@ alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
 prometheus_endpoint: "127.0.0.1:9145"
 
-{#  key,dhparam,cert,chain_cert,full_cert #}
+{#  key,dhparam,cert,chain_cert,full_cert names (without path) #}
 ssl_key: server.key.pem
 ssl_dhparam: server.dhparam.pem
 ssl_cert: server.cert.pem
@@ -209,6 +208,10 @@ ssl_invalid_full_cert: ssl-cert-invalid-full.pem
 {# key,cert of selfsigned domain #}
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
+{# easy rsa (local ca) config #}
+ssl_pki_validity_days: 1095
+ssl_pki_algo: ed
+ssl_pki_curve: ed25519
 
 {# geoip provider: currently only dbip_city #}
 geoip_provider:
@@ -263,6 +266,10 @@ external: {{ http_frontend_external.objects }}
 
 {% do settings.update( {'https_proxy_endpoints': ns.https_proxy_endpoints} ) %}
 {% do settings.update( {'http_proxy_endpoints': ns.http_proxy_endpoints} ) %}
+
+{% do settings.update( {'alpn_endpoint_port': settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1')} ) %}
+{% do settings.update( {'ssl_acme_service': settings.ssl.acme.service if not settings.ssl.acme.staging else settings.ssl.acme.staging_service} ) %}
+{% do settings.udpate( {'ssl_acme_domain': settings.ssl_acme_service|regex_replace('https?://([^/]+)/.*', '\\1')} ) %}
 
 {# expand ##version## in field external.*.download #}
 {% for n,v in settings.external.items() %}
