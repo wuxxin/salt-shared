@@ -46,7 +46,7 @@ cert_watchlist_target: /var/lib/gitops/cert_watchlist.txt
 onfailure_service: []
 
 update:
-  automatic_reboot: true
+  unattended_reboot: true
   validate_cmd: "/usr/local/sbin/execute-saltstack.sh . state.highstate mock=true > /dev/null"
   before_cmd: /usr/bin/true
   update_cmd: "/usr/local/sbin/execute-saltstack.sh . state.highstate"

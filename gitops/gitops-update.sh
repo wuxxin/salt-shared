@@ -35,8 +35,8 @@ main () {
             exit 1
         fi
     fi
-    if flag_is_set gitops.update.disable; then
-        echo "Warning: gitops.update.disable flag is set, exit update run without update"
+    if flag_is_set gitops.update.disabled; then
+        echo "Warning: gitops.update.disabled flag is set, exit update run without update"
         simple_metric update_duration_sec gauge \
             "number of seconds for a update run" $(($(date +%s) - start_epoch_sec))
         exit 0
@@ -99,7 +99,20 @@ main () {
     fi
 
     if test -e /run/reboot-required; then
-        if flag_is_set reboot.automatic.disable; then
+        unattended_reboot="true"
+        if flag_is_set reboot.unattended.disabled; then
+            unattended_reboot="false"
+            if which clevis-set-reboot-slot.sh > /dev/null; then
+                if ! clevis-set-reboot-slot.sh --yes; then
+                    echo "Warning: reboot of system required, clevis installed but clevis-set-reboot-slot.sh failed"
+                    sentry_entry warning "Gitops Warning" "clevis set reboot slot failed but node needs reboot"
+                else
+                    unattended_reboot="true"
+                    sentry_entry info "Gitops Info" "trying unattended reboot using clevis"
+                fi
+            fi
+        fi
+        if test "$unattended_reboot" = "false"; then
             echo "Warning: reboot of system required, but automatic reboot not allowed; contacting admin"
             sentry_entry error "Gitops Attention" "node needs reboot, human attention required"
         else

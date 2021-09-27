@@ -25,9 +25,9 @@
 ### Flags recognized
 
 + `gitops.update.failed`
-+ `gitops.update.disable`
++ `gitops.update.disabled`
 + `gitops.update.force`
-+ `reboot.automatic.disable`
++ `reboot.unattended.disabled`
 
 ### Tags recognized
 
