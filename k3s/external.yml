@@ -1,6 +1,6 @@
 objects:
   k3s:
-    version: 1.21.1+k3s1
+    version: 1.22.2+k3s1
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/k3s-io/k3s/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
     download: https://github.com/k3s-io/k3s/releases/download/v##version##/k3s
     hash_url: https://github.com/rancher/k3s/releases/download/v##version##/sha256sum-amd64.txt
