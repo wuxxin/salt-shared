@@ -27,4 +27,4 @@ $call_prefix ./easyrsa --batch revoke "$certname"
 $call_prefix ./easyrsa --batch gen-crl
 install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
         "{{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_crl }}"
+        "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_crl }}"

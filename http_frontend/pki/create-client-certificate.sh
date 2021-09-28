@@ -21,7 +21,7 @@ EOF
 
 randbytes=15
 base64size=$(echo "if (($randbytes * 8) > ($randbytes * 8 /6 *6)) { $randbytes * 8 /6 +1} else { $randbytes *8 /6 }" | bc)
-daysvalid="{{ settings.ssl_pki_validity_days }}"
+daysvalid="{{ settings.ssl_local_ca_validity_days }}"
 additional_san=""
 call_prefix=""
 
@@ -50,7 +50,7 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 # create cert
 echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin \
-        --use-algo="{{ settings.ssl_pki_algo }}" --curve="{{ settings.ssl_pki_curve }}" \
+        --use-algo="{{ settings.ssl_local_ca_algo }}" --curve="{{ settings.ssl_local_ca_curve }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
         --subject-alt-name="email:$email${additional_san}" \
@@ -66,7 +66,7 @@ echo -e "$randpass\n$randpass\n$randpass\n$randpass" | \
 $call_prefix ./easyrsa --batch gen-crl
 install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
         "{{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem" \
-        "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_crl }}"
+        "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_crl }}"
 
 # display password for user
 cat << EOF

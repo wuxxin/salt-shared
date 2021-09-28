@@ -44,12 +44,10 @@ virtual_names: []
        env: {}
 #}
 
-{# ssl encryption parameter
-use cert+key if exists, else
-use acme to create host certs if acme:enabled and successful, else
-use local CA to create host certs if local_ca == true, else
-create a selfsigned host cert
-#}
+{# ssl encryption: use cert+key if exists,
+else use acme to create host certs if acme:enabled and successful,
+else use local CA to create host certs if local_ca == true,
+else create a selfsigned host cert #}
 ssl:
   {# user for cert operations #}
   user: {{ def_user }}
@@ -78,8 +76,11 @@ ssl:
     {# challenge: alpn(default)|dns_*), eg. dns_knot,
         see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
     challenge: alpn
+    {# service: acme server url, default= letsencrypt production
+      for letsencrypt staging use
+      https://acme-staging-v02.api.letsencrypt.org/directory
+    #}
     service: https://acme-v02.api.letsencrypt.org/directory
-    # service: https://acme-staging-v02.api.letsencrypt.org/directory
     env: {}
       # KNOT_SERVER: "dns.example.com"
       # KNOT_KEY: ""
@@ -101,10 +102,8 @@ default_header:
   {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
   X-Content-Type-Options: '"nosniff"' #}
 
-{#
-# response header
-# dict of header vars to be inserted for the main domain;
-# will use default_header if header does not exist
+{# response header #}
+{# dict of header vars for the main domain, will use default_header if not existing
 header: {}
 #}
 
@@ -180,8 +179,10 @@ metrics:
   buildin: true
   prometheus: false
 
-
-{# ### internal settings #}
+{#
+### internal settings ####
+change only with good reason
+#}
 
 {# user to run nginx as #}
 nginx_user: www-data
@@ -198,20 +199,20 @@ ssl_dhparam: server.dhparam.pem
 ssl_cert: server.cert.pem
 ssl_chain_cert: server.chain.cert.pem
 ssl_full_cert: server.chain.cert.dhparam.pem
-{# local_ca,local_crl #}
-ssl_local_ca: local-ca.cert.pem
-ssl_local_crl: local-ca.crl.pem
 {# key,cert,full_cert of hostname.invalid #}
 ssl_invalid_cert: ssl-cert-invalid.pem
 ssl_invalid_key: ssl-cert-invalid.key
 ssl_invalid_full_cert: ssl-cert-invalid-full.pem
-{# key,cert of selfsigned domain #}
+{# key,cert of selfsigned host domain #}
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
-{# easy rsa (local ca) config #}
-ssl_pki_validity_days: 1095
-ssl_pki_algo: ed
-ssl_pki_curve: ed25519
+{# local ca (easy rsa) config #}
+ssl_local_ca_cert: local-ca.cert.pem
+ssl_local_ca_crl: local-ca.crl.pem
+ssl_local_ca_validity_days: 1095
+ssl_local_ca_algo: ed
+ssl_local_ca_curve: ed25519
+
 
 {# geoip provider: currently only dbip_city #}
 geoip_provider:

@@ -17,7 +17,7 @@ EOF
 if test "$1" != "-k" -o "$3" != "-c" -o "$5" = ""; then usage; fi
 key_path="$2"
 cert_path="$4"
-daysvalid="{{ settings.ssl_pki_validity_days }}"
+daysvalid="{{ settings.ssl_local_ca_validity_days }}"
 shift 4
 if test "$1" = "--days" -a "$2" != ""; then
     daysvalid=$2

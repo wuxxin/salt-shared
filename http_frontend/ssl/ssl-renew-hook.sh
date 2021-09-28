@@ -9,7 +9,7 @@ installs certs into the target directories
 {{ settings.ssl.base_dir }}/vhost/*
 so they are picked up by eg. nginx and others.
 
-for the host domain ({{ settings.domain }}), the files are symlinked to
+for the host domain ({{ settings.domain }}), these files are symlinked to
 {{ settings.ssl.base_dir }}
 
 after installation, it will call settings.ssl.on_renew hooks,

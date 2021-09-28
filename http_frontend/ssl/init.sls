@@ -1,6 +1,6 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
 {% from "http_frontend/ssl/lib.sls" import
-    issue_from_pillar, issue_from_file, issue_from_local_ca, issue_self_signed %}
+    issue_from_file, issue_from_pillar, issue_from_local_ca, issue_self_signed %}
 
 include:
   - http_frontend.dirs

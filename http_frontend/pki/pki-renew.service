@@ -12,9 +12,8 @@ Group={{ settings.ssl.user }}
 Environment=UNITNAME=%n
 Environment=USER="{{ settings.ssl.user }}"
 PassEnvironment=UNITNAME USER
-WorkingDirectory={{ settings.ssl.base_dir }}
-ExecStart={{ settings.ssl.base_dir }}/acme.sh/acme.sh --cron --home "{{ settings.ssl.base_dir }}/acme.sh"
-make-ssl-cert generate-default-snakeoil --force-overwrite
-
-# acme.sh returns 2 when renewal is skipped (i.e. certs up to date)
-SuccessExitStatus=0 2
+WorkingDirectory={{ settings.ssl.base_dir }}/easyrsa
+ExecStart=/usr/local/bin/renew-host-certificates.sh \
+  --cron --renew-hook '{{ settings.ssl.base_dir }}/ssl-renew-hook.sh'
+# renew-host-certificates.sh returns 2 when renewal is skipped (i.e. certs up to date)
+# SuccessExitStatus=0 2

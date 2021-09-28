@@ -1,29 +1,33 @@
 {% macro issue_from_file(san_list, key_path, cert_path, chain_path) %}
-{{ settings.ssl.base_dir }}/{{ settings.ssl_key }}:
-  file.copy:
-    - source: {{ settings.ssl_snakeoil_key_path }}
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "0640"
-    - require:
-      - sls: http_frontend.dirs
-      - cmd: generate_snakeoil_cert
+  {% set domain= san_list[0] %}
 
-    {% for i in [settings.ssl_cert, settings.ssl_chain_cert] %}
-{{ settings.ssl.base_dir }}/{{ i }}:
+issue_from_file_key_{{ domain }}:
   file.copy:
-    - source: {{ settings.ssl_snakeoil_cert_path }}
+    - name: {{ settings.ssl.base_dir }}/vhost/{{ settings.ssl_key }}
+    - source: {{ key_path }}
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - mode: "0640"
-    - require:
-      - sls: http_frontend.dirs
-      - cmd: generate_snakeoil_cert
-    {% endfor %}
+issue_from_file_cert_{{ domain }}:
+  file.copy:
+    - name: {{ settings.ssl.base_dir }}/vhost/{{ settings.ssl_cert }}
+    - source: {{ cert_path }}
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
+    - mode: "0640"
+issue_from_file_chain_cert_{{ domain }}:
+  file.copy:
+    - name: {{ settings.ssl.base_dir }}/vhost/{{ settings.ssl_chain_cert }}
+    - source: {{ chain_path }}
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
+    - mode: "0640"
 {% endmacro %}
 
 
 {% macro issue_from_pillar(san_list, key, cert) %}
+  {% set domain= san_list[0] %}
+
 {{ settings.ssl.base_dir }}/{{ settings.ssl_key }}:
   file.managed:
     - user: {{ settings.ssl.user }}
@@ -71,6 +75,8 @@
 
 
 {% macro issue_self_signed(san_list) %}
+  {% set domain= san_list[0] %}
+
 self-signed-deploy-{{ domain }}:
   cmd.run:
     - runas: {{ settings.ssl.user }}
@@ -97,9 +103,9 @@ self-signed-deploy-{{ domain }}:
 
 
 {% macro issue_from_local_ca(san_list) %}
-{# issue new cert, if not already available or SAN list != expected SAN list #}
-{% set domain= san_list[0] %}
-{% set domain_dir = settings.ssl.base_dir+ '/easyrsa/pki/' + domain %}
+  {# issue new cert, if not already available or SAN list != expected SAN list #}
+  {% set domain= san_list[0] %}
+  {% set domain_dir = settings.ssl.base_dir+ '/easyrsa/pki/' + domain %}
 
 local-ca-issue-cert-{{ domain }}:
   cmd.run:
@@ -109,7 +115,7 @@ local-ca-issue-cert-{{ domain }}:
             {{ san_list.split(' \n\t')|join(' ') }}
     - unless: |
         gosu {{ settings.ssl.user }} \
-          /usr/local/sbin/create-host-certificate.sh --is-listed \
+          /usr/local/sbin/create-host-certificate.sh --check-domains-listed \
             {{ san_list.split(' \n\t')|join(' ') }}
 
 local-ca-chain-cert-{{ domain }}:
@@ -118,7 +124,7 @@ local-ca-chain-cert-{{ domain }}:
     - umask: 027
     - name: |
         cat {{ domain_dir }}/{{ domain }}.crt  \
-            {{ settings.ssl.base_dir }}/{{ ssl_local_ca }} \
+            {{ settings.ssl.base_dir }}/{{ ssl_local_ca_cert }} \
             > {{ domain_dir }}/{{ domain }}.{{ settings.ssl_chain_cert }}
   - require:
     - cmd: local-ca-issue-cert-{{ domain }}
@@ -130,7 +136,7 @@ local-ca-deploy-cert-{{ domain }}:
         "{{ domain_dir }}/{{ domain }}.key" \
         "{{ domain_dir }}/{{ domain }}.crt" \
         "{{ domain_dir }}/{{ domain }}.{{ settings.ssl_chain_cert }}"
-        "{{ settings.ssl.base_dir }}/{{ ssl_local_ca }}"
+        "{{ settings.ssl.base_dir }}/{{ ssl_local_ca_cert }}"
   - require:
     - cmd: local-ca-chain-cert-{{ domain }}
 

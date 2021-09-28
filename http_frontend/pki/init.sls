@@ -13,6 +13,7 @@ pki_requisites:
 {% for i in [
 'create-client-certificate.sh',
 'create-host-certificate.sh',
+'renew-host-certificates.sh',
 'revoke-certificate.sh'] %}
 "/usr/local/bin/{{ i }}":
   file.managed:
@@ -61,7 +62,7 @@ easyrsa_vars:
     - mode: "0640"
     - contents: |
         set_var EASYRSA_CRL_DAYS 3650
-        set_var EASYRSA_CERT_EXPIRE {{ settings.ssl_pki_validity_days }}
+        set_var EASYRSA_CERT_EXPIRE {{ settings.ssl_local_ca_validity_days }}
 
 # Generate initial CA
 easyrsa_build_ca:
@@ -74,7 +75,7 @@ easyrsa_build_ca:
         fi
         ./easyrsa --batch init-pki
         ./easyrsa --batch \
-          --use-algo={{ settings.ssl_pki_algo }} --curve={{ settings.ssl_pki_curve }} \
+          --use-algo={{ settings.ssl_local_ca_algo }} --curve={{ settings.ssl_local_ca_curve }} \
           --req-cn="{{ settings.domain }}" \
           --subject-alt-name="DNS:{{ settings.domain }}" \
           --req-org="{{ settings.domain }} Cert Authority" \
@@ -108,7 +109,7 @@ easyrsa_gen_crl:
       - cmd: easyrsa_build_ca
 
 # copy ca and crl to ssl.pki.data
-{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca }}:
+{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_cert }}:
   file.copy:
     - source: {{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt
     - user: {{ settings.ssl.user }}
@@ -118,7 +119,7 @@ easyrsa_gen_crl:
     - onchanges:
       - cmd: easyrsa_build_ca
 
-{{ settings.ssl.base_dir }}/{{ settings.ssl_local_crl }}:
+{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_crl }}:
   file.copy:
     - source: {{ settings.ssl.base_dir }}/easyrsa/pki/crl.pem
     - user: {{ settings.ssl.user }}
