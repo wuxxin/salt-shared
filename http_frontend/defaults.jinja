@@ -75,6 +75,10 @@ ssl:
     algo: rsa
     curve: secp384r1
     keysize: 2048
+    {# Organization of the Certificate Authority, optional City and Country #}
+    organization: ""
+    city: ""
+    country: ""
 
   acme:
     {# if enabled:false, dont use acme for ANY certificate #}
@@ -218,6 +222,9 @@ ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 {# local ca (easy rsa) config #}
 ssl_local_ca_cert: local-ca.cert.pem
 ssl_local_ca_crl: local-ca.crl.pem
+ssl_local_ca_authority_unit: "Certificate Authority"
+ssl_local_ca_server_unit: "Server Certificates"
+ssl_local_ca_client_unit: "Client Certificates"
 
 {# geoip provider: currently only dbip_city #}
 geoip_provider:

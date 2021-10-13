@@ -61,8 +61,11 @@ $call_prefix ./easyrsa --batch \
     --curve="{{ settings.ssl.local_ca.curve }}" \
     --keysize="{{ settings.ssl.local_ca.keysize }}" \
     --days="$daysvalid" \
+    --dn-mode=org \
     --req-cn="$certname" \
-    --dn-mode=org --req-org="{{ settings.domain }} CA Server Cert" \
+    --req-org="{{ settings.ssl.local_ca.organization }}" \
+    --req-ou="{{ settings.ssl_local_ca_server_unit }}" \
+    --req-email="" --req-city="" --req-st="" --req-c="" \
     --subject-alt-name="${subjectAltName}" \
     build-server-full "$certname" nopass
 

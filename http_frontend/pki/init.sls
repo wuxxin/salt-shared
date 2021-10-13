@@ -66,6 +66,7 @@ easyrsa_vars:
         set_var EASYRSA_CERT_EXPIRE {{ settings.ssl.local_ca.validity_days }}
 
 # Generate initial CA
+{% set root_cert_ca_cn= settings.domain ~ ' Root Cert Authority' %}
 easyrsa_build_ca:
   cmd.run:
     - runas: {{ settings.ssl.user }}
@@ -79,8 +80,14 @@ easyrsa_build_ca:
           --use-algo="{{ settings.ssl.local_ca.algo }}" \
           --curve="{{ settings.ssl.local_ca.curve }}" \
           --keysize="{{ settings.ssl.local_ca.keysize }}" \
-          --req-cn="{{ settings.domain }}" \
-          --dn-mode=org --req-org="{{ settings.domain }} Cert Authority" \
+          --dn-mode=org \
+          --req-cn="{{ root_cert_ca_cn }}" \
+          --req-org="{{ settings.ssl.local_ca.organization }}" \
+          --req-ou="{{ settings.ssl_local_ca_authority_unit }}" \
+          --req-city="{{ settings.ssl.local_ca.city }}" \
+          --req-st="" \
+          --req-c="{{ settings.ssl.local_ca.country }}" \
+          --req-email="" \
           --subject-alt-name="DNS:{{ settings.domain }}" \
           build-ca nopass
     - unless: |
@@ -89,9 +96,9 @@ easyrsa_build_ca:
           subject_cn=$(openssl x509 -text -noout \
             -in "{{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt" | \
             grep "Subject: CN" | sed -r "s/[[:space:]]+Subject: +CN += +(.+)/\\1/g")
-          echo "subject_cn:$subject_cn"
-          echo "domain:{{ settings.domain }}"
-          if test "$subject_cn" = "{{ settings.domain }}"; then
+          echo "current_cn:$subject_cn"
+          echo "expected_cn:{{ root_cert_ca_cn }}"
+          if test "$subject_cn" = "{{ root_cert_ca_cn }}"; then
             result="true"
           fi
         fi

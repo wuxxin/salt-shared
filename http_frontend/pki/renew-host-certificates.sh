@@ -31,10 +31,7 @@ for commonName in all names; do
         --use-algo="{{ settings.ssl.local_ca.algo }}" \
         --curve="{{ settings.ssl.local_ca.curve }}" \
         --days="$daysvalid" \
-        --req-cn="$certname" \
-        --subject-alt-name="${additional_san}" \
-        --req-org="{{ settings.domain }} CA Server Cert" \
-        build-host-full "$certname" nopass
+        renew "$certname" nopass
 done
 
 # update revocation list

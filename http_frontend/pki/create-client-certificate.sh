@@ -73,10 +73,14 @@ if test "$email" = ""; then
         --curve="{{ settings.ssl.local_ca.curve }}" \
         --keysize="{{ settings.ssl.local_ca.keysize }}" \
         --days="$daysvalid" \
+        --dn-mode=org \
         --req-cn="$certname" \
-        --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \
+        --req-org="{{ settings.ssl.local_ca.organization }}" \
+        --req-ou="{{ settings.ssl_local_ca_client_unit }}" \
+        --req-email="" --req-city="" --req-st="" --req-c="" \
         --subject-alt-name="${additional_san}" \
         build-client-full "$certname"
+
     # update revocation list
     $call_prefix ./easyrsa --batch gen-crl
     install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
@@ -95,9 +99,12 @@ echo -e "$randpass\n$randpass" | \
         --curve="{{ settings.ssl.local_ca.curve }}" \
         --keysize="{{ settings.ssl.local_ca.keysize }}" \
         --days="$daysvalid" \
+        --dn-mode=org \
         --req-cn="$certname" \
-        --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \
-        --reg-email="$email" \
+        --req-org="{{ settings.ssl.local_ca.organization }}" \
+        --req-ou="{{ settings.ssl_local_ca_client_unit }}" \
+        --req-email="$email" \
+        --req-city="" --req-st="" --req-c="" \
         --subject-alt-name="email:$email${additional_san}" \
         build-client-full "$certname"
 
