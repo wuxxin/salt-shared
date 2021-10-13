@@ -1,6 +1,5 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
-{% from "http_frontend/ssl/lib.sls" import
-    issue_from_file, issue_from_pillar, issue_from_local_ca, issue_self_signed %}
+{% from "http_frontend/ssl/lib.sls" import issue_from_file, issue_from_pillar, issue_from_local_ca, issue_self_signed %}
 
 include:
   - http_frontend.dirs
@@ -14,7 +13,7 @@ ssl_requisites:
 
 /usr/local/sbin/create-selfsigned-host-cert.sh:
   file.managed:
-    - mode: "0755"
+    - mode: "755"
     - source: salt://http_frontend/ssl/create-selfsigned-host-cert.sh
 
 /etc/sudoers.d/http_frontend_cert_renew_hook:
@@ -77,39 +76,48 @@ append_dhparam_to_invalid_cert:
     - name: |
         cat {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_cert) }} \
           {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} >
-          {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert }}
+          {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert) }}
     - onlyif: test ! -e {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert) }}
     - require:
       - cmd: generate_invalid_cert
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
 
-# generate symlinks for host domain
-if test "{{ settings.domain }}" != "$DOMAIN"; then
-    # symlink all files of domain if domain is host domain
-    for i in "{{ settings.ssl_key }}" "{{ settings.ssl_cert }}" \
-        "{{ settings.ssl_chain_cert }}" "{{ settings.ssl_full_cert }}"; do
-        ln -s -f -r -T "{{ settings.ssl.base_dir }}/$i" "$subpath/$i"
-    done
-fi
+# symlinks to host domain
+{% for i in [settings.ssl_key, settings.ssl_cert, settings.ssl_chain_cert] %}
+symlink_{{ i }}:
+  file.symlink:
+    - name: {{ settings.ssl.base_dir }}/{{ i }}
+    - target: {{ settings.ssl.base_dir }}/vhost/{{ settings.domain }}/{{ i }}
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
+{% endfor %}
+
+# host domain
+{{ settings.ssl.base_dir }}/vhost/{{ settings.domain }}:
+  file.directory:
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
+    - makedirs: true
+    - mode: "0750"
 
 {% if settings.ssl.cert|d(false) and settings.ssl.key|d(false) %}
-# 1. use static cert/key for base host
+# 1. use static cert/key for host domain cert
 {{ issue_from_pillar(settings.server_name.split(' \n\t'),
   settings.ssl.key, settings.ssl.cert) }}
 {% else %}
   {% if settings.ssl.local_ca %}
-# 2. use local ca to create host cert
+# 2. use local ca to create host domain cert
 {{ issue_from_local_ca(settings.server_name.split(' \n\t')) }}
   {% else %}
-# 3. use snakeoil cert/key for base host
+# 3. use snakeoil cert/key for host domain cert, maybe acme will overwrite it later
 {{ issue_from_file(settings.server_name.split(' \n\t'),
   settings.ssl_snakeoil_key_path,
   settings.ssl_snakeoil_cert_path,
-  settings.ssl_snakeoil_cert_path) }}
+  settings.ssl_snakeoil_cert_path, overwrite=false) }}
   {% endif %}
 {% endif %}
 
-# append dhparam to current server cert
+# append dhparam to current host cert
 {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}:
   cmd.run:
     - runas: {{ settings.ssl.user }}
@@ -122,26 +130,35 @@ fi
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
 
+# virtual domains
 {%- for virtual_host in settings.virtual_names %}
-  {%- set vhost_domain= virtual_host.name.split(' \t\n')|first %}
+  {%- set vhost_san_list= virtual_host.name.split(' \t\n') %}
+  {%- set vhost_domain= vhost_san_list|first %}
 
 {{ settings.ssl.base_dir }}/vhost/{{ vhost_domain }}:
   file.directory:
     - user: {{ settings.ssl.user }}
     - group: {{ settings.ssl.user }}
     - makedirs: true
-    - mode: "0750"k
+    - mode: "0750"
 
-  {%- if virtual_host.key|d(false) and virtual_host.cert|d(false)) %}
-# put key/cert into target files
-{{ issue_from_pillar(virtual_host.name.split(' \t\n'),
-  virtual_host.key, virtual_host.cert) }}
-  {%- elif settings.ssl.acme.enabled and virtual_host.acme.enabled|d(
-              settings.ssl.acme.enabled) %}
-# if no old acme key/certs are available, generate a selfsigned cert
+  {%- if (virtual_host.key|d(false) and virtual_host.cert|d(false)) %}
+# if pillar data is configured, put key/cert into target files
+{{ issue_from_pillar(vhost_san_list, virtual_host.key, virtual_host.cert) }}
+
+  {%- elif settings.ssl.acme.enabled and
+      virtual_host.acme.enabled|d(settings.ssl.acme.enabled) %}
+# if acme enabled, but no old acme key/certs are available for virtual domain, use snakeoil host cert
+{{ issue_from_file(vhost_san_list, settings.ssl_snakeoil_key_path,
+    settings.ssl_snakeoil_cert_path, settings.ssl_snakeoil_cert_path, overwrite=false) }}
+
   {%- elif settings.host.local_ca %}
-# local ca sign cert
+# no pillar data, no acme, but local_ca enabled, create a local ca signed cert
+{{ issue_from_local_ca(vhost_san_list) }}
+
   {%- else %}
-# selfsign
+# last resort, create a selfsigned certificate
+{{ issue_self_signed(vhost_san_list) }}
   {%- endif %}
+
 {%- endfor %}
