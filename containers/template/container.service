@@ -28,7 +28,7 @@ Restart={{ entry.systemd.restart }}
 RuntimeDirectory={{ entry.name }}
 WorkingDirectory={{ entry.workdir }}
 
-{%- if entry.update %}
+{%- if entry.refresh %}
   {%- if entry.build.source != '' %}
 # build on start
 ExecStartPre=/usr/bin/bash 'cd {{ entry.builddir }} && \
@@ -51,6 +51,42 @@ ExecStartPre=/usr/bin/bash 'registry="{{ entry.image }}"; \
 # remove existing container before start
 ExecStartPre=-podman rm -f {{ entry.name }}
 {%- endif %}
+
+# commands run before the first time the service is started
+ExecStartPre=/usr/bin/bash \
+  'if test ! -e "{{ entry.configdir }}/image.digest"; then
+      echo "INFO: initial run"; \
+  {%- if entry.prepare.initial.command != '' %}
+      /usr/bin/env - \
+        {% for k,v in entry.prepare.initial.environment -%}{{ k }}={{ v }}{%- endfor %} \
+        {{ entry.prepare.initial.command }}; \
+  {%- endif %}
+  fi'
+
+# create a digest if none is existing
+ExecStartPre=/usr/bin/bash \
+  'if test ! -e "{{ entry.configdir }}/image.digest"; then
+      podman image list --format json {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | \
+        jq ".[0].Digest" -r > "{{ entry.configdir }}/image.digest"; \
+  fi'
+
+# commands run after updating image to newer image before starting new image
+ExecStartPre=/usr/bin/bash \
+  'if test "$(cat "{{ entry.configdir }}/image.digest")" != \
+      "$(podman image list --format json \
+        {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | jq -r ".[0].Digest")"; then \
+      echo "INFO: update run"; \
+  {%- if entry.prepare.change.command != '' %}
+      /usr/bin/env - \
+    {% for k,v in entry.prepare.change.environment -%}{{ k }}={{ v }}{%- endfor %} \
+        {{ entry.prepare.change.command }}; \
+  {%- endif %}
+  fi'
+
+# update digest
+ExecStartPre=/usr/bin/bash \
+  podman image list --format json {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | \
+    jq -r ".[0].Digest" > "{{ entry.configdir }}/image.digest"
 
 # start container
 ExecStart=podman run \
