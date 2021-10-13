@@ -210,9 +210,14 @@ ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_local_ca_cert: local-ca.cert.pem
 ssl_local_ca_crl: local-ca.crl.pem
 ssl_local_ca_validity_days: 1095
-ssl_local_ca_algo: ed
-ssl_local_ca_curve: ed25519
-
+ssl_local_ca_algo: rsa
+ssl_local_ca_curve: secp384r1
+ssl_local_ca_keysize: 2048
+{#
+algo: rsa, keysize: 2048
+algo: ec, curve: secp384r1
+algo: ed, curve: ed25519
+#}
 
 {# geoip provider: currently only dbip_city #}
 geoip_provider:
