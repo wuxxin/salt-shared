@@ -24,8 +24,8 @@ if test "$1" = "--days" -a "$2" != ""; then
     shift 2
 fi
 if test "$1" = ""; then usage; fi
-commonName="$1"
-subjectAltName="DNS:$commonName"
+certname="$1"
+subjectAltName="DNS:$certname"
 shift
 for i in $@; do
     subjectAltName="$subjectAltName
@@ -42,7 +42,7 @@ template="/usr/share/ssl-cert/ssleay.cnf"
 TMPFILE="$(mktemp)" || exit 1
 TMPOUT="$(mktemp)"  || exit 1
 trap "rm -f $TMPFILE $TMPOUT" EXIT
-sed -e s#@HostName@#"$commonName"# -e s#@SubjectAltName@#"$subjectAltName"# $template > $TMPFILE
+sed -e s#@HostName@#"$certname"# -e s#@SubjectAltName@#"$subjectAltName"# $template > $TMPFILE
 if $call_prefix openssl req -config $TMPFILE -new -x509 -days $daysvalid -nodes -sha256 \
     -out "$cert_path" -keyout "$key_path" > $TMPOUT 2>&1
 then

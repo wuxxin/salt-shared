@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eo pipefail
+set -x
 
 usage(){
     cat << EOF
@@ -32,7 +33,7 @@ mkdir -m 0750 -p "$domain_dir"
 
 simple_metric ssl_cert_renew counter \
     "timestamp of last cert-renew incovation" "$(date +%s)000"
-if test ! -e "${domain_dir}}/{{ settings.ssl_key }}"; then
+if test ! -e "${domain_dir}/{{ settings.ssl_key }}"; then
     execute_hooks="false"
 fi
 
@@ -41,7 +42,7 @@ install -m "0644" -T "$CERTFILE" "${domain_dir}/{{ settings.ssl_cert }}"
 install -m "0644" -T "$FULLCHAINFILE" "${domain_dir}/{{ settings.ssl_chain_cert }}"
 cat "${domain_dir}/{{ settings.ssl_chain_cert }}" \
     "{{ settings.ssl.base_dir}}/{{ settings.ssl_dhparam }}" \
-    > "{{ settings.ssl.base_dir}}/${subpath}{{ settings.ssl_full_cert }}"
+    > "${domain_dir}/{{ settings.ssl_full_cert }}"
 chmod 0644 "${domain_dir}/{{ settings.ssl_full_cert }}"
 
 valid_until=$(openssl x509 -in "${domain_dir}/{{ settings.ssl_cert }}" \
@@ -52,6 +53,6 @@ simple_metric ssl_cert_valid_until gauge \
 
 if test "$execute_hooks" = "true"; then
 {%- for command in settings.ssl.on_renew %}
-{{ command }} "$DOMAIN" "$KEYFILE" "$CERTFILE" "$FULLCHAINFILE"
+{{ command }}
 {%- endfor %}
 fi

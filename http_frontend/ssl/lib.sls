@@ -76,7 +76,7 @@ issue_from_pillar_chain_cert_{{ domain }}:
   {# issue new cert, if not already available or SAN list != expected SAN list #}
   {% from "http_frontend/defaults.jinja" import settings with context %}
   {% set domain= san_list[0] %}
-  {% set domain_dir= settings.ssl.base_dir ~ '/easyrsa/pki/' ~ domain %}
+  {% set domain_dir= settings.ssl.base_dir ~ '/easyrsa/pki' %}
 
 local-ca-issue-cert-{{ domain }}:
   cmd.run:
@@ -94,9 +94,9 @@ local-ca-chain-cert-{{ domain }}:
     - runas: {{ settings.ssl.user }}
     - umask: 027
     - name: |
-        cat {{ domain_dir }}/{{ domain }}.crt  \
+        cat {{ domain_dir }}/issued/{{ domain }}.crt  \
             {{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_cert }} \
-            > {{ domain_dir }}/{{ domain }}.{{ settings.ssl_chain_cert }}
+            > {{ domain_dir }}/issued/{{ domain }}.{{ settings.ssl_chain_cert }}
     - require:
       - cmd: local-ca-issue-cert-{{ domain }}
 
@@ -104,13 +104,15 @@ local-ca-deploy-cert-{{ domain }}:
   cmd.run:
     - name: |
         gosu {{ settings.ssl.user }} {{ settings.ssl.base_dir }}/ssl-renew-hook.sh \
+            --no-hooks \
             "{{ domain }}" \
-            "{{ domain_dir }}/{{ domain }}.key" \
-            "{{ domain_dir }}/{{ domain }}.crt" \
-            "{{ domain_dir }}/{{ domain }}.{{ settings.ssl_chain_cert }}"
+            "{{ domain_dir }}/private/{{ domain }}.key" \
+            "{{ domain_dir }}/issued/{{ domain }}.crt" \
+            "{{ domain_dir }}/issued/{{ domain }}.{{ settings.ssl_chain_cert }}" \
             "{{ settings.ssl.base_dir }}/{{ settings.ssl_local_ca_cert }}"
     - require:
       - cmd: local-ca-chain-cert-{{ domain }}
+      - file: {{ settings.ssl.base_dir }}/ssl-renew-hook.sh
 
 {% endmacro %}
 

@@ -13,8 +13,11 @@ ssl_requisites:
 
 /usr/local/bin/create-selfsigned-host-cert.sh:
   file.managed:
-    - mode: "755"
+    - mode: "0755"
     - source: salt://http_frontend/ssl/create-selfsigned-host-cert.sh
+    - template: jinja
+    - defaults:
+        settings: {{ settings }}
 
 /etc/sudoers.d/http_frontend_cert_renew_hook:
   file.managed:
@@ -28,6 +31,8 @@ ssl_requisites:
     - source: salt://http_frontend/ssl/ssl-renew-hook.sh
     - mode: "0755"
     - template: jinja
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
     - defaults:
         settings: {{ settings }}
     - require:
@@ -75,12 +80,12 @@ append_dhparam_to_invalid_cert:
     - umask: 027
     - name: |
         cat {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_cert) }} \
-          {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} >
-          {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert) }}
+          {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} \
+          > {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert) }}
     - onlyif: test ! -e {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_full_cert) }}
     - require:
       - cmd: generate_invalid_cert
-      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
+      - cmd: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
 
 # symlinks to host domain
 {% for i in [settings.ssl_key, settings.ssl_cert, settings.ssl_chain_cert] %}
@@ -124,11 +129,11 @@ symlink_{{ i }}:
     - umask: 027
     - name: |
         cat {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }} \
-          {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} >
-            {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
+          {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} \
+          > {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
     - require:
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
-      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
+      - cmd: {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}
 
 # virtual domains
 {%- for virtual_host in settings.virtual_names %}
