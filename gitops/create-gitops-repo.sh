@@ -131,7 +131,7 @@ base:
   '*':
     - main
 EOF
-cp salt/salt-shared/gitops/template/config.template.sls config/config.sls
+cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
 cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
 cp salt/salt-shared/gitops/template/state.template.sls salt/custom/top.sls
 touch salt/custom/main.sls

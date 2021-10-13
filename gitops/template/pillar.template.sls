@@ -1,4 +1,4 @@
-{% from 'config.sls' import config %}
+{% from 'node.sls' import config %}
 
 ssh_authorized_keys:
 {% for key in config.ssh_authorized_keys.split("\n") %}
@@ -16,12 +16,10 @@ node:
   locale:
     lang: de_AT.UTF-8
     language: de_de:de
-    additional: de_DE en_US en_GB
-    messages: POSIX
     timezone: Europe/Vienna
-    location: Vienna
 
   network:
+    internal: {{ config.network.internal }}
     netplan: |
 {{ config.network.netplan|indent(8, True) }}
 
