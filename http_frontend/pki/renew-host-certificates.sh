@@ -4,11 +4,11 @@ set -eo pipefail
 
 usage(){
     cat << EOF
-Usage: $0 --cron [--renew-hook hook-shell-script.sh]
+Usage: $0 --cron [--renew-hook <hook-shell-script.sh>]
 
-Renews host certificates using the local ca.
-calls 'hook-shell-script.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE'
-on renewal
+Renews host certificates using the local ca
+
++ calls 'hook-shell-script.sh DOMAIN KEYFILE CERTFILE FULLCHAINFILE' on renewal
 
 EOF
     exit 1
@@ -16,16 +16,14 @@ EOF
 
 if test "$1" != "--cron"; then usage; fi
 shift
-
 call_prefix=""
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.ssl.user }}"
     echo "debug: called as root, using $call_prefix"
 fi
-
-# main
 cd "{{ settings.ssl.base_dir }}/easyrsa"
 
+# main
 for commonName in all names; do
     # check if > minimum days valid
     # renew if not
