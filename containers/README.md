@@ -37,6 +37,11 @@
 
 ### remarks
 
+# commands run before the first time the service is started
+  
++ extract config from docker/compose daemon
+  https://github.com/nginx-proxy/docker-gen
+
 + The podman run and podman create commands now feature a --sdnotify option to
   control the behavior of systemd's sdnotify with containers,
   enabling improved support for Podman in Type=notify units.
