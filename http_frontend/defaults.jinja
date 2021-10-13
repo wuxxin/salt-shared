@@ -68,10 +68,9 @@ ssl:
   {# local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
   local_ca: true
   acme:
-  {# if enabled:false, dont use acme for ANY certificate #}
+    {# if enabled:false, dont use acme for ANY certificate #}
     enabled: true
     global: true
-    {# if host:false, dont use acme for settings.hostname #}
     host: true
     {# challenge: alpn(default)|dns_*), eg. dns_knot,
         see https://github.com/acmesh-official/acme.sh/wiki/dnsapi #}
@@ -147,8 +146,8 @@ host: []
 #}
 
 {# nginx additional customization, can be multiline yaml like "|" #}
-custom:
-  nginx:
+nginx:
+  custom:
     global: ""
     stream: ""
     http: ""
@@ -179,6 +178,7 @@ metrics:
   buildin: true
   prometheus: false
 
+
 {#
 ### internal settings ####
 change only with good reason
@@ -193,19 +193,19 @@ alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
 prometheus_endpoint: "127.0.0.1:9145"
 
-{#  key,dhparam,cert,chain_cert,full_cert names (without path) #}
+{#  key,cert,chain_cert,dhparam,full_cert names (without path) #}
 ssl_key: server.key.pem
-ssl_dhparam: server.dhparam.pem
 ssl_cert: server.cert.pem
 ssl_chain_cert: server.chain.cert.pem
+ssl_dhparam: server.dhparam.pem
 ssl_full_cert: server.chain.cert.dhparam.pem
 {# key,cert,full_cert of hostname.invalid #}
-ssl_invalid_cert: ssl-cert-invalid.pem
 ssl_invalid_key: ssl-cert-invalid.key
+ssl_invalid_cert: ssl-cert-invalid.pem
 ssl_invalid_full_cert: ssl-cert-invalid-full.pem
 {# key,cert of selfsigned host domain #}
-ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
+ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
 {# local ca (easy rsa) config #}
 ssl_local_ca_cert: local-ca.cert.pem
 ssl_local_ca_crl: local-ca.crl.pem
@@ -253,8 +253,8 @@ external: {{ http_frontend_external.objects }}
 
 {# compute https_proxy_endpoints and http_proxy_endpoints #}
 {% set ns = namespace() %}
-{% set ns.https_proxy_endpoints= ['127.0.0.1:' ~ settings.https_proxy_port] ) %}
-{% set ns.http_proxy_endpoints= ['127.0.0.1:' ~ settings.http_proxy_port] ) %}
+{% set ns.https_proxy_endpoints= ['127.0.0.1:' ~ settings.https_proxy_port] %}
+{% set ns.http_proxy_endpoints= ['127.0.0.1:' ~ settings.http_proxy_port] %}
 
 {% for ip in settings.listen_ip %}
   {% if 'https_proxy' in settings.listen_service %}
@@ -269,8 +269,8 @@ external: {{ http_frontend_external.objects }}
 {% do settings.update( {'http_proxy_endpoints': ns.http_proxy_endpoints} ) %}
 
 {% do settings.update( {'alpn_endpoint_port': settings.alpn_endpoint|regex_replace('^[^:]:([0-9]+)', '\\1')} ) %}
-{% do settings.update( {'ssl_acme_service': settings.ssl.acme.service if not settings.ssl.acme.staging else settings.ssl.acme.staging_service} ) %}
-{% do settings.udpate( {'ssl_acme_domain': settings.ssl_acme_service|regex_replace('https?://([^/]+)/.*', '\\1')} ) %}
+{% do settings.update( {'ssl_acme_service': settings.ssl.acme.service} ) %}
+{% do settings.update( {'ssl_acme_domain': settings.ssl_acme_service|regex_replace('https?://([^/]+)/.*', '\\1')} ) %}
 
 {# expand ##version## in field external.*.download #}
 {% for n,v in settings.external.items() %}
