@@ -76,10 +76,12 @@ easyrsa_build_ca:
         fi
         ./easyrsa --batch init-pki
         ./easyrsa --batch \
-          --use-algo={{ settings.ssl_local_ca_algo }} --curve={{ settings.ssl_local_ca_curve }} \
+          --use-algo="{{ settings.ssl_local_ca_algo }}" \
+          --curve="{{ settings.ssl_local_ca_curve }}" \
+          --key-size="{{ settings.ssl_local_ca_keysize }}" \
           --req-cn="{{ settings.domain }}" \
+          --dn-mode=org --req-org="{{ settings.domain }} Cert Authority" \
           --subject-alt-name="DNS:{{ settings.domain }}" \
-          --req-org="{{ settings.domain }} Cert Authority" \
           build-ca nopass
     - unless: |
         result="false"

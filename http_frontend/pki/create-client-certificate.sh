@@ -69,11 +69,13 @@ cd "{{ settings.ssl.base_dir }}/easyrsa"
 if test "$email" = ""; then
     # create cert
     $call_prefix ./easyrsa --batch \
-        --use-algo="{{ settings.ssl_local_ca_algo }}" --curve="{{ settings.ssl_local_ca_curve }}" \
+        --use-algo="{{ settings.ssl_local_ca_algo }}" \
+        --curve="{{ settings.ssl_local_ca_curve }}" \
+        --key-size="{{ settings.ssl_local_ca_keysize }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
+        --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \
         --subject-alt-name="${additional_san}" \
-        --req-org="{{ settings.domain }} CA Client Cert" \
         build-client-full "$certname"
     # update revocation list
     $call_prefix ./easyrsa --batch gen-crl
@@ -89,11 +91,14 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 # create cert
 echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin \
-        --use-algo="{{ settings.ssl_local_ca_algo }}" --curve="{{ settings.ssl_local_ca_curve }}" \
+        --use-algo="{{ settings.ssl_local_ca_algo }}" \
+        --curve="{{ settings.ssl_local_ca_curve }}" \
+        --key-size="{{ settings.ssl_local_ca_keysize }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
+        --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \
+        --reg-email="$email" \
         --subject-alt-name="email:$email${additional_san}" \
-        --req-org="{{ settings.domain }} CA Client Cert" \
         build-client-full "$certname"
 
 # export/convert cert to p12 filetype (readable by almost all browser)

@@ -59,10 +59,11 @@ fi
 $call_prefix ./easyrsa --batch \
     --use-algo="{{ settings.ssl_local_ca_algo }}" \
     --curve="{{ settings.ssl_local_ca_curve }}" \
+    --key-size="{{ settings.ssl_local_ca_keysize }}" \
     --days="$daysvalid" \
     --req-cn="$certname" \
+    --dn-mode=org --req-org="{{ settings.domain }} CA Server Cert" \
     --subject-alt-name="${subjectAltName}" \
-    --req-org="{{ settings.domain }} CA Server Cert" \
     build-server-full "$certname" nopass
 
 # update revocation list
