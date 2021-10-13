@@ -9,19 +9,22 @@ After=network-online.target {{ entry.systemd.after }}
 
 [Service]
 Type=exec
-Restart={{ entry.restart }}
+{%- if not entry.systemd.restart|length %}
+Restart=on-failure
+{%- else %}
+Restart={{ entry.systemd.restart }}
+{%- endif %}
 WorkingDirectory={{ entry.workdir }}
 # RuntimeDirectory will create /run/{{ entry.name }} for pid, socket files
 RuntimeDirectory={{ entry.name }}
 # Environment=PODMAN_USERNS={{ entry.userns }}
-{%- if entry.update %}
-  {%- if entry.build %}
-ExecStartPre=podman-compose build
-  {%- else %}
+{%- if entry.refresh %}
 ExecStartPre=podman-compose pull
-  {%- endif %}
 {%- endif %}
-ExecStart=podman-compose up --abort-on-container-exit
+{%- if entry.ephemeral %}
+ExecStartPre=-podman pod rm {{ entry.name }}
+{%- endif %}
+ExecStart=podman-compose up --no-build --abort-on-container-exit
 ExecStop=podman-compose down
 {%- for k,v in entry.systemd.service.items() %}
 {{ k }}={{ v }}
