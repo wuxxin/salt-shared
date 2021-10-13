@@ -88,28 +88,36 @@
   {%- endload -%}
   {%- do repl_ns.to_repl.update( {'environment': env_update} ) -%}
   {# repl labels #}
-  {%- load_json as labels_update -%}
+  {%- if entry.labels|d(false) -%}
+    {%- load_json as labels_update -%}
 {{ repl_env_json(entry.labels, repl_ns.to_repl.environment, user=user) }}
-  {%- endload -%}
-  {%- do repl_ns.to_repl.update( {'labels': labels_update} ) -%}
-  {# repl storage #}
-  {%- do repl_ns.to_repl.update({'storage': []}) -%}
-  {%- for s in entry.storage -%}
-    {%- load_json as s_entry -%}
-{{ repl_env_json(s, repl_ns.to_repl.environment, user=user) }}
     {%- endload -%}
-    {%- do repl_ns.to_repl.storage.append(s_entry) -%}
-  {%- endfor -%}
-  {# repl volumes #}
-  {%- do repl_ns.to_repl.update({'volumes': []}) -%}
-  {%- for v in entry.volumes -%}
-    {%- do repl_ns.to_repl.volumes.append(var_repl(v, repl_ns.to_repl.environment, user)) -%}
-  {%- endfor -%}
-  {# repl ports #}
-  {%- do repl_ns.to_repl.update({'ports': []}) -%}
-  {%- for p in entry.ports -%}
-    {%- do repl_ns.to_repl.ports.append(var_repl(p, repl_ns.to_repl.environment, user)) -%}
-  {%- endfor -%}
+    {%- do repl_ns.to_repl.update( {'labels': labels_update} ) -%}
+  {%- endif -%}
+    {# repl storage #}
+  {%- if entry.storage|d(false) -%}
+    {%- do repl_ns.to_repl.update({'storage': []}) -%}
+    {%- for s in entry.storage -%}
+      {%- load_json as s_entry -%}
+{{ repl_env_json(s, repl_ns.to_repl.environment, user=user) }}
+      {%- endload -%}
+      {%- do repl_ns.to_repl.storage.append(s_entry) -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if entry.volumes|d(false) -%}
+    {# repl volumes #}
+    {%- do repl_ns.to_repl.update({'volumes': []}) -%}
+    {%- for v in entry.volumes -%}
+      {%- do repl_ns.to_repl.volumes.append(var_repl(v, repl_ns.to_repl.environment, user)) -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if entry.ports|d(false) -%}
+    {# repl ports #}
+    {%- do repl_ns.to_repl.update({'ports': []}) -%}
+    {%- for p in entry.ports -%}
+      {%- do repl_ns.to_repl.ports.append(var_repl(p, repl_ns.to_repl.environment, user)) -%}
+    {%- endfor -%}
+  {%- endif -%}
 {{ repl_ns.to_repl|json() }}
 {%- endmacro -%}
 
@@ -431,6 +439,7 @@ containers_volume_{{ volume_name }}{{ postfix_user }}:
   {%- endload -%}
   {%- do entry.update(entry_update) -%}
 
+{{ create_directories(entry, user=user) }}
 {{ write_files(entry, user) }}
 {{ write_env(entry, user) }}
 
