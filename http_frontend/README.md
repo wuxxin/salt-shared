@@ -22,19 +22,7 @@ configured http **Upstreams** defaults:
   + http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
 
 ### TODO
-
 FIXME: pki -> ssl -> nginx -> acme
-
-+ pki: create ca
-+ ssl: create dh_param
-+ ssl: regenerate snakeoil if not existing or cn != settings.domain
-+ ssl: generate invalid cert if not existing, append dhparam to it
-
-+ ssl: write key, cert, cert_chain for host (eg. snakeoil, localca)
-+ ssl: make full_cert by chain_chert plus dhparam
-
-+ make acme use dns as alternative
-+ make acme * certificates
 
 ### Administration
 
@@ -65,7 +53,7 @@ virtual_names:
   - name: another.domain still.another.domain
     acme:
       enabled: false
-  - name: *.name.domain
+  - name: name.domain *.name.domain
     acme:
       challenge: dns_knot
       env:
