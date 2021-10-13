@@ -9,51 +9,61 @@ Usage: $0 [--days daysvalid] domain [add domains*]
 
 Creates a host certificate using the local ca.
 
-+ The default certificate lifetime is $daysvalid days.
++ calling $0 --check-domains-listed domain [domains*]
+    will exit 0 if all domains are listed in the current existing certificate,
+    and exit 1 otherwise
 
-        result="false"
-        if test -f "{{ domain_dir }}/fullchain.cer"; then
-          if test -f "{{ domain_dir }}/{{ domain }}.cer"; then
-            san_list=$(openssl x509 -text -noout -in "{{ domain_dir }}/{{ domain }}.cer" | \
-              awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
-              tr -d "DNS:" | tr "," "\\n" | sort)
-            exp_list=$(echo "{{ san_list|join(' ') }}" | tr " " "\\n" | sort)
-            if test "$san_list" = "$exp_list"; then result="true"; fi
-          fi
-        fi
-        $result
++ The default certificate lifetime is $daysvalid days,
+    use --days daysvalid to specify a different value
 
 EOF
     exit 1
 }
 
+check_only="false"
 daysvalid="{{ settings.ssl_local_ca_validity_days }}"
-if test "$1" = "--days" -a "$2" != ""; then daysvalid=$2; shift 2; fi
+if test "$1" = "--days"; then daysvalid=$2; shift 2; fi
+if test "$1" = "--check-domains-listed"; then check_only="true"; shift; fi
 if test "$1" = ""; then usage; fi
-commonName="$1"
-subjectAltName="DNS:$commonName"
+certname="$1"
+subjectAltName="DNS:$certname"
+san_list="$certname"
 shift
 for i in $@; do
     subjectAltName="$subjectAltName,DNS:$i"
+    san_list="$san_list $i"
 done
 call_prefix=""
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.ssl.user }}"
     echo "debug: called as root, using $call_prefix"
 fi
-
-# main
 cd "{{ settings.ssl.base_dir }}/easyrsa"
 
+if test "$check_only" = "true"; then
+    # check if current existing cert has all domains listed on commandline inside the cert
+    cert_path="{{ settings.ssl.base_dir }}/easyrsa/pki/issued/${certname}.crt"
+    if test -f "$cert_path"; then
+        current_san_list=$(openssl x509 -text -noout -in "$cert_path" | \
+            awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
+            tr -d "DNS:" | tr "," "\\n" | sort)
+        expected_san_list=$(echo "$san_list" | tr " " "\\n" | sort)
+        if test "$current_san_list" = "$expected_san_list"; then
+            exit 0
+        fi
+    fi
+    exit 1
+fi
+
 # create cert
-$call_prefix ./easyrsa --batch --passout=stdin \
+$call_prefix ./easyrsa --batch \
     --use-algo="{{ settings.ssl_local_ca_algo }}" \
     --curve="{{ settings.ssl_local_ca_curve }}" \
     --days="$daysvalid" \
     --req-cn="$certname" \
-    --subject-alt-name="${additional_san}" \
+    --subject-alt-name="${subjectAltName}" \
     --req-org="{{ settings.domain }} CA Server Cert" \
-    build-host-full "$certname" nopass
+    build-server-full "$certname" nopass
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
