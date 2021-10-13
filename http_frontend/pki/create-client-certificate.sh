@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eo pipefail
-# set -x
+set -x
 
 usage(){
     cat << EOF
@@ -27,6 +27,18 @@ Creates a client certificate, optionally send created certificate via Email.
             --san "URI:https://web.domain.tl,DNS:web.domain.tl"
         + specify an emailaddress without a password or sending the certificate via email
             --san "email:name@address"
+        + --san "IP:192.168.7.1"
+        + --san "IP:13::17"
+        + --san "DNS:some.other.address"
+        + --san "email:copy,email:my@other.address,URI:http://my.url.here/""
+        + --san "email:my@other.address,RID:1.2.3.4"
+        + --san "otherName:1.2.3.4;UTF8:some other identifier"
+        + --san "dirName:dir_sect"
+            # [dir_sect]
+            # C=UK
+            # O=My Organization
+            # OU=My Unit
+            # CN=My Name
 EOF
     exit 1
 }
