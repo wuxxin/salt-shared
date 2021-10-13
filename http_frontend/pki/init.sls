@@ -9,6 +9,7 @@ pki_requisites:
       - bc
       - swaks
       - gosu
+      - openssl
 
 {% for i in [
 'create-client-certificate.sh',
