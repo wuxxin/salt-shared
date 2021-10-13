@@ -13,7 +13,7 @@ objects:
     hash: cae114c212a5be4d89f2253d36c70ab94f68d295f24e8b6711c2cab0fabf7e18
   dbip_city_mmdb_gz:
     version: "2021-09"
-    latest: echo "{{ current_date_time[:7] }}"
+    latest: echo "2021-09"
     download: "https://download.db-ip.com/free/dbip-city-lite-##version##.mmdb.gz"
     target: /usr/local/lib/dbip-city.mmdb.gz
     hash: da42f2f3e6962488de6b905996c043ab626354e5959684a629ce3d58c2ead48e
