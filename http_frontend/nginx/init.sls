@@ -83,7 +83,7 @@ nginx:
     - require:
       - pkg: nginx
       - file: /etc/nginx/nginx.conf
-      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
+      - cmd: {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
       - archive: lua_prometheus_module
     - watch:
       - file: /etc/nginx/nginx.conf
