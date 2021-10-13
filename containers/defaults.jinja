@@ -2,22 +2,8 @@
 config:
   containers:
     # /etc/containers/containers.conf
-
-    containers:
-      default_capabilities:
-        - "CHOWN"
-        - "DAC_OVERRIDE"
-        - "FOWNER"
-        - "FSETID"
-        - "KILL"
-        - "NET_BIND_SERVICE"
-        - "SETFCAP"
-        - "SETGID"
-        - "SETPCAP"
-        - "SETUID"
-        - "SYS_CHROOT"
-      default_sysctls:
-        - "net.ipv4.ping_group_range=0 0"
+    containers: {}
+    network: {}
     engine:
       # Container Runtime: ["crun", "runc", "kata"]
       # crun: OCI runtime with support for cgroup V2
@@ -29,11 +15,14 @@ config:
     storage:
       # Primary storage driver
       driver: "overlay"
+      runroot: "/run/containers/storage"
+      graphroot: "/var/lib/containers/storage"
 
       # storage options
       options:
         overlay:
           mount_program: "/usr/bin/fuse-overlayfs"
+          mountopt: "nodev,metacopy=on"
 
   mounts:
     # /etc/containers/mounts.conf
@@ -141,8 +130,8 @@ tag: ""
 enabled: true
 # absent (service, oneshot): if true also remove systemd service files
 absent: false
-# update: if true, container image will be pulled/build on every service start
-update: true
+# refresh: if true, container image will be pulled/build on every service start
+refresh: true
 # ephemeral (service, oneshot, command, desktop): remove existing container before start
 ephemeral: true
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
@@ -222,13 +211,13 @@ build:
 # additional commands run on certain events
 prepare:
   initial:
+    command: ""
+    environment: {}
     # commands run before the first time the service is started
+  change:
     command: ""
     environment: {}
-  update:
-    # commands run after updating image to newer image before starting new image
-    command: ""
-    environment: {}
+    # commands run after updating the corresponding image to a newer image before starting the service
 {% endload %}
 
 
@@ -244,8 +233,8 @@ type: service
 enabled: true
 # absent: if true also remove systemd service files
 absent: false
-# update: if true, container image will be pulled/build on every service start
-update: true
+# refresh: if true, container image will be pulled/build on every service start
+refresh: true
 # ephemeral: remove existing container before start
 ephemeral: true
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
@@ -286,11 +275,11 @@ files: {}
 # additional commands run on certain events
 prepare:
   initial:
+    command: ""
+    environment: {}
     # commands run before the first time the service is started
+  change:
     command: ""
     environment: {}
-  update:
-    # commands run after updating image to newer image before starting new image
-    command: ""
-    environment: {}
+    # commands run after updating the corresponding images to newer images before starting the service
 {% endload %}
