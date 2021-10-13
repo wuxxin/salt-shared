@@ -13,6 +13,7 @@ import sys
 import os
 import argparse
 import subprocess
+import textwrap
 import time
 import re
 import hashlib
@@ -51,6 +52,15 @@ filteri = lambda a: filter(lambda i: i, a)
 def try_int(i, fallback=None):
     try:
         return int(i)
+    except ValueError:
+        pass
+    except TypeError:
+        pass
+    return fallback
+
+def try_float(i, fallback=None):
+    try:
+        return float(i)
     except ValueError:
         pass
     except TypeError:
@@ -504,6 +514,103 @@ def get_mount_args(compose, cnt, volume):
         args = mount_desc_to_mount_args(compose, volume, srv_name, cnt['name'])
         return ['--mount', args]
 
+
+def get_secret_args(compose, cnt, secret):
+    secret_name = secret if is_str(secret) else secret.get('source', None)
+    if not secret_name or secret_name not in compose.declared_secrets.keys():
+        raise ValueError(
+            'ERROR: undeclared secret: "{}", service: "{}"'
+            .format(secret, cnt['_service'])
+        )
+    declared_secret = compose.declared_secrets[secret_name]
+
+    source_file = declared_secret.get('file', None)
+    dest_file = ''
+    secret_opts = ''
+
+    target = None if is_str(secret) else secret.get('target', None)
+    uid = None if is_str(secret) else secret.get('uid', None)
+    gid = None if is_str(secret) else secret.get('gid', None)
+    mode = None if is_str(secret) else secret.get('mode', None)
+
+    if source_file:
+        if not target:
+            dest_file = '/run/secrets/{}'.format(secret_name)
+        elif not target.startswith("/"):
+            dest_file = '/run/secrets/{}'.format(target if target else secret_name)
+        else:
+            dest_file = target
+        volume_ref = [
+            '--volume', '{}:{}:ro,rprivate,rbind'.format(source_file, dest_file)
+        ]
+        if uid or gid or mode:
+            print(
+                'WARNING: Service "{}" uses secret "{}" with uid, gid, or mode.'
+                    .format(cnt['_service'], target if target else secret_name)
+                + ' These fields are not supported by this implementation of the Compose file'
+            )
+        return volume_ref
+    # v3.5 and up added external flag, earlier the spec
+    # only required a name to be specified.
+    # docker-compose does not support external secrets outside of swarm mode.
+    # However accessing these via podman is trivial
+    # since these commands are directly translated to
+    # podman-create commands, albiet we can only support a 1:1 mapping
+    # at the moment
+    if declared_secret.get('external', False) or declared_secret.get('name', None):
+        secret_opts += ',uid={}'.format(uid) if uid else ''
+        secret_opts += ',gid={}'.format(gid) if gid else ''
+        secret_opts += ',mode={}'.format(mode) if mode else ''
+        # The target option is only valid for type=env,
+        # which in an ideal world would work
+        # for type=mount as well.
+        # having a custom name for the external secret
+        # has the same problem as well
+        ext_name = declared_secret.get('name', None)
+        err_str = 'ERROR: Custom name/target reference "{}" for mounted external secret "{}" is not supported'
+        if ext_name and ext_name != secret_name:
+            raise ValueError(err_str.format(secret_name, ext_name))
+        elif target and target != secret_name:
+            raise ValueError(err_str.format(target, secret_name))
+        elif target:
+            print('WARNING: Service "{}" uses target: "{}" for secret: "{}".'
+                    .format(cnt['_service'], target, secret_name)
+                  + ' That is un-supported and a no-op and is ignored.')
+        return [ '--secret', '{}{}'.format(secret_name, secret_opts) ]
+
+    raise ValueError('ERROR: unparseable secret: "{}", service: "{}"'
+                        .format(secret_name, cnt['_service']))
+
+
+def container_to_res_args(cnt, podman_args):
+    # v2 < https://docs.docker.com/compose/compose-file/compose-file-v2/#cpu-and-other-resources
+    cpus_limit_v2 = try_float(cnt.get('cpus', None), None)
+    cpu_shares_v2 = try_int(cnt.get('cpu_shares', None), None)
+    mem_limit_v2 = cnt.get('mem_limit', None)
+    mem_res_v2 = cnt.get('mem_reservation', None)
+    # v3 < https://docs.docker.com/compose/compose-file/compose-file-v3/#resources
+    # spec < https://github.com/compose-spec/compose-spec/blob/master/deploy.md#resources
+    deploy = cnt.get('deploy', None) or {}
+    res = deploy.get('resources', None) or {}
+    limits = res.get('limits', None) or {}
+    cpus_limit_v3 = try_float(limits.get('cpus', None), None)
+    mem_limit_v3 = limits.get('memory', None)
+    reservations = res.get('reservations', None) or {}
+    #cpus_res_v3 = try_float(reservations.get('cpus', None), None)
+    mem_res_v3 = reservations.get('memory', None)
+    # add args
+    cpus = cpus_limit_v3 or cpus_limit_v2
+    if cpus:
+        podman_args.extend(('--cpus', str(cpus),))
+    if cpu_shares_v2:
+        podman_args.extend(('--cpu-shares', str(cpu_shares_v2),))
+    mem = mem_limit_v3 or mem_limit_v2
+    if mem:
+        podman_args.extend(('-m', str(mem).lower(),))
+    mem_res = mem_res_v3 or mem_res_v2
+    if mem_res:
+        podman_args.extend(('--memory-reservation', str(mem_res).lower(),))
+
 def container_to_args(compose, cnt, detached=True):
     # TODO: double check -e , --add-host, -v, --read-only
     dirname = compose.dirname
@@ -537,6 +644,8 @@ def container_to_args(compose, cnt, detached=True):
         podman_args.extend(['--cap-drop', c])
     for d in cnt.get('devices', []):
         podman_args.extend(['--device', d])
+    for d in cnt.get('group_add', []):
+        podman_args.extend(['--group-add', d])
     env_file = cnt.get('env_file', [])
     if is_str(env_file): env_file = [env_file]
     for i in env_file:
@@ -552,13 +661,23 @@ def container_to_args(compose, cnt, detached=True):
     for volume in cnt.get('volumes', []):
         # TODO: should we make it os.path.realpath(os.path.join(, i))?
         podman_args.extend(get_mount_args(compose, cnt, volume))
+    log = cnt.get('logging')
+    if log is not None:
+        podman_args.append(f'--log-driver={log.get("driver", "k8s-file")}')
+        log_opts = log.get('options') or {}
+        podman_args += [f'--log-opt={name}={value}' for name, value in log_opts.items()]
+    for secret in cnt.get('secrets', []):
+        podman_args.extend(get_secret_args(compose, cnt, secret))
     for i in cnt.get('extra_hosts', []):
         podman_args.extend(['--add-host', i])
     for i in cnt.get('expose', []):
         podman_args.extend(['--expose', i])
     if cnt.get('publishall', None):
         podman_args.append('-P')
-    for i in cnt.get('ports', []):
+    ports = cnt.get('ports', None) or []
+    if isinstance(ports, str):
+        ports = [ports]
+    for i in ports:
         podman_args.extend(['-p', i])
     user = cnt.get('user', None)
     if user is not None:
@@ -567,14 +686,6 @@ def container_to_args(compose, cnt, detached=True):
         podman_args.extend(['-w', cnt['working_dir']])
     if cnt.get('hostname', None):
         podman_args.extend(['--hostname', cnt['hostname']])
-    mem_limit = cnt.get("deploy", {}).get("resources", {}).get(
-                "limits", {}).get("memory", None)
-    if mem_limit:
-        podman_args.extend(["--memory", mem_limit.lower()])
-    mem_reservation = cnt.get("deploy", {}).get("resources", {}).get(
-                        "reservations", {}).get("memory", None)
-    if mem_reservation:
-        podman_args.extend(["--memory-reservation", mem_reservation.lower()])
     if cnt.get('ipc', None):
         podman_args.extend(['--ipc', cnt['ipc']])
     if cnt.get('shm_size', None):
@@ -592,6 +703,7 @@ def container_to_args(compose, cnt, detached=True):
     if cnt.get('restart', None) is not None:
         podman_args.extend(['--restart', cnt['restart']])
     container_to_ulimit_args(cnt, podman_args)
+    container_to_res_args(cnt, podman_args)
     # currently podman shipped by fedora does not package this
     if cnt.get('init', None):
         podman_args.append('--init')
@@ -715,7 +827,7 @@ class Podman:
         return subprocess.check_output(cmd_ls)
 
     def run(self, podman_args, cmd='', cmd_args=None, wait=True, sleep=1, obj=None):
-        cmd_args = cmd_args or []
+        cmd_args = list(map(str, cmd_args or []))
         xargs = self.compose.get_podman_args(cmd) if cmd else []
         cmd_ls = [self.podman_path, *podman_args, cmd] + xargs + cmd_args
         print(" ".join(cmd_ls))
@@ -728,7 +840,7 @@ class Podman:
             print(exit_code)
             if obj is not None:
                 obj.exit_code = exit_code
-            
+
         if sleep:
             time.sleep(sleep)
         return p
@@ -824,6 +936,7 @@ class PodmanCompose:
         self.pods = None
         self.containers = None
         self.shared_vols = None
+        self.declared_secrets = None
         self.container_names_by_service = None
         self.container_by_name = None
         self._prefer_volume_over_mount = True
@@ -875,6 +988,8 @@ class PodmanCompose:
                 "compose.yml",
                 "compose.override.yaml",
                 "compose.override.yml",
+		"podman-compose.yaml",
+		"podman-compose.yml",
                 "docker-compose.yml",
                 "docker-compose.yaml",
                 "docker-compose.override.yml",
@@ -886,7 +1001,7 @@ class PodmanCompose:
             ]))
         files = args.file
         if not files:
-            print("no compose.yaml, docker-compose.yml ot container-compose.yml file found, pass files with -f")
+            print("no compose.yaml, docker-compose.yml or container-compose.yml file found, pass files with -f")
             exit(-1)
         ex = map(os.path.exists, files)
         missing = [ fn0 for ex0, fn0 in zip(ex, files) if not ex0 ]
@@ -910,7 +1025,7 @@ class PodmanCompose:
         os.chdir(dirname)
 
         if not project_name:
-            # More strict then acually needed for simplicity: podman requires [a-zA-Z0-9][a-zA-Z0-9_.-]*
+            # More strict then actually needed for simplicity: podman requires [a-zA-Z0-9][a-zA-Z0-9_.-]*
             project_name = norm_re.sub('', dir_basename.lower())
             if not project_name:
                 raise RuntimeError("Project name [{}] normalized to empty".format(dir_basename))
@@ -953,7 +1068,7 @@ class PodmanCompose:
         if services is None:
             services = {}
             print("WARNING: No services defined")
-		
+
         # NOTE: maybe add "extends.service" to _deps at this stage
         flat_deps(services, with_extends=True)
         service_names = sorted([ (len(srv["_deps"]), name) for name, srv in services.items() ])
@@ -978,7 +1093,7 @@ class PodmanCompose:
         # other top-levels:
         # networks: {driver: ...}
         # configs: {...}
-        # secrets: {...}
+        self.declared_secrets = compose.get('secrets', {})
         given_containers = []
         container_names_by_service = {}
         for service_name, service_desc in services.items():
@@ -1028,7 +1143,9 @@ class PodmanCompose:
 
 
     def _parse_args(self):
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawTextHelpFormatter
+        )
         self._init_global_parser(parser)
         subparsers = parser.add_subparsers(title='command', dest='command')
         subparser = subparsers.add_parser('help', help='show help')
@@ -1037,12 +1154,16 @@ class PodmanCompose:
             for cmd_parser in cmd._parse_args:
                 cmd_parser(subparser)
         self.global_args = parser.parse_args()
+        if self.global_args.version:
+            self.global_args.command = "version"
         if not self.global_args.command or self.global_args.command=='help':
             parser.print_help()
             exit(-1)
         return self.global_args
 
     def _init_global_parser(self, parser):
+        parser.add_argument("-v", "--version",
+                            help="show version", action='store_true')
         parser.add_argument("-f", "--file",
                             help="Specify an alternate compose file (default: docker-compose.yml)",
                             metavar='file', action='append', default=[])
@@ -1066,7 +1187,15 @@ class PodmanCompose:
         parser.add_argument("--dry-run",
                             help="No action; perform a simulation of commands", action='store_true')
         parser.add_argument("-t", "--transform_policy",
-                            help="how to translate docker compose to podman [1pod|hostnet|accurate]",
+                            help=textwrap.dedent("""\
+                            how to translate docker compose to podman (default: 1podfw)
+                                1podfw - create all containers in one pod (inter-container communication is done via localhost), doing port mapping in that pod
+                                1pod - create all containers in one pod, doing port mapping in each container (does not work)
+                                identity - no mapping
+                                hostnet - use host network, and inter-container communication is done via host gateway and published ports
+                                cntnet - create a container and use it via --network container:name (inter-container communication via localhost)
+                                publishall - publish all ports to host (using -P) and communicate via gateway
+                            """),
                             choices=['1pod', '1podfw', 'hostnet', 'cntnet', 'publishall', 'identity'], default='1podfw')
 
 podman_compose = PodmanCompose()
@@ -1111,12 +1240,24 @@ def compose_version(compose, args):
     print("podman-composer version ", __version__)
     compose.podman.run(["--version"], "", [], sleep=0)
 
-@cmd_run(podman_compose, 'pull', 'pull stack images')
+def is_local(container: dict) -> bool:
+    """Test if a container is local, i.e. if it is
+    * prefixed with localhost/
+    * has a build section and is not prefixed
+    """
+    return (
+        not "/" in container["image"]
+        if "build" in container
+        else container["image"].startswith("localhost/")
+    )
+
+@cmd_run(podman_compose, "pull", "pull stack images")
 def compose_pull(compose, args):
-    images = set()
-    for cnt in compose.containers:
-        if cnt.get('build', None): continue
-        images.add(cnt["image"])
+    img_containers = [cnt for cnt in compose.containers if "image" in cnt]
+    images = {cnt["image"] for cnt in img_containers}
+    if not args.force_local:
+        local_images = {cnt["image"] for cnt in img_containers if is_local(cnt)}
+        images -= local_images
     for image in images:
         compose.podman.run([], "pull", [image], sleep=0)
 
@@ -1179,6 +1320,8 @@ def create_pods(compose, args):
             "--share", "net",
         ]
         ports = pod.get("ports", None) or []
+        if isinstance(ports, str):
+            ports = [ports]
         for i in ports:
             podman_args.extend(['-p', str(i)])
         compose.podman.run([], "pod", podman_args)
@@ -1315,7 +1458,7 @@ def compose_exec(compose, args):
     if args.user: podman_args += ['--user', args.user]
     if args.workdir: podman_args += ['--workdir', args.workdir]
     if not args.T: podman_args += ['--tty']
-    env = dict(cnt['environment'])
+    env = dict(cnt.get('environment', {}))
     if args.env:
         additional_env_vars = dict(map(lambda each: each.split('='), args.env))
         env.update(additional_env_vars)
@@ -1491,6 +1634,11 @@ def compose_logs_parse(parser):
         type=str, default="all")
     parser.add_argument('service', metavar='service', nargs=None,
         help='service name')
+
+@cmd_parse(podman_compose, 'pull')
+def compose_pull_parse(parser):
+    parser.add_argument("--force-local", action='store_true', default=False,
+        help="Also pull unprefixed images for services which have a build section")
 
 @cmd_parse(podman_compose, 'push')
 def compose_push_parse(parser):
