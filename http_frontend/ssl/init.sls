@@ -11,7 +11,7 @@ ssl_requisites:
       - openssl
       - ssl-cert
 
-/usr/local/sbin/create-selfsigned-host-cert.sh:
+/usr/local/bin/create-selfsigned-host-cert.sh:
   file.managed:
     - mode: "755"
     - source: salt://http_frontend/ssl/create-selfsigned-host-cert.sh
@@ -60,14 +60,14 @@ generate_invalid_cert:
   cmd.run:
     - runas: {{ settings.ssl.user }}
     - name: |
-        /usr/local/sbin/create-selfsigned-host-cert.sh \
+        /usr/local/bin/create-selfsigned-host-cert.sh \
           -k {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_key) }} \
           -c {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_cert) }} \
           host.invalid
     - onlyif: test ! -e {{ salt['file.join'](settings.ssl.base_dir, settings.ssl_invalid_key) }}
     - require:
       - pkg: ssl_requisites
-      - file: /usr/local/sbin/create-selfsigned-host-cert.sh
+      - file: /usr/local/bin/create-selfsigned-host-cert.sh
 
 append_dhparam_to_invalid_cert:
   cmd.run:

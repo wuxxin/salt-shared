@@ -82,11 +82,11 @@ local-ca-issue-cert-{{ domain }}:
   cmd.run:
     - name: |
         gosu {{ settings.ssl.user }} \
-          /usr/local/sbin/create-host-certificate.sh \
+          /usr/local/bin/create-host-certificate.sh \
             {{ san_list|join(' ') }}
     - unless: |
         gosu {{ settings.ssl.user }} \
-          /usr/local/sbin/create-host-certificate.sh --check-domains-listed \
+          /usr/local/bin/create-host-certificate.sh --check-domains-listed \
             {{ san_list|join(' ') }}
 
 local-ca-chain-cert-{{ domain }}:
@@ -122,7 +122,7 @@ local-ca-deploy-cert-{{ domain }}:
 self-signed-deploy-{{ domain }}:
   cmd.run:
     - name: |
-        gosu {{ settings.ssl.user }} /usr/local/sbin/create-selfsigned-host-cert.sh \
+        gosu {{ settings.ssl.user }} /usr/local/bin/create-selfsigned-host-cert.sh \
           -k {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }} \
           -c {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_chain_cert }} \
           {{ san_list|join(' ') }}
