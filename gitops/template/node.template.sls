@@ -22,8 +22,8 @@
 
 {% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) %}
 {% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
-{% set internal_cidr = '10.140.250.1/24') %}
-{% set internal_name = 'resident') %}
+{% set internal_cidr = '10.140.250.1/24' %}
+{% set internal_name = 'resident' %}
 {% set netplan = "" %}
 
 {% set ssh_authorized_keys = "" %}
