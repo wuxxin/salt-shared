@@ -5,9 +5,9 @@ include:
 {% from "http_frontend/defaults.jinja" import settings with context %}
 
 {% macro issue_cert(san_list, challenge='alpn', env={}) %}
-{# issue new cert, if not already available or SAN list != expected SAN list #}
-{% set domain= san_list[0] %}
-{% set domain_dir = settings.ssl.base_dir+ '/acme.sh/' + domain %}
+  {# issue new cert, if not already available or SAN list != expected SAN list #}
+  {% set domain= san_list[0] %}
+  {% set domain_dir = settings.ssl.base_dir+ '/acme.sh/' + domain %}
 
 acme-issue-cert-{{ domain }}:
   cmd.run:
@@ -188,10 +188,16 @@ acme-register-account:
     - onchanges:
       - file: /etc/systemd/system/acme.timer
 
-enable-acme-service:
-  service.running:
-    - name: acme.timer
+configure-acme-service:
+  service:
+  {% if settings.ssl.acme.enabled %}
+    - running
     - enable: true
+  {%- else %}
+    - dead
+    - enable: false
+  {% endif %}
+    - name: acme.timer
     - require:
       - file: /etc/systemd/system/acme.service
       - file: /etc/systemd/system/acme.timer
