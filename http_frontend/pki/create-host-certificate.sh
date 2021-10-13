@@ -21,7 +21,7 @@ EOF
 }
 
 check_only="false"
-daysvalid="{{ settings.ssl_local_ca_validity_days }}"
+daysvalid="{{ settings.ssl.local_ca.validity_days }}"
 if test "$1" = "--days"; then daysvalid=$2; shift 2; fi
 if test "$1" = "--check-domains-listed"; then check_only="true"; shift; fi
 if test "$1" = ""; then usage; fi
@@ -57,9 +57,9 @@ fi
 
 # create cert
 $call_prefix ./easyrsa --batch \
-    --use-algo="{{ settings.ssl_local_ca_algo }}" \
-    --curve="{{ settings.ssl_local_ca_curve }}" \
-    --key-size="{{ settings.ssl_local_ca_keysize }}" \
+    --use-algo="{{ settings.ssl.local_ca.algo }}" \
+    --curve="{{ settings.ssl.local_ca.curve }}" \
+    --keysize="{{ settings.ssl.local_ca.keysize }}" \
     --days="$daysvalid" \
     --req-cn="$certname" \
     --dn-mode=org --req-org="{{ settings.domain }} CA Server Cert" \

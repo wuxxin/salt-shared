@@ -28,8 +28,8 @@ for commonName in all names; do
     # check if > minimum days valid
     # renew if not
     $call_prefix ./easyrsa --batch --passout=stdin \
-        --use-algo="{{ settings.ssl_local_ca_algo }}" \
-        --curve="{{ settings.ssl_local_ca_curve }}" \
+        --use-algo="{{ settings.ssl.local_ca.algo }}" \
+        --curve="{{ settings.ssl.local_ca.curve }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
         --subject-alt-name="${additional_san}" \

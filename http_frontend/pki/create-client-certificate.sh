@@ -45,7 +45,7 @@ EOF
 
 randbytes=15
 base64size=$(echo "if (($randbytes * 8) > ($randbytes * 8 /6 *6)) { $randbytes * 8 /6 +1} else { $randbytes *8 /6 }" | bc)
-daysvalid="{{ settings.ssl_local_ca_validity_days }}"
+daysvalid="{{ settings.ssl.local_ca.validity_days }}"
 additional_san=""
 email=""
 call_prefix=""
@@ -69,9 +69,9 @@ cd "{{ settings.ssl.base_dir }}/easyrsa"
 if test "$email" = ""; then
     # create cert
     $call_prefix ./easyrsa --batch \
-        --use-algo="{{ settings.ssl_local_ca_algo }}" \
-        --curve="{{ settings.ssl_local_ca_curve }}" \
-        --key-size="{{ settings.ssl_local_ca_keysize }}" \
+        --use-algo="{{ settings.ssl.local_ca.algo }}" \
+        --curve="{{ settings.ssl.local_ca.curve }}" \
+        --keysize="{{ settings.ssl.local_ca.keysize }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
         --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \
@@ -91,9 +91,9 @@ randspellout=$(echo "$randpass" | fold -w 4 | tr "\n" " ")
 # create cert
 echo -e "$randpass\n$randpass" | \
     $call_prefix ./easyrsa --batch --passout=stdin \
-        --use-algo="{{ settings.ssl_local_ca_algo }}" \
-        --curve="{{ settings.ssl_local_ca_curve }}" \
-        --key-size="{{ settings.ssl_local_ca_keysize }}" \
+        --use-algo="{{ settings.ssl.local_ca.algo }}" \
+        --curve="{{ settings.ssl.local_ca.curve }}" \
+        --keysize="{{ settings.ssl.local_ca.keysize }}" \
         --days="$daysvalid" \
         --req-cn="$certname" \
         --dn-mode=org --req-org="{{ settings.domain }} CA Client Cert" \

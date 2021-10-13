@@ -63,7 +63,7 @@ easyrsa_vars:
     - mode: "0640"
     - contents: |
         set_var EASYRSA_CRL_DAYS 3650
-        set_var EASYRSA_CERT_EXPIRE {{ settings.ssl_local_ca_validity_days }}
+        set_var EASYRSA_CERT_EXPIRE {{ settings.ssl.local_ca.validity_days }}
 
 # Generate initial CA
 easyrsa_build_ca:
@@ -76,9 +76,9 @@ easyrsa_build_ca:
         fi
         ./easyrsa --batch init-pki
         ./easyrsa --batch \
-          --use-algo="{{ settings.ssl_local_ca_algo }}" \
-          --curve="{{ settings.ssl_local_ca_curve }}" \
-          --key-size="{{ settings.ssl_local_ca_keysize }}" \
+          --use-algo="{{ settings.ssl.local_ca.algo }}" \
+          --curve="{{ settings.ssl.local_ca.curve }}" \
+          --keysize="{{ settings.ssl.local_ca.keysize }}" \
           --req-cn="{{ settings.domain }}" \
           --dn-mode=org --req-org="{{ settings.domain }} Cert Authority" \
           --subject-alt-name="DNS:{{ settings.domain }}" \
