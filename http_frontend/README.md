@@ -22,11 +22,10 @@ configured http **Upstreams** defaults:
   + http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
 
 ### TODO
-FIXME: pki -> ssl -> nginx -> acme
 
 ### Administration
 
-#### local PKI - CA
+#### local CA pki
 + Creates a client certificate, and send certificate via Email
   + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san add-san-values]`
 + revoke an existing certificate
@@ -84,21 +83,4 @@ host:
         target: root /var/www/another.domain/
   - name: *.name.domain
     target: proxy_pass http://k3s
-```
-
-### snippets
-
-```
-# subjectAltName=IP:192.168.7.1
-# subjectAltName=IP:13::17
-# subjectAltName=DNS:some.other.address
-# subjectAltName=email:copy,email:my@other.address,URI:http://my.url.here/
-# subjectAltName=email:my@other.address,RID:1.2.3.4
-# subjectAltName=otherName:1.2.3.4;UTF8:some other identifier
-# subjectAltName=dirName:dir_sect
-# [dir_sect]
-# C=UK
-# O=My Organization
-# OU=My Unit
-# CN=My Name
 ```
