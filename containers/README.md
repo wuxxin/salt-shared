@@ -37,8 +37,6 @@
 
 ### remarks
 
-# commands run before the first time the service is started
-  
 + extract config from docker/compose daemon
   https://github.com/nginx-proxy/docker-gen
 
