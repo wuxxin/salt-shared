@@ -1,14 +1,13 @@
 # Node state
 
-Configures hostname, users, groups, locales, timezone, network, storage
+Configures hostname, users, groups, locales, location, network, storage
 
 + .locale
-  + configure locale
-  + configure timezone
+  + configure language, messages, timezone, location
 + .network
   + add internal bridge
-  + install and configure nfs-common (and rpcbind) to only listen to internal ip's
-  + change pillar list: nfs:listen_ip to overwrite default list
+  + install and configure nfs-common (and rpcbind) to only listen to localhost
+    + use pillar: "nfs:listen_ip" to overwrite the default list
 + .hostname
   + Configures hostname
 + .accounts
@@ -43,21 +42,29 @@ node:
   locale:
     lang: de_AT.UTF-8
     language: de_de:de
-    additional: de_DE en_US en_GB
-    # eg. "messages: POSIX", will be written to LC_MESSAGES, set to None/false to clear LC_MESSAGES
+    additional_language: de_DE en_US en_GB
+    # if messages is set, it will be written to LC_MESSAGES, eg.: messages: POSIX
     messages: POSIX
+    hypen: de en-gb en-us
+    spell: de-at de-de en-gb en-us
+    # timezone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     timezone: Europe/Vienna
-    location: Vienna
+    city: Vienna
+    country_code: AT
+    # latitude+longitude+elevation=Stephansdom/Vienna
+    latitude: 48.20849
+    longitude: 16.37315
+    # Altitude above sea level in meters
+    elevation: 172
+    # metric for Metric, imperial for Imperial
+    unit_system: metric
 
   network:
-    internal_cidr: 10.140.250.1/24
-    internal_name: resident
+    internal:
+      cidr: 10.140.250.1/24
+      name: resident
+      # computed if empty: ip, netcidr, netmask, reverse_net, short_net
     netplan: ""
-
-    # computed
-    internal_ip: {{ internal_cidr|regex_replace ('([^/]+)/.+', '\\1') }}
-    internal_netcidr: {{ salt['network.convert_cidr'](internal_cidr)['network'] }}
-    internal_netmask: {{ salt['network.convert_cidr'](internal_cidr)['netmask'] }}
 
   storage:
     filesystem:

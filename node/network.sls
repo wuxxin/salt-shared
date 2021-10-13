@@ -55,16 +55,16 @@ network-utils:
       - bridge-utils
 
 {# add resident bridge #}
-{{ add_internal_bridge(settings.network.internal_name, settings.network.internal_cidr) }}
+{{ add_internal_bridge(settings.network.internal.name, settings.network.internal.cidr) }}
 
 nfs.common_after_bridge:
   test.nop:
     - require:
-      - cmd: bridge_{{ settings.network.internal_name }}
+      - cmd: bridge_{{ settings.network.internal.name }}
     - require_in:
       - sls: kernel.nfs.common
 
-{# write if not empty, remove if empty #}
+{# write pillar netplan settings to disk if not empty, remove file otherwise #}
 default_netplan:
   file:
     - name: /etc/netplan/50-default.yaml

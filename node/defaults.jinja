@@ -1,9 +1,11 @@
 {% macro netcidr(cidr) %}{{ salt['network.convert_cidr'](cidr)['network'] }}{% endmacro %}
 {% macro netmask(cidr) %}{{ salt['network.convert_cidr'](cidr)['netmask'] }}{% endmacro %}
 {% macro cidr2ip(cidr) %}{{ cidr|regex_replace ('([^/]+)/.+', '\\1') }}{% endmacro %}
+{% macro reverse_net(cidr) %}{{ salt['network.reverse_ip'](netcidr(cidr))|regex_replace('[^.]+\\.(.+)$', '\\1') }}{% endmacro %}
+{% macro short_net(cidr) %}{{ cidr2ip(netcidr(cidr))|regex_replace('(.+)\\.[^.]+$', '\\1') }}{% endmacro %}
 
-{% set internal_cidr = salt['pillar.get']('node:network:internal_cidr', '10.140.250.1/24') %}
-{% set internal_name = salt['pillar.get']('node:network:internal_name', 'resident') %}
+{% set internal_cidr = salt['pillar.get']('node:network:internal:cidr', '10.140.250.1/24') %}
+{% set internal_name = salt['pillar.get']('node:network:internal:name', 'resident') %}
 
 
 {# defaults #}
@@ -15,15 +17,29 @@ groups:
 locale:
   lang: en_US.UTF-8
   language: en_us:en
+  additional_language: ""
+  # if messages is set, it will be written to LC_MESSAGES, eg.: messages: POSIX
   messages:
-  # eg. "messages: POSIX", will be written to LC_MESSAGES
-  location: World
+  hypen: en-us
+  spell: en-us
+
+  city: World
+  country_code: UN
+  # latitude + longitude = Greenwich/UK at sealevel
+  latitude: 51.47731
+  longitude: 0
+  # elevation: Altitude above sea level in meters
+  elevation: 0
+  # time_zone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   timezone: UTC
-  additional: ""
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
 
 network:
-  internal_cidr: {{ internal_cidr }}
-  internal_name: {{ internal_name }}
+  internal:
+    cidr: {{ internal_cidr }}
+    name: {{ internal_name }}
+    # computed if empty: ip, netcidr, netmask, reverse_net, short_net
   netplan:
 
 # storage: {}
@@ -33,9 +49,24 @@ network:
 {% set settings=salt['grains.filter_by']({'none': defaults},
   grain='none', default= 'none', merge= salt['pillar.get']('node', {})) %}
 
-{# update settings.network #}
-{% do settings.network.update({
-  'internal_ip': cidr2ip(settings.network.internal_cidr),
-  'internal_netcidr': netcidr(settings.network.internal_cidr),
-  'internal_netmask': netmask(settings.network.internal_cidr),
-  }) %}
+{# update settings.network.internal #}
+{% if not settings.network.internal.ip|d(false) %}
+{% do settings.network.internal.update(
+  {'ip': cidr2ip(settings.network.internal.cidr),} ) %}
+{% endif %}
+{% if not settings.network.internal.netcidr|d(false) %}
+{% do settings.network.internal.update(
+  {'netcidr': netcidr(settings.network.internal.cidr),} ) %}
+{% endif %}
+{% if not settings.network.internal.netmask|d(false) %}
+{% do settings.network.internal.update(
+  {'netmask': netmask(settings.network.internal.cidr),} ) %}
+{% endif %}
+{% if not settings.network.internal.reverse_net|d(false) %}
+{% do settings.network.internal.update(
+  {'reverse_net': reverse_net(settings.network.internal.cidr),} ) %}
+{% endif %}
+{% if not settings.network.internal.short_net|d(false) %}
+{% do settings.network.internal.update(
+  {'short_net': short_net(settings.network.internal.cidr),} ) %}
+{% endif %}

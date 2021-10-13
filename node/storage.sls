@@ -1,5 +1,13 @@
 {% from "node/defaults.jinja" import settings %}
 
+{%- macro mksnapshot(spaces, frequent=false, hourly=false, daily=false, weekly=false, monthly=false) %}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:frequent": "'~ frequent~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:hourly": "'~ hourly~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:daily": "'~ daily~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:weekly": "'~ weekly~ '"' }}
+{{ ''|indent(spaces,True) ~ '"com.sun:auto-snapshot:monthly": "'~ monthly~ '"' }}
+{%- endmacro %}
+
 include:
   - .hostname
   - .accounts

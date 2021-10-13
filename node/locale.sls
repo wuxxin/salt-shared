@@ -1,6 +1,7 @@
 {% from "node/defaults.jinja" import settings with context %}
 
-{% set additional= settings.locale.additional.strip().split(' ')|join('.UTF-8 ') ~ '.UTF-8' %}
+{% set additional_list=
+  settings.locale.additional_language.strip().split(' ')|join('.UTF-8 ') ~ '.UTF-8' %}
 
 /etc/default/locale:
   file.managed:
@@ -32,7 +33,7 @@ generate_locale:
     - unless: |
         all_locales=$(locale -a | sed -r "s/\.utf8/.UTF-8/g")
         all_valid=true
-        for l in {{ settings.locale.lang }} {{ additional }}; do
+        for l in {{ settings.locale.lang }} {{ additional_list }}; do
             if ! $(echo "$all_locales" | grep -q "$l"); then
                 all_valid=false
             fi
