@@ -31,7 +31,7 @@ gstreamer-packages:
       - gst123
 
 python-gstreamer-packages:
-  - pkg.installed:
+  pkg.installed:
     - pkgs:
       - python3-gst-1.0
       - gir1.2-gstreamer-1.0
