@@ -56,7 +56,8 @@ generate_snakeoil_cert:
     - onlyif: |
         test ! -e {{ settings.ssl_snakeoil_key_path }} -o \
         "$(openssl x509 -in {{ settings.ssl_snakeoil_cert_path }} -noout -text | \
-        grep Subject: | sed -re 's/.*Subject: .*CN=([^,]+).*/\1/')" != "{{ settings.domain }}"
+          grep -E  "^[[:space:]]+Subject:.+CN =" | \
+          sed -r "s/^[[:space:]]+Subject:.+CN = (.+)$/\\1/g")" != "{{ settings.domain }}"
     - require:
       - pkg: ssl_requisites
 
