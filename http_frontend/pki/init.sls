@@ -66,7 +66,7 @@ easyrsa_vars:
         set_var EASYRSA_CERT_EXPIRE {{ settings.ssl.local_ca.validity_days }}
 
 # Generate initial CA
-{% set root_cert_ca_cn= settings.domain ~ ' Root Cert Authority' %}
+# will wipe and recreate CA if settings.domain is changed
 easyrsa_build_ca:
   cmd.run:
     - runas: {{ settings.ssl.user }}
@@ -76,29 +76,30 @@ easyrsa_build_ca:
           rm -r {{ settings.ssl.base_dir }}/easyrsa/pki
         fi
         ./easyrsa --batch init-pki
-        ./easyrsa --batch \
+        ./easyrsa \
+          --batch \
           --use-algo="{{ settings.ssl.local_ca.algo }}" \
           --curve="{{ settings.ssl.local_ca.curve }}" \
           --keysize="{{ settings.ssl.local_ca.keysize }}" \
           --dn-mode=org \
-          --req-cn="{{ root_cert_ca_cn }}" \
+          --req-cn="{{ settings.domain }}" \
           --req-org="{{ settings.ssl.local_ca.organization }}" \
           --req-ou="{{ settings.ssl_local_ca_authority_unit }}" \
           --req-city="{{ settings.ssl.local_ca.city }}" \
           --req-st="" \
           --req-c="{{ settings.ssl.local_ca.country }}" \
           --req-email="" \
-          --subject-alt-name="DNS:{{ settings.domain }}" \
           build-ca nopass
     - unless: |
         result="false"
         if test -f {{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt; then
           subject_cn=$(openssl x509 -text -noout \
             -in "{{ settings.ssl.base_dir }}/easyrsa/pki/ca.crt" | \
-            grep "Subject: CN" | sed -r "s/[[:space:]]+Subject: +CN += +(.+)/\\1/g")
-          echo "current_cn:$subject_cn"
-          echo "expected_cn:{{ root_cert_ca_cn }}"
-          if test "$subject_cn" = "{{ root_cert_ca_cn }}"; then
+              grep -E "^[[:space:]]+Subject:.+CN =" | \
+              sed -r "s/^[[:space:]]+Subject:.+CN = (.+)$/\\1/g")
+          echo "expected_cn: {{ settings.domain }}"
+          echo "current_cn: $subject_cn"
+          if test "$subject_cn" = "{{ settings.domain }}"; then
             result="true"
           fi
         fi

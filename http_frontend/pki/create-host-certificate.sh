@@ -48,6 +48,8 @@ if test "$check_only" = "true"; then
             awk '/X509v3 Subject Alternative Name/ {getline;gsub(/ /, "", $0); print}' | \
             tr -d "DNS:" | tr "," "\\n" | sort)
         expected_san_list=$(echo "$san_list" | tr " " "\\n" | sort)
+        echo "expected san_list: $expected_san_list"
+        echo "current san_list: $current_san_list"
         if test "$current_san_list" = "$expected_san_list"; then
             exit 0
         fi
@@ -56,13 +58,13 @@ if test "$check_only" = "true"; then
 fi
 
 # create cert
-$call_prefix ./easyrsa --batch \
+$call_prefix ./easyrsa \
+    --batch \
     --use-algo="{{ settings.ssl.local_ca.algo }}" \
     --curve="{{ settings.ssl.local_ca.curve }}" \
     --keysize="{{ settings.ssl.local_ca.keysize }}" \
     --days="$daysvalid" \
-    --dn-mode=org \
-    --req-cn="$certname" \
+    --dn-mode=org --req-cn="$certname" \
     --req-org="{{ settings.ssl.local_ca.organization }}" \
     --req-ou="{{ settings.ssl_local_ca_server_unit }}" \
     --req-email="" --req-city="" --req-st="" --req-c="" \
