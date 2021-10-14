@@ -28,8 +28,7 @@ certname="$1"
 subjectAltName="DNS:$certname"
 shift
 for i in $@; do
-    subjectAltName="$subjectAltName
-subjectAltName=DNS:$i"
+    subjectAltName="$subjectAltName,DNS:$i"
 done
 call_prefix=""
 if test "$(id -u)" = "0"; then
