@@ -1,0 +1,21 @@
+homeassistant:
+{{ hass.configuration.homeassistant|yaml(False)|indent(2,True) }}
+  # take all files in subdir ./packages as package drop in
+  packages: !include_dir_named packages
+  customize: !include include/customize.yaml
+  customize_domain: !include include/customize_domain.yaml
+  customize_glob: !include include/customize_glob.yaml
+
+# list all defined hass.configuration keys except homeassistant as included files
+{%- for k in hass.configuration.keys() %}
+  {%- if k not in ['homeassistant'] %}
+{{ k }}: !include include/{{ k }}.yaml
+  {%- endif %}
+{%- endfor %}
+
+# also list all default_enabled keys that are not defined in hass.configuration
+{%- for k in hass.default_enabled.keys() %}
+  {%- if k not in hass.configuration.keys() %}
+{{ k }}: !include include/{{ k }}.yaml
+  {%- endif %}
+{%- endfor %}

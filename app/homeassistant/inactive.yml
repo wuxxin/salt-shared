@@ -1,0 +1,75 @@
+'appdaemon/appdaemon.yaml':
+  contents: |
+{{ settings.config.appdaemon|yaml(False)|indent(4,True) }}
+
+'rhasspy/profile.json':
+  contents: |
+{{ settings.config.rhasspy|json(False)|indent(4,True) }}
+
+
+  # rhasspy (voice assistant) for controlling homeassistant via voice
+  # https://github.com/rhasspy/rhasspy
+  rhasspy:
+    container_name: rhasspy
+    image: docker.io/rhasspy/rhasspy:latest
+    restart: "unless-stopped"
+    pull_policy: missing
+    environment:
+      RHASSPY_PROFILE: en
+    networks:
+      - assistant_net
+    # ports:
+    # - "12101:12101"
+    volumes:
+      - rhasspy:/profiles"
+      - ./rhasspy/profile.json:/profiles/${RHASSPY_PROFILE}/profile.json
+    devices:
+      - "/dev/snd:/dev/snd"
+    user: 1000:1000
+    group_add:
+      - audio
+    command: --user-profiles /profiles --profile ${RHASSPY_PROFILE}
+    depends_on:
+      - mosquitto
+
+  # AppDaemon (homeassistant automation)
+  appdaemon:
+    container_name: appdaemon
+    image: docker.io/acockburn/appdaemon:latest
+    restart: "unless-stopped"
+    pull_policy: missing
+    environment: {}
+    networks:
+      - assistant_net
+    # ports:
+    # - "5050:5050"
+    volumes:
+      - appdaemon:/conf
+      - ./appdaemon/appdaemon.yaml:/conf/appdaemon.yaml
+    depends_on:
+      - hass
+
+  # Node-RED (general automation)
+  # https://github.com/hassio-addons/addon-node-red
+  nodered:
+    container_name: nodered
+    image: nodered/node-red
+    restart: "unless-stopped"
+    # ports: []
+      # - "1880:1880"
+    volumes:
+      - nodered:/data
+    depends_on:
+      - mosquitto
+
+  # grafana (data series graphic visualization)
+  # https://github.com/hassio-addons/addon-grafana
+  grafana:
+    container_name: grafana
+    image:
+    depends_on:
+      - influxdb
+
+  # additional possible addons
+  # https://github.com/hassio-addons/addon-grocy
+  # https://github.com/hassio-addons/addon-traccar

@@ -1,0 +1,139 @@
+{% import_yaml "app/homeassistant/zigbee2mqtt.yml" as zigbee2mqtt %}
+{% import_yaml "app/homeassistant/homeassistant.yml" as hass %}
+{% import_yaml "app/homeassistant/appdaemon.yml" as appdaemon %}
+{% import_yaml "app/homeassistant/rhasspy-profile.yml" as rhasspy %}
+
+{% load_yaml as defaults %}
+config:
+  mosquitto:
+    configuration: |
+      # mosquitto config
+      persistence true
+      persistence_location /mosquitto/data
+      log_dest stdout
+      per_listener_settings true
+      # pod internal listener
+      listener 1883
+      allow_anonymous true
+    listener: []
+
+  zigbee2mqtt:
+    configuration: {{ zigbee2mqtt }}
+
+  hass:
+    configuration: {{ hass }}
+    customize: {}
+    customize_domain: {}
+    customize_glob: {}
+    packages:
+      {# to disable entry, set homeassistant:config:hass:packages:zigbee2mqtt: false #}
+      zigbee2mqtt: salt://app/homeassistant/packages/zigbee2mqtt.yaml
+    default_enabled:
+      {# to disable entry, set homeassistant:config:hass:default_enabled:<value>: false #}
+      # Configure a default setup of Home Assistant (frontend, api, etc)
+      default_config: true
+      # Enables configuration UI
+      config: true
+      # Checks for available updates
+      updater: true
+      # Discover some devices automatically
+      discovery: true
+      # Enables support for tracking state changes over time
+      history: true
+      # View all events in a logbook
+      logbook: true
+      # Track the sun
+      sun: true
+      # Map
+      map: true
+      # Wake on LAN
+      # wake_on_lan:
+      # System health
+      system_health: true
+      # Mobile App Support
+      mobile_app: true
+      # Persons
+      auth: true
+
+  appdaemon: {{ appdaemon }}
+  rhasspy: {{ rhasspy}}
+
+compose:
+  name: homeassistant
+  source: salt://app/homeassistant/docker-compose.yml
+  refresh: false
+  ephemeral: true
+  systemd:
+    wants: postgresql.service
+    restart: on-success
+  files: {}
+  # environment: {}
+    # RHASSPY_PROFILE: en
+    # ZB_ADAPTER: /dev/ttyUSB0
+
+{% endload %}
+
+{% set settings = salt['grains.filter_by']({'default': defaults},
+  grain='default', default= 'default', merge= salt['pillar.get']('homeassistant', {})) %}
+
+{% load_yaml as files %}
+'mosquitto/mosquitto.conf':
+  user: 1883
+  group: 1883
+  contents: |
+{{ settings.config.mosquitto.configuration|indent(4,True) }}
+  {%- for listener in settings.config.mosquitto.listener %}
+    listener {{ listener.listener }}
+{{ listener.config|indent(4,True) }}
+  {%- endfor %}
+
+'zigbee2mqtt/configuration.yaml':
+  user: 1001
+  group: 1001
+  contents: |
+{{ settings.config.zigbee2mqtt.configuration|yaml(False)|indent(4,True) }}
+
+'hass/configuration.yaml':
+  source: salt://app/homeassistant/homeassistant-template.yml
+  template: jinja
+  context:
+    hass:
+{{ settings.config.hass|yaml(False)|indent(6,True) }}
+
+{# write customizations #}
+  {%- for k in ['customize', 'customize_domain', 'customize_glob'] %}
+'hass/include/{{ k }}.yaml':
+  contents: |
+{{ settings.config.hass[k]|yaml(False)|indent(4,True) }}
+  {%- endfor %}
+
+{# write all defined hass.configuration keys except homeassistant as included files #}
+  {%- for k in settings.config.hass.configuration.keys() %}
+    {%- if k not in ['homeassistant'] %}
+'hass/include/{{ k }}.yaml':
+  contents: |
+{{ settings.config.hass.configuration[k]|yaml(False)|indent(4,True) }}
+    {%- endif %}
+  {%- endfor %}
+
+{# also write all default_enabled keys that are not defined in hass.configuration #}
+  {%- for k,v in settings.config.hass.default_enabled.items() %}
+    {%- if k not in settings.config.hass.configuration.keys() and v == true %}
+'hass/include/{{ k }}.yaml':
+  contents: ""
+    {%- endif %}
+  {%- endfor %}
+
+{# write listed packages #}
+  {%- for k,v in settings.config.hass.packages.items() %}
+    {%- if v is string %}
+'hass/packages/{{ k }}.yaml':
+  source: {{ v }}
+    {%- endif %}
+  {%- endfor %}
+
+{% endload %}
+
+{% for key, value in files.items() %}
+{% do settings.compose.files.update( {key: value} ) %}
+{% endfor %}

@@ -1,0 +1,32 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: home
+  # Location required to calculate the time the sun rises and sets
+  # Default = Greenwich/UK at sealevel
+  latitude: 51.47731
+  longitude: 0
+  # Altitude above sea level in meters
+  elevation: 0
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: UTC
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+
+# frontend
+http:
+  server_port: 8123
+  use_x_forwarded_for: true
+  trusted_proxies: 127.0.0.1
+
+# mqtt
+mqtt:
+  discovery: true
+  broker: "mosquitto"
+  port: 1883
+  # certificate: "PATH_TO_CA.crt"
+  # username: "MQTT_USERNAME"
+  # password: !secret MQTT_PASSWORD
+
+# Logger
+logger:
+  default: error

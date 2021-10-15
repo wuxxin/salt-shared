@@ -1,0 +1,240 @@
+# how to communicate with Home Assistant/Hass.io
+home_assistant:
+  # Base URL of Home Assistant server (no /api)
+  url: http://hass
+  # long-lived access token for Home Assistant (Hass.io token is used automatically)
+  access_token:
+  # pem_file: Full path to your PEM certificate file
+  # key_file: Full path to your key file (if separate, optional)
+  # event_type_format: Python format string used to create event type from intent type ({0})
+
+
+# transcribing voice commands to text
+speech_to_text:
+  # name of speech to text system (pocketsphinx, kaldi, remote, command, remote, hermes, or dummy)
+  system: dummy
+  # configuration for remote Rhasspy server
+  remote: {}
+    # url: URL to POST WAV data for transcription (e.g., http://your-rhasspy-server:12101/api/speech-to-text)
+  # configuration for external speech-to-text program
+  command: {}
+    # program: path to executable
+    # arguments: list of arguments to pass to program
+
+
+# transforming text commands to intents
+intent:
+  # intent recognition system (fsticuffs, fuzzywuzzy, rasa, remote, adapt, command, or dummy)
+  system: dummy
+  # configuration for remote Rhasspy server
+  remote: {}
+    # url: URL to POST text to for intent recognition (e.g., http://your-rhasspy-server:12101/api/text-to-intent)
+  # configuration for Rasa NLU based intent recognizer
+  rasa: {}
+    # url: URL of remote Rasa NLU server (e.g., http://localhost:5005/)
+    # examples_markdown: Markdown file to generate with intents/example sentences
+    # project_name: name of project to generate during training
+  # configuration for Mycroft Adapt based intent recognizer
+  adapt: {}
+    # stop_words: text file with words to ignore in training sentences
+  # configuration for external speech-to-text program
+  command: {}
+    # program: path to executable
+    # arguments: list of arguments to pass to program
+  # replace_numbers if true, automatically replace number ranges (N..M) or numbers (N) with words
+
+
+# pronouncing words
+text_to_speech:
+  # text to speech system (espeak, flite, picotts, marytts, command, remote, command, hermes, or dummy)
+  system: dummy
+  # configuration for eSpeak
+  espeak: {}
+    # voice: name of voice to use (e.g., en, fr)
+  # configuration for flite
+  flite: {}
+    # voice: name of voice to use (e.g., kal16, rms, awb)
+  # configuration for PicoTTS
+  picotts: {}
+    # language: language to use (default if not present)
+  # configuration for MaryTTS
+  marytts: {}
+    # url: address:port of MaryTTS server (port is usually 59125)
+    # voice: name of voice to use (e.g., cmu-slt). Default if not present.
+    # locale: name of locale to use (e.g., en-US). Default if not present.
+  # configuration for Google's WaveNet
+  wavenet: {}
+    # cache_dir: path to directory in your profile where WAV files are cached
+    # credentials_json: path to the JSON credentials file (generated online)
+    # gender: gender of speaker (MALE FEMALE)
+    # language_code: language/locale e.g. en-US,
+    # sample_rate: WAV sample rate (default: 22050)
+    # url: URL of WaveNet endpoint
+    # voice: voice to use (e.g., Wavenet-C)
+    # fallback_tts: text to speech system to use when offline or error occurs (e.g., espeak)
+  # configuration for remote text to speech server
+  remote: {}
+    # url: URL to POST sentence to and get back WAV data
+  # configuration for external text-to-speech program
+  command: {}
+    # say_program: path to executable for text to WAV
+    # say_arguments: list of arguments to pass to say program
+    # voices_program: path to executable for listing available voices
+    # voices_arguments: list of arguments to pass to voices program
+
+
+# training speech/intent recognizers
+training:
+  # training for speech decoder
+  speech_to_text:
+    # speech to text training system (auto or dummy)
+    system: auto
+    # command: configuration for external speech-to-text training program
+      # program: path to executable
+      # arguments: list of arguments to pass to program
+    # remote: configuration for external HTTP endpoint
+      # url: URL of speech to text training endpoint
+  # training for intent recognizer
+  intent:
+    # intent recognizer training system (auto or dummy)
+    system: auto
+    # command: configuration for external intent recognizer training program
+      # program: path to executable
+      # arguments: list of arguments to pass to program
+    # remote: configuration for external HTTP endpoint
+      # url: URL of intent recognizer training endpoint
+
+
+# waking Rhasspy up for speech input
+wake:
+  # wake word recognition system (raven, pocketsphinx, snowboy, precise, porcupine, command, hermes, or dummy)
+  system: dummy
+  # configuration for Raven wake word recognizer
+  raven: {}
+    # template_dir: directory where WAV templates are stored in profile (default: raven)
+    # probability_threshold: list with lower/upper probability range for detection (default: [0.45, 0.55])
+    # minimum_matches: number of templates that must match for a detection (default: 1)
+  # configuration for Pocketsphinx wake word recognizer
+  pocketsphinx: {}
+    # keyphrase: phrase to wake up on (3-4 syllables recommended)
+    # threshold: sensitivity of detection (recommended range 1e-50 to 1e-5)
+    # chunk_size: number of bytes per chunk to feed to Pocketsphinx (default 960)
+  # configuration for snowboy
+  snowboy: {}
+    # model: path to model file(s), separated by commas (in profile directory)
+    # sensitivity: model sensitivity (0-1, default 0.5)
+    # audio_gain: audio gain (default 1)
+    # apply_frontend: true if ApplyFrontend should be set
+    # chunk_size: number of bytes per chunk to feed to snowboy (default 960)
+    # model_settings: settings for each snowboy model path (e.g., snowboy/snowboy.umdl)
+  # configuration for Mycroft Precise
+  precise: {}
+    # engine_path: path to the precise-engine binary
+    # model: path to model file (in profile directory)
+    # sensitivity: model sensitivity (0-1, default 0.5)
+    # trigger_level: number of events to trigger activation (default 3)
+    # chunk_size: number of bytes per chunk to feed to Precise (default 2048)
+  # configuration for PicoVoice's Porcupine
+  porcupine: {}
+    # library_path: path to libpv_porcupine.so for your platform/architecture
+    # model_path: path to the porcupine_params.pv (lib/common)
+    # keyword_path: path to the .ppn keyword file
+    # sensitivity: model sensitivity (0-1, default 0.5)
+  # configuration for external speech-to-text program
+  command: {}
+    # program: path to executable
+    # arguments: list of arguments to pass to program
+
+
+# configuration for audio recording
+microphone:
+  # audio recording system (pyaudio, arecord, gstreamer, or dummy`)
+  system: dummy
+  # configuration for PyAudio microphone
+  pyaudio: {}
+    # device: index of device to use or empty for default device
+    # frames_per_buffer: number of frames to read at a time (default 480)
+  # configuration for ALSA microphone
+  arecord: {}
+    # device: name of ALSA device (see arecord -L) to use or empty for default device
+    # chunk_size: number of bytes to read at a time (default 960)
+  # configuration for external audio input program
+  command: {}
+    # record_program: path to executable for audio input
+    # record_arguments: list of arguments to pass to record program
+    # list_program: path to executable for listing available output devices
+    # list_arguments: list of arguments to pass to list program
+    # test_program: path to executable for testing available output devices
+    # test_arguments: list of arguments to pass to test program
+
+
+# configuration for audio output from Rhasspy
+sounds:
+  # which sound output system to use (aplay, command, remote, hermes, or dummy)
+  system: dummy
+  # wake: path to WAV file to play when Rhasspy wakes up
+  # recorded: path to WAV file to play when a command finishes recording
+  # configuration for ALSA speakers
+  aplay: {}
+    # device: name of ALSA device (see aplay -L) to use or empty for default device
+  # configuration for external audio output program
+  command: {}
+    # play_program: path to executable for audio output
+    # play_arguments: list of arguments to pass to play program
+    # list_program: path to executable for listing available output devices
+    # list_arguments: list of arguments to pass to list program
+  # configuration for remote audio output server
+  remote: {}
+    # url: URL to POST WAV data to
+
+
+handle:
+  # which intent handling system to use (hass, command, remote, command, or dummy)
+  system: dummy
+  # configuration for remote HTTP intent handler
+  remote: {}
+    # url: URL to POST intent JSON to and receive response JSON from
+  # configuration for external speech-to-text program
+  command: {}
+    # program: path to executable
+    # arguments: list of arguments to pass to program
+
+
+# configuration for MQTT
+mqtt:
+  # true if external broker should be used (false uses internal broker on port 12183)
+  enabled: true
+  host: mosquitto
+  port: 1883
+  # username: external MQTT username (blank for anonymous)
+  # password: external MQTT password
+  # site_id: one or more Hermes site IDs (comma separated). First ID is used for new messages
+
+
+# configuration for Hermes dialogue manager
+dialogue:
+  # which dialogue manager to use (rhasspy, hermes, or dummy)
+  system: dummy
+
+
+# configuration for profile file downloading
+download: {}
+  # url_base: base URL to download profile artifacts (defaults to Github)
+  # conditions: profile settings that will trigger file downloads
+  #    keys are profile setting paths (e.g., wake.system)
+  #    values are dictionaries whose keys are profile settings values (e.g., snowboy)
+  #    settings may have the form <=N or !X to mean "less than or equal to N" or "not X"
+  #    leaf nodes are dictionaries whose keys are destination file paths and whose values reference the files dictionary
+  # files: locations, etc. of files to download
+  #    keys are names of files, values are dictionaries with:
+  #      url: URL of file to download (appended to url_base)
+  #      bytes_expected: number of bytes file should be after decompression
+  #      unzip: true if file should be decompressed with gunzip
+  #      parts: list of objects representing parts of a file that should be combined with cat
+  #        fragment: fragment appended to file URL
+  #        bytes_expected: number of bytes for this part
+
+
+# settings for service loggers
+logging: {}
+  # format: Python logger format string

@@ -1,0 +1,72 @@
+
+networks:
+  assistant_net:
+
+volumes:
+  mosquitto:
+  zigbee2mqtt:
+  hass:
+  appdaemon:
+  rhasspy:
+
+services:
+
+  # MQTT Server
+  mosquitto:
+    container_name: mosquitto
+    image: docker.io/library/eclipse-mosquitto:latest
+    restart: "unless-stopped"
+    networks:
+      - assistant_net
+    # ports: []
+      # default: mqtt: 1883 (plaintext)
+      # optional: mqtts: 8883 (tls)
+      # - localhost:1883:1883
+      # - 8883:8883
+    volumes:
+      - mosquitto:/mosquitto/data
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # bridges Zigbee events and controls Zigbee devices via MQTT
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: docker.io/koenkk/zigbee2mqtt:latest
+    restart: "unless-stopped"
+    environment:
+      ZB_ADAPTER: /dev/ttyUSB0
+    networks:
+      - assistant_net
+    # ports: []
+      # default frontend: 8080
+      # - 8080:8080
+    volumes:
+      - zigbee2mqtt:/app/data
+      - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml
+    devices:
+      - ${ZB_ADAPTER}:/dev/ttyACM0:rw
+    user: 1001:1001
+    group_add:
+      - dialout
+    # command: ["/sbin/tini", "--", "node", "index.js", "--unhandled-rejections=strict"]
+    depends_on:
+      - mosquitto
+
+  # homeassistant connecting to zigbee devices via MQTT to zigbee2mqtt
+  hass:
+    container_name: hass
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: "unless-stopped"
+    environment: {}
+      # DISABLE_JEMALLOC: true
+    networks:
+      - assistant_net
+    # ports: []
+      # - "8123:8123"
+    volumes:
+      - hass:/config
+      - ./hass/configuration.yaml:/config/configuration.yaml
+      - ./hass/include:/config/include
+      - ./hass/packages:/config/packages
+    depends_on:
+      - mosquitto
+      - zigbee2mqtt

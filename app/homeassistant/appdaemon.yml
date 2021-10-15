@@ -1,0 +1,13 @@
+appdaemon:
+  # Default = Greenwich/UK at sealevel
+  latitude: 51.47731
+  longitude: 0
+  # Altitude above sea level in meters
+  elevation: 0
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: UTC
+  plugins:
+    HASS:
+      type: hass
+      ha_url: "http://hass:8123"
+      token: ""
