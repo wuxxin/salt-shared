@@ -206,16 +206,16 @@ alpn_endpoint: "127.0.0.1:10443"
 stub_status_endpoint: "127.0.0.1:10080"
 prometheus_endpoint: "127.0.0.1:9145"
 
-{#  key,cert,chain_cert,dhparam,full_cert names (without path) #}
+{#  key,cert,chain_cert,dhparam basenames #}
 ssl_key: server.key.pem
 ssl_cert: server.cert.pem
 ssl_chain_cert: server.chain.cert.pem
 ssl_dhparam: server.dhparam.pem
-ssl_full_cert: server.chain.cert.dhparam.pem
-{# key,cert,full_cert of hostname.invalid #}
+{# minimum dhparam bitsize #}
+ssl_dhparam_bitsize: 2236
+{# key,cert of hostname.invalid basenames #}
 ssl_invalid_key: ssl-cert-invalid.key
 ssl_invalid_cert: ssl-cert-invalid.pem
-ssl_invalid_full_cert: ssl-cert-invalid-full.pem
 {# key,cert of selfsigned host domain #}
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
