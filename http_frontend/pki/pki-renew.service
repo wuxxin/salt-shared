@@ -15,3 +15,5 @@ PassEnvironment=UNITNAME USER
 WorkingDirectory={{ settings.ssl.base_dir }}/easyrsa
 ExecStart=/usr/local/bin/renew-host-certificates.sh \
   --cron --renew-hook "{{ settings.ssl.base_dir }}/ssl-renew-hook.sh"
+# renew-host-certificates.sh returns 2 when renewal is skipped (i.e. all certs up to date)
+SuccessExitStatus=0 2
