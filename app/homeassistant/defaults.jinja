@@ -29,6 +29,7 @@ config:
       {# to disable entry, set homeassistant:config:hass:packages:zigbee2mqtt: false #}
       zigbee2mqtt: salt://app/homeassistant/packages/zigbee2mqtt.yaml
     plural_section_filenames:
+      {# these sections filenames have additional "s" and be included in the main directory  #}
       - scene
       - automation
       - sensor
@@ -80,9 +81,11 @@ compose:
     wants: postgresql.service
     restart: on-success
   files: {}
-  # environment: {}
+  environment:
     # RHASSPY_PROFILE: en
     # ZB_ADAPTER: /dev/ttyUSB0
+    ZB_RUNAS: "1001"
+    HASS_RUNAS: "1001"
 
 {% endload %}
 
@@ -101,14 +104,16 @@ compose:
   {%- endfor %}
 
 'zigbee2mqtt/configuration.yaml':
-  user: 1001
-  group: 1001
+  user: {{ settings.compose.environment.ZB_RUNAS }}
+  group: {{ settings.compose.environment.ZB_RUNAS }}
   contents: |
 {{ settings.config.zigbee2mqtt.configuration|yaml(False)|indent(4,True) }}
 
 'hass/configuration.yaml':
   source: salt://app/homeassistant/homeassistant-template.yml
   template: jinja
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
   context:
     hass:
 {{ settings.config.hass|yaml(False)|indent(6,True) }}
@@ -116,6 +121,8 @@ compose:
 {# write customizations #}
   {%- for k in ['customize', 'customize_domain', 'customize_glob'] %}
 'hass/include/{{ k }}.yaml':
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
   contents: |
 {{ settings.config.hass[k]|yaml(False)|indent(4,True) }}
   {%- endfor %}
@@ -123,7 +130,10 @@ compose:
 {# write all defined hass.configuration keys except homeassistant as included files #}
   {%- for k in settings.config.hass.configuration.keys() %}
     {%- if k not in ['homeassistant'] %}
-'hass/include/{{ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' }}.yaml':
+      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' %}
+'hass/{{ l }}.yaml':
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
   contents: |
 {{ settings.config.hass.configuration[k]|yaml(False)|indent(4,True) }}
     {%- endif %}
@@ -132,7 +142,10 @@ compose:
 {# also write all default_enabled keys that are not defined in hass.configuration #}
   {%- for k,v in settings.config.hass.default_enabled.items() %}
     {%- if k not in settings.config.hass.configuration.keys() and v == true %}
-'hass/include/{{ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' }}.yaml':
+      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' %}
+'hass/{{ l }}.yaml':
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
   contents: ""
     {%- endif %}
   {%- endfor %}
@@ -141,6 +154,8 @@ compose:
   {%- for k,v in settings.config.hass.packages.items() %}
     {%- if v is string %}
 'hass/packages/{{ k }}.yaml':
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
   source: {{ v }}
     {%- endif %}
   {%- endfor %}

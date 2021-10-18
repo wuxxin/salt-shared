@@ -9,15 +9,15 @@ homeassistant:
 # list all defined hass.configuration keys except homeassistant as included files
 {%- for k in hass.configuration.keys() %}
   {%- if k not in ['homeassistant'] %}
-    {%- set l = k if k not in hass.plural_section_filenames else k ~ 's' %}
-{{ k }}: !include include/{{ l }}.yaml
+    {%- set l = 'include/' ~ k if k not in hass.plural_section_filenames else k ~ 's' %}
+{{ k }}: !include {{ l }}.yaml
   {%- endif %}
 {%- endfor %}
 
 # also list all default_enabled keys that are not defined in hass.configuration
 {%- for k in hass.default_enabled.keys() %}
   {%- if k not in hass.configuration.keys() %}
-    {%- set l = k if k not in hass.plural_section_filenames else k ~ 's' %}
-{{ k }}: !include include/{{ l }}.yaml
+    {%- set l = 'include/' ~k if k not in hass.plural_section_filenames else k ~ 's' %}
+{{ k }}: !include {{ l }}.yaml
   {%- endif %}
 {%- endfor %}

@@ -68,6 +68,9 @@ services:
     volumes:
       - hass:/config
       - ./hass/configuration.yaml:/config/configuration.yaml
+      - ./hass/scenes.yaml:/config/scenes.yaml
+      - ./hass/automations.yaml:/config/automations.yaml
+      - ./hass/sensors.yaml:/config/sensors.yaml
       - ./hass/include:/config/include
       - ./hass/packages:/config/packages
     depends_on:
