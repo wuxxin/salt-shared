@@ -29,7 +29,6 @@ some states have a documentation README.md
 * Network
     * [http_frontend](http_frontend): modern https frontend using nginx, acme.sh and easyrsa
     * [oauth2proxy](oauth2proxy): OAuth2Proxy for Oauth2/oidc Authentification
-    * [haproxy](haproxy): The Reliable, High Performance TCP/HTTP Load Balancer
     * [ssh](ssh): openssh client and server
     * [http_proxy](http_proxy):
         * [.server](http_proxy/server.sls): trafficserver as caching http_proxy service
@@ -40,18 +39,15 @@ some states have a documentation README.md
     * [coturn](coturn): STUN (Session Traversal Utilities for NAT) and TURN (Traversal Using Relays around NAT)
     * [wireguard](wireguard): Wireguard VPN
     * [strongswan](strongswan): IPsec VPN
-    * [syncthing](syncthing): network file synchronisation
 
 * Virtual Machines
     * [kvm+qemu](kernel/kvm): qemu/kvm full virtualization
     * [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
-    * [lxc](kernel/lxc): lxc leightweight machine virtualization
     * [systemd nspawn](systemd/nspawn): leightweight machine container manager
     * [vagrant](vagrant): vagrant virtual machine manager (libvirt, lxc, a.o.)
-    * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
 
 * Container
-    * [containers](containers): OCI container runtime using podman
+    * [containers](containers): OCI container runtime using podman, podman-compose, x11docker
     * [containerd](containerd): Kubernetes OCI container runtime
     * [k3s](k3s): selfcontained, small footprint Kubernetes Distribution
 
@@ -60,9 +56,22 @@ some states have a documentation README.md
     * [mysql](mysql): MariaDB (mysql compatible) Database
     * [redis](redis): Redis (Key/Value Store) Instances
 
-* Email
+* Mailserver
     * [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
     * [getmail](getmail): fetchmail alternative
 
 * Android
     * [android](android): tools and android emulator container for desktop and headless emulator
+
+* [Applications](app/) using (Podman) Containers (podman)
+    * [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
+      with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
+
+* unfinished, halfbroken, quirky or very minimum skeleton packages
+    * [backup](backup): Modern backup solution using restic and rclone
+    * [lxc](kernel/lxc): lxc leightweight machine virtualization
+    * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
+    * [haproxy](haproxy): The Reliable, High Performance TCP/HTTP Load Balancer
+    * [syncthing](syncthing): network file synchronisation
+    * [openwrt](openwrt) , [clevis](clevis) , [envoy](envoy) , [step-ca](step-ca) ,
+    * [terraform](terraform) , [golang](golang) , [nodejs](nodejs)
