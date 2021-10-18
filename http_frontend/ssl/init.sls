@@ -48,7 +48,7 @@ ssl_requisites:
         openssl dhparam -outform PEM \
           -out {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} \
           {{ settings.ssl_dhparam_bitsize }}
-    - onlyif: |
+    - unless: |
         if test ! -e {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}; then
           true
         elif test "{{ settings.ssl_dhparam_bitsize }}" -gt \

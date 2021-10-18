@@ -83,8 +83,8 @@ nginx:
     - require:
       - pkg: nginx
       - file: /etc/nginx/nginx.conf
-      - cmd: {{ settings.ssl.base_dir }}/{{ settings.ssl_full_cert }}
       - archive: lua_prometheus_module
+      - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
     - watch:
       - file: /etc/nginx/nginx.conf
       - file: /etc/nginx/proxy_params
