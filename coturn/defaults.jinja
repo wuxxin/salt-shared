@@ -14,6 +14,8 @@ external_ip: []
 ssl: true
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
 ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+{# custom dhparam file to use instead of the 2066 bits predefined DH TLS key #}
+ssl_dhparam: ""
 udp_min_port: 49152
 udp_max_port: 49752 {# 49152 + 600 #}
 user_quota: 12
