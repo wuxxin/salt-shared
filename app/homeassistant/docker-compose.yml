@@ -34,6 +34,7 @@ services:
     restart: "unless-stopped"
     environment:
       ZB_ADAPTER: /dev/ttyUSB0
+      ZB_RUNAS: "1001"
     networks:
       - assistant_net
     # ports: []
@@ -44,7 +45,7 @@ services:
       - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml
     devices:
       - ${ZB_ADAPTER}:/dev/ttyACM0:rw
-    user: 1001:1001
+    user: ${ZB_RUNAS}:${ZB_RUNAS}
     group_add:
       - dialout
     # command: ["/sbin/tini", "--", "node", "index.js", "--unhandled-rejections=strict"]
@@ -56,10 +57,12 @@ services:
     container_name: hass
     image: ghcr.io/home-assistant/home-assistant:stable
     restart: "unless-stopped"
-    environment: {}
+    environment:
+      HASS_RUNAS: "1001"
       # DISABLE_JEMALLOC: true
     networks:
       - assistant_net
+    user: ${HASS_RUNAS}:${HASS_RUNAS}
     # ports: []
       # - "8123:8123"
     volumes:

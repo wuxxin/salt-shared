@@ -28,32 +28,45 @@ config:
     packages:
       {# to disable entry, set homeassistant:config:hass:packages:zigbee2mqtt: false #}
       zigbee2mqtt: salt://app/homeassistant/packages/zigbee2mqtt.yaml
+    plural_section_filenames:
+      - scene
+      - automation
+      - sensor
     default_enabled:
-      {# to disable entry, set homeassistant:config:hass:default_enabled:<value>: false #}
-      # Configure a default setup of Home Assistant (frontend, api, etc)
-      default_config: true
+      {# to disable an already listed entry, set entry to false #}
+      automation: true
+      # cloud: true
+      counter: true
+      # dhcp: true
+      energy: true
+      frontend: true
+      history: true
+      input_boolean: true
+      input_datetime: true
+      input_number: true
+      input_select: true
+      input_text: true
+      logbook: true
+      map: true
+      media_source: true
+      mobile_app: true
+      my: true
+      network: true
+      person: true
+      scene: true
+      script: true
+      ssdp: true
+      sun: true
+      system_health: true
+      tag: true
+      timer: true
+      # usb: true
+      updater: true
+      webhook: true
+      zeroconf: true
+      zone: true
       # Enables configuration UI
       config: true
-      # Checks for available updates
-      updater: true
-      # Discover some devices automatically
-      discovery: true
-      # Enables support for tracking state changes over time
-      history: true
-      # View all events in a logbook
-      logbook: true
-      # Track the sun
-      sun: true
-      # Map
-      map: true
-      # Wake on LAN
-      # wake_on_lan:
-      # System health
-      system_health: true
-      # Mobile App Support
-      mobile_app: true
-      # Persons
-      auth: true
 
   appdaemon: {{ appdaemon }}
   rhasspy: {{ rhasspy}}
@@ -110,7 +123,7 @@ compose:
 {# write all defined hass.configuration keys except homeassistant as included files #}
   {%- for k in settings.config.hass.configuration.keys() %}
     {%- if k not in ['homeassistant'] %}
-'hass/include/{{ k }}.yaml':
+'hass/include/{{ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' }}.yaml':
   contents: |
 {{ settings.config.hass.configuration[k]|yaml(False)|indent(4,True) }}
     {%- endif %}
@@ -119,7 +132,7 @@ compose:
 {# also write all default_enabled keys that are not defined in hass.configuration #}
   {%- for k,v in settings.config.hass.default_enabled.items() %}
     {%- if k not in settings.config.hass.configuration.keys() and v == true %}
-'hass/include/{{ k }}.yaml':
+'hass/include/{{ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' }}.yaml':
   contents: ""
     {%- endif %}
   {%- endfor %}
