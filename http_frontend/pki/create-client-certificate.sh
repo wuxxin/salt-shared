@@ -52,7 +52,7 @@ shift
 if test "$1" = "--san" -a "$2" != ""; then additional_san="$2"; shift 2; fi
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.ssl.user }}"
-    echo "debug: called as root, using $call_prefix"
+    echo "info: called as root, using $call_prefix"
 fi
 
 # main
