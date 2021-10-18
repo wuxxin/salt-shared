@@ -19,21 +19,22 @@
 ### Defaults
 
 configured http **Upstreams** defaults:
-  + http_version: 1.1, headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
+  + http_version: 1.1
+  + headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
 
 ### Administration
 
 #### local CA
-+ Creates a client certificate, and send certificate via Email
-  + `create-client-certificate.sh email@address cert_name [--days daysvalid] [--san add-san-values]`
++ Create a client certificate and send certificate via Email
+  + `create-client-certificate.sh [--days <number>] [--user <user.email@address.domain>] <cert_name> [--san <san-values>]`
++ Create a host certificate using the local CA
+  + `create-host-certificate.sh [--days <days>] <domain> [<domains>*]`
 + revoke an existing certificate
   + `revoke-certificate.sh cert_name --yes`
-+ create a host certificate using the local CA
-  + `create-host-certificate.sh [--days <daysvalid>] <domain> [<domains>*]`
 
 #### selfsigned Certificate
 + create a self signed certificate
-  + `create-selfsigned-host-cert.sh -k <keyfile> -c <certfile> [--days <daysvalid>] <domain> [<domains>*]`
+  + `create-selfsigned-host-cert.sh [--days <days>] -k <keyfile> -c <certfile> <domain> [<domains>*]`
 
 ### Example Pillar
 
@@ -88,9 +89,6 @@ host:
 ```
 
 ### TODO
-
-FIXME: local_ca gets overwritten !!
-FIXME: ssl settings for nginx !!
 
 Installing a root/CA Certificate
 Given a CA certificate file foo.crt, follow these steps to install it on Ubuntu:
