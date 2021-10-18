@@ -2,21 +2,6 @@
   {% from "http_frontend/defaults.jinja" import settings with context %}
   {% set domain= san_list[0] %}
 
-deploy_from_file_key_{{ domain }}:
-  file.copy:
-    - name: {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }}
-    - source: {{ key_path }}
-    - user: {{ settings.ssl.user }}
-    - group: {{ settings.ssl.user }}
-    - mode: "640"
-  {%- if not overwrite %}
-    - onlyif: test ! -e {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }}
-  {%- endif %}
-  {%- if onchanges != '' %}
-    - onchanges:
-      {{ onchanges }}
-  {%- endif %}
-
 deploy_from_file_cert_{{ domain }}:
   file.copy:
     - name: {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_cert }}
@@ -29,8 +14,25 @@ deploy_from_file_cert_{{ domain }}:
   {%- endif %}
   {%- if onchanges != '' %}
     - onchanges:
-      {{ onchanges }}
+      - {{ onchanges }}
   {%- endif %}
+
+deploy_from_file_key_{{ domain }}:
+  file.copy:
+    - name: {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }}
+    - source: {{ key_path }}
+    - user: {{ settings.ssl.user }}
+    - group: {{ settings.ssl.user }}
+    - mode: "640"
+  {%- if not overwrite %}
+    - onlyif: test ! -e {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }}
+  {%- endif %}
+  {%- if onchanges != '' %}
+    - onchanges:
+      - {{ onchanges }}
+  {%- endif %}
+    - require:
+      - file: deploy_from_file_cert_{{ domain }}
 
 deploy_from_file_chain_cert_{{ domain }}:
   file.copy:
@@ -44,8 +46,10 @@ deploy_from_file_chain_cert_{{ domain }}:
   {%- endif %}
   {%- if onchanges != '' %}
     - onchanges:
-      {{ onchanges }}
+      - {{ onchanges }}
   {%- endif %}
+    - require:
+      - file: deploy_from_file_cert_{{ domain }}
 {% endmacro %}
 
 
@@ -96,9 +100,13 @@ issue_local_ca_cert_{{ domain }}:
           /usr/local/bin/create-host-certificate.sh \
             {{ san_list|join(' ') }}
     - unless: |
-        gosu {{ settings.ssl.user }} \
+        gosu {{ settings.ssl.user }}
           /usr/local/bin/create-host-certificate.sh --is-valid \
             {{ san_list|join(' ') }}
+    - require:
+      - file: /usr/local/bin/create-host-certificate.sh
+    - require_in:
+      - file: deploy_from_file_cert_{{ domain }}
 
 {{ deploy_from_file(san_list,
   domain_dir ~ '/private/' ~ domain ~ '.key',
@@ -126,6 +134,8 @@ issue_self_signed_cert_{{ domain }}:
           -k {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_key }} \
           -c {{ settings.ssl.base_dir }}/vhost/{{ domain }}/{{ settings.ssl_cert }} \
           {{ san_list|join(' ') }}
+    - require:
+      - file: /usr/local/bin/create-selfsigned-host-cert.sh
 
 deploy_self_signed_chain_cert_{{ domain }}:
   file.copy:
