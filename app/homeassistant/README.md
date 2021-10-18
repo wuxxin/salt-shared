@@ -41,13 +41,6 @@ Components:
 + more adaptive lightning:
   + https://github.com/basnijholt/adaptive-lighting
 
-+ openwrt hostapd_cli presence detection
-  + https://forum.fhem.de/index.php?topic=113524.0
-  + homeassistant/openwrt/
-    + /etc/rc.local
-    + /etc/hostapd_hook_mqtt.conf
-    + /bin/hostapd_hook_mqtt.sh
-
 ## example pillar
 
 ```yaml
