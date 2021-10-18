@@ -17,11 +17,11 @@ if test "$2" != "--yes"; then usage; fi
 call_prefix=""
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.ssl.user }}"
-    echo "debug: called as root, using $call_prefix"
+    echo "info: called as root, using $call_prefix"
 fi
-cd "{{ settings.ssl.base_dir }}/easyrsa"
 
 # main
+cd "{{ settings.ssl.base_dir }}/easyrsa"
 $call_prefix ./easyrsa --batch revoke "$certname"
 $call_prefix ./easyrsa --batch gen-crl
 install -o "{{ settings.ssl.user }}" -g "{{ settings.ssl.user }}" -m "0640" -T \
