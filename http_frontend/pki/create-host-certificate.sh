@@ -1,20 +1,19 @@
 #!/bin/bash
 set -eo pipefail
-# set -x
+set -x
 
 usage(){
     cat << EOF
-Usage: $0 [--days daysvalid] domain [add domains*]
-       $0 --check-domains-listed domain [add domains*]
+Usage: $0 [--is-valid] [--days <days>] <domain> [<domains>*]
 
 Creates a host certificate using the local ca.
 
-+ calling $0 --check-domains-listed domain [domains*]
-    will exit 0 if all domains are listed in the current existing certificate,
++ calling $0 --is-valid <domain> [<domains>*]
+    will exit 0 if certificate exists, and all domains are listed in the current certificate,
     and exit 1 otherwise
 
 + The default certificate lifetime is $daysvalid days,
-    use --days daysvalid to specify a different value
+    use --days <days> to specify a different value
 
 EOF
     exit 1
@@ -22,8 +21,9 @@ EOF
 
 check_only="false"
 daysvalid="{{ settings.ssl.local_ca.validity_days }}"
+if test "$1" = "--is-valid"; then check_only="true"; shift; fi
 if test "$1" = "--days"; then daysvalid=$2; shift 2; fi
-if test "$1" = "--check-domains-listed"; then check_only="true"; shift; fi
+
 if test "$1" = ""; then usage; fi
 certname="$1"
 subjectAltName="DNS:$certname"
@@ -36,8 +36,10 @@ done
 call_prefix=""
 if test "$(id -u)" = "0"; then
     call_prefix="gosu {{ settings.ssl.user }}"
-    echo "debug: called as root, using $call_prefix"
+    echo "info: called as root, using $call_prefix"
 fi
+
+# main
 cd "{{ settings.ssl.base_dir }}/easyrsa"
 
 if test "$check_only" = "true"; then
@@ -70,6 +72,9 @@ $call_prefix ./easyrsa \
     --req-email="" --req-city="" --req-st="" --req-c="" \
     --subject-alt-name="${subjectAltName}" \
     build-server-full "$certname" nopass
+
+# add local_ca to chain cert
+cat pki/issued/${certname}.crt pki/ca.crt | $call_prefix tee pki/issued/${certname}.fullchain.crt
 
 # update revocation list
 $call_prefix ./easyrsa --batch gen-crl
