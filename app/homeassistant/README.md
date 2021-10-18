@@ -8,40 +8,7 @@ Components:
 + **Rhasspy** as voice assistant for controlling homeassistant via voice
 + **podman** and **podman-compose** as container infrastructure
 
-## Info
-
-### Zigbee
-
-+ Wireless Controller Coverage: Highly recommended: Male to female USB extension cable
-+ Groups, Scenes and Bindings are stored on the target device
-+ Groups: By using Zigbee groups you can control multiple devices simultaneously with one command.
-+ Scenes: Scenes allow to quickly set certain states for a device or group. Most of the time this is used for bulbs or a group of bulbs as it allows to set a certain color and brightness with a single command.
-+ Binding: Zigbee has support for binding which makes it possible that devices can directly control each other without the intervention of Zigbee2MQTT or any home automation software.
-+ When a devices is being bound to, Zigbee2MQTT will automatically configure reporting for these devices. This will make the device report state changes when the state is changed through a bound device. In order for this feature to work, the device has to support it.
-
-#### Re-Pairing
-
-+ OSRAM/LEDVANCE Lights
-  + 5 sec on, 5 sec off, repeat 5-6 times, bulb will blink on success
-
-+ EnOcean PTM 215Z Pushbutton transmitter
-  + This device has 4 buttons: Nr/Button/Position
-    + 1:A0=top left , 2:A1=bottom left , 3:B0=top right , 4:B1=bottom right
-  + To pair it, hold the corresponding button for that channel for 7 seconds or more.
-    + Button/Channel: A0=15 , A1=20 , B0=11 , B1=25
-
-#### Devices
-
-+ thermal sensor array:
-  + https://www.omron.com/global/en/media/press/2012/06/e0627.html
-  + https://www.sparkfun.com/products/14607
-
-### Home Assistant
-
-+ more adaptive lightning:
-  + https://github.com/basnijholt/adaptive-lighting
-
-## example pillar
+## Example pillar
 
 ```yaml
 homeassistant:
@@ -59,9 +26,9 @@ homeassistant:
         longitude: 16.37315
         # Altitude above sea level in meters
         elevation: 172
-        # List of time zones: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        # see http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         time_zone: Europe/Vienna
-        # metric for Metric (meter, °celcius), imperial for Imperial (miles, °fahrenheit)
+        # unit_system: metric (meter, °celcius) or imperial (miles, °fahrenheit)
         unit_system: metric
     zigbee2mqtt:
       configuration:
@@ -114,9 +81,28 @@ homeassistant:
         system: rhasspy
 ```
 
-### Notes
+## Notes
 
-+ settings for all devices in device_options, devices, groups:
+### Zigbee
+
++ Groups, Scenes and Bindings are stored on the target device
++ Groups: control multiple devices simultaneously with one command
++ Scenes: quickly set certain states for a device or group.
++ Binding: binding devices to directly control each other without the intervention of Zigbee2MQTT
+  + When a devices is being bound to, Zigbee2MQTT will automatically configure reporting for these devices. This will make the device report state changes when the state is changed through a bound device. In order for this feature to work, the device has to support it.
+
+#### Re-Pairing
+
++ OSRAM/LEDVANCE/Philips Lights
+  + 5 sec on, 5 sec off, repeat 5-6 times, bulb will blink on success
+
++ EnOcean PTM 215Z Pushbutton transmitter
+  + This device has 4 buttons: Nr/Button/Position
+    + 1:A0=top left , 2:A1=bottom left , 3:B0=top right , 4:B1=bottom right
+  + To pair it, hold the corresponding button for that channel for 7 seconds or more.
+    + Button/Channel: A0=15 , A1=20 , B0=11 , B1=25
+
+#### settings for all devices in device_options, devices, groups
 
 ```yaml
 friendly_name:
@@ -163,13 +149,25 @@ filtered_optimistic:
   Example: filtered_optimistic: ["color_mode", "color"].
 ```
 
-+ settings for lights
+#### settings for lights
 ```yaml
 set_transition: 1
 # set default transition time to 1 second
 remember_state: true
 # Remember current light state
 ```
+
+### other
+
++ Wireless Controller Coverage:
+  + Highly recommended: Male to female USB extension cable
+
++ thermal sensor array:
+  + https://www.omron.com/global/en/media/press/2012/06/e0627.html
+  + https://www.sparkfun.com/products/14607
+
++ more adaptive lightning:
+  + https://github.com/basnijholt/adaptive-lighting
 
 + Audio In and Audio Out for Rhasspy
 ```
