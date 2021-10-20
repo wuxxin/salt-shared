@@ -33,7 +33,7 @@
   + entry:environment:`SERVICE_NAME=entry.name, USER, HOME, USERNS_ID`
   + entry:desktop:template_options=settings.x11docker[entry.desktop.template]
   + entry:configdir, workdir, builddir, servicedir, scriptdir, desktopdir
-  + replace ${} vars in: environment, labels, storage, volumes, ports
+  + container type: replace ${} vars in: environment, labels, storage, volumes, ports
 
 ### remarks
 
