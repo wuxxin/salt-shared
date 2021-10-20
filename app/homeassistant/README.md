@@ -151,10 +151,19 @@ filtered_optimistic:
 
 #### settings for lights
 ```yaml
-set_transition: 1
 # set default transition time to 1 second
-remember_state: true
+set_transition: 1
 # Remember current light state
+remember_state: true
+# color_sync: Synchronizes the color values in the state, e.g. if the state
+#   contains color_temp and color.xy and the color_temp is set, color.xy will
+#   be updated to match the color_temp. (default: true)
+color_sync: true
+# transition: Controls the transition time (in seconds) of on/off, brightness,
+#   color temperature (if applicable) and color (if applicable) changes.
+#   Defaults to 0 (no transition). Note that this value is overridden if a
+#   transition value is present in the MQTT command payload.
+transition: 0
 ```
 
 ### other
