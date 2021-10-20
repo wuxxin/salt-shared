@@ -237,6 +237,8 @@
 
 {% macro write_service(entry, source, user='') %}
   {# write systemd service file and start service if service, remove service if entry.absent #}
+  {# XXX remove files from entry dict, may cause yaml issues #}
+  {%- do entry.update({'files': {}})   %}
 {{ entry.name }}.service:
   file:
   {%- if entry.absent %}
