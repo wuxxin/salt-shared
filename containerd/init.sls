@@ -41,6 +41,8 @@ nerdctl.tar.gz:
     - onchanges:
       - file: nerdctl.tar.gz
 
+FIXME: makes file owner confustion on unpack!
+
 cri-containerd-cni.tar.gz:
   file.managed:
     - source: {{ settings.external['cri-containerd-cni.tar.gz']['download'] }}
