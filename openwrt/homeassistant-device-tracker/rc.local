@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# hostapd to mqtt hook setup
+config_file="/etc/hostapd_hook_mqtt_credentials.conf"
+if [ ! -e "$config_file" ] ; then
+    echo "error: could not start hostapd_cli for mqtt hook: config file $config_file not found"
+else
+    # echo "start hostapd_cli as daemon to call /usr/bin/hostapd_mqtt_hook.sh on events"
+    # hostapd_cli -i wlan0-1 -B -r -a /usr/bin/hostapd_hook_mqtt.sh
+    echo "start logread as daemon to call /usr/bin/hostapd_mqtt_hook.sh --log-line on events"
+    nohup /usr/bin/logread_hook_mqtt.sh  >/dev/null 2>/dev/null &
+fi
