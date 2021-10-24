@@ -1,5 +1,5 @@
 {% from "http_frontend/defaults.jinja" import settings with context %}
-{% from "http_frontend/ssl/lib.sls" import  deploy_from_file, deploy_from_pillar,
+{% from "http_frontend/ssl/lib.sls" import deploy_from_file, deploy_from_pillar,
   issue_from_local_ca, issue_self_signed %}
 
 include:
@@ -48,7 +48,7 @@ ssl_requisites:
         openssl dhparam -outform PEM \
           -out {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }} \
           {{ settings.ssl_dhparam_bitsize }}
-    - unless: |
+    - onlyif: |
         if test ! -e {{ settings.ssl.base_dir }}/{{ settings.ssl_dhparam }}; then
           true
         elif test "{{ settings.ssl_dhparam_bitsize }}" -gt \
