@@ -43,6 +43,8 @@ services:
     volumes:
       - zigbee2mqtt:/app/data
       - ./zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml
+      - ./zigbee2mqtt/devices.yaml:/app/data/devices.yaml:rw
+      - ./zigbee2mqtt/groups.yaml:/app/data/groups.yaml:rw
     devices:
       - ${ZB_ADAPTER}:/dev/ttyACM0:rw
     user: ${ZB_RUNAS}:${ZB_RUNAS}
@@ -68,11 +70,12 @@ services:
     volumes:
       - hass:/config
       - ./hass/configuration.yaml:/config/configuration.yaml
+      - ./hass/include:/config/include
+      - ./hass/packages:/config/packages
+      # XXX must be in sync with defaults.jinja config:hass:plural_names entries
       - ./hass/scenes.yaml:/config/scenes.yaml
       - ./hass/automations.yaml:/config/automations.yaml
       - ./hass/sensors.yaml:/config/sensors.yaml
-      - ./hass/include:/config/include
-      - ./hass/packages:/config/packages
     depends_on:
       - mosquitto
       - zigbee2mqtt

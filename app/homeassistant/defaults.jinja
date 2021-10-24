@@ -19,6 +19,8 @@ config:
 
   zigbee2mqtt:
     configuration: {{ zigbee2mqtt }}
+    devices: {}
+    groups: {}
 
   hass:
     configuration: {{ hass }}
@@ -28,13 +30,14 @@ config:
     packages:
       {# to disable entry, set homeassistant:config:hass:packages:zigbee2mqtt: false #}
       zigbee2mqtt: salt://app/homeassistant/packages/zigbee2mqtt.yaml
-    plural_section_filenames:
-      {# these sections filenames have additional "s" and be included in the main directory  #}
+    plural_names:
+      {# these sections filenames will have additional "s" and be included in the main directory #}
+      {# XXX must be in sync with docker-compose.yml hass:volumes entries #}
       - scene
       - automation
       - sensor
     default_enabled:
-      {# to disable an already listed entry, set entry to false #}
+      {# default sections enabled, to disable an already listed entry, set entry to false #}
       automation: true
       # cloud: true
       counter: true
@@ -109,6 +112,18 @@ compose:
   contents: |
 {{ settings.config.zigbee2mqtt.configuration|yaml(False)|indent(4,True) }}
 
+'zigbee2mqtt/devices.yaml':
+  user: {{ settings.compose.environment.ZB_RUNAS }}
+  group: {{ settings.compose.environment.ZB_RUNAS }}
+  contents: |
+{{ settings.config.zigbee2mqtt.devices|yaml(False)|indent(4,True) }}
+
+'zigbee2mqtt/groups.yaml':
+  user: {{ settings.compose.environment.ZB_RUNAS }}
+  group: {{ settings.compose.environment.ZB_RUNAS }}
+  contents: |
+{{ settings.config.zigbee2mqtt.groups|yaml(False)|indent(4,True) }}
+
 'hass/configuration.yaml':
   source: salt://app/homeassistant/homeassistant-template.yml
   template: jinja
@@ -130,7 +145,7 @@ compose:
 {# write all defined hass.configuration keys except homeassistant as included files #}
   {%- for k in settings.config.hass.configuration.keys() %}
     {%- if k not in ['homeassistant'] %}
-      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' %}
+      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_names else k ~ 's' %}
 'hass/{{ l }}.yaml':
   user: {{ settings.compose.environment.HASS_RUNAS }}
   group: {{ settings.compose.environment.HASS_RUNAS }}
@@ -142,7 +157,7 @@ compose:
 {# also write all default_enabled keys that are not defined in hass.configuration #}
   {%- for k,v in settings.config.hass.default_enabled.items() %}
     {%- if k not in settings.config.hass.configuration.keys() and v == true %}
-      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_section_filenames else k ~ 's' %}
+      {%- set l = 'include/' ~ k if k not in settings.config.hass.plural_names else k ~ 's' %}
 'hass/{{ l }}.yaml':
   user: {{ settings.compose.environment.HASS_RUNAS }}
   group: {{ settings.compose.environment.HASS_RUNAS }}
