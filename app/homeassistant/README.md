@@ -6,7 +6,7 @@ Components:
 + **Homeassistant** connecting to zigbee devices via MQTT to zigbee2mqtt
 + **AppDaemon** for advanced homeassistant automation
 + **Rhasspy** as voice assistant for controlling homeassistant via voice
-+ **podman** and **podman-compose** as container infrastructure
++ **Podman** and **podman-compose** as container infrastructure
 
 ## Example pillar
 
@@ -17,19 +17,6 @@ homeassistant:
       RHASSPY_PROFILE: de
       ZB_ADAPTER: /dev/ttyUSB0
   config:
-    hass:
-      homeassistant:
-        # Name of the location where Home Assistant is running
-        name: Home
-        # latitude+longitude+elevation=Stephansdom/Vienna
-        latitude: 48.20849
-        longitude: 16.37315
-        # Altitude above sea level in meters
-        elevation: 172
-        # see http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        time_zone: Europe/Vienna
-        # unit_system: metric (meter, °celcius) or imperial (miles, °fahrenheit)
-        unit_system: metric
     zigbee2mqtt:
       configuration:
         serial:
@@ -50,6 +37,19 @@ homeassistant:
       groups:
         '1':
           friendly_name: friendly-group-name
+    hass:
+      homeassistant:
+        # Name of the location where Home Assistant is running
+        name: Home
+        # latitude+longitude+elevation=Stephansdom/Vienna
+        latitude: 48.20849
+        longitude: 16.37315
+        # Altitude above sea level in meters
+        elevation: 172
+        # see http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        time_zone: Europe/Vienna
+        # unit_system: metric (meter, °celcius) or imperial (miles, °fahrenheit)
+        unit_system: metric
     appdaemon:
       appdaemon:
         # latitude+longitude+elevation=Stephansdom/Vienna
