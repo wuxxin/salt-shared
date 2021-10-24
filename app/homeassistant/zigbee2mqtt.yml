@@ -210,9 +210,10 @@ experimental: {}
 
 # # Optional: OTA update settings
 ota:
-  update_check_interval: 10080
-  # 10080 = 7 days in minutes
-  # # Minimum time between OTA update checks, see https://www.zigbee2mqtt.io/information/ota_updates.html for more info
+  update_check_interval: 43200
+  # 43200 = 30 days in minutes
+  # # Minimum time (in minutes) between OTA update checks,
+  # # see https://www.zigbee2mqtt.io/information/ota_updates.html for more info
   # update_check_interval: 1440
   # # Disable automatic update checks, see https://www.zigbee2mqtt.io/information/ota_updates.html for more info
   # disable_automatic_update_check: false
