@@ -16,11 +16,17 @@
 + extended **Prometheus Stats** using **lua_nginx_prometheus**
 + **Downstream http/https proxy** PROXY protocol support
 
-### Defaults
+### Usage
 
-configured http **Upstreams** defaults:
++ configured http **Upstreams** defaults
   + http_version: 1.1
   + headers: HOST, X-Real-IP, X-Forwarded-For, X-Forwarded-Host, X-Forwarded-Proto
+
++ to safely upgrade a location to websocket use
+```
+proxy_set_header Upgrade $safe_http_upgrade;
+proxy_set_header Connection $safe_connection_upgrade;
+```
 
 ### Administration
 
@@ -41,8 +47,6 @@ configured http **Upstreams** defaults:
 + for details see [defaults.jinja](defaults.jinja)
 
 ```yaml
-listen_ip:
-  - default-route-ip
 listen_service:
   - https
 server_name: hostname.something another.something
@@ -88,9 +92,10 @@ host:
     target: proxy_pass http://k3s
 ```
 
-### TODO
+### Notes
 
-Installing a root/CA Certificate
++ Installing a root/CA Certificate
+```
 Given a CA certificate file foo.crt, follow these steps to install it on Ubuntu:
     Create a directory for extra CA certificates in /usr/share/ca-certificates:
      sudo mkdir /usr/local/share/ca-certificates/extra
@@ -104,3 +109,4 @@ In case of a .pem file on Ubuntu, it must first be converted to a .crt file:
 openssl x509 -in foo.pem -inform PEM -out foo.crt
 Or a .cer file can be converted to a .crt file:
 openssl x509 -inform DER -in foo.cer -out foo.crt
+```
