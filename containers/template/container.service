@@ -1,6 +1,6 @@
 [Unit]
-Description={{ 'user' if user = '' }} systemd service for podman container {{ entry.name }}
-{%- if user = '' %}
+Description={{ 'user' if user }} systemd service for podman container {{ entry.name }}
+{%- if not user %}
 After=network-online.target {{ entry.systemd.after }}
 {%- else %}
 {% if entry.systemd.after|length %}After={{ entry.systemd.after }}{% endif %}
@@ -13,7 +13,7 @@ After=network-online.target {{ entry.systemd.after }}
 {%- endfor %}
 
 [Service]
-Type={{ entry.type }}
+Type={{ 'oneshot' if entry.type == 'oneshot' else 'exec' }}
 {%- if not entry.systemd.restart|length %}
   {%- if entry.type == 'oneshot' %}
 Restart=no
@@ -31,19 +31,21 @@ WorkingDirectory={{ entry.workdir }}
 {%- if entry.refresh %}
   {%- if entry.build.source != '' %}
 # build on start
-ExecStartPre=/usr/bin/bash 'cd {{ entry.builddir }} && \
-    podman build {{ '--tag='+ entry.tag if entry.tag }} \
-    {%- for key,value in entry.build.args.items() %}
-    {{ '--build-arg=' ~ key ~ '=' ~ value }} \
-    {%- endfor %}
-    {{ entry.build.source }}'
-  {%- else %}
+ExecStartPre=/usr/bin/bash -c -- \
+  'cd {{ entry.builddir }} && \
+  podman build {{ '--tag='+ entry.tag if entry.tag }} \
+  {%- for key,value in entry.build.args.items() %}
+  {{ '--build-arg=' ~ key ~ '=' ~ value }} \
+  {%- endfor %}
+  {{ entry.build.source }}'
 
+  {%- else %}
 # pull on start
-ExecStartPre=/usr/bin/bash 'registry="{{ entry.image }}"; \
-    if test "${registry%*/}" != "localhost"; then \
-      podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}; \
-    fi'
+ExecStartPre=/usr/bin/bash -c -- \
+  'registry="{{ entry.image }}"; \
+  if test "${registry%*/}" != "localhost"; then \
+    podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}; \
+  fi'
   {%- endif %}
 {%- endif %}
 
@@ -53,8 +55,8 @@ ExecStartPre=-podman rm -f {{ entry.name }}
 {%- endif %}
 
 # commands run before the first time the service is started
-ExecStartPre=/usr/bin/bash \
-  'if test ! -e "{{ entry.configdir }}/image.digest"; then
+ExecStartPre=/usr/bin/bash -c -- \
+  'if test ! -e "{{ entry.configdir }}/image.digest"; then \
       echo "INFO: initial run"; \
   {%- if entry.prepare.initial.command != '' %}
       /usr/bin/env - \
@@ -64,14 +66,14 @@ ExecStartPre=/usr/bin/bash \
   fi'
 
 # create a digest if none is existing
-ExecStartPre=/usr/bin/bash \
-  'if test ! -e "{{ entry.configdir }}/image.digest"; then
+ExecStartPre=/usr/bin/bash -c -- \
+  'if test ! -e "{{ entry.configdir }}/image.digest"; then \
       podman image list --format json {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | \
         jq ".[0].Digest" -r > "{{ entry.configdir }}/image.digest"; \
   fi'
 
 # commands run after updating image to newer image before starting new image
-ExecStartPre=/usr/bin/bash \
+ExecStartPre=/usr/bin/bash -c -- \
   'if test "$(cat "{{ entry.configdir }}/image.digest")" != \
       "$(podman image list --format json \
         {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | jq -r ".[0].Digest")"; then \
@@ -84,9 +86,9 @@ ExecStartPre=/usr/bin/bash \
   fi'
 
 # update digest
-ExecStartPre=/usr/bin/bash \
-  podman image list --format json {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | \
-    jq -r ".[0].Digest" > "{{ entry.configdir }}/image.digest"
+ExecStartPre=/usr/bin/bash -c -- \
+  'podman image list --format json {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | \
+    jq -r ".[0].Digest" > "{{ entry.configdir }}/image.digest"'
 
 # start container
 ExecStart=podman run \
@@ -94,7 +96,7 @@ ExecStart=podman run \
   --cgroups=split \
   --env-file {{ entry.configdir }}/.env \
   --env-host \
-{%- if entry.userns == 'pick' %}
+{%- if entry.userns == 'pick' or (entry.userns == 'auto' and user) %}
   --uidmap=0:{{ entry.USERNS_ID }}:65536 \
   --gidmap=0:{{ entry.USERNS_ID }}:65536 \
 {%- else %}
@@ -116,7 +118,9 @@ ExecStart=podman run \
   {{ entry.command }} {{ entry.args }}
 {% endif %}
 
-{%- if entry.type = 'service' %}
+
+
+{%- if entry.type == 'service' %}
 # stop container
 ExecStop=podman stop {{ entry.name }}
 {%- endif %}
@@ -125,9 +129,10 @@ ExecStop=podman stop {{ entry.name }}
 {{ k }}={{ v }}
 {%- endfor %}
 
-{%- if entry.type = 'service' %}
+{%- if entry.type == 'service' %}
+
 [Install]
-  {%- if user = '' %}
+  {%- if not user %}
 WantedBy=multi-user.target
   {%- else %}
 WantedBy=default.target
