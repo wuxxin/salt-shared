@@ -1,10 +1,9 @@
 {% load_yaml as defaults %}
-
 builder:
   name: build-android-lineage-microg
   image: lineageos4microg/docker-lineage-cicd
   tag: latest
-  type: script
+  type: command
   environment:
     BUILD_DATA_VOLUME: android-build-data
     BRANCH_NAME: lineage-17.1
@@ -21,6 +20,7 @@ builder:
     - ${BUILD_DATA_VOLUME}/ccache:/srv/ccache
     - ${BUILD_DATA_VOLUME}/keys:/srv/keys
     - ${BUILD_DATA_VOLUME}/manifests:/srv/local_manifests
+
 
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
@@ -55,13 +55,11 @@ emulator_build:
     build/Dockerfile:
       contents: |
         FROM localhost/android/emulator-unmodified
-
         COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
         RUN chmod +x /android/sdk/launch-emulator.sh
         RUN mv /android-home /android-home-default
         RUN sed -r -i -e "s/^disk.dataPartition.size=.+//g" /android-home-default/Pixel2.avd/config.ini
         RUN install -o 1000 -g 1000 -m "777" -d /android-home
-
     build/launch-emulator.sh:
       source: salt://android/emulator/launch-emulator.sh
 
@@ -80,7 +78,6 @@ emulator_desktop:
       Categories: Network;
       Keywords: android;emulator;
   environment:
-    DATA_VOLUME: data
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "false"
     AVD_CONFIG: ""
@@ -89,10 +86,10 @@ emulator_desktop:
   labels:
     android: emulator
   storage:
-    - name: ${SERVICE_NAME}_${DATA_VOLUME}
+    - name: ${SERVICE_NAME}_data
   volumes:
-    - ${SERVICE_NAME}_${DATA_VOLUME}/user:/home/user/
-    - ${SERVICE_NAME}_${DATA_VOLUME}/android-home:/android-home
+    - ${SERVICE_NAME}_data/user:/home/user/
+    - ${SERVICE_NAME}_data/android-home:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
@@ -104,17 +101,16 @@ emulator_headless_service:
   image: localhost/android/emulator
   type: service
   environment:
-    DATA_VOLUME: data
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "true"
     AVD_CONFIG: ""
     EMULATOR_PARAMS: ""
     ADD_EMULATOR_PARAMS: "-nowindow"
   storage:
-    - name: ${SERVICE_NAME}_${DATA_VOLUME}
+    - name: ${SERVICE_NAME}_data
   volumes:
-    - ${SERVICE_NAME}_${DATA_VOLUME}/user:/home/user/
-    - ${SERVICE_NAME}_${DATA_VOLUME}/android-home:/android-home
+    - ${SERVICE_NAME}_data/user:/home/user/
+    - ${SERVICE_NAME}_data/android-home:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
@@ -126,22 +122,49 @@ emulator_webrtc_service:
   image: localhost/android/emulator
   type: service
 
+
+redroid_image:
+  name: redroid_image
+  image: docker.io/redroid/redroid
+  tag: 11.0.0-latest
+
+redroid_build:
+  name: redroid_build
+  image: localhost/redroid/redroid
+  tag: 11.0.0-latest
+  type: build
+  build:
+    source: .
+  files:
+    build/Dockerfile:
+      contents: |
+        FROM docker.io/redroid/redroid:11.0.0-latest
+        RUN ["/system/bin/rm", "/bin", "/bugreports", "/etc", "/init", "/product", "/sdcard", "/system_ext"]
+        RUN ["/system/bin/ln", "system/bin", "bin"]
+        RUN ["/system/bin/ln", "system/etc", "etc"]
+        RUN ["/system/bin/ln", "system/bin/init", "init"]
+        RUN ["/system/bin/ln", "system/product", "product"]
+        RUN ["/system/bin/ln", "system/system_ext", "system_ext"]
+        RUN ["/system/bin/ln", "data/user_de/0/com.android.shell/files/bugreports", "bugreports"]
+        RUN ["/system/bin/ln", "storage/self/primary", "sdcard"]
+
 redroid_service:
   name: redroid
-  image: redroid/redroid
-  tag: 10.0.0-latest
+  image: localhost/redroid/redroid
+  tag: 11.0.0-latest
+  refresh: false
+  systemd:
+    restart: on-success
   type: service
-  environment:
-    DATA_VOLUME: data
   storage:
-    - name: ${SERVICE_NAME}_${DATA_VOLUME}
+    - name: ${SERVICE_NAME}_data
   volumes:
-    - ${SERVICE_NAME}_${DATA_VOLUME}:/data
+    - ${SERVICE_NAME}_data:/data
   publish:
     - 127.0.0.1:5555:5555/tcp
   options:
-    # - --privileged
     - --memory-swappiness 0
+    # - --privileged
 
 {% endload %}
 
