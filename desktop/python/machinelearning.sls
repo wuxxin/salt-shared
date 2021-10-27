@@ -6,12 +6,6 @@ include:
 
 {# machine learning frameworks (sklearn,tensorflow,pytorch) and supporting libraries #}
 {% load_yaml as machinelearning %}
-# ### generic ###
-- statsmodels
-# statsmodels: estimation of many different statistical models, conducting statistical tests, and statistical data exploration
-- optuna
-# optuna: hyperparameter optimization framework to automate hyperparameter search
-
 # ### sklearn ###
 - sklearn
 - sklearn-pandas
@@ -25,21 +19,27 @@ include:
 
 # ### pytorch ###
 - torch
+- torchinfo
+# torchinfo: provides information complementary to print(your_model)
 - torchvision
 - torchaudio
 - torchtext
-- torchinfo
-# torchinfo: provides information complementary to print(your_model)
-- skorch
-# skorch: scikit-learn compatible neural network library that wraps PyTorch
-- pytorch-lightning
-# pytorch-lightning: lightweight PyTorch wrapper for high-performance AI research
 - pytorchvideo
 # pytorchvideo: a deeplearning library with a focus on video understanding work
 - kornia
 # kornia: classical computer vision integrated into deep learning models
 - fastai
+# fastai: simplifies training fast and accurate neural nets using modern best practices
+- skorch
+# skorch: scikit-learn compatible neural network library that wraps PyTorch
+- pytorch-lightning
+# pytorch-lightning: lightweight PyTorch wrapper for high-performance AI research
 
+# ### generic ###
+- statsmodels
+# statsmodels: estimation of many different statistical models, conducting statistical tests, and statistical data exploration
+- optuna
+# optuna: hyperparameter optimization framework to automate hyperparameter search
 {% endload %}
 
 {{ pipx_inject('jupyterlab', machinelearning,
