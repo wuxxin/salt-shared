@@ -27,7 +27,7 @@ some states have a documentation README.md
     * [zfs](zfs): OpenZFS is an advanced file system and volume manager
 
 * Network
-    * [http_frontend](http_frontend): modern https frontend using nginx, acme.sh and easyrsa
+    * [http_frontend](http_frontend): https frontend using nginx, acme.sh and easyrsa
     * [oauth2proxy](oauth2proxy): OAuth2Proxy for Oauth2/oidc Authentification
     * [ssh](ssh): openssh client and server
     * [http_proxy](http_proxy):
@@ -36,7 +36,7 @@ some states have a documentation README.md
         * [.client_no_proxy](http_proxy/client_no_proxy.sls)
     * [unbound](unbound): caching recursive dns resolver
     * [knot](knot): authoritative dnsec capable dns server
-    * [coturn](coturn): STUN (Session Traversal Utilities for NAT) and TURN (Traversal Using Relays around NAT)
+    * [coturn](coturn): STUN and TURN Server
     * [wireguard](wireguard): Wireguard VPN
     * [strongswan](strongswan): IPsec VPN
 
@@ -60,18 +60,23 @@ some states have a documentation README.md
     * [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
     * [getmail](getmail): fetchmail alternative
 
-* Android
-    * [android](android): tools and android emulator container for desktop and headless emulator
-
-* [Applications](app/) using (Podman) Containers (podman)
+* [Applications](app/) using [containers](containers)
     * [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
       with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
+
+* Android
+    * [android](android): android tools (adb,fastboot,aapt,heimdall,scrcopy)
+    * [android/emulator](android/emulator) Android Emulator (qemu based) container for desktop and headless
+    * [android/builder](android/builder) Android Lineage Builder container for building android
+    * [android/redroid](android/redroid) GPU accelerated Android on same kernel container
+
+* Embedded
+    * [Openwrt/Homeassistant device_tracker](openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
+    * [Airrohr](iot/airrohr) Airquality Sensor, setup and integration into homeassistant
 
 * unfinished, halfbroken, quirky or very minimum skeleton packages
     * [backup](backup): Modern backup solution using restic and rclone
     * [lxc](kernel/lxc): lxc leightweight machine virtualization
     * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
-    * [haproxy](haproxy): The Reliable, High Performance TCP/HTTP Load Balancer
-    * [syncthing](syncthing): network file synchronisation
-    * [openwrt](openwrt) , [clevis](clevis) , [envoy](envoy) , [step-ca](step-ca) ,
-    * [terraform](terraform) , [golang](golang) , [nodejs](nodejs)
+    * [haproxy](haproxy) , [syncthing](syncthing) ,  [clevis](clevis) , [envoy](envoy)
+    * [step-ca](step-ca) , [terraform](terraform) , [golang](golang) , [nodejs](nodejs)
