@@ -14,6 +14,16 @@ include:
   file:
     - directory
 
+# The --userns=auto flag, requires that the user name containers and a range
+# of subordinate user ids that the Podman container is allowed to use be
+# specified in the /etc/subuid and /etc/subgid files.
+{% for n in 'subuid', 'subgid' %}
+/etc/{{ n }}:
+  file.append:
+    - text: |
+        containers:1000000:1048576
+{% endfor %}
+
 {% for dirname in [
     settings.podman.system.config_basepath,
     settings.podman.system.workdir_basepath,
