@@ -1,11 +1,13 @@
-# lightweight modern containers using podman
+# modern containers
 
-+ uses podman, crun, buildah, skopeo, fuse-overlayfs (from ppa)
+Components:
++ podman, crun, buildah, skopeo, fuse-overlayfs (from ppa)
 + compose support via podman-compose
 + gui support via x11docker
-+ easy rootless support with user !=''
 
 ## containers.lib
+
++ easy rootless support with user !=''
 
 + create a data volume
   + `volume(volume_name, opts=[], labels={}, driver='local', user='')`
