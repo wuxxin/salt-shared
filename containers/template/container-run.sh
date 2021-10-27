@@ -78,7 +78,7 @@ exec podman run \
   --cgroups=split \
   --env-file {{ entry.configdir }}/.env \
   --env-host \
-{%- if entry.userns == 'pick' %}
+{%- if entry.userns == 'pick' or (entry.userns == 'auto' and user) %}
   --uidmap=0:{{ entry.USERNS_ID }}:65536 \
   --gidmap=0:{{ entry.USERNS_ID }}:65536 \
 {%- else %}
