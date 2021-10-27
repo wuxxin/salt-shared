@@ -1,4 +1,4 @@
-#!/bin/sh
+# to include in /etc/rc.local
 
 # hostapd to mqtt hook setup
 config_file="/etc/hostapd_hook_mqtt_credentials.conf"
