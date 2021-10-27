@@ -1,4 +1,4 @@
-# home-assistant via MQTT
+# Home-Assistant via MQTT
 
 Components:
 + **Mosquitto** as a MQTT-Server
@@ -8,7 +8,7 @@ Components:
 + **Rhasspy** as voice assistant for controlling homeassistant via voice
 + **Podman** and **podman-compose** as container infrastructure
 
-## Example pillar
+## Example pillar configuration
 
 ```yaml
 homeassistant:
