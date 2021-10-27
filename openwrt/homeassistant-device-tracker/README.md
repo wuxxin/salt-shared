@@ -3,7 +3,8 @@
 + based on https://forum.fhem.de/index.php?topic=113524.0
 + can use logread or hostapd_cli for information gathering
     + XXX currently only logread is working,
-      because hostapd_cli hook misses the connect after a disconnect/connect renew
+      because hostapd_cli hook misses the connect after
+      a disconnect/connect cycle on dhcp renew
 
 ## install
 
