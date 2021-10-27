@@ -2,22 +2,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="refresh" content="30" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
-      *, body { margin: 0; padding: 0; font-family: sans-serif; font-size: 1.2em; }
-      #content { margin: 0.1em; }
-      .innerwrap { border: 0.1em; padding: 0.2em; solid #EBEBEB;
-          background: #F8F8F8; text-align: center; }
-      #content .innerwrap p { display: block; }
-      #content a { color: #2B558E; text-decoration: none; }
-      #content a:hover { text-decoration: underline; }
+      body {
+        background-color: #787878;
+        color: #fff;
+        text-align: center;
+        font-family: arial, sans-serif;
+        margin: 0;
+      }
+      div {
+        position:absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+      }
+      p {
+        color: #eee;
+      }
     </style>
+    <title>{{ topic }}</title>
   </head>
   <body>
-    <div id="content">
-      <div class="innerwrap">
-        <p><h2>{{ topic }}</h2></p>
-        <p>{{ text }}</p>
-      </div>
+    <div>
+      <h1>{{ topic }}</h1>
+      <p>{{ text }}</p>
     </div>
   </body>
 </html>
