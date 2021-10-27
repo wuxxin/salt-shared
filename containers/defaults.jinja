@@ -136,6 +136,7 @@ refresh: true
 ephemeral: true
 # Set the user namespace mode for the container. options are "pick","auto","host","private"
 # pick is analog to systemd nspawn and computes starting host_uid based on the container name hash
+# if user != root then auto will be substituted by pick
 userns: auto
 
 # systemd options
