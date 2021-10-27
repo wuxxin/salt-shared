@@ -67,7 +67,7 @@ some states have a documentation README.md
 * Android
     * [android](android): android tools (adb,fastboot,aapt,heimdall,scrcopy)
     * [android/emulator](android/emulator) Android Emulator (qemu based) container for desktop and headless
-    * [android/builder](android/builder) Android Lineage Builder container for building android
+    * [android/builder](android/builder) Lineage Android OS Builder container for building android
     * [android/redroid](android/redroid) GPU accelerated Android on same kernel container
 
 * Embedded
