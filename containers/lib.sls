@@ -39,14 +39,11 @@
   {%- set repl_ns= namespace(to_repl={'environment': entry.environment}) -%}
   {# add SERVICE_NAME and USER, HOME #}
   {%- do repl_ns.to_repl.environment.update({'SERVICE_NAME': entry.name}) -%}
-  {%- if entry.userns == 'pick' %}
-    {# add calculated user namespace id if userns=pick #}
-    {%- do repl_ns.to_repl.update({'USERNS_ID':
-      salt['cmd.run_stdout'](
-        'python -c "import binascii;id=(binascii.crc_hqx(b\'' ~
-        entry.name ~
+  {# add calculated user namespace id if needed for userns=pick or therelike #}
+  {%- do repl_ns.to_repl.update({'USERNS_ID':
+    salt['cmd.run_stdout'](
+      'python -c "import binascii;id=(binascii.crc_hqx(b\'' ~ entry.name ~
         '\', 0) & 0x7fff); print(\'{:d}\'.format((id+ 0x4000 if id <=8 else id) << 16))"') }) -%}
-  {%- endif -%}
   {# add x11docker template_options #}
   {%- do repl_ns.to_repl.update( {'desktop': entry.desktop} ) -%}
   {%- do repl_ns.to_repl.desktop.update( {'template_options': x11docker_options} ) -%}
