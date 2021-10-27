@@ -1,4 +1,4 @@
-{% from "android/defaults.jinja" import settings with context %}
+{% from "android/builder/defaults.jinja" import settings with context %}
 {% from "containers/lib.sls" import image with context %}
 
 include:
