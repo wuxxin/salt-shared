@@ -10,6 +10,8 @@ usage(){
 
 Usage:  $0 create <reponame> <gitserver> <gituser> <webhook_target> [--output <file>]
 
+creates a webhook for a git repository on gogs/gitea instance
+
 - needs env variable "Authorization" set to the gituser API token,
     eg. 'Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"'
 

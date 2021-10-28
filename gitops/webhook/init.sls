@@ -24,7 +24,7 @@ webhook:
   file.managed:
     - mode: "0755"
     - contents: |
-          #!/bin/bash
+          #!/usr/bin/bash
           set -e
           echo "called as $0 with parameter $@"
           echo "starting gitops-update"
