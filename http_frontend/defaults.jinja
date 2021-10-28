@@ -179,10 +179,10 @@ error_pages:
   host: true
   {# if enabled:true, target will be displayed instead of standard error page #}
   {# individual vhosts can enable custom error pages, via  #}
-  500: /var/lib/http_frontend/www/500.html
-  502: /var/lib/http_frontend/www/502.html
-  503: /var/lib/http_frontend/www/503.html
-  504: /var/lib/http_frontend/www/504.html
+  target_500: /var/lib/http_frontend/www/500.html
+  target_502: /var/lib/http_frontend/www/502.html
+  target_503: /var/lib/http_frontend/www/503.html
+  target_504: /var/lib/http_frontend/www/504.html
 
 {# geoip support #}
 geoip:
@@ -241,6 +241,8 @@ ssl_dhparam_bitsize: 2236
 {# key,cert of hostname.invalid basenames #}
 ssl_invalid_key: ssl-cert-invalid.key
 ssl_invalid_cert: ssl-cert-invalid.pem
+ssl_invalid_target: /var/lib/http_frontend/www/invalid.html
+
 {# key,cert of selfsigned host domain #}
 ssl_snakeoil_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
 ssl_snakeoil_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem

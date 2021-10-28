@@ -4,10 +4,10 @@ include:
   - http_frontend.pki
   - http_frontend.ssl
 
-{% for p in [settings.maintenance_target,
-  settings.error_pages['500'], settings.error_pages['502'],
-  settings.error_pages['503'], settings.error_pages['504'] ] %}
-create_http_frontend_{{ p }}:
+{% for p in [settings.maintenance_target, settings.ssl_invalid_target,
+  settings.error_pages.target_500, settings.error_pages.target_502,
+  settings.error_pages.target_503, settings.error_pages.target_504] %}
+create_http_frontend_dir_{{ p }}:
   file.directory:
     - name: {{ salt['file.dirname'](p) }}
     - makedirs: true
@@ -16,6 +16,17 @@ create_http_frontend_{{ p }}:
     - require_in:
       - service: nginx
 {% endfor %}
+
+create_http_frontend_{{ settings.ssl_invalid_target }}:
+  file.managed:
+    - source: salt://gitops/template/maintenance.template.html
+    - name: {{ settings.ssl_invalid_target }}
+    - user: {{ settings.nginx_user }}
+    - group: {{ settings.nginx_user }}
+    - template: jinja
+    - defaults:
+        topic: "🤖 Unknown Hostname"
+        text: We're sorry, that's all we know.
 
 /etc/nginx/proxy_params:
   file.managed:
