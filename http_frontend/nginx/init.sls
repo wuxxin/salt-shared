@@ -4,7 +4,9 @@ include:
   - http_frontend.pki
   - http_frontend.ssl
 
-{% for p in [settings.maintenance_target, settings.upstream_error_target] %}
+{% for p in [settings.maintenance_target,
+  settings.error_pages['500'], settings.error_pages['502'],
+  settings.error_pages['503'], settings.error_pages['504'] ] %}
 create_http_frontend_{{ p }}:
   file.directory:
     - name: {{ salt['file.dirname'](p) }}
@@ -64,6 +66,14 @@ lua_prometheus_module:
     - user: www-data
     - group: www-data
 
+/etc/systemd/system/nginx/network_online.conf:
+  file.managed:
+    - makedirs: true
+    - contents: |
+        [Unit]
+        # wait until network is fully online (default=network.target => network started)
+        After=network-online.target
+
 {% if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 20 %}
 {# bionic 1.14, eoan 1.16, focal, groovy 1.17.10, ppa (2020-05) 1.17.3 #}
 {% from "ubuntu/lib.sls" import apt_add_repository %}
@@ -87,5 +97,6 @@ nginx:
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
     - watch:
       - file: /etc/nginx/nginx.conf
+      - file: /etc/systemd/system/nginx/network_online.conf
       - file: /etc/nginx/proxy_params
       - file: /etc/nginx/uwsgi_params
