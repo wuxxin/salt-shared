@@ -1,20 +1,23 @@
 # http_frontend (glue around nginx)
 
-+ stream switching, ssl termination, rate limiting, proxying, static webserver using **nginx**
+stream switching, ssl termination, rate limiting, proxying, static frontend webserver using **nginx**.
 
-+ **configuration** using **pillar:nginx**, for details see [defaults.jinja](defaults.jinja)
-+ Ssl certificates can use
-  + Certs **from pillar**, **Acme**, be created by the **Local CA** or be **Selfsigned**
-  + can have multiple virtual domains with **multiple SAN's** per domain
-+ **ACME** host certificates via **ALPN on https** port or **DNS-01** using **`acme.sh`**
-+ **Local CA** pki management** for **client certificates**, **host certificates** using **easy-rsa**
+
++ **configuration** is done in **pillar:http_frontend**, for details see [defaults.jinja](defaults.jinja)
++ **automatic SSL certificates** management for server_name and virtual_names
+  + Certs can be from **pillar**, issued by **ACME**, be created by the **Local CA** or be **Selfsigned**
+  + Certs can have multiple virtual domains with **multiple SAN's** per domain
+  + **unknown or invalid SNI domains** will **return 404** and a **"hostname.invalid"** certificate
+  + **ACME** creates certificates via **ALPN on https port** or **DNS-01** using **`acme.sh`**
+  + **Local CA** pki management for **client certificates**, **host certificates** using **`easy-rsa`**
   + **optional** or **mandatory client certificates**
-+ **unknown or invalid sni domains** will **return 404** and a **"hostname.invalid"** certificate
-+ optional augumentation with **location HEADER variables** for upstreams via **Geoip2** databases
-+ simple **ratelimit** global or per domain support
+  + **configurable hooks** on certificate updates
 + **Oauth2-proxy** support for **oidc authentification** of legacy upstreams using auth_request
-+ extended **Prometheus Stats** using **lua_nginx_prometheus**
-+ **Downstream http/https proxy** PROXY protocol support
++ optional augumentation of **geo location HEADER variables** for upstreams via **Geoip2** databases
++ optional simple **ratelimit** globally or per domain
++ optional extended **Prometheus Stats** using **`lua_nginx_prometheus`**
++ Downstream http/https proxy via **PROXY protocol**
++ customizable **maintenance page** and http status **500,502,503,504 error pages**
 
 ### Usage
 
@@ -28,18 +31,23 @@ proxy_set_header Upgrade $safe_http_upgrade;
 proxy_set_header Connection $safe_connection_upgrade;
 ```
 
++ mainenance support is enabled on the host for location "/",
+  to also enable in an vhost, use the following inside location:
+    +  `if (-f {{ settings.error.target_maintenance }}) { return 590; }`
+
 ### Administration
 
 #### local CA
++ the local CA ist automatically created on first usage
 + Create a client certificate and send certificate via Email
   + `create-client-certificate.sh [--days <number>] [--user <user.email@address.domain>] <cert_name> [--san <san-values>]`
-+ Create a host certificate using the local CA
++ Create an additional host certificate using the local CA
   + `create-host-certificate.sh [--days <days>] <domain> [<domains>*]`
 + revoke an existing certificate
   + `revoke-certificate.sh cert_name --yes`
 
 #### selfsigned Certificate
-+ create a self signed certificate
++ create an additional self signed certificate
   + `create-selfsigned-host-cert.sh [--days <days>] -k <keyfile> -c <certfile> <domain> [<domains>*]`
 
 ### Example Pillar
@@ -64,7 +72,6 @@ virtual_names:
 ssl:
   local_ca:
     organization: "Super Organization"
-
 geoip:
   enabled: true
 ratelimit:
