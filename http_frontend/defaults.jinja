@@ -20,7 +20,8 @@ listen_service:
 http_port: 80
 {# https_port is required if acme certificate creation is requested and dns is not used #}
 https_port: 443
-{# http_proxy_port and https_proxy_port both expect proxy protocol #}
+{# http_proxy_port and https_proxy_port both expect a trusted downstream host
+  speaking the proxy protocol; Usually used only on localhost; See listen_service #}
 http_proxy_port: 8080
 https_proxy_port: 8443
 {# list of ip's allowed to set real ip proxy header. The Default is correct and safe, read
@@ -44,6 +45,25 @@ virtual_names: []
        env: {}
 #}
 
+{# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
+client_max_body_size: 150M
+
+{# response headers to be inserted, if header or host:header is not present or empty dict. #}
+default_header:
+  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security #}
+  Strict-Transport-Security: max-age=31536000 {# 3x10^7 s ~ 1 y #}
+  {# https://scotthelme.co.uk/hardening-your-http-response-headers #}
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+  X-Content-Type-Options: '"nosniff"' #}
+
+{# response header #}
+{# dict of header vars for the main domain, will use default_header if not existing
+header: {}
+#}
+
+
 {# ssl encryption: use cert+key if exists,
 else use acme to create host certs if acme:enabled and successful,
 else use local CA to create host certs if local_ca == true,
@@ -66,6 +86,18 @@ ssl:
   # cert: |
   {# key: pem encoded ssl key, default empty #}
   # key: |
+
+  {# Intermediate: Firefox 27, Android 4.4.2, Chrome 31, Edge, IE 11 on Windows 7, Java 8u31, OpenSSL 1.0.1, Opera 20, and Safari 9 #}
+  protocols: TLSv1.2 TLSv1.3
+  ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+  prefer_server_ciphers: "off"
+  profile_name: "Intermediate, generated 2021-10-22, https://ssl-config.mozilla.org/#server=nginx&version=1.18&config=intermediate&openssl=1.1.1f&guideline=5.6"
+  {# Modern: Firefox 63, Android 10.0, Chrome 70, Edge 75, Java 11, OpenSSL 1.1.1, Opera 57, and Safari 12.1
+  protocols: TLSv1.3
+  ciphers: ""
+  prefer_server_ciphers: "off"
+  profile_name: "Modern, generated 2021-10-22, https://ssl-config.mozilla.org/#server=nginx&version=1.18&config=modern&openssl=1.1.1f&guideline=5.6"
+  #}
 
   {# local_ca: use local ca for signing host certs, else create selfsigned host certs if needed #}
   local_ca:
@@ -96,28 +128,6 @@ ssl:
     env: {}
       # KNOT_SERVER: "dns.example.com"
       # KNOT_KEY: ""
-
-{# nginx client_max_body_size: <wanted max upload size, 0=disabled, eg. 150M> #}
-client_max_body_size: 150M
-{# filepath, if exists will be displayed instead of normal operation #}
-maintenance_target: /var/lib/http_frontend/www/503.html
-{# filepath, if exists will be displayed instead of standard 502 error page on upstream timeout #}
-upstream_error_target: /var/lib/http_frontend/www/502.html
-
-{# response headers to be inserted, if header or host:header is not present or empty dict. #}
-default_header:
-  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security #}
-  Strict-Transport-Security: max-age=31536000 {# 3x10^7 s ~ 1 y #}
-  {# https://scotthelme.co.uk/hardening-your-http-response-headers #}
-  X-Frame-Options: SAMEORIGIN
-  Referrer-Policy: strict-origin-when-cross-origin
-  {# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-  X-Content-Type-Options: '"nosniff"' #}
-
-{# response header #}
-{# dict of header vars for the main domain, will use default_header if not existing
-header: {}
-#}
 
 {# upstream connections #}
 upstream: []
@@ -158,13 +168,21 @@ host: []
         target: root /var/www/another.domain/
 #}
 
-{# nginx additional customization, can be multiline yaml like "|" #}
-nginx:
-  custom:
-    global: ""
-    stream: ""
-    http: ""
-    host: ""
+{# maintenance support #}
+{# filepath, if exists will be displayed instead of normal operation #}
+maintenance_target: /var/lib/http_frontend/www/maintenance.html
+
+{# custom error pages support #}
+error_pages:
+  enabled: false
+  global: true
+  host: true
+  {# if enabled:true, target will be displayed instead of standard error page #}
+  {# individual vhosts can enable custom error pages, via  #}
+  500: /var/lib/http_frontend/www/500.html
+  502: /var/lib/http_frontend/www/502.html
+  503: /var/lib/http_frontend/www/503.html
+  504: /var/lib/http_frontend/www/504.html
 
 {# geoip support #}
 geoip:
@@ -191,6 +209,13 @@ metrics:
   buildin: true
   prometheus: false
 
+{# nginx additional customization, can be multiline yaml like "|" #}
+nginx:
+  custom:
+    global: ""
+    stream: ""
+    http: ""
+    host: ""
 
 {#
 ### internal settings ####
@@ -225,21 +250,6 @@ ssl_local_ca_crl: local-ca.crl.pem
 ssl_local_ca_authority_unit: "Certificate Authority"
 ssl_local_ca_server_unit: "Server Certificates"
 ssl_local_ca_client_unit: "Client Certificates"
-
-{# https://ssl-config.mozilla.org/#server=nginx&version=1.18&config=intermediate&openssl=1.1.1f&guideline=5.6 #}
-{# Intermediate, generated 2021-10-22
-   Firefox 27, Android 4.4.2, Chrome 31, Edge, IE 11 on Windows 7, Java 8u31, OpenSSL 1.0.1, Opera 20, and Safari 9
-#}
-ssl_protocols: TLSv1.2 TLSv1.3
-ssl_ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-ssl_prefer_server_ciphers: "off"
-
-{# Modern, generated 2021-10-22
-   Firefox 63, Android 10.0, Chrome 70, Edge 75, Java 11, OpenSSL 1.1.1, Opera 57, and Safari 12.1
-ssl_protocols: TLSv1.3
-ssl_ciphers: ""
-ssl_prefer_server_ciphers: "off"
-#}
 
 {# geoip provider: currently only dbip_city #}
 geoip_provider:
