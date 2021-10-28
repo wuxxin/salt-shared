@@ -61,15 +61,18 @@ services:
     restart: "unless-stopped"
     environment:
       HASS_RUNAS: "1001"
+      PUID: $HASS_RUNAS
+      PGID: $HASS_RUNAS
       # DISABLE_JEMALLOC: true
     networks:
       - assistant_net
-    user: ${HASS_RUNAS}:${HASS_RUNAS}
+    # user: ${HASS_RUNAS}:${HASS_RUNAS}
     # ports: []
       # - "8123:8123"
     volumes:
       - hass:/config
       - ./hass/configuration.yaml:/config/configuration.yaml
+      - ./hass/run:/etc/services.d/home-assistant/run
       - ./hass/include:/config/include
       - ./hass/packages:/config/packages
       # XXX must be in sync with defaults.jinja config:hass:plural_names entries

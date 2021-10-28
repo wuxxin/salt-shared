@@ -4,6 +4,7 @@ Components:
 + **Mosquitto** as a MQTT-Server
 + **Zigbee2MQTT** to bridge Zigbee events and controls Zigbee devices via MQTT
 + **Homeassistant** connecting to zigbee devices via MQTT to zigbee2mqtt
+  + non-root modification https://github.com/tribut/homeassistant-docker-venv
 + **AppDaemon** for advanced homeassistant automation
 + **Rhasspy** as voice assistant for controlling homeassistant via voice
 + **Podman** and **podman-compose** as container infrastructure

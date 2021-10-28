@@ -133,6 +133,12 @@ compose:
     hass:
 {{ settings.config.hass|yaml(False)|indent(6,True) }}
 
+'hass/run':
+  source: salt://app/homeassistant/homeassistant_run
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
+  mode: "755"
+
 {# write customizations #}
   {%- for k in ['customize', 'customize_domain', 'customize_glob'] %}
 'hass/include/{{ k }}.yaml':
@@ -167,7 +173,7 @@ compose:
 
 {# write listed packages #}
   {%- for k,v in settings.config.hass.packages.items() %}
-    {%- if v is string %}
+    {%- if v %}
 'hass/packages/{{ k }}.yaml':
   user: {{ settings.compose.environment.HASS_RUNAS }}
   group: {{ settings.compose.environment.HASS_RUNAS }}
