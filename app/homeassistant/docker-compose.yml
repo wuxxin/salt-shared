@@ -50,7 +50,7 @@ services:
     user: ${ZB_RUNAS}:${ZB_RUNAS}
     group_add:
       - dialout
-    # command: ["/sbin/tini", "--", "node", "index.js", "--unhandled-rejections=strict"]
+    command: ["/sbin/tini", "--", "node", "index.js", "--unhandled-rejections=strict"]
     depends_on:
       - mosquitto
 
