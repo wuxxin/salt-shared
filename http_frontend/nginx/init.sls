@@ -25,8 +25,8 @@ create_http_frontend_{{ settings.ssl_invalid_target }}:
     - group: {{ settings.nginx_user }}
     - template: jinja
     - defaults:
-        topic: "🤖 Unknown Hostname"
-        text: We're sorry, that's all we know.
+        topic: "💣 Unknown / invalid Hostname"
+        text: "We don't know the host <b>'##host##'</b> you want to connect to."
 
 /etc/nginx/proxy_params:
   file.managed:

@@ -7,7 +7,7 @@ stream switching, ssl termination, rate limiting, proxying, static frontend webs
 + **automatic SSL certificates** management for server_name and virtual_names
   + Certs can be from **pillar**, issued by **ACME**, be created by the **Local CA** or be **Selfsigned**
   + Certs can have multiple virtual domains with **multiple SAN's** per domain
-  + **unknown or invalid SNI domains** will **return 404** and a **"hostname.invalid"** certificate
+  + **unknown or invalid SNI domains** will **return customized 404** and a **"hostname.invalid"** cert
   + **ACME** creates certificates via **ALPN on https port** or **DNS-01** using **`acme.sh`**
   + **Local CA** pki management for **client certificates**, **host certificates** using **`easy-rsa`**
   + **optional** or **mandatory client certificates**
@@ -31,7 +31,7 @@ proxy_set_header Upgrade $safe_http_upgrade;
 proxy_set_header Connection $safe_connection_upgrade;
 ```
 
-+ mainenance support is enabled on the host for location "/",
++ **mainenance support** is enabled on the host for **location "/"**,
   to also enable in an vhost, use the following inside location:
     +  `if (-f {{ settings.error.target_maintenance }}) { return 590; }`
 
