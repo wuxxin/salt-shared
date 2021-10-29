@@ -180,6 +180,10 @@ compose:
   source: {{ v }}
     {%- endif %}
   {%- endfor %}
+'hass/packages/_keepdir':
+  user: {{ settings.compose.environment.HASS_RUNAS }}
+  group: {{ settings.compose.environment.HASS_RUNAS }}
+  contents: ""
 
 {% endload %}
 
