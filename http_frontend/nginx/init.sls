@@ -108,6 +108,6 @@ nginx:
       - file: {{ settings.ssl.base_dir }}/{{ settings.ssl_chain_cert }}
     - watch:
       - file: /etc/nginx/nginx.conf
-      - file: /etc/systemd/system/nginx/network_online.conf
+      - file: /etc/systemd/system/nginx.service.d/network_online.conf
       - file: /etc/nginx/proxy_params
       - file: /etc/nginx/uwsgi_params
