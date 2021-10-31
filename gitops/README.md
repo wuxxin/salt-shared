@@ -3,12 +3,12 @@
 + Systemd Service for updating software from git repository
 + timer based, webhook based, direct calling of gitops-update.service
 + defaults to saltstack as update state reconciler
-+ Errors, Warnings are written to Sentry
-+ some prometheus metrics about the update
-+ supports secure bootstraping from
++ errors and warnings are written to Sentry
++ prometheus metrics about the update
++ secure bootstraping from
   + ssh key accessable private git repositories
   + git-crypt encrypted repositories
-+ combine with http_frontend for webhook support
++ combine this state with http_frontend for https webhook support
 
 ## bootstrap a gitops install
 
