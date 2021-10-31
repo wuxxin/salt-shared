@@ -19,7 +19,7 @@ create_http_frontend_dir_{{ p }}:
 
 create_http_frontend_{{ settings.ssl_invalid_target }}:
   file.managed:
-    - source: salt://gitops/template/maintenance.template.html
+    - source: salt://http_frontend/nginx/status.template.html
     - name: {{ settings.ssl_invalid_target }}
     - user: {{ settings.nginx_user }}
     - group: {{ settings.nginx_user }}
@@ -77,7 +77,7 @@ lua_prometheus_module:
     - user: www-data
     - group: www-data
 
-/etc/systemd/system/nginx/network_online.conf:
+/etc/systemd/system/nginx.service.d/network_online.conf:
   file.managed:
     - makedirs: true
     - contents: |

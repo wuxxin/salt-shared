@@ -62,7 +62,7 @@ create_var_dir:
 
 create_gitops_maintenance_template:
   file.managed:
-    - source: salt://gitops/template/maintenance.template.html
+    - source: salt://http_frontend/nginx/status.template.html
     - name: {{ settings.maintenance_template }}
     - user: {{ settings.user }}
     - group: {{ settings.user }}
