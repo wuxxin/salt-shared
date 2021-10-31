@@ -1,14 +1,13 @@
 # kernel
 
 ## TODO
-+ is this still needed for current ubuntu
++ is this still needed for current ubuntu ?
   user@ubuntu:~$ sudo vim /etc/pam.d/common-session
   # add this line to it
   session required pam_limits.so
 + https://wiki.archlinux.org/index.php/Talk:Sysctl
 + https://blog.cloudflare.com/path-mtu-discovery-in-practice/
 + https://blog.cloudflare.com/the-story-of-one-latency-spike/
-+ https://nateware.com/2013/04/06/linux-network-tuning-for-2013/
 
 ### state: kernel
 + install matching kernel-image, headers and tools, depending os-version
@@ -43,16 +42,18 @@
 + kernel.nfs
 + kernel.network
 
-### state: sysctl.tcp-bbr
+### other states not included in kernel.server
+
+#### state: kernel.entropy
++ installs haveged, for feeding additional entropy to kernel
+
+#### state: power
++ installs acpid, for power button functionality
+
+#### state: sysctl.tcp-bbr
 + install tcp bbr congestion control instead of kernel default (usually cubic)
     + see url links in tcp-bbr.sls for insights about bbr
 
-### state: kernel.oomd
+#### state: kernel.oomd
 + install advanced out of memory managment userspace daemon
     + needs cgroup v2 and systemd accounting
-
-### state: kernel.entropy
-+ installs haveged, for feeding additional entropy to kernel
-
-### state: power
-+ installs acpid, for power button functionality
