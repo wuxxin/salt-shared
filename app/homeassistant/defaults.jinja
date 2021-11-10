@@ -78,7 +78,7 @@ config:
 compose:
   name: homeassistant
   source: salt://app/homeassistant/docker-compose.yml
-  refresh: false
+  refresh: true
   ephemeral: true
   systemd:
     wants: postgresql.service
