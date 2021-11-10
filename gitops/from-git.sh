@@ -6,7 +6,7 @@ self_path=$(dirname "$(readlink -e "$0")")
 
 usage(){
     cat << EOF
-clone and update (encrypted) git repository
+clone and update a (encrypted) git repository
 
 Install Usage:
     $0 bootstrap --url giturl --branch branch --user user --home homedir --git-dir clonedir

@@ -22,14 +22,14 @@
 
 ## Flags, Tags, Metrics, Sentry Messages
 
-### Flags recognized
+### Flags set and recognized
 
 + `gitops.update.failed`
 + `gitops.update.disabled`
 + `gitops.update.force`
 + `reboot.unattended.disabled`
 
-### Tags recognized
+### Tags set and recognized
 
 + `gitops_failed_rev`
 + `gitops_current_rev`
@@ -44,14 +44,16 @@
 ### Sentry Messages
 
 + info
-  + "Gitops Execution" "Frontend Ready"
+  + `Gitops Execution` "Frontend Ready"
+
 + warning
-  + "SSL warning" "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
+  + `SSL Warning` "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
+
 + error
-  + "Gitops Attention" "node needs reboot, human attention required"
-  + "Gitops Error" "(validate_cmd|before_cmd|update_cmd|after_cmd|finish_cmd) failed with error $result"
-  + "SSL error" "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
-  + "Service Error" "Service ($UNITNAME) failed" "$(unit_json_status)"
+  + `Gitops Attention` "node needs reboot, human attention required"
+  + `Gitops Error` "(validate_cmd|before_cmd|update_cmd|after_cmd|finish_cmd) failed with error $result"
+  + `Service Error` "Service ($UNITNAME) failed" "$(unit_json_status)"
+  + `SSL Error` "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
 
 ## Update Execution
 
