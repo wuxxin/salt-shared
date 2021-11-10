@@ -17,7 +17,7 @@ def flatten(d, parent_key="", sep=""):
 
     if isinstance(d, MutableMapping):
         for k, v in d.items():
-            new_key = parent_key + sep + k if parent_key else k
+            new_key = parent_key + sep + str(k) if parent_key else str(k)
             items.extend(flatten(v, new_key, sep).items())
         return dict(items)
 
