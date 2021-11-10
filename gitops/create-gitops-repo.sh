@@ -70,7 +70,7 @@ git init || echo "could not init git, already a git repository ?"
 
 # create first config files
 mkdir -p config log run
-printf "# ignores\n/log\n/run\n" > .gitignore
+printf "# ignores\n/run\n" > .gitignore
 printf "hostname=%s\nfirstuser=%s\ngitops_user=%s\ngitops_target=%s\ngitops_source=%s\ngitops_branch=%s\n" \
     "$hostname" "$firstuser" "$firstuser" "/home/$firstuser" \
     "ssh://git@$gitserver:$gitserver_sshport/$gituser/$gitreponame.git" \
@@ -122,7 +122,7 @@ git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
 
 
 # add saltstack
-mkdir -p salt/custom
+mkdir -p salt/local
 pushd salt
 git submodule add https://github.com/wuxxin/salt-shared.git
 popd
@@ -133,8 +133,8 @@ base:
 EOF
 cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
 cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
-cp salt/salt-shared/gitops/template/state.template.sls salt/custom/top.sls
-touch salt/custom/main.sls
+cp salt/salt-shared/gitops/template/state.template.sls salt/local/top.sls
+touch salt/local/main.sls
 cat > bootstrap.sh <<"EOF"
 #!/usr/bin/env bash
 set -eo pipefail

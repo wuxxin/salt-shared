@@ -87,7 +87,7 @@ salt_install() { # no parameter
 main() {
     config_path=/etc/salt
     config_list="config"
-    states_list="salt/salt-shared salt/custom"
+    states_list="salt/salt-shared salt/local"
     if test "$1" = "--config"; then config_list="$2"; shift 2; fi
     if test "$1" = "--states"; then states_list="$2"; shift 2; fi
     if test ! -e "$1"; then usage; fi
