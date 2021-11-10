@@ -184,6 +184,7 @@ volumes: []
 # ports: list of strings: expose container ports: ["[hostip]:hostport:containerport[/protocol]",]
 ports: []
 # files to be placed inside workdir, which will be available via "./"
+# source can be file.managed: contents, source or special case symlink (see example)
 files: {}
 {# Example:
   test.file:
@@ -196,6 +197,8 @@ files: {}
     # specify any file.managed attribute, environment will be put into context
     defaults:
       custom: this is a custom var that will be available in the jinja context
+  some.symlink.file:
+    symlink: /target/the/symlink/is/pointing
 #}
 
 # command: string, if set, will replace default command

@@ -170,17 +170,25 @@
     {%- if not entry.enabled %}
     - absent
     - name: {{ entry.workdir ~ "/" ~ fname }}
+
     {%- else %}
+      {%- if fdata.symlink is defined %}
+    - symlink
+      {%- else %}
     - managed
+      {%- endif %}
     - name: {{ entry.workdir ~ "/" ~ fname }}
     - makedirs: true
       {%- if user != '' -%}
     - user: {{ user }}
     - group: {{ user }}
       {%- endif %}
+
       {%- if fdata.contents is defined %}
     - contents: |
 {{ fdata.contents|indent(8,True) }}
+      {%- elif fdata.symlink is defined %}
+    - target: {{ fdata.symlink }}
       {%- else %}
     - defaults:
         {%- for key,value in entry.environment.items() %}
@@ -192,8 +200,9 @@
           {%- endfor %}
         {%- endif %}
       {%- endif %}
+
       {%- for k,v in fdata.items() %}
-        {%- if k not in ['contents', 'defaults', ] %}
+        {%- if k not in ['contents', 'defaults', 'symlink' ] %}
     - {{ k }}: {{ v }}
         {%- endif %}
       {%- endfor %}

@@ -37,7 +37,7 @@ Components:
   + entry:configdir, workdir, builddir, servicedir, scriptdir, desktopdir
   + container type: replace ${} vars in: environment, labels, storage, volumes, ports
 
-### remarks
+### Unsorted Notes
 
 + extract config from docker/compose daemon
   https://github.com/nginx-proxy/docker-gen
