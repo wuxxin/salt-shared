@@ -1,7 +1,6 @@
 {% load_yaml as defaults %}
 
 store:
-  nspawn_env: /etc/systemd/nspawn/
   nspawn_config: /etc/systemd/nspawn/
   nspawn_target: /var/lib/machines
   nspawn_volume: /var/lib/volumes/nspawn
@@ -10,16 +9,17 @@ store:
   mkosi_target: /var/lib/mkosi
 
 image:
-  focal:
+  {% for distro in ['xenial', 'bionic', 'focal'] %}
+  {{ distro }}:
     mkosi:
       Distribution:
         Distribution: ubuntu
-        Release: focal
+        Release: {{ distro }}
         Repositories: main,universe,multiverse,restricted
       Output:
         Format: directory
         Bootable: no
-        Hostname: focal
+        Hostname: {{ distro }}
       Packages:
         PostInstallationScript: mkosi.postinst
         NSpawnSettings: mkosi.nspawn
@@ -37,19 +37,27 @@ image:
       Exec:
         Boot: on
         LinkJournal: try-guest
-      Files: {}
+        PrivateUsers: pick
+      Files:
+        PrivateUsersChown: on
       Network:
         Private: on
         VirtualEthernet: on
+        Zone=nspawn
+  {% endfor %}
 {% endload %}
 
 
 {% load_yaml as machine_defaults %}
 # name of the nspawn container and name of the controlling systemd service
 name: ""
+# image: a image name created with eg. `image(name='focal', template='focal')`
+image: focal
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
+# environment: dict of key,value pairs to be included in the target environment
 environment: {}
+# additional or overriding nspawn settings
 nspawn:
   Exec: {}
   Files: {}

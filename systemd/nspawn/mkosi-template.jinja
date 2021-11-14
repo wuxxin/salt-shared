@@ -1,0 +1,11 @@
+{% for section, data in dataset.items() %}
+[{{ section }}]
+  {%- for key, value in data.items() %}
+    {%- if value is iterable and (value is not string and value is not mapping) %}
+{{ key }} = [ {{ value|join(', ')}} ]
+    {%- else %}
+{{ key }} = {{ value }}
+    {%- endif %}
+  {%- endfor %}
+
+{% endfor %}

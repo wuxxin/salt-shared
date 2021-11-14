@@ -1,0 +1,40 @@
+#!/usr/bin/sh
+# create app user and skeleton dirs, configure ssh host keys, add ssh public key to root
+set -e
+HOME=/app; userid=$1; groupid=$2; username=$3
+if test "$3" = ""; then
+    echo "error, usage: cat sshpublickeyfile | $0 userid groupid username"
+    exit 1
+fi
+
+# copy ssh publickey to /root/.ssh/authorized_keys
+AUTHORIZED_KEYS=$(cat -)
+mkdir -p -m "0700" /root/.ssh
+printf "%s\n" "$AUTHORIZED_KEYS" > /root/.ssh/authorized_keys
+chmod "0600" /root/.ssh/authorized_keys
+
+# do not use and remove ecdsa keys
+for i in ssh_host_ecdsa_key ssh_host_ecdsa_key.pub; do
+    if test -e /etc/ssh/$i; then rm /etc/ssh/$i; fi
+done
+cat >> /etc/ssh/sshd_config <<EOF
+### NSPAWN-MACHINE-POSTINST-BEGIN ###
+# Supported HostKey algorithms by order of preference.
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+# disabled: HostKey /etc/ssh/ssh_host_ecdsa_key
+AuthenticationMethods publickey
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+### NSPAWN-MACHINE-POSTINST-END ###
+EOF
+# create a new set of openssh-server host keys
+dpkg-reconfigure --force openssh-server
+
+# add user, make homedir, install skeleton files
+addgroup --gid $groupid $username
+adduser --disabled-password --gecos ",,," \
+    --uid "$userid" -gid "$groupid" --home "$HOME" "$username" || true
+install -o $userid -g "$groupid" -t "$HOME" \
+    /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile

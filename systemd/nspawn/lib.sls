@@ -19,23 +19,28 @@ mkosi_config_dir_{{ name }}:
     - name: {{ settings.store.mkosi_config }}/{{ name }}
 
 mkosi_config_default_{{ name }}:
-  file.serialize:
+  file.managed:
     - name: {{ settings.store.mkosi_config }}/{{ name }}/mkosi.default
-    - dataset: {{ settings.image.mkosi[template] }}
-    - formatter: toml
+    - source: salt://systemd/nspawn/mkosi-template.jinja
+    - template: jinja
+    - defaults:
+        dataset: {{ settings.image[template]['mkosi'] }}
     - require:
       - file: mkosi_config_dir_{{ name }}
 
 mkosi_config_nspawn_{{ name }}:
-  file.serialize:
+  file.managed:
     - name: {{ settings.store.mkosi_config }}/{{ name }}/mkosi.nspawn
-    - dataset: {{ settings.image.nspawn[template] }}
-    - formatter: toml
+    - source: salt://systemd/nspawn/mkosi-template.jinja
+    - template: jinja
+    - defaults:
+        dataset: {{ settings.image[template]['nspawn'] }}
 
 mkosi_config_postinst_{{ name }}:
   file.managed:
     - source: salt://systemd/nspawn/mkosi.postinst
     - name: {{ settings.store.mkosi_config }}/{{ name }}/mkosi.postinst
+    - mode: "755"
 
 mkosi_image_{{ name }}:
   cmd.run:
@@ -57,37 +62,53 @@ mkosi_image_{{ name }}:
   {%- set this= salt['grains.filter_by']({'default': machine_defaults},
     grain='default', default= 'default', merge=definition) %}
 
-nspawn_env_{{ this.name }}:
-  file.managed:
-    - name: {{ settings.store.nspawn_env }}/{{ this.name }}.env
-    - mode: 0600
-    - contents: |
-  {%- for key,value in this.environment.items() %}
-        {{ key }}={{ value }}
-  {%- endfor %}
-
 nspawn_image_{{ this.name }}:
   cmd.run:
     - name: |
         machinectl import-fs \
-            {{ settings.store.mkosi_target }}/{{ this.name }} \
-            {{ this.name }}
-    - unless: test -e {{ settings.store.nspawn_target }}/{{ name }}
+            {{ settings.store.mkosi_target }}/{{ this.image }} {{ this.name }}
+    - unless: test -e {{ settings.store.nspawn_target }}/{{ this.name }}
 
 nspawn_config_{{ this.name }}:
-  file.serialize:
+  file.manage:
     - name: {{ settings.store.nspawn_config }}/{{ this.name }}.nspawn
-    - dataset: {{ this.nspawn }}
-    - formatter: toml
+    - source: salt://systemd/nspawn/nspawn-template.jinja
+    - template: jinja
+    - mode: "600"
+    - defaults:
+        dataset: {{ this.nspawn }}
+        environment: {{ this.environment }}
     - require:
       - cmd: nspawn_image_{{ this.name }}
 
+  {% if this.enabled %}
 nspawn_start_{{ this.name }}:
   cmd.run:
     - name: machinectl start {{ this.name }}
     - require:
-      - file: nspawn_env_{{ this.name }}
       - cmd: nspawn_image_{{ this.name }}
-      - file: nspawn_config_{{ this.name }}:
+      - file: nspawn_config_{{ this.name }}
+
+nspawn_started_{{ this.name }}:
+  cmd.run:
+    - name: |
+        while ! machinectl list -a --no-legend | grep -q ^$1; do
+            echo -n "."; sleep 1
+        done
+        while ! machinectl show $1 | grep -q State=running; do
+            echo -n "+"; sleep 1
+        done
+        sleep 1
+    - require:
+      - cmd: nspawn_start_{{ this.name }}
+
+  {% else %}
+nspawn_stop_{{ this.name }}:
+  cmd.run:
+    - name: machinectl stop {{ this.name }}
+    - require:
+      - cmd: nspawn_image_{{ this.name }}
+      - file: nspawn_config_{{ this.name }}
+  {% endif %}
 
 {% endmacro %}

@@ -1,10 +1,10 @@
 # systemd nspawn machine container
 
-+ see [nspawn-config.md](nspawn-config.md) for config details of nspawn machine
++ see [nspawn-config.md](nspawn-config.md) for config possibilities
 
 ## usage
 
-+ create image, start test machine
++ create image, start machine
 
 ```
 include:
@@ -13,9 +13,13 @@ include:
 {% from "systemd/nspawn/lib.sls" import volume, image, machine %}
 
 # make mkosi focal image
-{{ image(name='focal', template=focal) }}
+{{ image(name='focal', template='focal') }}
 
 # create test machine
-{{ machine(name ) }}
+{% load_yaml as definition %}
+name: mytest
+image: focal
+{% endload %}
+{{ machine(definition) }}
 
 ```

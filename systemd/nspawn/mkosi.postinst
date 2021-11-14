@@ -22,7 +22,6 @@ systemctl enable systemd-resolved
 rm /etc/ssh/ssh_host*
 
 # # make sure we symlink /run/systemd/resolve/stub-resolv.conf to /etc/resolv.conf
-# # otherwise curl will fail
 # ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 # # unlock root account
