@@ -8,7 +8,7 @@
     {%- endif %}
   {%- endfor %}
 
-  {%- if section = 'Exec' %}
+  {%- if section == 'Exec' %}
     {%- for key, value in environment.items() %}
 Environment={{ key }}={{ value }}
     {%- endfor %}

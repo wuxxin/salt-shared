@@ -1,7 +1,7 @@
 {% load_yaml as defaults %}
 
 store:
-  nspawn_config: /etc/systemd/nspawn/
+  nspawn_config: /etc/systemd/nspawn
   nspawn_target: /var/lib/machines
   nspawn_volume: /var/lib/volumes/nspawn
   mkosi_config: /etc/mkosi
@@ -43,7 +43,7 @@ image:
       Network:
         Private: on
         VirtualEthernet: on
-        Zone=nspawn
+        Zone: nspawn
   {% endfor %}
 {% endload %}
 
@@ -55,6 +55,13 @@ name: ""
 image: focal
 # enabled: if false, service will not get started and will be stopped if running
 enabled: true
+# ssh keys authorized for login
+authorized_keys: ""
+# script copied to and executed on target machine once, after creation of machine
+postinst:
+  # cat sshpublickeyfile | $0 <userid> <groupid> <username> <homedir>
+  source: salt://systemd/nspawn/machine.postinst
+  args: ['1000' , '1000', 'app', '/home/app']
 # environment: dict of key,value pairs to be included in the target environment
 environment: {}
 # additional or overriding nspawn settings

@@ -70,7 +70,7 @@ nspawn_image_{{ this.name }}:
     - unless: test -e {{ settings.store.nspawn_target }}/{{ this.name }}
 
 nspawn_config_{{ this.name }}:
-  file.manage:
+  file.managed:
     - name: {{ settings.store.nspawn_config }}/{{ this.name }}.nspawn
     - source: salt://systemd/nspawn/nspawn-template.jinja
     - template: jinja
@@ -92,20 +92,56 @@ nspawn_start_{{ this.name }}:
 nspawn_started_{{ this.name }}:
   cmd.run:
     - name: |
-        while ! machinectl list -a --no-legend | grep -q ^$1; do
+        while ! machinectl list -a --no-legend | grep -q ^{{ this.name }}; do
             echo -n "."; sleep 1
         done
-        while ! machinectl show $1 | grep -q State=running; do
+        while ! machinectl show {{ this.name }} | grep -q State=running; do
             echo -n "+"; sleep 1
         done
         sleep 1
+        echo " machine {{ this.name }} is running"
     - require:
       - cmd: nspawn_start_{{ this.name }}
+
+    {% if this.postinst.source %}
+nspawn_postinst_copy_{{ this.name }}:
+  file.managed:
+    - name: {{ settings.store.nspawn_config }}/{{ this.name }}.postinst
+    - source: {{ this.postinst.source }}
+  cmd.run:
+    - name: |
+        machinectl copy-to {{ this.name }} \
+          {{ settings.store.nspawn_config }}/{{ this.name }}.postinst \
+          /tmp/machine.postinst
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - require:
+      - file: nspawn_postinst_copy_{{ this.name }}
+
+nspawn_postinst_exec_{{ this.name }}:
+  cmd.run:
+    - name: |
+        printf "%s\n" "${authorized_keys}" | \
+          systemd-run --wait --pipe --machine {{ this.name }} \
+            /usr/bin/sh /tmp/machine.postinst {{ this.postinst.args|join(' ') }}
+    - env:
+        authorized_keys: |
+{{ this.authorized_keys|indent(10, true) }}
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - require:
+      - cmd: nspawn_postinst_copy_{{ this.name }}
+
+nspawn_create_postinst_done_{{ this.name }}:
+  cmd.run:
+    - name: touch {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - require:
+      - cmd: nspawn_postinst_exec_{{ this.name }}
+      {% endif %}
 
   {% else %}
 nspawn_stop_{{ this.name }}:
   cmd.run:
-    - name: machinectl stop {{ this.name }}
+    - name: machinectl stop {{ this.name }} || true
     - require:
       - cmd: nspawn_image_{{ this.name }}
       - file: nspawn_config_{{ this.name }}
