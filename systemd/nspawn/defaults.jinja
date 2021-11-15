@@ -72,4 +72,4 @@ nspawn:
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('nspawn', {})) %}
+  grain='default', default= 'default', merge= salt['pillar.get']('systemd:nspawn', {})) %}
