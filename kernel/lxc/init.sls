@@ -7,9 +7,8 @@ include:
   - kernel.sysctl
   - kernel.limits
   - kernel.limits.memlock
-  - kernel.cgroup
-  - systemd.cgroup
   - kernel.network
+  - systemd.cgroup
 
 {#
 /etc/default/lxc:
@@ -33,6 +32,5 @@ lxc:
       - sls: kernel.sysctl
       - sls: kernel.limits
       - sls: kernel.limits.memlock
-      - sls: kernel.cgroup
-      - sls: systemd.cgroup
       - sls: kernel.network
+      - sls: systemd.cgroup

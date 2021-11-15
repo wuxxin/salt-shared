@@ -20,17 +20,13 @@
 
 + kernel.running
     + make kernel headers of running kernel available, in case dkms modules need them
-+ kernel.cgroup
-    + set cgroup v2 only hierachy managed by systemd
-    + allow normal users to run unprivileged containers
-+ systemd.cgroup
-    + activate cgroup (cpu, task, memory, io) accounting
 + kernel.swappiness
     + configure swap usage, defaults to kernel default, for details read swappiness.sls
 + kernel.limits
     + increase maximum open files, maximum locked-in-memory address space
 + kernel.sysctl
     + expand max for kernel keys, inotify entries, memory mapped areas, ipv4 and ipv6 arp cache
+    + cgroup: allow normal users to run unprivileged containers
     + not included by default: sysctl.tcp-bbr
 + kernel.module
     + activate typical used network kernel modules
@@ -41,6 +37,9 @@
     + install cgroup tools and support files for lxc powered virtualization
 + kernel.nfs
 + kernel.network
++ systemd.cgroup
+    + set cgroup v2 only hierachy managed by systemd
+    + activate cgroup (cpu, task, memory, io) accounting
 
 ### other states not included in kernel.server
 

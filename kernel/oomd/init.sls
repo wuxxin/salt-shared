@@ -1,5 +1,5 @@
 include:
-  - kernel.cgroup
+  - kernel.sysctl.cgroup-userns-clone
   - systemd.cgroup
 
 pkg.installed:

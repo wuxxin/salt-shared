@@ -4,11 +4,10 @@ include:
   - kernel.sysctl
   - kernel.limits
   - kernel.swappiness
-  - kernel.cgroup
-  - systemd.cgroup
   - kernel.network
   - kernel.kvm
   - kernel.lxc
+  - systemd.cgroup
 
 kernel_server_nop:
   test:

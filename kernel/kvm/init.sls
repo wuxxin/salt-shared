@@ -1,9 +1,9 @@
 include:
   - kernel
   - kernel.swappiness
-  - kernel.cgroup
-  - systemd.cgroup
+  - kernel.sysctl.cgroup-userns-clone
   - kernel.network
+  - systemd.cgroup
 
 qemu:
   pkg.installed:
