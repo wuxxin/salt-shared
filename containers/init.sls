@@ -4,8 +4,8 @@ include:
   - kernel.server
 
 {% set baseurl =
-  'https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_'+
-  grains['osrelease'] %}
+  'https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/' ~
+  settings.origin.branch ~ '/xUbuntu_' ~ grains['osrelease'] %}
 
 {% if salt['cmd.retcode']('curl -sSL -D - -o /dev/null --max-time 5 "'+
   baseurl+ '/InRelease" | grep -qE "^HTTP/[12]\.?1? 200"', python_shell=true) == 0 %}
