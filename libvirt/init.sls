@@ -23,3 +23,5 @@ libvirt:
     - enable: True
     - require:
       - pkg: libvirt
+
+{# XXX maybe also enable libnss-libvirt #}
