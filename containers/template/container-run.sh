@@ -7,8 +7,8 @@ set -eo pipefail
 # build container
 pushd {{ entry.builddir }} > /dev/null
 podman build {{ '--tag='+ entry.tag if entry.tag }} \
-    {%- for key,value in entry.build.args.items() %}
-    {{ '--build-arg=' ~ key ~ '=' ~ value }} \
+    {%- for k,v in entry.build.args.items() %}
+    {{ '--build-arg=' ~ k ~ '=' ~ v }} \
     {%- endfor %}
     {{ entry.build.source }}
 popd > /dev/null
@@ -30,10 +30,10 @@ podman rm -f {{ entry.name }} || true
 # commands run before the first time the service is started
 if test ! -e "{{ entry.configdir }}/image.digest"; then
     echo "INFO: initial run"
-{%- if entry.prepare.initial.command != '' %}
+{%- if entry.init.command != '' %}
     /usr/bin/env - \
-        {{ key ~ '=' ~ value for key,value in entry.prepare.initial.environment }} \
-        {{ entry.prepare.initial.command }}
+        {% for k,v in entry.init.environment %}{{ k ~ '=' ~ v }} {% endfor %} \
+        {{ entry.init.command }}
 {%- endif %}
 fi
 
@@ -48,10 +48,10 @@ if test "$(cat "{{ entry.configdir }}/image.digest")" != \
     "$(podman image list --format json \
         {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | jq -r ".[0].Digest")"; then
     echo "INFO: update run"
-{%- if entry.prepare.change.command != '' %}
+{%- if entry.change.command != '' %}
     /usr/bin/env - \
-        {{ key ~ '=' ~ value for key,value in entry.prepare.change.environment }} \
-        {{ entry.prepare.change.command }}
+        {% for k,v in entry.change.environment %}{{ k ~ '=' ~ v }} {% endfor %} \
+        {{ entry.change.command }}
 {%- endif %}
 fi
 
@@ -84,8 +84,8 @@ exec podman run \
 {%- else %}
   --userns={{ entry.userns }} \
 {%- endif %}
-{%- for key,value in entry.labels.items() %}
-  --label={{ key }}={{ value }} \
+{%- for k,v in entry.labels.items() %}
+  --label={{ k }}={{ v }} \
 {%- endfor %}
 {%- for vol in entry.volumes %}
   --volume={{ vol }} \

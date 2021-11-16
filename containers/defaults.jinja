@@ -215,17 +215,14 @@ options: []
 build:
   source: ""
   args: {}
-
-# additional commands run on certain events
-prepare:
-  initial:
-    command: ""
-    environment: {}
-    # commands run before the first time the service is started
-  change:
-    command: ""
-    environment: {}
-    # commands run after updating the corresponding image to a newer image before starting the service
+# run before the service is started the first time
+init:
+  command: ""
+  environment: {}
+# run after updating the corresponding image to a newer image before starting the service
+change:
+  command: ""
+  environment: {}
 {% endload %}
 
 
@@ -280,14 +277,12 @@ config: {}
 files: {}
 {# Examples: see container_defaults #}
 
-# additional commands run on certain events
-prepare:
-  initial:
-    command: ""
-    environment: {}
-    # commands run before the first time the service is started
-  change:
-    command: ""
-    environment: {}
-    # commands run after updating the corresponding images to newer images before starting the service
+# run before the service is started the first time
+init:
+  command: ""
+  environment: {}
+# run after updating the corresponding image to a newer image before starting the service
+change:
+  command: ""
+  environment: {}
 {% endload %}

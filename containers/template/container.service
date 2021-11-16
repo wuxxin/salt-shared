@@ -1,4 +1,4 @@
-[Unit]
+changeinit[Unit]
 Description={{ 'user' if user }} systemd service for podman container {{ entry.name }}
 {%- if not user %}
 After=network-online.target {{ entry.systemd.after }}
@@ -58,10 +58,10 @@ ExecStartPre=-podman rm -f {{ entry.name }}
 ExecStartPre=/usr/bin/bash -c -- \
   'if test ! -e "{{ entry.configdir }}/image.digest"; then \
       echo "INFO: initial run"; \
-  {%- if entry.prepare.initial.command != '' %}
+  {%- if entry.init.command != '' %}
       /usr/bin/env - \
-        {% for k,v in entry.prepare.initial.environment -%}{{ k }}={{ v }}{%- endfor %} \
-        {{ entry.prepare.initial.command }}; \
+        {% for k,v in entry.init.environment -%}{{ k }}={{ v }} {% endfor %} \
+        {{ entry.init.command }}; \
   {%- endif %}
   fi'
 
@@ -78,10 +78,10 @@ ExecStartPre=/usr/bin/bash -c -- \
       "$(podman image list --format json \
         {{ entry.image }}{{ ":"+ entry.tag if entry.tag }} | jq -r ".[0].Digest")"; then \
       echo "INFO: update run"; \
-  {%- if entry.prepare.change.command != '' %}
+  {%- if entry.change.command != '' %}
       /usr/bin/env - \
-    {% for k,v in entry.prepare.change.environment -%}{{ k }}={{ v }}{%- endfor %} \
-        {{ entry.prepare.change.command }}; \
+    {% for k,v in entry.change.environment -%}{{ k }}={{ v }} {% endfor %} \
+        {{ entry.change.command }}; \
   {%- endif %}
   fi'
 
