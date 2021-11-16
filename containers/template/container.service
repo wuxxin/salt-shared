@@ -1,4 +1,4 @@
-changeinit[Unit]
+[Unit]
 Description={{ 'user' if user }} systemd service for podman container {{ entry.name }}
 {%- if not user %}
 After=network-online.target {{ entry.systemd.after }}
