@@ -1,5 +1,15 @@
 # Ideas of Software to take a look and maybe integrate
 
+## howto
+
++ how to send a desktop notification, will get used to send netdata alarms to desktop user
+
+```
+DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$userid/bus" gosu $username bash \
+  'notify-send "Notification Titel" "Notification Body" -u critical -i face-worried'
+```
+
+
 ## unsorted
 
 + https://qgis.org/ubuntu/dists/
