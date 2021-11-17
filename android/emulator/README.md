@@ -1,7 +1,8 @@
 # android.emulator.lib
 
-## Create and launch an android emulator container
-using qemu/kvm for emulation
+## Create and launch an android emulator container based on qemu/kvm for emulation
+
++ https://github.com/google/android-emulator-container-scripts
 
 + `emulator_image()`
 + `emulator_desktop()`
@@ -12,12 +13,19 @@ using qemu/kvm for emulation
 
 ```yaml
 environment:
-  ANDROID_DATA_VOLUME: name-of-instance-data-volume
-  AVD_CONFIG: be used instead of default_args:avd if not empty
-  EMULATOR_PARAMS: be used instead of default_args:emulator if not empty
+  AVD_CONFIG: be appended to avd config file
+  EMULATOR_PARAMS: be used instead of defaults
   ADD_EMULATOR_PARAMS: add emulator args, eg "-camera-front webcam1 -netdelay umts -netspeed hsdpa "
-  # for emulator launch parameter see:
-  # https://developer.android.com/studio/run/emulator-commandline
+  # emulator launch parameter: https://developer.android.com/studio/run/emulator-commandline
+  # -accel on
+  # -no-boot-anim
+  # -gpu swiftshader_indirect
+  # -memory 2048
+  # -netdelay umts
+  # -netspeed hsdpa
+  # -no-snapshot
+  # -verbose
+  # -camera-front webcam1
 desktop:
   template: default*|host
   options:
@@ -38,7 +46,6 @@ include:
 {% load_yaml as android4me %}
 name: android4me
 environment:
-  ANDROID_DATA_VOLUME: android4me_data
   ADD_EMULATOR_PARAMS: "-netdelay umts -netspeed hsdpa -camera-front webcam1"
 desktop:
   options:

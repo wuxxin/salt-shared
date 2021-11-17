@@ -1,18 +1,8 @@
 {% macro emulator_image() %}
 {%- from "android/emulator/defaults.jinja" import settings with context %}
 {%- from "containers/lib.sls" import image, container with context %}
-
 {# download emulator container image #}
 {{ image(settings.emulator.image, settings.emulator.tag) }}
-
-{# tag local emulator container #}
-tag_latest_android_emulator:
-  cmd.run:
-    - name: podman image tag {{ settings.emulator.image }}:{{ settings.emulator.tag }} \
-        localhost/android/emulator-unmodified:latest
-    - onchanges:
-      - cmd: containers_image_{{ settings.emulator.image }}
-
 {# create customized emulator container to also work with gui #}
 {{ container(settings.emulator_build) }}
 {% endmacro %}

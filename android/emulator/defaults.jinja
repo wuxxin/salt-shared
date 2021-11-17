@@ -1,25 +1,8 @@
 {% load_yaml as defaults %}
 emulator:
   image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics
-  tag: latest
-  # latest: version from 17.02.2021
-  # tag: 30.1.4
-  # tag: 30.1.2
-
-  default_args:
-    - -accel on
-    - -no-boot-anim
-    - -gpu swiftshader_indirect
-    - -memory 2048
-    # - -netdelay umts
-    # - -netspeed hsdpa
-    # - -no-snapshot
-    # - -verbose
-    # - -camera-front webcam1
-  avd:
-    default_args:
-      # 1gb = 1073741824b
-      disk.dataPartition.size: 1073741824
+  tag: 7148297
+  # tag: 7148297 is latest (from 17.02.2021)
 
 emulator_build:
   name: android-emulator
@@ -31,7 +14,7 @@ emulator_build:
   files:
     build/Dockerfile:
       contents: |
-        FROM localhost/android/emulator-unmodified
+        FROM us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics:7148297
         COPY ./launch-emulator.sh /android/sdk/launch-emulator.sh
         RUN chmod +x /android/sdk/launch-emulator.sh
         RUN mv /android-home /android-home-default
@@ -57,16 +40,15 @@ emulator_desktop:
   environment:
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "false"
-    AVD_CONFIG: ""
-    EMULATOR_PARAMS: ""
+    AVD_DATA_SIZE: "disk.dataPartition.size=536870912"
+    EMULATOR_PARAMS: "-accel on -no-snapshot -no-boot-anim -gpu swiftshader_indirect -memory 2048"
     ADD_EMULATOR_PARAMS: ""
   labels:
     android: emulator
   storage:
     - name: ${SERVICE_NAME}_data
   volumes:
-    - ${SERVICE_NAME}_data/user:/home/user/
-    - ${SERVICE_NAME}_data/android-home:/android-home
+    - ${SERVICE_NAME}_data:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp
@@ -80,14 +62,13 @@ emulator_headless_service:
   environment:
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "true"
-    AVD_CONFIG: ""
-    EMULATOR_PARAMS: ""
-    ADD_EMULATOR_PARAMS: "-nowindow"
+    AVD_CONFIG: "disk.dataPartition.size=536870912"
+    EMULATOR_PARAMS: "-nowindow -accel on -no-snapshot -no-boot-anim -gpu swiftshader_indirect -memory 2048"
+    ADD_EMULATOR_PARAMS: ""
   storage:
     - name: ${SERVICE_NAME}_data
   volumes:
-    - ${SERVICE_NAME}_data/user:/home/user/
-    - ${SERVICE_NAME}_data/android-home:/android-home
+    - ${SERVICE_NAME}_data:/android-home
   publish:
     - 127.0.0.1:8554:8554/tcp
     - 127.0.0.1:5555:5555/tcp

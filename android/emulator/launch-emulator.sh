@@ -13,12 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# 2020.10.18 wuxxin@gmail.com: modification to be executed as user instead of root
-#   - changed default options, add some new environment Vars, support headless and desktop
-
 VERBOSE=3
-
+ANDROID_HOME=/android-home
+ANDROID_AVD_HOME=${ANDROID_HOME}/.android/avd
+export ANDROID_HOME
+export ANDROID_AVD_HOME
 
 # Return the value of a given named variable.
 # $1: variable name
@@ -68,6 +67,10 @@ var_append () {
     fi
 }
 
+is_mounted () {
+    mount | grep "$1"
+}
+
 # Run a command, output depends on verbosity level
 run () {
     if [ "$VERBOSE" -lt 0 ]; then
@@ -90,9 +93,8 @@ run () {
 }
 
 
-show_info() {
-  # This function logs info about versions and running user
-  echo "Running as User: $(id -un)"
+log_version_info() {
+  # This function logs version info.
   emulator/emulator -version | head -n 1 | sed -u 's/^/version: /g'
   echo 'version: launch_script: {{version}}'
   img=$ANDROID_SDK_ROOT/system-images/android
@@ -101,19 +103,26 @@ show_info() {
 }
 
 install_adb_keys() {
+  # We do not want to keep adb secrets around, if the emulator
+  # ever created the secrets itself we will never be able to connect.
+  run rm -f ${ANDROID_HOME}/.android/adbkey ${ANDROID_HOME}/.android/adbkey.pub
+
   if [ -s "/run/secrets/adbkey" ]; then
     echo "emulator: Copying private key from secret partition"
-    run cp /run/secrets/adbkey "${homedir}/.android"
+    run cp /run/secrets/adbkey ${ANDROID_HOME}/.android
   elif [ ! -z "${ADBKEY}" ]; then
     echo "emulator: Using provided adb private key"
-    echo "-----BEGIN PRIVATE KEY-----" >"${homedir}/.android/adbkey"
-    echo $ADBKEY | tr " " "\\n" | sed -n "4,29p" >>"${homedir}/.android/adbkey"
-    echo "-----END PRIVATE KEY-----" >>"${homedir}/.android/adbkey"
+    echo "-----BEGIN PRIVATE KEY-----" >${ANDROID_HOME}/.android/adbkey
+    echo $ADBKEY | tr " " "\\n" | sed -n "4,29p" >>${ANDROID_HOME}/.android/adbkey
+    echo "-----END PRIVATE KEY-----" >>${ANDROID_HOME}/.android/adbkey
+  elif [ ! -z "${ADBKEY_PUB}" ]; then
+    echo "emulator: Using provided adb public key"
+    echo $ADBKEY_PUB >>${ANDROID_HOME}/.android/adbkey.pub
   else
     echo "emulator: No adb key provided, creating internal one, you might not be able connect from adb."
-    run adb keygen "${homedir}/.android/adbkey"
+    run /android/sdk/platform-tools/adb keygen ${ANDROID_HOME}/.android/adbkey
   fi
-  run chmod 600 "${homedir}/.android/adbkey"
+  run chmod 600 ${ANDROID_HOME}/.android/adbkey
 }
 
 # Installs the console tokens, if any. The environment variable |TOKEN| will be
@@ -121,11 +130,11 @@ install_adb_keys() {
 install_console_tokens() {
   if [ -s "/run/secrets/token" ]; then
     echo "emulator: Copying console token from secret partition"
-    run cp /run/secrets/token "${homedir}/.emulator_console_auth_token"
+    run cp /run/secrets/token ${ANDROID_HOME}/.emulator_console_auth_token
     TOKEN=yes
   elif [ ! -z "${TOKEN}" ]; then
     echo "emulator: Using provided emulator console token"
-    echo ${TOKEN} >"${homedir}/.emulator_console_auth_token"
+    echo ${TOKEN} >${ANDROID_HOME}/.emulator_console_auth_token
   else
     echo "emulator: No console token provided, console disabled."
   fi
@@ -138,44 +147,59 @@ install_console_tokens() {
 
 install_grpc_certs() {
     # Copy certs if they exists and are not empty.
-    [ -s "/run/secrets/grpc_cer" ] && cp /run/secrets/grpc_cer "${homedir}/.android/emulator-grpc.cer"
-    [ -s "/run/secrets/grpc_key" ] && cp /run/secrets/grpc_key "${homedir}/.android/emulator-grpc.key"
+    [ -s "/run/secrets/grpc_cer" ] && cp /run/secrets/grpc_cer ${ANDROID_HOME}/.android/emulator-grpc.cer
+    [ -s "/run/secrets/grpc_key" ] && cp /run/secrets/grpc_key ${ANDROID_HOME}/.android/emulator-grpc.key
 }
 
 clean_up() {
   # Delete any leftovers from hard exits.
-  run rm -rf /android-home/Pixel2.avd/*.lock
-  run install -d "${homedir}/.android"
-  run install -d "${tempdir}/log"
+  run rm -rf /tmp/*
+  run rm -rf ${ANDROID_AVD_HOME}/Pixel2.avd/*.lock
+
   # Check for core-dumps, that might be left over
   if ls core* 1>/dev/null 2>&1; then
     echo "emulator: ** WARNING ** WARNING ** WARNING **"
     echo "emulator: Core dumps exist in this image. This means the emulator has crashed in the past."
   fi
+
+  mkdir -p ${ANDROID_HOME}/.android
+  mkdir -p ${ANDROID_AVD_HOME}
 }
 
 setup_pulse_audio() {
   # We need pulse audio for the webrtc video bridge, let's configure it.
-  run mkdir -p ${homedir}/.config/pulse
-  export PULSE_SERVER=unix:/${homedir}/.config/pulse/pulse-socket
-  run pulseaudio -D -vvvv --log-time=1 --log-target=newfile:${tempdir}/log/pulseverbose.log --log-time=1 --exit-idle-time=-1
-  tail -f ${tempdir}/log/pulseverbose.log -n +1 | sed -u 's/^/pulse: /g' &
+  run mkdir -p ${ANDROID_HOME}/.config/pulse
+  export PULSE_SERVER=unix:/tmp/pulse-socket
+  run pulseaudio -D -vvvv --log-time=1 --log-target=newfile:/tmp/pulseverbose.log --log-time=1 --exit-idle-time=-1
+  tail -f /tmp/pulseverbose.log -n +1 | sed -u 's/^/pulse: /g' &
   run pactl list || exit 1
 }
 
 forward_loggers() {
-  run mkdir ${tempdir}/log
-  run mkfifo ${tempdir}/log/kernel.log
-  run mkfifo ${tempdir}/log/logcat.log
+  run mkdir /tmp/android-unknown
+  run mkfifo /tmp/android-unknown/kernel.log
+  run mkfifo /tmp/android-unknown/logcat.log
   echo "emulator: It is safe to ignore the warnings from tail. The files will come into existence soon."
-  tail --retry -f ${tempdir}/log/goldfish_rtc_0 | sed -u 's/^/video: /g' &
-  cat ${tempdir}/log/kernel.log | sed -u 's/^/kernel: /g' &
-  cat ${tempdir}/log/logcat.log | sed -u 's/^/logcat: /g' &
+  tail --retry -f /tmp/android-unknown/goldfish_rtc_0 | sed -u 's/^/video: /g' &
+  cat /tmp/android-unknown/kernel.log | sed -u 's/^/kernel: /g' &
+  cat /tmp/android-unknown/logcat.log | sed -u 's/^/logcat: /g' &
 }
 
-homedir="$( getent passwd "$(id -u)" | cut -d: -f6 )"
-tempdir="/tmp"
-show_info
+initialize_data_part() {
+  # Check if we have mounted a data partition (tmpfs, or persistent)
+  # and if so, we will use that as our avd directory.
+  if  is_mounted /data; then
+    run cp -fr /android-home/ /data
+    ln -sf /data/android-home ${ANDROID_AVD_HOME}
+    echo "path=${ANDROID_AVD_HOME}/Pixel2.avd" > ${ANDROID_AVD_HOME}/Pixel2.ini
+  else
+    ln -sf /android-home ${ANDROID_AVD_HOME}
+  fi
+}
+
+# Let us log the emulator,script and image version.
+log_version_info
+# initialize_data_part
 clean_up
 install_console_tokens
 install_adb_keys
@@ -183,26 +207,30 @@ install_grpc_certs
 if test "${NO_PULSE_AUDIO}" != "true"; then
   setup_pulse_audio
 fi
+if test "${NO_FORWARD_LOGGERS}" != "true"; then
+  forward_loggers
+fi
 
 # copy config sekelton if config.ini not existing, and let its user override/append to it
-if test ! -e /android-home/Pixel2.avd/config.ini; then
-    cp -dR /android-home-default/* /android-home/
+if test ! -e ${ANDROID_AVD_HOME}/Pixel2.avd/config.ini; then
+    cp -dR /android-home-default/* ${ANDROID_AVD_HOME}/
     if [ ! -z "${AVD_CONFIG}" ]; then
         echo "Adding ${AVD_CONFIG} to config.ini"
-        echo "${AVD_CONFIG}" >>"/android-home/Pixel2.avd/config.ini"
+        echo "${AVD_CONFIG}" >>"${ANDROID_HOME}/Pixel2.avd/config.ini"
     fi
+    echo "path=${ANDROID_AVD_HOME}/Pixel2.avd" > ${ANDROID_AVD_HOME}/Pixel2.ini
 fi
 
 # Basic launcher command, additional flags can be added.
-LAUNCH_CMD=emulator/emulator
+LAUNCH_CMD=/android/sdk/emulator/emulator
 var_append LAUNCH_CMD -avd Pixel2
 var_append LAUNCH_CMD -ports 5556,5557 -grpc 8554
 var_append LAUNCH_CMD -skip-adb-auth
-var_append LAUNCH_CMD -feature AllowSnapshotMigration
 if test "${NO_FORWARD_LOGGERS}" != "true"; then
-  forward_loggers
-  var_append LAUNCH_CMD -shell-serial file:${tempdir}/log/kernel.log
-  var_append LAUNCH_CMD -logcat-output ${tempdir}/log/logcat.log
+  var_append LAUNCH_CMD -shell-serial file:/tmp/android-unknown/kernel.log
+  var_append LAUNCH_CMD -logcat "*:V"
+  var_append LAUNCH_CMD -logcat-output /tmp/android-unknown/logcat.log
+  var_append LAUNCH_CMD -logcat "*:V"
 fi
 if [ ! -z "${EMULATOR_PARAMS}" ]; then
   var_append LAUNCH_CMD $EMULATOR_PARAMS
