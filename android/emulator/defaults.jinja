@@ -41,7 +41,8 @@ emulator_desktop:
     NO_FORWARD_LOGGERS: "true"
     NO_PULSE_AUDIO: "false"
     AVD_DATA_SIZE: "disk.dataPartition.size=536870912"
-    EMULATOR_PARAMS: "-accel on -no-snapshot -no-boot-anim -gpu swiftshader_indirect -memory 2048"
+    # use host gpu for desktop emulator
+    EMULATOR_PARAMS: "-accel on -no-snapshot -no-boot-anim -gpu host -memory 2048"
     ADD_EMULATOR_PARAMS: ""
   labels:
     android: emulator
@@ -79,6 +80,18 @@ emulator_webrtc_service:
   name: android-emulator-webrtc
   image: localhost/android/emulator
   type: service
+  environment:
+    NO_FORWARD_LOGGERS: "true"
+    NO_PULSE_AUDIO: "false"
+    AVD_CONFIG: "disk.dataPartition.size=536870912"
+    EMULATOR_PARAMS: "-nowindow -accel on -no-snapshot -no-boot-anim -gpu swiftshader_indirect -memory 2048"
+    ADD_EMULATOR_PARAMS: ""
+  storage:
+    - name: ${SERVICE_NAME}_data
+  volumes:
+    - ${SERVICE_NAME}_data:/android-home
+  options:
+    - --device /dev/kvm
 
 {% endload %}
 
