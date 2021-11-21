@@ -1,6 +1,6 @@
 # android.redroid.lib
 
-## Create and launch a (same kernel) android container using ReDroid
+Create and launch a (same kernel) android container using ReDroid.
 
 + `redroid_service()`
 
