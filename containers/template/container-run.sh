@@ -16,7 +16,7 @@ popd > /dev/null
   {%- else %}
 # pull container if not already pointing to localhost
 registry="{{ entry.image }}"
-if test "${registry%*/}" != "localhost"; then
+if test "${registry%%/*}" != "localhost"; then
     podman pull {{ entry.image }}{{ ":"+ entry.tag if entry.tag }}
 fi
   {%- endif %}
@@ -78,11 +78,13 @@ exec podman run \
   --cgroups=split \
   --env-file {{ entry.configdir }}/.env \
   --env-host \
-{%- if entry.userns == 'pick' or (entry.userns == 'auto' and user) %}
+{%- if entry.type != 'desktop' %}
+  {%- if entry.userns == 'pick' or (entry.userns == 'auto' and user) %}
   --uidmap=0:{{ entry.USERNS_ID }}:65536 \
   --gidmap=0:{{ entry.USERNS_ID }}:65536 \
-{%- else %}
+  {%- else %}
   --userns={{ entry.userns }} \
+  {%- endif %}
 {%- endif %}
 {%- for k,v in entry.labels.items() %}
   --label={{ k }}={{ v }} \
