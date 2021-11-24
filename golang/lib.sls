@@ -19,7 +19,7 @@ target:
 
 {% load_yaml as defaults %}
 
-user: go_builder
+user: builder
 build:
   name:
   dir:
