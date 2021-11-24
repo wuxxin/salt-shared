@@ -13,7 +13,7 @@ gitea:
       server:
         domain: full.qualified.domain.name
         root_url: may be needed to set, eg. if behind reverse proxy eg. %(PROTOCOL)s://%(DOMAIN)s:%(HTTP_PORT)s/
-        lfs_jwt_secret: optional, but mandatory if enabling lfs
+        lfs_jwt_secret: optional, but mandatory if enabling lfs, eg. "openssl rand -base64 32"
       security:
         secret_key: mandatory, eg. "openssl rand -base64 32"
       oauth2:

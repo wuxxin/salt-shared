@@ -1,6 +1,6 @@
 objects:
   gitea_binary_xz:
-    version: 1.14.2
+    version: 1.15.6
     latest: curl -L -s -o /dev/null -w "%{url_effective}" "https://github.com/go-gitea/gitea/releases/latest" | sed -r "s/.*\/v([^\/]+)$/\1/"
     download: https://github.com/go-gitea/gitea/releases/download/v##version##/gitea-##version##-linux-amd64.xz
     hash_url: https://github.com/go-gitea/gitea/releases/download/v##version##/gitea-##version##-linux-amd64.xz.sha256
