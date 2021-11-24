@@ -1,17 +1,7 @@
 [Unit]
-Description=Backup Service using Restic
+Description=Backup Service using Restic {{ '(Initial Run)' if instance_type == 'initial' }}
 After=network-online.target {{ settings.systemd.after }}
 Wants=network-online.target {{ settings.systemd.wants}}
-{% if instance_type = 'initial' %}
-FIXME
-  run only if backup.service not running
-  set tag in prestart: backup.initial.starttime
-  set flag in poststart: backup.initial.finished
-{% else %}
-FIXME
-  need flag backup.initial.finished to start
-  else start initial instead
-{% endif %}
 {% if settings.systemd.requires %}
 Requires={{ settings.systemd.requires }}
 {% endif %}
@@ -34,4 +24,24 @@ Environment=USER={{ settings.user }}
 EnvironmentFile={{ settings.env_file }}
 WorkingDirectory={{ settings.home_dir }}
 PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
-ExecStart=/usr/local/lib/backup-service.sh --from-systemd-service
+
+{% if instance_type == 'initial' %}
+ExecStart=/usr/bin/bash -c \
+  '
+  last_start=get_tag backup.initial.starttime 0
+  set_tag backup.initial.starttime ${unixtime}
+  /usr/local/lib/backup-service.sh --from-systemd-service \
+  set_tag backup.initial.finished ${unixtime}
+  '
+
+{% else %}
+ExecStart=/usr/bin/bash -c \
+  ' \
+  if tag_is_set backup.initial.finished; then \
+    /usr/local/lib/backup-service.sh --from-systemd-service \
+  else \
+    systemctl start --no-block backup-initial \
+  fi \
+  '
+
+{% endif %}

@@ -7,7 +7,32 @@ usage () {
     exit 1
 }
 
-. "/usr/local/lib/app-library.sh"
+if test -e "/usr/local/lib/app-library.sh"; then
+    . "/usr/local/lib/app-library.sh"
+else
+    json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
+        python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
+    }
+    set_tag() { # $1=tagname $2=tagvalue
+        echo "$2" > "{{ settings.tag_dir }}/$1"
+    }
+    get_tag() { # $1=tagname $2=default-if-not-found
+        cat "{{ settings.tag_dir }}/$1" 2> /dev/null || echo "$2"
+    }
+    get_tag_fullpath() { # $1=tagname
+        echo "{{ settings.tag_dir }}/$1"
+    }
+    mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=timestamp]]
+        echo "$@"
+    }
+    metric_save() { # $1=metric-output-name $2..$x=metric data
+        printf "%s\n" "$@"
+    }
+    sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
+        printf "%s\n" "$@"
+    }
+    unit_json_status
+fi
 
 # save script start time ms
 start_epoch_ms="$(date +%s)000"

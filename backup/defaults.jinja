@@ -3,8 +3,12 @@
 
 {% load_yaml as defaults %}
 enabled: true
+
 # backup run user
 user: ""
+
+# readall_privilege = true turns on: CAP_DAC_READ_SEARCH for user
+readall_privilege: false
 
 # backup target and secret key
 repository_url: {{ default_test_repository }}
@@ -27,23 +31,20 @@ hooks:
   pre_backup: []
   post_backup: []
 
+# timer based invocation default, once per day
+timer: *-*-* 23:30:00
+
 # maximum backup storage to expect, -1 (default) to disable checking for current usage
 max_backup_storage: -1
 
 # age of oldest data change to keep
 forget: keep-within 1y6m
 
-# readall_privilege = true turns on: CAP_DAC_READ_SEARCH for user
-readall_privilege: false
-
-# first job max time on new repository, eg: 48h (2880min) equals 3,4TB using 20mb/s
-initial_job_runtime: 2880min
-
 # max time for fullbackup, eg: 8hours equals 562GB using 20mb/s
 max_job_runtime: 480min
 
-# timer based invocation default, once per day
-timer: *-*-* 23:30:00
+# first job max time on new repository, eg: 48h (2880min) equals 3,4TB using 20mb/s
+initial_job_runtime: 2880min
 
 # interval in days to run restic forget,prune and check
 housekeeping_interval_days: 7
@@ -56,6 +57,9 @@ systemd:
   onfailure:
 
 env_file: /etc/systemd/system/backup.env
+# directory used if /usr/local/app-library.sh (used for tags) does not exist
+tag_dir: /etc/backup/tags
+
 default_ssh_port: 22
 default_test_repository: {{ default_test_repository }}
 

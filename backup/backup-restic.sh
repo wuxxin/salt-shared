@@ -24,7 +24,17 @@ EOF
     exit 1
 }
 
-. "/usr/local/lib/app-library.sh"
+
+if test -e "/usr/local/lib/app-library.sh"; then
+    . "/usr/local/lib/app-library.sh"
+else
+    json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
+        python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
+    }
+    set_tag() { # $1=tagname $2=tagvalue
+        echo "$2" > "{{ settings.tag_dir }}/$1"
+    }
+fi
 
 if test "$1" != "repository" -a "$1" != "run"; then
     echo "Error: unknown command"

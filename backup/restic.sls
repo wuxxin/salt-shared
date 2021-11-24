@@ -38,9 +38,10 @@ rclone:
     - require:
       - pkg: restic_req
   cmd.run:
-    - name: unzip -q -j -o -d /usr/local/bin \
-            {{ settings.external['rclone_zip']['target'] }} \
-            rclone-v{{ settings.external['rclone_zip']['version']-linux-amd64/rclone
+    - name: |
+        unzip -q -j -o -d /usr/local/bin \
+          {{ settings.external['rclone_zip']['target'] }} \
+          rclone-v{{ settings.external['rclone_zip']['version']-linux-amd64/rclone
     - onchanges:
       - file: rclone
 
