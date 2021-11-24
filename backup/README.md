@@ -1,25 +1,25 @@
 # Backup
 
-Backup using Restic to many third party storage types as a systemd service and timer.
-+ pre and post- backup hooks
-+ configurable storage size
-+ automatic housekeeping for the backupstorage with prunning requested oldest changes
+Backup using **Restic** to many third party storage types as a systemd service and timer.
++ pre and post- backup **hooks**
++ automatic housekeeping of the backupstorage (prunning, cleanup)
 + initial backup job can define a different maximum runtime (already filled servers)
-+ rclone for additional third party storage types
-+ errors and warnings written to Sentry
-+ prometheus metrics about the backup
++ **rclone** for additional third party storage types
++ errors and warnings can be written to **Sentry**
++ **prometheus metrics** available about the backup
 
 ## Configuration
 
 ## Execution
 
-Can be triggered viasystemd timer, or manual via `systemctl start backup`.
+Can be triggered via systemd timer, or manual via `systemctl start backup`.
 
 ### Tags set and recognized
 
 will use directory gitops gitops.var_dir/tags if included: gitops, else backup.tag_dir for storage
 
-+ `app_backup_id`
++ `backup_repo_id`
++ `backup_housekeeping_timestamp`
 
 ### Prometheus Metrics
 
@@ -38,6 +38,7 @@ to use prometheus metrics, include: gitops, if not included, metrics will be pri
 + `backup_check_duration_sec` gauge "The duration in number of seconds of the backup check run"
 + `backup_cleanup_duration_sec` gauge "The duration in number of seconds of the backup cleanup run"
 + `backup_stats_duration_sec` gauge "The duration in number of seconds of the backup stats run"
++ `backup_stats_local_duration_sec` gauge "The duration in number of seconds of the backup local stats run"
 
 ### Sentry Messages
 
@@ -48,7 +49,7 @@ to use sentry reporting, include: gitops, if not included, sentry entries will b
   + `App Backup` "backup warning: stats returned error"
 
 + error
-  + `App Backup` "backup error: repository id at $(get_tag_fullpath app_backup_id) is missing or invalid.""
+  + `App Backup` "backup error: repository id at $(get_tag_fullpath backup_repo_id) is missing or invalid.""
   + `App Backup` "backup error: could not get repository id from remote"
   + `App Backup` "backup error: repository id missmatch"
   + `App Backup` "backup error: backup failed with error $err"

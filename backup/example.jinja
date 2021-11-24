@@ -1,37 +1,39 @@
 hooks:
   pre_backup:
     - name: assure_mounted_and_not_empty
-      desc: assure app media_dir is mounted if external mount and app media_dir is non empty
+      desc: assure x is mounted if external mount and is not empty
       cmd: |
-          if grep -q "{{ settings.media_dir }}" /etc/fstab; then
-              if ! mountpoint -q "{{ settings.media_dir }}"; then
-                  sentry_entry error "App Backup" "backup error: Mount at Mountpoint {{ settings.media_dir }} is not mounted"
+        for i in
+          if grep -q "$i" /etc/fstab; then
+              if ! mountpoint -q "$i"; then
+                  sentry_entry error "App Backup" "backup error: Mount at Mountpoint $i is not mounted"
                   exit 1
               fi
           fi
-          files_found=$(find "{{ settings.media_dir }}" -mindepth 1 -path "{{ settings.media_dir }}/lost+found" -prune -o -type f -exec echo true \; -quit)
+          files_found=$(find "$i" -mindepth 1 -path "$i/lost+found" -prune -o -type f -exec echo true \; -quit)
           if test "$files_found" != "true"; then
-              sentry_entry error "App Backup" "backup error: media_dir {{ settings.media_dir }} is empty"
+              sentry_entry error "App Backup" "backup error: media_dir $i is empty"
               exit 1
           fi
-
+        done
 
     - name: dump_postgres_databases
       desc: dump all postgresql databases
       cmd: |
-          for i in
-            psql -lqt | cut -d \| -f 1 | grep -qw "$DATABASE" && err=$? || err=$?
-            if test $err -ne 0; then
-                sentry_entry error "App Backup" "backup error: Database $DATABASE does not exist"
-                exit 1
-            fi
-            dbdump="{{ settings.pgdump_dir }}/$DATABASE.pgdump.gz"
-            /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d "$DATABASE" | \
-                /bin/gzip --rsyncable > "${dbdump}.new" && err=$? || err=$?
-            duration_pg_dump=$(( $(date +%s) - duration_start ))
-            if test "$err" -ne 0; then
-                sentry_entry error "App Backup" "backup error: could not create database dump" \
-                    $(unit_json_status)"
-                exit 1
-            fi
-            mv "${dbdump}.new" "${dbdump}"
+        for i in
+          psql -lqt | cut -d \| -f 1 | grep -qw "$i" && err=$? || err=$?
+          if test $err -ne 0; then
+              sentry_entry error "App Backup" "backup error: Database $i does not exist"
+              exit 1
+          fi
+          dbdump="{{ settings.pgdump_dir }}/$i.pgdump.gz"
+          /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d "$i" | \
+              /bin/gzip --rsyncable > "${dbdump}.new" && err=$? || err=$?
+          duration_pg_dump=$(( $(date +%s) - duration_start ))
+          if test "$err" -ne 0; then
+              sentry_entry error "App Backup" "backup error: could not create database dump" \
+                  $(unit_json_status)"
+              exit 1
+          fi
+          mv "${dbdump}.new" "${dbdump}"
+        done

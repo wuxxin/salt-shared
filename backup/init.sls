@@ -164,7 +164,7 @@ create_default_backup_id_tag:
     - name: |
         echo $(restic cat config --json | \
           python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" 'id') \
-          > {{ settings.etc_dir }}/tags/app_backup_id
+          > {{ settings.etc_dir }}/tags/backup_repo_id
     - runas: {{ settings.user }}
     - cwd: {{ settings.home_dir }}
     - env:

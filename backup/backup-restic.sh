@@ -89,7 +89,7 @@ elif test "$1" = "repository"; then
         RESTIC_REPOSITORY="$RESTIC_REPOSITORY" \
         restic cat config --json | json_dict_get id)
     echo "activate backup for repository id: $restic_repo_id"
-    set_tag "app_backup_id" "$restic_repo_id"
+    set_tag "backup_repo_id" "$restic_repo_id"
 else
     usage
 fi
