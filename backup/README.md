@@ -37,14 +37,22 @@ group:
 
 ## Configuration
 
-see defaults.jinja.
++ [defaults.jinja](defaults.jinja)
++ restic, see https://restic.readthedocs.io/en/stable/
++ gitops state, see state [gitops](../gitops)
 
-## Execution
+## Usage
 
 + Backup can be triggered via systemd timer, or manual via `systemctl start backup`.
 
 + Restic Backup Maintenance as root can be done using `backup-run.sh restic *`,
 which will read the backup user environment change to the user and run restic.
+
++ create a new restic repository at configured location
+    + `$0 restic init`
+
++ activate an existing repository for backup
+    + `set_tag "backup_repo_id" "$($0 restic cat config --json | json_dict_get id)"`
 
 ## Tags set and recognized
 

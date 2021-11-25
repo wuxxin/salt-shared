@@ -27,11 +27,15 @@ PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if setti
 
 {% if instance_type == 'initial' %}
 ExecStart=/usr/bin/bash -c \
-  '
-  last_start=get_tag backup.initial.starttime 0
-  set_tag backup_initial_start_timestamp ${unixtime}
+  ' \
+  if test -e "/usr/local/lib/gitops-library.sh"; then \
+      . "/usr/local/lib/gitops-library.sh" \
+  else \
+      set_tag() { echo "$2" > "{{ settings.var_dir }}/tags/$1" } \
+  fi \
+  set_tag backup_initial_start_timestamp $(date +%s) \
   /usr/local/lib/backup-service.sh --from-systemd-service \
-  set_tag backup_initial_end_timestamp ${unixtime}
+  set_tag backup_initial_end_timestamp $(date +%s) \
   '
 
 {% else %}
