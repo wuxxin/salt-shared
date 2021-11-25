@@ -11,9 +11,9 @@ include:
     - group: {{ settings.user }}
     - dir_mode: "700"
 
-/usr/local/sbin/backup-restic.sh:
+/usr/local/sbin/backup-run.sh:
   file.managed:
-    - source: salt://backup/backup-restic.sh
+    - source: salt://backup/backup-run.sh
     - template: jinja
     - defaults:
         settings: {{ settings }}
@@ -44,17 +44,19 @@ include:
     - source: salt://app/backup/app-backup.service
     - template: jinja
     - defaults:
+        instance_type: 'default'
         settings: {{ settings }}
     - require:
       - file: {{ settings.default_test_repository }}
       - file: /usr/local/lib/backup-service.sh
       - sls: backup.restic
 
-/etc/systemd/system/initial-backup.service:
+/etc/systemd/system/backup-initial.service:
   file.managed:
     - source: salt://app/backup/app-backup.service
     - template: jinja
     - defaults:
+        instance_type: 'initial'
         settings: {{ settings }}
     - require:
       - file: /etc/systemd/system/backup.service

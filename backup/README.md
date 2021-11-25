@@ -2,30 +2,64 @@
 
 Backup using **Restic** to many third party storage types as a systemd service and timer.
 + pre and post- backup **hooks**
-+ automatic housekeeping of the backupstorage (prunning, cleanup)
-+ initial backup job can define a different maximum runtime (already filled servers)
-+ **rclone** for additional third party storage types
-+ errors and warnings can be written to **Sentry**
++ **automatic housekeeping** of the backupstorage (forget, prune, cleanup)
++ initial backup job can define a different maximum runtime (for already filled servers)
++ **rclone** for additional **third party storage** types
++ **errors and warnings** can be written to **Sentry**
 + **prometheus metrics** available about the backup
+
+## Operation Safety and Security
+
+this state can be used without alerting and metrics tracking,
+but for operational security, eg. to get sure that the backup actually sucessfully happend,
+and be alerted if not, alerting and metrics tracking should be used.
+
++ prometheus metrics are written to prom files for pickup.
++ alert tracking is done via sentry, and needs the `gitops` state to be included.
++ additional alerts should be configured via prometheus eg. from
+last sucessful backup start timestamp < 25h, to be sure that even if there is no error sent, the absence of the last sucessful metrics, will also trigger an alert.
+
+```yaml
+# example alert.rules.yml
+group:
+- name: backup.alert.rules
+  rules:
+  - alert: BackupMissed
+    expr: (time() / 3600) - (backup_start_timestamp / 3600) > 25
+    labels:
+      severity: error
+    annotations:
+      summary: "Backup run missed"
+      description: |
+        Node did not have a sucessful backup since 25h. Last sucessful backup was at {{ $value }}.
+        Backup should run every 24h.
+```
 
 ## Configuration
 
+see defaults.jinja.
+
 ## Execution
 
-Can be triggered via systemd timer, or manual via `systemctl start backup`.
++ Backup can be triggered via systemd timer, or manual via `systemctl start backup`.
 
-### Tags set and recognized
++ Restic Backup Maintenance as root can be done using `backup-run.sh restic *`,
+which will read the backup user environment change to the user and run restic.
 
-will use directory gitops gitops.var_dir/tags if included: gitops, else backup.tag_dir for storage
+## Tags set and recognized
+
+will use backup.var_dir/tags, or gitops.var_dir/tags if gitops state is included.
 
 + `backup_repo_id`
 + `backup_housekeeping_timestamp`
++ `backup_initial_start_timestamp`
++ `backup_initial_end_timestamp`
 
-### Prometheus Metrics
+## Prometheus Metrics
 
-to use prometheus metrics, include: gitops, if not included, metrics will be printed to stdout
+output will be written to backup.var_dir/metrics, or to gitops.var_dir/metrics if gitops state is included.
 
-+ `backup_start_timestamp` counter "The start of the last backup run as timestamp-epoch-seconds"
++ `backup_start_timestamp` counter "The start of the last sucessful backup run as timestamp-epoch-seconds"
 + `backup_duration_sec` gauge "The duration in number of seconds of the last backup run"
 + `backup_used_size_kb` gauge "The number of kilo-bytes used in the backup space"
 + `backup_data_size_kb` gauge "The sum of the local filesizes of the backuped files in kilo-bytes"
@@ -42,14 +76,20 @@ to use prometheus metrics, include: gitops, if not included, metrics will be pri
 
 ### Sentry Messages
 
-to use sentry reporting, include: gitops, if not included, sentry entries will be printed to stdout
+to use sentry reporting, add and configure
+```
+include:
+  - gitops
+```
+if gitops state is not included, sentry entries will be printed to stdout but not send.
+
 
 + warning
   + `App Backup` "backup warning: cache --cleanup returned error"
   + `App Backup` "backup warning: stats returned error"
 
 + error
-  + `App Backup` "backup error: repository id at $(get_tag_fullpath backup_repo_id) is missing or invalid.""
+  + `App Backup` "backup error: repository id at $(get_tag_fullpath backup_repo_id) is missing or invalid."
   + `App Backup` "backup error: could not get repository id from remote"
   + `App Backup` "backup error: repository id missmatch"
   + `App Backup` "backup error: backup failed with error $err"

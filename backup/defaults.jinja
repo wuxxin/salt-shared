@@ -65,8 +65,8 @@ systemd:
 # root only readable, will be injected in target user environment
 env_file: /etc/systemd/system/backup.env
 
-# directory used if /usr/local/app-library.sh (used for tags) does not exist
-tag_dir: /etc/backup/tags
+# base directory (used for /tags and /metrics) if /usr/local/gitops-library.sh not found
+var_dir: /etc/backup
 
 default_ssh_port: 22
 default_test_repository: {{ default_test_repository }}

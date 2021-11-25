@@ -29,9 +29,9 @@ PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if setti
 ExecStart=/usr/bin/bash -c \
   '
   last_start=get_tag backup.initial.starttime 0
-  set_tag backup.initial.starttime ${unixtime}
+  set_tag backup_initial_start_timestamp ${unixtime}
   /usr/local/lib/backup-service.sh --from-systemd-service \
-  set_tag backup.initial.finished ${unixtime}
+  set_tag backup_initial_end_timestamp ${unixtime}
   '
 
 {% else %}

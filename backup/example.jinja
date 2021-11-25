@@ -1,9 +1,9 @@
 hooks:
   pre_backup:
     - name: assure_mounted_and_not_empty
-      desc: assure x is mounted if external mount and is not empty
+      desc: assure x is mounted if external mount and is not empty, needs env $MOUNTPOINTS
       cmd: |
-        for i in
+        for i in $MOUNTPOINTS; do
           if grep -q "$i" /etc/fstab; then
               if ! mountpoint -q "$i"; then
                   sentry_entry error "App Backup" "backup error: Mount at Mountpoint $i is not mounted"
@@ -18,15 +18,15 @@ hooks:
         done
 
     - name: dump_postgres_databases
-      desc: dump all postgresql databases
+      desc: dump selected postgresql databases, needs env $DATABASES, $PGDUMP_DIR
       cmd: |
-        for i in
+        for i in $DATABASES; do
           psql -lqt | cut -d \| -f 1 | grep -qw "$i" && err=$? || err=$?
           if test $err -ne 0; then
               sentry_entry error "App Backup" "backup error: Database $i does not exist"
               exit 1
           fi
-          dbdump="{{ settings.pgdump_dir }}/$i.pgdump.gz"
+          dbdump="$PGDUMP_DIR/$i.pgdump.gz"
           /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d "$i" | \
               /bin/gzip --rsyncable > "${dbdump}.new" && err=$? || err=$?
           duration_pg_dump=$(( $(date +%s) - duration_start ))

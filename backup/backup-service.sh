@@ -7,26 +7,27 @@ usage () {
     exit 1
 }
 
-if test -e "/usr/local/lib/app-library.sh"; then
-    . "/usr/local/lib/app-library.sh"
+if test -e "/usr/local/lib/gitops-library.sh"; then
+    . "/usr/local/lib/gitops-library.sh"
 else
     json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
         python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
     }
     set_tag() { # $1=tagname $2=tagvalue
-        echo "$2" > "{{ settings.tag_dir }}/$1"
+        echo "$2" > "{{ settings.var_dir }}/tags/$1"
     }
     get_tag() { # $1=tagname $2=default-if-not-found
-        cat "{{ settings.tag_dir }}/$1" 2> /dev/null || echo "$2"
+        cat "{{ settings.var_dir }}/tags/$1" 2> /dev/null || echo "$2"
     }
     get_tag_fullpath() { # $1=tagname
-        echo "{{ settings.tag_dir }}/$1"
+        echo "{{ settings.var_dir }}/tags/$1"
     }
     mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=timestamp]]
-        echo "$@"
-    }
-    metric_save() { # $1=metric-output-name $2..$x=metric data
-        printf "%s\n" "$@"
+        local metric value_type helptext value labels timestamp
+        metric="$1"; value_type="$2"; helptext="$3"; value="$4"; labels="$5"; timestamp="$6"
+        if test "$labels" != ""; then labels="{$labels}"; fi
+        printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' "$metric" "$helptext" \
+            "$metric" "$value_type" "$metric" "$labels" "$value" "$timestamp"
     }
     sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
         printf "%s\n" "$@"
@@ -37,10 +38,10 @@ else
 fi
 
 # save script start time ms
-start_epoch_ms="$(date +%s)000"
 start_epoch_seconds=$(date +%s)
 duration_config=0; duration_hook=0; duration_backup=0; duration_cleanup=0; duration_forget=0
 duration_prune=0; duration_check=0; duration_stats=0; duration_local_stats=0
+backup_target_data_size_kb=0; backup_local_data_size_kb=0
 
 # ###
 # pre backup steps
@@ -62,8 +63,8 @@ fi
 # assure expected_id matches actual_id
 duration_start=$(date +%s)
 if ! { read actual_id < <(restic cat config --json| json_dict_get id); }; then
-    sentry_entry "error" "App Backup" "backup error: could not get repository id from remote" \
-        "$(unit_json_status)"
+    sentry_entry "error" "App Backup" \
+        "backup error: could not get repository id from remote" "$(unit_json_status)"
     exit 1
 fi
 duration_config=$(( $(date +%s) - duration_start ))
@@ -98,8 +99,8 @@ duration_start=$(date +%s)
 restic backup {{ backup_excludes }} {{ backup_list|join(" ") }} && err=$? || err=$?
 duration_backup=$(( $(date +%s) - duration_start ))
 if test "$err" -ne "0"; then
-    sentry_entry "error" "App Backup" "backup error: backup failed with error $err" \
-        "$(unit_json_status)"
+    sentry_entry "error" "App Backup" \
+        "backup error: backup failed with error $err" "$(unit_json_status)"
     exit 1
 fi
 
@@ -113,8 +114,6 @@ oldest_expected_housekeeping=$(( start_epoch_seconds - housekeeping_interval_day
 
 if test "$last_housekeeping" -le "$oldest_expected_housekeeping"; then
     set_tag backup_housekeeping_timestamp $start_epoch_seconds
-
-    # XXX keep all snapshots from now to 1,5 years back, forget and prune older snapshots
     duration_start=$(date +%s)
     restic forget --{{ settings.forget }} && err=$? || err=$?
     duration_forget=$(( $(date +%s) - duration_start ))
@@ -127,16 +126,16 @@ if test "$last_housekeeping" -le "$oldest_expected_housekeeping"; then
     restic prune && err=$? || err=$?
     duration_prune=$(( $(date +%s) - duration_start ))
     if test "$err" -ne "0"; then
-        sentry_entry "error" "App Backup" "backup error: prune returned error" \
-            "$(unit_json_status)"
+        sentry_entry "error" "App Backup" \
+            "backup error: prune returned error" "$(unit_json_status)"
     fi
 
     duration_start=$(date +%s)
     restic check && err=$? || err=$?
     duration_check=$(( $(date +%s) - duration_start ))
     if test "$err" -ne "0"; then
-        sentry_entry "error" "App Backup" "backup error: repository check returned error" \
-            "$(unit_json_status)"
+        sentry_entry "error" "App Backup" \
+            "backup error: repository check returned error" "$(unit_json_status)"
     fi
 fi
 
@@ -145,18 +144,17 @@ duration_start=$(date +%s)
 restic cache --cleanup && err=$? || err=$?
 duration_cleanup=$(( $(date +%s) - duration_start ))
 if test "$err" -ne "0"; then
-    sentry_entry "warning" "App Backup" "backup warning: cache --cleanup returned error" \
-        "$(unit_json_status)"
+    sentry_entry "warning" "App Backup" \
+        "backup warning: cache --cleanup returned error" "$(unit_json_status)"
 fi
 
 {% if settings.count_backup_data_size %}
 # calculate used space on backup storage
-backup_target_data_size_kb=0
 duration_start=$(date +%s)
 if ! { read backup_used_size < <(restic stats --mode raw-data --json | \
     json_dict_get total_size); }; then
-    sentry_entry "warning" "App Backup" "backup warning: stats returned error" \
-        "$(unit_json_status)"
+    sentry_entry "warning" "App Backup" \
+        "backup warning: stats returned error" "$(unit_json_status)"
 else
     backup_target_data_size_kb=$(( backup_used_size/1024 ))
 fi
@@ -190,7 +188,7 @@ duration=$(( end_epoch_seconds - start_epoch_seconds ))
 
 # create all other metrics
 metric_save backup \
-    "$(mk_metric backup_start_timestamp counter "The start of the last backup run as timestamp-epoch-seconds" ${start_epoch_seconds})" \
+    "$(mk_metric backup_start_timestamp counter "The start of the last sucessful backup run as timestamp-epoch-seconds" ${start_epoch_seconds})" \
     "$(mk_metric backup_duration_sec gauge "The duration in number of seconds of the last backup run" $duration)" \
     "$(mk_metric backup_target_data_size_kb gauge "The number of kilo-bytes used in the backup space" $backup_target_data_size_kb)" \
     "$(mk_metric backup_local_data_size_kb gauge "The sum of the local filesizes of the backuped files in kilo-bytes" $backup_local_data_size_kb)"
