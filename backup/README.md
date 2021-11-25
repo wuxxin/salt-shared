@@ -71,6 +71,7 @@ output will be written to backup.var_dir/metrics, or to gitops.var_dir/metrics i
 + `backup_duration_sec` gauge "The duration in number of seconds of the last backup run"
 + `backup_used_size_kb` gauge "The number of kilo-bytes used in the backup space"
 + `backup_data_size_kb` gauge "The sum of the local filesizes of the backuped files in kilo-bytes"
+
 + `backup_config_duration_sec` gauge "The duration in number of seconds of the backup config run"
 + `backup_pre_hook_{{ hook.name }}_duration_sec` gauge "Duration for {{ hook.description|d(hook.name) }}"
 + `backup_backup_duration_sec` gauge "The duration in number of seconds of the actual backup run"

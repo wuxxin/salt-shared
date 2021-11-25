@@ -27,7 +27,7 @@ else
         metric="$1"; value_type="$2"; helptext="$3"; value="$4"; labels="$5"; timestamp="$6"
         if test "$labels" != ""; then labels="{$labels}"; fi
         printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' "$metric" "$helptext" \
-            "$metric" "$value_type" "$metric" "$labels" "$value" "$timestamp"
+            "$metric" "$value_type" "$metric" "$labels" "$value" "$timestamp" | sed 's/ *$//g'
     }
     sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
         printf "%s\n" "$@"

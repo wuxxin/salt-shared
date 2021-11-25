@@ -34,6 +34,7 @@ ExecStart=/usr/bin/bash -c \
       set_tag() { echo "$2" > "{{ settings.var_dir }}/tags/$1" } \
   fi \
   set_tag backup_initial_start_timestamp $(date +%s) \
+  export UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %} \
   /usr/local/lib/backup-service.sh --from-systemd-service \
   set_tag backup_initial_end_timestamp $(date +%s) \
   '
@@ -42,6 +43,7 @@ ExecStart=/usr/bin/bash -c \
 ExecStart=/usr/bin/bash -c \
   ' \
   if tag_is_set backup.initial.finished; then \
+    export UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %} \
     /usr/local/lib/backup-service.sh --from-systemd-service \
   else \
     systemctl start --no-block backup-initial \

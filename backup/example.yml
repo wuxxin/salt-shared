@@ -1,3 +1,30 @@
+# backup run user
+user: backup
+
+# backup target and secret key
+repository_url:
+repository_key:
+
+# extra env for backup call and hooks
+env:
+  MOUNTPOINTS: '/mnt/data /mnt/whatever'
+  DATABASES: 'mydatabase anotherdb'
+  PGDUMP_DIR: '/var/backups/pgdump'
+
+# include the following files/dirs
+includes:
+  - /etc
+  - /var
+# exclude some files/dirs inside this directories
+excludes: []
+
+# age of oldest data change to keep
+forget: keep-within 1y6m
+
+# systemd dependencies
+systemd:
+  wants: postgresql
+
 hooks:
   pre_backup:
     - name: assure_mounted_and_not_empty
@@ -12,7 +39,7 @@ hooks:
           fi
           files_found=$(find "$i" -mindepth 1 -path "$i/lost+found" -prune -o -type f -exec echo true \; -quit)
           if test "$files_found" != "true"; then
-              sentry_entry error "App Backup" "backup error: media_dir $i is empty"
+              sentry_entry error "App Backup" "backup error: dir $i is empty"
               exit 1
           fi
         done
@@ -37,3 +64,5 @@ hooks:
           fi
           mv "${dbdump}.new" "${dbdump}"
         done
+
+  post_backup: []
