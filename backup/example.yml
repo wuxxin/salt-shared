@@ -65,4 +65,20 @@ hooks:
           mv "${dbdump}.new" "${dbdump}"
         done
 
-  post_backup: []
+    - name: zfs_create_snapshot
+      cmd: |
+        if snapshot_exist backup_service; then
+            bytes_written = $(zfs get -Hp -o value written $ii)
+            if test $bytes_written -gt $bytes_minimum; then
+              if exist old tail snapshot delete
+              rename snapshot head to tail
+              new snapshot head from tail
+              mount snapshot to /backup
+            else
+              return 2 for empty backup
+            fi
+
+  post_backup:
+    - name: zfs_prune_snapshots
+      cmd: |
+        remove all but the last used snapshot of backup

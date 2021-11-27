@@ -39,6 +39,16 @@ include:
   {%- endfor %}
 {%- endif %}
 
+{# create directory var_dir, in case gitops is not used #}
+{% for i in ['/tags/backup', '/metrics/backup'] %}
+{{ settings.var_dir }}{{ i }}:
+  file.directory:
+    - user: {{ settings.user }}
+    - group: {{ settings.group }}
+    - mode: "775"
+    - makedirs: true
+{% endfor %}
+
 /etc/systemd/system/backup.service:
   file.managed:
     - source: salt://app/backup/app-backup.service
@@ -83,9 +93,7 @@ backup_systemd_reload:
   {%- set backup_user= settings.repository_url|regex_replace(url_regex, '\\2') %}
   {%- set backup_host= settings.repository_url|regex_replace(url_regex, '\\3') %}
   {%- set backup_port= settings.repository_url|regex_replace(url_regex, '\\4') %}
-  {%- if backup_port == '' %}
-    {%- set backup_port=settings.default_ssh_port %}
-  {%- endif %}
+  {%- if backup_port == '' %}{%- set backup_port=settings.default_ssh_port %}{%- endif %}
 
 {{ settings.home_dir }}/.ssh:
   file.directory:
@@ -166,7 +174,7 @@ create_default_backup_id_tag:
     - name: |
         echo $(restic cat config --json | \
           python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" 'id') \
-          > {{ settings.etc_dir }}/tags/backup_repo_id
+          > {{ settings.var_dir }}/tags/backup_repo_id
     - runas: {{ settings.user }}
     - cwd: {{ settings.home_dir }}
     - env:
@@ -181,7 +189,6 @@ create_default_backup_id_tag:
     - onchanges:
       - cmd: create_default_test_repository
 {% endif %}
-
 
 app-backup.timer:
 {%- if settings.enabled %}

@@ -26,6 +26,16 @@ WorkingDirectory={{ settings.home_dir }}
 PassEnvironment=UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %}
 
 {% if instance_type == 'initial' %}
+ExecStartPre=/usr/bin/bash -c \
+  ' \
+  if test -e "/usr/local/lib/gitops-library.sh"; then \
+      . "/usr/local/lib/gitops-library.sh" \
+  else \
+      set_tag() { echo "$2" > "{{ settings.var_dir }}/tags/$1" } \
+  fi \
+  set_tag backup/backup_initial_start_timestamp $(date +%s) \
+  '
+
 ExecStart=/usr/bin/bash -c \
   ' \
   if test -e "/usr/local/lib/gitops-library.sh"; then \
@@ -33,18 +43,22 @@ ExecStart=/usr/bin/bash -c \
   else \
       set_tag() { echo "$2" > "{{ settings.var_dir }}/tags/$1" } \
   fi \
-  set_tag backup_initial_start_timestamp $(date +%s) \
   export UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %} \
   /usr/local/lib/backup-service.sh --from-systemd-service \
-  set_tag backup_initial_end_timestamp $(date +%s) \
+  set_tag backup/backup_initial_end_timestamp $(date +%s) \
   '
 
 {% else %}
 ExecStart=/usr/bin/bash -c \
   ' \
-  if tag_is_set backup.initial.finished; then \
-    export UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %} \
-    /usr/local/lib/backup-service.sh --from-systemd-service \
+  if test -e "/usr/local/lib/gitops-library.sh"; then \
+      . "/usr/local/lib/gitops-library.sh" \
+  else \
+      get_tag_fullpath() { echo "{{ settings.var_dir }}/tags/$1" } \
+  fi \
+  if test -e "$(get_tag_fullpath backup/backup_initial_end_timestamp)"; then \
+      export UNITNAME HOME USER RESTIC_REPOSITORY RESTIC_PASSWORD {% if settings.env %}{% for k,v in settings.env.items() %}{{ k }} {% endfor %}{% endif %} \
+      /usr/local/lib/backup-service.sh --from-systemd-service \
   else \
     systemctl start --no-block backup-initial \
   fi \

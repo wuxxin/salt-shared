@@ -8,6 +8,10 @@ Backup using **Restic** to many third party storage types as a systemd service a
 + **errors and warnings** can be written to **Sentry**
 + **prometheus metrics** available about the backup
 
+## TODO
+
++ backup-service.sh: finish restic backup call (include, exclude, ...)
+
 ## Operation Safety and Security
 
 this state can be used without alerting and metrics tracking,
@@ -52,7 +56,7 @@ which will read the backup user environment change to the user and run restic.
     + `$0 restic init`
 
 + activate an existing repository for backup
-    + `set_tag "backup_repo_id" "$($0 restic cat config --json | json_dict_get id)"`
+    + `set_tag "backup/backup_repo_id" "$($0 restic cat config --json | json_dict_get id)"`
 
 ## Tags set and recognized
 
@@ -98,7 +102,7 @@ if gitops state is not included, sentry entries will be printed to stdout but no
   + `App Backup` "backup warning: stats returned error"
 
 + error
-  + `App Backup` "backup error: repository id at $(get_tag_fullpath backup_repo_id) is missing or invalid."
+  + `App Backup` "backup error: repository id at $(get_tag_fullpath backup/backup_repo_id) is missing or invalid."
   + `App Backup` "backup error: could not get repository id from remote"
   + `App Backup` "backup error: repository id missmatch"
   + `App Backup` "backup error: backup failed with error $err"

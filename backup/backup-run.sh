@@ -8,9 +8,9 @@ Usage:  $0 restic <args>*
 
 backup command line wrapper for the root user.
 
-    + executes restic as user {{ settings.user }},
-    + puts {{ settings.env_file }} in environment,
-    + passes all remaining cmdline arguments to restic
++ executes restic as user {{ settings.user }}
++ puts {{ settings.env_file }} in environment
++ passes all remaining cmdline arguments to restic
 
 Examples:
 
@@ -26,7 +26,7 @@ json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
 set_tag() { # $1=tagname $2=tagvalue
     echo "$2" > "{{ settings.var_dir }}/tags/$1"
 }
-set_tag "backup_repo_id" "$($0 restic cat config --json | json_dict_get id)"`
+set_tag "backup/backup_repo_id" "$($0 restic cat config --json | json_dict_get id)"`
 ```
 
 EOF
@@ -42,7 +42,6 @@ HOME={{ settings.home_dir }}
 USER={{ settings.user }}
 EnvironmentFile={{ settings.env_file }}
 WorkingDirectory={{ settings.home_dir }}
-
 # get restic configuration, populate env
 if ! test -e "$EnvironmentFile"; then
     echo "error: could not read backup environment: $EnvironmentFile"

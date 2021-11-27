@@ -13,8 +13,23 @@ else
     json_dict_get() { # $1=entry [$2..$x=subentry] , eg. gitops git source
         python3 -c "import sys, json, functools; print(functools.reduce(dict.__getitem__, sys.argv[1:], json.load(sys.stdin)))" $@
     }
+    mk_metric_dir() { # $1 = type, $2 = metricname
+        local add_args=""
+        if test "$(id -u)" = "0"; then
+            add_args="-o {{ settings.user }} -g {{ settings.user }}"
+        fi
+        install $add_args -d "{{ settings.var_dir }}/$1/$(dirname $2)"
+    }
+    chown_to_user() { # $1=filename
+        if test "$(id -u)" = "0"; then
+            # if currently root, set owner to {{ settings.user }}
+            chown "{{ settings.user }}:{{ settings.user }}" "$1"
+        fi
+    }
     set_tag() { # $1=tagname $2=tagvalue
+        if test "$(basename $1)" != "$1"; then mk_metric_dir tags "$1"; fi
         echo "$2" > "{{ settings.var_dir }}/tags/$1"
+        chown_to_user "{{ settings.var_dir }}/tags/$1"
     }
     get_tag() { # $1=tagname $2=default-if-not-found
         cat "{{ settings.var_dir }}/tags/$1" 2> /dev/null || echo "$2"
@@ -28,6 +43,18 @@ else
         if test "$labels" != ""; then labels="{$labels}"; fi
         printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' "$metric" "$helptext" \
             "$metric" "$value_type" "$metric" "$labels" "$value" "$timestamp" | sed 's/ *$//g'
+    }
+    metric_save() { # $1=metric-output-name $2..$x=metric data
+        local metric outputname
+        metric="$1"; shift
+        outputname="{{ settings.var_dir }}/metrics/${metric}.temp"
+        if test "$(basename $metric)" != "$metric"; then mk_metric_dir metrics "$metric"; fi
+        printf "%s\n" "$1" > "$outputname"; shift
+        while test "$1" != ""; do
+            printf "%s\n" "$1" >> "$outputname"; shift
+        done
+        chown_to_user "$outputname"
+        mv "$outputname" "$(dirname "$outputname")/${metric}.prom"
     }
     sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-status]]] ENV[UNITNAME]=culprit
         printf "%s\n" "$@"
@@ -53,10 +80,10 @@ if test "$(id -u -n)" != "{{ settings.user }}" -o "$1" != "--from-systemd-servic
 fi
 
 # assure tag backup_repo_id is set
-expected_id=$(get_tag backup_repo_id invalid)
+expected_id=$(get_tag backup/backup_repo_id invalid)
 if test "$expected_id" = "invalid"; then
     sentry_entry error "App Backup" \
-        "backup error: repository id at $(get_tag_fullpath backup_repo_id) is missing or invalid.\n create/update repository id by using scripts/app-restic.sh)"
+        "backup error: repository id at $(get_tag_fullpath backup/backup_repo_id) is missing or invalid.\n create/update repository id by using scripts/app-restic.sh)"
     exit 1
 fi
 
@@ -109,11 +136,11 @@ fi
 # post backup steps
 
 # house keeping: call restic forget, prune and check, once every housekeeping interval
-last_housekeeping=$(get_tag backup_housekeeping_timestamp 0)
+last_housekeeping=$(get_tag backup/backup_housekeeping_timestamp 0)
 oldest_expected_housekeeping=$(( start_epoch_seconds - housekeeping_interval_days * 60*60*24 ))
 
 if test "$last_housekeeping" -le "$oldest_expected_housekeeping"; then
-    set_tag backup_housekeeping_timestamp $start_epoch_seconds
+    set_tag backup/backup_housekeeping_timestamp $start_epoch_seconds
     duration_start=$(date +%s)
     restic forget --{{ settings.forget }} && err=$? || err=$?
     duration_forget=$(( $(date +%s) - duration_start ))

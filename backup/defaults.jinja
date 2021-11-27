@@ -27,7 +27,7 @@ includes: []
 # exclude some files/dirs inside this directories
 excludes: []
 
-hooks:
+addins:
   pre_backup: []
   post_backup: []
 
@@ -66,7 +66,7 @@ systemd:
 env_file: /etc/systemd/system/backup.env
 
 # base directory (used for /tags and /metrics) if /usr/local/gitops-library.sh not found
-var_dir: /etc/backup
+var_dir: /var/lib/backup-service
 
 default_ssh_port: 22
 default_test_repository: {{ default_test_repository }}
