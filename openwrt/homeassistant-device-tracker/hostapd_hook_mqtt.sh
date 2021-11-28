@@ -1,23 +1,23 @@
 #!/bin/sh
 
-# Usage from hostapd_cli: $0 <interface> <event> <device_mac>
-#   `hostapd_cli -i wlan0-1 -B -r -a /usr/bin/hostapd_hook_mqtt.sh`
+# Usage from logread:
+#   `logread -e "hostapd:.*AP-STA-" -f | tr '\n' '\0' | \
+#      xargs -n 1 -0 /usr/bin/hostapd_hook_mqtt.sh --log-line`
 #
-# Usage from logread: $0 --log-line <logline>
-#   `logread -e "hostapd:.*AP-STA-" -f | tr '\n' '\0' | xargs -n 1 -0 /usr/bin/hostapd_hook_mqtt.sh --log-line`
 # Example logline:
 #   "Tue Oct 19 23:16:37 2021 daemon.notice hostapd: wlan0-1: AP-STA-DISCONNECTED 12:34:56:78:90:ab"
 #
-# on first connect/disconnect of a device since last openwrt reboot:
-#   advertise the device to mqtt topic
-#       "homeassistant/device_tracker/openwrt/<device_id>"
-#   device_id is the mac-id of the tracked device uppercase and ":" translated to "_"
-#   device (friendly) name will be taken from the dhcp name
-#       or if not available set to "guest-<macid>"
+# Usage from hostapd_cli: $0 <interface> <event> <device_mac>
+#   `hostapd_cli -i wlan0-1 -B -r -a /usr/bin/hostapd_hook_mqtt.sh`
 #
-# on connect or disconnect of a device:
-#   write payload ["AP-STA-CONNECTED", "AP-STA-DISCONNECTED"] to mqtt topic
-#       "openwrt/$device_id/state"
+# Workflow:
+#   on first connect/disconnect of a device since last openwrt reboot:
+#     advertise the device to mqtt topic "homeassistant/device_tracker/openwrt/<device_id>"
+#     device_id is the mac-id of the tracked device uppercase and ":" translated to "_"
+#     device (friendly) name will be taken from the dhcp name or set to "guest-<macid>"
+#
+#   on connect or disconnect of a device:
+#     write payload ["AP-STA-CONNECTED", "AP-STA-DISCONNECTED"] to mqtt "openwrt/$device_id/state"
 #
 # both advertisement and device connection status is published with the retain flag set
 #
