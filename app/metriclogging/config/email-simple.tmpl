@@ -1,0 +1,33 @@
+{{ define "email.simple.subject" }}[{{ .Status | toUpper }}]{{ .CommonLabels.alertname }}{{ end }}
+{{ define "email.simple.source" }}http://localhost:{{ reReplaceAll "https?://[^:]+:(.+)" "$1" .GeneratorURL }}{{ end }}
+{{ define "email.simple.alert_url" }}http://localhost:{{ reReplaceAll "https?://[^:]+:(.+)" "$1" .ExternalURL }}/#/alerts?receiver={{ .Receiver }}{{ end }}
+
+{{ define "email.simple.alert_list" }}{{ range . }}    - labels:
+{{ range .Labels.SortedPairs }}        {{ .Name }}: {{ .Value }}
+{{ end }}      annotations:
+{{ range .Annotations.SortedPairs }}        {{ .Name }}: {{ .Value }}
+{{ end }}      source: {{ template "email.simple.source" . }}
+      starttime: {{ .StartsAt }}
+{{ if eq (toUpper .Status) "RESOLVED" }}      endtime: {{ .EndsAt }}{{ end }}
+{{ end }}{{ end }}
+
+{{ define "email.simple.text" }}
+```prometheus.alert.yaml
+manager: {{ template "email.simple.alert_url" . }}
+severity: {{ if eq (toUpper .Status) "RESOLVED" }}info{{ else }}{{ .CommonLabels.severity }}{{ end }}
+status: {{ .Status }}
+alerts:
+{{- if gt (len .Alerts.Firing) 0 }}
+  firing:
+    count: {{ .Alerts.Firing | len }}
+    entries:
+{{ template "email.simple.alert_list" .Alerts.Firing }}
+{{- end }}
+{{- if gt (len .Alerts.Resolved) 0 }}
+  resolved:
+    count: {{ .Alerts.Resolved | len }}
+    entries:
+{{ template "email.simple.alert_list" .Alerts.Resolved }}
+{{- end }}
+```
+{{- end }}

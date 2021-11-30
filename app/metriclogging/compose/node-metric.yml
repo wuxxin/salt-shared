@@ -1,0 +1,66 @@
+networks:
+  metric_net:
+
+volumes:
+  victoriametrics:
+  alertmanager:
+
+
+services:
+  # group metric:server
+  metric-server:
+    image: victoriametrics/victoria-metrics
+    networks:
+      - metric_net
+    ports:
+      - 127.0.0.1:8428:8428
+      # - 127.0.0.1:4242:4242
+      # - 8086:8086
+      # - 8086:8086/udp
+      # - 2003:2003
+      # - 2003:2003/udp
+    volumes:
+      - victoriametrics:/storage
+    command:
+      - --storageDataPath=/storage
+      - --retentionPeriod=50y
+      - --influx.databaseNames=air,home,self,gadget,covid19
+      - --httpListenAddr=:8428
+      # - --influxListenAddr=:8086
+      # - --opentsdbListenAddr=:4242
+      # - --graphiteListenAddr=:2003
+      # --metricsAuthKey
+      # --deleteAuthKey
+      # --snapshotAuthKey
+      # --forceMergeAuthKey
+      # --search.resetCacheAuthKey
+
+  vmagent:
+    image: victoriametrics/vmagent
+    networks:
+      - metric_net
+    command:
+      - -promscrape.config
+      # with the path to Prometheus config file (usually located at /etc/prometheus/prometheus.yml)
+      - -remoteWrite.url
+      # with the remote storage endpoint such as VictoriaMetrics, the -remoteWrite.url argument can be specified multiple times to replicate data concurrently to an arbitrary number of remote storage systems.
+
+  vmalert:
+    image: victoriametrics/vmalert
+    networks:
+      - metric_net
+
+  alertmanager:
+    image: prom/alertmanager
+    networks:
+      - metric_net
+    expose:
+      - "9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager.yml
+      - ./alertmanager-template.d:/etc/alertmanager-template.d
+      - alertmanager:/data
+    args:
+      - --config.file=/etc/alertmanager.yml
+      - --log.level=debug
+      - --storage.path=/data

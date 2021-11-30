@@ -1,0 +1,115 @@
+groups:
+
+- name: node.general
+  rules:
+  - alert: NodeRebootsTooOften
+    expr: changes(node_boot_time_seconds[1d]) > 1
+    labels:
+      severity: warning
+    annotations:
+      description: "Node reboots too often ({{ $value }} is more than 1 time per 1d)"
+      summary: Node reboots too often
+
+- name: memory
+  rules:
+  - alert: NodeMemoryUsageHigh400mb
+    expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes) / 1048576 < 400
+    for: 30s
+    labels:
+      severity: error
+    annotations:
+      description: "Node free & cached memory together is less than the threshold (400mb) with a value of {{ $value }}."
+      summary: "Node memory usage is high (< 400mb free)"
+
+  - alert: NodeMemoryUsageHigh80percent
+    expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes)) / node_memory_MemTotal_bytes * 100 > 80
+    for: 30s
+    labels:
+      severity: warning
+    annotations:
+      description: "Node used memory is more than the threshold (80%) with a value of {{ $value }}."
+      summary: "Node memory usage is high (> 80% used)"
+
+- name: load
+  rules:
+  - alert: NodeLoadHigh
+    expr: node_load1 > machine_cpu_cores / 2
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: "Node is under high load (load1 > cores /2 for 2 min)."
+      summary: "Node under high load"
+
+- name: certificates
+  rules:
+  - alert: LetsencryptCertValidityLow
+    expr: (letsencrypt_valid_until - time() ) / 86400 < 10
+    labels:
+      severity: warning
+    annotations:
+      description: "Node letsencrypt certificate is less than 10 days ({{ $value }}) valid."
+      summary: "Letsencrypt certificate is less than 10 days valid"
+
+  - alert: LetsencryptCertValidityCritical
+    expr: (letsencrypt_valid_until - time() ) / 86400 < 3
+    labels:
+      severity: critical
+    annotations:
+      description: "Node letsencrypt certificate is less than 3 days ({{ $value }}) valid."
+      summary: "Letsencrypt certificate is less than 3 days valid"
+
+- name: updates
+  rules:
+  - alert: UpdateMissed
+    expr: (time() / 86400) - (update_last_call / 86400) > 8
+    labels:
+      severity: error
+    annotations:
+      description: "Node did not have a sucessful update run since more than 8 days. Last update run was {{ $value }} days ago. Update should run once every 7 days."
+      summary: "Update run missed"
+
+- name: storage
+  rules:
+  - alert: NodeFilesystemFreeLow
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"}) < 20
+    labels:
+      severity: warning
+    annotations:
+      description: "Node filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% available disk space remaining."
+      summary: "Node filesystem available space is low (< 20%)"
+
+  - alert: NodeFilesystemFreeLowCritical
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"}) < 15
+    labels:
+      severity: critical
+    annotations:
+      description: "Node filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% available disk space remaining."
+      summary: "Node filesystem available space is critically low (< 15%)"
+
+  - alert: NodeMdadmResync
+    expr: node_md_is_active and (node_md_disks != node_md_disks_active or node_md_blocks != node_md_blocks_synced)
+    labels:
+      severity: warning
+    annotations:
+      description: "Node MDADM not synced or not all active"
+      summary: MDADM has unsynced blocks or not all disks active
+
+- name: hardware
+  rules:
+  - alert: NodeHwmonTemperatureHigh
+    expr: node_hwmon_temp_celsius > node_hwmon_temp_max_celsius
+    for: 1m
+    labels:
+      severity: error
+    annotations:
+      description: "Node Hardware temperature is over specified MAX value: {{ $value }} chip: {{ $labels.chip }} sensor: {{ $labels.sensor }}"
+      summary: Hardware over specified MAX Temperature
+
+  - alert: NodeHwmonTemperatureCritical
+    expr: node_hwmon_temp_celsius >= (node_hwmon_temp_critical_celsius -2)
+    labels:
+      severity: critical
+    annotations:
+      description: "Node Hardware temperature is near specified CRITICAL value: {{ $value }} chip: {{ $labels.chip }} sensor: {{ $labels.sensor }}"
+      summary: Hardware near specified CRITICAL Temperature
