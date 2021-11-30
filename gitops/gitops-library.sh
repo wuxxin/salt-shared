@@ -50,6 +50,14 @@ install_as_user() { # $1..$x= parameter for install
     install -o "{{ settings.user }}" -g "{{ settings.user }}" "$@"
 }
 
+mk_metric_dir() { # $1 = type, $2 = metricname
+    local add_args=""
+    if test "$(id -u)" = "0"; then
+        add_args="-o {{ settings.user }} -g {{ settings.user }}"
+    fi
+    install $add_args -d "{{ settings.var_dir }}/$1/$(dirname $2)"
+}
+
 chown_to_user() { # $1=filename
     if test "$(id -u)" = "0"; then
         # if currently root, set owner to {{ settings.user }}
@@ -60,6 +68,7 @@ chown_to_user() { # $1=filename
 
 # ### flags ###
 set_flag() { # $1=flagname
+    if test "$(basename $1)" != "$1"; then mk_metric_dir flags "$1"; fi
     touch "{{ settings.var_dir }}/flags/$1"
     chown_to_user "{{ settings.var_dir }}/flags/$1"
 }
@@ -80,6 +89,12 @@ flag_is_set() { # $1=flagname
 
 
 # ### tags ###
+set_tag() { # $1=tagname $2=tagvalue
+    if test "$(basename $1)" != "$1"; then mk_metric_dir tags "$1"; fi
+    echo "$2" > "{{ settings.var_dir }}/tags/$1"
+    chown_to_user "{{ settings.var_dir }}/tags/$1"
+}
+
 get_tag() { # $1=tagname $2=default-if-not-found
     cat "{{ settings.var_dir }}/tags/$1" 2> /dev/null || echo "$2"
 }
@@ -94,14 +109,13 @@ del_tag() { # $1=tagname
     fi
 }
 
-set_tag() { # $1=tagname $2=tagvalue
-    echo "$2" > "{{ settings.var_dir }}/tags/$1"
-    chown_to_user "{{ settings.var_dir }}/tags/$1"
-}
-
 set_tag_from_file() { # $1=tagname $2=filename
-    install -o "{{ settings.user }}" -g "{{ settings.user }}" \
-        "$2" "{{ settings.var_dir }}/tags/$1"
+    local add_args=""
+    if test "$(basename $1)" != "$1"; then mk_metric_dir tags "$1"; fi
+    if test "$(id -u)" = "0"; then
+        add_args="-o {{ settings.user }} -g {{ settings.user }}"
+    fi
+    install $add_args "$2" "{{ settings.var_dir }}/tags/$1"
 }
 
 
@@ -115,46 +129,36 @@ mk_metric() { # $1=metric $2=value_type $3=helptext $4=value [$5=labels{,} [$6=t
 \$2=value_type can be one of "counter, gauge, untyped"
 \$4=value float but can have "Nan", "+Inf", and "-Inf" as valid values
 \$5=labels string [name="value"[,name="value"]*]?
-\$6=timestamp (epoch-ms) int64, optional, default is empty, use "\$(date +%s)000" for now
+\$6=timestamp (epoch-ms) int64, optional, default is empty, use "\$(date +%s)000" for now()
 EOF
         return
     fi
     if test "$labels" != ""; then labels="{$labels}"; fi
-    if test "$timestamp" != ""; then
-        printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' \
-            "$metric" "$helptext" \
-            "$metric" "$value_type" \
-            "$metric" "$labels" "$value" "$timestamp"
-    else
-        printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s\n' \
-            "$metric" "$helptext" \
-            "$metric" "$value_type" \
-            "$metric" "$labels" "$value"
-    fi
+    printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' "$metric" "$helptext" \
+        "$metric" "$value_type" "$metric" "$labels" "$value" "$timestamp" | sed 's/ *$//g'
 }
 
 metric_save() { # $1=metric-output-name $2..$x=metric data
     local metric outputname
-    metric="$1"
-    shift
+    metric="$1"; shift
     outputname="{{ settings.var_dir }}/metrics/${metric}.temp"
-    printf "%s\n" "$1" > "${outputname}"
-    shift
+    if test "$(basename $metric)" != "$metric"; then mk_metric_dir metrics "$metric"; fi
+    printf "%s\n" "$1" > "$outputname"; shift
     while test "$1" != ""; do
-        printf "%s\n" "$1" >> "${outputname}"
-        shift
+        printf "%s\n" "$1" >> "$outputname"; shift
     done
     chown_to_user "$outputname"
-    mv "${outputname}" "$(dirname "${outputname}")/${metric}.prom"
+    mv "$outputname" "$(dirname "$outputname")/${metric}.prom"
 }
 
 metric_pipe_save() { # $1=metric-output-name STDIN=metric-data
     local metric outputname
     metric="$1"
     outputname="{{ settings.var_dir }}/metrics/${metric}.temp"
-    cat - > "${outputname}"
+    if test "$(basename $metric)" != "$metric"; then mk_metric_dir metrics "$metric"; fi
+    cat - > "$outputname"
     chown_to_user "$outputname"
-    mv "${outputname}" "$(dirname "${outputname}")/${metric}.prom"
+    mv "$outputname" "$(dirname "$outputname")/${metric}.prom"
 }
 
 simple_metric() { # equal to mk_metric, but saves/overwrites data to filename=$1
