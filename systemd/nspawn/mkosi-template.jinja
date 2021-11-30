@@ -3,6 +3,8 @@
   {%- for key, value in data.items() %}
     {%- if value is iterable and (value is not string and value is not mapping) %}
 {{ key }} = [ {{ value|join(', ')}} ]
+    {%- elif value is boolean %}
+{{ key }} = {{ 'on' if value else 'off' }}
     {%- else %}
 {{ key }} = {{ value }}
     {%- endif %}

@@ -31,7 +31,7 @@ mkosi_config_default_{{ name }}:
 mkosi_config_nspawn_{{ name }}:
   file.managed:
     - name: {{ settings.store.mkosi_config }}/{{ name }}/mkosi.nspawn
-    - source: salt://systemd/nspawn/mkosi-template.jinja
+    - source: salt://systemd/nspawn/nspawn-template.jinja
     - template: jinja
     - defaults:
         dataset: {{ settings.image[template]['nspawn'] }}

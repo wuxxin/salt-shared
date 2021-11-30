@@ -3,12 +3,14 @@
   {%- for key, value in data.items() %}
     {%- if value is iterable and (value is not string and value is not mapping) %}
 {{ key }}=[ {{ value|join(', ')}} ]
+    {%- elif value is boolean %}
+{{ key }}={{ 'yes' if value else 'no' }}
     {%- else %}
 {{ key }}={{ value }}
     {%- endif %}
   {%- endfor %}
 
-  {%- if section == 'Exec' %}
+  {%- if section == 'Exec' and environment is defined %}
     {%- for key, value in environment.items() %}
 Environment={{ key }}={{ value }}
     {%- endfor %}
