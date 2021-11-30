@@ -60,7 +60,7 @@
 Can be triggered via webhook, systemd timer, or manual via `systemctl start gitops-update`.
 Execute the following steps, any step that fails stops executing later steps:
 
-+ `validate`: check the syntactical validity of the update, must not interrupt services!
++ `validate`: check the validity of the update, must not interrupt services!
 + `before`: executed before "update", may stop services that may get restarted on finish
 + `update`: the acutal update command
 + `after`: executed after "update" did run sucessful, eg. for metric processing
