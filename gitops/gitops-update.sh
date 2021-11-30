@@ -37,14 +37,13 @@ main () {
     fi
     if flag_is_set gitops.update.disabled; then
         echo "Warning: gitops.update.disabled flag is set, exit update run without update"
-        simple_metric update_duration_sec gauge \
-            "number of seconds for a update run" $(($(date +%s) - start_epoch_sec))
         exit 0
     fi
 
     echo "update origin repository source"
     current_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
-    /usr/local/sbin/from-git.sh pull --url "$src_url" --branch "$src_branch" --user "$src_user" --git-dir "$src_dir"
+    /usr/local/sbin/from-git.sh pull \
+        --url "$src_url" --branch "$src_branch" --user "$src_user" --git-dir "$src_dir"
     latest_origin_rev="$(gosu "$src_user" git -C "$src_dir" rev-parse HEAD)"
     latest_commit_msg=$(gosu "$src_user" git -C "$src_dir" log -1 --pretty=format:%B)
 
