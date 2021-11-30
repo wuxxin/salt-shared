@@ -11,7 +11,7 @@
 
 + `scrcpy`: display and control of Android devices connected on USB (or over TCP/IP)
 
-## Service
+## Services based on containers
 
 + [android/emulator](android/emulator) Android Emulator (qemu based) container for desktop and headless
 + [android/redroid](android/redroid) GPU accelerated Android on same kernel container
