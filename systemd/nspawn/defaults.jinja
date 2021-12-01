@@ -2,6 +2,7 @@
 
 store:
   nspawn_config: /etc/systemd/nspawn
+  nspawn_run: /run/systemd/nspawn
   nspawn_target: /var/lib/machines
   nspawn_volume: /var/lib/volumes/nspawn
   mkosi_config: /etc/mkosi
@@ -18,7 +19,7 @@ image:
         Repositories: main,universe,multiverse,restricted
       Output:
         Format: directory
-        Bootable: no
+        Bootable: false
         Hostname: {{ distro }}
       Packages:
         PostInstallationScript: mkosi.postinst
@@ -33,43 +34,43 @@ image:
         - python3
       Host: {}
       Validation: {}
-    nspawn:
-      Exec:
-        Boot: on
-        LinkJournal: try-guest
-        PrivateUsers: pick
-      Files:
-        PrivateUsersChown: on
-      Network:
-        Private: on
-        VirtualEthernet: on
-        Zone: nspawn
+
+    machine:
+      # enabled: if false, service will not get started and will be stopped if running
+      enabled: true
+
+      # environment: dict of key,value pairs to be included in the target environment
+      environment: {}
+
+      nspawn:
+        Exec:
+          Boot: on
+          LinkJournal: try-guest
+          PrivateUsers: pick
+          ResolvConf: copy-host
+        Files:
+          PrivateUsersChown: on
+        Network:
+          Private: on
+          VirtualEthernet: on
+          Zone: nspawn
+
+      postinst:
+        # after creation of machine, a script can be copied to and executed
+        # on the target machine once. the source will be copied to /tmp/machine.postinst
+        # and called using $0 <userid> <groupid> <username> <homedir>
+        source: salt://systemd/nspawn/machine.postinst
+
+        # defaults arguments for the postinst script
+        args: ['1000' , '1000', 'app', '/home/app']
+
+        # ssh keys string authorized for root and <userid>,
+        # will be created at /tmp/authorized_keys for usage in postinst
+        authorized_keys: ""
   {% endfor %}
+
 {% endload %}
 
-
-{% load_yaml as machine_defaults %}
-# name of the nspawn container and name of the controlling systemd service
-name: ""
-# image: a image name created with eg. `image(name='focal', template='focal')`
-image: focal
-# enabled: if false, service will not get started and will be stopped if running
-enabled: true
-# ssh keys authorized for login
-authorized_keys: ""
-# script copied to and executed on target machine once, after creation of machine
-postinst:
-  # cat sshpublickeyfile | $0 <userid> <groupid> <username> <homedir>
-  source: salt://systemd/nspawn/machine.postinst
-  args: ['1000' , '1000', 'app', '/home/app']
-# environment: dict of key,value pairs to be included in the target environment
-environment: {}
-# additional or overriding nspawn settings
-nspawn:
-  Exec: {}
-  Files: {}
-  Network: {}
-{% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
   grain='default', default= 'default', merge= salt['pillar.get']('systemd:nspawn', {})) %}

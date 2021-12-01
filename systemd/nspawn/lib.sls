@@ -58,10 +58,10 @@ mkosi_image_{{ name }}:
 
 
 {% macro machine(definition) %}
-  {%- from "systemd/nspawn/defaults.jinja" import settings, machine_defaults with context %}
-  {%- set this= salt['grains.filter_by']({'default': machine_defaults},
+  {%- from "systemd/nspawn/defaults.jinja" import settings with context %}
+  {%- set this= salt['grains.filter_by']({'default': settings.image[definition.image]['machine']},
     grain='default', default= 'default', merge=definition) %}
-
+  
 nspawn_image_{{ this.name }}:
   cmd.run:
     - name: |
@@ -104,31 +104,45 @@ nspawn_started_{{ this.name }}:
       - cmd: nspawn_start_{{ this.name }}
 
     {% if this.postinst.source %}
+
 nspawn_postinst_copy_{{ this.name }}:
   file.managed:
-    - name: {{ settings.store.nspawn_config }}/{{ this.name }}.postinst
+    - name: {{ settings.store.nspawn_run }}/{{ this.name }}.postinst
     - source: {{ this.postinst.source }}
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
   cmd.run:
     - name: |
         machinectl copy-to {{ this.name }} \
-          {{ settings.store.nspawn_config }}/{{ this.name }}.postinst \
+          {{ settings.store.nspawn_run }}/{{ this.name }}.postinst \
           /tmp/machine.postinst
     - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
     - require:
       - file: nspawn_postinst_copy_{{ this.name }}
 
+nspawn_authorized_keys_copy_{{ this.name }}:
+  file.managed:
+    - name: {{ settings.store.nspawn_run }}/{{ this.name }}.authorized_keys
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - contents: |
+{{ this.postinstall.authorized_keys|indent(8, true) }}
+  cmd.run:
+    - name: |
+        machinectl copy-to {{ this.name }} \
+          {{ settings.store.nspawn_run }}/{{ this.name }}.authorized_keys \
+          /tmp/authorized_keys
+    - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
+    - require:
+      - file: nspawn_authorized_keys_copy_{{ this.name }}
+
 nspawn_postinst_exec_{{ this.name }}:
   cmd.run:
     - name: |
-        printf "%s\n" "${authorized_keys}" | \
-          systemd-run --wait --pipe --machine {{ this.name }} \
-            /usr/bin/sh /tmp/machine.postinst {{ this.postinst.args|join(' ') }}
-    - env:
-        authorized_keys: |
-{{ this.authorized_keys|indent(10, true) }}
+        machinectl shell {{ this.name }} \
+          /bin/sh -c '/bin/chmod +x /tmp/machine.postinst; /tmp/machine.postinst {{ this.postinst.args|join(' ') }}'
     - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
     - require:
       - cmd: nspawn_postinst_copy_{{ this.name }}
+      - cmd: nspawn_authorized_keys_copy_{{ this.name }}
 
 nspawn_create_postinst_done_{{ this.name }}:
   cmd.run:

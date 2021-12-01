@@ -147,7 +147,7 @@ LimitCPU, LimitFSIZE, LimitDATA, LimitSTACK, LimitCORE, LimitRSS, LimitNOFILE, L
 
   Configures the kernel hostname set for the container. This is equivalent to the --hostname= command line switch, and takes the same argument. See systemd-nspawn(1) for details.
 
-#### ResolvConf
+	#### ResolvConf
 
   Configures how /etc/resolv.conf in the container shall be handled. This is equivalent to the --resolv-conf= command line switch, and takes the same argument. See systemd-nspawn(1) for details.
 
