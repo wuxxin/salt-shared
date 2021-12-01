@@ -1,30 +1,17 @@
 #!/bin/sh
-# create app user and skeleton dirs, configure ssh host keys, add ssh public keys
+# re-create ssh host keys
+# create app user and skeleton dirs
+# add ssh public keys to root and app user
 set -e
 
 userid="$1"; groupid="$2"; username="$3"; HOME="$4";
 AUTHORIZED_KEYS="/tmp/authorized_keys"
-
 if test "$4" = ""; then
     echo "error, usage: $0 <userid> <groupid> <username> <homedir>"
     echo "will use $AUTHORIZED_KEYS if exist"
     exit 1
 fi
 
-# configure ssh
-# do not use and remove ecdsa keys
-for i in ssh_host_ecdsa_key ssh_host_ecdsa_key.pub; do
-    if test -e /etc/ssh/$i; then rm /etc/ssh/$i; fi
-done
-cat >> /etc/ssh/sshd_config <<EOF
-### NSPAWN-MACHINE-POSTINST-BEGIN ###
-# Supported HostKey algorithms by order of preference.
-HostKey /etc/ssh/ssh_host_ed25519_key
-HostKey /etc/ssh/ssh_host_rsa_key
-# disabled: HostKey /etc/ssh/ssh_host_ecdsa_key
-AuthenticationMethods publickey
-### NSPAWN-MACHINE-POSTINST-END ###
-EOF
 # create a new set of openssh-server host keys
 dpkg-reconfigure --force openssh-server
 

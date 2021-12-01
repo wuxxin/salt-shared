@@ -61,7 +61,7 @@ mkosi_image_{{ name }}:
   {%- from "systemd/nspawn/defaults.jinja" import settings with context %}
   {%- set this= salt['grains.filter_by']({'default': settings.image[definition.image]['machine']},
     grain='default', default= 'default', merge=definition) %}
-  
+
 nspawn_image_{{ this.name }}:
   cmd.run:
     - name: |
@@ -109,6 +109,7 @@ nspawn_postinst_copy_{{ this.name }}:
   file.managed:
     - name: {{ settings.store.nspawn_run }}/{{ this.name }}.postinst
     - source: {{ this.postinst.source }}
+    - makedirs: true
     - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
   cmd.run:
     - name: |

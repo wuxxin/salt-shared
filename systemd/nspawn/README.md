@@ -6,7 +6,7 @@
 
 + create image, start machine
 
-```
+```jinja
 include:
   - systemd.nspawn
 
@@ -17,9 +17,10 @@ include:
 
 # create test machine
 {% load_yaml as definition %}
-# name of the nspawn container and name of the controlling systemd service
-name: testmachine
 
+# mandatory: name, image
+# name: name of the nspawn container and name of the controlling systemd service
+name: testmachine
 # image: a image name created with eg. `image(name='focal', template='focal')`
 image: focal
 

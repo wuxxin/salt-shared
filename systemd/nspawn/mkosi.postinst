@@ -18,9 +18,17 @@ fi
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 
-# delete openssh-server keys, will be regenerated on app.postinst
+# delete openssh-server keys, should/will be regenerated on machine.postinst
 rm /etc/ssh/ssh_host*
-
+cat >> /etc/ssh/sshd_config <<EOF
+### NSPAWN-POSTINST-BEGIN ###
+# Supported HostKey algorithms by order of preference.
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+# disabled: HostKey /etc/ssh/ssh_host_ecdsa_key
+AuthenticationMethods publickey
+### NSPAWN-POSTINST-END ###
+EOF
 # # make sure we symlink /run/systemd/resolve/stub-resolv.conf to /etc/resolv.conf
 # ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 

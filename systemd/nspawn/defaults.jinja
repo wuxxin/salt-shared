@@ -44,15 +44,15 @@ image:
 
       nspawn:
         Exec:
-          Boot: on
+          Boot: true
           LinkJournal: try-guest
           PrivateUsers: pick
           ResolvConf: copy-host
         Files:
-          PrivateUsersChown: on
+          PrivateUsersChown: true
         Network:
-          Private: on
-          VirtualEthernet: on
+          Private: true
+          VirtualEthernet: true
           Zone: nspawn
 
       postinst:
