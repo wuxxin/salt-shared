@@ -17,6 +17,7 @@ Usage: $0 <certificate.pem> <days-warning> <days-error>
     - print error, make sentry error entry, exit 0
 - if validity <= days-warning
     - print warning, make sentry warning entry, exit 0
+- exit 0
 EOF
     exit 1
 }
