@@ -7,27 +7,24 @@ self_path=$(dirname "$(readlink -e "$0")")
 
 usage(){
     cat << EOF
-Usage:  $0 [--config config_list --states states_list] base_path [salt-call parameter]
+Usage:  $0 [--config <list> --states <states> [--add-default-skel]] <base_path> [<salt-call parameter>]
 
 --config defaults to "$config_list"
 --states defaults to "$states_list"
-paths are relative to base_path
+--add-default-skel writes additional default salt layout to base_path
 
-script rewrites $config_path/minion on execution
-
-script expects root, or call with sudo as sudo able user
+script expects root, or be called with sudo as sudo able user.
+paths are relative to <base_path>, script rewrites $config_path/minion on execution.
 
 EOF
     exit 1
 }
 
 
-minion_config() { # $1=basepath $2=configpath $3=config_list $4=states_list
-    local base_path config_path config_list states_list
-    base_path=$1
-    config_path=$2
-    config_list=$3
-    states_list=$4
+minion_config() { # $1=base_path $2=confi_gpath $3=config_list $4=states_list
+    # $5=add_default_skel:true,*false*,''
+    local base_path config_path config_list states_list add_default_skel
+    base_path=$1; config_path=$2; config_list=$3; states_list=$4; add_default_skel=$5
     echo "generating $config_path/minion config file"
     mkdir -p "$config_path"
     cat << EOF > "$config_path/minion"
@@ -50,8 +47,25 @@ grains:
   project_basepath: $base_path
 
 EOF
-
+    if test "$add_default_skel" = "true"; then
+        if ! which git > /dev/null; then
+            DEBIAN_FRONTEND=noninteractive apt-get install -y git
+        fi
+        echo "generating salt skeleton at $base_path"
+        mkdir -p $base_path/salt/local
+        cd $base_path/salt
+        git clone https://github.com/wuxxin/salt-shared.git
+        cd $base_path
+        cat > $base_path/salt/local/top.sls << EOF
+base:
+  '*':
+    - main
+EOF
+        mkdir -p $base_path/config
+        cp $base_path/salt/local/top.sls $base_path/config/top.sls
+    fi
 }
+
 
 salt_install() { # no parameter
     local os_release os_codename os_distributor os_architecture
@@ -90,6 +104,7 @@ main() {
     states_list="salt/salt-shared salt/local"
     if test "$1" = "--config"; then config_list="$2"; shift 2; fi
     if test "$1" = "--states"; then states_list="$2"; shift 2; fi
+    if test "$1" = "--add-default-skel"; then add_default_skel="true"; shift; fi
     if test ! -e "$1"; then usage; fi
     base_path="$(readlink -e $1)"
     shift
