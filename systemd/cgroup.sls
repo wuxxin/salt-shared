@@ -1,10 +1,14 @@
+{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
+include:
+  - kernel.sysctl.cgroup-userns-clone
+{% endif %}
+
 cgroup:
   pkg.installed:
     - pkgs:
       - cgroup-tools
 
 {% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
-
 {# it's past 2020, enable cgroup v2 only hierachy managed by systemd #}
 cgroup-grub-settings:
   file.managed:
@@ -16,7 +20,6 @@ cgroup-grub-settings:
     - name: update-grub
     - watch:
       - file: cgroup-grub-settings
-
 {% endif %}
 
 
