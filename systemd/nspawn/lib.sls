@@ -34,7 +34,7 @@ mkosi_config_nspawn_{{ name }}:
     - source: salt://systemd/nspawn/nspawn-template.jinja
     - template: jinja
     - defaults:
-        dataset: {{ settings.image[template]['nspawn'] }}
+        dataset: {{ settings.image[template]['machine']['nspawn'] }}
 
 mkosi_config_postinst_{{ name }}:
   file.managed:
@@ -125,7 +125,7 @@ nspawn_authorized_keys_copy_{{ this.name }}:
     - name: {{ settings.store.nspawn_run }}/{{ this.name }}.authorized_keys
     - onlyif: test ! -e {{ settings.store.nspawn_config }}/{{ this.name }}.postinst.done
     - contents: |
-{{ this.postinstall.authorized_keys|indent(8, true) }}
+{{ this.postinst.authorized_keys|indent(8, true) }}
   cmd.run:
     - name: |
         machinectl copy-to {{ this.name }} \
