@@ -4,23 +4,63 @@ set -eo pipefail
 
 usage(){
     cat << EOF
-Usage: $0 start
+Usage: $0 sync|hard_reset --yes
 
-connects to a remote server defined in $config_file via ssh,
-does a continous one way sync of the working copy of the git repository
-(ignoring .git) to the remote server's location of the sourcecode using unison.
+$0 sync
 
-This does not touch the .git directory on the remote side,
-only the working copy of the remote repository is modified.
+    connects to a remote server defined in $config_file via ssh,
+    does a continous **one way** sync of the working copy of the git repository
+    (ignoring .git) to the remote server's location of the sourcecode using unison.
 
-while the sync is active, changes on the remote side working copy are overwritten.
-It should be useful to dryrun/tryout changes without pushing them first.
-once finished doctoring, assure to take care of the modified remote working copy,
-eg. by overwriting it: `git reset --hard "origin/master"`
+    This does **not** touch the .git directory on the remote side,
+    only the working copy of the remote repository is modified.
+
+    Before the sync is started, the state of the remote repository is checked,
+    and the sync is aborted if the remote repository is unclean.
+
+    while the sync is active, changes on the remote side working copy are overwritten.
+
+$0 hard_reset --yes
+
+    mark a remote repository as clean by overwriting **ANY** changes in working tree,
+    which calls "$hard_reset_git" on the target.
+
+    after finished doctoring, assure to take care of the modified remote working copy,
+    by. executing "$0 hard_reset --yes" to reset all changes.
 
 EOF
     exit 1
 }
+
+hard_reset_git='git reset --hard --recurse-submodules HEAD'
+is_clean_git='
+    is_clean="true"
+    if ! git diff-files --quiet --; then
+        echo "error: working directory is not clean."
+        git --no-pager diff-files --name-status -r --
+        is_clean="false"
+    fi
+    if ! git diff-index --cached --quiet HEAD --; then
+        echo "error: there are cached/staged changes"
+        git --no-pager diff-index --cached --name-status -r HEAD --
+        is_clean="false"
+    fi
+    if test "$(git ls-files --other --exclude-standard --directory)" != ""; then
+        echo "error: working directory has extra files"
+        git --no-pager ls-files --other --exclude-standard --directory
+        is_clean="false"
+    fi
+    if test "$(git log --branches --not --remotes --pretty=format:"%H")" != ""; then
+        echo "error: there are unpushed changes"
+        git --no-pager log --branches --not --remotes --pretty=oneline
+        is_clean="false"
+    fi
+    if test "$is_clean" = "true"; then
+        echo "OK, is clean"
+        exit 0
+    fi
+    exit 1
+'
 
 ssh_uri() { # sshlogin [ssh,scp,host,port,user,known [--user newuser]]
     local sshlogin user userprefix port host known
@@ -72,9 +112,20 @@ remote_user=$gitops_user
 remote_sshlogin=$(ssh_uri ${sshlogin} ssh --user $remote_user)
 remote_src=$gitops_target/$base_name
 
-echo "start unison, exit with CTRL-C"
-one way only to remote, also ignore .git and probably if possible content of .gitignore
-fixme unison \
+is_clean=$(ssh $sshopts "$(ssh_uri ${sshlogin})" "cd $remote_src; $is_clean_git")
+if test "$is_clean" != "OK, is clean"; then
+    echo "Error: remote repository is not clean."
+    echo "$is_clean"
+    exit 1
+fi
+
+echo 'starting sync, exit with CTRL-C, revert all remote changes with `$0 hard_reset --yes`'
+unison default \
     ${base_path} \
     ${remote_sshlogin}${remote_src} \
-    -repeat watch -terse
+    -noupdate ${base_path} \
+    -force ${base_path} \
+    -ignore .git \
+    -repeat watch \
+    -terse \
+    -batch
