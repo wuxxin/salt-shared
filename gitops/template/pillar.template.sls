@@ -22,6 +22,11 @@ node:
     internal: {{ config.network.internal }}
     netplan: |
 {{ config.network.netplan|indent(8, True) }}
+    systemd:
+      netdev: |
+{{ config.network.systemd.netdev|indent(10, True) }}
+      network: |
+{{ config.network.systemd.network|indent(10, True) }}
 
 gitops:
   user: {{ config.gitops_user }}
