@@ -1,26 +1,129 @@
 # Gitops State
 
-+ Systemd Service for updating software from git repository
-+ timer based, webhook based, direct calling of gitops-update.service
-+ defaults to saltstack as update state reconciler
-+ errors and warnings are written to Sentry
-+ prometheus metrics about the update
-+ secure bootstraping from
-  + ssh key accessable private git repositories
-  + git-crypt encrypted repositories
-+ combine this state with http_frontend for https webhook support
+Service and tools for bootstraping and updating software from git repositories.
 
-## bootstrap a gitops install
++ **templating** of new **gitops repositories** with `create-gitops-repo.sh`
++ secure **bootstraping** execution from **git repositories** with `from-git.sh` and `execute-saltstack.sh`
+  + private git repositories accessable by ssh key
+  + git-crypt encrypted repositories
++ timer, webhook and direct calling of a **git repository** based **update service**
+    + defaults to saltstack as update state reconciler
+    + errors and warnings are written to Sentry
+    + prometheus metrics about the update
+    + https webhook support in combination with state `http_frontend`
++ support for **interactive remote tinker** with `remote-doctor.sh` by syncing local working tree changes to the remote on demand
++ **standalone one file saltstack execution** with salt-shared included
++ part of **machine-bootstrap**'s optional **devop installation** step
+
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [create a gitops repository](#create-a-gitops-repository)
+- [bootstrap from a gitops repository](#bootstrap-from-a-gitops-repository)
+- [interactive remote tinker](#interactive-remote-tinker)
+- [one shot, no repository execution](#one-shot-no-repository-execution)
+- [gitops repository based Update System](#gitops-repository-based-update-system)
+	- [Execution](#execution)
+	- [Flags set and recognized](#flags-set-and-recognized)
+	- [Tags set and recognized](#tags-set-and-recognized)
+	- [Prometheus Metrics](#prometheus-metrics)
+	- [Sentry Messages](#sentry-messages)
+
+<!-- /TOC -->
+
+## create a gitops repository
 
 ```sh
 /path/to/create-gitops-repo.sh ~/work mymachine \
     git.server.domain gituser user@email mymachine.domain.name --no-remote
 ```
-## start update
 
-+ `systemctl start gitops-update`
+## bootstrap from a gitops repository
 
-## Flags, Tags, Metrics, Sentry Messages
+```sh
+ssh_id=""; gpg_id=""; ssh_known_hosts=""; http_proxy=""
+gitops_source=""; gitops_branch=""; gitops_user=""; gitops_target=""; base_name=""
+
+# copy script to target
+curl https://raw.githubusercontent.com/wuxxin/salt-shared/master/gitops/from-git.sh \
+        > /tmp/from-git.sh
+scp /tmp/from-git.sh ssh://target.domain/tmp/from-git.sh
+# pipe ssh_id,gpg_id,ssh_known_hosts to ssh on target and execute script there
+printf "%s\n%s\n%s\n" "$ssh_id" "$gpg_id" "$ssh_known_hosts" | \
+    ssh ssh://target.domain "
+        chmod +x /tmp/from-git.sh;
+        http_proxy=\"$http_proxy\"; export http_proxy;
+        /tmp/from-git.sh bootstrap \
+            --url \"$gitops_source\" \
+            --branch \"${gitops_branch:-master}\" \
+            --user \"$gitops_user\" \
+            --home \"$gitops_target\" \
+            --git-dir \"${gitops_target}/${base_name}\" \
+            --keys-from-stdin
+        "
+```
+
+
+## interactive remote tinker
+
++ start
+  + on local: `remote-doctor.sh sync`
++ loop until done:
+  + on local: make changes in local files
+  + on remote: `cd $src_dir; /usr/local/sbin/execute-saltstack.sh . state.highstate`
++ done
+  + on local: `remote-doctor.sh hard_reset --yes`
+
+## one shot, no repository execution
+
++ execute on target
+
+```sh
+#!/bin/sh
+set -eo pipefail
+self_path=$(dirname "$(readlink -e "$0")")
+if test "$1" != "--yes"; then
+    echo "Usage: $0 --yes [salt-call param, default=state.highstate]"; exit 1
+fi
+shift; args="$@"; if test "$args" = ""; then args="state.highstate"; fi
+if ! which git > /dev/null; then DEBIAN_FRONTEND=noninteractive apt-get install -y git; fi
+mkdir -p $self_path/salt/local $self_path/config
+git -C $self_path/salt clone https://github.com/wuxxin/salt-shared.git
+printf "base:\n  '*':\n    - main\n" > $self_path/salt/local/top.sls
+printf "base:\n  '*':\n    - main\n" > $self_path/config/top.sls
+cat > config/main.sls << EOF
+# pillar
+
+EOF
+cat > salt/local/main.sls << EOF
+# states
+
+EOF
+exec $self_path/salt/salt-shared/gitops/execute-saltstack.sh $self_path "$args"
+```
+
+## gitops repository based Update System
+
+### Execution
+
+Can be triggered via webhook, systemd timer, or manual via
+`systemctl start gitops-update`
+
+Execute the following steps, any step that fails stops executing later steps:
+
++ `validate`: check the validity of the update, must not interrupt services!
++ `before`: executed before "update", may stop services that may get restarted on finish
++ `update`: the acutal update command
++ `after`: executed after "update" did run sucessful, eg. for metric processing
++ `finish`: is executed after "after" was sucessful and machine does not need a reboot
+            eg. to restart services that got stopped
+
+Example:
+```yaml
+update:
+  before_cmd: /usr/bin/systemctl stop xyz
+  after_cmd: /usr/bin/bash '. /usr/local/lib/gitops-library.sh; simple_metric test_update_run counter "timestamp of update run" "$(date +%s)"'
+  finish_cmd: /usr/bin/systemctl start --no-block xyz
+```
 
 ### Flags set and recognized
 
@@ -54,23 +157,3 @@
   + `Gitops Error` "(validate_cmd|before_cmd|update_cmd|after_cmd|finish_cmd) failed with error $result"
   + `Service Error` "Service ($UNITNAME) failed" "$(unit_json_status)"
   + `SSL Error` "Certificate for $subject_cn is less than $min_days days valid\nValidity end date=$valid_until"
-
-## Update Execution
-
-Can be triggered via webhook, systemd timer, or manual via `systemctl start gitops-update`.
-Execute the following steps, any step that fails stops executing later steps:
-
-+ `validate`: check the validity of the update, must not interrupt services!
-+ `before`: executed before "update", may stop services that may get restarted on finish
-+ `update`: the acutal update command
-+ `after`: executed after "update" did run sucessful, eg. for metric processing
-+ `finish`: is executed after "after" was sucessful and machine does not need a reboot
-            eg. to restart services that got stopped
-
-Example:
-```yaml
-update:
-  before_cmd: /usr/bin/systemctl stop xyz
-  after_cmd: /usr/bin/bash '. /usr/local/lib/gitops-library.sh; simple_metric test_update_run counter "timestamp of update run" "$(date +%s)"'
-  finish_cmd: /usr/bin/systemctl start --no-block xyz
-```
