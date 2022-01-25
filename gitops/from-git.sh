@@ -4,7 +4,8 @@ set -eo pipefail
 
 self_path=$(dirname "$(readlink -e "$0")")
 
-usage(){
+
+usage() {
     cat << EOF
 clone and update a (encrypted) git repository
 
@@ -49,7 +50,22 @@ EOF
     exit 1
 }
 
-extract_gpg(){
+
+gosu() {
+    local user home
+    user=$1
+    shift
+    if which gosu > /dev/null; then
+        gosu $user $@
+    else
+        home="$( getent passwd "$user" | cut -d: -f6 )"
+        setpriv --reuid=$user --regid=$user --init-groups \
+            env HOME=$home $@
+    fi
+}
+
+
+extract_gpg() {
     local head="-----BEGIN PGP PRIVATE KEY BLOCK-----"
     local bottom="-----END PGP PRIVATE KEY BLOCK-----"
     echo "$1" | grep -qPz "(?s)$head.*$bottom"
@@ -57,7 +73,8 @@ extract_gpg(){
     echo "$1" | awk "/$head/,/$bottom/"
 }
 
-extract_ssh(){
+
+extract_ssh() {
     local oldhead="-----BEGIN RSA PRIVATE KEY-----"
     local oldbottom="-----END RSA PRIVATE KEY-----"
     local newhead="-----BEGIN OPENSSH PRIVATE KEY-----"
@@ -72,7 +89,8 @@ extract_ssh(){
     fi
 }
 
-extract_known_hosts(){
+
+extract_known_hosts() {
   local head='# ---BEGIN OPENSSH KNOWN HOSTS---'
   local bottom='# ---END OPENSSH KNOWN HOSTS---'
   echo "$1" | grep -qPz "(?s)$head.*$bottom"
@@ -80,7 +98,8 @@ extract_known_hosts(){
   echo "$1" | awk "/$head/,/$bottom/"
 }
 
-ssh_type(){
+
+ssh_type() {
     echo "$@" | grep -q -- "-----BEGIN RSA PRIVATE KEY-----"
     if test $? -eq 0; then
         echo "id_rsa"
@@ -92,7 +111,8 @@ ssh_type(){
     fi
 }
 
-pull_latest_src () {
+
+pull_latest_src() {
    # $1=src_url $2=src_branch $3=target_dir $4=user
    local src_url src_branch target_dir user
    src_url="$1"
@@ -121,7 +141,8 @@ pull_latest_src () {
    gosu "$user" git -C "$target_dir" submodule update --init --recursive
 }
 
-export_src () {
+
+export_src() {
    # $1=src_dir $2=target_dir $3=user
    local src_dir target_dir user
    src_dir="$1"
@@ -133,7 +154,8 @@ export_src () {
    gosu "$user" bash "git -C $src_dir archive --format=tar HEAD | tar -x -C $target_dir"
 }
 
-write_gitrev_files () {
+
+write_gitrev_files() {
    # $1=src_dir $2=output_dir $3=$user
    local src_dir output_dir user GIT_REV GIT_BRANCH GIT_VERSION
    src_dir="$1"; output_dir="$2"; user="$3"
@@ -151,6 +173,7 @@ GIT_BRANCH="$GIT_BRANCH"
 GIT_VERSION=$GIT_VERSION
 EOF
 }
+
 
 # main
 cd /run
@@ -230,13 +253,18 @@ if test "$cmd" = "bootstrap"; then
 
     # install base packages
     req_missing=false
-    for i in "locale-gen curl gosu git gpg git-crypt"; do
+    for i in "locale-gen curl git gpg git-crypt gosu"; do
         if ! which "$i" > /dev/null; then req_missing=true; fi
     done
     if test "$req_missing" = "true"; then
-        DEBIAN_FRONTEND=noninteractive apt-get -y update
-        DEBIAN_FRONTEND=noninteractive apt-get -y install \
-            software-properties-common locales curl gosu git gnupg git-crypt
+        if which apt-get > /dev/null; then
+            DEBIAN_FRONTEND=noninteractive apt-get -y update
+            DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                software-properties-common locales curl git gnupg git-crypt gosu
+        elif which pamac > /dev/null; then
+            # manjaro is missing gosu, will be replaced by setpriv in bash function gosu
+            pamac install --no-confirm --no-upgrade glibc-locales curl git gnupg git-crypt
+        fi
     fi
 
     # generate locales
