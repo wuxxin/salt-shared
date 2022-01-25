@@ -126,11 +126,7 @@ mkdir -p salt/local
 pushd salt
 git submodule add https://github.com/wuxxin/salt-shared.git
 popd
-cat > config/top.sls << EOF
-base:
-  '*':
-    - main
-EOF
+printf "base:\n  '*':\n    - main\n" > config/top.sls
 cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
 cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
 cp salt/salt-shared/gitops/template/state.template.sls salt/local/top.sls
