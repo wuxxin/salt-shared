@@ -6,10 +6,10 @@ gitop-requisites:
   pkg.installed:
     - pkgs:
       - curl
-      - gosu
       - git
       - gnupg
       - git-crypt
+      - gosu
       - jq
 
 /usr/local/lib/gitops-library.sh:
