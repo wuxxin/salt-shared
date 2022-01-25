@@ -1,6 +1,18 @@
 #!/usr/bin/bash
 
 # ### tools ###
+gosu() { # username cmd [args]
+    local user home
+    user=$1
+    shift
+    if which gosu > /dev/null; then
+        gosu $user $@
+    else
+        home="$( getent passwd "$user" | cut -d: -f6 )"
+        setpriv --reuid=$user --regid=$user --init-groups env HOME=$home $@
+    fi
+}
+
 uplink_ip() { # return STDOUT=uplink_ip
     local default_iface default_ip
     default_iface=$(ip -j route list default | sed -r 's/.+dev":"([^"]+)".+/\1/g')
@@ -163,15 +175,6 @@ metric_pipe_save() { # $1=metric-output-name STDIN=metric-data
 
 simple_metric() { # equal to mk_metric, but saves/overwrites data to filename=$1
     local data
-    if test "$1" = ""; then
-        cat <<"EOF"
-see mk_metric for detailed usage; writes one metric per file. example:
-simple_metric test_metric gauge "app version" 1 \
-    "app_git_rev=\"$(gosu {{ settings.user }} git -C /app/origin rev-parse HEAD)\",\
-    app_git_branch=\"$(gosu {{ settings.user }} git -C /app/origin rev-parse --abbrev-ref HEAD)\""
-EOF
-        return
-    fi
     data=$(mk_metric "$@")
     metric_save "$1" "$data"
 }

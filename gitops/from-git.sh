@@ -59,8 +59,7 @@ gosu() {
         gosu $user $@
     else
         home="$( getent passwd "$user" | cut -d: -f6 )"
-        setpriv --reuid=$user --regid=$user --init-groups \
-            env HOME=$home $@
+        setpriv --reuid=$user --regid=$user --init-groups env HOME=$home $@
     fi
 }
 
