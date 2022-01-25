@@ -1,0 +1,16 @@
+{% load_yaml as defaults %}
+
+build:
+  name: openwrt-builder
+  image: openwrtorg/imagebuilder
+  tag: latest
+  type: script
+  environment: {}
+  storage:
+    - name: ${SERVICE_NAME}_data
+  volumes:
+    - ${SERVICE_NAME}_data:/output
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+    grain='default', default= 'default', merge= salt['pillar.get']('openwrt', {})) %}

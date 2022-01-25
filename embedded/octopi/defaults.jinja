@@ -1,0 +1,32 @@
+{% load_yaml as defaults %}
+
+build:
+  name: octopi-builder
+  image: localhost/octopi/builder
+  tag: latest
+  type: script
+  build:
+    source: .
+  files:
+    build/Dockerfile:
+      contents: |
+        FROM Debian
+        RUN apt-get install gawk util-linux qemu-user-static git p7zip-full python3
+        RUN git clone https://github.com/guysoft/CustomPiOS.git; \
+            git clone https://github.com/guysoft/OctoPi.git; \
+            cd OctoPi/src/image; \
+            wget -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf_latest'; \
+            cd ..; \
+            ../../CustomPiOS/src/update-custompios-paths
+  environment: {}
+  storage:
+    - name: ${SERVICE_NAME}_data
+  volumes:
+    - ${SERVICE_NAME}_data:/output
+{% endload %}
+
+# sudo modprobe loop
+# EXEC bash -x ./build_dist
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+    grain='default', default= 'default', merge= salt['pillar.get']('octopi', {})) %}
