@@ -4,3 +4,4 @@ include:
   - .photo
   - .pixel
   - .vector
+  - .3d
