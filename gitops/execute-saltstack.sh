@@ -56,11 +56,7 @@ EOF
         cd $base_path/salt
         git clone https://github.com/wuxxin/salt-shared.git
         cd $base_path
-        cat > $base_path/salt/local/top.sls << EOF
-base:
-  '*':
-    - main
-EOF
+        printf "base:\n  '*':\n    - main\n" > $base_path/salt/local/top.sls
         mkdir -p $base_path/config
         cp $base_path/salt/local/top.sls $base_path/config/top.sls
     fi
@@ -74,27 +70,33 @@ salt_install() { # no parameter
     os_codename=$(lsb_release -c -s)
     os_distributor=$(lsb_release  -i -s | tr '[:upper:]' '[:lower:]')
     os_architecture=$(dpkg --print-architecture)
-    salt_major_version="3003"
-    salt_repo_aptline="deb [arch=${os_architecture}] http://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version} ${os_codename} main"
-    salt_repo_keyfile="https://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version}/SALTSTACK-GPG-KEY.pub"
 
-    if test "$os_architecture" = "amd64"; then
-        if [[ $os_codename =~ ^(bionic|focal|stretch|buster)$ ]]; then
-            echo "installing saltstack ($salt_major_version) from ppa"
-            curl -L -s "$salt_repo_keyfile" | apt-key add -
-            echo "$salt_repo_aptline" > /etc/apt/sources.list.d/saltstack.list
-            DEBIAN_FRONTEND=noninteractive apt-get update --yes
+    if which apt-get > /dev/null; then
+        salt_major_version="3004"
+        salt_repo_aptline="deb [arch=${os_architecture}] http://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version} ${os_codename} main"
+        salt_repo_keyfile="https://repo.saltstack.com/py3/${os_distributor}/${os_release}/${os_architecture}/${salt_major_version}/SALTSTACK-GPG-KEY.pub"
+        if test "$os_architecture" = "amd64"; then
+            if [[ $os_codename =~ ^(bionic|focal|stretch|buster)$ ]]; then
+                echo "installing saltstack ($salt_major_version) from ppa"
+                curl -L -s "$salt_repo_keyfile" | apt-key add -
+                echo "$salt_repo_aptline" > /etc/apt/sources.list.d/saltstack.list
+                DEBIAN_FRONTEND=noninteractive apt-get update --yes
+            else
+                echo "installing distro buildin saltstack version"
+            fi
         else
             echo "installing distro buildin saltstack version"
         fi
-    else
-        echo "installing distro buildin saltstack version"
-    fi
 
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        salt-minion python3-pytoml curl gosu git gnupg git-crypt
-    echo "keep minion from running automatically"
-    for i in disable stop mask; do systemctl $i salt-minion; done
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            salt-minion python3-pytoml curl git gnupg git-crypt
+        echo "keep minion from running automatically"
+        for i in disable stop mask; do systemctl $i salt-minion; done
+
+    elif which pamac > /dev/null; then
+        echo "installing distro buildin saltstack version"
+        pamac install --no-confirm --no-upgrade salt curl git gnupg git-crypt
+    fi
 }
 
 
