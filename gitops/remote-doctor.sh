@@ -10,7 +10,7 @@ $0 sync
 
     connects to a remote server defined in $config_file via ssh,
     does a continous **one way** sync of the working copy of the git repository
-    (ignoring .git) to the remote server's location of the sourcecode using unison.
+    (ignoring .git) to the remote server's location of the sourcecode using **unison**.
 
     This does **not** touch the .git directory on the remote side,
     only the working copy of the remote repository is modified.
@@ -19,6 +19,7 @@ $0 sync
     and the sync is aborted if the remote repository is unclean.
 
     while the sync is active, changes on the remote side working copy are overwritten.
+    unison is needed on both sides. local side availability will be checked beforehand.
 
 $0 hard_reset --yes
 
