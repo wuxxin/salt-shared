@@ -1,3 +1,3 @@
 include:
+  - .cgroup
   - .journald
-  - .nsswitch
