@@ -6,7 +6,8 @@
 
 ```
 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$userid/bus" gosu $username bash \
-  'notify-send "Notification Titel" "Notification Body" -u critical -i face-worried'
+  'notify-send "Notification Titel" "Notification Body with some text" \
+  -u critical -i face-worried'
 ```
 
 

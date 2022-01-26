@@ -70,11 +70,14 @@ some states have a documentation README.md
     * [android/builder](android/builder) Lineage Android OS Builder container for building android
     * [android/redroid](android/redroid) GPU accelerated Android on same kernel container
 
-* Embedded
-    * [Openwrt/Homeassistant device_tracker](openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
+* IOT \& Embedded
     * [Airrohr](iot/airrohr) Airquality Sensor, setup and integration into homeassistant
+    * [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
+    * [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
+    * [OctoPI](embedded/octopi) Builder for Raspberry PI - OctoPrint (a 3D printer web interface) Distribution
 
 * unfinished, halfbroken, quirky or very minimum skeleton packages
+    * [manjaro](manjaro): disable or enable manjaro specifics
     * [backup](backup): Modern backup solution using restic and rclone
     * [lxc](kernel/lxc): lxc leightweight machine virtualization
     * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
