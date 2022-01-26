@@ -1,5 +1,10 @@
 # android
 
+## new
+
+https://github.com/waydroid/waydroid
+https://github.com/sickcodes/dock-droid
+
 ## android.tools
 
 + `adb`: Android Debug Bridge
