@@ -240,8 +240,9 @@ fi
 if test "$cmd" = "bootstrap"; then
     # wait for cloud-init to finish, breaks pkg installing
     if which cloud-init > /dev/null; then
-        echo -n "waiting for cloud-init finish..."
-        cloud-init status --wait || echo "finished with error: $?"
+        printf "waiting for cloud-init finish..."
+        cloud-init status --wait || printf "exited with error: $?"
+        printf "\n"
     fi
 
     # set temporary locale
