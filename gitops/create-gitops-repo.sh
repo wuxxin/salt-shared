@@ -9,8 +9,8 @@ gitreponame=""
 gitserver=""
 gituser=""
 gitgpguser=""
-hostname=""
 
+hostname=""
 firstuser=gitops
 gitserver_sshport=22
 authorized_keys="~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub"
