@@ -2,7 +2,7 @@
 # origin: system|custom
 origin: system
 custom_src_dist: focal
-custom_apply_patches: true
+custom_apply_patches: false
 
 # arc_max_percent: use up to x % of memory for arc
 arc_max_percent: 25
@@ -46,7 +46,7 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
     canmount: off
     mountpoint: none
 
-- name: ROOT/ubuntu
+- name: ROOT/{{ grains['os']|lower }}
   properties:
     canmount: noauto
     mountpoint: /
@@ -75,55 +75,70 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
 
 
 {% load_yaml as zfs_pool_defaults %}
+# keep in sync with machine-bootstrap/bootstrap-library.sh@create_root_zpool
+
 - name: data/home
   properties:
     mountpoint: /home
     setuid: off
     exec: on
-
 - name: data/home/root
   properties:
     mountpoint: /root
 
+- name: var/basedir-tmp
+  properties:
+    mountpoint: /tmp
+- name: var/tmp
+- name: var/spool
+- name: var/log
+  properties:
+    exec: off
+- name: var/cache
+  properties:
+    exec: off
+
+# for postgresql
 - name: data/postgresql
   properties:
     recordsize: 16K
     logbias: throughput
     primarycache: metadata
-
 - name: data/postgresql/localhost
   properties:
     mountpoint: /var/lib/postgresql
 
+# for mail
 - name: data/mail
   properties:
     mountpoint: /var/lib/mail
 
-- name: var/basedir-tmp
-  properties:
-    mountpoint: /tmp
-
-- name: var/tmp
-- name: var/spool
+# for apt based systems
 - name: var/backups
-- name: var/log
-  properties:
-    exec: off
-
-- name: var/cache
-  properties:
-    exec: off
-
-- name: var/cache/pbuilder
-  properties:
-    exec: on
-    devices: on
-
 - name: var/lib/apt-lists
   properties:
     exec: off
     mountpoint: /var/lib/apt/lists
 
+# for pbuilder
+- name: var/cache/pbuilder
+  properties:
+    exec: on
+    devices: on
+
+# for snaps
 - name: var/lib/snapd
 
+# for GNOME
+#- name: var/lib/AccountsService
+# for Docker
+# - name: var/lib/docker
+# for NFS
+# - name: var/lib/nfs
+# for LXC
+# - name: var/lib/lxc
+# for LibVirt
+# - name: var/lib/libvirt
+
+# keep in sync end
 {% endload %}
