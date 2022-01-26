@@ -5,9 +5,11 @@ Configures hostname, users, groups, locales, location, network, storage
 + .locale
   + configure language, messages, timezone, location
 + .network
-  + add internal bridge
+  + add internal bridge (uses netplan or systemd or ifup depending avaiability)
+  + configure nsswitch.conf@hosts line for dns name lookup order
   + install and configure nfs-common (and rpcbind) to only listen to localhost
     + use pillar: "nfs:listen_ip" to overwrite the default list
+  + add netplan or systemd.netdev/network files if present in pillar
 + .hostname
   + Configures hostname
 + .accounts
@@ -47,8 +49,12 @@ node:
     messages: POSIX
     hypen: de en-gb en-us
     spell: de-at de-de en-gb en-us
+
     # timezone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     timezone: Europe/Vienna
+    # metric for Metric, imperial for Imperial
+    unit_system: metric
+
     city: Vienna
     country_code: AT
     # latitude+longitude+elevation=Stephansdom/Vienna
@@ -56,15 +62,19 @@ node:
     longitude: 16.37315
     # Altitude above sea level in meters
     elevation: 172
-    # metric for Metric, imperial for Imperial
-    unit_system: metric
 
   network:
     internal:
       cidr: 10.140.250.1/24
       name: resident
-      # computed if empty: ip, netcidr, netmask, reverse_net, short_net
+      # computed if empty:
+      # ip, netcidr, netmask, reverse_net, short_net
     netplan: ""
+    systemd:
+      netdev: ""
+      network: ""
+    nsswitch:
+      hosts: mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
 
   storage:
     filesystem:

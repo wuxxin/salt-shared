@@ -23,6 +23,11 @@ locale:
   hypen: en-us
   spell: en-us
 
+  # time_zone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  timezone: UTC
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+
   city: World
   country_code: UN
   # latitude + longitude = Greenwich/UK at sealevel
@@ -30,17 +35,19 @@ locale:
   longitude: 0
   # elevation: Altitude above sea level in meters
   elevation: 0
-  # time_zone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-  timezone: UTC
-  # metric for Metric, imperial for Imperial
-  unit_system: metric
 
 network:
   internal:
     cidr: {{ internal_cidr }}
     name: {{ internal_name }}
-    # computed if empty: ip, netcidr, netmask, reverse_net, short_net
+    # computed if empty: ip, netcidr, netmask, reverse_net, short_net; default priority
   netplan:
+  systemd:
+    netdev:
+    network:
+  nsswitch:
+    hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
+  priority: 80
 
 # storage: {}
 {% endload %}
