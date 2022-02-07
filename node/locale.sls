@@ -1,7 +1,7 @@
 {% from "node/defaults.jinja" import settings with context %}
 
 {% set additional_list=
-  settings.locale.additional_language.strip().split(' ')|join('.UTF-8 ') ~ '.UTF-8' %}
+  settings.locale.additional_lang.strip().split(' ')|join('.UTF-8 ') ~ '.UTF-8' %}
 
 /etc/default/locale:
   file.managed:

@@ -43,10 +43,13 @@ node:
 
   locale:
     lang: de_AT.UTF-8
-    language: de_de:de
-    additional_language: de_DE en_US en_GB
+    # additional_lang: space seperated list of lang entries (without .UTF-8)
+    additional_lang: de_DE en_US en_GB
     # if messages is set, it will be written to LC_MESSAGES, eg.: messages: POSIX
     messages: POSIX
+    language: de_de:de
+    # keymap: keymap of keyboard
+    keymap: de-latin1
     hypen: de en-gb en-us
     spell: de-at de-de en-gb en-us
 

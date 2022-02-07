@@ -16,10 +16,13 @@ groups:
 
 locale:
   lang: en_US.UTF-8
+  # additional_lang: space seperated list of lang entries (without .UTF-8)
+  additional_lang: ""
   language: en_us:en
-  additional_language: ""
-  # if messages is set, it will be written to LC_MESSAGES, eg.: messages: POSIX
+  # messages: if set, will be written to LC_MESSAGES, eg.: "messages: POSIX"
   messages:
+  # keymap: keymap of keyboard
+  keymap: us
   hypen: en-us
   spell: en-us
 
@@ -28,6 +31,7 @@ locale:
   # metric for Metric, imperial for Imperial
   unit_system: metric
 
+  # ### location information
   city: World
   country_code: UN
   # latitude + longitude = Greenwich/UK at sealevel
@@ -43,8 +47,6 @@ network:
     # computed if empty: ip, netcidr, netmask, reverse_net, short_net; default priority
   netplan:
   systemd:
-    netdev:
-    network:
   nsswitch:
     hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
   priority: 80
