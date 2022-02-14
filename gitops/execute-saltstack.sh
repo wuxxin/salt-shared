@@ -69,7 +69,15 @@ salt_install() { # no parameter
     os_release=$(lsb_release -r -s)
     os_codename=$(lsb_release -c -s)
     os_distributor=$(lsb_release  -i -s | tr '[:upper:]' '[:lower:]')
-    os_architecture=$(dpkg --print-architecture)
+    os_hardware=$(uname -m)
+    if test "$os_hardware" = "x86_64"; then
+        os_architecture="amd64"
+    elif [[ "$os_hardware" =~ ^(i386|i486|i586|i686)$ ]] ; then
+        os_architecture="i386"
+    else
+        echo "Error: Unknown Hardware Architecture: $os_hardware"
+        exit 1
+    fi
 
     if which apt-get > /dev/null; then
         salt_major_version="3004"
