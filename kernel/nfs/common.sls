@@ -1,10 +1,10 @@
 {% from "kernel/nfs/defaults.jinja" import settings %}
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
-{% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
+
 {% set nfs_common_replace = [
   ('STATDOPTS', '--port 32765 --outgoing-port 32766 '+ param_list('--name', settings.listen_ip) ),
-  ('NEED_STATD', 'yes' if settings.legacy_support else 'no'),
+  ('NEED_STATD', 'no'),
   ('NEED_IDMAPD', ''),
 ] %}
 
@@ -21,132 +21,49 @@ rpcbind:
     - require:
       - pkg: rpcbind
 
-{# only start rpcbind[.socket] if nfs3 legacy support is required #}
-{% if settings.legacy_support %}
-
-  {% if salt['file.is_link']('/etc/systemd/system/rpcbind.socket') %}
-absent_rpcbind.socket:
-  file.absent:
-    - name: /etc/systemd/system/rpcbind.socket
-    - require_in:
-      - file: rpcbind.socket
-  {% endif %}
-  {% if salt['file.is_link']('/etc/systemd/system/rpcbind.service') %}
-absent_rpcbind.service:
-  file.absent:
-    - name: /etc/systemd/system/rpcbind.service
-  cmd.run:
-    - name: systemctl daemon-reload
-    - onchanges:
-      - file: absent_rpcbind.service
-    - require_in:
-      - service: unmask_legacy_rpcbind
-  {% endif %}
-
 rpcbind.socket:
-  file.managed:
-    - name: /etc/systemd/system/rpcbind.socket
-    - makedirs: true
-    - require:
-      - pkg: rpcbind
-    - contents: |
-        [Unit]
-        Description=RPCbind Server Activation Socket
-        DefaultDependencies=no
-        After=network-online.target
-
-        [Socket]
-        ListenStream=/run/rpcbind.sock
-
-        # RPC netconfig can't handle ipv6/ipv4 dual sockets
-        BindIPv6Only=ipv6-only
-  {%- for ip in settings.listen_ip %}
-  {%- set ip = '['+ ip+ ']' if ip|is_ipv6 else ip %}
-        ListenStream={{ ip }}:111
-        ListenDatagram={{ ip }}:111
-  {%- endfor %}
-
-        [Install]
-        WantedBy=sockets.target
-  cmd.run:
-    - name: systemctl daemon-reload
-    - onchanges:
-      - file: rpcbind.socket
-
-unmask_legacy_rpcbind:
-  service.unmasked:
-    - name: rpcbind
-    - require_in:
-      - service: legacy_rpcbind
-
-legacy_rpcbind:
-  service.running:
-    - name: rpcbind
-    - enable: True
-    - require:
-      - file: /etc/default/rpcbind
-    - watch:
-      - file: /etc/default/rpcbind
-
-legacy_rpcbind.socket:
-  service.running:
-    - name: rpcbind.socket
-    - enable: True
-    - require:
-      - service: legacy_rpcbind
-      - cmd: rpcbind.socket
-    - watch:
-      - file: rpcbind.socket
-
-{% else %}
-
-legacy_rpcbind.socket:
   service.dead:
     - name: rpcbind.socket
     - enable: False
     - require:
       - pkg: rpcbind
-
-rpcbind.socket:
   file.absent:
     - name: /etc/systemd/system/rpcbind.socket
     - require:
-      - service: legacy_rpcbind.socket
+      - service: rpcbind.socket
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: rpcbind.socket
 
-mask_legacy_rpcbind.socket:
+mask_rpcbind.socket:
   service.masked:
     - name: rpcbind.socket
     - require:
       - file: rpcbind.socket
       - cmd: rpcbind.socket
 
-legacy_rpcbind:
+rpcbind.service:
   service.dead:
-    - name: rpcbind
+    - name: rpcbind.service
     - enable: False
     - require:
       - file: /etc/default/rpcbind
     - watch:
       - file: /etc/default/rpcbind
 
-mask_legacy_rpcbind:
+mask_rpcbind.service:
   service.masked:
-    - name: rpcbind
+    - name: rpcbind.service
     - require:
-      - service: legacy_rpcbind
-{% endif %}
-
+      - service: rpcbind.service
 
 nfs-common:
   pkg.installed:
     - name: nfs-common
     - require:
-      - service: legacy_rpcbind
-      - service: legacy_rpcbind.socket
+      - service: rpcbind.service
+      - service: rpcbind.socket
 
 {% for name, value in nfs_common_replace %}
 {{ name }}-nfs-common:

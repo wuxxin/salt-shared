@@ -4,10 +4,10 @@ include:
   - kernel.nfs.common
 
 {% macro param_list(param_name, list) %}{% if list %}{{ param_name+ ' '+ list|join(' '+ param_name+ ' ') }}{% endif %}{% endmacro %}
-{% set nfs3_option= '' if settings.legacy_support else '-N 3 ' %}
+
 {% set nfs_server_replace = [
-  ('RPCNFSDOPTS',   '-N 2 '+ nfs3_option+ '--no-udp '+ param_list('--host', settings.listen_ip) ),
-  ('RPCMOUNTDOPTS', '-N 2 '+ nfs3_option+ '--no-udp --manage-gids --port 32767'),
+  ('RPCNFSDOPTS',   '-N 2 -N 3 --no-udp '+ param_list('--host', settings.listen_ip) ),
+  ('RPCMOUNTDOPTS', '-N 2 -N 3 --no-udp --manage-gids --port 32767'),
 ] %}
 
 nfs-kernel-server:
