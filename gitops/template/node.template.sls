@@ -25,7 +25,6 @@
 {% set internal_cidr = '10.140.250.1/24' %}
 {% set internal_name = 'resident' %}
 {% set netplan = "" %}
-{% set systemd_netdev = "" %}
 {% set systemd_network = "" %}
 
 {% set ssh_authorized_keys = "" %}
@@ -40,9 +39,6 @@
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/netplan.yaml') %}
   {% import_text 'netplan.yaml' as netplan %}
-{% endif %}
-{% if salt['file.file_exists'](project_basepath+ '/config/systemd.netdev') %}
-  {% import_text 'systemd.netdev' as systemd_netdev %}
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/systemd.network') %}
   {% import_text 'systemd.network' as systemd_network %}
@@ -84,10 +80,7 @@ short_net: {{ short_net(internal_cidr) }}
   "network": {
       "internal": network_internal,
       "netplan": netplan,
-      "systemd": {
-        "netdev": systemd_netdev,
-        "network": systemd_network,
-        }
+      "systemd": systemd_network,
       "def_route_device": def_route_device,
       "def_route_ip": def_route_ip,
     },

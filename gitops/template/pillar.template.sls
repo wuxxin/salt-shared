@@ -21,12 +21,9 @@ node:
   network:
     internal: {{ config.network.internal }}
     netplan: |
-{{ config.network.netplan|indent(8, True) }}
-    systemd:
-      netdev: |
-{{ config.network.systemd.netdev|indent(10, True) }}
-      network: |
-{{ config.network.systemd.network|indent(10, True) }}
+{{ config.network.netplan|indent(6, True) }}
+    systemd: |
+{{ config.network.systemd|indent(6, True) }}
 
 gitops:
   user: {{ config.gitops_user }}
@@ -35,10 +32,10 @@ gitops:
     source: {{ config.node.gitops_source }}
     branch: {{ config.node.gitops_branch|d('master') }}
     gpg_id: |
-{{ config.gitops_gpg_secret|indent(8,True)}}
+{{ config.gitops_gpg_secret|indent(6,True)}}
     ssh_id: |
-{{ config.gitops_ssh_secret|indent(8,True)}}
+{{ config.gitops_ssh_secret|indent(6,True)}}
     ssh_id_pub: |
-{{ config.gitops_ssh_public|indent(8,True)}}
+{{ config.gitops_ssh_public|indent(6,True)}}
     ssh_known_hosts: |
-{{ config.gitops_known_hosts|indent(8, True) }}
+{{ config.gitops_known_hosts|indent(6, True) }}
