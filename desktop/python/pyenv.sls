@@ -1,7 +1,7 @@
 include:
   - python.dev
 
-FIXME: use tarball from github with version: 1.2.27
+FIXME use tarball from github with version 1.2.27
 
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:
@@ -27,8 +27,6 @@ pyenv:
     - target: {{ user_home }}/.pyenv
     - user: {{ user }}
     - submodules: True
-
-{# FIXME: uses pyenv from git #}
 
 pyenv_bashrc:
   file.blockreplace: {# XXX file.blockreplace does use "content" instead of "contents" #}
