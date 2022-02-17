@@ -1,4 +1,3 @@
-
 {% from 'desktop/user/lib.sls' import user, user_info, user_home, add_to_groups with context %}
 
 {{ add_to_groups(user, ['users']) }}
@@ -11,5 +10,3 @@ add_local_{{ key }}:
     - group: {{ user }}
     - makedirs: true
 {% endfor %}
-
-
