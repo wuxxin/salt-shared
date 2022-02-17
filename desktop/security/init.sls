@@ -1,8 +1,7 @@
 include:
-  - .browser
+  - desktop.browser.torbrowser
   - .jail
   - .keyring
   - .metadata
   - .vpn
   - .solokey
-
