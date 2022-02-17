@@ -1,4 +1,4 @@
-{% from "python/lib.sls" import pip3_install %}
+{% from "python/lib.sls" import pip_install %}
 
 include:
   - python
@@ -12,7 +12,7 @@ python3-sentrycat-packages:
     - require:
       - sls: python
 
-{{ pip3_install('sentry-sdk>=0.7.3', require= 'pkg: python3-sentrycat-packages') }}
+{{ pip_install('sentry-sdk>=0.7.3', require= 'pkg: python3-sentrycat-packages') }}
 
 /usr/local/bin/sentrycat.py:
   file.managed:

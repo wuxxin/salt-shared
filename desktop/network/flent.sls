@@ -1,5 +1,5 @@
 {# The FLExible Network Tester - make experimental evaluations of networks more reliable and easier #}
-{% from 'python/lib.sls' import pip3_install %}
+{% from 'python/lib.sls' import pip_install %}
 
 include:
   - python
@@ -55,10 +55,10 @@ flent-req:
     {%- set flent_giturl='https://github.com/tohojo/flent.git@v2.0.0#egg=flent' %}
     {# flent is broken with newer pyqt5,
         git master @2020-01-30 has pyside2 support which is working #}
-{{ pip3_install('shiboken2', require='pkg: flent-req') }}
-{{ pip3_install('pyside2', require='pip: shiboken2') }}
-{{ pip3_install('qtpy', require='pip: pyside2') }}
-{{ pip3_install('git+'+ flent_giturl, require=['pkg: flent-req', 'pip: qtpy']) }}
+{{ pip_install('shiboken2', require='pkg: flent-req') }}
+{{ pip_install('pyside2', require='pip: shiboken2') }}
+{{ pip_install('qtpy', require='pip: pyside2') }}
+{{ pip_install('git+'+ flent_giturl, require=['pkg: flent-req', 'pip: qtpy']) }}
 
 flent:
   pkg.installed:

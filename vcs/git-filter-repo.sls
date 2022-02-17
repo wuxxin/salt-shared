@@ -1,6 +1,6 @@
-{% from 'python/lib.sls' import pip3_install %}
+{% from 'python/lib.sls' import pip_install %}
 
 include:
   - python
 
-{{ pip3_install('git-filter-repo') }}
+{{ pip_install('git-filter-repo') }}

@@ -1,4 +1,4 @@
-{% from "python/lib.sls" import pip3_install %}
+{% from "python/lib.sls" import pip_install %}
 
 include:
   - python
@@ -12,7 +12,7 @@ python3-ravencat-req:
     - require:
       - sls: python
 
-{{ pip3_install('raven', require= 'pkg: python3-ravencat-req') }}
+{{ pip_install('raven', require= 'pkg: python3-ravencat-req') }}
 
 /usr/local/bin/ravencat.py:
   file.managed:

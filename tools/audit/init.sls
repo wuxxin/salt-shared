@@ -9,8 +9,8 @@ forensic-packages:
       - fcrackzip   {# password cracker for zip archives #}
 
 {# - volatility  advanced memory forensics framework #}
-{% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('msoffcrypto-tool') }} {# decrypting encrypted MS Office files #}
+{% from 'python/lib.sls' import pip_install %}
+{{ pip_install('msoffcrypto-tool') }} {# decrypting encrypted MS Office files #}
 
 auditing-packages:
   pkg.installed:

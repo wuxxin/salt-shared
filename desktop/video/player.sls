@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pip3_install %}
+{% from 'python/lib.sls' import pip_install %}
 
 include:
   - python
@@ -27,7 +27,7 @@ youtube-dl:
   pkg:
     - installed
 
-{{ pip3_install('youtube-dl', require='pkg: youtube-dl') }}
+{{ pip_install('youtube-dl', require='pkg: youtube-dl') }}
 
 
 {# The YouTube channel checker - Command Line tool to keep track of your
@@ -41,4 +41,4 @@ ytcc-req:
     - require:
       - pkg: video-player
 
-{{ pip3_install('git+https://github.com/woefe/ytcc.git#egg=ytcc', require='pkg: ytcc-req') }}
+{{ pip_install('git+https://github.com/woefe/ytcc.git#egg=ytcc', require='pkg: ytcc-req') }}

@@ -210,8 +210,8 @@ docker-compose-req:
       - python3-texttable
       - python3-websocket
       - python3-yaml
-{% from 'python/lib.sls' import pip3_install %}
-{{ pip3_install('docker-compose', require= 'pkg: docker-compose-req') }}
+{% from 'python/lib.sls' import pip_install %}
+{{ pip_install('docker-compose', require= 'pkg: docker-compose-req') }}
 
 {%- else %}
 docker-compose:

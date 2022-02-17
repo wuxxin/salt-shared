@@ -17,7 +17,7 @@ include:
 {# ### imap mail migration #}
 {# Python v3.4+ [STALLED] (experimental: see known issues)
 https://github.com/OfflineIMAP/offlineimap/issues?q=is%3Aissue+is%3Aopen+label%3APy3 #}
-{% from 'python/lib.sls' import pip2_install, pip3_install %}
+{% from 'python/lib.sls' import pip2_install, pip_install %}
 {{ pip2_install('offlineimap') }}
 
 /home/{{ settings.admin.user }}/.offlineimaprc:

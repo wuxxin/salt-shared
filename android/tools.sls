@@ -1,7 +1,7 @@
 include:
   - python
 
-{% from 'python/lib.sls' import pip3_install %}
+{% from 'python/lib.sls' import pip_install %}
 
 android-tools:
   pkg.installed:
@@ -23,14 +23,14 @@ python-adb-req:
       - python3-libusb1
       - python3-progressbar
       {# either python3-pycryptodome or python3-rsa #}
-{{ pip3_install('adb', require='pkg: python-adb-req') }}
+{{ pip_install('adb', require='pkg: python-adb-req') }}
 
 python-gplaycli-req:
   pkg.installed:
     - pkgs:
       - python3-pyaxmlparser
       - python3-gpapi
-{{ pip3_install('gplaycli', require='pkg: python-gplaycli-req') }}
+{{ pip_install('gplaycli', require='pkg: python-gplaycli-req') }}
 
 heimdall:
   pkg.installed:

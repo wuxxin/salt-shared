@@ -1,4 +1,4 @@
-{% macro pip_install(package_or_package_list, version="3", kwargs={}) %}
+{% macro pip_install(package_or_package_list, version="", kwargs={}) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
 "python{{ version }}-{{ package_or_package_list }}":
   pip.installed:
@@ -17,7 +17,6 @@
   {%- endif %}
     - require:
       - pkg: python
-      - cmd: pip3-chain
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
     {%- if d is sequence and d is not string %}
@@ -40,11 +39,6 @@
       {%- endif %}
     {%- endif %}
   {%- endfor %}
-{% endmacro %}
-
-
-{% macro pip3_install(package_or_package_list) %}
-{{ pip_install(package_or_package_list, '3', kwargs=kwargs) }}
 {% endmacro %}
 
 
