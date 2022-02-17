@@ -26,10 +26,10 @@ jinja2-cli-req:
 python3-jinja2:
   pkg.installed:
     - pkgs:
-    - python3-jinja2
-    - python3-xmltodict
-    - python3-toml
-    - python3-yaml
+      - python3-jinja2
+      - python3-xmltodict
+      - python3-toml
+      - python3-yaml
 
 {{ pip3_install('jinja2-cli[yaml,toml,xml]', require= 'pkg: python3-jinja2') }}
 
