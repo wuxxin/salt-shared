@@ -1,3 +1,4 @@
+
 {# since 19.10 chromium is no longer available as deb package from ubuntu, therefore get from ppa #}
 {%- set baseurl =
 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Ubuntu_'+
@@ -28,7 +29,6 @@ chromium-browser:
   pkg.installed:
     - pkgs:
       - chromium-browser
-      - chromium-codecs-ffmpeg-extra
-      - chromium-chromedriver
+      {{ '- chromium-chromedriver' if grains['os'] == 'Ubuntu' }}
 
 {%- endif %}

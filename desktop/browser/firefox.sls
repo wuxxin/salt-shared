@@ -8,4 +8,4 @@ firefox:
   pkg.installed:
     - pkgs:
       - firefox
-      - firefox-geckodriver
+      {{ '- firefox-geckodriver' if grains['os'] == 'Ubuntu' }}
