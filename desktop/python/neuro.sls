@@ -6,20 +6,20 @@ include:
 
 {# working with neurophysiological data #}
 {% load_yaml as neurophysiological %}
-- pyvista
 # pyvista: 3D plotting and mesh analysis interface for the Visualization Toolkit (VTK)
-- opencv-python
+- pyvista
 # opencv-python: Pre-built CPU-only OpenCV Open Source Computer Vision Library
-- pylsl
+- opencv-python
 # pylsl: lab streaming layer
-- neurodsp
+- pylsl
 # neurodsp: Neuro Digital Signal Processing Toolbox
-- nilearn
+- neurodsp
 # nilearn: Statistics for NeuroImaging in Python
-- mne
+- nilearn
 # mne: exploring, visualizing, and analyzing human neurophysiological data
-- brainflow
+- mne
 # brainflow: obtain, parse and analyze EEG, EMG, ECG and other kinds of data from biosensors
+- brainflow
 {% endload %}
 
 {{ pipx_inject('jupyterlab', neurophysiological,
