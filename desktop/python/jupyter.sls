@@ -19,9 +19,8 @@ include:
   'jupyterlab-git',
   'jupyter-resource-usage',
   'retrolab',
-  'jupyterlab-tabular-data-editor',
   ], user=user) }}
-{#  'xeus-sqlite', 'xonsh[full]' #}
+{#  'xeus-sqlite', 'xonsh[full]' , 'jupyterlab-tabular-data-editor', #}
 
 {# jupyterlab extension language server #}
 {{ pipx_inject('jupyterlab', [
@@ -38,9 +37,7 @@ include:
 
 {# jupyterlab extensions with cmdline tools #}
 {{ pipx_inject('jupyterlab', [
-  'jupytext',
-  'nbterm',
-  'nbdev',
+  'jupytext', 'nbterm', 'nbdev',
  ], pipx_opts='--include-apps', user=user) }}
 
 {# jupyterlab desktop entry #}
