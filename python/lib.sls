@@ -17,7 +17,7 @@
   {%- endif %}
     - require:
       - pkg: python
-      - cmd: pip3-upgrade
+      - cmd: pip3-chain
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
     {%- if d is sequence and d is not string %}
