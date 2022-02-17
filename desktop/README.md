@@ -2,6 +2,14 @@
 
 Installs and configures features usually wanted for a working desktop
 
+usage:
+
+```yaml
+include:
+  - desktop
+
+```
+
 ## Pillar Settings
 
 ```yaml
@@ -11,25 +19,28 @@ desktop:
   video:
     loopback:
       enabled: *false|true      # install video4linux2 loopback kernel modules
-  proprietary:
-    enabled:   *false|true      # allow to install non opensource packages
   games:
     enabled:   *false|true      # install Arcade-, PS2-, Nintendo64- Emulator
 ```
 
-## Main Features
+## Showcased Features
+
+see desktop.ubuntu , desktop.manjaro for details of packages
 
 + Audio
     + pipewire as pulseaudio replacement
++ Music
+    + lollypop, cdparanoia, sound-juicer, picard
 + Video
     + gstreamer and most codecs
     + video4linux2 and (if enabled) video loopback devices
     + vlc (videolanclient)
     + youtube-dl
-+ Voice
++ Voice telephone
     + mumble, linphone
-+ Music
-    + lollypop, cdparanoia, sound-juicer, picard
++ Chat and Voice and Video telephone
+    + Element (matrix client)
+    + Signal
 + Graphics
     + Pixel Software: Gimp, Krita
     + Foto Software: Darktable
@@ -41,17 +52,12 @@ desktop:
     + Sphinx
     + Latex
     + Scribus (DTP)
-+ Chat
-    + Element (matrix client)
-    + Signal (if proprietary is enabled)
++ Browser
+    + Firefox- , Chromium- \& Tor- Browser
 + Security
-    + Tor Browser
     + firejail (restricted application jail)
     + keychain/keyring support packages
     + metadata stripper (mat)
-    + chipcard hardware daemon
-+ Browser
-    + Firefox- \& Chromium- Browser
 + Ubuntu
     + reenable suspend to disk, disable apport and whoopsie, a.o.
 
@@ -60,11 +66,10 @@ desktop:
 needs desktop:development:enabled: true
 
 + Editor: atom
-+ Revision control systems & tools, git-crypt, homeshick
++ Revision control systems & tools, git-crypt
 + Python development
 + Emulation/Virtualization
   + qemu/kvm, libvirt, lxc, vagrant, nspawn, android-emulator
-
-+ jupyterlab with scientific python including:
-  + machinelearning:  sklearn*, tensor*, torch* and fastai
++ jupyterlab with scientific python
+  + machinelearning:  sklearn, tensorflow, pytorch and fastai
   + neurophysiological: brainflow, pylsl, neurodsp, mne, opencv
