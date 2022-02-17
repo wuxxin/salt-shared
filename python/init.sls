@@ -4,13 +4,12 @@ python:
   pkg.installed:
     - pkgs:
       - python3
+{% if grains['os'] == 'Ubuntu' %}
       - python3-pip
       - python3-setuptools
       - python3-venv
       - python3-virtualenv
       - virtualenv
-
-{% if grains['os'] == 'Ubuntu' %}
 
 {# python3-pip is usually to old, upgrade it after install #}
 pip3-upgrade:
