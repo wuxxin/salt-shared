@@ -53,18 +53,19 @@
 {% endmacro %}
 
 
-{% macro pipx_install(package, user) %}
+{% macro pipx_install(package, user) %} {# pipx_opts, pip_args #}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
       python_settings['pipx']['update']['automatic'] %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
+  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args ' ~ kwargs['pip_args'] %}
   {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
 
 "pipx_{{ package }}":
   cmd.run:
-    - name: pipx install {{ pipx_opts }} {{ package }}
+    - name: pipx install {{ pipx_opts }} {{ pip_args }} {{ package }}
     - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package_name }}
     - runas: {{ user }}
     - require:
@@ -102,16 +103,17 @@
 {% endmacro %}
 
 
-{% macro pipx_inject(package, package_list, user) %}
+{% macro pipx_inject(package, package_list, user) %} {# pipx_opts, pip_args #}
   {% set inject_hash= package_list|join(' ')| md5 %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
+  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args ' ~ kwargs['pip_args'] %}
   {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
 
 "pipx_inject_{{ package }}_{{ inject_hash }}":
   cmd.run:
-    - name: pipx inject {{ pipx_opts }} {{ package_name }} {{ package_list|join(' ') }}
+    - name: pipx inject {{ pipx_opts }} {{ pip_args }} {{ package_name }} {{ package_list|join(' ') }}
     - runas: {{ user }}
     - unless: |
         injected=$(pipx list --include-injected --json | \
