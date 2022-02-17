@@ -1,5 +1,6 @@
 {% from 'python/lib.sls' import pipx_inject %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from "desktop/python/defaults.jinja" import settings with context %}
 
 include:
   - desktop.python.jupyter
@@ -11,6 +12,12 @@ include:
 - sklearn-pandas
 - auto-sklearn
 
+# ### generic ###
+# statsmodels: estimation of many different statistical models, conducting statistical tests, and statistical data exploration
+- statsmodels
+# optuna: hyperparameter optimization framework to automate hyperparameter search
+- optuna
+
 # ### tensorflow ###
 - tensorflow
 - tensorflow_hub
@@ -18,32 +25,37 @@ include:
 - jupyterlab_tensorboard
 
 # ### pytorch ###
-- torch
-- torchinfo
+{% for pkg in settings.torch[settings.flavor]['pkgs'] %}
+- {{ pkg }}
+{% endfor %}
 # torchinfo: provides information complementary to print(your_model)
-- torchvision
-- torchaudio
+- torchinfo
 - torchtext
-- pytorchvideo
 # pytorchvideo: a deeplearning library with a focus on video understanding work
-- kornia
+- pytorchvideo
 # kornia: classical computer vision integrated into deep learning models
-- fastai
+- kornia
 # fastai: simplifies training fast and accurate neural nets using modern best practices
-- skorch
+- fastai
 # skorch: scikit-learn compatible neural network library that wraps PyTorch
-- pytorch-lightning
+- skorch
 # pytorch-lightning: lightweight PyTorch wrapper for high-performance AI research
+- pytorch-lightning
 
-# ### generic ###
-- statsmodels
-# statsmodels: estimation of many different statistical models, conducting statistical tests, and statistical data exploration
-- optuna
-# optuna: hyperparameter optimization framework to automate hyperparameter search
 {% endload %}
+
+{% if settings.torch[settings.flavor]['links'] %}
+
+{{ pipx_inject('jupyterlab', machinelearning,
+    require='sls: desktop.python.jupyter', user=user,
+    pip_args='"-f '~ settings.torch[settings.flavor]['links']~ '"' ) }}
+
+{% else %}
 
 {{ pipx_inject('jupyterlab', machinelearning,
     require='sls: desktop.python.jupyter', user=user) }}
+
+{% endif %}
 
 {#
 detectron2        # Facebook AI Research's next generation library that provides state-of-the-art detection and segmentation algorithms
