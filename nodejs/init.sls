@@ -1,6 +1,6 @@
-{% from "nodejs/defaults.jinja" import settings with context %}
-{% set reponame= "node_" ~ settings.major~ ".x" %}
+{% if grains['os_family'] == "Debian" %}
 
+{% set reponame= "node_16" ~ settings.major~ ".x" %}
 nodejs:
   pkgrepo.managed:
     - name: deb https://deb.nodesource.com/{{ reponame }} {{ grains['oscodename'] }} main
@@ -10,3 +10,11 @@ nodejs:
       - pkg: nodejs
   pkg:
     - installed
+
+{% else %}
+
+nodejs:
+  pkg:
+    - installed
+
+{% endif %}

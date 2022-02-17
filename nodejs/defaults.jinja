@@ -1,6 +1,0 @@
-{% load_yaml as defaults %}
-major: "14"
-{% endload %}
-
-{% set settings=salt['grains.filter_by']({'default': defaults},
-    grain='default', default= 'default', merge= salt['pillar.get']('nodejs', {})) %}
