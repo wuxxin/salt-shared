@@ -25,14 +25,12 @@ python-tools:
 {# poetry - Python packaging and dependency management made easy #}
 {{ pipx_install('poetry', user=user) }}
 
-{# pipenv - Python Dev Workflow for Humans, to bring the best of all packaging worlds to the python world #}
+{# pipenv - Python Dev Workflow for Humans #}
 {{ pipx_install('pipenv', user=user) }}
 
-{# Python-powered, cross-platform, Unix-gazing shell language and command prompt #}
-{{ pipx_install('xonsh[full]', user=user) }}
-
-{# python language server plus extensions #}
+{# python language server plus extensions
 {{ pipx_install('python-lsp-server[all]', user=user) }}
 {{ pipx_inject('python-lsp-server[all]', [
   'pyls-isort', 'python-lsp-black', 'pyls-memestra', 'mypy-ls', 'pyls-flake8',
   ], user=user) }}
+#}
