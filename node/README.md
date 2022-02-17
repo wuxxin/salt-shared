@@ -73,9 +73,7 @@ node:
       # computed if empty:
       # ip, netcidr, netmask, reverse_net, short_net
     netplan: ""
-    systemd:
-      netdev: ""
-      network: ""
+    systemd: ""
     nsswitch:
       hosts: mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
 

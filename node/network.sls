@@ -40,7 +40,7 @@ nfs.common_after_bridge:
     - require_in:
       - sls: kernel.nfs.common
 
-{# write pillar netplan settings to disk if not empty, remove file otherwise #}
+{# write and apply pillar netplan settings to disk if not empty, remove file otherwise #}
 default_netplan:
   file:
     - name: /etc/netplan/{{ settings.network.priority }}-default.yaml
@@ -58,32 +58,20 @@ default_netplan:
     - require_in:
       - sls: kernel.nfs.common
 
-{# write pillar systemd.netdev, systemd.network settings to disk if not empty, remove files otherwise #}
-default_systemd.netdev:
-  file:
-    - name: /etc/systemd/network/{{ priority }}-default.netdev
-{% if not settings.network.systemd.netdev %}
-    - absent
-{% else %}
-    - managed
-    - contents: |
-{{ settings.network.systemd.netdev|indent(8,True) }}
-{% endif %}
-
+{# write and apply pillar systemd network settings to disk if not empty, remove file otherwise #}
 default_systemd.network:
   file:
     - name: /etc/systemd/network/{{ priority }}-default.network
-  {% if not settings.network.systemd.network %}
+  {% if not settings.network.systemd %}
     - absent
 {% else %}
     - managed
     - contents: |
-{{ settings.network.systemd.network|indent(8,True) }}
+{{ settings.network.systemd|indent(8,True) }}
 {% endif %}
   cmd.run:
     - name: networkctl reload
     - onchanges:
-      - file: default_systemd.netdev
       - file: default_systemd.network
     - require_in:
       - sls: kernel.nfs.common
