@@ -10,19 +10,15 @@ python:
       - python3-virtualenv
       - virtualenv
 
+{% if grains['os'] == 'Ubuntu' %}
+
 {# python3-pip is usually to old, upgrade it after install #}
 pip3-upgrade:
   cmd.run:
     - name: pip3 install -U pip
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
-
-{# make a chain call in case there is no more recent version of pip #}
-pip3-chain:
-  cmd.run:
-    - name: printf '#!/usr/bin/sh\nexec /usr/bin/pip3 $@\n'> /usr/local/bin/pip3; chmod +x /usr/local/bin/pip3
-    - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
-    - require:
-      - cmd: pip3-upgrade
+    - require_in:
+      - cmd: pip3-chain
 
 {# unconditionaly set python to python3 #}
 update-python-alternative:
@@ -31,6 +27,14 @@ update-python-alternative:
     - unless: test $(readlink -f /usr/bin/python) = $(readlink -f /usr/bin/python3)
     - require:
       - pkg: python
+
+{% endif %}
+
+{# make a chain call in case there is no /usr/local/bin version of pip #}
+pip3-chain:
+  cmd.run:
+    - name: printf '#!/usr/bin/sh\nexec /usr/bin/pip3 $@\n'> /usr/local/bin/pip3; chmod +x /usr/local/bin/pip3
+    - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
 {# Install and Run Python Applications in Isolated Environments #}
 {{ pip3_install('pipx') }}
