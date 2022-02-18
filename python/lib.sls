@@ -52,7 +52,7 @@
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
       python_settings['pipx']['update']['automatic'] %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
-  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args ' ~ kwargs['pip_args'] %}
+  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args=' ~ kwargs['pip_args'] %}
   {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
@@ -100,7 +100,7 @@
 {% macro pipx_inject(package, package_list, user) %} {# pipx_opts, pip_args #}
   {% set inject_hash= package_list|join(' ')| md5 %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
-  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args ' ~ kwargs['pip_args'] %}
+  {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args=' ~ kwargs['pip_args'] %}
   {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
@@ -118,7 +118,7 @@
           printf "%s" "${injected}" | grep -Eq "^${i}$"
         done
     - require:
-      - pkg: python      
+      - pkg: python
       - cmd: "pipx_{{ package }}"
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
