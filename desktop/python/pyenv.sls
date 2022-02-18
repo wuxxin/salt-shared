@@ -1,7 +1,9 @@
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
 include:
   - python.dev
 
-FIXME use tarball from github with version 1.2.27
+{% if grains['os'] == 'Ubuntu' %}
 
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:
@@ -22,6 +24,7 @@ pyenv:
       - wget
       - curl
       - llvm
+  {# FIXME use release tarball from github, eg. 1.2.27 #}
   git.latest:
     - name: https://github.com/pyenv/pyenv.git
     - target: {{ user_home }}/.pyenv
@@ -38,3 +41,11 @@ pyenv_bashrc:
     - content: |
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
+
+{% else %}
+
+pyenv:
+  pkg:
+    - installed
+
+{% endif %}
