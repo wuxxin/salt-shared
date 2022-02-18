@@ -1,6 +1,6 @@
 # python bindings
 
-+ use official python bindings (gpgme) "python3-gpg" from gnupg that are comming with system
++ use official python bindings (gpgme) "python(3)-gpg" from gnupg that are comming with system
 + use Hkp4py for keyserver
 + create mime email by hand
 
