@@ -15,7 +15,7 @@ prepare-mariadb.service:
 mariadb_requisites:
   pkg.installed:
     - pkgs:
-      - python3-mysqldb
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-mysqldb
 
 mariadb:
   pkg.installed:
