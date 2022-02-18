@@ -1,10 +1,9 @@
+{% from "python/defaults.jinja" import settings with context %}
+
 include:
   - python
-  - python.jinja2
+  - python.jinja
 
-interactive-python:
+ipython:
   pkg.installed:
-    - pkgs:
-      - python3-ipdb  {# python debugger, with IPython features #}
-      - python3-jedi  {# autocompletion tool for Python #}
-      - ipython3      {# Enhanced interactive Python shell #}
+    - pkgs: {{ settings.ipython[grains['os_family']|lower] }}

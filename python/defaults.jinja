@@ -1,10 +1,77 @@
 {% load_yaml as defaults %}
-packages:
+pip:
   update:
     automatic: false
 pipx:
   update:
     automatic: false
+python:
+  debian:
+  - python3
+  - python3-pip
+  - python3-setuptools
+  - python3-venv
+  - python3-virtualenv
+  - virtualenv
+  arch:
+  - python
+  - python-pip
+  - python-setuptools
+  - python-virtualenv
+ipython:
+  debian:
+  - python3-ipdb  {# python debugger, with IPython features #}
+  - python3-jedi  {# autocompletion tool for Python #}
+  - ipython3      {# Enhanced interactive Python shell #}
+  arch:
+  - python-ipdb
+  - python-jedi
+  - ipython
+jinja:
+  debian:
+  - python3-markupsafe
+  - python3-xmltodict
+  - python3-toml
+  - python3-yaml
+  arch:
+  - python-jinja
+  - python-xmltodict
+  - python-toml
+  - python-yaml
+python_dev:
+  debian:
+  - build-essential
+  - python3-dev
+  - python3-pudb    {# full-screen console debugger for Python #}
+  - cython3  {# syntax very similar to python for wrapping external C libraries and fast C modules #}
+  arch:
+  - base-devel
+  - python-pudb
+  - cython
+python_desktop:
+  debian:
+  - mypy              {# type check type annotations #}
+  - yapf3             {# code audit and reformating #}
+  - pylama            {# code audit and reformating for Python #}
+  - isort             {# sort imports separated into sections #}
+  - python3-autopep8  {# autopep8 - code audit and reformating to PEP 8 style #}
+  arch:
+  - mypy
+  - yapf
+  - pylama
+  - python-isort
+  - autopep8
+  - python-cookiecutter
+  - python-black
+  - python-poetry
+  - python-pipenv
+pipx_desktop:
+  debian:
+  - cookiecutter  {# cookiecutter - creates projects from cookiecutters (project templates) #}
+  - black         {# black - opinionated python source code formating #}
+  - poetry        {# poetry - Python packaging and dependency management made easy #}
+  - pipenv        {# pipenv - Python Dev Workflow for Humans #}
+  arch: []
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},

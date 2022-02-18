@@ -1,17 +1,13 @@
-{% from 'python/lib.sls' import pip3_install %}
+{% from 'python/lib.sls' import pip_install %}
+{% from "python/defaults.jinja" import settings with context %}
 
 python:
   pkg.installed:
-    - pkgs:
-      - python3
-{% if grains['os'] == 'Ubuntu' %}
-      - python3-pip
-      - python3-setuptools
-      - python3-venv
-      - python3-virtualenv
-      - virtualenv
+    - pkgs: {{ settings.python[grains['os_family']|lower] }}
 
-{# python3-pip is usually to old, upgrade it after install #}
+{% if grains['os'] == 'Ubuntu' %}
+
+{# pip is usually to old, upgrade it after install #}
 pip3-upgrade:
   cmd.run:
     - name: pip3 install -U pip
@@ -27,8 +23,6 @@ update-python-alternative:
     - require:
       - pkg: python
 
-{% endif %}
-
 {# make a chain call in case there is no /usr/local/bin version of pip #}
 pip3-chain:
   cmd.run:
@@ -36,4 +30,12 @@ pip3-chain:
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
 {# Install and Run Python Applications in Isolated Environments #}
-{{ pip3_install('pipx') }}
+{{ pip_install('pipx') }}
+
+{% else %}
+
+python-pipx:
+  pkg:
+    - installed
+
+{% endif %}
