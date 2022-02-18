@@ -9,7 +9,7 @@
   {%- endif %}
   {% if 'upgrade' in kwargs %}
     - upgrade: {{ kwargs['upgrade'] }}
-  {% elif python_settings['packages']['update']['automatic'] %}
+  {% elif python_settings['pip']['update']['automatic'] %}
     - upgrade: true
   {% endif %}
   {%- if version %}
