@@ -63,7 +63,7 @@
     - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package_name }}
     - runas: {{ user }}
     - require:
-      - pip: pipx
+      - pkg: python
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
     {%- if d is sequence and d is not string %}
@@ -118,7 +118,7 @@
           printf "%s" "${injected}" | grep -Eq "^${i}$"
         done
     - require:
-      - pip: pipx
+      - pkg: python      
       - cmd: "pipx_{{ package }}"
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
