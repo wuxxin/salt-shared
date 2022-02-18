@@ -1,4 +1,4 @@
-{% macro pip_install(package_or_package_list, version="", kwargs={}) %}
+{% macro pip_install(package_or_package_list, version="") %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
 "python{{ version }}-{{ package_or_package_list }}":
   pip.installed:

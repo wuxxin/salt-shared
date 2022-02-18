@@ -19,6 +19,6 @@ python-jinja:
   pkg.installed:
     - pkgs: {{ settings.jinja[grains['os_family']|lower] }}
 
-{{ pip_install('jinja2-cli[yaml,toml,xml]', require= 'pkg: python-jinja') }}
+{{ pip_install('jinja2-cli[yaml,toml,xml]', require= ['pkg: python-jinja']) }}
 
 {% endif  %}
