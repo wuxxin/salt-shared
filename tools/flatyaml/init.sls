@@ -4,7 +4,7 @@ include:
 flatyaml-common-packages:
   pkg.installed:
     - pkgs:
-      - python3-yaml
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-yaml
     - require:
       - sls: python
 

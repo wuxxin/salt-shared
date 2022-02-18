@@ -8,7 +8,7 @@ from shlex import quote
 try:
     import yaml
 except ImportError as e:
-    print('ERROR: could not import yaml: {0}, try "apt install python3-yaml"'.format(e))
+    print('ERROR: could not import yaml: {0}, install python yaml package'.format(e))
     sys.exit(1)
 
 
