@@ -1,6 +1,6 @@
 include:
   - python              {# basic python environment #}
-  - python.jinja2       {# Jinja2 including cli interface #}
+  - python.jinja        {# Jinja templating language including cli interface #}
   - tools.gnupg         {# GnuPG tools for cryptographic communications and data storage #}
   - tools.tmux          {# terminal multiplexer like screen #}
   - tools.flatyaml      {# convert yaml to a flat key=value format #}
