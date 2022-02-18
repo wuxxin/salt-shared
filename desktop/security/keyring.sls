@@ -2,5 +2,5 @@ keyring:
   pkg.installed:
     - pkgs:
       - gnome-keyring
-      - python3-keyring
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-keyring
       - keyringer

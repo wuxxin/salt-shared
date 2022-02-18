@@ -33,6 +33,6 @@ gstreamer-packages:
 python-gstreamer-packages:
   pkg.installed:
     - pkgs:
-      - python3-gst-1.0
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-gst-1.0
       - gir1.2-gstreamer-1.0
       - gir1.2-gst-plugins-base-1.0

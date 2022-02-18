@@ -4,7 +4,7 @@ include:
 virt-tools:
   pkg.installed:
     - pkgs:
-      - python3-guestfs
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-guestfs
       - ssh-askpass-gnome
       - virt-manager
       - virt-viewer

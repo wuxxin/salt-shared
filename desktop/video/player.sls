@@ -35,9 +35,9 @@ youtube-dl:
 ytcc-req:
   pkg.installed:
     - pkgs:
-      - python3-sqlalchemy
-      - python3-lxml
-      - python3-feedparser
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-sqlalchemy
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-lxml
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-feedparser
     - require:
       - pkg: video-player
 
