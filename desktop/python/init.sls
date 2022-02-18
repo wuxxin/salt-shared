@@ -13,4 +13,4 @@ python_desktop:
 {# install the following as pipx user package, so they are isolated from others #}
 {% for i in settings.pipx_desktop[grains['os_family']] %}
 {{ pipx_install(i, user=user) }}
-{% endif %}
+{% endfor %}
