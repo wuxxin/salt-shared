@@ -1,11 +1,8 @@
-include:
-  - .plantuml
-
 graph:
   pkg.installed:
     - pkgs:
       - graphviz
-      - python3-blockdiag
-      - python3-actdiag
-      - python3-nwdiag
-      - python3-seqdiag
+      - plantuml
+{% for p in ['blockdiag', 'actdiag', 'nwdiag', 'seqdiag',] %}
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-{{ p }}
+{% endfor %}
