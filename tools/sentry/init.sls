@@ -3,16 +3,16 @@
 include:
   - python
 
-# python3 packages needed for sentrycat
-python3-sentrycat-packages:
+# python packages needed for sentrycat
+python-sentrycat-packages:
   pkg.installed:
     - pkgs:
-      - python3-requests
-      - python3-chardet
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-requests
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-chardet
     - require:
       - sls: python
 
-{{ pip_install('sentry-sdk>=0.7.3', require= 'pkg: python3-sentrycat-packages') }}
+{{ pip_install('sentry-sdk>=0.7.3', require= 'pkg: python-sentrycat-packages') }}
 
 /usr/local/bin/sentrycat.py:
   file.managed:
