@@ -8,7 +8,7 @@ include:
 {# python code formating/linting/auditing tools #}
 python_desktop:
   pkg.installed:
-    - pkgs: {{ settings.python_desktop[grains['os_family']|lower]] }}
+    - pkgs: {{ settings.python_desktop[grains['os_family']|lower] }}
 
 {# install the following as pipx user package, so they are isolated from others #}
 {% for i in settings.pipx_desktop[grains['os_family']] %}
