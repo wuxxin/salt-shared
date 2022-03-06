@@ -42,8 +42,8 @@ python_dev:
   debian:
   - build-essential
   - python3-dev
-  - python3-pudb    {# full-screen console debugger for Python #}
-  - cython3  {# syntax very similar to python for wrapping external C libraries and fast C modules #}
+  - python3-pudb  {# full-screen console debugger for Python #}
+  - cython3       {# similar to python for wrapping external C libraries and fast C modules #}
   arch:
   # base-devel group
   - autoconf
@@ -73,13 +73,15 @@ python_dev:
   # other
   - python-pudb
   - cython
+  # additional (for eg. auto-sklearn)
+  - swig
 python_desktop:
   debian:
   - mypy              {# type check type annotations #}
   - yapf3             {# code audit and reformating #}
   - pylama            {# code audit and reformating for Python #}
   - isort             {# sort imports separated into sections #}
-  - python3-autopep8  {# autopep8 - code audit and reformating to PEP 8 style #}
+  - python3-autopep8  {# code audit and reformating to PEP 8 style #}
   arch:
   - mypy
   - yapf
@@ -92,10 +94,10 @@ python_desktop:
   - python-pipenv
 pipx_desktop:
   debian:
-  - cookiecutter  {# cookiecutter - creates projects from cookiecutters (project templates) #}
-  - black         {# black - opinionated python source code formating #}
-  - poetry        {# poetry - Python packaging and dependency management made easy #}
-  - pipenv        {# pipenv - Python Dev Workflow for Humans #}
+  - cookiecutter  {# creates projects from cookiecutters (project templates) #}
+  - black         {# opinionated python source code formating #}
+  - poetry        {# Python packaging and dependency management made easy #}
+  - pipenv        {# Python Dev Workflow for Humans #}
   arch: []
 {% endload %}
 
