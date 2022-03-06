@@ -1,4 +1,4 @@
-{% macro pip_install(package_or_package_list, version="") %}
+{% macro pip_install(package_or_package_list) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
 "python{{ version }}-{{ package_or_package_list }}":
   pip.installed:
@@ -12,8 +12,8 @@
   {% elif python_settings['pip']['update']['automatic'] %}
     - upgrade: true
   {% endif %}
-  {%- if version %}
-    - bin_env: {{ '/usr/local/bin/pip'+ version }}
+  {%- if 'bin_env' in kwargs %}
+    - bin_env: {{ kwargs['bin_env'] }}
   {%- endif %}
     - require:
       - pkg: python
@@ -39,11 +39,6 @@
       {%- endif %}
     {%- endif %}
   {%- endfor %}
-{% endmacro %}
-
-
-{% macro pip2_install(package_or_package_list) %}
-{{ pip_install(package_or_package_list, '2', kwargs=kwargs) }}
 {% endmacro %}
 
 
