@@ -19,7 +19,7 @@ but for operational security, eg. to get sure that the backup actually sucessful
 and be alerted if not, alerting and metrics tracking should be used.
 
 + prometheus metrics are written to prom files for pickup.
-+ alert tracking is done via sentry, and needs the `gitops` state to be included.
++ alert tracking can be done via sentry, and needs the `gitops` state to be included.
 + additional alerts should be configured via prometheus eg. from
 last sucessful backup start timestamp < 25h, to be sure that even if there is no error sent, the absence of the last sucessful metrics, will also trigger an alert.
 

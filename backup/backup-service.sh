@@ -103,7 +103,7 @@ fi
 
 # execute each entry of hooks.pre_backup
 backup_hook_metrics=""
-{% for hook in settings.hooks.pre_backup %}
+{% for hook in settings.steps.prepare %}
 duration_start=$(date +%s)
 {{ hook.cmd }}
 duration_hook=$(( $(date +%s) - duration_start ))
@@ -196,9 +196,9 @@ backup_local_data_size_kb=$(du --apparent-size --summarize --total -BK \
 duration_local_stats=$(( $(date +%s) - duration_start ))
 {% endif %}
 
-# execute each entry of hooks.post_backup
+# execute each entry of steps.finish
 backup_hook_metrics=""
-{% for hook in settings.hooks.post_backup %}
+{% for hook in settings.steps.finish %}
 duration_start=$(date +%s)
 {{ hook.cmd }}
 duration_hook=$(( $(date +%s) - duration_start ))
