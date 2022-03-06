@@ -1,9 +1,8 @@
-{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
-
 include:
   - python.dev
 
 {% if grains['os'] == 'Ubuntu' %}
+  {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:
