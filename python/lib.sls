@@ -1,6 +1,6 @@
 {% macro pip_install(package_or_package_list) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
-"python{{ version }}-{{ package_or_package_list }}":
+"python{{ '3' if grains['os'] == 'Ubuntu' }}-{{ package_or_package_list }}":
   pip.installed:
   {%- if package_or_package_list is iterable and package_or_package_list is not string %}
     - pkgs: {{ package_or_package_list }}
