@@ -3,12 +3,13 @@ include:
   - kernel.sysctl.cgroup-userns-clone
 {% endif %}
 
+
+{% if grains['os'] == 'Ubuntu' %}
 cgroup:
   pkg.installed:
     - pkgs:
       - cgroup-tools
-
-{% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
+  {% if grains['virtual']|lower() not in ['lxc', 'systemd-nspawn'] %}
 {# it's past 2020, enable cgroup v2 only hierachy managed by systemd #}
 cgroup-grub-settings:
   file.managed:
@@ -20,6 +21,7 @@ cgroup-grub-settings:
     - name: update-grub
     - watch:
       - file: cgroup-grub-settings
+  {% endif %}
 {% endif %}
 
 
@@ -30,7 +32,7 @@ cgroup-grub-settings:
   'DefaultTasksAccounting',
   ]
 %}
-{# default enable Accounting #}
+{# enable default Accounting #}
 /etc/systemd/system.conf_{{ p }}:
   file.replace:
     - name: /etc/systemd/system.conf
@@ -43,7 +45,7 @@ cgroup-grub-settings:
       - cmd: cgroup-reload
 {% endfor %}
 
-{# Enabling nonroot user CPU, CPUSET, and I/O delegation for rootless container #}
+{# enabling nonroot user CPU, CPUSET, and I/O delegation for rootless container #}
 /etc/systemd/system/user@.service.d/delegate.conf:
   file.managed:
     - makedirs: true
