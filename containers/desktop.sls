@@ -1,35 +1,22 @@
+{% from "containers/defaults.jinja" import settings with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
 include:
   - containers
 
+{% for n in 'subuid', 'subgid' %}
+add_{{ n }}_to_user_{{ user }}:
+  file.append:
+    - name: /etc/{{ n }}
+    - text: |
+        {{ user }}:100000:65536
+{% endfor %}
+
+{% if grains['os'] == 'Ubuntu' %}
+
 x11docker-tools:
   pkg.installed:
-    - pkgs:
-      - tini
-
-x11docker-x11-tools:
-  pkg.installed:
-    - pkgs:
-      - xinit
-      - xauth
-      - xclip
-      - x11-utils
-      - x11-xkb-utils
-      - x11-xserver-utils
-      - xdg-utils
-      - xdotool
-      - dbus-x11
-      - xpra
-      - xserver-xephyr
-      - weston
-      - xwayland
-
-x11docker-gpu-tools:
-  pkg.installed:
-    - pkgs:
-      - mesa-utils
-      - mesa-utils-extra
-      - libxv1
-      - va-driver-all
+    - pkgs: {{ settings.pkg.ubuntu.desktop }}
 
 # snapshot (6.9.1-beta-1) at 038af50b3389ceaecf5916b29f3bc21ae5c613de
 # https://github.com/mviereck/x11docker
@@ -40,5 +27,15 @@ x11docker:
     - mode: "755"
     - require:
       - pkg: x11docker-tools
-      - pkg: x11docker-x11-tools
-      - pkg: x11docker-gpu-tools
+
+
+{% elif grains['os'] == 'Manjaro' %}
+  {% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+
+x11docker-tools:
+  pkg.installed:
+    - pkgs: {{ settings.pkg.manjaro.desktop }}
+
+{{ pamac_install("x11docker", ["x11docker"], require="pkg: x11docker-tools") }}
+
+{% endif %}

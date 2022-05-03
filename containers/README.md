@@ -1,9 +1,6 @@
 # modern containers
 
-Components:
-+ podman, crun, buildah, skopeo, fuse-overlayfs (from ppa)
-+ compose support via podman-compose
-+ gui support via x11docker
+Components: podman, crun, buildah, podman-compose, gui support via x11docker
 
 ## containers.lib
 

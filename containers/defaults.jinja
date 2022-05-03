@@ -1,21 +1,15 @@
 {% load_yaml as defaults %}
-origin:
-  source: ppa
-  branch: stable {# stable,testing #}
-
 config:
   containers:
     # /etc/containers/containers.conf
     containers: {}
     network: {}
     engine:
-      # Container Runtime: ["crun", "runc", "kata"]
       # crun: OCI runtime with support for cgroup V2
       runtime: "crun"
 
   storage:
     # /etc/containers/storage.conf
-
     storage:
       # Primary storage driver
       driver: "overlay"
@@ -24,13 +18,13 @@ config:
 
       # storage options
       options:
+        root-auto-userns-user: containers
         overlay:
           mount_program: "/usr/bin/fuse-overlayfs"
           mountopt: "nodev,metacopy=on"
 
   mounts:
     # /etc/containers/mounts.conf
-
     # Global Mounts: The format of the mounts.conf is the volume format /SRC:/DEST,
     # one mount per line. For example, a mounts.conf with the line
     # - "/usr/share/secrets:/run/secrets"
@@ -41,7 +35,6 @@ config:
 
   policy:
     # /etc/containers/policy.json
-
     # Policy: Manages which registries you trust as a source of container images based on its location.
     # The location is determined by the transport and the registry host of the image.
     # Using this container image docker://docker.io/library/busybox as an example,
@@ -106,6 +99,60 @@ x11docker:
     - --gpu
     # - --verbose
     # - --webcam
+
+pkg:
+  ubuntu:
+    source: ppa
+    branch: stable {# stable,testing #}
+    base:
+    - uidmap
+    - criu
+    - crun
+    - cri-o-runc
+    - cri-tools
+    - containernetworking-plugins
+    - slirp4netns
+    - fuse-overlayfs
+    - skopeo
+    - buildah
+    - podman
+    desktop:
+    # x11docker-tools
+    - tini
+    # x11docker-x11-tools
+    - xinit
+    - xauth
+    - xclip
+    - x11-utils
+    - x11-xkb-utils
+    - x11-xserver-utils
+    - xdg-utils
+    - xdotool
+    - dbus-x11
+    - xpra
+    - xserver-xephyr
+    - weston
+    - xwayland
+    # x11docker-gpu-tools
+    - mesa-utils
+    - mesa-utils-extra
+    - libxv1
+    - va-driver-all
+  manjaro:
+    base:
+    - crun
+    - catatonit
+    - netavark
+    - aardvark-dns
+    - buildah
+    - podman
+    - podman-compose
+    - podman-docker
+    desktop:
+    - wtype
+    - weston
+    - xorg-xwayland
+
 {% endload %}
 
 
