@@ -3,8 +3,9 @@
 A collection of saltstack states. Most states are working,
 some states have a documentation README.md
 
-* Target Platform: **Ubuntu Focal 20.04 LTS**
-    * many states also work with older/newer ubuntu/debian based distros
+* Target Platforms:
+    * **Ubuntu Focal 20.04 LTS**
+    * **Manjaro Stable**
 
 * To bootstrap a machine from scratch (including a custom storage setup), see:
     * [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
@@ -16,8 +17,11 @@ some states have a documentation README.md
     * [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     * [hardware](hardware): hardware related packages and setup
     * [ubuntu](ubuntu): disable or enable ubuntu specifics
+    * [manjaro](manjaro): manjaro specifics
 
 * [Desktop](desktop): software for a desktop installation
+    * [ubuntu](ubuntu): Ubuntu Desktop with Applications
+    * [manjaro](manjaro): Manjaro Desktop with Applications
 
 * Deployment / Admin
     * [gitops](gitops): deploy and update machines from git, with webhook support
@@ -41,7 +45,7 @@ some states have a documentation README.md
     * [strongswan](strongswan): IPsec VPN
 
 * Virtual Machines
-    * [kvm+qemu](kernel/kvm): qemu/kvm full virtualization
+    * [qemu](qemu): qemu/kvm full virtualization
     * [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
     * [systemd nspawn](systemd/nspawn): leightweight machine container manager
     * [vagrant](vagrant): vagrant virtual machine manager (libvirt, lxc, a.o.)
@@ -65,19 +69,21 @@ some states have a documentation README.md
       with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
 
 * Android
-    * [android](android): android tools (adb,fastboot,aapt,heimdall,scrcopy)
-    * [android/emulator](android/emulator) Android Emulator (qemu based) container for desktop and headless
-    * [android/builder](android/builder) Lineage Android OS Builder container for building android
-    * [android/redroid](android/redroid) GPU accelerated Android on same kernel container
+    * [android](android): android tools (adb,fastboot,heimdall,scrcopy)
+    * [android/builder](android/builder) Lineage/MicroG Android OS Builder container for building android
+    + [android/redroid](android/redroid) Android Emulator (same kernel, GPU accel, docker container)
+    + [android/dockdroid](android/dockdroid) Android Emulator (qemu based, but x86-android, GPU accel, docker container)
+    + [android/android-x86](android/android-x86) Android Emulator (qemu based, but x86-android)
+    + [android/waydroid](android/waydroid) Android Emulator (same kernel, GPU Accel, LXC container)
+    + [android/emulator](android/emulator) Android Emulator (qemu based, emulator) container for desktop and headless
 
 * IOT \& Embedded
-    * [Airrohr](iot/airrohr) Airquality Sensor, setup and integration into homeassistant
+    * [Airrohr](embedded/airrohr) Airquality Sensor, setup and integration into homeassistant
     * [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
     * [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
     * [OctoPI](embedded/octopi) Builder for Raspberry PI - OctoPrint (a 3D printer web interface) Distribution
 
 * unfinished, halfbroken, quirky or very minimum skeleton packages
-    * [manjaro](manjaro): disable or enable manjaro specifics
     * [backup](backup): Modern backup solution using restic and rclone
     * [lxc](kernel/lxc): lxc leightweight machine virtualization
     * [opennebula](opennebula): cloud infrastructure virtualization for kvm/lxc/firecracker
