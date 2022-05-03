@@ -2,7 +2,6 @@
 
 include:
   - python
-  - python.jinja
 
 ipython:
   pkg.installed:

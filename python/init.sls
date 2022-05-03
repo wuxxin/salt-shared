@@ -1,5 +1,5 @@
-{% from 'python/lib.sls' import pip_install %}
 {% from "python/defaults.jinja" import settings with context %}
+{% from 'python/lib.sls' import pip_install %}
 
 python:
   pkg.installed:
@@ -32,10 +32,7 @@ pip3-chain:
 {# Install and Run Python Applications in Isolated Environments #}
 {{ pip_install('pipx') }}
 
-{% else %}
-
-python-pipx:
-  pkg:
-    - installed
+{# get jinja from pypi, because > 2.9 < 2.11 is broken for saltstack #}
+{{ pip_install('Jinja2>=2.11') }}
 
 {% endif %}

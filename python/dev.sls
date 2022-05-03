@@ -4,8 +4,17 @@
 include:
   - python
   - python.ipython
-  - python.meson
 
 python-dev:
   pkg.installed:
     - pkgs: {{ settings.python_dev[grains['os_family']|lower] }}
+
+{% if grains['os'] == 'Ubuntu' %}
+
+meson-req:
+  pkg.installed:
+    - name: ninja-build
+
+{{ pip_install('meson', require= 'pkg: meson-req') }}
+
+{% endif %}
