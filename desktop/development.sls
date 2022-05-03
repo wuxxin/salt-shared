@@ -1,11 +1,11 @@
 {% if grains['os'] == 'Ubuntu' %}
 include:
-  - desktop.ubuntu
+  - desktop.ubuntu.development
 {% elif grains['os'] == 'Manjaro' %}
 include:
-  - desktop.manjaro
+  - desktop.manjaro.development
 {% endif %}
 
-desktop_packages:
+desktop_development_packages:
   test:
     - nop
