@@ -1,3 +1,6 @@
+include:
+  - hardware.acpi
+
 filesystem-tools:
   pkg.installed:
     - pkgs:
