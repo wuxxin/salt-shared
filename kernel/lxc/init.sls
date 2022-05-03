@@ -1,9 +1,6 @@
-{% from "kernel/defaults.jinja" import settings with context %}
-
 {# modify kernel for production http://lxd.readthedocs.io/en/latest/production-setup/ #}
 include:
   - kernel
-  - kernel.modules
   - kernel.sysctl
   - kernel.limits
   - kernel.limits.memlock

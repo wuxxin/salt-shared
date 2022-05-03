@@ -1,4 +1,4 @@
-{% load_yaml as package_defaults %}
+{% load_yaml as ubuntu_package_defaults %}
 bionic:
   meta: linux-generic-hwe-18.04
   image: linux-image-generic-hwe-18.04
@@ -24,7 +24,7 @@ generic:
 keep_current: false
 # if virtual_extra, install additional extra modules
 virtual_extra: true
-package: {{ salt['grains.filter_by'](package_defaults,
+package: {{ salt['grains.filter_by'](ubuntu_package_defaults,
   grain= 'oscodename', default= 'generic',
   merge= salt['pillar.get']('kernel:package', {})) }}
 limits:
