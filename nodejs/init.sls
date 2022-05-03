@@ -7,13 +7,18 @@ nodejs:
     - file: /etc/apt/sources.list.d/nodesource.com.list
     - require_in:
       - pkg: nodejs
+      - pkg: npm
   pkg:
     - installed
 
-{% else %}
+{% elif grains['os'] == 'Manjaro' %}
 
 nodejs:
-  pkg:
-    - installed
+  pkg.installed:
+    - name: nodejs-lts-gallium
 
 {% endif %}
+
+npm:
+  pkg:
+    - installed
