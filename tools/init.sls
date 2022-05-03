@@ -1,11 +1,9 @@
 include:
   - python              {# basic python environment #}
-  - python.jinja        {# Jinja templating language including cli interface #}
   - tools.gnupg         {# GnuPG tools for cryptographic communications and data storage #}
-  - tools.tmux          {# terminal multiplexer like screen #}
+  - tools.jinj2-cli     {# Jinja templating language cli interface #}
   - tools.flatyaml      {# convert yaml to a flat key=value format #}
   - tools.sentry        {# sentrycat.py error reporting to sentry #}
-  - tools.passgen       {# human friendly password generator #}
 
 {% if grains['os_family'] == 'Debian' %}
 base-tools:
@@ -60,6 +58,7 @@ base-tools:
       - usbutils        {# Linux USB utilities #}
 
       {# user tools #}
+      - tmux            {# terminal multiplexer like screen #}
       - mc              {# Midnight Commander is a text-mode full-screen file manager #}
       - jupp            {# user friendly full screen text editor #}
       - ncdu            {# ncurses-based du viewer #}

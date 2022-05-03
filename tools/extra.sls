@@ -1,8 +1,8 @@
 include:
   - tools
   - tools.qrcode
+  - tools.passgen
   - tools.stress
-  - tools.audit
 
 {% if grains['os_family'] == 'Debian' %}
 extended-tools:

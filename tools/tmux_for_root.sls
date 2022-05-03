@@ -1,5 +1,5 @@
 include:
-  - tools.tmux
+  - tools
 
 {% set marker = "# saltstack tmux automatic config" %}
 {% set start = marker+ " start" %}

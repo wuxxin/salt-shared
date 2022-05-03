@@ -3,9 +3,7 @@ include:
 
 passgen-common-packages:
   pkg.installed:
-    - pkgs:
-      - python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
-      - openssl
+    - name: python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
     - require:
       - sls: python
 

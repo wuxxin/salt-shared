@@ -31,7 +31,7 @@ import os
 try:
     from bitstring import BitStream
 except ImportError:
-    print("error: you need to install python package bitstring")
+    print("error: you need to install python package 'bitstring'")
     raise
 
 consonants = "bcdfghjklmnpqrstvwxyz"
