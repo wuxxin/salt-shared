@@ -12,8 +12,11 @@ if test "$4" = ""; then
     exit 1
 fi
 
-# create a new set of openssh-server host keys
-dpkg-reconfigure --force openssh-server
+distribution=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+if test "$distribution" = "debian" -o "$distribution" = "ubuntu"; then
+  # create a new set of openssh-server host keys
+  dpkg-reconfigure --force openssh-server
+fi
 
 # add user, make homedir, install skeleton files
 addgroup --gid $groupid $username

@@ -2,9 +2,17 @@
 {% from 'python/lib.sls' import pip_install %}
 
 include:
-  - kernel.server
+  - systemd.cgroup
   - python
 
+{% if grains['os'] == 'Manjaro' %}
+nspawn:
+  pkg.installed:
+    - pkgs:
+      - mkosi
+      - debootstrap
+
+{% elif grains['os'] == 'Ubuntu' %}
 nspawn:
   pkg.installed:
     - pkgs:
@@ -15,10 +23,13 @@ nspawn:
       - debootstrap
       - augeas-tools
     - require:
-      - sls: kernel.server
+      - sls: systemd.cgroup
 
 {# mkosi is bitrotten on focal #}
 {{ pip_install('https://github.com/systemd/mkosi/archive/refs/tags/v10.tar.gz') }}
+
+{% endif %}
+
 
 {% for conf in ['nspawn_config', 'nspawn_volume', 'nspawn_target',
   'mkosi_config', 'mkosi_cache', 'mkosi_target'] %}

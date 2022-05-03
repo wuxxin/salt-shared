@@ -1,5 +1,4 @@
 {% load_yaml as defaults %}
-
 store:
   nspawn_config: /etc/systemd/nspawn
   nspawn_run: /run/systemd/nspawn
@@ -21,7 +20,10 @@ image:
         Format: directory
         Bootable: false
         Hostname: {{ distro }}
+      Content:
+        WithNetwork: true
       Packages:
+        WithNetwork: true
         PostInstallationScript: mkosi.postinst
         NSpawnSettings: mkosi.nspawn
         Packages:
@@ -38,7 +40,6 @@ image:
     machine:
       # enabled: if false, service will not get started and will be stopped if running
       enabled: true
-
       # environment: dict of key,value pairs to be included in the target environment
       environment: {}
 
@@ -60,10 +61,8 @@ image:
         # on the target machine once. the source will be copied to /tmp/machine.postinst
         # and called using $0 <userid> <groupid> <username> <homedir>
         source: salt://systemd/nspawn/machine.postinst
-
         # defaults arguments for the postinst script
-        args: ['1000' , '1000', 'app', '/home/app']
-
+        args: ['1000' , '1000', 'user', '/home/user']
         # ssh keys string authorized for root and <userid>,
         # will be created at /tmp/authorized_keys for usage in postinst
         authorized_keys: ""

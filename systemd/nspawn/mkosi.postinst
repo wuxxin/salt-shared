@@ -1,8 +1,8 @@
 #!/bin/sh
 codename=$(lsb_release -c -s)
-distributor=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+distribution=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 
-if test "$distributor" = "ubuntu"; then
+if test "$distribution" = "ubuntu"; then
     # ubuntu: enable additional updates and security apt sources
     if ! grep -q "${codename}-updates" /etc/apt/sources.list; then
         echo "deb http://archive.ubuntu.com/ubuntu/ ${codename}-updates main universe multiverse restricted" \

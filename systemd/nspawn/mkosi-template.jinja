@@ -2,11 +2,11 @@
 [{{ section }}]
   {%- for key, value in data.items() %}
     {%- if value is iterable and (value is not string and value is not mapping) %}
-{{ key }} = [ {{ value|join(', ')}} ]
+{{ key }}=[ {{ value|join(', ')}} ]
     {%- elif value is boolean %}
-{{ key }} = {{ 'true' if value else 'false' }}
+{{ key }}={{ 'yes' if value else 'no' }}
     {%- else %}
-{{ key }} = {{ value }}
+{{ key }}={{ value }}
     {%- endif %}
   {%- endfor %}
 
