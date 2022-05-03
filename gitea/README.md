@@ -38,3 +38,7 @@ gitea:
 + server:http_addr if not defined and
   + server:protocol == unix, it will be set to /run/gitea_<profile:name>/gitea.sock
   + server:protocol == http, it will be set to 127.0.0.1
+
+## tools
+
++ cli: https://gitea.com/gitea/tea
