@@ -1,6 +1,5 @@
 include:
   - kernel
-  - kernel.swappiness
   - kernel.sysctl.cgroup-userns-clone
   - kernel.network
   - systemd.cgroup
@@ -8,6 +7,7 @@ include:
 qemu:
   pkg.installed:
     - pkgs:
+{% if grains['os'] == 'Ubuntu' %}
       - qemu-block-extra
       - qemu-kvm
       - qemu-system
@@ -17,3 +17,8 @@ qemu:
       - qemu-utils
       - ovmf
       - libosinfo-bin
+{% elif grains['os'] == 'Manjaro' %}
+      - qemu
+      - qemu-guest-agent
+      - mkosi
+{% endif %}

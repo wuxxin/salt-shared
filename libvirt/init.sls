@@ -1,27 +1,40 @@
 include:
-  - kernel.kvm
+  - qemu
+
+{% if grains['os'] == 'Manjaro' %}
 
 libvirt:
   pkg.installed:
     - pkgs:
-{%- if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 18 %}
+      - libvirt
+      - libvirt-dbus
+      - libvirt-python
+
+{% elif grains['os'] == 'Ubuntu' %}
+
+libvirt:
+  pkg.installed:
+    - pkgs:
+  {%- if grains['osmajorrelease']|int < 18 %}
       - libvirt-bin
-{%- else %}
+  {%- else %}
       - libvirt-clients
       - libvirt-daemon
       - libvirt-daemon-system
       - augeas-tools
-{%- endif %}
+  {%- endif %}
     - require:
-      - sls: kernel.kvm
+      - sls: qemu
   service.running:
-{%- if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 18 %}
+  {%- if grains['osmajorrelease']|int < 18 %}
     - name: libvirt-bin
-{%- else %}
+  {%- else %}
     - name: libvirtd
-{%- endif %}
+  {%- endif %}
     - enable: True
     - require:
       - pkg: libvirt
 
 {# XXX maybe also enable libnss-libvirt #}
+
+{%- endif %}
