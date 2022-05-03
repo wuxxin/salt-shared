@@ -3,8 +3,8 @@
 include:
   - kernel.server
   - kernel.network
-  - kernel.kvm
   - kernel.lxc
+  - qemu
   - libvirt
 
 opennebula-ppa:
@@ -49,4 +49,4 @@ opennebula-node-firecracker:
       - opennebula-node-firecracker
     - require:
       - sls: kernel.network
-      - sls: kernel.kvm
+      - sls: qemu
