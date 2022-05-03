@@ -1,0 +1,8 @@
+{% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+
+include:
+  - hardware.amd.rocm
+
+{{ pamac_install('python-tensorflow-rocm_aur',
+    ['tensorflow-rocm', 'tensorflow_hub', ],
+    require= 'sls: hardware.amd.rocm') }}

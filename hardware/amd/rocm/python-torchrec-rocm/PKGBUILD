@@ -1,0 +1,30 @@
+# Maintainer: wuxxin <wuxxin@gmail.com>
+
+pkgname=python-torchrec-rocm
+_pkgname=torchrec
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Pytorch domain library for recommendation systems"
+arch=('any')
+url="https://github.com/pytorch/torchrec"
+license=('BSD')
+depends=('python' 'python-pytorch-rocm')
+# optdepends=('')
+makedepends=('git' 'python-setuptools' 'cmake' 'ninja')
+conflicts=(python-torchrec)
+provides=(python-torchrec)
+source=("$url/archive/26104833bee135a17cf3544df38dbb4af921c65e.tar.gz")
+sha256sums=('21358267ebda558d68f072acda6a70f9cbc371f2e5d63ad2a7baa9076f409b5d')
+
+build() {
+  cd "$srcdir/${_pkgname}"
+  FORCE_CUDA=1 \
+  python setup.py build
+}
+
+package() {
+  cd "$srcdir/${_pkgname}"
+  FORCE_CUDA=1 \
+  python setup.py install --root="$pkgdir"/ --optimize=1
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

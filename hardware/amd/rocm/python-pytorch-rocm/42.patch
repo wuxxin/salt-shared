@@ -1,0 +1,38 @@
+From ae9ae079fdd4b29749e6b0563c8d70779908064f Mon Sep 17 00:00:00 2001
+From: JP-Ellis <josh@jpellis.me>
+Date: Sun, 17 Apr 2022 17:37:42 +1000
+Subject: [PATCH] Update dependencies
+
+Updates some missing dependencies.
+
+Also avoid clone the full `eigen` dependency.
+
+Signed-off-by: JP-Ellis <josh@jpellis.me>
+---
+ PKGBUILD | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index e05cff8..af64b7f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,8 +16,8 @@ license=('BSD')
+ depends=('google-glog' 'gflags' 'opencv' 'openmp' 'rccl' 'pybind11' 'python' 'python-yaml' 'libuv'
+          'python-numpy' 'protobuf' 'ffmpeg4.4' 'python-future' 'qt5-base' 'onednn' 'intel-mkl'
+          'python-typing_extensions')
+-makedepends=('python' 'python-setuptools' 'python-yaml' 'python-numpy' 'cmake' 'rocm-hip-sdk' 'roctracer'
+-             'miopen' 'git' 'ninja' 'pkgconfig' 'doxygen')
++makedepends=('cmake' 'doxygen' 'git' 'hipfft' 'miopen' 'ninja' 'pkgconfig' 'python' 'python-numpy'
++             'python-setuptools' 'python-yaml' 'rocblas' 'rocm-hip-sdk' 'rocrand' 'roctracer')
+ source=("${_pkgname}-${pkgver}::git+https://github.com/pytorch/pytorch.git#tag=v$_pkgver"
+         # generated using parse-submodules
+         # "${pkgname}::https://github.com/pytorch/pytorch#commit=7cc129e60c"
+@@ -121,7 +121,7 @@ prepare() {
+   git submodule deinit third_party/eigen
+   git rm -f third_party/eigen
+   rm -rf .git/modules/third_party/eigen
+-  git submodule add --force https://gitlab.com/libeigen/eigen.git third_party/eigen
++  git submodule add --depth 1 --force https://gitlab.com/libeigen/eigen.git third_party/eigen
+
+   # generated using parse-submodules
+   git submodule init
