@@ -1,20 +1,38 @@
 include:
   - python
 
-{% from 'python/lib.sls' import pip_install %}
+{%- if grains['os'] == 'Manjaro' %}
+  {% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
 
 android-tools:
   pkg.installed:
     - pkgs:
-{%- if grains['os'] == 'Ubuntu' and grains['osmajorrelease']|int < 18 %}
-      - android-tools-adb
-      - android-tools-fastboot
-{%- else %}
+      - android-udev
+      - android-tools
+      - gvfs-mtp
+      - scrcpy
+      - heimdall
+{% load_yaml as pkgs %}
+      - sndcpy-bin
+      - gplaycli
+      - apk-mitm
+      # - gnirehtet
+{% endload %}
+{{ pamac_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
+
+
+{%- elif grains['os'] == 'Ubuntu' %}
+
+android-tools:
+  pkg.installed:
+    - pkgs:
       - adb
       - fastboot
-{%- endif %}
       - aapt
+      - heimdall-flash
+      - heimdall-flash-frontend
 
+{% from 'python/lib.sls' import pip_install %}
 python-adb-req:
   pkg.installed:
     - pkgs:
@@ -32,8 +50,4 @@ python-gplaycli-req:
       - python3-gpapi
 {{ pip_install('gplaycli', require='pkg: python-gplaycli-req') }}
 
-heimdall:
-  pkg.installed:
-    - pkgs:
-      - heimdall-flash
-      - heimdall-flash-frontend
+{% endif %}

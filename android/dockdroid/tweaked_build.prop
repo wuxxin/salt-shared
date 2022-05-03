@@ -1,0 +1,379 @@
+#unsecure - SELinux enabled.
+ro.build.selinux=1
+
+#unsecure - SELinux set permissive (not enforcing), disable re-applying policy and context. You must also edit the boot.img with those props and add 'setenforce 0' according to https://gist.github.com/eladkarako/5694eada31277fdc75cee4043461372e#gistcomment-3475304 -- then repack the boot.img and flash it (init.rc will launch at boot).
+ro.boot.selinux=permissive
+androidboot.selinux=permissive
+persist.android.strictmode=0
+persist.selinux.enforcing=0
+ro.build.selinux.enforce=0
+security.perf_harden=0
+selinux.reload_policy=0
+selinux.sec.restorecon=0
+
+#unsecure - developer features: allow mock locations, no-notification (always-allowed) adb connection (when possible), media-transfer-protocol side-by-side with adb, adbd starting as root instead of shell - 'ro.secure=0' must be placed in boot.img default.prop to work it will not work in build.prop (if not placed in default.prop, adbd will start as shell and you will have to run 'adb root' after connecting to relaunch adbd service with root permissions on your adb session).
+ro.allow.mock.location=1
+persist.adb.notify=0
+persist.sys.usb.config=mtp,adb
+ro.secure=0
+ro.adb.secure=0
+ro.debuggable=1
+service.adb.root=1
+persist.sys.root_access=1
+persist.service.adb.enable=1
+
+#unsecure - allow skipping steps in first-time setup. allow device functionality without SIM.
+ro.setupwizard.enable_bypass=1
+ro.setupwizard.enterprise_mode=0
+ro.setupwizard.mode=OPTIONAL
+ro.setupwizard.network_required=false
+ro.setupwizard.wifi_required=false
+
+#unsecure - set system to not use secure mode, disable knox and its secure-storage/ams/tima/DRM-container (DRM loads up libs anyway, this will hopefully just disables its functionality).
+persist.sys.strict_op_enable=false
+persist.sys.strictmode.disable=1
+persist.sys.strictmode.visual=false
+ro.config.knox=0
+sys.knox.exists=0
+sys.knox.store=0
+dev.knoxapp.running=false
+init.svc.knox=stopped
+ro.config.sec_storage=0
+ro.securestorage.knox=false
+ro.securestorage.support=false
+ro.config.tima=0
+ro.config.timaversion=0
+ro.sec.fle.encryption=false
+persist.security.ams.enforcing=0
+ro.config.kap_default_on=false
+ro.config.rkp=false
+drm.service.enabled=false
+init.svc.drm=stopped
+init.svc.mediadrm=stopped
+init.svc.drmservice=stopped
+oma_drm.service.enabled=false
+
+#----------------------------------net
+#net - explicitly allow maximum amount of WiFi channels to support WiFi 5G (A/AC) range and bandwidth (N-40 AC-40/80) - works with Samsung S4. Set your router to use channel 1 for 2.4hz and 36 for 5hz for extra-compatibility (an additional 2.4 amplifier can be on channel 11).
+ro.wifi.channels=161
+
+#net - allow TCP/UDP/IP extensions to improve network stability.
+#-----------------------------------------------allow PING/ICMP and broadcast.
+#-----------------------------------------------'min_pmtu=1280' is MTU which is slightly larger than the initial, so saves some time while probing for optimal MTU, and it is the minimum for IPv6 (good to use even if you don't use one).
+#-----------------------------------------------enabling ECN, timestamps, window-scalling for improved stability.
+#-----------------------------------------------disabling fastopen, even if Linux kernel supports it (>3.11) since it's crappy and always fallback to standard connection after failing and uses an additional cookie-to support the connection which is bad.
+#-----------------------------------------------https://vincent.bernat.ch/en/blog/2014-tcp-time-wait-state-linux
+#-----------------------------------------------tcp_autocorking=0 means TCP_CORK OFF --- means send all the data (partial frames, smaller packets) as soon as possible, without filling waiting for buffers to be filled.. faster web-navigation.
+#-----------------------------------------------https://stackoverflow.com/questions/22124098/is-there-any-significant-difference-between-tcp-cork-and-tcp-nodelay-in-this-use
+#-----------------------------------------------tcp_workaround_signed_windows is for very old systems, now we use a 'tcp_window_scaling=1'.
+#-----------------------------------------------tcp_tw_recycle and tcp_tw_reuse are problematic reuse of socket-space (originally designed for servers only), the sockets change their nature and best not used.
+#-----------------------------------------------https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
+net.ipv4.icmp_echo_ignore_all=0
+net.ipv4.icmp_echo_ignore_broadcasts=0
+net.ipv4.ip_no_pmtu_disc=0
+net.ipv4.min_pmtu=1280
+net.ipv4.route.flush=1
+net.ipv4.tcp_abort_on_overflow=0
+net.ipv4.tcp_autocorking=0
+net.ipv4.tcp_ecn=1
+net.ipv4.tcp_ecn_fallback=1
+net.ipv4.tcp_fack=1
+net.ipv4.tcp_fastopen=0
+net.ipv4.tcp_fin_timeout=60
+net.ipv4.tcp_frto=1
+net.ipv4.tcp_frto_response=2
+net.ipv4.tcp_fwmark_accept=1
+net.ipv4.tcp_low_latency=1
+net.ipv4.tcp_mtu_probing=2
+net.ipv4.tcp_no_metrics_save=0
+net.ipv4.tcp_no_ssthresh_metrics_save=0
+net.ipv4.tcp_rfc1337=1
+net.ipv4.tcp_sack=1
+net.ipv4.tcp_timestamps=1
+net.ipv4.tcp_tw_recycle=0
+net.ipv4.tcp_tw_reuse=0
+net.ipv4.tcp_window_scaling=1
+net.ipv4.tcp_workaround_signed_windows=0
+
+#net - disable IPv6
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+persist.telephony.support.ipv4=1
+persist.telephony.support.ipv6=0
+
+#battery - allow powering-down the SIM-circuit entirely, for example in Airplane(flight)-mode. some old/legacy devices had problems turning-ON the SIM-circuit back-ON and were must be turned-OFF and ON again to get back full functionality, so the property was added to still keep the SIM ON anyway. if you have smartphone with no SIM (you use WiFi for example) you can turn-ON Airplane(flight)-mode and turn-ON the WiFi back-ON, it will prevent quite a lot of wakelocks and will save a bit of your battery.
+persist.radio.apm_sim_not_pwdn=0
+
+#battery - disabling emulator pipeline driver in kernel at boot --- DO NOT ADD THOSE!!!
+#--------- for some reason 'ro.kernel.qemu=0' generates a MASSIVE AMOUNT of GPU-glitches in lineageOS (custom firmware) - every app that uses GPU accelaration will suffer from buttons not showing, backgrounds messed up and display layers broken.
+#--------- normally those two are use (QEMU pipeline and daemon-service - at boot) when you run Android on an emulator and not on a device, and are used to connect with the PC computer.
+#--------- it is best to keep those two commented-out, unless you really to work with an emulator.
+#--------- this section is HERE FOR YOUR INFORMATION, SO YOU'LL KNOW TO NOT ALLOW OR EVEN SET IT (in case you'll "play around" with other properties from around the web).
+#--------- note that Samsung sets on its original 'build.prop': 'ro.adb.qemud=1' and 'ro.kernel.qemu=0' which seems to be fine (probably internally disabled) but lineageOS gets totally messed up.
+#--------- https://git.congatec.com/android/build/commit/e6b969f3bc6e5c2f9cfb7788664b1c3e8eb06ba1
+###ro.adb.qemud=0
+###ro.kernel.qemu=0
+
+#battery
+persist.radio.add_power_save=1
+persist.service.lgospd.enable=0
+persist.service.pcsync.enable=0
+pm.sleep_mode=3
+power.saving.mode=1
+ro.config.hw_power_saving=1
+ro.lcd_min_brightness=10
+ro.product.use_charge_counter=1
+ro.ril.disable.power.collapse=0
+ro.sim_refresh_reset_by_modem=1
+ro.ril.power_collapse=1
+ste.nmf.autoidle=1
+
+#battery - charger mode is a different way the device is running (no - your device is not turned off when you connect a charger!).
+#--------- most custom roms favor the "false" value, and when you push power the charger-mode is turned off (the device actually turned off for real), and then restarted ("cold boot").
+#--------- some devices are allowed to initialize booting directly from charger-mode by processing boot procedures loading services etc.., it saves few seconds but it is considered a "warm boot", and your device might act a little weird (you might not notice it).
+#--------- the safer option is to always have those options turned off.
+#--------- if you use "false", some car-android devices will require you to manually power-ON the device, in this case if you normally had the device auto-started you should either switch to true and 1, or disable those properties to allow the device to load its default settings.
+#--------- it is best to avoid enabling those values anyway, unless you require cold-boot or want to override a custom-rom to allow boot-from-charger-mode (for example).
+#--------- https://android.googlesource.com/platform/system/core/+/e4b7b29%5E!/
+###ro.enable_boot_charger_mode=false
+###sys.boot_from_charger_mode=0
+
+#battery - disable sensors - pedometer (step counter) and facing the screen (to keep it ON) sensors.
+#--------- best to also remove the bloatware of Google/Samsung Health-app and service (for samsung it is in '/system/priv-app/HealthService*', '/system/priv-app/SHealth*')
+#--------- it is best to avoid from disabling 'ro.qti.sensors.dev_ori', 'ro.qti.sensors.facing' and such since it can mess up with the UI-components
+#--------- disabled sensors will not report data and will not wake the device (wakelock).
+#------------- movement related sensors generates a lot of wakelocks (and potentially private-data).
+#------------- facing detection keeps some hardware-ON, and can be manages with apps such as 'keep-screen-ON' (eu.aboutall.android.tools.kepscreenon).
+#------------- pick up sensor can falsely detect movement when the device shakes in a bag or pocket and the system usually trigger the screen to light up. it is best to disable it and turn the screen ON/OFF manually using the device buttons.
+#------------- step detection and significant motion sensors are usually not real sensors but actually based on the accelerometer data (and sometimes gyroscope too). the accelerometer is still ON even if you'll disable the step-counter 'services'.
+#------------- https://webcache.googleusercontent.com/search?ie=UTF-8&q=cache%3Ahttps%3A%2F%2Fsource.android.com%2Fdevices%2Fsensors%2Fsensor-types
+ro.qti.sensors.pedometer=false
+ro.qti.sensors.step_counter=false
+ro.qti.sensors.step_detector=false
+ro.qti.sensors.facing=false
+ro.qti.sensors.pick_up=false
+
+#battery - reduce scanning WiFi-networks from every 15 seconds (default) to every 3 minutes.
+#--------- you can still manually refresh any time you want using the wifi-settings menu.
+#--------- note 1 (side effect)         : the device might take a while to identify your home WiFi when returning from work and will continue to use the data-plan up-to 3 minutes after you arrive home (of right after manually refreshing).
+#--------- note 2 (side effect)         : if you are sitting in a coffee-shop and looking for the public WiFi, you'll only see it after up-to 3 minutes (of right after manually refreshing).
+#--------- note 3 (more battery saving) : you can manually disable 'scanning for public-networks' in your WiFi-settings.
+#--------- note 4 (more battery saving) : you can manually disable 'scanning WiFi networks' and 'scanning bluetooth devices' in your location-settings.
+#--------- this is is a huge (!) power-save, refreshing (even when connected to a WiFi-network) every 3-minutes instead of every 15-seconds (default) saves about 20% battery a day (!).
+wifi.supplicant_scan_interval=180
+
+#battery capacity explicitly declare (mostly used by Sony devices)
+###ro.semc.batt.capacity=2600
+
+#phone - SD-Card - phone loading speed by allowing background-loading of data-on-sdcard, sd-card is seens as phone secondary-memory which ease-up permissions for native-file-saving with 3rd-party-apps. TIP: allow developers-mode and switch ON allow writing to external-storage regardless of manifest.
+persist.sys.storage_preload=1
+persist.radio.no_wait_for_card=1
+
+#phone - allow functionality of device even if SIM isn't available yet.
+keyguard.no_require_sim=true
+
+#phone - allow built-in disk-manager if possible (Android 6+).
+ro.storage_manager.enabled=true
+
+#phone - proximity delay faster, helps with putting phone near ear and display turn off/on when moved.
+mot.proximity.delay=5
+ro.lge.proximity.delay=5
+ro.proximity.delay=5
+
+#phone - call - phone reacts faster to in-comming call signal.
+ring.delay=5
+ro.telephony.call_ring.delay=5
+
+#phone - call - try to allow/remove restrictions of built in call-recording feature and UI.
+persist.call_recording.enabled=true
+persist.call_recording.src=4
+ro.opa.eligible_device=true
+persist.sys.oem.region=CN
+
+#phone - call - (suited for older phones) process audio in speech range, and when using AMR codec use slightly better range for improved quality, slightly reducing low/high background noise.
+persist.cust.tel.eons=1
+persist.eons.enabled=true
+ro.config.hw_voicerecord=true
+ro.ril.enable.amr.wideband=1
+ro.ril.enable.imc.feature=1
+
+#phone - call - disable ability to preform multiple calls in the same time (rarely used), better performances when connecting calls.
+ro.telephony.call_ring.multiple=false
+
+#phone - allow legacy '/storage/emulated/0/' for old apps. this takes part of the internal storage and represent it as a whole storage (/storage/emulated/0/ is /storage/sdCard/ is /data/media/ - or /data/media/0/ - those are symlinks).
+#------- note that this has nothing to do with an actual removable sd-card which is named 'extSdCard' usually.
+#------- the main purpose of this is:
+#-------      1. when you connect your device to a computer not using 'media-transfer-protocol', but as 'USB-mass-storage' the device only expose this folder, and does not actually dismount the entire internal-storage (what would normally do).
+#-------      2. file-system of the device is linux-based ext3/ext4 with special permissions (similar to windows NTFS), but the 'emulated sdCard' is exposed as FAT/FAT32 which is perfectly fine for moving file from a PC to the device.
+#------- now days the internal storage is kept directly under '/data' partition (in ext3/ext4 file-system), and simply exposed to a PC as 'FAT/FAT32' using the media-transfer-protocol, this is a legacy property, and does nothing but best to kept-ON (true) just in case. It provides a legacy symlink and if the device has ability to really mount as USB-storage-device (for example if you installed lineageOS on an old device) it will keep your internal-storage safe.
+#------- https://android.stackexchange.com/questions/205430/what-is-storage-emulated-0
+persist.fuse_sdcard=true
+
+
+#phone - allow built-in WiFi-HotSpot/tethering (mostly useful for HTC devices which have it disabled).
+#-------------------------------------- disable DUN check.
+#-------------------------------------- https://review.aosip.dev/c/AOSIP/platform_frameworks_base/+/8999/2/services/core/java/com/android/server/connectivity/tethering/TetheringConfiguration.java
+#-------------------------------------- https://developer.android.com/reference/android/net/ConnectivityManager
+###persist.sys.dun.override=0
+###ro.wifi.hotspotUI=1
+###ro.tether.denied=false
+#------------------------------------on some overly restricted data-plans, the carrior may restrict the traffic. try enabling the properties below, in a terminal run 'su' [ENTER], 'settings put global tether_dun_required 0' [ENTER], install a VPN app (it will mask your traffic packets), restart the device, open the VPN app and connect to any server, turn ON the WiFi-hotspot using the device built-in settings, if your VPN has specific 'VPN Tether' option this is the time to turn it on as well. your device is functioning as a router now, try to include few of the network-properties (net.ipv4.*) to enhance the speed and stability of the connections.
+#-------------------------------------- https://android.googlesource.com/platform/frameworks/opt/telephony/+/afe71ef98351f33c82d5cf513e0d24078bba2d2c%5E%21/
+###net.tethering.noprovisioning=true
+
+
+
+#phone - disable agressive RAM cleaning background service (other switches prevents it collecting information regarding programs and maintaining database of scores of installed programs which stays in memory), which sometimes kills 3rd-party keyboard and makes the phone revert to default (Samsung) keyboard. it also keeps other programs in memory so you need to manually close down programs you don't want to run or install 3rd-party such as 'Android Assistant' (com.androidassistant) which can be set to clean background tasks every X minutes (with ignore list so you can explicitly include your keyboard in..)
+#-------------------------------------- https://webcache.googleusercontent.com/search?ie=UTF-8&q=cache:https%3A%2F%2Fwww.phonearena.com%2Fnews%2FHow-to-fix-that-annoying-SwiftKey-lag-on-Galaxy-S6-and-Note-4-root-reqd_id74641
+###sys.config.spcm_enable=false
+###sys.config.spcm_kill_skip=true
+###sys.config.samp_spcm_enable=false
+###sys.config.spcm_db_enable=false
+###sys.config.spcm_db_launcher=false
+###sys.config.spcm_preload_enable=false
+###sys.config.spcm_gcm_kill_enable=false
+
+#phone - control amount of programs. false is like 0. don't un-commment unless needed. "background" apps term is known as 'HIDDEN_APPS', and is similar to developer-options limit of background-apps. don't use less than 'ro.MAX_HIDDEN_APPS=3' since the launcher also needs to run, and you might want to re-enable SPCM (including killing and database, see above) if it isn't cause you problems since it kills background-tasks which are no longer needed.
+#-------------- https://forum.xda-developers.com/t/how-to-edit-max_hidden_apps.1902255/#post-84323649
+#-------------- https://android.googlesource.com/platform/frameworks/base/+/7d276c3/services/java/com/android/server/am/ProcessList.java
+###ro.ENFORCE_PROCESS_LIMIT=false
+###ro.MAX_SERVICE_INACTIVITY=false
+###ro.MIN_HIDDEN_APPS=false
+###ro.MAX_HIDDEN_APPS=false
+###ro.CONTENT_APP_IDLE_OFFSET=false
+###ro.EMPTY_APP_IDLE_OFFSET=false
+###ro.MAX_ACTIVITIES=false
+###ro.ACTIVITY_INACTIVITY_RESET_TIME=false
+###ro.MAX_RECENT_TASKS=false
+###ro.MIN_RECENT_TASKS=false
+###ro.APP_SWITCH_DELAY_TIME=false
+###ro.MAX_PROCESSES=false
+###ro.PROC_START_TIMEOUT=false
+###ro.CPU_MIN_CHECK_DURATION=false
+###ro.GC_TIMEOUT=false
+###ro.SERVICE_TIMEOUT=false
+###ro.MIN_CRASH_INTERVAL=false
+ro.MAX_HIDDEN_APPS=5
+
+
+#----------------------------------GPU
+#-------------------------------------- https://webcache.googleusercontent.com/search?ie=UTF-8&q=cache%3Ahttps%3A%2F%2Fsource.android.com%2Fdevices%2Fgraphics%2Frenderer
+#GPU - allow loading of OpenGL drivers at boot time to be shared with all processes. this is the default (true=when the device-GL-driver has no support for shared).
+ro.zygote.disable_gl_preload=false
+
+#GPU - you don't need to uncomment this, this is just for information and preventing future change. this is true by default, and should always be true, unless developing drivers or booting stage, so don't use in boot.img I guess...        https://webcache.googleusercontent.com/search?ie=UTF-8&q=cache%3Ahttps%3A%2F%2Fsource.android.com%2Fdevices%2Fgraphics%2Frenderer
+#hwui.use_gpu_pixel_buffers=true
+
+#GPU - OpenGL 3D-hardware acceleration
+debug.egl.hw=1
+#GPU - compositing (1=try hardware(with fallback),0=prefer just software).
+debug.sf.hw=1
+sys.hwc.gpu_perf_mode=1
+#GPU - use developer-options to force GPU use for UI-elements as well.
+persist.sys.ui.hw=true
+debug.gr.numframebuffers=3
+#GPU - no debug messages (remove this if you are actually developing).
+debug.hwui.level=0
+
+
+
+#GPS - enable background location reporting/getting to Google, whom maintain location based on WiFi and carrior network and enable a slightly faster pre-GPU location fix.
+#----------- there are several additional modifications to '/system/etc/gpx.xml' changing to 'ReAidingOnHotStart="true"'
+#              and   '/system/etc/gps.conf'  setting:
+#                DEFAULT_AGPS_ENABLE=TRUE            --master switch to AGPS (list of current known satalites).
+#                REPORT_POSITION_USE_SUPL_REFLOC=1   --(starting point location narrow-down) IP to country.
+#                INTERMEDIATE_POS=1                  --(starting point location narrow-down) cell-tower positioning.
+#                ENABLE_WIPER=1                      --(starting point location narrow-down) enable WiFi positioning.
+#----------- you might want to change 'persist.radio.apm_sim_not_pwdn=1' to make sure the SIM is available.
+#----------- when you use WiFi the carrior-data is disabled, keeping SIM-functionality to just calls/SMS. you may use the developer-settings to keep the data-always ON, which might speed up location-fix slightly.
+#----------- if you don't care about battery, enable 'scanning for WiFi networks' and 'scanning for bluetooth devices' in the location-settings to speed-up slightly getting a starting-point-location.
+ro.com.google.locationfeatures=1
+ro.com.google.networklocation=1
+
+
+
+
+#-------------------------------Java VM
+#---------------------------------no pre-verifying (ahead of time - AOT).
+#---------------------------------no just-in-time (JIT and JIT-profiles).
+#---------------------------------result: faster first-boot, boot, apk-installations. slower apk first run. background + multi-threading when supported.
+#----------------------------------------https://niziak.spox.org/wiki/android:dalvik#bytecode_verification
+#----------------------------------------https://gist.github.com/dalinaum/1630446
+#----------------------------------------https://source.android.com/devices/tech/dalvik/configure
+#Java VM - limit the AOT, JIT OFF.
+dalvik.vm.dexopt-flags=v=n,o=n,m=n,u=n
+debug.usejit=false
+dalvik.vm.usejit=false
+dalvik.vm.usejitprofiles=false
+
+#Java VM - limit JIT to minimal verification, no use of profiles.
+dalvik.vm.image-dex2oat-filter=verify-at-runtime
+pm.dexopt.first-boot=verify-at-runtime
+pm.dexopt.boot=verify-at-runtime
+pm.dexopt.install=interpret-only
+pm.dexopt.ab-ota=quicken
+pm.dexopt.core-app=quicken
+pm.dexopt.bg-dexopt=quicken
+pm.dexopt.shared-apk=quicken
+pm.dexopt.nsys-library=quicken
+pm.dexopt.forced-dexopt=quicken
+
+#Java VM - when possible, try multi-threading and hyper-threading (simultaneous multithreading - SMT) to finish VM-tasks in background and quicker. OK to be included (also needs 'u=n' at the end of 'dalvik.vm.dexopt-flags'), if not supported nothing happens. some similar properties for various manufactures.
+persist.sys.dalvik.hyperthreading=true
+persist.sys.dalvik.multithread=true
+dalvik.vm.dex2oat-threads=4
+dalvik.vm.dex2oat-thread_count=4
+ro.sys.fw.dex2oat_thread_count=4
+dalvik.vm.boot-dex2oat-threads=4
+dalvik.vm.image-dex2oat-threads=4
+
+#Java VM - reduce verifications with dex checksum before launch, and reduce logs.
+dalvik.vm.check-dex-sum=false
+dalvik.vm.checkjni=false
+dalvik.vm.verify-bytecode=false
+debug.atrace.tags.enableflags=0
+ro.config.dmverity=false
+ro.config.htc.nocheckin=1
+ro.config.nocheckin=1
+ro.dalvik.vm.native.bridge=0
+ro.kernel.android.checkjni=0
+ro.kernel.checkjni=0
+
+
+#unLOG - disable/limit when possible. some will be overriden when ADB debugging is started.
+debug.mdpcomp.logs=0
+debugtool.anrhistory=0
+logcat.live=disable
+persist.brcm.ap_crash=none
+persist.brcm.cp_crash=none
+persist.brcm.log=none
+persist.radio.adb_log_on=0
+persist.sys.qc.sub.rdump.on=0
+profiler.debugmonitor=false
+profiler.force_disable_err_rpt=1
+profiler.force_disable_ulog=1
+profiler.hung.dumpdobugreport=false
+profiler.launch=false
+ro.product_ship=true
+persist.ims.disableDebugLogs=1
+
+
+#phone - USB OTG - make sure OTG-USB is not "software disabled".
+persist.sys.isUsbOtgEnabled=1
+
+#phone - audio - no high-volume warning.
+audio.safemedia.bypass=true
+audio.safemedia.force=false
+
+#phone - audio - increase amount of steps in the volume-selector-control just for finer-control, this does NOT actually increase the maximum volume.
+#-------- to increase the maximum volume you need to edit /system/etc/mixer_paths.xml or /system/vendor/etc/mixer_paths.xml changing speaker related volume to around 80 up to 90 (from around 60) and headphones to around 20 (from 15), any single digits values are not to be modified, they are identifiers (reference to entries - 'mapping' - previously defined within the file itself). add new items such as 'RX7 Digital Volume' (actually RX1 to RX9) and 'HPHL Volume' as '<ctl' nodes in xml in either inside a '<path' mapping or at the head of the file.
+#----------- https://www.youtube.com/watch?v=kyCxhpo5PHE&disable_polymer=1&gl=GB&hl=en-GB#spfk-no-polymer
+#----------- https://android.stackexchange.com/questions/87101/how-does-changing-the-mixer-paths-xml-increase-volume
+#----------- https://old.reddit.com/r/Nexus5/comments/28jnc2/simple_tweak_to_increase_speaker_and_headphone/
+#----------- https://forum.xda-developers.com/t/increase-speaker-headphones-volume-stable.4070111/
+#----------- https://review.lineageos.org/c/LineageOS/android_device_htc_ville/+/162120/2/configs/mixer_paths.xml
+#----------- https://android.googlesource.com/device/huawei/angler/+/b4c7865838b7ad7650c23d4e5d4d41448d84f396/mixer_paths.xml
+#----------- https://gist.github.com/luca020400/5389df3791f718ea9e8f
+#----------- https://github.com/marshmallow-og/android_device_asus_flo/blob/master/mixer_paths.xml
+ro.config.vc_call_vol_steps=15
+ro.config.media_vol_steps=30

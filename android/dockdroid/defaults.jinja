@@ -1,8 +1,8 @@
 {% load_yaml as defaults %}
-redroid_service:
-  name: redroid
-  image: docker.io/redroid/redroid
-  tag: 11.0.0-amd64
+container:
+  name: dockdroid
+  image: docker.io/sickcodes/dock-droid
+  tag: latest
   refresh: false
   systemd:
     restart: on-success
@@ -19,4 +19,4 @@ redroid_service:
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},
-    grain='default', default= 'default', merge= salt['pillar.get']('redroid', {})) %}
+    grain='default', default= 'default', merge= salt['pillar.get']('dockdroid', {})) %}

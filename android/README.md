@@ -1,23 +1,21 @@
 # android
 
-## new
-
-https://github.com/waydroid/waydroid
-https://github.com/sickcodes/dock-droid
-
 ## android.tools
 
-+ `adb`: Android Debug Bridge
-+ `aapt`: Android Asset Packaging Tool
-+ `fastboot`: flashing firmware on Android device, boot an Android device to fastboot mode
-+ `heimdall`: flashing firmware on Samsung devices supporting ODIN mode
++ adb - Android Debug Bridge
++ fastboot - flashing firmware on Android device, boot to fastboot mode
++ heimdall - flashing firmware on Samsung devices supporting ODIN mode
++ scrcpy - display and control of Android devices connected on USB (or tcp/ip)
++ gplaycli - search, install, update Android applications from the Play Store
 
-### android.scrcpy (user tool)
+## Android Emulator
 
-+ `scrcpy`: display and control of Android devices connected on USB (or over TCP/IP)
++ [android/redroid](android/redroid) Android Emulator (same kernel, GPU accel, docker container)
++ [android/dockdroid](android/dockdroid) Android Emulator (qemu based, but x86-android, GPU accel, docker container)
++ (android/android-x86) Android Emulator (qemu based, but x86-android)
++ (android/waydroid) Android Emulator (same kernel, GPU Accel, LXC container)
++ [android/emulator](android/emulator) Android Emulator (qemu based, emulator) container for desktop and headless
 
-## Services based on containers
+## Android Builder
 
-+ [android/emulator](android/emulator) Android Emulator (qemu based) container for desktop and headless
-+ [android/redroid](android/redroid) GPU accelerated Android on same kernel container
 + [android/builder](android/builder) Lineage Android OS Builder container for building android

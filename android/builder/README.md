@@ -2,13 +2,14 @@
 
 ## Cross-build android lineage for a set of target hardware
 
-+ `build_image()`
++ `build_image(pkgdefinition, user="")`
 
 ### Configure
+
 ```yaml
 environment:
   BUILD_DATA_VOLUME: android-build-data
-  BRANCH_NAME: lineage-17.1
+  BRANCH_NAME: lineage-18.1
   DEVICE_LIST: sailfish
   SIGN_BUILDS: true
   SIGNATURE_SPOOFING: restricted
