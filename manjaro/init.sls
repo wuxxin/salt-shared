@@ -1,0 +1,3 @@
+manjaro-base:
+  test:
+    - nop

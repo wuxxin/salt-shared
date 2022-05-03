@@ -19,6 +19,8 @@ build_tools:
       - git-lfs
       # cmake - cross-platform open-source make system
       - cmake
+      # dkms - dynamic kernel modules system
+      - dkms
       # archlinux-contrib - Collection of contrib scripts used in Arch Linux
       - archlinux-contrib
       # pikaur - aur helper, for building packages from AUR

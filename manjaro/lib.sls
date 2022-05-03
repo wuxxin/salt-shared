@@ -1,4 +1,5 @@
 {% macro pamac_install(name, pkgs=[]) %} {# require #}
+
 "{{ name }}":
   cmd.run:
     - name: pamac install --no-confirm {{ pkgs|join(' ') }}
@@ -37,7 +38,8 @@
 {% endmacro %}
 
 
-{% macro pamac_patch_install(name, patches=[]) %} {# require #}
+{% macro pamac_patch_install(name, patches=[], require='') %}
+
 clone-{{ name }}:
   cmd.run:
   {% if 'custom' in kwargs and kwargs['custom'] %}
@@ -46,15 +48,15 @@ clone-{{ name }}:
     - name: pamac clone {{ name }}
     - unless: pamac list -i -q | grep -q {{ name }}
   {% endif %}
-  {%- if 'require' in kwargs %}
+  {%- if (require is string and require != '') or
+         (require is sequence and require|length > 0) %}
     - require:
-    {%- set d = kwargs['require'] %}
-    {%- if d is sequence and d is not string %}
-      {%- for l in d %}
+    {%- if require is sequence and require is not string %}
+      {%- for l in require %}
       - {{ l }}
       {%- endfor %}
     {%- else %}
-      - {{ d }}
+      - {{ require }}
     {%- endif %}
   {%- endif %}
 
@@ -87,7 +89,8 @@ build-{{ name }}:
 {% endmacro %}
 
 
-{% macro pamac_patch_install_dir(name, srcdir) %} {# require #}
+{% macro pamac_patch_install_dir(name, srcdir) %} {# require, custom #}
+
 {%- set d = kwargs['require']|d([]) %}
 {%- set c = kwargs['custom']|d(false) %}
 
