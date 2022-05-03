@@ -17,7 +17,7 @@ Most states are working, some states have a documentation README.md
     + [node](node): basic machine setup (hostname, locale, network, storage)
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
-        + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and ROCM hardware accelerated pytorch and tensorflow
+        + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and hardware accelerated pytorch and tensorflow
     + [ubuntu](ubuntu): disable or enable ubuntu specifics
     + [manjaro](manjaro): manjaro specifics
 
