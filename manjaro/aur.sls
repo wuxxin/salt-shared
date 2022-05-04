@@ -17,6 +17,8 @@ build_tools:
       - git
       # git-lfs - Git extension for versioning large files
       - git-lfs
+      # gnupg - free implementation of the OpenPGP standard
+      - gnupg
       # cmake - cross-platform open-source make system
       - cmake
       # dkms - dynamic kernel modules system
