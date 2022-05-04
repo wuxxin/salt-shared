@@ -1,0 +1,22 @@
+From ebf276fd9bf0d2e3879e8eb1aa42ac1831f0d281 Mon Sep 17 00:00:00 2001
+From: Felix Erkinger <felix@ep3.at>
+Date: Tue, 3 May 2022 22:13:20 +0200
+Subject: [PATCH] fix easyname entity__name parsing
+
+---
+ lexicon/providers/easyname.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lexicon/providers/easyname.py b/lexicon/providers/easyname.py
+index 1dbbc442f..5ba745145 100644
+--- a/lexicon/providers/easyname.py
++++ b/lexicon/providers/easyname.py
+@@ -257,7 +257,7 @@ def _list_records_internal(
+                 try:
+                     rec = {}
+                     columns = row.find_all("td")
+-                    rec["name"] = (columns[0].string or "").strip()
++                    rec["name"] = (columns[0].contents[0].string or "").strip()
+                     rec["type"] = (columns[1].contents[1].text or "").strip()
+                     rec["content"] = (columns[2].contents[1].string or "").strip()
+                     rec["priority"] = (columns[3].contents[1].string or "").strip()
