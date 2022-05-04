@@ -1,3 +1,5 @@
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
 manjaro-pipewire:
   pkg.installed:
     - pkgs:
@@ -25,6 +27,7 @@ manjaro-desktop:
       - manjaro-gstreamer
       - manjaro-printer
 
+{# enable cups #}
 {% for s in ['service', 'socket', 'path'] %}
 cups.{{ s }}:
   service.enabled:
@@ -32,25 +35,27 @@ cups.{{ s }}:
       - pkg: manjaro-desktop
 {% endfor %}
 
+
+{# make sure wayland as gui platform is used #}
+{{ user_home }}/.config/environment.d/envvars.conf:
+  file.managed:
+    - makedirs: true
+    - user: {{ user }}
+    - group: {{ user }}
+    - contents: |
+        # QT5/6 (packages qt5-wayland,qt6-wayland)
+        QT_QPA_PLATFORM=wayland
+        # To run a SDL2 application on Wayland
+        SDL_VIDEODRIVER=wayland
+        # Run Firefox on Wayland
+        MOZ_ENABLE_WAYLAND=1
+
 {#
-+ user config for wayland
-    + env vars for native wayland support
-        + wayland uses systemd user environment variables
-        + edit ~/.config/environment.d/envvars.conf
-```shell
-# QT5/6 (packages qt5-wayland,qt6-wayland)
-QT_QPA_PLATFORM=wayland
-# To run a SDL2 application on Wayland
-SDL_VIDEODRIVER=wayland
-# Run Firefox on Wayland
-MOZ_ENABLE_WAYLAND=1
-```
-    + electron based applications
-        + To use electron-based applications natively under Wayland,
-          create or edit the file ${XDG_CONFIG_HOME}/electron-flags.conf
-          to add the following options
-```
++ electron based applications
+    + To use electron-based applications natively under Wayland,
+      create or edit the file ${XDG_CONFIG_HOME}/electron-flags.conf
+      to add the following options
+
 --enable-features=UseOzonePlatform
 --ozone-platform=wayland
-```
 #}
