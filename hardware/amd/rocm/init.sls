@@ -9,6 +9,7 @@ include:
   'rocm-hip-sdk',
   'rocm-opencl-sdk',
   'miopen-hip',
+  'hipmagma',
   ]) }}
 
 hardware-amd-rocm:
