@@ -30,6 +30,10 @@
 network-tools:
   pkg.installed:
     - pkgs:
+      - iptables-nft
       - bridge-utils
       - ipset
       - netctl
+      - vde2
+      - dnsmasq
+      - openbsd-netcat
