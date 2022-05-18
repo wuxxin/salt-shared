@@ -22,21 +22,21 @@ zfs-utils:
 {% for pool in settings.pools %}
 
 zpool-scrub@{{ pool }}.timer:
-  service:
-    - {{ 'enabled' if settings.autoscrub == true else 'disabled' }}
+  cmd.run:
+    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub@{{ pool }}.timer
     - require:
       - file: zpool-scrub@.timer
 
 zpool-trim@{{ pool }}.timer:
-  service:
-    - {{ 'enabled' if settings.autotrim == true else 'disabled' }}
+  cmd.run:
+    - name: systemctl {{ 'enable' if settings.autotrim == true else 'disable' }} --now zpool-trim@{{ pool }}.timer
     - require:
       - file: zpool-trim@.timer
 
   {% for label in ['frequent', 'hourly', 'daily', 'weekly', 'monthly'] %}
 zfs-snapshot-{{ label }}@rpool.timer:
-  service:
-    - {{ 'enabled' if (settings.autosnapshot == true and settings.snapshot[label] != 0) else 'disabled' }}
+  cmd.run:
+    - name: systemctl {{ 'enable' if (settings.autosnapshot == true and settings.snapshot[label] != 0) else 'disable' }} --now zfs-snapshot-{{ label }}@rpool.timer
     - require:
       - file: zfs-snapshot-{{ label }}@.timer
   {% endfor %}
