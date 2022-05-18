@@ -2,8 +2,6 @@
 
 A collection of saltstack states.
 
-Most states are working, some states have a documentation README.md
-
 + Target Platforms:
     + **Ubuntu Focal 20.04 LTS**
     + **Manjaro Stable**
