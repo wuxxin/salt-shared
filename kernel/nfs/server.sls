@@ -1,5 +1,16 @@
 {% from "kernel/nfs/defaults.jinja" import settings %}
 
+{% if grains['os'] == 'Manjaro' %}
+
+nfs-kernel-server:
+  pkg.installed:
+    - require:
+      - sls: kernel.nfs.common
+  service.running:
+    - enable: True
+
+{% elif grains['os'] == 'Ubuntu' %}
+
 include:
   - kernel.nfs.common
 
@@ -19,7 +30,7 @@ nfs-kernel-server:
     - require:
       - pkg: nfs-kernel-server
 
-{% for name, value in nfs_server_replace %}
+  {% for name, value in nfs_server_replace %}
 {{ name }}-nfs-kernel-server:
   file.replace:
     - name: /etc/default/nfs-kernel-server
@@ -32,4 +43,5 @@ nfs-kernel-server:
       - service: nfs-kernel-server
     - watch_in:
       - service: nfs-kernel-server
-{% endfor %}
+  {% endfor %}
+{% endif %}
