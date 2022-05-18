@@ -43,8 +43,6 @@ emulator-windows:
       - wine
       # wine-gecko - Wine's built-in replacement for Microsoft's Internet Explorer
       - wine-gecko
-      # playonlinux - GUI for managing Windows programs
-      - phoenicis-playonlinux
       # vkd3d - Direct3D 12 to Vulkan translation library By WineHQ
       - vkd3d
       # bottles - tailored windows configurations
