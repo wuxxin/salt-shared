@@ -6,7 +6,7 @@ enable_aur:
     - repl: EnableAUR
     - append_if_not_found: true
 
-build-essentials:
+build_essentials:
   pkg.group_installed:
     - name: base-devel
 
