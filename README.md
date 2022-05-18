@@ -18,10 +18,11 @@ Most states are working, some states have a documentation README.md
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
         + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and hardware accelerated pytorch and tensorflow
-    + [ubuntu](ubuntu): disable or enable ubuntu specifics
+    + [virtual](virtual): guest additions for running under qemu/libvirt, virtualbox, vmware
+    + [ubuntu](ubuntu): ubuntu specifics
     + [manjaro](manjaro): manjaro specifics
 
-+ [Desktop](desktop): software for a desktop installation
++ [Desktop](desktop)
     + [ubuntu](desktop/ubuntu): Ubuntu Desktop with Applications
     + [manjaro](desktop/manjaro): Manjaro Desktop with Applications
         + [python](desktop/manjaro/python): JupyterLab Scientific+ Machinelearning Python Stack
@@ -31,7 +32,7 @@ Most states are working, some states have a documentation README.md
     + [tools](tools): useful set of command line tools
     + [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
     + [python Language Support](python)
-    + [zfs](zfs): OpenZFS is an advanced file system and volume manager
+    + [zfs](zfs): ZFS file system and volume management (scrub, trim, snapshot)
 
 + Network
     + [http_frontend](http_frontend): https frontend using nginx, acme.sh and easyrsa
@@ -51,7 +52,6 @@ Most states are working, some states have a documentation README.md
     + [qemu](qemu): qemu/kvm full virtualization
     + [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
     + [systemd nspawn](systemd/nspawn): leightweight machine container manager
-    + [vagrant](vagrant): vagrant virtual machine manager (libvirt, lxc, a.o.)
 
 + Container
     + [containers](containers): OCI container runtime using podman, podman-compose, x11docker
@@ -63,13 +63,9 @@ Most states are working, some states have a documentation README.md
     + [mysql](mysql): MariaDB (mysql compatible) Database
     + [redis](redis): Redis (Key/Value Store) Instances
 
-+ Mailserver
++ Mail
     + [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
     + [getmail](getmail): fetchmail alternative
-
-+ [Applications](app/) using [containers](containers)
-    + [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
-      with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
 
 + Android
     + [android](android): android tools (adb,fastboot,heimdall,scrcopy)
@@ -82,6 +78,10 @@ Most states are working, some states have a documentation README.md
     + [Airrohr](embedded/airrohr) Airquality Sensor, setup and integration into homeassistant
     + [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
     + [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
+
++ [Applications](app/) using [containers](containers)
+    + [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
+      with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
 
 + unfinished, halfbroken, quirky or very minimum skeleton packages
     + [android/android-x86](android/android-x86) Android Emulator (qemu based, but x86-android)
