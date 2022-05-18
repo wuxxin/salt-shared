@@ -5,6 +5,14 @@ include:
   - python
   - python.ipython
 
+{% if grains['os_family']|lower == 'arch' %}
+
+python-build-essentials:
+  pkg.group_installed:
+    - name: base-devel
+
+{% endif %}
+
 python-dev:
   pkg.installed:
     - pkgs: {{ settings.python_dev[grains['os_family']|lower] }}
