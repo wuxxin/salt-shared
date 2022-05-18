@@ -1,25 +1,33 @@
 {% load_yaml as defaults %}
-# origin: system|custom
-origin: system
-custom_src_dist: focal
-custom_apply_patches: false
-
-# arc_max_percent: use up to x % of memory for arc
-arc_max_percent: 25
-# arc_max_bytes: will be computed from arc_max_percent if unset
-
 # enable cyclic rotating filesystem snapshots
-# any fs where "com.sun:auto-snapshot" is not false and
-# "com.sun:auto-snapshot:<interval>" is not false, a rotating snapshot will be taken
 autosnapshot: false
 
-# rotation intervals: keep x snapshots per interval
-keep_frequent: 4 {# 15min  intervals for the last hour #}
-keep_hourly: 10  {# 1hour  intervals for the last 10 hours #}
-keep_daily: 9    {# 1day   intervals for the last  9 days #}
-keep_weekly: 3   {# 1week  intervals for the last  3 weeks #}
-keep_monthly: 3  {# 1month intervals for the last  3 months #}
+# enable cyclic data scrubbing of filesystem
+autoscrub: false
 
+# enable cyclic "automatic" manual start of trimming the filesystem
+autotrim: false
+
+snapshot:
+  # any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
+  # is not false, a rotating snapshot will be taken
+  # rotation intervals: keep x snapshots per interval, 0 to disable
+  frequent: 4 {# 15min  intervals for the last hour #}
+  hourly: 8   {# 1hour  intervals for the last 8 hours #}
+  daily: 8    {# 1day   intervals for the last 9 days #}
+  weekly: 0   {# 1week  intervals for the last 0 weeks #}
+  monthly: 0  {# 1month intervals for the last 0 months #}
+  # --min-size only available from github master
+  args: --quiet --syslog --default-exclude --fast --skip-scrub --min-size 1
+
+# List of pools to act on
+pools:
+  - rpool
+
+# arc_max_percent: use up to x % of memory for arc
+# arc_max_bytes: will be computed from arc_max_percent if unset
+arc_max_limit: true
+arc_max_percent: 25
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},
@@ -69,7 +77,7 @@ keep_monthly: 3  {# 1month intervals for the last  3 months #}
     mountpoint: none
     setuid: off
     exec: off
-{{ mksnapshot(4, frequent=true, hourly=true, daily=true, weekly=true, monthly=true) }}
+{{ mksnapshot(4, frequent=true, hourly=true, daily=true) }}
 
 {% endload %}
 
