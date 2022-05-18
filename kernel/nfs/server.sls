@@ -3,9 +3,8 @@
 {% if grains['os'] == 'Manjaro' %}
 
 nfs-kernel-server:
-  pkg.installed:
-    - require:
-      - sls: kernel.nfs.common
+  pkg:
+    - installed
   service.running:
     - enable: True
 
