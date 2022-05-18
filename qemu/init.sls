@@ -18,7 +18,9 @@ qemu:
       - ovmf
       - libosinfo-bin
 {% elif grains['os'] == 'Manjaro' %}
-      - qemu
+      - qemu-desktop
       - qemu-guest-agent
+      - edk2-ovmf
+      - swtpm
       - mkosi
 {% endif %}
