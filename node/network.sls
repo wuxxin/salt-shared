@@ -3,7 +3,7 @@
 
 include:
   - ssh
-  - kernel.nfs.common
+  - kernel.nfs
 
 {# configure nsswitch with additional systemd specific libraries #}
 nsswitch.packages:
@@ -32,13 +32,13 @@ network-utils:
 {{ add_internal_bridge(settings.network.internal.name,
     settings.network.internal.cidr, settings.network.priority) }}
 
-{# require bridge creation before kernel.nfs.common setup, so nfs can be configured to bridge also #}
+{# require bridge creation before kernel.nfs setup, so nfs can be configured to bridge also #}
 nfs.common_after_bridge:
   test.nop:
     - require:
       - cmd: bridge_{{ settings.network.internal.name }}
     - require_in:
-      - sls: kernel.nfs.common
+      - sls: kernel.nfs
 
 {# write and apply pillar netplan settings to disk if not empty, remove file otherwise #}
 default_netplan:
@@ -56,7 +56,7 @@ default_netplan:
     - onchanges:
       - file: default_netplan
     - require_in:
-      - sls: kernel.nfs.common
+      - sls: kernel.nfs
 
 {# write and apply pillar systemd network settings to disk if not empty, remove file otherwise #}
 default_systemd.network:
@@ -74,4 +74,4 @@ default_systemd.network:
     - onchanges:
       - file: default_systemd.network
     - require_in:
-      - sls: kernel.nfs.common
+      - sls: kernel.nfs
