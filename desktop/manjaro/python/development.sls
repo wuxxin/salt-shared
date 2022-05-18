@@ -29,3 +29,9 @@ python_desktop:
       {# Analyzes Python code looking for bugs and signs of poor quality #}
       - pyenv
       {# Easily switch between multiple versions of Python #}
+
+python_other:
+  pkg.installed:
+    - pkgs:
+      - python-websockets
+      - python-sounddevice
