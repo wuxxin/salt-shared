@@ -1,7 +1,6 @@
 # ROCM sdk
 
 + packages needed for python-pytorch-rocm and tensorflow-rocm
-  + rocm-hip-sdk, miopen-hip
 
 ```
 hip-runtime-amd rocm-llvm rocm-hip-sdk rocm-opencl-sdk
