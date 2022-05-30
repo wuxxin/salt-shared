@@ -1,5 +1,6 @@
 {% macro jupyter_user_kernel(user, name, pkgs=[], system_packages=True, rebuild=False) %}
-  {% set BASE_DIR= salt['user.info'](user)['home'] ~ '/.local/lib/ipykernel' %}
+  {% set HOME= salt['user.info'](user)['home'] %}
+  {% set BASE_DIR= HOME ~ '/.local/lib/ipykernel' %}
   {% set VIRTUAL_ENV= BASE_DIR ~ '/' ~ name %}
 
 create_jupyter_python_env_{{ name }}:
@@ -32,6 +33,8 @@ install_ipykernel_and_packages_{{ name }}:
     - pkgs: {{ ['ipykernel'] + pkgs }}
     - bin_env: {{ VIRTUAL_ENV }}
     - use_vt: true
+    - env:
+        HOME: {{ HOME }}
     - require:
       - cmd: create_jupyter_python_env_{{ name }}
 
@@ -40,6 +43,8 @@ register_ipykernel_{{ name }}:
     - name: python -m ipykernel install --user --name={{ name }}
     - user: {{ user }}
     - group: {{ user }}
+    - env:
+        HOME: {{ HOME }}
     - require:
       - pip: install_ipykernel_and_packages_{{ name }}
 
@@ -51,23 +56,25 @@ installed_jupyter_kernel_{{ name }}:
 {% endmacro %}
 
 
-{% macro jupyter_user_service(user, notebook_dir) %}
+{% macro jupyter_user_service(user, notebook_dir, port) %}
 
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% set basename= salt['file.basename'](notebook_dir) %}
   {% set home= salt['user.info'](user)['home'] %}
-  {% set WMID= 'jupterlab_' ~ salt['cmd.run_stdout'](
+  {% set WMID= 'jupyterlab_' ~ salt['cmd.run_stdout'](
     'python -c "import binascii; print(\'{:x}\'.format(binascii.crc_hqx(b\'' ~
     notebook_dir ~ '\', 0)))"' ) %}
   {% set ice_profile= home ~ '.local/share/ice/profiles/' ~ WMID %}
   {% set WMClass= 'WebApp-' ~ WMID %}
-  {% set token= '' %}
-  {% set port= '8888' %}
+  {% set token= 'FIXME' %}
 
 # create a systemd user service for starting jupyter lab in background without gui
 jupyter_user_service_{{ WMID }}:
   file.managed:
     - name: {{ home }}/.config/systemd/user/{{ WMID }}.service
+    - user: {{ user }}
+    - group: {{ user }}
+    - makedirs: true
     - contents: |
         [Unit]
         Description=Jupyter notebook server ({{ notebook_dir }})
@@ -89,7 +96,6 @@ jupyter_user_service_{{ WMID }}:
 
         [Install]
         WantedBy=default.target
-
   {%- if 'require' in kwargs %}
     - require:
     {%- set data = kwargs['require'] %}
@@ -101,7 +107,6 @@ jupyter_user_service_{{ WMID }}:
       - {{ data }}
     {%- endif %}
   {%- endif %}
-
 
 {% load_yaml as desktop_config %}
 Type: Application
@@ -120,13 +125,12 @@ X-WebApp-Isolated: true
 {% endload %}
 
 # create a jupyterlab desktop entry to start the gui-browser as "app"
-{{ user_desktop(user, desktop_config, require='file: jupyter_user_service_'~ WMID) }}
-
+{{ user_desktop(user, WMClass|lower(), desktop_config, require='file: jupyter_user_service_'~ WMID) }}
 
 installed_jupyter_user_service_{{ WMID }}:
   test.nop:
     - require:
       - file: jupyter_user_service_{{ WMID }}
-      - file: {{ desktop_config.Name }}.desktop
+      - file: {{ WMClass|lower() }}.desktop
 
 {% endmacro %}

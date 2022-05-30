@@ -24,6 +24,7 @@ user_python_env_jupyter_packages:
     - use_vt: true
 {% endif %}
 
+{#
 # install all configured kernels for jupyter
 {% for key, value in settings.kernel.items() %}
 {{ jupyter_user_kernel(user=user, name=key, pkgs=value.packages,
@@ -31,11 +32,14 @@ user_python_env_jupyter_packages:
     rebuild=value.rebuild|d(false),
     require='test: desktop_manjaro_python_init') }}
 {% endfor %}
+#}
 
 {% for key, value in settings.service.items() %}
 # create a systemd user service for starting jupyter lab in background without gui
 # and a desktop entry chromium app to start the gui app of jupyterlab
-{{ jupyter_user_service(user=user, notebook_dir=value.notebook_dir,
+{{ jupyter_user_service(user=user,
+    notebook_dir=value.notebook_dir,
+    port=value.port,
     require='test: desktop_manjaro_python_init') }}
 {% endfor %}
 

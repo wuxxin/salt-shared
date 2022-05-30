@@ -16,25 +16,30 @@ scientific_python_base:
     - pkgs:
       ## scientific python
       - python-scipy
+      # pandas - data structures and data analysis
+      - python-pandas
+      - python-pandas-datareader
       # statsmodels - estimation of many different statistical models, conducting statistical tests, and statistical data exploration
       - python-statsmodels
       # xarray - N-D labeled arrays and datasets in Python
       - python-xarray
+
       # matplotlib - plotting library, making publication quality plots
       - python-matplotlib
       - python-matplotlib-inline
       # pyside2 - use of Qt5 APIs in Python applications
       - pyside2
-      # pandas - data structures and data analysis
-      - python-pandas
-      - python-pandas-datareader
       # Statistical data visualization
       - python-seaborn
+      # python-opencv - Open Source Computer Vision Library
+      - python-opencv
 
       ## jupyter
-      - jupyter
       - jupyterlab
-      # jupyterlab-widgets needs nodejs and npm
+      - python-jupyterlab_server
+      # nbconvert - jupyter Notebook Conversion
+      - jupyter-nbconvert
+      # jupyterlab-widgets - extensions to use ipywidgets, needs nodejs and npm
       - jupyterlab-widgets
 
       ## language server
@@ -67,8 +72,12 @@ scientific_python_base:
       # python-hvplot
 
       ## jupyter: widgets, extensions, converter, kernels
-      - jupyter-lsp
+      # jupyterlab-lsp - Coding assistance for JupyterLab with Language Server Protocol
       - jupyterlab-lsp
+      # jupyterlab_git - Git extension for JupyterLab
+      - jupyterlab-extension-jupyterlab_git
+      # jupyterlab-execute-time - display cell timings in Jupyter Lab
+      - jupyterlab-execute-time
       # python-ipympl - Matplotlib Jupyter Extension
       - python-ipympl
       # jupyterlab-plotly - Jupyter Extension for Plotly.py
@@ -81,17 +90,16 @@ scientific_python_base:
       - python-py2nb
       # nbdime - Diff and merge of Jupyter Notebooks
       - python-nbdime
-      # jupyterlab-git - Git extension for JupyterLab
-      - jupyterlab-git
       # ipysheet - Spreadsheet in the jupyter notebook
       - python-ipysheet
       ### jupyter: kernels
       - xeus
+      ### jupyter: language
+      # jupyterlab-language-pack-de-de - German (Germany) language pack for JupyterLab
+      - jupyterlab-language-pack-de-de
 
       ## language server: additional
       - dockerfile-language-server
-      - python-lsp-isort
-      - python-lsp-mypy
       - python-pylsp-rope
 {% endload %}
 {{ pamac_install('scientific_python_aur', pkgs,
