@@ -19,6 +19,7 @@ include:
 {{ pamac_install('python-kaldi-io', ['python-kaldi-io',],
     require='sls: desktop.manjaro.python.hardware_optimized') }}
 
+# torchrec - Domain library for recommendation systems
 {#
 
 {{ pamac_patch_install_dir('python-torchaudio-rocm',

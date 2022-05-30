@@ -2,7 +2,9 @@
 
 include:
   - hardware.amd.rocm
+  - desktop.manjaro.python.hardware_optimized
 
-{{ pamac_install('python-tensorflow-rocm_aur',
-    ['tensorflow-rocm', 'tensorflow_hub', ],
-    require= 'sls: hardware.amd.rocm') }}
+{{ pamac_install('python-tensorflow-rocm_aur', [
+    'tensorflow-rocm',
+    'tensorflow_hub',
+    ], require= 'sls: hardware.amd.rocm') }}
