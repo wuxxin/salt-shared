@@ -33,7 +33,6 @@ emulator-arcade:
     - pkgs:
       - retroarch
       - libretro-overlays
-      - libretro-shaders
       - mame
 
 emulator-windows:
