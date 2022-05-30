@@ -27,7 +27,7 @@ manjaro-desktop:
       - manjaro-gstreamer
       - manjaro-printer
 
-{# enable cups #}
+# enable cups
 {% for s in ['service', 'socket', 'path'] %}
 cups.{{ s }}:
   service.enabled:
@@ -35,8 +35,7 @@ cups.{{ s }}:
       - pkg: manjaro-desktop
 {% endfor %}
 
-
-{# make sure wayland as gui platform is used #}
+# make sure wayland as gui platform is used
 {{ user_home }}/.config/environment.d/envvars.conf:
   file.managed:
     - makedirs: true
