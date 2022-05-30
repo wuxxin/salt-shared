@@ -1,10 +1,12 @@
 # Scientific Python using the Jupyter ecosystem
 
+most python packages are installed as system packages,
+some system packages are build from aur,
+some python packages are only local in user environment or specific jupyter kernels
+
 ## notes
 
-additional and currently disabled packages
-
-### disabled packages
+### currently disabled packages
 ```
 ## machinelearning ml_tensorflow
 ml_tensorflow:

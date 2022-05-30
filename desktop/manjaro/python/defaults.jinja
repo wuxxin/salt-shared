@@ -1,4 +1,16 @@
 {% load_yaml as defaults %}
+service:
+  lab:
+    notebook_dir: ~/lab
+    port: 8888
+    token: Insert-openssl_rand_-hex_24
+user:
+  default_packages: true
+  packages: []
+kernel:
+  lab:
+    system_packages: true
+    packages: []
 default:
   packages:
     ## jupterlab extensions not available in arch
@@ -11,26 +23,8 @@ default:
     # nbdev - Create delightful python projects/libraries/tests using Jupyter Notebooks
     - nbdev
     ## jupyterlab themes
-    - jupyterlab_miami_nights
     - theme-darcula
     - jupyterlab_materialdarker
-user:
-  default_packages: true
-  packages: []
-kernel:
-  lab:
-    system_packages: true
-    default_packages: true
-    packages: []
-  lab_user:
-    system_packages: false
-    default_packages: true
-    rebuild: false
-    packages: []
-service:
-  lab:
-    notebook_dir: ~/lab
-    port: 8888
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},

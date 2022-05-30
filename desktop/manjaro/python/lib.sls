@@ -1,9 +1,9 @@
-{% macro jupyter_user_kernel(user, name, pkgs=[], system_packages=True, rebuild=False) %}
+{% macro jupyter_user_kernel(user, name, pkgs=[], system_packages=True) %}
   {% set HOME= salt['user.info'](user)['home'] %}
   {% set BASE_DIR= HOME ~ '/.local/lib/ipykernel' %}
   {% set VIRTUAL_ENV= BASE_DIR ~ '/' ~ name %}
 
-create_jupyter_python_env_{{ name }}:
+jupyter_user_kernel_{{ name }}:
   file.directory:
     - name: {{ BASE_DIR }}
     - user: {{ user }}
@@ -12,10 +12,11 @@ create_jupyter_python_env_{{ name }}:
   cmd.run:
     - name: python -m venv {{ '--system-site-packages' if system_packages }} {{ VIRTUAL_ENV }}
     - unless: test -f {{ VIRTUAL_ENV }}/bin/activate
-    - user: {{ user }}
-    - group: {{ user }}
-  {%- if 'require' in kwargs %}
+    - runas: {{ user }}
+    - cwd: {{ HOME }}
     - require:
+      - file: jupyter_user_kernel_{{ name }}
+  {%- if 'require' in kwargs %}
     {%- set data = kwargs['require'] %}
     {%- if data is sequence and data is not string %}
       {%- for value in data %}
@@ -25,39 +26,30 @@ create_jupyter_python_env_{{ name }}:
       - {{ data }}
     {%- endif %}
   {%- endif %}
-
-install_ipykernel_and_packages_{{ name }}:
   pip.installed:
-    - user: {{ user }}
-    - group: {{ user }}
     - pkgs: {{ ['ipykernel'] + pkgs }}
-    - bin_env: {{ VIRTUAL_ENV }}
-    - use_vt: true
-    - env:
-        HOME: {{ HOME }}
-    - require:
-      - cmd: create_jupyter_python_env_{{ name }}
-
-register_ipykernel_{{ name }}:
-  cmd.run:
-    - name: python -m ipykernel install --user --name={{ name }}
     - user: {{ user }}
-    - group: {{ user }}
-    - env:
-        HOME: {{ HOME }}
+    - cwd: {{ HOME }}
+    - bin_env: {{ VIRTUAL_ENV }}
     - require:
-      - pip: install_ipykernel_and_packages_{{ name }}
+      - cmd: jupyter_user_kernel_{{ name }}
 
-installed_jupyter_kernel_{{ name }}:
-  test.nop:
+register_jupyter_user_kernel_{{ name }}:
+  cmd.run:
+    - name: {{ VIRTUAL_ENV }}/bin/python -m ipykernel install --user --name={{ name }}
+    - runas: {{ user }}
+    - cwd: {{ HOME }}
+    - env:
+        USER: {{ user }}
+        HOME: {{ HOME }}
+        VIRTUAL_ENV: {{ VIRTUAL_ENV }}
     - require:
-      - cmd: register_ipykernel_{{ name}}
+      - pip: jupyter_user_kernel_{{ name }}
 
 {% endmacro %}
 
 
-{% macro jupyter_user_service(user, notebook_dir, port) %}
-
+{% macro jupyter_user_service(user, notebook_dir, port, token) %}
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% set basename= salt['file.basename'](notebook_dir) %}
   {% set home= salt['user.info'](user)['home'] %}
@@ -66,7 +58,6 @@ installed_jupyter_kernel_{{ name }}:
     notebook_dir ~ '\', 0)))"' ) %}
   {% set ice_profile= home ~ '.local/share/ice/profiles/' ~ WMID %}
   {% set WMClass= 'WebApp-' ~ WMID %}
-  {% set token= 'FIXME' %}
 
 # create a systemd user service for starting jupyter lab in background without gui
 jupyter_user_service_{{ WMID }}:
@@ -87,7 +78,6 @@ jupyter_user_service_{{ WMID }}:
           --notebook-dir={{ notebook_dir }} \
           --ip=localhost \
           --port={{ port }} \
-          --pylab=True \
           --NotebookApp.token='{{ token }}' \
           --no-browser
 

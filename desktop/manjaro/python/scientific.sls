@@ -31,6 +31,7 @@ scientific_python_base:
       - pyside2
       # Statistical data visualization
       - python-seaborn
+
       # python-opencv - Open Source Computer Vision Library
       - python-opencv
 
@@ -53,12 +54,13 @@ scientific_python_base:
 
 {% load_yaml as pkgs %}
       ## scientific python
-      # bokeh - Interactive Web Plotting
-      - python-bokeh
-      # scikit-image - Image processing routines for SciPy
-      - python-scikit-image
       # pooch - fetching and caching data files
       - python-pooch
+      # scikit-image - Image processing routines for SciPy
+      - python-scikit-image
+
+      # bokeh - Interactive Web Plotting
+      - python-bokeh
       # plotly - interactive graphing library
       - python-plotly
       # altair - Declarative statistical visualization library
@@ -69,7 +71,6 @@ scientific_python_base:
       - python-panel
       # holoviews - With Holoviews, your data visualizes itself
       - python-holoviews
-      # python-hvplot
 
       ## jupyter: widgets, extensions, converter, kernels
       # jupyterlab-lsp - Coding assistance for JupyterLab with Language Server Protocol
@@ -92,9 +93,11 @@ scientific_python_base:
       - python-nbdime
       # ipysheet - Spreadsheet in the jupyter notebook
       - python-ipysheet
-      ### jupyter: kernels
+
+      ## jupyter: kernels
       - xeus
-      ### jupyter: language
+
+      ## jupyter: UI-language
       # jupyterlab-language-pack-de-de - German (Germany) language pack for JupyterLab
       - jupyterlab-language-pack-de-de
 

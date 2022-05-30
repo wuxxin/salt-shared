@@ -25,6 +25,8 @@ python_desktop:
       # pipenv - Python Dev Workflow for Humans
       - python-rope
       # rope - Refactoring library
+      - pyright
+      # pyright - Type checker for the Python language
       - python-pylint
       # pylint - Analyzes Python code looking for bugs and signs of poor quality
       - pyenv
