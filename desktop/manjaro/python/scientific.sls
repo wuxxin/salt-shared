@@ -6,6 +6,11 @@ include:
   - desktop.manjaro.python.hardware_optimized
   - nodejs
 
+scientific_browser_app:
+  pkg.installed:
+    - pkgs:
+      - chromium
+
 scientific_python_base:
   pkg.installed:
     - pkgs:
@@ -97,41 +102,3 @@ scientific_python:
     - require:
       - pkg: scientific_python_base
       - test: scientific_python_aur
-
-
-{# jupyterlab desktop entry #}
-{% load_yaml as yupyter_desktop %}
-Type: Application
-Name: Jupyter-Lab
-Comment: Jupyter Scientific Lab
-Icon: jupyter
-Categories: Development;Science;GTK;Network;
-Exec: jupyterlab
-Terminal: 'true'
-{% endload %}
-
-{# jupyter systemd user unit #}
-
-{# jupyter related
-
-+ pip --user
-  jupyterlab-system-monitor
-  hugo_jupyter
-  nbterm
-  nbdev
-
-+ addons
-  pyforest
-  jupyter-notify
-  https://github.com/finos/perspective
-  elyra-pipeline-editor-extension
-  https://github.com/jtpio/jupyterlab-system-monitor
-  jupyterlab_execute_time
-
-+ themes
-  jupyterlab_miami_nights
-  jupyterlab_darkside_ui
-  theme-darcula
-  Jupyter-Atom-Dark-Theme
-  jupyterlab_materialdarker
-#}

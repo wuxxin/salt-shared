@@ -1,0 +1,40 @@
+{% load_yaml as defaults %}
+default:
+  packages:
+    ## jupterlab extensions not available in arch
+    # jupyterlab-system-monitor - display system information (memory and cpu usage)
+    - jupyterlab-system-monitor
+    # jupyterlab_execute_time - display cell timings in Jupyter Lab
+    - jupyterlab_execute_time
+    # jupyternotify - provides %%notify via a browser push to notify the user upon completion of a cell
+    - jupyternotify
+    # hugo_jupyter - publish Jupyter notebooks with Hugo
+    - hugo_jupyter
+    # nbdev - Create delightful python projects/libraries/tests using Jupyter Notebooks
+    - nbdev
+
+    ## jupyterlab themes
+    - jupyterlab_miami_nights
+    - jupyterlab_darkside_ui
+    - theme-darcula
+    - jupyterlab_materialdarker
+user:
+  default_packages: true
+  packages: []
+kernel:
+  lab:
+    system_packages: true
+    default_packages: true
+    packages: []
+  lab_user:
+    system_packages: false
+    default_packages: true
+    rebuild: false
+    packages: []
+service:
+  lab:
+    notebook_dir: ~/lab
+{% endload %}
+
+{% set settings=salt['grains.filter_by']({'default': defaults},
+    grain='default', default= 'default', merge= salt['pillar.get']('jupyter', {})) %}
