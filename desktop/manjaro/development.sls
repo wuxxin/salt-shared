@@ -16,5 +16,7 @@ desktop_manjaro_dev_packages:
 {% load_yaml as pkgs %}
       # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
       - dns-lexicon
+      # ttf-humor-sans - xkcd styled sans-serif typeface
+      - ttf-humor-sans
 {% endload %}
 {{ pamac_install("desktop_manjaro_dev_aur_packages", pkgs) }}
