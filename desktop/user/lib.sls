@@ -2,7 +2,6 @@
 {% set user= salt['pillar.get']('desktop:user', def_user) %}
 {% set user_info= salt['user.info'](user) %}
 {% set user_home= user_info['home'] %}
-{% set user_download= user_home %}
 
 {% macro add_to_groups(user, groups) %}
 {{ user }}-add-to-groups:
@@ -12,10 +11,12 @@
     - remove_groups: False
 {% endmacro %}
 
-{% macro user_desktop(user, user_home, desktop) %}
+{% macro user_desktop(user, desktop) %}
+  {% set home= salt['user.info'](user)['home'] %}
+
 {{ desktop.Name }}.desktop:
   file.managed:
-    - name: {{ user_home }}/.local/share/applications/{{ desktop.Name }}.desktop
+    - name: {{ home }}/.local/share/applications/{{ desktop.Name }}.desktop
     - user: {{ user }}
     - group: {{ user }}
     - contents: |
@@ -24,4 +25,15 @@
         {%- for k,v in desktop.items() %}
         {{ k }}={{ v }}
         {%- endfor %}
+  {%- if 'require' in kwargs %}
+    - require:
+    {%- set data = kwargs['require'] %}
+    {%- if data is sequence and data is not string %}
+      {%- for value in data %}
+      - {{ value }}
+      {%- endfor %}
+    {%- else %}
+      - {{ data }}
+    {%- endif %}
+  {%- endif %}
 {% endmacro %}

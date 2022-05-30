@@ -52,4 +52,4 @@ Icon: python3
 Categories: Development;Science;
 {% endload %}
 
-{{ user_desktop(user, user_home, yupyter_desktop) }}
+{{ user_desktop(user, yupyter_desktop) }}
