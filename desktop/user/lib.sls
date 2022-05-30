@@ -11,12 +11,12 @@
     - remove_groups: False
 {% endmacro %}
 
-{% macro user_desktop(user, desktop) %}
+{% macro user_desktop(user, name, desktop) %}
   {% set home= salt['user.info'](user)['home'] %}
 
-{{ desktop.Name }}.desktop:
+{{ name }}.desktop:
   file.managed:
-    - name: {{ home }}/.local/share/applications/{{ desktop.Name }}.desktop
+    - name: {{ home }}/.local/share/applications/{{ name }}.desktop
     - user: {{ user }}
     - group: {{ user }}
     - contents: |
