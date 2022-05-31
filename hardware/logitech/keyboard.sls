@@ -9,7 +9,7 @@ profile: |
 {% endload %}
 
 {%- set settings = salt['grains.filter_by']({'default': defaults},
-  grain='default', default= 'default', merge= salt['pillar.get']('logitech:g-keyboard', {})) %}
+  grain='default', default= 'default', merge= salt['pillar.get']('logitech:keyboard', {})) %}
 
 /etc/g810-led/profile:
   file.managed:

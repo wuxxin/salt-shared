@@ -2,7 +2,7 @@
 
 ## profile examples
 
-pillar["logitech:g-keyboard:profile"]
+pillar["logitech:keyboard:profile"]
 
 ### g810
 ```yaml
