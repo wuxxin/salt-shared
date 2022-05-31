@@ -2,7 +2,8 @@
 
 most python packages are installed as system packages,
 some system packages are build from aur,
-some python packages are only local in user environment or specific jupyter kernels
+some python packages are only local in user environment,
+some python packages are only specific to jupyter kernels
 
 ## notes
 

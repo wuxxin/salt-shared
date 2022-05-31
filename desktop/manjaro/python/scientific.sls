@@ -6,9 +6,10 @@ include:
   - desktop.manjaro.python.hardware_optimized
   - nodejs
 
-scientific_browser_app:
+scientific_tools:
   pkg.installed:
     - pkgs:
+      # chromium - used as browser app for juptyer GUI
       - chromium
 
 scientific_python_base:
