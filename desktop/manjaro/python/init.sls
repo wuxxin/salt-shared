@@ -1,4 +1,3 @@
-{% from 'python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
 {% from "desktop/manjaro/python/defaults.jinja" import settings with context %}
 {% from 'desktop/manjaro/python/lib.sls' import jupyter_user_service, jupyter_user_kernel %}
@@ -15,9 +14,6 @@ desktop_manjaro_python_init:
       - sls: desktop.manjaro.python.scientific
       - sls: desktop.manjaro.python.machinelearning
 
-# euporie - jupyter Text-User-Interface
-{{ pipx_install('euporie', user=user) }}
-
 # install user packages for jupyter if configured
 {% if settings.user.default_packages or settings.user.packages %}
   {% set pkgs= settings.default.packages+ settings.user.packages if
@@ -26,6 +22,8 @@ user_python_env_jupyter_packages:
   pip.installed:
     - user: {{ user }}
     - pkgs: {{ pkgs }}
+    - require:
+      - test: desktop_manjaro_python_init
 {% endif %}
 
 # install all configured kernels for jupyter

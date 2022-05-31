@@ -1,5 +1,7 @@
 {# scientific python #}
-{% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+{% from 'python/lib.sls' import pipx_install %}
+{% from 'desktop/user/lib.sls' import user with context %}
+{% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
   - desktop.manjaro.python.development
@@ -11,6 +13,14 @@ scientific_tools:
     - pkgs:
       # chromium - used as browser app for juptyer GUI
       - chromium
+{% load_yaml as pkgs %}
+      # ttf-humor-sans - xkcd styled sans-serif typeface
+      - ttf-humor-sans
+{% endload %}
+{{ pamac_install("scientific_tools_aur", pkgs) }}
+
+# euporie - jupyter Text-User-Interface
+{{ pipx_install('euporie', user=user) }}
 
 scientific_python_base:
   pkg.installed:
@@ -52,6 +62,9 @@ scientific_python_base:
       - yaml-language-server
     - require:
       - sls: desktop.manjaro.python.hardware_optimized
+      - sls: nodejs
+      - pkg: scientific_tools
+      - test: scientific_tools_aur
 
 {% load_yaml as pkgs %}
       ## scientific python
@@ -112,5 +125,4 @@ scientific_python_base:
 scientific_python:
   test.nop:
     - require:
-      - pkg: scientific_python_base
       - test: scientific_python_aur
