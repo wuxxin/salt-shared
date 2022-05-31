@@ -1,5 +1,5 @@
 {# machinelearning #}
-{% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+{% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
   - desktop.manjaro.python.scientific
