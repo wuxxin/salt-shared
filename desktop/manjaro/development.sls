@@ -5,9 +5,12 @@ include:
   - desktop.manjaro.emulator
   - desktop.manjaro.python
 
-desktop_manjaro_dev_packages:
+development_tools:
   pkg.installed:
     - pkgs:
+      # pandoc - Conversion between markup formats, export to pdf
+      - pandoc
+      - pandoc-crossref
       # age - simple, modern and secure file encryption tool
       - age
       # topgrade - Invoke the upgrade procedure of multiple package managers
@@ -19,4 +22,4 @@ desktop_manjaro_dev_packages:
       # ttf-humor-sans - xkcd styled sans-serif typeface
       - ttf-humor-sans
 {% endload %}
-{{ pamac_install("desktop_manjaro_dev_aur_packages", pkgs) }}
+{{ pamac_install("development_tools_aur", pkgs) }}
