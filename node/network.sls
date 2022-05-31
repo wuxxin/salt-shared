@@ -1,4 +1,4 @@
-{% from "node/defaults.jinja" import settings %}
+{% from "node/defaults.jinja" import settings with context %}
 {% from "node/lib.sls" import add_internal_bridge %}
 
 include:
@@ -61,7 +61,7 @@ default_netplan:
 {# write and apply pillar systemd network settings to disk if not empty, remove file otherwise #}
 default_systemd.network:
   file:
-    - name: /etc/systemd/network/{{ priority }}-default.network
+    - name: /etc/systemd/network/{{ settings.network.priority }}-default.network
   {% if not settings.network.systemd %}
     - absent
 {% else %}

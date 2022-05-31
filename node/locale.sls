@@ -29,7 +29,7 @@ set_system_timezone:
 
 generate_locale:
   cmd.run:
-    - name: locale-gen {{ settings.locale.lang }} {{ additional }}
+    - name: locale-gen {{ settings.locale.lang }} {{ additional_list }}
     - unless: |
         all_locales=$(locale -a | sed -r "s/\.utf8/.UTF-8/g")
         all_valid=true

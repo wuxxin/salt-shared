@@ -8,7 +8,7 @@ bridge_{{ bridge_name }}:
         network:
           version: 2
           bridges:
-            {{ bridge_name}}:
+            {{ bridge_name }}:
               interfaces: []
               parameters:
                 stp: false
@@ -45,7 +45,7 @@ bridge_{{ bridge_name }}:
 
         [Network]
         LinkLocalAddressing=ipv6
-        Address={{ settings.bridge_cidr }}
+        Address={{ bridge_cidr }}
         ConfigureWithoutCarrier=yes
   cmd.run:
     - name: networkctl reload
