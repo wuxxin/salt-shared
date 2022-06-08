@@ -38,8 +38,13 @@ user_python_env_jupyter_packages:
 {% for key, value in settings.service.items() %}
 # create a systemd user service for starting jupyter lab in background without gui
 # and a desktop entry chromium app to start the gui app of jupyterlab
-{{ jupyter_user_service(user=user,
+  {% set chromium_flags= settings.default.chromium+ value.chromium|d([]) if
+        value.default_chromium|d(true) else value.chromium|d([]) %}
+{{ jupyter_user_service(
+    user=user,
     notebook_dir=value.notebook_dir,
-    port=value.port, token=value.token,
+    port=value.port,
+    token=value.token,
+    chromium_flags= chromium_flags,
     require='test: desktop_manjaro_python_init') }}
 {% endfor %}
