@@ -12,12 +12,20 @@ development_tools:
       # pandoc - Conversion between markup formats, export to pdf
       - pandoc
       - pandoc-crossref
+
       ## encryption
       # age - simple, modern and secure file encryption tool
       - age
+
       ## updates
       # topgrade - Invoke the upgrade procedure of multiple package managers
       - topgrade
+
+      ## terminal
+      # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
+      - kitty
+      # wezterm - GPU-accelerated cross-platform terminal emulator and multiplexer
+      - wezterm
 
 {% load_yaml as pkgs %}
       ## devop tools
