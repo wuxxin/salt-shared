@@ -49,15 +49,16 @@ register_jupyter_user_kernel_{{ name }}:
 {% endmacro %}
 
 
-{% macro jupyter_user_service(user, notebook_dir, port, token) %}
+{% macro jupyter_user_service(user, notebook_dir, port, token, chromium_flags) %}
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% set basename= salt['file.basename'](notebook_dir) %}
   {% set home= salt['user.info'](user)['home'] %}
   {% set WMID= 'jupyterlab_' ~ salt['cmd.run_stdout'](
     'python -c "import binascii; print(\'{:x}\'.format(binascii.crc_hqx(b\'' ~
     notebook_dir ~ '\', 0)))"' ) %}
-  {% set ice_profile= home ~ '.local/share/ice/profiles/' ~ WMID %}
+  {% set ice_profile= home ~ '/.local/share/ice/profiles/' ~ WMID %}
   {% set WMClass= 'WebApp-' ~ WMID %}
+  {% set chromium_args= ' '.join(chromium_flags) %}
 
 # create a systemd user service for starting jupyter lab in background without gui
 jupyter_user_service_{{ WMID }}:
@@ -73,12 +74,12 @@ jupyter_user_service_{{ WMID }}:
         [Service]
         Type=simple
         WorkingDirectory={{ notebook_dir }}
-        Restart=on-failure
+        Restart=always
         ExecStart=jupyter lab \
           --notebook-dir={{ notebook_dir }} \
           --ip=localhost \
           --port={{ port }} \
-          --NotebookApp.token='{{ token }}' \
+          --ServerApp.token='{{ token }}' \
           --no-browser
 
         # --autoreload \
@@ -104,7 +105,7 @@ Name: Jupyterlab-{{ basename }}
 Comment: Jupyter Lab Web-App ({{ notebook_dir }})
 Icon: jupyter
 Categories: Development;Science;GTK;Network;
-Exec: chromium --app=http://localhost:{{ port }}/lab?token={{ token }} --class={{ WMClass }} --user-data-dir={{ ice_profile }}
+Exec: /usr/lib/chromium/chromium --app=http://localhost:{{ port }}/lab?token={{ token }} --class={{ WMClass }} --user-data-dir={{ ice_profile }} {{ chromium_args }}
 Path: {{ notebook_dir }}
 StartupWMClass: {{ WMClass }}
 StartupNotify: true
