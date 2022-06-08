@@ -7,6 +7,15 @@ some python packages are only specific to jupyter kernels
 
 ## notes
 
+### FAQ
+
++ ISSUE: matplotlib.pyplot.xkcd not finding humor sans font
+  + RESOLUTION: refresh your system's font cache and to delete Maplotlib's font cache.
+```sh
+sudo fc-cache -f -v
+cd ~/.cache/matplotlib; rm fontlist*.json
+```
+
 ### currently disabled packages
 ```
 ## machinelearning ml_tensorflow
