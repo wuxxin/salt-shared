@@ -4,6 +4,7 @@ service:
     notebook_dir: ~/lab
     port: 8888
     token: Insert-openssl_rand_-hex_24
+    default_chromium: true
 user:
   default_packages: true
   packages: []
@@ -12,6 +13,15 @@ kernel:
     system_packages: true
     packages: []
 default:
+  chromium:
+    - --enable-crashpad
+    - --flag-switches-begin
+    - --enable-gpu-rasterization
+    - --enable-zero-copy
+    - --ozone-platform-hint=wayland
+    - --enable-features=EnableDrDc,PageInfoAboutThisSite,SystemNotifications,Vulkan,WebRTCPipeWireCapturer
+    - --flag-switches-end
+    - --ozone-platform=wayland
   packages:
     ## jupterlab extensions not available in arch
     # jupyterlab-system-monitor - display system information (memory and cpu usage)
