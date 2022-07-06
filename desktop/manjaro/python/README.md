@@ -1,9 +1,9 @@
 # Scientific Python using the Jupyter ecosystem
 
-most python packages are installed as system packages,
-some system packages are build from aur,
-some python packages are only local in user environment,
-some python packages are only specific to jupyter kernels
++ most python packages are installed **as system packages**
++ some system packages are **build from aur**
++ some python packages are only local in **user environment**
++ some python packages are only specific to **jupyter kernels**
 
 ## notes
 
@@ -18,13 +18,8 @@ cd ~/.cache/matplotlib; rm fontlist*.json
 
 ### currently disabled packages
 ```
+## hardware/amd/rocm/tensorflowm
 ## machinelearning ml_tensorflow
-ml_tensorflow:
-  test.nop:
-    - require:
-      - test: scientific_python
-      - test: ml_tools_aur
-      - sls: hardware.amd.rocm.tensorflow
 
 ## machinelearning ml_tools_aur
 # sentencepiece - unsupervised text tokenizer and detokenizer
@@ -41,29 +36,27 @@ ml_tensorflow:
       - python-sklearn-pandas
 {% endload %}
 {{ pamac_install('ml_sklearn_aur', pkgs, require='pkg: ml_sklearn') }}
-
-## machinelearning ml_pytorch_extra_aur
-# fastai - simplifies training fast and accurate neural nets using modern best practices
-{{ pamac_patch_install_dir('python-fastcore',
-    'salt://desktop/manjaro/python/python-fastcore',
-    require= 'test: ml_pytorch_extra_aur') }}
-{{ pamac_patch_install_dir('python-fastai2',
-    'salt://desktop/manjaro/python/python-fastai2',
-    require= 'test: python-fastcore') }}
-
 ```
 
-### jupyter
+### additional packages
+#### jupyter
 + python-pyarrow - Columnar in-memory analytics layer for big data
 + itables - Pandas DataFrames and Series as interactive datatables
-+ finos/perspective - interactive analytics and data visualization component for large and/or streaming datasets
++ finos/perspective - interactive analytics and data visualization for large and/or streaming datasets
 + elyra-pipeline-editor-extension
 
-### lsp
+#### lsp
 + python-lsp-mypy
 + python-lsp-isort
 
-### ml using torch and others
+#### sklearn
++ auto-sklearn
+
+#### ml using torch and others
++ jina
++ https://github.com/iterative/mlem
+    + machine learning model deployment. It saves ML models in a standard format
+
 + python-wandb      # Weights and Biases - organize and analyze machine learning experiments
 + python-timm       # PyTorch Image Models
 + captum            # Model interpretability and understanding for PyTorch
@@ -79,8 +72,6 @@ ml_tensorflow:
 + parlai            # a framework for sharing, training and testing dialogue models, from open-domain chitchat, to task-oriented dialogue, to visual question answering
 + KevinMusgrave/pytorch-metric-learning
 
-### sklearn
-+ auto-sklearn
 
 ### inference
 + https://github.com/Tencent/ncnn
@@ -91,4 +82,3 @@ ml_tensorflow:
 + https://github.com/Tencent/TNN
     + A high-performance, lightweight neural network inference framework open sourced by Tencent Youtu Lab.
     + It also has many outstanding advantages such as cross-platform, high performance, model compression, and code tailoring.
-#}
