@@ -2,12 +2,14 @@
 
 include:
   - hardware.amd.rocm
+  - desktop.manjaro.python.development
   - desktop.manjaro.python.hardware_optimized
 
 # pytorch - Tensors and Dynamic neural networks in Python with strong GPU acceleration
 {{ pamac_install('python-pytorch-rocm', ['python-pytorch-rocm', ],
     require=[
       'sls: hardware.amd.rocm',
+      'sls: desktop.manjaro.python.development',
       'sls: desktop.manjaro.python.hardware_optimized',
     ]) }}
 
@@ -17,9 +19,11 @@ include:
 
 # torchaudio - Data manipulation and transformation for audio signal processing
 {{ pamac_install('python-kaldi-io', ['python-kaldi-io',],
-    require='sls: desktop.manjaro.python.hardware_optimized') }}
+    require=[
+      'sls: desktop.manjaro.python.development',
+      'sls: desktop.manjaro.python.hardware_optimized',
+      ]) }}
 
-# torchrec - Domain library for recommendation systems
 {#
 
 {{ pamac_patch_install_dir('python-torchaudio-rocm',
@@ -28,4 +32,7 @@ include:
       'test: python-pytorch-rocm',
       'test: python-kaldi-io'
     ], custom=true) }}
+
+# torchrec - Domain library for recommendation systems
+
 #}
