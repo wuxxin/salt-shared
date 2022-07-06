@@ -29,15 +29,15 @@ user_python_env_jupyter_packages:
 # install all configured kernels for jupyter
 {% for key, value in settings.kernel.items() %}
   {% set pkgs= settings.default.packages+ value.packages|d([]) if
-        value.default_packages|d(true) else value.packages|d([]) %}
+        value.default_packages|d(false) else value.packages|d([]) %}
 {{ jupyter_user_kernel(user=user, name=key, pkgs=pkgs,
     system_packages=value.system_packages|d(true),
     require='test: desktop_manjaro_python_init') }}
 {% endfor %}
 
-{% for key, value in settings.service.items() %}
 # create a systemd user service for starting jupyter lab in background without gui
 # and a desktop entry chromium app to start the gui app of jupyterlab
+{% for key, value in settings.service.items() %}
   {% set chromium_flags= settings.default.chromium+ value.chromium|d([]) if
         value.default_chromium|d(true) else value.chromium|d([]) %}
 {{ jupyter_user_service(
