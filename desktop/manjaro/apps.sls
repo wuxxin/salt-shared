@@ -36,7 +36,6 @@ browser:
     - pkgs:
       - firefox
       - chromium
-      - torbrowser-launcher
 
 chat:
   pkg.installed:
@@ -55,14 +54,8 @@ download:
     - pkgs:
       # Torrent Download Gui
       - transmission-gtk
-
-foto:
-  pkg.installed:
-    - pkgs:
-      - darktable
-      - digikam
-      - hugin
-      - qt5-imageformats
+      # yt-dlp - youtube-dl fork with additional features and fixes
+      - yt-dlp
 
 mail-calendar-contacts:
   pkg.installed:
@@ -98,11 +91,32 @@ password:
 {% endload %}
 {{ pamac_install("password_aur", pkgs, require="pkg: password") }}
 
+picture:
+  pkg.installed:
+    - pkgs:
+      - darktable
+      - digikam
+      - hugin
+      - qt5-imageformats
+      # nautilus-image-converter - extension to rotate/resize image files
+      - nautilus-image-converter
+
 pixel-graphic:
   pkg.installed:
     - pkgs:
       - gimp
       - krita
+
+privacy:
+  pkg.installed:
+    - pkgs:
+      - torbrowser-launcher
+      # mat2 - Metadata removal tool, supporting a wide range of commonly used file formats
+      - mat2
+{% load_yaml as pkgs %}
+      - metadata-cleaner
+{% endload %}
+{{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
 sync:
   pkg.installed:
