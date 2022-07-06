@@ -101,14 +101,16 @@ jupyter_user_service_{{ WMID }}:
 
 {% load_yaml as desktop_config %}
 Type: Application
-Name: Jupyterlab-{{ basename }}
+Name: Jupyterlab {{ basename }}
 Comment: Jupyter Lab Web-App ({{ notebook_dir }})
-Icon: jupyter
-Categories: Development;Science;GTK;Network;
+Icon: notebook
+Categories: Development;Science;Education;Network;
+Keywords: python;
 Exec: /usr/lib/chromium/chromium --app=http://localhost:{{ port }}/lab?token={{ token }} --class={{ WMClass }} --user-data-dir={{ ice_profile }} {{ chromium_args }}
 Path: {{ notebook_dir }}
 StartupWMClass: {{ WMClass }}
 StartupNotify: true
+SingleMainWindow: true
 X-MultipleArgs: false
 X-WebApp-Browser: Chromium
 X-WebApp-URL: http://localhost:{{ port }}/lab?token={{ token }}
