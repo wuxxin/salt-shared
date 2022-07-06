@@ -4,6 +4,7 @@
 include:
   - desktop.manjaro.python.scientific
   - hardware.amd.rocm.pytorch
+  - hardware.amd.rocm.tensorflow
 
 ml_tools:
   pkg.installed:
@@ -29,13 +30,17 @@ ml_sklearn:
     - pkgs:
       - python-scikit-learn
     - require:
-      - test: scientific_python
       - test: ml_tools_aur
+
+ml_tensorflow:
+  test.nop:
+    - require:
+      - test: ml_tools_aur
+      - sls: hardware.amd.rocm.tensorflow
 
 ml_pytorch:
   test.nop:
     - require:
-      - test: scientific_python
       - test: ml_tools_aur
       - sls: hardware.amd.rocm.pytorch
 {% load_yaml as pkgs %}
