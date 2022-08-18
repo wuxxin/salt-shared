@@ -1,6 +1,6 @@
 {% from 'manjaro/lib.sls' import pamac_install with context %}
 
-3dprinting:
+3d-printing:
   pkg.installed:
     - pkgs:
       - cura
@@ -42,12 +42,6 @@ chat:
     - pkgs:
       - element-desktop
       - signal-desktop
-
-code:
-  pkg.installed:
-    - pkgs:
-      - atom
-      - ctags
 
 download:
   pkg.installed:
@@ -118,7 +112,7 @@ privacy:
 {% endload %}
 {{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
-sync:
+file-sync:
   pkg.installed:
     - pkgs:
       - syncthing
@@ -133,21 +127,31 @@ video-converter:
   pkg.installed:
     - pkgs:
       - handbrake
+      - avidemux-qt
 
 video-editor:
   pkg.installed:
     - pkgs:
       - openshot
-
-video-player:
-  pkg.installed:
-    - pkgs:
-      - vlc
+      - shotcut
+      - kdenlive
+      - noise-suppression-for-voice
 
 video-loopback:
   pkg.installed:
     - pkgs:
       - v4l2loopback-utils
       - v4l2loopback-dkms
-
 {{ pamac_install("video-loopback-aur", [ "akvcam-dkms" ]) }}
+
+video-player:
+  pkg.installed:
+    - pkgs:
+      - vlc
+
+video-studio:
+  pkg.installed:
+    - pkgs:
+      - obs-studio
+      - sndio
+{{ pamac_install("video-studio-aur", [ "webcamoid" ]) }}
