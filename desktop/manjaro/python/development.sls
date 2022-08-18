@@ -1,36 +1,48 @@
+{% from 'python/lib.sls' import pipx_install %}
+{% from 'desktop/user/lib.sls' import user with context %}
+
 include:
   - python.dev
 
-## python code formating/linting/auditing tools
+# pipenv - Python Dev Workflow for Humans
+{{ pipx_install('pipenv', user=user) }}
+
+python_ide:
+  pkg.installed:
+    - pkgs:
+      # pycharm-community-edition - Python IDE for Professional Developers
+      - pycharm-community-edition
+  
 python_desktop:
   pkg.installed:
     - pkgs:
-      - mypy
+      ## python code formating/linting/auditing/refactoring tools
       # mypy - type check type annotations
-      - yapf
+      - mypy
       # yapf - code audit and reformating
-      - pylama
+      - yapf
       # pylama - code audit and reformating
-      - python-isort
+      - pylama
       # isort - sort imports separated into sections
-      - autopep8
+      - python-isort
       # autopep8 - code audit and reformating to PEP 8 style
-      - python-cookiecutter
+      - autopep8
       # cookiecutter - creates projects from cookiecutters project templates
-      - python-black
+      - python-cookiecutter
       # black - opinionated python source code formating
-      - python-poetry
-      # poetry - Python packaging and dependency management made easy
-      - python-pipenv
-      # pipenv - Python Dev Workflow for Humans
-      - python-rope
+      - python-black
       # rope - Refactoring library
-      - pyright
+      - python-rope
       # pyright - Type checker for the Python language
-      - python-pylint
+      - pyright
       # pylint - Analyzes Python code looking for bugs and signs of poor quality
-      - pyenv
+      - python-pylint
+
+      ## python environment tools
       # pyenv - Easily switch between multiple versions of Python
+      - pyenv
+      # poetry - Python packaging and dependency management made easy
+      - python-poetry
 
 python_other:
   pkg.installed:

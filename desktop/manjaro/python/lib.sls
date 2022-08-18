@@ -1,6 +1,6 @@
 {% macro jupyter_user_kernel(user, name, pkgs=[], system_packages=True) %}
   {% set HOME= salt['user.info'](user)['home'] %}
-  {% set BASE_DIR= HOME ~ '/.local/lib/ipykernel' %}
+  {% set BASE_DIR= HOME ~ '/.local/share/jupyter/kernels' %}
   {% set VIRTUAL_ENV= BASE_DIR ~ '/' ~ name %}
 
 jupyter_user_kernel_{{ name }}:
@@ -75,6 +75,8 @@ jupyter_user_service_{{ WMID }}:
         Type=simple
         WorkingDirectory={{ notebook_dir }}
         Restart=always
+        # Environment=HIP_LAUNCH_BLOCKING=1
+        # Environment=AMD_LOG_LEVEL=3
         ExecStart=jupyter lab \
           --notebook-dir={{ notebook_dir }} \
           --ip=localhost \
@@ -98,6 +100,10 @@ jupyter_user_service_{{ WMID }}:
       - {{ data }}
     {%- endif %}
   {%- endif %}
+  cmd.run:
+    - name: systemctl --user daemon-reload
+    - onchanges:
+      - file: jupyter_user_service_{{ WMID }}
 
 {% load_yaml as desktop_config %}
 Type: Application

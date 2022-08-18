@@ -5,14 +5,14 @@ include:
   - desktop.manjaro.python.scientific
   - hardware.amd.rocm.pytorch
   - hardware.amd.rocm.tensorflow
+  - hardware.amd.rocm.jax
 
 ml_tools:
   pkg.installed:
     - pkgs:
       # tensorboard - visualization and tooling needed for machine learning experimentation
       - tensorboard
-    - require:
-      - test: scientific_python
+
 {% load_yaml as pkgs %}
       # tensorboardX - Tensorboard for PyTorch
       - python-tensorboardx
@@ -29,20 +29,22 @@ ml_sklearn:
   pkg.installed:
     - pkgs:
       - python-scikit-learn
-    - require:
-      - test: ml_tools_aur
 
 ml_tensorflow:
   test.nop:
     - require:
-      - test: ml_tools_aur
       - sls: hardware.amd.rocm.tensorflow
+
+ml_jax:
+  test.nop:
+    - require:
+      - sls: hardware.amd.rocm.jax
 
 ml_pytorch:
   test.nop:
     - require:
-      - test: ml_tools_aur
       - sls: hardware.amd.rocm.pytorch
+
 {% load_yaml as pkgs %}
       # torchtext - data processing utilities and popular datasets for natural language
       - python-torchtext
@@ -57,5 +59,4 @@ ml_pytorch:
       # albumentations - image augmentation to create new training samples from the existing data
       - python-albumentations
 {% endload %}
-{{ pamac_install('ml_pytorch_extra_aur', pkgs,
-    require=['test: ml_pytorch', 'test: ml_tools_aur']) }}
+{{ pamac_install('ml_pytorch_extra_aur', pkgs, require='test: ml_pytorch') }}
