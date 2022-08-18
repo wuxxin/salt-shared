@@ -5,13 +5,12 @@ include:
   - desktop.manjaro.python.development
   - desktop.manjaro.python.hardware_optimized
 
-tensorflow_req:
+jax_req:
   test.nop:
     - require:
       - sls: hardware.amd.rocm
       - sls: desktop.manjaro.python.development
       - sls: desktop.manjaro.python.hardware_optimized
 
-# python-tensorflow-opt-rocm - scalable machine learning (with ROCM and AVX2 CPU optimizations)
-{{ pamac_install('python-tensorflow-rocm_aur', [ 'python-tensorflow-opt-rocm',],
-    require= 'test: tensorflow_req') }}
+{{ pamac_install('python-jax-rocm_aur', ['python-jax-rocm'],
+    require= "test: jax_req") }}
