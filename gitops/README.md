@@ -3,7 +3,8 @@
 Service and tools for bootstraping and updating software from git repositories.
 
 + **templating** of new **gitops repositories** with `create-gitops-repo.sh`
-+ secure **bootstraping** execution from **git repositories** with `from-git.sh` and `execute-saltstack.sh`
++ secure **bootstraping** execution from **git repositories**
+  + using `from-git.sh` and `execute-saltstack.sh`
   + private git repositories accessable by ssh key
   + git-crypt encrypted repositories
 + timer, webhook and direct calling of a **git repository** based **update service**
@@ -19,8 +20,8 @@ Service and tools for bootstraping and updating software from git repositories.
 
 - [create a gitops repository](#create-a-gitops-repository)
 - [bootstrap from a gitops repository](#bootstrap-from-a-gitops-repository)
+- [one shot saltstack template, no repository execution](#one-shot-saltstack-template-no-repository-execution)
 - [interactive remote tinker](#interactive-remote-tinker)
-- [one shot, no repository execution](#one-shot-no-repository-execution)
 - [gitops repository based Update System](#gitops-repository-based-update-system)
 	- [Execution](#execution)
 	- [Flags set and recognized](#flags-set-and-recognized)
@@ -40,40 +41,32 @@ Service and tools for bootstraping and updating software from git repositories.
 ## bootstrap from a gitops repository
 
 ```sh
-ssh_id=""; gpg_id=""; ssh_known_hosts=""; http_proxy=""
+target_domain=""; ssh_id=""; gpg_id=""; ssh_known_hosts=""; http_proxy=""
 gitops_source=""; gitops_branch=""; gitops_user=""; gitops_target=""; base_name=""
-
+from_git="https://raw.githubusercontent.com/wuxxin/salt-shared/master/gitops/from-git.sh"
 # copy script to target
-curl https://raw.githubusercontent.com/wuxxin/salt-shared/master/gitops/from-git.sh \
-        > /tmp/from-git.sh
-scp /tmp/from-git.sh ssh://target.domain/tmp/from-git.sh
-# pipe ssh_id,gpg_id,ssh_known_hosts to ssh on target and execute script there
+curl "$from_git" > /tmp/from-git.sh
+scp /tmp/from-git.sh ssh://$target_domain/tmp/from-git.sh
+# pipe ssh_id, gpg_id and ssh_known_hosts to ssh on target and execute script there
 printf "%s\n%s\n%s\n" "$ssh_id" "$gpg_id" "$ssh_known_hosts" | \
-    ssh ssh://target.domain "
-        chmod +x /tmp/from-git.sh;
-        http_proxy=\"$http_proxy\"; export http_proxy;
+    ssh ssh://$target_domain "
+        chmod +x /tmp/from-git.sh &&
+        http_proxy=\"$http_proxy\" && export http_proxy &&
         /tmp/from-git.sh bootstrap \
             --url \"$gitops_source\" \
             --branch \"${gitops_branch:-master}\" \
             --user \"$gitops_user\" \
             --home \"$gitops_target\" \
             --git-dir \"${gitops_target}/${base_name}\" \
-            --keys-from-stdin
+            --keys-from-stdin && \
+        ${gitops_target}/${base_name}/salt/salt-shared/gitops/execute-saltstack.sh \
+            --minion-etc run ${gitops_target}/${base_name} \
+            state.highstate
         "
 ```
 
 
-## interactive remote tinker
-
-+ start
-  + on local: `remote-doctor.sh sync`
-+ loop until done:
-  + on local: make changes in local files
-  + on remote: `cd $src_dir; /usr/local/sbin/execute-saltstack.sh . state.highstate`
-+ done
-  + on local: `remote-doctor.sh hard_reset --yes`
-
-## one shot, no repository execution
+## one shot saltstack template, no repository execution
 
 + execute on target
 
@@ -86,20 +79,33 @@ if test "$1" != "--yes"; then
 fi
 shift; args="$@"; if test "$args" = ""; then args="state.highstate"; fi
 if ! which git > /dev/null; then DEBIAN_FRONTEND=noninteractive apt-get install -y git; fi
-mkdir -p $self_path/salt/local $self_path/config
+mkdir -p $self_path/run $self_path/salt/local $self_path/config
 git -C $self_path/salt clone https://github.com/wuxxin/salt-shared.git
 printf "base:\n  '*':\n    - main\n" > $self_path/salt/local/top.sls
 printf "base:\n  '*':\n    - main\n" > $self_path/config/top.sls
-cat > config/main.sls << EOF
+cat > $self_path/config/main.sls << EOF
 # pillar
 
 EOF
-cat > salt/local/main.sls << EOF
+cat > $self_path/salt/local/main.sls << EOF
 # states
 
 EOF
-exec $self_path/salt/salt-shared/gitops/execute-saltstack.sh $self_path "$args"
+exec $self_path/salt/salt-shared/gitops/execute-saltstack.sh \
+      --minion-etc run $self_path "$args"
 ```
+
+
+## interactive remote tinker
+
++ bootstrapped remote machine is running
++ on local: `remote-doctor.sh sync`
++ loop until done:
+  + on local: make changes in local files
+  + on remote: `cd $src_dir; /usr/local/sbin/execute-saltstack.sh . state.highstate test=true`
++ done
++ on local: `remote-doctor.sh hard_reset --yes`
+
 
 ## gitops repository based Update System
 
@@ -111,8 +117,9 @@ Can be triggered via webhook, systemd timer, or manual via
 Execute the following steps, any step that fails stops executing later steps:
 
 + `validate`: check the validity of the update, must not interrupt services!
+    + default is `execute-saltstack.sh . state.highstate mock=true`
 + `before`: executed before "update", may stop services that may get restarted on finish
-+ `update`: the acutal update command
++ `update`: the acutal update command, default is `execute-saltstack.sh . state.highstate`
 + `after`: executed after "update" did run sucessful, eg. for metric processing
 + `finish`: is executed after "after" was sucessful and machine does not need a reboot
             eg. to restart services that got stopped

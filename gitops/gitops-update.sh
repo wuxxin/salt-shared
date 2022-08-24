@@ -65,31 +65,31 @@ main () {
         echo "calling validate_cmd: {{ settings['update']['validate_cmd'] }}"
         {{ settings['update']['validate_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
-            gitops_error "Gitops Error" \
+            system_error "Gitops Error" \
                 "validate_cmd failed with error: $result" "$(unit_json_status)"
         else
             echo "validation successful, display gitops maintenance information"
-            gitops_maintenance "Gitops Update" "$msg"
+            system_maintenance "Gitops Update" "$msg"
             need_service_restart="true"
 
             echo "calling before_cmd: {{ settings['update']['before_cmd'] }}"
             {{ settings['update']['before_cmd'] }} && result=$? || result=$?
             if test $result -ne 0; then
-                gitops_error "Gitops Error" \
+                system_error "Gitops Error" \
                     "before_cmd failed with error: $result" "$(unit_json_status)"
             else
                 echo "calling update_cmd: {{ settings['update']['update_cmd'] }}"
                 {{ settings['update']['update_cmd'] }} && result=$? || result=$?
                 if test $result -ne 0; then
                     set_tag gitops_failed_rev "$latest_origin_rev"
-                    gitops_error "Gitops Error" \
+                    system_error "Gitops Error" \
                         "update_cmd failed with error: $result" "$(unit_json_status)"
                 else
                     set_tag gitops_current_rev "$latest_origin_rev"
                     echo "calling after_cmd: {{ settings['update']['after_cmd'] }}"
                     {{ settings['update']['after_cmd'] }} && result=$? || result=$?
                     if test $result -ne 0; then
-                        gitops_error "Gitops Error" \
+                        system_error "Gitops Error" \
                             "after_cmd failed with error: $result" "$(unit_json_status)"
                     fi
                 fi
@@ -129,11 +129,11 @@ main () {
         echo "calling finish_cmd: {{ settings['update']['finish_cmd'] }}"
         {{ settings['update']['finish_cmd'] }} && result=$? || result=$?
         if test $result -ne 0; then
-            gitops_error "Gitops Error" \
+            system_error "Gitops Error" \
                 "finish_cmd failed with error: $result" "$(unit_json_status)"
         else
             echo "Information: all done, enable access to frontend service"
-            gitops_maintenance --clear
+            system_maintenance --clear
         fi
     fi
 

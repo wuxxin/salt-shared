@@ -218,8 +218,8 @@ sentry_entry() { # $1=level $2=topic $3=message [$4=extra={} [$5=logger=app-stat
 }
 
 
-# ### gitops maintenance ###
-gitops_maintenance() { # $1="--clear" | $1=topic $2=message
+# ### system maintenance ###
+system_maintenance() { # $1="--clear" | $1=topic $2=message
     # $1=--clear" to delete maintenance file and let frontend serve application
     local templatefile="{{ settings.maintenance_template }}"
     local resultfile="{{ settings.maintenance_target }}"
@@ -237,13 +237,13 @@ gitops_maintenance() { # $1="--clear" | $1=topic $2=message
     fi
 }
 
-gitops_error() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
-    gitops_maintenance "$1" "$(echo "$2" | head -n 1)"
+system_error() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
+    system_maintenance "$1" "$(echo "$2" | head -n 1)"
     sentry_entry error "$1" "$2" "$3" "$4"
 }
 
-gitops_failed() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
-    gitops_maintenance "$1" "$(echo "$2" | head -n 1)"
+system_failed() { # $1=topic $2=message [$3=extra={} [$4=logger=app-status]]]
+    system_maintenance "$1" "$(echo "$2" | head -n 1)"
     sentry_entry critical "$1" "$2" "$3" "$4"
     set_flag gitops.update.failed
 }

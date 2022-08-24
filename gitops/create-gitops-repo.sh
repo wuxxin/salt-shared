@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 set -eo pipefail
 set -x
-
 self_path=$(dirname "$(readlink -e "$0")")
 
 basepath=""
@@ -9,16 +8,16 @@ gitreponame=""
 gitserver=""
 gituser=""
 gitgpguser=""
-
 hostname=""
 firstuser=gitops
 gitserver_sshport=22
 authorized_keys="~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub"
-
-do_gitcrypt_setup="true"
-do_machine_setup="true"
-do_saltstack_setup="true"
-do_remote_setup="true"
+do_overwrite="false"
+do_gitcrypt_setup="false"
+do_machine_setup="false"
+do_saltstack_setup="false"
+do_pulumi_setup="false"
+do_remote_setup="false"
 do_only_remote_setup="false"
 
 
@@ -28,13 +27,15 @@ Usage: $0 <basepath> <reponame> <githost> <gituser> <creator-gpgid> <hostname>
     [--firstuser <username:default=$firstuser>]
     [--git-port <gitsshport:default=$gitserver_sshport>]
     [--authorized-keys <authorized_keys:default="$authorized_keys">]
-    [--no-git-crypt] [--no-machine] [--no-saltstack] [--no-remote|--only-remote]
+    [--overwrite] [--git-crypt] [--machine] [--saltstack] [--no-remote|--only-remote]
 
---no-gitcrypt      : do not add git-crypt repository setup
---no-machine       : do not add hardware (machine-bootstrap) repository setup
---no-saltstack     : do not add gitops (saltstack) repository setup
---no-remote        : do not execute remote calls
---only-remote      : only execute remote calls
+--overwrite     : also applies changes if a git repository already exists
+--gitcrypt      : add git-crypt repository setup
+--machine       : add hardware (machine-bootstrap) repository setup
+--saltstack     : add gitops (saltstack) repository setup
+--pulumi        : add python pulumi infrastructure repository setup
+--no-remote     : do not execute remote calls
+--only-remote   : only execute remote calls
 
 + local
     + create (partly encrypted) gitops git repository
@@ -43,7 +44,8 @@ Usage: $0 <basepath> <reponame> <githost> <gituser> <creator-gpgid> <hostname>
 + remote
     + create repository on git server
     + add access key for gitops user to access repository on the git server
-    + add origin git server as upstream and push repository to git server
+    + add origin git server as upstream
+    + push repository to git server
 
 creating and configuring the remote git repository using API Calls
 (currently tested on gogs), needs the env variable "Authorization" to be set
@@ -69,7 +71,7 @@ cd $basepath/$gitreponame
 git init || echo "could not init git, already a git repository ?"
 
 # create first config files
-mkdir -p config log run
+mkdir -p config run run/log
 printf "# ignores\n/run\n" > .gitignore
 printf "hostname=%s\nfirstuser=%s\ngitops_user=%s\ngitops_target=%s\ngitops_source=%s\ngitops_branch=%s\n" \
     "$hostname" "$firstuser" "$firstuser" "/home/$firstuser" \
@@ -85,8 +87,9 @@ git commit -v -m "initial config"
 
 
 # add git-crypt config
-git-crypt init
-cat > .gitattributes <<EOF
+if test "$do_gitcrypt_setup" = "true"; then
+    git-crypt init
+    cat > .gitattributes <<EOF
 *secret* filter=git-crypt diff=git-crypt
 *secrets* filter=git-crypt diff=git-crypt
 **/secret/** filter=git-crypt diff=git-crypt
@@ -103,15 +106,16 @@ csrftokens* filter=git-crypt diff=git-crypt
 random_seed filter=git-crypt diff=git-crypt
 .gitattributes !filter !diff
 EOF
-# add first git-crypt user
-git-crypt add-gpg-user $gitgpguser
-# create machine gpg id files
-gpgutils.py gen_keypair gitops@node "$gitreponame" config/gitops@node-secret-key.gpg config/gitops@node-public-key.gpg
-# add machine gpg id files to git-crypt
-gpg  --import config/gitops@node-public-key.gpg
-git-crypt git-crypt add-gpg-user --trusted "$gitreponame"
-git add .
-git commit -v -m "add git-crypt config"
+    # add first git-crypt user
+    git-crypt add-gpg-user $gitgpguser
+    # create machine gpg id files
+    gpgutils.py gen_keypair gitops@node "$gitreponame" config/gitops@node-secret-key.gpg config/gitops@node-public-key.gpg
+    # add machine gpg id files to git-crypt
+    gpg  --import config/gitops@node-public-key.gpg
+    git-crypt git-crypt add-gpg-user --trusted "$gitreponame"
+    git add .
+    git commit -v -m "add git-crypt config"
+fi
 
 
 # add known_hosts and machine ssh id
@@ -121,17 +125,18 @@ git add .
 git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
 
 
-# add saltstack
-mkdir -p salt/local
-pushd salt
-git submodule add https://github.com/wuxxin/salt-shared.git
-popd
-printf "base:\n  '*':\n    - main\n" > config/top.sls
-cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
-cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
-cp salt/salt-shared/gitops/template/state.template.sls salt/local/top.sls
-touch salt/local/main.sls
-cat > bootstrap.sh <<"EOF"
+# add saltstack skeleton
+if test "$do_saltstack_setup" = "true"; then
+    mkdir -p salt/local
+    pushd salt
+    git submodule add https://github.com/wuxxin/salt-shared.git
+    popd
+    printf "base:\n  '*':\n    - main\n" > config/top.sls
+    cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
+    cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
+    cp salt/salt-shared/gitops/template/state.template.sls salt/local/top.sls
+    touch salt/local/main.sls
+    cat > bootstrap.sh <<"EOF"
 #!/usr/bin/env bash
 set -eo pipefail
 self_path=$(dirname "$(readlink -e "$0")")
@@ -142,16 +147,20 @@ fi
 shift
 args="$@"
 if test "$args" = ""; then args="state.highstate"; fi
-exec $self_path/salt/salt-shared/gitops/execute-saltstack.sh $self_path "$args"
+exec "$self_path/salt/salt-shared/gitops/execute-saltstack.sh" \
+      --minion-etc run "$self_path" "$args"
 EOF
-chmod +x bootstrap.sh
-git add .
-git commit -v -m "add saltstack skeleton"
+    chmod +x bootstrap.sh
+    git add .
+    git commit -v -m "add saltstack skeleton"
+fi
 
 
-# add machine-bootstrap
+# add machine-bootstrap skeleton
 fixme add machine bootstrap and make symlink on saltstack
 
+
+# add pulumi skeleton
 
 # add origin to upstream
 git remote add origin ssh://git@${gitserver}:${gitserver_sshport}/${gituser}/${gitreponame}.git

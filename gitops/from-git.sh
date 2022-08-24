@@ -1,7 +1,6 @@
 #!/bin/bash
 set -eo pipefail
 # set -x
-
 self_path=$(dirname "$(readlink -e "$0")")
 
 
@@ -9,42 +8,47 @@ usage() {
     cat << EOF
 clone and update a (encrypted) git repository
 
-Install Usage:
-    $0 bootstrap --url giturl --branch branch --user user --home homedir --git-dir clonedir
-        [--export-dir targetdir] [--gitrev-dir gitrevdir]
-        [--keys-from-stdin | --keys-from-file filename]
+Install Usage: $0 bootstrap
+    --url <giturl> --branch <branch>
+    --user <user> --home <homedir> --git-dir <clonedir>
+    [--export-dir <targetdir>] [--gitrev-dir <gitrevdir>]
+    [--keys-from-stdin | --keys-from-file <filename>]
 
-Update Usage:
-    $0 pull --url giturl --branch branch --user user --git-dir clonedir
-        [--export-dir targetdir] [--gitrev-dir gitrevdir]
+Update Usage: $0 pull
+    --url <giturl> --branch <branch>
+    --user <user> --git-dir <clonedir>
+    [--export-dir <targetdir>] [--gitrev-dir <gitrevdir>]
 
 Mandatory Parameter:
 
---url giturl:       url of git repository
---branch branch:    branchname
---user user:        user to be created and owner of the targetdir files
---home homedir:     home directory of user to be created
---git-dir clonedir: directory where the source should be cloned to
+--url <giturl>        # url of git repository
+--branch <branch>     # branchname
+--user <user>         # user to be created and owner of the targetdir files
+--home <homedir>      # home directory of user to be created
+--git-dir <clonedir>  # directory where the source should be cloned to
 
 Optional Parameter:
 
---export-dir targetdir:  directory with the checked out specific source version
+--export-dir <targetdir>
+    directory with the checked out specific source version
 
---gitrev-dir gitrevdir:  directory where to create GIT_REV, GIT_BRANCH, GIT_ID.py
+--gitrev-dir <gitrevdir>
+    directory where to create GIT_REV, GIT_BRANCH, GIT_ID.py
     GIT_REV will be set to include GIT revision
     GIT_BRANCH will be set to includes GIT branch
     GIT_ID.py will be set to include: GIT_REV,GIT_BRANCH and GIT_VERSION python escaped
 
---keys-from-file filename:
---keys-from-stdin:
-    reads 1) openssh private key and 2) openssh known hosts 3) gpg_key data
+--keys-from-file <filename>
+--keys-from-stdin
+    reads an openssh privatekey, openssh known hosts data, and optional gpg key data
     needed to connect to a git repository via ssh and unlock git-crypt secrets
     with all data coming from stdin.
-    + 1) openssh private key can be rsa or ed25519
-    + 2) known hosts must be pre- and post-fixed
+
+    + openssh private key, can be rsa or ed25519
+    + known hosts data, must be pre- and post-fixed with
         + prefix:   "# ---BEGIN OPENSSH KNOWN HOSTS---"
         + postfix:  "# ---END OPENSSH KNOWN HOSTS---"
-    + 3) gpg key need to be ascii armored
+    + gpg key, needs to be ascii armored
 
 EOF
     exit 1
@@ -114,10 +118,7 @@ ssh_type() {
 pull_latest_src() {
    # $1=src_url $2=src_branch $3=target_dir $4=user
    local src_url src_branch target_dir user
-   src_url="$1"
-   src_branch="$2"
-   target_dir="$3"
-   user="$4"
+   src_url="$1"; src_branch="$2"; target_dir="$3"; user="$4"
 
    # clone, update source code as user
    if test ! -d "$target_dir"; then
@@ -144,9 +145,7 @@ pull_latest_src() {
 export_src() {
    # $1=src_dir $2=target_dir $3=user
    local src_dir target_dir user
-   src_dir="$1"
-   target_dir="$2"
-   user="$3"
+   src_dir="$1"; target_dir="$2"; user="$3"
 
    # checkout specified source to target_dir
    install -o "$user" -g "$user" -d "$target_dir"
@@ -207,7 +206,9 @@ fi
 if test "$cmd" = "bootstrap" -a "$home_dir" = ""; then
     usage
 fi
-echo "src: $src_url branch: $src_branch user: $user home: $home_dir clone: $clone_dir target: $target_dir gitrev: $gitrev_dir"
+echo "url: $src_url branch: $src_branch"
+echo "user: $user home: $home_dir git-dir: $clone_dir"
+echo "export-dir: $target_dir gitrev-dir: $gitrev_dir"
 
 # extract keys from input
 if test "$keys_from_file" != ""; then
@@ -235,6 +236,7 @@ if test "$keys_from_file" != ""; then
     if ! $result; then
         echo "Warning: no gpg key found from input"
     fi
+    keydata=""
 fi
 
 if test "$cmd" = "bootstrap"; then
@@ -245,11 +247,15 @@ if test "$cmd" = "bootstrap"; then
         printf "\n"
     fi
 
-    # set temporary locale
+    # force temporary locale
     export LANG="C.UTF-8"
     export LANGUAGE="C"
     export LC_MESSAGES="$LANG"
-    printf "LANG=%s\nLANGUAGE=%s\nLC_MESSAGES=%s\n" "$LANG" "$LANGUAGE" "$LC_MESSAGES" > /etc/default/locale
+
+    if test ! -e /etc/default/locale; then
+        # write forced locale as new default locale, if no default exists
+        printf "LANG=%s\nLANGUAGE=%s\nLC_MESSAGES=%s\n" "$LANG" "$LANGUAGE" "$LC_MESSAGES" > /etc/default/locale
+    fi
 
     # install base packages
     req_missing=false
@@ -257,29 +263,34 @@ if test "$cmd" = "bootstrap"; then
         if ! which "$i" > /dev/null; then req_missing=true; fi
     done
     if test "$req_missing" = "true"; then
-        if which apt-get > /dev/null; then
+        os_distributor=$(lsb_release  -i -s | tr '[:upper:]' '[:lower:]')
+        if [[ $os_distributor =~ ^(debian|ubuntu)$ ]]; then
             DEBIAN_FRONTEND=noninteractive apt-get -y update
             DEBIAN_FRONTEND=noninteractive apt-get -y install \
                 software-properties-common locales curl git gnupg git-crypt gosu
-        elif which pamac > /dev/null; then
+        elif test "$os_distributor" = "manjaro"; then
             # manjaro is missing gosu, will be replaced by setpriv in bash function gosu
             pamac install --no-confirm --no-upgrade glibc-locales curl git gnupg git-crypt
         fi
     fi
 
-    # generate locales
+    # generate locale files if locale != C[.UTF-8]
     if test "$LANG" != "C" -a "$LANG" != "C.UTF-8"; then
         locale-gen $LANG
     fi
 
-    # set temporary timezone
-    echo "Etc/UTC" > /etc/timezone
-    timedatectl set-timezone "Etc/UTC"
+    # set temporary timezone if none set
+    if test ! -e /etc/timezone; then
+        echo "Etc/UTC" > /etc/timezone
+        timedatectl set-timezone "Etc/UTC"
+    fi
 
-    # create homedir
+    # create user
     export HOME=$home_dir
     adduser --disabled-password --gecos ",,," --home "$home_dir" "$user" || true
+    # write files from skeleton to homedir, overwrite if existing
     cp -r /etc/skel/. "$home_dir/."
+    # recursive change all files in home_dir to user:user
     chown -R "$user:$user" "$home_dir"
 
     # install keys
@@ -311,7 +322,7 @@ if test "$cmd" = "bootstrap"; then
 fi
 
 # download latest source
-pull_latest_src $src_url $src_branch $clone_dir $user
+pull_latest_src "$src_url" "$src_branch" "$clone_dir" "$user"
 
 if test "$gpgkey" != ""; then
     # unlock source if gpgkey is available
@@ -321,7 +332,7 @@ if test "$gpgkey" != ""; then
 fi
 if test "$target_dir" != ""; then
     # export specified source to target
-    export_src $clone_dir $target_dir $user
+    export_src "$clone_dir" "$target_dir" "$user"
 fi
 if test "$gitrev_dir" != ""; then
     # write out to gitrevdir/GIT_REV,GIT_BRANCH,GIT_ID.py

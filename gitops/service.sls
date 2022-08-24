@@ -24,16 +24,24 @@ gitop-requisites:
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 
-{% for i in ['execute-saltstack.sh', 'from-git.sh', 'gitops-update.sh'] %}
-/usr/local/sbin/{{ i }}:
+/usr/local/sbin/gitops-update.sh:
   file.managed:
-    - source: salt://gitops/{{ i }}
+    - source: salt://gitops/gitops-update.sh
     - mode: "0755"
     - template: jinja
     - defaults:
         settings: {{ settings }}
     - require:
-      - pkg: gitop-requisites
+      - file: /usr/local/lib/gitops-library.sh
+    - require_in:
+      - file: /etc/systemd/system/gitops-update.service
+
+{% for i in ['execute-saltstack.sh', 'from-git.sh'] %}
+/usr/local/sbin/{{ i }}:
+  file.managed:
+    - source: salt://gitops/{{ i }}
+    - mode: "0755"
+    - require:
       - file: /usr/local/lib/gitops-library.sh
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
@@ -60,7 +68,7 @@ create_var_dir:
       - file: /etc/systemd/system/gitops-update.service
 {% endfor %}
 
-create_gitops_maintenance_template:
+create_system_maintenance_template:
   file.managed:
     - source: salt://http_frontend/nginx/status.template.html
     - name: {{ settings.maintenance_template }}
@@ -69,7 +77,7 @@ create_gitops_maintenance_template:
     - require_in:
       - file: /etc/systemd/system/gitops-update.service
 
-create_gitops_maintenance_target_dir:
+create_system_maintenance_target_dir:
   file.directory:
     - name: {{ salt['file.dirname'](settings.maintenance_target) }}
     - makedirs: true
