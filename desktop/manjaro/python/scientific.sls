@@ -8,7 +8,11 @@ include:
   - desktop.manjaro.python.hardware_optimized
   - nodejs
 
-scientific_tools:
+# euporie - jupyter TUI (Text-User-Interface)
+{{ pipx_install('euporie', user=user) }}
+
+# jupyter GUI (Browser)
+scientific_gui:
   pkg.installed:
     - pkgs:
       # chromium - used as browser app for juptyer GUI
@@ -17,10 +21,7 @@ scientific_tools:
       # ttf-humor-sans - xkcd styled sans-serif typeface
       - ttf-humor-sans
 {% endload %}
-{{ pamac_install("scientific_tools_aur", pkgs) }}
-
-# euporie - jupyter Text-User-Interface
-{{ pipx_install('euporie', user=user) }}
+{{ pamac_install("scientific_gui_aur", pkgs) }}
 
 scientific_python_base:
   pkg.installed:
@@ -63,13 +64,11 @@ scientific_python_base:
     - require:
       - sls: desktop.manjaro.python.hardware_optimized
       - sls: nodejs
-      - pkg: scientific_tools
-      - test: scientific_tools_aur
+      - pkg: scientific_gui
+      - test: scientific_gui_aur
 
 {% load_yaml as pkgs %}
       ## scientific python
-      # numba - NumPy aware dynamic Python compiler using LLVM
-      - python-numba
       # pooch - fetching and caching data files
       - python-pooch
       # scikit-image - Image processing routines for SciPy
@@ -85,13 +84,15 @@ scientific_python_base:
       # holoviews - With Holoviews, your data visualizes itself
       - python-holoviews
 
-      ## jupyter: kernels, widgets, extensions, converter, language
+      ## jupyter: service, kernels, widgets, extensions, converter, language
       # xeus - C++ implementation of the Jupyter kernel protocol
       - xeus
       # jupyterlab-lsp - Coding assistance for JupyterLab with Language Server Protocol
       - jupyterlab-lsp
       # jupyterlab_git - Git extension for JupyterLab
       - jupyterlab-extension-jupyterlab_git
+      # jupyterlab_code_formatter - A universal code formatter for JupyterLab
+      - jupyterlab_code_formatter
       # jupyterlab-execute-time - display cell timings in Jupyter Lab
       - jupyterlab-execute-time
       # python-ipympl - Matplotlib Jupyter Extension

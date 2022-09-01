@@ -2,39 +2,65 @@
 
 + most python packages are installed **as system packages**
 + some system packages are **build from aur**
-+ some python packages are only local in **user environment**
-+ some python packages are only specific to **jupyter kernels**
++ some python packages are installed in the **jupyter server environment**
++ some python packages are installed in the **jupyter kernels**
 
-## notes
+## Notes
 
-### FAQ
-+ ISSUE: matplotlib.pyplot.xkcd not finding humor sans font
-  + RESOLUTION: refresh your system's font cache and to delete Maplotlib's font cache.
+### Issue: matplotlib.pyplot.xkcd not finding humor sans font
+  + **Resolution**: refresh your system's font cache and to delete Maplotlib's font cache.
 ```sh
 sudo fc-cache -f -v
 cd ~/.cache/matplotlib; rm fontlist*.json
 ```
 
 ### currently disabled packages
-```
-## machinelearning ml_tools_aur
-# sentencepiece - unsupervised text tokenizer and detokenizer
+
+#### scientific scientific_python_aur
+
+- python-numba
+  - NumPy aware dynamic Python compiler using LLVM
+
+#### machinelearning ml_tools_aur
 - python-sentencepiece-git
+  - unsupervised text tokenizer and detokenizer
 
-## machinelearning ml_pytorch_extra_aur
-# kornia - classical computer vision integrated into deep learning models
+#### machinelearning ml_pytorch_extra_aur
+
 - python-kornia
+  - classical computer vision integrated into deep learning models
 
-## machinelearning ml_sklearn_aur
-{% load_yaml as pkgs %}
-      ## sklearn
-      # sklearn-pandas - bridge between Scikit-Learn's methods and pandas-style Data Frames
-      - python-sklearn-pandas
-{% endload %}
-{{ pamac_install('ml_sklearn_aur', pkgs, require='pkg: ml_sklearn') }}
-```
+#### machinelearning ml_sklearn_aur
+- python-sklearn-pandas
+  - bridge between Scikit-Learn's methods and pandas-style Data Frames
+
+
+#### scientific jupyter server
+
+- jupyterlab-kernelspy
+  - inspecting messages to/from a kernel
+- jupyterlab-friendly-traceback
+  - A JupyterLab extension for friendly traceback
+- jupyter_innotater
+  - Annotate data including image bounding boxes inline
+- jupyterlab_autoscrollcelloutput
+- jupyterlab_kernel_usage
+- ipylab
+- jupyterlab_tensorboard
+- jupyterlab_execute_time
+- jupyterlab_notify
+- jupyterlab-notifications
 
 ### additional packages
+
+#### machine learning
++ gradio
+  + Create UIs for your machine learning model in Python in 3 minutes
++ jina
+  + Build cross-modal and multimodal applications on the cloud
++ python-wandb
+  + Weights and Biases - organize and analyze machine learning experiments
+
 #### jupyter
 + python-pyarrow - Columnar in-memory analytics layer for big data
 + itables - Pandas DataFrames and Series as interactive datatables
@@ -48,13 +74,9 @@ cd ~/.cache/matplotlib; rm fontlist*.json
 #### sklearn
 + auto-sklearn
 
-#### torch and others
-+ jina
-  + Build cross-modal and multimodal applications on the cloud
+#### torch
 + https://github.com/iterative/mlem
   + machine learning model deployment. It saves ML models in a standard format
-+ python-wandb
-  + Weights and Biases - organize and analyze machine learning experiments
 + python-timm
   + PyTorch Image Models
 + captum

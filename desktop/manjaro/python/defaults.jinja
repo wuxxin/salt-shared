@@ -5,37 +5,48 @@ service:
     port: 8888
     token: Insert-openssl_rand_-hex_24
     default_chromium: true
-user:
-  default_packages: true
-  packages: []
+    default_packages: true
+    chromium:
+      args: []
+      extensions: []
+    packages: []
 kernel:
   lab:
     system_packages: true
     packages: []
 default:
   chromium:
-    - --enable-crashpad
-    - --flag-switches-begin
-    - --enable-gpu-rasterization
-    - --enable-zero-copy
-    - --ozone-platform-hint=wayland
-    - --enable-features=EnableDrDc,PageInfoAboutThisSite,SystemNotifications,Vulkan,WebRTCPipeWireCapturer
-    - --flag-switches-end
-    - --ozone-platform=wayland
-  packages:
-    ## jupterlab extensions
-    # jupyterlab-system-monitor - display system information (memory and cpu usage)
-    - jupyterlab-system-monitor
-    # jupyternotify - provides %%notify via a browser push to notify the user upon completion of a cell
-    - jupyternotify
-    # jupyterlab-code-formatter - automatic code formatters on cells
-    - jupyterlab-code-formatter
-    # rise - instantly turn your Jupyter Notebooks into a slideshow
-    - rise
-    ## jupyterlab themes
-    - theme-darcula
-    - jupyterlab_materialdarker
+    args:
+      - --enable-crashpad
+      - --flag-switches-begin
+      - --enable-gpu-rasterization
+      - --enable-zero-copy
+      - --ozone-platform-hint=wayland
+      - --enable-features=EnableDrDc,PageInfoAboutThisSite,SystemNotifications,Vulkan,WebRTCPipeWireCapturer
+      - --flag-switches-end
+    extensions:
+      # ublockorigin
+      - cjpalhdlnbpafiamejdnhcphjbkeiagm
+      # privacybadger
+      - pkehgijcmpdhfbdbbnkijodmdjhbjlgp
+      # noscript
+      - doojmbjmlfjjnbmnoijecmcbfeoakpjm
+  service:
+    packages:
+      ## jupterlab extensions
+      - jupyterlab-system-monitor
+      - jupyterlab-bookmarks-extension
+      - jupyterlab-cell-flash
+      - jupyterlab-autosave-on-focus-change
+      # rise - instantly turn your Jupyter Notebooks into a slideshow
+      - rise
+      # jupyterlab-geojson - A JupyterLab extension for rendering GeoJSON
+      - jupyterlab-geojson
+
+      ## jupyterlab themes
+      - theme-darcula
+      - jupyterlab_materialdarker
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},
-    grain='default', default= 'default', merge= salt['pillar.get']('jupyter', {})) %}
+    grain='default', default= 'default', merge= salt['pillar.get']('python', {})) %}

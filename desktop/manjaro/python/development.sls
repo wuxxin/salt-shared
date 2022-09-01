@@ -4,16 +4,29 @@
 include:
   - python.dev
 
-# pipenv - Python Dev Workflow for Humans
-{{ pipx_install('pipenv', user=user) }}
-
 python_ide:
   pkg.installed:
     - pkgs:
       # pycharm-community-edition - Python IDE for Professional Developers
       - pycharm-community-edition
-  
-python_desktop:
+
+## python environment tools
+# pipenv - Python Dev Workflow for Humans
+{{ pipx_install('pipenv', user=user) }}
+
+# pipx - Install and execute apps from Python packages
+# upgrade pipx with user install of pipx, current arch version is old (0.16.4)
+{{ pipx_install('pipx', user=user) }}
+
+python_tools_environment:
+  pkg.installed:
+    - pkgs:
+      # pyenv - Easily switch between multiple versions of Python
+      - pyenv
+      # poetry - Python packaging and dependency management made easy
+      - python-poetry
+
+python_tools_devel:
   pkg.installed:
     - pkgs:
       ## python code formating/linting/auditing/refactoring tools
@@ -38,13 +51,7 @@ python_desktop:
       # pylint - Analyzes Python code looking for bugs and signs of poor quality
       - python-pylint
 
-      ## python environment tools
-      # pyenv - Easily switch between multiple versions of Python
-      - pyenv
-      # poetry - Python packaging and dependency management made easy
-      - python-poetry
-
-python_other:
+python_libraries_other:
   pkg.installed:
     - pkgs:
       - python-websockets
