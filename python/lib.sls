@@ -42,20 +42,25 @@
 {% endmacro %}
 
 
-{% macro pipx_install(package, user) %} {# pipx_opts, pip_args #}
+{% macro pipx_install(package, user) %} {# pipx_suffix pipx_opts, pip_args #}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
       python_settings['pipx']['update']['automatic'] %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
   {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args=' ~ kwargs['pip_args'] %}
+  {% set suffix= '' %}
+  {% if 'pipx_suffix' in kwargs %}
+    {% set suffix= kwargs['pipx_suffix'] %}
+    {% set pipx_opts= '--suffix '~ suffix~ ' '~ pipx_opts %}
+  {% endif %}
   {% set json2yaml= 'python3 -c "import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)"' %}
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
 
-"pipx_{{ package }}":
+"pipx_{{ package }}{{ suffix }}":
   cmd.run:
     - name: pipx install {{ pipx_opts }} {{ pip_args }} {{ package }}
-    - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package_name }}
+    - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package_name }}{{ suffix }}
     - runas: {{ user }}
     - require:
       - pkg: python
@@ -83,11 +88,11 @@
   {%- endfor %}
 
   {%- if upgrade %}
-"pipx_upgrade_{{ package }}":
-    - name: pipx upgrade --upgrade-injected {{ package_name }}
+"pipx_upgrade_{{ package }}{{ suffix }}":
+    - name: pipx upgrade --upgrade-injected {{ package_name }}{{ suffix }}
     - runas: {{ user }}
     - require:
-      - cmd: "pipx_{{ package }}"
+      - cmd: "pipx_{{ package }}{{ suffix }}"
   {%- endif %}
 {% endmacro %}
 
