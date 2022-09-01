@@ -1,12 +1,5 @@
 # ROCM sdk
 
-+ packages needed for python-pytorch-rocm and tensorflow-rocm
-
-```
-hip-runtime-amd rocm-llvm rocm-hip-sdk rocm-opencl-sdk
-rocm-clang-ocl hsa-rocr rocprofiler roctracer rocm-llvm-mlir miopengemm miopen-hip
-```
-
 + see https://docs.amd.com/bundle/AMD_HIP_Programming_Guide/page/Programming_with_HIP.html
 
 + set environment (eg. /etc/environment.d/gpu_targets.conf)
@@ -25,12 +18,12 @@ HIP_LAUNCH_BLOCKING=1
 AMD_LOG_LEVEL=3
 ```
 
++ basic pytorch testing
+```
 HIP_LAUNCH_BLOCKING=1 AMD_LOG_LEVEL=3 \
   python -c "import torch;d=torch.device('cuda:0');
     a=torch.randn(100,device=d,dtype=torch.float);print(a)"
-
-_ZN2at6native6modern18elementwise_kernelINS0_13BUnaryFunctorIfffNS0_10MulFunctorIfEEEENS_6detail5ArrayIPcLi2EEEEEviT_T0_
-_ZN2at6native6modern18elementwise_kernelINS0_13BUnaryFunctorIfffNS0_10MulFunctorIfEEEENS_6detail5ArrayIPcLi2EEEEEviT_T0_
+```
 
 + Command-line to trace HIP APIs and output
 ```sh
