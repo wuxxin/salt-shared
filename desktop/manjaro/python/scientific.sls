@@ -1,5 +1,4 @@
 {# scientific python #}
-{% from 'python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
 {% from 'manjaro/lib.sls' import pamac_install with context %}
 
@@ -8,10 +7,14 @@ include:
   - desktop.manjaro.python.hardware_optimized
   - nodejs
 
-# euporie - jupyter TUI (Text-User-Interface)
-{{ pipx_install('euporie', user=user) }}
+scientific_base:
+  test.nop:
+    - require:
+      - sls: desktop.manjaro.python.development
+      - sls: desktop.manjaro.python.hardware_optimized
+      - sls: nodejs
 
-# jupyter GUI (Browser)
+# customized gui components
 scientific_gui:
   pkg.installed:
     - pkgs:
@@ -23,7 +26,8 @@ scientific_gui:
 {% endload %}
 {{ pamac_install("scientific_gui_aur", pkgs) }}
 
-scientific_python_base:
+
+scientific_python:
   pkg.installed:
     - pkgs:
       ## scientific python
@@ -46,24 +50,8 @@ scientific_python_base:
       - python-seaborn
       # python-opencv - Open Source Computer Vision Library
       - python-opencv
-
-      ## jupyter
-      - jupyterlab
-      - python-jupyterlab_server
-      # nbconvert - jupyter Notebook Conversion
-      - jupyter-nbconvert
-      # jupyterlab-widgets - extensions to use ipywidgets, needs nodejs and npm
-      - jupyterlab-widgets
-
-      ## language server
-      - python-lsp-server
-      - python-lsp-black
-      - python-lsp-jsonrpc
-      - bash-language-server
-      - yaml-language-server
     - require:
-      - sls: desktop.manjaro.python.hardware_optimized
-      - sls: nodejs
+      - test: scientific_base
       - pkg: scientific_gui
       - test: scientific_gui_aur
 
@@ -83,43 +71,6 @@ scientific_python_base:
       - python-panel
       # holoviews - With Holoviews, your data visualizes itself
       - python-holoviews
-
-      ## jupyter: service, kernels, widgets, extensions, converter, language
-      # xeus - C++ implementation of the Jupyter kernel protocol
-      - xeus
-      # jupyterlab-lsp - Coding assistance for JupyterLab with Language Server Protocol
-      - jupyterlab-lsp
-      # jupyterlab_git - Git extension for JupyterLab
-      - jupyterlab-extension-jupyterlab_git
-      # jupyterlab_code_formatter - A universal code formatter for JupyterLab
-      - jupyterlab_code_formatter
-      # jupyterlab-execute-time - display cell timings in Jupyter Lab
-      - jupyterlab-execute-time
-      # python-ipympl - Matplotlib Jupyter Extension
-      - python-ipympl
-      # jupyterlab-plotly - Jupyter Extension for Plotly.py
-      - jupyterlab-plotly
-      # pelican-jupyter - Pelican static webpage plugin for Jupyter Notebooks
-      - python-pelican-jupyter
-      # jupytext - Jupyter notebooks as diffable Markdown, Julia or Python
-      - python-jupytext
-      # py2nb - Convert python scripts to jupyter
-      - python-py2nb
-      # nbdime - Diff and merge of Jupyter Notebooks
-      - python-nbdime
-      # ipysheet - Spreadsheet in the jupyter notebook
-      - python-ipysheet
-      # jupyterlab-language-pack-de-de - German (Germany) language pack for JupyterLab
-      - jupyterlab-language-pack-de-de
-
-      ## language server: additional languages
-      - dockerfile-language-server
-      - python-pylsp-rope
 {% endload %}
 {{ pamac_install('scientific_python_aur', pkgs,
-    require='pkg: scientific_python_base') }}
-
-scientific_python:
-  test.nop:
-    - require:
-      - test: scientific_python_aur
+    require='pkg: scientific_python') }}

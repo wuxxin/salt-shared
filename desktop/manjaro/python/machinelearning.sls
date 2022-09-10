@@ -7,31 +7,43 @@ include:
   - hardware.amd.rocm.tensorflow
   - hardware.amd.rocm.jax
 
+machinelearning_base:
+  test.nop:
+    - require:
+      - sls: desktop.manjaro.python.scientific
+
 ml_scikit:
   pkg.installed:
     - pkgs:
       - python-scikit-learn
+    - require:
+      - test: machinelearning_base
 
 ml_pytorch:
   test.nop:
     - require:
       - sls: hardware.amd.rocm.pytorch
+      - test: machinelearning_base
 
 ml_tensorflow:
   test.nop:
     - require:
       - sls: hardware.amd.rocm.tensorflow
+      - test: machinelearning_base
 
 ml_jax:
   test.nop:
     - require:
       - sls: hardware.amd.rocm.jax
+      - test: machinelearning_base
 
 ml_tools:
   pkg.installed:
     - pkgs:
       # tensorboard - visualization and tooling needed for machine learning experimentation
       - tensorboard
+    - require:
+      - test: machinelearning_base
 
 {% load_yaml as pkgs %}
       # transformers - pretrained models to perform text, vision, and audio tasks for Jax, pytorch and tensorflow

@@ -1,7 +1,7 @@
 # Scientific Python using the Jupyter ecosystem
 
-+ most python packages are installed **as system packages**
-+ some system packages are **build from aur**
++ some python packages are installed **as system packages**
++ some system python packages are **build from aur**
 + some python packages are installed in the **jupyter server environment**
 + some python packages are installed in the **jupyter kernels**
 

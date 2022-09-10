@@ -66,7 +66,7 @@ register_python_kernel_{{ name }}:
 
 
 {% macro jupyter_service(user, notebook_dir, port, token,
-                          pkgs, chromium_args, chromium_extensions) %}
+                          pkgs, apps, chromium_args, chromium_extensions) %}
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% from 'python/lib.sls' import pipx_install, pipx_inject %}
   {% set basename= salt['file.basename'](notebook_dir) %}
@@ -85,6 +85,9 @@ register_python_kernel_{{ name }}:
 
 # inject additional packages if defined into environment
 {{ pipx_inject('jupyterlab' ~ ID, pkgs, user, pipx_opts='--system-site-packages') }}
+
+# inject additional apps if defined into environment
+{{ pipx_inject('jupyterlab' ~ ID, apps, user, pipx_opts='--include-apps --system-site-packages') }}
 
 # create a systemd user service for starting jupyter lab in background without gui
 jupyter_service_{{ WMID }}:

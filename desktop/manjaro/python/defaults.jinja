@@ -6,6 +6,7 @@ service:
     token: Insert-openssl_rand_-hex_24
     default_chromium: true
     default_packages: true
+    default_apps: true
     chromium:
       args: []
       extensions: []
@@ -14,6 +15,7 @@ kernel:
   lab:
     system_packages: true
     packages: []
+
 default:
   chromium:
     args:
@@ -31,18 +33,47 @@ default:
       - pkehgijcmpdhfbdbbnkijodmdjhbjlgp
       # noscript
       - doojmbjmlfjjnbmnoijecmcbfeoakpjm
+
   service:
+    apps:
+      ## jupyterlab: additional apps including commandline interfaces
+      # euporie - jupyter TUI (Text-User-Interface)
+      - euporie
+      # jupytext - Jupyter notebooks as diffable Markdown, Julia or Python
+      - jupytext
+      # py2nb - Convert python scripts to jupyter
+      - py2nb
+      # nbconvert - jupyter Notebook Conversion
+      - nbconvert
+      # nbdime - Diff and merge of Jupyter Notebooks
+      - nbdime
+      # rise - instantly turn your Jupyter Notebooks into a slideshow
+      - rise
+
     packages:
-      ## jupterlab extensions
+      ## jupyterlab: extensions, widgets, themes
+      # jupyterlab-language-pack-de-de - German (Germany) language pack for JupyterLab
+      - jupyterlab-language-pack-de-de
+      # jupyterlab-widgets - extensions to use ipywidgets, needs nodejs and npm
+      - jupyterlab-widgets
+      # jupyterlab-lsp - Coding assistance for JupyterLab with Language Server Protocol
+      - jupyterlab-lsp
+      # jupyterlab-git - Git extension for JupyterLab
+      - jupyterlab-git
+      # jupyterlab_code_formatter - A universal code formatter for JupyterLab
+      - jupyterlab_code_formatter
+      # jupyterlab-execute-time - display cell timings in Jupyter Lab
+      - jupyterlab-execute-time
+      # ipympl - Matplotlib Jupyter Extension
+      - ipympl
+      # ipysheet - Spreadsheet in the jupyter notebook
+      - ipysheet
+      # jupyterlab-geojson - A JupyterLab extension for rendering GeoJSON
+      - jupyterlab-geojson
       - jupyterlab-system-monitor
       - jupyterlab-bookmarks-extension
       - jupyterlab-cell-flash
       - jupyterlab-autosave-on-focus-change
-      # rise - instantly turn your Jupyter Notebooks into a slideshow
-      - rise
-      # jupyterlab-geojson - A JupyterLab extension for rendering GeoJSON
-      - jupyterlab-geojson
-
       ## jupyterlab themes
       - theme-darcula
       - jupyterlab_materialdarker

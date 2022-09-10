@@ -2,33 +2,33 @@
 
 include:
   - desktop.manjaro
-  - desktop.manjaro.emulator
   - desktop.manjaro.python
+  - desktop.manjaro.emulator
+
+development_ide:
+  pkg.installed:
+    - pkgs:
+      # pycharm-community-edition - Python IDE for Professional Developers
+      - pycharm-community-edition
+
+{% load_yaml as pkgs %}
+      # gnome-text-editor - Simple text editor that focuses on session management
+      - gnome-text-editor
+      # vscodium - Free/Libre Open Source Software Binaries of VSCode
+      - vscodium
+      - vscodium-features
+      - vscodium-marketplace
+      # imhex - A Hex Editor for Reverse Engineers
+      - imhex
+{% endload %}
+{{ pamac_install("development_ide_aur", pkgs) }}
+
 
 development_fonts:
   pkg.installed:
     - pkgs:
       # nerd-fonts-complete - Iconic font aggregator, collection, & patcher. 3,600+ icons, 50+ patched fonts
       - nerd-fonts-complete
-
-development_ide:
-  pkg.installed:
-    - pkgs:
-      - atom
-      - ctags
-
-{% load_yaml as pkgs %}
-      ## editor
-      # gnome-text-editor - Simple text editor that focuses on session management
-      - gnome-text-editor
-      # vscodium - Free/Libre Open Source Software Binaries of VSCode
-      - vscodium
-      - vscodium-features
-      - vscodium-marketplacev
-      # imhex - A Hex Editor for Reverse Engineers
-      - imhex
-{% endload %}
-{{ pamac_install("development_ide_aur", pkgs) }}
 
 development_tools:
   pkg.installed:
