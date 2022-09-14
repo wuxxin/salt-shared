@@ -65,40 +65,37 @@ register_python_kernel_{{ name }}:
 {% endmacro %}
 
 
-{% macro jupyter_service(user, notebook_dir, port, token,
+{% macro jupyter_service(name, user, notebook_dir, port, token,
                           pkgs, apps, chromium_args, chromium_extensions) %}
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% from 'python/lib.sls' import pipx_install, pipx_inject %}
-  {% set basename= salt['file.basename'](notebook_dir) %}
   {% set home= salt['user.info'](user)['home'] %}
-  {% set ID= salt['cmd.run_stdout'](
-    'python -c "import binascii; print(\'{:x}\'.format(binascii.crc_hqx(b\'' ~
-      notebook_dir ~ '\', 0)))"' ) %}
-  {% set WMID= 'jupyterlab_' ~ ID %}
-  {% set ice_profile= home ~ '/.local/share/ice/profiles/' ~ WMID %}
-  {% set WMClass= 'WebApp-' ~ WMID %}
+  {% set SUFFIX= '_' ~ name %}
+  {% set JUPYTERLAB_ID= 'jupyterlab' ~ SUFFIX %}
+  {% set WMClass= 'WebApp-' ~ JUPYTERLAB_ID %}
+  {% set ice_profile= home ~ '/.local/share/ice/profiles/' ~ JUPYTERLAB_ID %}
   {% set chromium_args= ' '.join(chromium_args) %}
 
 # create a pipx environment for jupyterlab service
-{{ pipx_install('jupyterlab', user=user, pipx_suffix= ID,
+{{ pipx_install('jupyterlab', user=user, pipx_suffix= SUFFIX,
       pipx_opts='--system-site-packages --pip-args="-I"') }}
 
 # inject additional packages if defined into environment
-{{ pipx_inject('jupyterlab' ~ ID, pkgs, user, pipx_opts='--system-site-packages') }}
+{{ pipx_inject(JUPYTERLAB_ID, pkgs, user, pipx_opts='--system-site-packages') }}
 
 # inject additional apps if defined into environment
-{{ pipx_inject('jupyterlab' ~ ID, apps, user, pipx_opts='--include-apps --system-site-packages') }}
+{{ pipx_inject(JUPYTERLAB_ID, apps, user, pipx_opts='--include-apps --system-site-packages') }}
 
 # create a systemd user service for starting jupyter lab in background without gui
-jupyter_service_{{ WMID }}:
+jupyter_service_{{ JUPYTERLAB_ID }}:
   file.managed:
-    - name: {{ home }}/.config/systemd/user/{{ WMID }}.service
+    - name: {{ home }}/.config/systemd/user/{{ JUPYTERLAB_ID }}.service
     - user: {{ user }}
     - group: {{ user }}
     - makedirs: true
     - contents: |
         [Unit]
-        Description=Jupyter notebook server ({{ notebook_dir }})
+        Description=Jupyter notebook server ({{ name }})
 
         [Service]
         Type=simple
@@ -106,7 +103,7 @@ jupyter_service_{{ WMID }}:
         Restart=always
         # Environment=HIP_LAUNCH_BLOCKING=1
         # Environment=AMD_LOG_LEVEL=3
-        ExecStart={{ home }}/.local/bin/jupyter-lab{{ ID }} \
+        ExecStart={{ home }}/.local/bin/jupyter-lab{{ SUFFIX }} \
           --notebook-dir={{ notebook_dir }} \
           --ip=localhost \
           --port={{ port }} \
@@ -133,12 +130,12 @@ jupyter_service_{{ WMID }}:
     - name: systemctl --user daemon-reload
     - runas: {{ user }}
     - onchanges:
-      - file: jupyter_service_{{ WMID }}
+      - file: jupyter_service_{{ JUPYTERLAB_ID }}
 
 {% load_yaml as desktop_config %}
 Type: Application
-Name: Jupyterlab {{ basename }}
-Comment: Jupyter Lab Web-App ({{ notebook_dir }})
+Name: Jupyter {{ name }}
+Comment: Jupyter ({{ name }}) Web-App ({{ notebook_dir }})
 Icon: notebook
 Categories: Development;Science;Education;Network;
 Keywords: python;
@@ -154,12 +151,12 @@ X-WebApp-Isolated: true
 {% endload %}
 
 # create a jupyterlab desktop entry to start the gui-browser as "app"
-{{ user_desktop(user, WMClass|lower(), desktop_config, require='file: jupyter_service_'~ WMID) }}
+{{ user_desktop(user, WMClass|lower(), desktop_config, require='file: jupyter_service_'~ JUPYTERLAB_ID) }}
 
-installed_jupyter_service_{{ WMID }}:
+installed_jupyter_service_{{ JUPYTERLAB_ID }}:
   test.nop:
     - require:
-      - file: jupyter_service_{{ WMID }}
+      - file: jupyter_service_{{ JUPYTERLAB_ID }}
       - file: {{ WMClass|lower() }}.desktop
 
 {% endmacro %}

@@ -1,9 +1,12 @@
-# Scientific Python using the Jupyter ecosystem
+#  Jupyter Ecosystem for Scientific Python and Hardware accelerated Machinelearning
 
++ systemd user jupyter server, desktop chromium web-app as jupyter client
+
++ hardware support for **amd rocm** gpu's in pytorch, tensorflow, jax
 + some python packages are installed **as system packages**
 + some system python packages are **build from aur**
-+ some python packages are installed in the **jupyter server environment**
-+ some python packages are installed in the **jupyter kernels**
++ **pipx** is used for the **jupyterlab server environment**
++ default for **jupyter kernels** is to use system site packages
 
 ## Notes
 
@@ -62,6 +65,8 @@ cd ~/.cache/matplotlib; rm fontlist*.json
   + Weights and Biases - organize and analyze machine learning experiments
 
 #### jupyter
+- jupyterlab-autosave-on-focus-change
+
 + python-pyarrow - Columnar in-memory analytics layer for big data
 + itables - Pandas DataFrames and Series as interactive datatables
 + finos/perspective - interactive analytics and data visualization for large and/or streaming datasets

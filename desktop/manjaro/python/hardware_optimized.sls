@@ -8,11 +8,6 @@
     'python-pillow-simd',
     ]) }}
 
-{#
-# AVX2 speedup available as custom package
-{{ pamac_patch_install_dir('python-pillow-simd', 'salt://desktop/manjaro/python/python-pillow-simd') }}
-#}
-
 hardware_optimized:
   test.nop:
     - require:

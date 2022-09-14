@@ -21,7 +21,7 @@ jupyter_base:
         if value.default_packages|d(false) else value.packages|d([]) %}
   {% set apps= settings.default.service.apps+ value.apps|d([])
         if value.default_apps|d(false) else value.apps|d([]) %}
-{{ jupyter_service(
+{{ jupyter_service(name=key,
     user=user,
     notebook_dir=value.notebook_dir,
     port=value.port,

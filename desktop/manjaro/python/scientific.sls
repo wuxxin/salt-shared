@@ -14,7 +14,7 @@ scientific_base:
       - sls: desktop.manjaro.python.hardware_optimized
       - sls: nodejs
 
-# customized gui components
+# gui components
 scientific_gui:
   pkg.installed:
     - pkgs:
