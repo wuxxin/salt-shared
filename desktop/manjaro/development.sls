@@ -5,6 +5,13 @@ include:
   - desktop.manjaro.python
   - desktop.manjaro.emulator
 
+development_languages:
+  pkg.installed:
+    - pkgs:
+      - go
+    - require:
+      - sls: desktop.manjaro.python
+
 development_tools:
   pkg.installed:
     - pkgs:
@@ -15,6 +22,8 @@ development_tools:
       ## encryption
       # age - simple, modern and secure file encryption tool
       - age
+      # minisign - A dead simple tool to sign files and verify digital signatures
+      - minisign
 
       ## devop
       # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
@@ -34,7 +43,14 @@ development_tools:
       - wezterm
       # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
       - kitty
-      # nnn - The fastest terminal file manager ever written.
+
+      # bat - Cat clone with syntax highlighting and git integration
+      - bat
+      # mediainfo - Supplies technical and tag information about a video or audio
+      - mediainfo
+      # elinks - advanced and well-established feature-rich text mode web browser
+      - elinks
+      # nnn - The fastest terminal file manager ever written
       - nnn
 
 {% load_yaml as pkgs %}
@@ -43,16 +59,14 @@ development_tools:
       - dns-lexicon
       # butane - Human readable Butane Configs into machine readable Ignition Configs
       - butane
-      # pixiecore - An all-in-one tool for easy netbooting
+      # pixiecore - An all-in-one tool for easy netbooting (ftfp,dhcp-netboot,http)
       - pixiecore-git
+
+      ## security
+      # mfoc - MiFare Classic Universal toolKit
+      - mfoc
 {% endload %}
 {{ pamac_install("development_tools_aur", pkgs) }}
-
-
-development_languages:
-  pkg.installed:
-    - pkgs:
-      - go
 
 development_fonts:
   pkg.installed:
@@ -77,3 +91,20 @@ development_ide:
       - imhex
 {% endload %}
 {{ pamac_install("development_ide_aur", pkgs) }}
+
+{% load_yaml as pkgs %}
+      # mkdocs - Project documentation with Markdown
+      - mkdocs
+      # lunr - to prebuild search index
+      - python-lunr
+      - mkdocs-git-revision-date-localized-plugin
+      - mkdocs-with-pdf
+      - mkdocs-ezlinks-plugin
+      - mkdocs-rss-plugin
+      - mkdocs-mermaid2-plugin
+      - mkdocs-redirects
+      - mkdocs-material
+      - mkdocs-material-extensions
+      - mkdocs-material-pymdownx-extras
+{% endload %}
+{{ pamac_install('development_docs_aur', pkgs) }}
