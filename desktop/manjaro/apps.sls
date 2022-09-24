@@ -58,11 +58,17 @@ mail-calendar-contacts:
       - evolution
       - highlight
 
-multimedia-player:
+media-player:
   pkg.installed:
     - pkgs:
       # kodi -  software media player and entertainment hub for digital media
       - kodi
+{% load_yaml as pkgs %}
+      - tabbed-git
+      # quickmedia - native client for web services. youtube, soundcloud, a.o.
+      - quickmedia-git
+{% endload %}
+{{ pamac_install("media-player-aur", pkgs) }}
 
 music-player:
   pkg.installed:
@@ -83,7 +89,7 @@ password:
       - firefox-extension-keepassxc-browser
       - chromium-keepassxc-browser
 {% endload %}
-{{ pamac_install("password_aur", pkgs, require="pkg: password") }}
+{{ pamac_install("password-aur", pkgs, require="pkg: password") }}
 
 picture:
   pkg.installed:
@@ -142,7 +148,10 @@ video-loopback:
     - pkgs:
       - v4l2loopback-utils
       - v4l2loopback-dkms
-{{ pamac_install("video-loopback-aur", [ "akvcam-dkms" ]) }}
+{% load_yaml as pkgs %}
+      - akvcam-dkms
+{% endload %}
+{{ pamac_install("video-loopback-aur", pkgs) }}
 
 video-player:
   pkg.installed:
@@ -154,4 +163,7 @@ video-studio:
     - pkgs:
       - obs-studio
       - sndio
-{{ pamac_install("video-studio-aur", [ "webcamoid" ]) }}
+{% load_yaml as pkgs %}
+      - webcamoid
+{% endload %}
+{{ pamac_install("video-studio-aur", pkgs) }}
