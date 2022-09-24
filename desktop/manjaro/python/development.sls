@@ -63,8 +63,15 @@ python_tools_lsp:
 {{ pamac_install('python_tools_lsp_aur', pkgs,
     require='pkg: python_tools_lsp') }}
 
-python_libraries_other:
+python_devices_libraries:
   pkg.installed:
     - pkgs:
-      - python-websockets
       - python-sounddevice
+      - python-nfc
+
+python_network_libraries:
+  pkg.installed:
+    - pkgs:
+      - python-requests
+      # - python-requests - Python HTTP for Humans
+      - python-websockets

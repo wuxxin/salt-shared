@@ -21,8 +21,9 @@ jupyter_base:
         if value.default_packages|d(false) else value.packages|d([]) %}
   {% set apps= settings.default.service.apps+ value.apps|d([])
         if value.default_apps|d(false) else value.apps|d([]) %}
-{{ jupyter_service(name=key,
+{{ jupyter_service(
     user=user,
+    name=key,
     notebook_dir=value.notebook_dir,
     port=value.port,
     token=value.token,
@@ -36,7 +37,10 @@ jupyter_base:
 
 # install all configured kernels
 {% for key, value in settings.kernel.items() %}
-{{ create_python_kernel(user=user, name=key, pkgs=value.packages|d([]),
+{{ create_python_kernel(
+    user=user,
+    name=key,
+    pkgs=value.packages|d([]),
     system_packages=value.system_packages|d(true),
     require='test: jupyter_base') }}
 {% endfor %}

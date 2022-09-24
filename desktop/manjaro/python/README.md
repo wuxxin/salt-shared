@@ -1,6 +1,6 @@
 #  Jupyter Ecosystem for Scientific Python and Hardware accelerated Machinelearning
 
-+ systemd user jupyter server, desktop chromium web-app as jupyter client
+systemd user jupyter server, desktop chromium web-app as jupyter client.
 
 + hardware support for **amd rocm** gpu's in pytorch, tensorflow, jax
 + some python packages are installed **as system packages**
@@ -17,44 +17,35 @@ sudo fc-cache -f -v
 cd ~/.cache/matplotlib; rm fontlist*.json
 ```
 
-### currently disabled packages
+### wanted, but currently not buildable packages
 
 #### scientific scientific_python_aur
-
+```
+# numba - NumPy aware dynamic Python compiler using LLVM
 - python-numba
-  - NumPy aware dynamic Python compiler using LLVM
+```
 
 #### machinelearning ml_tools_aur
+```
+# sentencepiece - unsupervised text tokenizer and detokenizer
 - python-sentencepiece-git
-  - unsupervised text tokenizer and detokenizer
+```
 
 #### machinelearning ml_pytorch_extra_aur
-
+```
+# monailabel - intelligent open source image labeling and learning tool
+- monailabel
+# kornia - classical computer vision integrated into deep learning models
 - python-kornia
-  - classical computer vision integrated into deep learning models
+```
 
 #### machinelearning ml_sklearn_aur
+```
+# sklearn-pandas - bridge between Scikit-Learn's methods and pandas-style Data Frames
 - python-sklearn-pandas
-  - bridge between Scikit-Learn's methods and pandas-style Data Frames
+```
 
-
-#### scientific jupyter server
-
-- jupyterlab-kernelspy
-  - inspecting messages to/from a kernel
-- jupyterlab-friendly-traceback
-  - A JupyterLab extension for friendly traceback
-- jupyter_innotater
-  - Annotate data including image bounding boxes inline
-- jupyterlab_autoscrollcelloutput
-- jupyterlab_kernel_usage
-- ipylab
-- jupyterlab_tensorboard
-- jupyterlab_execute_time
-- jupyterlab_notify
-- jupyterlab-notifications
-
-### additional packages
+### additional untried and unevaluated packages found
 
 #### machine learning
 + gradio
@@ -65,12 +56,24 @@ cd ~/.cache/matplotlib; rm fontlist*.json
   + Weights and Biases - organize and analyze machine learning experiments
 
 #### jupyter
-- jupyterlab-autosave-on-focus-change
-
 + python-pyarrow - Columnar in-memory analytics layer for big data
 + itables - Pandas DataFrames and Series as interactive datatables
 + finos/perspective - interactive analytics and data visualization for large and/or streaming datasets
 + elyra-pipeline-editor-extension
++ jupyterlab-kernelspy
+  + inspecting messages to/from a kernel
++ jupyterlab-friendly-traceback
+  + A JupyterLab extension for friendly traceback
++ jupyter_innotater
+  + Annotate data including image bounding boxes inline
++ jupyterlab_autoscrollcelloutput
++ jupyterlab-autosave-on-focus-change
++ jupyterlab_kernel_usage
++ ipylab
++ jupyterlab_tensorboard
++ jupyterlab_execute_time
++ jupyterlab_notify
++ jupyterlab-notifications
 
 #### lsp
 + python-lsp-mypy

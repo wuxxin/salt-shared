@@ -65,7 +65,7 @@ register_python_kernel_{{ name }}:
 {% endmacro %}
 
 
-{% macro jupyter_service(name, user, notebook_dir, port, token,
+{% macro jupyter_service(user, name, notebook_dir, port, token,
                           pkgs, apps, chromium_args, chromium_extensions) %}
   {% from 'desktop/user/lib.sls' import user_desktop %}
   {% from 'python/lib.sls' import pipx_install, pipx_inject %}
