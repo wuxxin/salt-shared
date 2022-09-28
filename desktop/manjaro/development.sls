@@ -12,62 +12,6 @@ development_languages:
     - require:
       - sls: desktop.manjaro.python
 
-development_tools:
-  pkg.installed:
-    - pkgs:
-      ## filter
-      # go-yq - Portable command-line YAML processor
-      - go-yq
-
-      ## encryption
-      # age - simple, modern and secure file encryption tool
-      - age
-      # minisign - A dead simple tool to sign files and verify digital signatures
-      - minisign
-
-      ## devop
-      # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
-      - step-cli
-
-      ## conversion
-      # pandoc - Conversion between markup formats, export to pdf
-      - pandoc
-      - pandoc-crossref
-
-      ## updates
-      # topgrade - Invoke the upgrade procedure of multiple package managers
-      - topgrade
-
-      ## terminal
-      # wezterm - GPU-accelerated cross-platform terminal emulator and multiplexer
-      - wezterm
-      # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
-      - kitty
-
-      # bat - Cat clone with syntax highlighting and git integration
-      - bat
-      # mediainfo - Supplies technical and tag information about a video or audio
-      - mediainfo
-      # elinks - advanced and well-established feature-rich text mode web browser
-      - elinks
-      # nnn - The fastest terminal file manager ever written
-      - nnn
-
-{% load_yaml as pkgs %}
-      ## devop
-      # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
-      - dns-lexicon
-      # butane - Human readable Butane Configs into machine readable Ignition Configs
-      - butane
-      # pixiecore - An all-in-one tool for easy netbooting (ftfp,dhcp-netboot,http)
-      - pixiecore-git
-
-      ## security
-      # mfoc - MiFare Classic Universal toolKit
-      - mfoc
-{% endload %}
-{{ pamac_install("development_tools_aur", pkgs) }}
-
 development_fonts:
   pkg.installed:
     - pkgs:
@@ -92,9 +36,86 @@ development_ide:
 {% endload %}
 {{ pamac_install("development_ide_aur", pkgs) }}
 
+development_tools:
+  pkg.installed:
+    - pkgs:
+      ## filter
+      # go-yq - Portable command-line YAML processor
+      - go-yq
+
+      ## encryption
+      # age - simple, modern and secure file encryption tool
+      - age
+      # minisign - A dead simple tool to sign files and verify digital signatures
+      - minisign
+
+      ## conversion
+      # pandoc - Conversion between markup formats, export to pdf
+      - pandoc
+      - pandoc-crossref
+
+      ## updates
+      # topgrade - Invoke the upgrade procedure of multiple package managers
+      - topgrade
+
+      ## terminal
+      # wezterm - GPU-accelerated cross-platform terminal emulator and multiplexer
+      - wezterm
+      # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
+      - kitty
+
+      ## filemanager
+      # nnn - The fastest terminal file manager ever written
+      - nnn
+      # bat - Cat clone with syntax highlighting and git integration
+      - bat
+      # mediainfo - Supplies technical and tag information about a video or audio
+      - mediainfo
+      # elinks - advanced and well-established feature-rich text mode web browser
+      - elinks
+
 {% load_yaml as pkgs %}
-      # mkdocs - Project documentation with Markdown
+      ## security
+      # mfoc - MiFare Classic Universal toolKit
+      - mfoc
+{% endload %}
+{{ pamac_install("development_tools_aur", pkgs) }}
+
+
+devop_tools:
+  pkg.installed:
+    - pkgs:
+      ## devop
+      # vault - A tool for managing secrets
+      - vault
+      # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
+      - step-cli
+      # fping - Utility to ping multiple hosts at once
+      - fping
+
+{% load_yaml as pkgs %}
+      ## devop
+      # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
+      - dns-lexicon
+      # butane - Human readable Butane Configs into machine readable Ignition Configs
+      - butane
+      # pixiecore - An all-in-one tool for easy netbooting (ftfp,dhcp-netboot,http)
+      - pixiecore-git
+      # flent - The FLExible Network Tester
+      - flent
+      # vault - command line tool for Hashicorp Vault
+      - vault-cli
+      ## security
+      # mfoc - MiFare Classic Universal toolKit
+      - mfoc
+{% endload %}
+{{ pamac_install("devop_tools_aur", pkgs) }}
+
+
+{% load_yaml as pkgs %}
+      ## mkdocs - Project documentation with Markdown
       - mkdocs
+      ## plugins
       # lunr - to prebuild search index
       - python-lunr
       - mkdocs-git-revision-date-localized-plugin
@@ -103,6 +124,11 @@ development_ide:
       - mkdocs-rss-plugin
       - mkdocs-mermaid2-plugin
       - mkdocs-redirects
+      ## themes
+      - mkdocs-cinder
+      - mkdocs-bootswatch
+      # FIXME: python-hatch-nodejs-version is currently not in manjaro community
+      - python-hatch-nodejs-version
       - mkdocs-material
       - mkdocs-material-extensions
       - mkdocs-material-pymdownx-extras
