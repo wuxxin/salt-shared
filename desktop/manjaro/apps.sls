@@ -51,6 +51,11 @@ download:
       # yt-dlp - youtube-dl fork with additional features and fixes
       - yt-dlp
 
+file-sync:
+  pkg.installed:
+    - pkgs:
+      - syncthing
+
 mail-calendar-contacts:
   pkg.installed:
     - pkgs:
@@ -118,10 +123,11 @@ privacy:
 {% endload %}
 {{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
-file-sync:
-  pkg.installed:
-    - pkgs:
-      - syncthing
+{% load_yaml as pkgs %}
+      # kali-themes - GTK theme included with Kali Linux
+      - kali-themes
+{% endload %}
+{{ pamac_install("themes-aur", pkgs) }}
 
 vector-graphic:
   pkg.installed:
