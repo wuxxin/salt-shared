@@ -39,6 +39,10 @@ development_ide:
 development_tools:
   pkg.installed:
     - pkgs:
+      ## linter/beautifier
+      # shfmt - Format shell programs
+      - shfmt
+
       ## filter
       # go-yq - Portable command-line YAML processor
       - go-yq
@@ -75,6 +79,9 @@ development_tools:
       - elinks
 
 {% load_yaml as pkgs %}
+      ## filter
+      # yj - Convert YAML <=> TOML <=> JSON <=> HCL
+      - yj
       ## security
       # mfoc - MiFare Classic Universal toolKit
       - mfoc
@@ -92,6 +99,8 @@ devop_tools:
       - step-cli
       # fping - Utility to ping multiple hosts at once
       - fping
+      # nmap - Utility for network discovery and security auditing
+      - nmap
 
 {% load_yaml as pkgs %}
       ## devop
