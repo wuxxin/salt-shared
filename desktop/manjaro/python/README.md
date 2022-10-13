@@ -21,6 +21,10 @@ cd ~/.cache/matplotlib; rm fontlist*.json
 
 #### scientific scientific_python_aur
 ```
+# panel - high-level app and dashboarding solution
+- python-panel
+# holoviews - With Holoviews, your data visualizes itself
+- python-holoviews
 # numba - NumPy aware dynamic Python compiler using LLVM
 - python-numba
 ```

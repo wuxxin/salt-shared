@@ -67,10 +67,6 @@ scientific_python:
       - python-plotly
       # altair - Declarative statistical visualization library
       - python-altair
-      # panel - high-level app and dashboarding solution
-      - python-panel
-      # holoviews - With Holoviews, your data visualizes itself
-      - python-holoviews
 {% endload %}
 {{ pamac_install('scientific_python_aur', pkgs,
     require='pkg: scientific_python') }}
