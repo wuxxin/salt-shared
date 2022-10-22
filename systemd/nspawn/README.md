@@ -1,7 +1,5 @@
 # systemd nspawn machine container
 
-+ see [nspawn-config.md](nspawn-config.md) for config possibilities
-
 ## usage
 
 + define machine

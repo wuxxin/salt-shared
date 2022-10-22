@@ -1,14 +1,7 @@
-
-# journald: triple the default RateLimitBurst, startup is usually more noisy
 {% for p,r in [
-  ("RateLimitBurst", "RateLimitBurst=3000"),
+  ("SystemMaxUse", "SystemMaxUse=128M")
+  ("RuntimeMaxUse", "RuntimeMaxUse=64M"),
   ] %}
-
-{#
-# journald: do not forward to syslog for storing, because we let journald store on disk
-("ForwardToSyslog", "ForwardToSyslog=No"),
-("Storage", "Storage=persistent"),
-#}
 
 /etc/systemd/journald.conf_{{ p }}:
   file.replace:
