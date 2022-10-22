@@ -24,8 +24,10 @@ python:
   - python-pip
   - python-setuptools
   - python-virtualenv
-  # additional
+  ### additional
+  # pipx - Install and execute apps from Python packages
   - python-pipx
+  # jinja - simple pythonic template language written in Python
   - python-jinja
   - python-yaml
   - python-xmljson
@@ -39,25 +41,30 @@ ipython:
   - ipython3
 
   arch:
-  - python-pudb   {# full-screen console debugger for Python #}
-  - python-ipdb   {# python debugger, with IPython features #}
-  - python-jedi   {# autocompletion tool for Python #}
-  - ipython       {# Enhanced interactive Python shell #}
+  # pudb - full-screen console debugger for Python
+  - python-pudb
+  # ipdb - python debugger, with IPython features
+  - python-ipdb
+  # jedi - autocompletion tool for Python
+  - python-jedi
+  # ipython - Enhanced interactive Python shell
+  - ipython
 
 python_dev:
   debian:
   - build-essential
   - python3-dev
-  # additional
+  ### additional
   - git
   - cython3
   - swig
 
   arch:
-  # base-devel installed as group
-  # additional
+  ### base-devel installed as group
+  ### additional
   - git
-  - cython      {# pythonic language wrapping external C libraries and fast C modules #}
+  # cython - pythonic language wrapping external C libraries and fast C modules
+  - cython
   - swig
   - meson
 {% endload %}
