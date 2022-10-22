@@ -5,21 +5,15 @@
 include:
   - python.dev
 
-## python environment tools
-# pipenv - Python Dev Workflow for Humans
-{{ pipx_install('pipenv', user=user) }}
-
-# pipx - Install and execute apps from Python packages
-# upgrade pipx with user install of pipx, current arch version is old (0.16.4)
-{{ pipx_install('pipx', user=user) }}
-
 python_tools_env:
   pkg.installed:
     - pkgs:
-      # pyenv - Easily switch between multiple versions of Python
-      - pyenv
+      # pipenv - Python Dev Workflow for Humans
+      - python-pipenv
       # poetry - Python packaging and dependency management made easy
       - python-poetry
+      # pyenv - Easily switch between multiple versions of Python
+      - pyenv
 
 python_tools_devel:
   pkg.installed:
