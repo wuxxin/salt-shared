@@ -1,3 +1,5 @@
+{% from 'manjaro/lib.sls' import pamac_install with context %}
+
 # enable aur , install group base-devel, build and debug tools
 enable_aur:
   file.replace:
@@ -25,8 +27,17 @@ build_tools:
       - dkms
       # archlinux-contrib - Collection of contrib scripts used in Arch Linux
       - archlinux-contrib
+    - require:
+      - pkg: build_essentials
+      - file: enable_aur
+
+{% load_yaml as pkgs %}
       # pikaur - aur helper, for building packages from AUR
       - pikaur
+      # paru - Feature packed AUR helper
+      - paru
+{% endload %}
+{{ pamac_install("build_tools-aur", pkgs, require="pkg: build_tools") }}
 
 debug_tools:
   pkg.installed:
