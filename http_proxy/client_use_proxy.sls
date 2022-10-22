@@ -18,8 +18,10 @@
     - makedirs: True
     - contents: |
         http_proxy="{{ salt['pillar.get']('http_proxy') }}"
+        https_proxy="{{ salt['pillar.get']('https_proxy') }}"
         no_proxy="{{ salt['pillar.get']('no_proxy', default_no_proxy) }}"
         export http_proxy
+        export https_proxy
         export no_proxy
     - order: 5
 
@@ -30,15 +32,5 @@
     - contents: |
         Defaults env_keep += "HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY"
         Defaults env_keep += "http_proxy https_proxy ftp_proxy no_proxy"
-    - order: 5
-
-{# inactiv
-
-modify_dokku:
-  cmd.run:
-    - name: dokku config:set --global http_proxy={{ salt['pillar.get']('http_proxy') }} HTTP_PROXY={{ salt['pillar.get']('http_proxy') }}
-    - onlyif: which dokku
-    - unless: dokku config:get --global http_proxy
-#}
 
 {% endif %}
