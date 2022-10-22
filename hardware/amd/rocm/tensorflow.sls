@@ -13,5 +13,5 @@ tensorflow_req:
       - sls: desktop.manjaro.python.hardware_optimized
 
 # python-tensorflow-opt-rocm - scalable machine learning (with ROCM and AVX2 CPU optimizations)
-{{ pamac_install('python-tensorflow-rocm_aur', [ 'python-tensorflow-opt-rocm',],
+{{ pamac_install('python-tensorflow-rocm-aur', [ 'python-tensorflow-opt-rocm',],
     require= 'test: tensorflow_req') }}

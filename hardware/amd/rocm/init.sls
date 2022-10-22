@@ -2,6 +2,7 @@
 
 include:
   - manjaro.aur
+  # - manjaro.arch4edu
   - hardware.amd.radeon
 
 {{ pamac_install('rocm-sdk', [
@@ -9,7 +10,7 @@ include:
   'rocm-hip-sdk',
   'rocm-opencl-sdk',
   'miopen-hip',
-  'hipmagma',
+  'hip-runtime-amd',
   ]) }}
 
 hardware-amd-rocm:
