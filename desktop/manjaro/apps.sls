@@ -36,6 +36,11 @@ browser:
     - pkgs:
       - firefox
       - chromium
+{% load_yaml as pkgs %}
+      - firefox-extension-keepassxc-browser
+      - chromium-keepassxc-browser
+{% endload %}
+{{ pamac_install("browser-aur", pkgs, require="pkg: password") }}
 
 chat:
   pkg.installed:
@@ -92,7 +97,9 @@ password:
       - wl-clipboard
 {% load_yaml as pkgs %}
       - firefox-extension-keepassxc-browser
+      - chromium-extension-keepassxc-browser
       - chromium-keepassxc-browser
+      - git-credential-keepassxc
 {% endload %}
 {{ pamac_install("password-aur", pkgs, require="pkg: password") }}
 
@@ -123,6 +130,7 @@ privacy:
 {% endload %}
 {{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
+# themes
 {% load_yaml as pkgs %}
       # kali-themes - GTK theme included with Kali Linux
       - kali-themes
