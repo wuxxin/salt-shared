@@ -21,7 +21,7 @@ syncthing_container:
       - UID={{ user_info['uid'] }}
       - GID={{ user_info['gid'] }}
     - binds:
-{% for i in pillar.get('syncthing:binds') %}
+{% for i in pillar.get('syncthing:paths') %}
       - {{ i }}
 {% endfor %}
 

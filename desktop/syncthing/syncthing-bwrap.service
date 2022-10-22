@@ -1,0 +1,45 @@
+[Unit]
+Description=Bubble-Wrapped Syncthing - Open Source Continuous File Synchronization 
+Documentation=man:syncthing(1)
+StartLimitIntervalSec=60
+StartLimitBurst=4
+
+[Service]
+ExecStart=bwrap \
+    --cap-drop all \
+    --bind "{{ user_home }}/.local/state/syncthing" "{{ user_home }}" \
+    --bind "{{ user_home }}/.config/syncthing" "{{ user_home }}/.config/syncthing" \
+{%- for source,target in settings.paths.items() %}
+    --bind "{{ source }} "{{ target }}" \
+{%- endfor %}
+{%- for source in settings.bind %}
+    --bind "{{ source }}" "{{ source }}" \
+{%- endfor %}
+    --ro-bind /usr /usr \
+    --dir /tmp \
+    --dir /var \
+    --symlink ../tmp var/tmp \
+    --proc /proc \
+    --dev /dev \
+    --ro-bind /etc/resolv.conf /etc/resolv.conf \
+    --symlink usr/lib /lib \
+    --symlink usr/lib64 /lib64 \
+    --symlink usr/bin /bin \
+    --symlink usr/sbin /sbin \
+    --chdir / \
+    --unshare-all \
+    --share-net \
+    --die-with-parent \
+    --dir "/run/user/$(id -u)" \
+    --setenv XDG_RUNTIME_DIR "/run/user/$(id -u)" \
+    --setenv PS1 "bwrap.inside$ " \
+    /usr/bin/syncthing serve --no-browser --no-restart --logflags=0
+
+Restart=on-failure
+RestartSec=1
+SuccessExitStatus=3 4
+RestartForceExitStatus=3 4
+
+[Install]
+WantedBy=default.target
+
