@@ -1,3 +1,26 @@
+{% macro pamac_repo_key(name, keyid, hash) %}
+
+import-repo-key-{{ name }}:
+  file.managed:
+    - source: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ keyid }}"
+    - source_hash: {{ hash }}
+    - name: /etc/pacman.d/{{ name }}-key.gpg
+  cmd.run:
+    - name: pacman-key --add /etc/pacman.d/{{ name }}-key.gpg
+    - onchange:
+      - file: import-repo-key-{{ name }}
+trust-repo-key-{{ name }}:
+  cmd.run:
+    - name: pacman-key --lsign-key "{{ keyid }}"
+    - onchange:
+      - cmd: import-repo-key-{{ name }}
+trusted-repo-{{ name }}:
+  test.nop:
+    - require:
+      - cmd: trust-repo-key-{{ name }}
+{% endmacro %}
+
+
 {% macro pamac_install(name, pkgs=[]) %} {# require #}
 
 "{{ name }}":
