@@ -1,4 +1,4 @@
-{% macro pamac_repo_key(name, keyid, hash) %}
+{% macro pamac_repo_key(name, keyid, hash, user="") %}
 
 import-repo-key-{{ name }}:
   file.managed:
@@ -14,10 +14,23 @@ trust-repo-key-{{ name }}:
     - name: pacman-key --lsign-key "{{ keyid }}"
     - onchange:
       - cmd: import-repo-key-{{ name }}
+
+{% if user != "" %}
+user-trust-repo-key-{{ name }}:
+  cmd.run:
+    - name: gpg --import /etc/pacman.d/{{ name }}-key.gpg
+    - runas: {{ user }}
+    - onchange:
+      - cmd: import-repo-key-{{ name }}
+    - require_in:
+      - test: trusted-repo-{{ name }}
+{% endif %}
+
 trusted-repo-{{ name }}:
   test.nop:
     - require:
       - cmd: trust-repo-key-{{ name }}
+
 {% endmacro %}
 
 

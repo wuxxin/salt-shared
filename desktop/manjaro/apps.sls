@@ -1,7 +1,8 @@
 {% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 {{ pamac_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
-    "c7ddd1013c324391d8a5d4151a29df0f4b2c7553e68d42dedda49748a57b293c") }}
+    "c7ddd1013c324391d8a5d4151a29df0f4b2c7553e68d42dedda49748a57b293c", user=user) }}
 
 3d-printing:
   pkg.installed:
