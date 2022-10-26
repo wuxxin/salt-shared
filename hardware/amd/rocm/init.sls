@@ -2,7 +2,7 @@
 
 include:
   - manjaro.aur
-  # - manjaro.arch4edu
+  - manjaro.arch4edu
   - hardware.amd.radeon
 
 {{ pamac_install('rocm-sdk', [
