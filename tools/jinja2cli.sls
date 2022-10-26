@@ -1,6 +1,8 @@
 include:
   - python
 
+# jinja2-cli - CLI interface to Jinja2, including yaml,xml,toml support
+
 {% if grains['os'] == 'Ubuntu' %}
 
 python-jinja-req:
@@ -11,10 +13,10 @@ python-jinja-req:
       - python3-toml
       - python3-yaml
 
-{# CLI interface to Jinja2, including yaml,xml,toml support #}
 {{ pip_install('jinja2-cli[yaml,toml,xml]', require= ['pip: Jinja2>=2.11', 'pkg: python-jinja-req']) }}
 
-{% else %}
+
+{% elif grains['os'] == 'Manjaro' %}
   {% from 'python/lib.sls' import pipx_install %}
   {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 

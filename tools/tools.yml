@@ -1,0 +1,112 @@
+pkgs:
+  arch:
+    ### network monitor
+    - nload
+    - bmon
+    - iftop
+    ### disk io monitor
+    - atop
+    - dstat
+    # lfs - modern df replacement
+    - lfs
+    # pueue - task management for sequential and parallel execution of long-running tasks
+    - pueue
+
+  debian:
+    ### system tools
+    # alternative to "su" and "sudo"
+    - gosu            
+    # popular version control system
+    - git
+    # Report faked system time to programs (cli)
+    - faketime        
+    # Secure Sockets Layer toolkit - cryptographic utility
+    - openssl         
+
+    ### compression
+    # bzip2 is a patent free, high-quality data compressor
+    - bzip2           
+    # command line tools for working with XZ compression
+    - xz-utils
+    # Zstandard, is a fast lossless compression algorithm
+    - zstd            
+
+    ### conversion/transformation/querying
+    # sqlite3 - command line interface for SQLite version 3
+    - sqlite3         
+    # jq - Command-line JSON processor
+    - jq              
+    # ag - fast grep command line tool 
+    - silversearcher-ag
+    # xmlstarlet - transform, query, validate, and edit XML
+    - xmlstarlet      
+    # html-xml-utils - manipulating and converting HTML and XML 
+    - html-xml-utils  
+    # html2text - converter from HTML to plain text
+    - html2text       
+    # tidy - convert html to xml
+    - tidy            
+    # ssss - Shamir's secret sharing scheme implementation
+    - ssss            
+
+    ## network
+    # curl - command line tool for transferring data with URL syntax
+    - curl            
+    # rsync - fast, versatile, remote (and local) file-copying tool
+    - rsync           
+    # unison - crossplatform file-synchronization tool written in OCaml
+    - unison          
+    # httpie - CLI, cURL-like tool for humans
+    - httpie          
+    # pv - monitor the progress of data through a pipe
+    - pv              
+    # socat - multipurpose relay for bidirectional data transfer
+    - socat           
+    # netcat - TCP/IP swiss army knife
+    - netcat-openbsd  
+    # trickle - a lightweight userspace bandwidth shaper
+    - trickle         
+    # etherwake - tool to send magic Wake-on-LAN packets
+    - etherwake       
+    # swaks - Swiss Army Knife SMTP, all-purpose smtp tester
+    - swaks           
+
+    ## top,perf monitor like
+    # htop - ncursed-based process viewer similar to top
+    - htop            
+    # iftop - displays bandwidth usage information on an network interface
+    - iftop           
+    # iotop - displays current I/O usage by processes on the system
+    - iotop           
+    # conntrack - manage the in-kernel connection tracking state table
+    - conntrack       
+    # dstat - versatile replacement for vmstat, iostat and ifstat
+    - dstat           
+    # cpu-checker - check cpu features NX/XD and VMX/SVM
+    - cpu-checker     
+    # perf-(test, kvm, bench, probe)
+    - linux-tools-common 
+    # watch, free, ps, top, uptime, kill, sysctl, vmstat
+    - procps          
+    # nethogs - Net top tool grouping bandwidth per process
+    - nethogs         
+    # Linux PCI utilities
+    - pciutils        
+    # Linux USB utilities
+    - usbutils        
+
+    ## user tools
+    # tmux - terminal multiplexer like screen
+    - tmux            
+    # mc - Midnight Commander is a text-mode full-screen file manager
+    - mc              
+    # jupp - user friendly full screen text editor
+    - jupp            
+    # ncdu - ncurses-based du viewer
+    - ncdu            
+    # tree - produces a depth indented listing of files
+    - tree            
+    # lynx - classic non-graphical (text-mode) web browser
+    - lynx            
+    # a handler that looks up programs not currently installed but available
+    - command-not-found
