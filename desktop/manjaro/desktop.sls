@@ -48,13 +48,3 @@ cups.{{ s }}:
         SDL_VIDEODRIVER=wayland
         # Run Firefox on Wayland
         MOZ_ENABLE_WAYLAND=1
-
-{#
-+ electron based applications
-    + To use electron-based applications natively under Wayland,
-      create or edit the file ${XDG_CONFIG_HOME}/electron-flags.conf
-      to add the following options
-
---enable-features=UseOzonePlatform
---ozone-platform=wayland
-#}

@@ -1,4 +1,7 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+
+{{ pamac_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
+    "c7ddd1013c324391d8a5d4151a29df0f4b2c7553e68d42dedda49748a57b293c") }}
 
 3d-printing:
   pkg.installed:
@@ -25,6 +28,19 @@ audio-editor:
     - pkgs:
       - audacity
 
+{% load_yaml as pkgs %}
+      - vcvrack
+      - vcvrack-goodsheperd
+      - vcvrack-freesurface
+      - vcvrack-cvly
+      - vcvrack-computerscare
+      - vcvrack-collection-one
+      - vcvrack-alikins
+      - vcvrack-ahornberg
+      - vcvrack-aaronstatic
+{% endload %}
+{{ pamac_install("audio-synthesizer-aur", pkgs) }}
+
 audio-workstation:
   pkg.installed:
     - pkgs:
@@ -37,10 +53,11 @@ browser:
       - firefox
       - chromium
 {% load_yaml as pkgs %}
+      - librewolf-bin
       - firefox-extension-keepassxc-browser
       - chromium-keepassxc-browser
 {% endload %}
-{{ pamac_install("browser-aur", pkgs, require="pkg: password") }}
+{{ pamac_install("browser-aur", pkgs, require=["pkg: password", "test: trusted-repo-librewolf"]) }}
 
 chat:
   pkg.installed:
