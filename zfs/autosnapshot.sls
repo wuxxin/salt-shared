@@ -1,6 +1,7 @@
 {% from "zfs/defaults.jinja" import settings with context %}
 
-{# snapshot from commit f938d9cc1c414a54a1ee8d638cea7d0ba388ea1a #}
+{# based on snapshot from commit f938d9cc1c414a54a1ee8d638cea7d0ba388ea1a #}
+{# additional changes: reformat with shformat and fix opt_verbose #}
 /usr/local/sbin/zfs-auto-snapshot.sh:
   file.managed:
     - source: salt://zfs/zfs-autosnapshot.sh
