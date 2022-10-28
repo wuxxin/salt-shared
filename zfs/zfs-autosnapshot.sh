@@ -20,7 +20,7 @@
 #
 
 # Set the field separator to a literal tab and newline.
-IFS="
+IFS="	
 "
 
 # Set default program options.
@@ -75,7 +75,7 @@ print_usage ()
   -v, --verbose      Print info messages.
       --destroy-only Only destroy older snapshots, do not create new ones.
       name           Filesystem and volume names, or '//' for all ZFS datasets.
-"
+" 
 }
 
 
@@ -443,7 +443,7 @@ done
 ZPOOLS_SCRUBBING=$(echo "$ZPOOL_STATUS" | awk -F ': ' \
   '$1 ~ /^ *pool$/ { pool = $2 } ; \
    $1 ~ /^ *scan$/ && $2 ~ /scrub in progress/ { print pool }' \
-  | sort )
+  | sort ) 
 
 # Get a list of pools that cannot do a snapshot.
 ZPOOLS_NOTREADY=$(echo "$ZPOOL_STATUS" | awk -F ': ' \
