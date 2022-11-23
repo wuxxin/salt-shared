@@ -57,7 +57,7 @@
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
 
-"pipx_{{ package }}{{ suffix }}":
+"pipx_{{ package }}{{ suffix }}_{{ user }}":
   cmd.run:
     - name: pipx install {{ pipx_opts }} {{ pip_args }} {{ package }}
     - unless: pipx list --json | {{ json2yaml }} | {{ yamlget }} venvs {{ package_name }}{{ suffix }}
@@ -88,11 +88,11 @@
   {%- endfor %}
 
   {%- if upgrade %}
-"pipx_upgrade_{{ package }}{{ suffix }}":
+"pipx_upgrade_{{ package }}{{ suffix }}_{{ user }}":
     - name: pipx upgrade --upgrade-injected {{ package_name }}{{ suffix }}
     - runas: {{ user }}
     - require:
-      - cmd: "pipx_{{ package }}{{ suffix }}"
+      - cmd: "pipx_{{ package }}{{ suffix }}_{{ user }}"
   {%- endif %}
 {% endmacro %}
 
@@ -105,7 +105,7 @@
   {% set yamlget= 'python3 -c "import sys, yaml, functools; yaml.safe_dump(functools.reduce(dict.__getitem__, sys.argv[1:], yaml.safe_load(sys.stdin)), sys.stdout, default_flow_style=False)"' %}
   {% set package_name= package|regex_replace('\[[^\]]+\]', '') %}
 
-"pipx_inject_{{ package }}_{{ inject_hash }}":
+"pipx_inject_{{ package }}_{{ user }}_{{ inject_hash }}":
   cmd.run:
     - name: pipx inject {{ pipx_opts }} {{ pip_args }} {{ package_name }} {{ package_list|join(' ') }}
     - runas: {{ user }}
@@ -119,7 +119,7 @@
         done
     - require:
       - pkg: python
-      - cmd: "pipx_{{ package }}"
+      - cmd: "pipx_{{ package }}_{{ user }}"
   {%- if 'require' in kwargs %}
     {%- set d = kwargs['require'] %}
     {%- if d is sequence and d is not string %}
