@@ -1,7 +1,4 @@
 {# install addons for user applications #}
-{% macro addons_atom(pkglist) %}
-{% endmacro %}
-
 {% macro addons_gnomeshell(pkglist) %}
 {% endmacro %}
 
