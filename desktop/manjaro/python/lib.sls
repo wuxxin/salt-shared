@@ -65,26 +65,26 @@ register_python_kernel_{{ name }}:
 {% endmacro %}
 
 
-{% macro jupyter_service(user, name, notebook_dir, port, token,
-                          pkgs, apps, chromium_args, chromium_extensions) %}
-  {% from 'desktop/user/lib.sls' import user_desktop %}
+{% macro jupyter_core(user, pkgs, apps) %}
   {% from 'python/lib.sls' import pipx_install, pipx_inject %}
+
+# create a pipx environment for jupyter[lab] service
+{{ pipx_install('jupyter-core', user=user, pipx_opts='--system-site-packages --pip-args="-I"') }}
+# inject additional packages if defined into environment
+{{ pipx_inject('jupyter-core', pkgs, user, pipx_opts='--system-site-packages') }}
+# inject additional apps if defined into environment
+{{ pipx_inject('jupyter-core', apps, user, pipx_opts='--include-apps --system-site-packages') }}
+
+{% endmacro %}
+
+
+{% macro jupyter_service(user, notebook_dir, port, token, chromium_args, chromium_extensions) %}
+  {% from 'desktop/user/lib.sls' import user_desktop %}
   {% set home= salt['user.info'](user)['home'] %}
-  {% set SUFFIX= '_' ~ name %}
-  {% set JUPYTERLAB_ID= 'jupyterlab' ~ SUFFIX %}
+  {% set JUPYTERLAB_ID= 'jupyter-core' %}
   {% set WMClass= 'WebApp-' ~ JUPYTERLAB_ID %}
   {% set ice_profile= home ~ '/.local/share/ice/profiles/' ~ JUPYTERLAB_ID %}
   {% set chromium_args= ' '.join(chromium_args) %}
-
-# create a pipx environment for jupyterlab service
-{{ pipx_install('jupyterlab', user=user, pipx_suffix= SUFFIX,
-      pipx_opts='--system-site-packages --pip-args="-I"') }}
-
-# inject additional packages if defined into environment
-{{ pipx_inject(JUPYTERLAB_ID, pkgs, user, pipx_opts='--system-site-packages') }}
-
-# inject additional apps if defined into environment
-{{ pipx_inject(JUPYTERLAB_ID, apps, user, pipx_opts='--include-apps --system-site-packages') }}
 
 # create a systemd user service for starting jupyter lab in background without gui
 jupyter_service_{{ JUPYTERLAB_ID }}:
@@ -95,7 +95,7 @@ jupyter_service_{{ JUPYTERLAB_ID }}:
     - makedirs: true
     - contents: |
         [Unit]
-        Description=Jupyter notebook server ({{ name }})
+        Description=Jupyter notebook server
 
         [Service]
         Type=simple
@@ -103,7 +103,7 @@ jupyter_service_{{ JUPYTERLAB_ID }}:
         Restart=always
         # Environment=HIP_LAUNCH_BLOCKING=1
         # Environment=AMD_LOG_LEVEL=3
-        ExecStart={{ home }}/.local/bin/jupyter-lab{{ SUFFIX }} \
+        ExecStart={{ home }}/.local/bin/jupyter lab \
           --notebook-dir={{ notebook_dir }} \
           --ip=localhost \
           --port={{ port }} \
@@ -134,8 +134,8 @@ jupyter_service_{{ JUPYTERLAB_ID }}:
 
 {% load_yaml as desktop_config %}
 Type: Application
-Name: Jupyter {{ name }}
-Comment: Jupyter ({{ name }}) Web-App ({{ notebook_dir }})
+Name: Jupyter Lab
+Comment: Jupyter (Web-App ({{ notebook_dir }})
 Icon: notebook
 Categories: Development;Science;Education;Network;
 Keywords: python;

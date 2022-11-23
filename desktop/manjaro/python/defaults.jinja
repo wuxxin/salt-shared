@@ -1,17 +1,17 @@
 {% load_yaml as defaults %}
 service:
-  lab:
-    notebook_dir: ~/lab
-    port: 8888
-    token: Insert-openssl_rand_-hex_24
-    default_chromium: true
-    default_packages: true
-    default_apps: true
-    chromium:
-      args: []
-      extensions: []
-    packages: []
-kernel:
+  notebook_dir: ~/lab
+  port: 8888
+  token: Insert-openssl_rand_-hex_24
+  default_chromium: true
+  default_packages: true
+  default_apps: true
+  chromium:
+    args: []
+    extensions: []
+  packages: []
+
+kernels:
   lab:
     system_packages: true
     packages: []
@@ -37,6 +37,8 @@ default:
   service:
     apps:
       ## jupyterlab: additional apps including commandline interfaces
+      # jupyterlab - Computational environment GUI
+      - jupyterlab
       # euporie - jupyter TUI (Text-User-Interface)
       - euporie
       # jupytext - Jupyter notebooks as diffable Markdown, Julia or Python
@@ -45,13 +47,19 @@ default:
       - py2nb
       # nbconvert - jupyter Notebook Conversion
       - nbconvert
+      # notebook - language-agnostic HTML notebook application for Project Jupyter
+      - notebook
       # nbdime - Diff and merge of Jupyter Notebooks
       - nbdime
-      # rise - instantly turn your Jupyter Notebooks into a slideshow
-      - rise
 
     packages:
-      ## jupyterlab: extensions, widgets, themes
+      ## jupyterlab: kernels, extensions, widgets, themes
+      # notebook-shim - switch to Jupyter Server for their Python Web application backend
+      - notebook-shim
+      # hass_pyscript_kernel - Python Scripting for Home Assistant
+      - hass_pyscript_kernel
+      # rise - instantly turn your Jupyter Notebooks into a slideshow
+      - rise
       # jupyterlab-language-pack-de-de - German (Germany) language pack for JupyterLab
       - jupyterlab-language-pack-de-de
       # jupyterlab-widgets - extensions to use ipywidgets, needs nodejs and npm
@@ -60,6 +68,8 @@ default:
       - jupyterlab-lsp
       # jupyterlab-git - Git extension for JupyterLab
       - jupyterlab-git
+      # jupyterlab_pygments - Pygments theme using JupyterLab CSS variables
+      - jupyterlab_pygments
       # jupyterlab_code_formatter - A universal code formatter for JupyterLab
       - jupyterlab_code_formatter
       # jupyterlab-execute-time - display cell timings in Jupyter Lab
@@ -79,4 +89,4 @@ default:
 {% endload %}
 
 {% set settings=salt['grains.filter_by']({'default': defaults},
-    grain='default', default= 'default', merge= salt['pillar.get']('python', {})) %}
+    grain='default', default= 'default', merge= salt['pillar.get']('jupyter', {})) %}
