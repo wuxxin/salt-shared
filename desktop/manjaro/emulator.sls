@@ -9,7 +9,7 @@ include:
 {% load_yaml as pkgs %}
       - qemu-android-x86
 {% endload %}
-{{ pamac_install("emulator-android", pkgs,
+{{ pamac_install("emulator-android-aur", pkgs,
     require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
 
 emulator-qemu:
