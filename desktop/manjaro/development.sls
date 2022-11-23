@@ -1,24 +1,26 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
   - desktop.manjaro
   - desktop.manjaro.python
   - desktop.manjaro.emulator
+  - desktop.manjaro.security
 
-development_languages:
+development-languages:
   pkg.installed:
     - pkgs:
       - go
     - require:
       - sls: desktop.manjaro.python
 
-development_fonts:
+development-fonts:
   pkg.installed:
     - pkgs:
       # nerd-fonts-complete - Iconic font aggregator, collection, & patcher. 3,600+ icons, 50+ patched fonts
       - nerd-fonts-complete
 
-development_ide:
+development-ide:
   pkg.installed:
     - pkgs:
       # pycharm-community-edition - Python IDE for Professional Developers
@@ -34,9 +36,9 @@ development_ide:
       # imhex - A Hex Editor for Reverse Engineers
       - imhex
 {% endload %}
-{{ pamac_install("development_ide_aur", pkgs) }}
+{{ pamac_install("development-ide-aur", pkgs) }}
 
-development_tools:
+development-tools:
   pkg.installed:
     - pkgs:
       ## linter/beautifier
@@ -82,17 +84,16 @@ development_tools:
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       - yj
-      ## security
-      # mfoc - MiFare Classic Universal toolKit
-      - mfoc
 {% endload %}
-{{ pamac_install("development_tools_aur", pkgs) }}
+{{ pamac_install("development-tools-aur", pkgs) }}
 
 
-devop_tools:
+devop-tools:
   pkg.installed:
     - pkgs:
       ## devop
+      # mosquitto - Open Source MQTT Broker
+      - mosquitto
       # vault - A tool for managing secrets
       - vault
       # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
@@ -101,6 +102,10 @@ devop_tools:
       - fping
       # nmap - Utility for network discovery and security auditing
       - nmap
+
+
+{{ pamac_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", 
+    "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
 
 {% load_yaml as pkgs %}
       ## devop
@@ -114,11 +119,8 @@ devop_tools:
       - flent
       # vault - command line tool for Hashicorp Vault
       - vault-cli
-      ## security
-      # mfoc - MiFare Classic Universal toolKit
-      - mfoc
 {% endload %}
-{{ pamac_install("devop_tools_aur", pkgs) }}
+{{ pamac_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
 
 {% load_yaml as pkgs %}
@@ -142,4 +144,4 @@ devop_tools:
       - mkdocs-material-extensions
       - mkdocs-material-pymdownx-extras
 {% endload %}
-{{ pamac_install('development_docs_aur', pkgs) }}
+{{ pamac_install('development-docs-aur', pkgs) }}
