@@ -7,7 +7,14 @@ include:
   - libvirt
 
 {% load_yaml as pkgs %}
-      - qemu-android-x86
+      - android-sdk
+      - android-sdk-platform-tools
+      - android-sdk-cmdline-tools-latest
+      - android-emulator
+      # platform versions
+      - android-sources-29
+      - android-platform-29
+      - android-google-apis-playstore-x86-64-system-image-29
 {% endload %}
 {{ pamac_install("emulator-android-aur", pkgs,
     require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
