@@ -4,10 +4,8 @@
 3d-printing:
   pkg.installed:
     - pkgs:
-      - cura
-      - cura-binary-data
-      - python-libcharon
-      - python-trimesh
+      - cura-bin
+      - cura-resources-materials
 
 audio-effects:
   pkg.installed:
@@ -153,6 +151,15 @@ privacy:
       - metadata-cleaner
 {% endload %}
 {{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
+
+# speech-synthesizer
+{% load_yaml as pkgs %}
+      - deepspeech-bin
+      - deepspeech-models
+      - rhvoice
+      - rhvoice-voice-evgeniy-eng
+{% endload %}
+{{ pamac_install("speech-synthesizer-aur", pkgs) }}
 
 # themes
 {% load_yaml as pkgs %}
