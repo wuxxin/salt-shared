@@ -14,11 +14,11 @@ development-languages:
     - require:
       - sls: desktop.manjaro.python
 
-development-fonts:
-  pkg.installed:
-    - pkgs:
-      # nerd-fonts-complete - Iconic font aggregator, collection, & patcher. 3,600+ icons, 50+ patched fonts
-      - nerd-fonts-complete
+# development-fonts:
+#   pkg.installed:
+#     - pkgs:
+#       # nerd-fonts-complete - Iconic font aggregator, collection, & patcher. 3,600+ icons, 50+ patched fonts
+#       - nerd-fonts-complete
 
 development-ide:
   pkg.installed:
@@ -35,6 +35,8 @@ development-ide:
       - vscodium-marketplace
       # imhex - A Hex Editor for Reverse Engineers
       - imhex
+      # ida-free - feature full dissassembler
+      - ida-free
 {% endload %}
 {{ pamac_install("development-ide-aur", pkgs) }}
 
@@ -60,6 +62,10 @@ development-tools:
       - pandoc
       - pandoc-crossref
 
+      ## database
+      # sqlitebrowser - GUI editor for SQLite databases
+      - sqlitebrowser
+
       ## updates
       # topgrade - Invoke the upgrade procedure of multiple package managers
       - topgrade
@@ -84,6 +90,8 @@ development-tools:
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       - yj
+      # browsh - a fully-modern text-based browser based on remote controlled firefox
+      - browsh-bin
 {% endload %}
 {{ pamac_install("development-tools-aur", pkgs) }}
 
@@ -109,6 +117,8 @@ devop-tools:
 
 {% load_yaml as pkgs %}
       ## devop
+      # mqttui - Subscribe to a MQTT Topic or publish  quickly from the terminal
+      - mqttui
       # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
       - dns-lexicon
       # butane - Human readable Butane Configs into machine readable Ignition Configs
@@ -119,6 +129,9 @@ devop-tools:
       - flent
       # vault - command line tool for Hashicorp Vault
       - vault-cli
+      # fakepkg - reassembles installed packages from its delivered files
+      - fakepkg
+      - fakeroot-tcp
 {% endload %}
 {{ pamac_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
