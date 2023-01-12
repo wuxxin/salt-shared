@@ -49,14 +49,21 @@ audio-workstation:
 browser:
   pkg.installed:
     - pkgs:
-      - firefox
+      # disable firefox because we use librewolf as replacement 
+      # - firefox
+      # chromium - open source version of google-chrome web browser
       - chromium
+      # qutebrowser - keyboard-driven, vim-like browser based on PyQt5
+      - qutebrowser
+      - python-adblock
+      - pdfjs
 {% load_yaml as pkgs %}
+      # librewolf - Community-maintained fork of Firefox, focused on privacy, security and freedom
       - librewolf-bin
-      - firefox-extension-keepassxc-browser
-      - chromium-keepassxc-browser
 {% endload %}
-{{ pamac_install("browser-aur", pkgs, require=["pkg: password", "test: trusted-repo-librewolf"]) }}
+{{ pamac_install("browser-aur", pkgs, require=[
+    "test: trusted-repo-librewolf", "pkg: browser", "pkg: password", "test: password-aur"
+  ]) }}
 
 chat:
   pkg.installed:
@@ -75,7 +82,10 @@ download:
 file-sync:
   pkg.installed:
     - pkgs:
+      # syncthing - Open Source Continuous Replication / Cluster Synchronization Thing
       - syncthing
+      # rclone - Sync files to and from Google Drive, S3, Swift, Cloudfiles, Dropbox and Google Cloud Storage
+      - rclone
 
 mail-calendar-contacts:
   pkg.installed:
@@ -119,7 +129,6 @@ password:
       - wl-clipboard
 {% load_yaml as pkgs %}
       - firefox-extension-keepassxc-browser
-      - chromium-extension-keepassxc-browser
       - chromium-keepassxc-browser
       - git-credential-keepassxc
 {% endload %}
@@ -134,6 +143,8 @@ picture:
       - qt5-imageformats
       # nautilus-image-converter - extension to rotate/resize image files
       - nautilus-image-converter
+      # imv - Image viewer for Wayland and X11
+      - imv
 
 pixel-graphic:
   pkg.installed:
@@ -152,10 +163,15 @@ privacy:
 {% endload %}
 {{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
-# speech-synthesizer
+# speech-to-text engine
 {% load_yaml as pkgs %}
       - deepspeech-bin
       - deepspeech-models
+{% endload %}
+{{ pamac_install("speech-to-text-aur", pkgs) }}
+
+# text-to-speech synthesizer
+{% load_yaml as pkgs %}
       - rhvoice
       - rhvoice-voice-evgeniy-eng
 {% endload %}
