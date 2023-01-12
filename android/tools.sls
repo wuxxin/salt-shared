@@ -17,6 +17,8 @@ android-tools:
       - scrcpy
       # heimdall - flash firmware (ROMs) onto Samsung Galaxy Devices
       - heimdall
+      # mitmproxy - SSL-capable man-in-the-middle HTTP proxy
+      - mitmproxy
 {% load_yaml as pkgs %}
       #  android-bash-completion - Bash completion for android, adb, emulator, fastboot, and repo
       - android-bash-completion Bash completion for android, adb, emulator, fastboot, and repo
@@ -26,6 +28,10 @@ android-tools:
       - sndcpy-bin
       # gplaycli - search, install, update Android applications from the Google Play Store
       - gplaycli
+      # android-apktool - tool for reengineering Android apk files
+      - android-apktool
+      # frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
+      - python-frida
       # apk-mitm - prepares Android APK files for HTTPS inspection
       - apk-mitm
       # adbfs-rootless-git - fuse filesystem over adb tool for android devices
@@ -46,26 +52,6 @@ android-tools:
     - pkgs:
       - adb
       - fastboot
-      - aapt
       - heimdall-flash
-      - heimdall-flash-frontend
-
-{% from 'python/lib.sls' import pip_install %}
-python-adb-req:
-  pkg.installed:
-    - pkgs:
-      - python3-pycryptodome
-      - python3-rsa
-      - python3-libusb1
-      - python3-progressbar
-      {# either python3-pycryptodome or python3-rsa #}
-{{ pip_install('adb', require='pkg: python-adb-req') }}
-
-python-gplaycli-req:
-  pkg.installed:
-    - pkgs:
-      - python3-pyaxmlparser
-      - python3-gpapi
-{{ pip_install('gplaycli', require='pkg: python-gplaycli-req') }}
 
 {% endif %}
