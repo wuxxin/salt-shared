@@ -61,11 +61,17 @@ python_devices_libraries:
   pkg.installed:
     - pkgs:
       - python-sounddevice
-      - python-nfc
 
 python_network_libraries:
   pkg.installed:
     - pkgs:
+      # requests - Python HTTP for Humans
       - python-requests
-      # - python-requests - Python HTTP for Humans
+      # websockets -  Python implementation of the WebSocket Protocol (RFC 6455)
       - python-websockets
+      # paho-mqtt - Python client library for MQTT v3.1
+      - python-paho-mqtt
+      # bleak - cross platform Bluetooth Low Energy Client for Python using asyncio
+      - python-bleak
+      # nfc - Python bindings for libnfc
+      - python-nfc
