@@ -5,14 +5,13 @@ include:
   - desktop.manjaro
   - desktop.manjaro.python
   - desktop.manjaro.emulator
+  - desktop.manjaro.iot
   - desktop.manjaro.security
 
-development-languages:
+language-go:
   pkg.installed:
     - pkgs:
       - go
-    - require:
-      - sls: desktop.manjaro.python
 
 # development-fonts:
 #   pkg.installed:
@@ -33,8 +32,6 @@ development-ide:
       - vscodium
       - vscodium-features
       - vscodium-marketplace
-      # imhex - A Hex Editor for Reverse Engineers
-      - imhex
       # ida-free - feature full dissassembler
       - ida-free
 {% endload %}
@@ -75,17 +72,21 @@ development-tools:
       - wezterm
       # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
       - kitty
-
-      ## filemanager
+      ### manager
       # nnn - The fastest terminal file manager ever written
       - nnn
+      ### viewer
+      # viu - Simple terminal image viewer
+      - viu
       # bat - Cat clone with syntax highlighting and git integration
       - bat
+      # moc - ncurses console audio player designed to be powerful and easy to use
+      - moc
       # mediainfo - Supplies technical and tag information about a video or audio
       - mediainfo
       # elinks - advanced and well-established feature-rich text mode web browser
       - elinks
-
+      
 {% load_yaml as pkgs %}
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
@@ -106,10 +107,8 @@ devop-tools:
       - vault
       # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
       - step-cli
-      # fping - Utility to ping multiple hosts at once
-      - fping
-      # nmap - Utility for network discovery and security auditing
-      - nmap
+      # macchanger - small utility to change your NIC's MAC address
+      - macchanger
 
 
 {{ pamac_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", 
@@ -121,6 +120,8 @@ devop-tools:
       - mqttui
       # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
       - dns-lexicon
+      # q-dns - tiny command line DNS client with support for UDP, DoT, DoH, DoQ and ODoH
+      - q-dns-git
       # butane - Human readable Butane Configs into machine readable Ignition Configs
       - butane
       # pixiecore - An all-in-one tool for easy netbooting (ftfp,dhcp-netboot,http)
