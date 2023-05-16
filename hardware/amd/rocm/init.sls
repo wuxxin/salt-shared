@@ -1,20 +1,23 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
-
 include:
-  - manjaro.aur
-  - manjaro.arch4edu
   - hardware.amd.radeon
+  - python.dev
 
-{{ pamac_install('rocm-sdk', [
-  'rocminfo',
-  'rocm-hip-sdk',
-  'rocm-opencl-sdk',
-  'miopen-hip',
-  'hip-runtime-amd',
-  ]) }}
+rocm-sdk:
+  pkg.installed:
+    - pkgs:
+      - rocm-hip-sdk
+      - rocm-opencl-sdk
+      - roctracer
+      - hipmagma
+      - miopen-hip
+      - rocminfo
+    - require:
+      - sls: hardware.amd.radeon
+      - sls: python.dev
 
 hardware-amd-rocm:
   test:
     - nop
     - require:
-      - test: rocm-sdk
+      - pkg: rocm-sdk
+

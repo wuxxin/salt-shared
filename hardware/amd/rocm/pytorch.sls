@@ -2,27 +2,20 @@
 
 include:
   - hardware.amd.rocm
-  - desktop.manjaro.python.development
-  - desktop.manjaro.python.hardware_optimized
-
-pytorch_req:
-  test.nop:
-    - require:
-      - sls: hardware.amd.rocm
-      - sls: desktop.manjaro.python.development
-      - sls: desktop.manjaro.python.hardware_optimized
 
 # pytorch - Tensors and Dynamic neural networks in Python with strong GPU acceleration
-{{ pamac_install('python-pytorch-rocm', ['python-pytorch-opt-rocm', ],
-    require='test: pytorch_req') }}
-
+pytorch:
+  pkg.installed:
+    - pkgs:
+      - python-pytorch-opt-rocm
+    - require:
+      - sls: hardware.amd.rocm
+      
 # torchvision - Datasets, transforms, and models specific to computer vision
-{{ pamac_install('python-torchvision-rocm', ['python-torchvision-rocm', ],
-    require='test: python-pytorch-rocm') }}
+{{ pamac_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') }}
 
 # torchaudio - prerequisites
-{{ pamac_install('python-kaldi-io', ['python-kaldi-io',],
-    require='test: pytorch_req') }}
+{{ pamac_install('python-kaldi-io', ['python-kaldi-io',], require='pkg: pytorch') }}
 
 {#
 # torchaudio - Data manipulation and transformation for audio signal processing
