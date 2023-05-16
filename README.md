@@ -3,27 +3,32 @@
 A collection of saltstack states.
 
 + Target Platforms:
-    + **Ubuntu Focal 20.04 LTS**
-    + **Manjaro Stable**
+    + **Arch Linux**
+    + **Manjaro Linux**
+    + some states also support **Ubuntu** and **Debian** Linux
 
 + To bootstrap a machine from scratch (including a custom storage setup), see:
     + [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
 ### Features
 
-+ Machine / Hardware / Distro
++ Machine / Hardware Support
     + [node](node): basic machine setup (hostname, locale, network, storage)
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
         + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and hardware accelerated pytorch and tensorflow
     + [virtual](virtual): guest additions for running under qemu/libvirt, virtualbox, vmware
-    + [ubuntu](ubuntu): ubuntu specifics
-    + [manjaro](manjaro): manjaro specifics
 
-+ [Desktop](desktop)
-    + [ubuntu](desktop/ubuntu): Ubuntu Desktop with Applications
++ Distribution
+    + [arch](arch): arch specifics
+    + [manjaro](manjaro): manjaro specifics
+    + [aur](aur): AUR - *A*rch/manjaro *U*ser *R*epository specifics
+
++ [Desktop](desktop) Desktop (arch/manjaro/ubuntu) with Applications
+    + [development](desktop/development) Desktop (arch/manjaro/ubuntu) with Development Tools
+    + [python](desktop/python): arch/manjaro JupyterLab Scientific+ Machinelearning Python Stack
+    + [arch](desktop/arch): Archlinux Desktop with Applications
     + [manjaro](desktop/manjaro): Manjaro Desktop with Applications
-        + [python](desktop/manjaro/python): JupyterLab Scientific+ Machinelearning Python Stack
 
 + Deployment / Admin
     + [gitops](gitops): deploy and update machines from git, with webhook support
@@ -52,7 +57,7 @@ A collection of saltstack states.
     + [systemd nspawn](systemd/nspawn): leightweight machine container manager
 
 + Container
-    + [containers](containers): OCI container runtime using podman, podman-compose, x11docker
+    + [containers](containers): OCI container runtime glue using podman, podman-compose, x11docker
     + [containerd](containerd): Kubernetes OCI container runtime
     + [k3s](k3s): selfcontained, small footprint Kubernetes Distribution
 
@@ -65,23 +70,19 @@ A collection of saltstack states.
     + [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
     + [getmail](getmail): fetchmail alternative
 
-+ Android
++ Mobile, Embedded \& IOT
     + [android](android): android tools (adb,fastboot,heimdall,scrcopy)
-    + [android/builder](android/builder) Lineage/MicroG Android OS Builder container for building android
-    + [android/redroid](android/redroid) Android Emulator (same kernel, GPU accel, docker container)
-    + [android/dockdroid](android/dockdroid) Android Emulator (qemu based, but x86-android, GPU accel, docker container)
-    + [android/emulator](android/emulator) Android Emulator (qemu based, emulator) container for desktop and headless
-
-+ IOT \& Embedded
     + [Airrohr](embedded/airrohr) Airquality Sensor, setup and integration into homeassistant
     + [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
     + [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
 
-+ [Applications](app/) using [containers](containers)
-    + [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
-      with mosquitto,zigbee2mqtt,homeassistant,appdaemon and rhasspy
-
 + unfinished, halfbroken, quirky or very minimum skeleton packages
+    + [android/builder](android/builder) Lineage/MicroG Android OS Builder container for building android
+    + [android/redroid](android/redroid) Android Emulator (same kernel, GPU accel, docker container)
+    + [android/dockdroid](android/dockdroid) Android Emulator (qemu based, but x86-android, GPU accel, docker container)
+    + [android/emulator](android/emulator) Android Emulator (qemu based, emulator) container for desktop and headless
+    + [Applications](app/) using [containers](containers)
+        + [homeassistant](app/homeassistant): Home-Assistant Automation via MQTT
     + [android/android-x86](android/android-x86) Android Emulator (qemu based, but x86-android)
     + [android/waydroid](android/waydroid) Android Emulator (same kernel, GPU Accel, LXC container)
     + [OctoPI](embedded/octopi) Builder for Raspberry PI - OctoPrint (a 3D printer web interface) Distribution
