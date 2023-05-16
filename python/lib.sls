@@ -1,5 +1,7 @@
 {% macro pip_install(package_or_package_list) %}
-  {% from "python/defaults.jinja" import settings as python_settings with context %}
+  {% import_yaml "python/defaults.yml" as defaults %}
+  {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
+    default= 'default', merge= salt['pillar.get']('python', {})) %}
 "python{{ '3' if grains['os'] == 'Ubuntu' }}-{{ package_or_package_list }}":
   pip.installed:
   {%- if package_or_package_list is iterable and package_or_package_list is not string %}
@@ -43,6 +45,9 @@
 
 
 {% macro pipx_install(package, user) %} {# pipx_suffix pipx_opts, pip_args #}
+  {% import_yaml "python/defaults.yml" as defaults %}
+  {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
+    default= 'default', merge= salt['pillar.get']('python', {})) %}
   {% from "python/defaults.jinja" import settings as python_settings with context %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
       python_settings['pipx']['update']['automatic'] %}
