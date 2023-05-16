@@ -21,11 +21,17 @@ zfs-utils:
 
 {% for pool in settings.pools %}
 
-zpool-scrub@{{ pool }}.timer:
+zpool-scrub-initial@{{ pool }}.timer:
   cmd.run:
-    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub@{{ pool }}.timer
+    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub-initial@{{ pool }}.timer
     - require:
-      - file: zpool-scrub@.timer
+      - file: zpool-scrub-initial@.timer
+
+zpool-scrub-resident@{{ pool }}.timer:
+  cmd.run:
+    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub-resident@{{ pool }}.timer
+    - require:
+      - file: zpool-scrub-resident@.timer
 
 zpool-trim@{{ pool }}.timer:
   cmd.run:

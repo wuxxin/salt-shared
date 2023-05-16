@@ -1,12 +1,14 @@
 {% load_yaml as defaults %}
-# enable cyclic rotating filesystem snapshots
-autosnapshot: false
-
 # enable cyclic data scrubbing of filesystem
+# if enabled will execute 4 times scrubbing every 2nd week, then every 6 months
 autoscrub: false
 
 # enable cyclic "automatic" manual start of trimming the filesystem
+# if enabled will execute a manual trimming start once per month
 autotrim: false
+
+# enable cyclic rotating filesystem snapshots
+autosnapshot: false
 
 snapshot:
   # any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"

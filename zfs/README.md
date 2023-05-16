@@ -1,10 +1,12 @@
 # zfs state
 
+see `defaults.jinja` for settings
+
 ## todo
 
 + implement non linear scrub
-  + for 6 weeks every 14days on sunday
-  + then every 6 months
+  + for 8 weeks every 14days on sunday
+  + then every 6 months, but the first time after 4 months after the last 14days scan
   + default: Scrub the second Sunday of every month.
       +  24 0 8-14 * * root [ $(date +\%w) -eq 0 ] && [ -x /usr/lib/zfs-linux/scrub ] && /usr/lib/zfs-linux/scrub
 
