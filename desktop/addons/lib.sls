@@ -2,7 +2,7 @@
 {% macro addons_gnomeshell(pkglist) %}
 {% endmacro %}
 
-{% macro addons_firefox(pkglist) %}
+{% macro addons_librewolf(pkglist) %}
 {% endmacro %}
 
 {% macro addons_chromium(pkglist) %}
