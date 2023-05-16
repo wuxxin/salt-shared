@@ -1,0 +1,10 @@
+[Unit]
+Description=Force podman system prune every day and on boot
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1d
+Unit=docker-system-prune.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Force a podman system prune
+
+[Service]
+Type=oneshot
+ExecStart=podman system prune -f
