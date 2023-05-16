@@ -1,5 +1,6 @@
 include:
-  - manjaro.aur
+  - aur
+  - manjaro.arch4edu
 
 manjaro-base:
   test:
