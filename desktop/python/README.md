@@ -52,7 +52,9 @@ cd ~/.cache/matplotlib; rm fontlist*.json
 ### additional untried and unevaluated packages found
 
 #### machine learning
-+ gradio
++ streamlit.io
+  + Streamlit turns data scripts into shareable web apps in minutes
++ gradio (older, people migrating to streamlit)
   + Create UIs for your machine learning model in Python in 3 minutes
 + jina
   + Build cross-modal and multimodal applications on the cloud

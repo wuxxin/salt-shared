@@ -3,16 +3,21 @@
 {% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
-  - desktop.manjaro.python.development
-  - desktop.manjaro.python.hardware_optimized
+  - desktop.python.development
   - nodejs
 
 scientific_base:
   test.nop:
     - require:
-      - sls: desktop.manjaro.python.development
-      - sls: desktop.manjaro.python.hardware_optimized
+      - sls: desktop.python.development
       - sls: nodejs
+
+# hardware optimized python packages
+# numpy - scientific computing build with CPU - multicore + CPU-extensions speedup
+{% from 'manjaro/lib.sls' import pamac_install with context %}
+{{ pamac_install('scientific_optimized', [
+    'python-numpy-openblas',
+    ]) }}
 
 # gui components
 scientific_gui:
@@ -42,16 +47,17 @@ scientific_python:
       # matplotlib - plotting library, making publication quality plots
       - python-matplotlib
       - python-matplotlib-inline
-      # pyside2 - use of Qt5 APIs in Python applications
-      # - pyside2
-      # pyside6 -	Enables the use of Qt6 APIs in Python applications
-      - pyside6
+      # pillow - Python Imaging Library (PIL) fork
+      - python-pillow
+      # python-opencv - Open Source Computer Vision Library
+      - python-opencv      
       # Statistical data visualization
       - python-seaborn
-      # python-opencv - Open Source Computer Vision Library
-      - python-opencv
+      # pyside6 - Enables the use of Qt6 APIs in Python applications
+      - pyside6
     - require:
       - test: scientific_base
+      - test: scientific_optimized
       - pkg: scientific_gui
       - test: scientific_gui_aur
 

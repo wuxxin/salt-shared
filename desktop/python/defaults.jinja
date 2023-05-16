@@ -2,7 +2,8 @@
 service:
   notebook_dir: ~/lab
   port: 8888
-  token: Insert-openssl_rand_-hex_24
+  # create token with: openssl_rand_-hex_24
+  token:
   default_chromium: true
   default_packages: true
   default_apps: true
@@ -51,6 +52,8 @@ default:
       - notebook
       # nbdime - Diff and merge of Jupyter Notebooks
       - nbdime
+      # dtale - Visualizer for pandas data structures
+      - dtale
 
     packages:
       ## jupyterlab: kernels, extensions, widgets, themes

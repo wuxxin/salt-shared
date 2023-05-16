@@ -1,17 +1,17 @@
 {% from 'desktop/user/lib.sls' import user with context %}
-{% from "desktop/manjaro/python/defaults.jinja" import settings with context %}
-{% from 'desktop/manjaro/python/lib.sls' import jupyter_service, jupyter_core, create_python_kernel, register_python_kernel %}
+{% from "desktop/python/defaults.jinja" import settings with context %}
+{% from 'desktop/python/lib.sls' import jupyter_service, jupyter_core, create_python_kernel, register_python_kernel %}
 
 include:
-  - desktop.manjaro.python.scientific
-  - desktop.manjaro.python.machinelearning
+  - desktop.python.scientific
+  - desktop.python.machinelearning
 
 jupyter_base:
   test:
     - nop
     - require:
-      - sls: desktop.manjaro.python.scientific
-      - sls: desktop.manjaro.python.machinelearning
+      - sls: desktop.python.scientific
+      - sls: desktop.python.machinelearning
 
 {% set chromium_args= settings.default.chromium.args+ settings.service.chromium.args|d([])
       if settings.service.default_chromium|d(true)

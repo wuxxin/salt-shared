@@ -1,4 +1,6 @@
 {% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'python/lib.sls' import pipx_install %}
 
 security-tools:
   pkg.installed:
@@ -35,12 +37,25 @@ security-tools:
       # mitmproxy - SSL-capable man-in-the-middle HTTP proxy
       - mitmproxy
 
+      ### HexEdit
+      # bless - High-quality, full-featured hex editor
+      bless
+
 {% load_yaml as pkgs %}
-      ## MITM
+      ### MITM
       # frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
       - python-frida
-      ## NFC 
+      ### NFC
       # mfoc - MiFare Classic Universal toolKit
       - mfoc
+      ### HexEdit
+      # imhex - Hex Editor for Reverse Engineers
+      imhex
 {% endload %}
 {{ pamac_install("security-tools-aur", pkgs) }}
+
+
+# security-tools-pipx
+
+# pywhat - Identify anything. identify emails, IP addresses, and more. Feed it a .pcap file or some text
+{{ pipx_install('pywhat', user=user) }}

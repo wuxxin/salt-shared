@@ -3,7 +3,7 @@
 
 include:
   - desktop.manjaro
-  - desktop.manjaro.python
+  - desktop.python
   - desktop.manjaro.emulator
   - desktop.manjaro.iot
   - desktop.manjaro.security
@@ -12,6 +12,11 @@ language-go:
   pkg.installed:
     - pkgs:
       - go
+
+language-rust:
+  pkg.installed:
+    - pkgs:
+      - rust
 
 # development-fonts:
 #   pkg.installed:
@@ -120,6 +125,8 @@ devop-tools:
       - mqttui
       # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
       - dns-lexicon
+      # dnscontrol - Synchronize your DNS to multiple providers from a simple DSL
+      - dnscontrol
       # q-dns - tiny command line DNS client with support for UDP, DoT, DoH, DoQ and ODoH
       - q-dns-git
       # butane - Human readable Butane Configs into machine readable Ignition Configs
@@ -136,26 +143,3 @@ devop-tools:
 {% endload %}
 {{ pamac_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
-
-{% load_yaml as pkgs %}
-      ## mkdocs - Project documentation with Markdown
-      - mkdocs
-      ## plugins
-      # lunr - to prebuild search index
-      - python-lunr
-      - mkdocs-git-revision-date-localized-plugin
-      - mkdocs-with-pdf
-      - mkdocs-ezlinks-plugin
-      - mkdocs-rss-plugin
-      - mkdocs-mermaid2-plugin
-      - mkdocs-redirects
-      ## themes
-      - mkdocs-cinder
-      - mkdocs-bootswatch
-      # FIXME: python-hatch-nodejs-version is currently not in manjaro community
-      - python-hatch-nodejs-version
-      - mkdocs-material
-      - mkdocs-material-extensions
-      - mkdocs-material-pymdownx-extras
-{% endload %}
-{{ pamac_install('development-docs-aur', pkgs) }}

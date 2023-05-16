@@ -1,5 +1,6 @@
 {% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'python/lib.sls' import pipx_install, pipx_inject %}
 
 3d-printing:
   pkg.installed:
@@ -23,19 +24,6 @@ audio-editor:
   pkg.installed:
     - pkgs:
       - audacity
-
-{% load_yaml as pkgs %}
-      - vcvrack
-      - vcvrack-goodsheperd
-      - vcvrack-freesurface
-      - vcvrack-cvly
-      - vcvrack-computerscare
-      - vcvrack-collection-one
-      - vcvrack-alikins
-      - vcvrack-ahornberg
-      - vcvrack-aaronstatic
-{% endload %}
-{{ pamac_install("audio-synthesizer-aur", pkgs) }}
 
 audio-workstation:
   pkg.installed:
@@ -61,9 +49,8 @@ browser:
       # librewolf - Community-maintained fork of Firefox, focused on privacy, security and freedom
       - librewolf-bin
 {% endload %}
-{{ pamac_install("browser-aur", pkgs, require=[
-    "test: trusted-repo-librewolf", "pkg: browser", "pkg: password", "test: password-aur"
-  ]) }}
+{{ pamac_install("browser-aur", pkgs,
+    require=["test: trusted-repo-librewolf", "pkg: browser", "pkg: password", "test: password-aur"]) }}
 
 chat:
   pkg.installed:
@@ -87,6 +74,13 @@ file-sync:
       # rclone - Sync files to and from Google Drive, S3, Swift, Cloudfiles, Dropbox and Google Cloud Storage
       - rclone
 
+file-rename:
+  pkg.installed:
+    - pkgs:
+      # pipe-rename -  list of files as input, opens $EDITOR, then renames those files accordingly
+      # eg. find . -regex ".*[][?():'\"\!,&|].*" -print0 | xargs -0 renamer
+      - pipe-rename
+
 mail-calendar-contacts:
   pkg.installed:
     - pkgs:
@@ -109,12 +103,23 @@ media-player:
 music-player:
   pkg.installed:
     - pkgs:
+      # lollypop - Music player for GNOME
       - lollypop
+      # strawberry - music player aimed at audio enthusiasts and music collectors
+      - strawberry
 
 music-tagger:
   pkg.installed:
     - pkgs:
+      # picard - Official MusicBrainz tagger
       - picard
+      # optional dependencies for picard
+      - chromaprint
+      # beets - Flexible music library manager and tagger
+      - beets
+      # optional dependencies for beets
+      - python-pylast
+      - python-pyacoustid
 
 paper:
   pkg.installed:
@@ -145,6 +150,11 @@ picture:
       - nautilus-image-converter
       # imv - Image viewer for Wayland and X11
       - imv
+
+# ### picture-pipx
+# lama-cleaner - Image inpainting tool powered by SOTA AI Model
+#    Remove any unwanted object, defect, people or erase and replace any thing on your pictures.
+{{ pipx_install('lama-cleaner', user=user, pipx_opts='--system-site-packages') }}
 
 pixel-graphic:
   pkg.installed:

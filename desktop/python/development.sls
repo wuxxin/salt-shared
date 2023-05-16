@@ -1,19 +1,9 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
 {% from 'python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
+{% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
   - python.dev
-
-python_tools_env:
-  pkg.installed:
-    - pkgs:
-      # pipenv - Python Dev Workflow for Humans
-      - python-pipenv
-      # poetry - Python packaging and dependency management made easy
-      - python-poetry
-      # pyenv - Easily switch between multiple versions of Python
-      - pyenv
 
 python_tools_devel:
   pkg.installed:
@@ -60,7 +50,14 @@ python_tools_lsp:
 python_devices_libraries:
   pkg.installed:
     - pkgs:
+      # sounddevice - Record and play back sound
       - python-sounddevice
+      # pyserial - Multiplatform Serial Port Module for Python
+      - python-pyserial
+      # nfc - Python bindings for libnfc
+      - python-nfc
+      # bleak - cross platform Bluetooth Low Energy Client for Python using asyncio
+      - python-bleak
 
 python_network_libraries:
   pkg.installed:
@@ -71,7 +68,3 @@ python_network_libraries:
       - python-websockets
       # paho-mqtt - Python client library for MQTT v3.1
       - python-paho-mqtt
-      # bleak - cross platform Bluetooth Low Energy Client for Python using asyncio
-      - python-bleak
-      # nfc - Python bindings for libnfc
-      - python-nfc

@@ -1,30 +1,28 @@
 {% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
-  - android.tools
-  - containers
   - qemu
   - libvirt
-
-{% load_yaml as pkgs %}
-      - android-sdk
-      - android-sdk-platform-tools
-      - android-sdk-cmdline-tools-latest
-      - android-emulator
-      # platform versions
-      - android-sources-29
-      - android-platform-29
-      - android-google-apis-playstore-x86-64-system-image-29
-{% endload %}
-{{ pamac_install("emulator-android-aur", pkgs,
-    require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
+  - android.tools
+  - containers
 
 emulator-qemu:
   pkg.installed:
     - pkgs:
+      - qemu-desktop
+      # add arm, mips and xtensa (esp8266, esp32) emulation
+      - qemu-system-arm
+      - qemu-system-mips
+      - qemu-system-xtensa
       - gnome-boxes
     - require:
       - sls: qemu
+
+{% load_yaml as pkgs %}
+      - virtio-win
+      # virtio-win - virtio drivers for Windows 7 and newer guests
+{% endload %}
+{{ pamac_install("emulator-qemu-aur", pkgs, require= ["pkg: emulator-qemu" ] ) }}
 
 emulator-libvirt:
   pkg.installed:
@@ -34,6 +32,31 @@ emulator-libvirt:
       - spice-gtk
     - require:
       - sls: libvirt
+
+cross-compiler-arm:
+  pkg.installed:
+    - pkgs:
+      - arm-none-eabi-binutils
+      - arm-none-eabi-gcc
+      - arm-none-eabi-newlib 
+
+{% load_yaml as pkgs %}
+      - android-sdk
+      - android-sdk-platform-tools
+      - android-sdk-build-tools
+      - android-sdk-cmdline-tools-latest
+      - android-emulator
+      - android-sources-29
+      - android-platform-29
+      - android-google-apis-playstore-x86-64-system-image-29
+{% endload %}
+{{ pamac_install("emulator-android-aur", pkgs,
+    require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
+
+chown_to_main_user:
+  # FIXME chwon /opt/android-sdk to mainuser:mainuser
+  # FIXME as mainuser: symlink lib and lib64 to /opt/android-sdk/emulator/qemu/linux-x86_64
+  for i in lib lib64; do ln -s ../../$i /opt/android-sdk/emulator/qemu/linux-x86_64/$i; done
 
 emulator-arcade:
   pkg.installed:

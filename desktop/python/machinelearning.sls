@@ -2,7 +2,7 @@
 {% from 'manjaro/lib.sls' import pamac_install with context %}
 
 include:
-  - desktop.manjaro.python.scientific
+  - desktop.python.scientific
   - hardware.amd.rocm.pytorch
   - hardware.amd.rocm.tensorflow
   - hardware.amd.rocm.jax
@@ -11,6 +11,14 @@ machinelearning_base:
   test.nop:
     - require:
       - sls: desktop.manjaro.python.scientific
+
+ml_tools:
+  pkg.installed:
+    - pkgs:
+      # tensorboard - visualization and tooling needed for machine learning experimentation
+      - tensorboard
+    - require:
+      - test: machinelearning_base
 
 ml_scikit:
   pkg.installed:
@@ -37,13 +45,6 @@ ml_jax:
       - sls: hardware.amd.rocm.jax
       - test: machinelearning_base
 
-ml_tools:
-  pkg.installed:
-    - pkgs:
-      # tensorboard - visualization and tooling needed for machine learning experimentation
-      - tensorboard
-    - require:
-      - test: machinelearning_base
 
 {% load_yaml as pkgs %}
       # transformers - pretrained models to perform text, vision, and audio tasks for Jax, pytorch and tensorflow
@@ -56,6 +57,12 @@ ml_tools:
       - python-optuna
 {% endload %}
 {{ pamac_install('ml_tools_aur', pkgs, require='pkg: ml_tools') }}
+
+{% load_yaml as pkgs %}
+      # Surprise - A Python scikit for building and analyzing recommender systems
+      - python-scikit-surprise
+{% endload %}
+{{ pamac_install('ml_scikit_extra_aur', pkgs, require='pkg: ml_scikit') }}
 
 {% load_yaml as pkgs %}
       # torchtext - data processing utilities and popular datasets for natural language
@@ -71,10 +78,5 @@ ml_tools:
       # albumentations - image augmentation to create new training samples from the existing data
       - python-albumentations
 {% endload %}
-{{ pamac_install('ml_pytorch_extra_aur', pkgs, require='test: ml_pytorch') }}
+{{ pamac_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
 
-{% load_yaml as pkgs %}
-      # Surprise - A Python scikit for building and analyzing recommender systems
-      - python-scikit-surprise
-{% endload %}
-{{ pamac_install('ml_scikit_extra_aur', pkgs, require='pkg: ml_scikit') }}
