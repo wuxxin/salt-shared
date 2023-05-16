@@ -15,13 +15,7 @@ base:
   # any machine with a kernel (no container virtualization)
   '* and not ( P@virtual:lxc or P@virtual:systemd-nspawn )':
     - match: compound
-    - kernel.acpi
     - kernel.entropy
-
-  # ubuntu specific
-  'os:Ubuntu':
-    - match: grain
-    - ubuntu
 
   # any
   '*':

@@ -20,14 +20,14 @@ do_pulumi_setup="false"
 do_remote_setup="false"
 do_only_remote_setup="false"
 
-
-usage(){
-    cat << EOF
+usage() {
+    cat <<EOF
 Usage: $0 <basepath> <reponame> <githost> <gituser> <creator-gpgid> <hostname>
     [--firstuser <username:default=$firstuser>]
     [--git-port <gitsshport:default=$gitserver_sshport>]
     [--authorized-keys <authorized_keys:default="$authorized_keys">]
-    [--overwrite] [--git-crypt] [--machine] [--saltstack] [--no-remote|--only-remote]
+    [--overwrite] [--git-crypt] [--machine] [--saltstack] 
+    [--no-remote|--only-remote]
 
 --overwrite     : also applies changes if a git repository already exists
 --gitcrypt      : add git-crypt repository setup
@@ -52,15 +52,16 @@ creating and configuring the remote git repository using API Calls
 to the gituser API token, eg. Authorization="token hexdigits".
 
 + Example
-```sh
-Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" \
-    $0 ~/work repository.name git.server gituser gpguserid full.machine.hostname \
-        --git-port 10023 --authorized_keys ~/work/id_rsa
-```
+$()$(
+        sh
+        Authorization="token deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" \
+            $0 ~/work repository.name git.server gituser gpguserid full.machine.hostname \
+            --git-port 10023 --authorized_keys ~/work/id_rsa
+    )$()
 EOF
 }
 
-for i in git git-crypt gpg ssh-keyscan ssh-keygen http; do if ! which $i > /dev/null; then
+for i in git git-crypt gpg ssh-keyscan ssh-keygen http; do if ! which $i >/dev/null; then
     echo "error, missing command $i; try 'apt-get install git git-crypt gnupg openssh-client httpie'"
     exit 1
 fi; done
@@ -72,24 +73,23 @@ git init || echo "could not init git, already a git repository ?"
 
 # create first config files
 mkdir -p config run run/log
-printf "# ignores\n/run\n" > .gitignore
+printf "# ignores\n/run\n" >.gitignore
 printf "hostname=%s\nfirstuser=%s\ngitops_user=%s\ngitops_target=%s\ngitops_source=%s\ngitops_branch=%s\n" \
     "$hostname" "$firstuser" "$firstuser" "/home/$firstuser" \
     "ssh://git@$gitserver:$gitserver_sshport/$gituser/$gitreponame.git" \
     "master" \
-    > config/node.env
+    >config/node.env
 # copy current user ssh public key as authorized_keys
 cat ~/.ssh/id_rsa.pub ~/.ssh/id_ed25519.pub \
-    > config/authorized_keys
+    >config/authorized_keys
 # commit to repo
 git add .
 git commit -v -m "initial config"
 
-
 # add git-crypt config
 if test "$do_gitcrypt_setup" = "true"; then
     git-crypt init
-    cat > .gitattributes <<EOF
+    cat >.gitattributes <<EOF
 *secret* filter=git-crypt diff=git-crypt
 *secrets* filter=git-crypt diff=git-crypt
 **/secret/** filter=git-crypt diff=git-crypt
@@ -111,19 +111,17 @@ EOF
     # create machine gpg id files
     gpgutils.py gen_keypair gitops@node "$gitreponame" config/gitops@node-secret-key.gpg config/gitops@node-public-key.gpg
     # add machine gpg id files to git-crypt
-    gpg  --import config/gitops@node-public-key.gpg
+    gpg --import config/gitops@node-public-key.gpg
     git-crypt git-crypt add-gpg-user --trusted "$gitreponame"
     git add .
     git commit -v -m "add git-crypt config"
 fi
 
-
 # add known_hosts and machine ssh id
-ssh-keyscan -H -p $gitserver_sshport $gitserver > config/gitops.known_hosts
+ssh-keyscan -H -p $gitserver_sshport $gitserver >config/gitops.known_hosts
 ssh-keygen -q -t ed25519 -N "" -C "$gitreponame" -f config/gitops.id_ed25519
 git add .
 git commit -v -m "add gitops ssh known_hosts, ssh deployment key"
-
 
 # add saltstack skeleton
 if test "$do_saltstack_setup" = "true"; then
@@ -131,12 +129,12 @@ if test "$do_saltstack_setup" = "true"; then
     pushd salt
     git submodule add https://github.com/wuxxin/salt-shared.git
     popd
-    printf "base:\n  '*':\n    - main\n" > config/top.sls
+    printf "base:\n  '*':\n    - main\n" >config/top.sls
     cp salt/salt-shared/gitops/template/node.template.sls config/node.sls
     cp salt/salt-shared/gitops/template/pillar.template.sls config/main.sls
     cp salt/salt-shared/gitops/template/state.template.sls salt/local/top.sls
     touch salt/local/main.sls
-    cat > bootstrap.sh <<"EOF"
+    cat >bootstrap.sh <<"EOF"
 #!/usr/bin/env bash
 set -eo pipefail
 self_path=$(dirname "$(readlink -e "$0")")
@@ -155,20 +153,17 @@ EOF
     git commit -v -m "add saltstack skeleton"
 fi
 
-
 # add machine-bootstrap skeleton
 fixme add machine bootstrap and make symlink on saltstack
-
 
 # add pulumi skeleton
 
 # add origin to upstream
 git remote add origin ssh://git@${gitserver}:${gitserver_sshport}/${gituser}/${gitreponame}.git
 
-
 # remote configuration, currently using the gogs api
 # create origin repo on server
-http -j  https://${gitserver}/api/v1/admin/users/${gituser}/repos \
+http -j https://${gitserver}/api/v1/admin/users/${gituser}/repos \
     name=$gitreponame \
     description="my repo" \
     private:=true
