@@ -31,9 +31,9 @@ network-tools:
   pkg.installed:
     - pkgs:
       - iptables-nft
+      - dnsmasq
+      - openbsd-netcat
       - bridge-utils
       - ipset
       - netctl
       - vde2
-      - dnsmasq
-      - openbsd-netcat
