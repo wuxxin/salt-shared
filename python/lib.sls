@@ -48,9 +48,7 @@
   {% import_yaml "python/defaults.yml" as defaults %}
   {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
     default= 'default', merge= salt['pillar.get']('python', {})) %}
-  {% from "python/defaults.jinja" import settings as python_settings with context %}
-  {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or
-      python_settings['pipx']['update']['automatic'] %}
+  {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or settings['pipx']['update']['automatic'] %}
   {% set pipx_opts= '' if 'pipx_opts' not in kwargs else kwargs['pipx_opts'] %}
   {% set pip_args= '' if 'pip_args' not in kwargs else '--pip-args=' ~ kwargs['pip_args'] %}
   {% set suffix= '' %}
