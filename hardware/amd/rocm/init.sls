@@ -8,7 +8,7 @@ rocm-sdk:
       - rocm-hip-sdk
       - rocm-opencl-sdk
       - roctracer
-      - hipmagma
+      # - hipmagma
       - miopen-hip
       - rocminfo
     - require:

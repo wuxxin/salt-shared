@@ -1,4 +1,4 @@
-{% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install_dir with context %}
+{% from 'aur/lib.sls' import aur_install, pamac_patch_install_dir with context %}
 
 include:
   - hardware.amd.rocm
@@ -12,10 +12,10 @@ pytorch:
       - sls: hardware.amd.rocm
       
 # torchvision - Datasets, transforms, and models specific to computer vision
-{{ pamac_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') }}
+{{ aur_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') }}
 
 # torchaudio - prerequisites
-{{ pamac_install('python-kaldi-io', ['python-kaldi-io',], require='pkg: pytorch') }}
+{{ aur_install('python-kaldi-io', ['python-kaldi-io',], require='pkg: pytorch') }}
 
 {#
 # torchaudio - Data manipulation and transformation for audio signal processing
