@@ -11,15 +11,15 @@ A collection of saltstack states.
 
 ### Features
 
-+ Machine / Hardware / Distro Support
++ Machine / Hardware Support
     + [node](node): basic machine setup (hostname, locale, network, storage)
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
         + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and hardware accelerated pytorch and tensorflow
     + [virtual](virtual): guest additions for running under qemu/libvirt, virtualbox, vmware
 
-+ Desktop (arch/manjaro) with Applications
-    + [manjaro](desktop/manjaro): Manjaro Desktop with Applications
++ Desktop with Applications
+    + [manjaro](desktop/manjaro): Manjaro Desktop with curated list of Applications
     + [development](desktop/manjaro/development.sls) Manjaro Desktop with Development Tools
         + [python](desktop/python): arch/manjaro JupyterLab Scientific+ Machinelearning Python Stack
 
