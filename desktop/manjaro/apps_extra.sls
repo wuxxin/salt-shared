@@ -1,6 +1,18 @@
-{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'aur/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'python/lib.sls' import pipx_install, pipx_inject %}
+
+3d-printing:
+  pkg.installed:
+    - pkgs:
+      - cura-bin
+      - cura-resources-materials
+
+media-player:
+  pkg.installed:
+    - pkgs:
+      # kodi -  software media player and entertainment hub for digital media
+      - kodi
 
 {% load_yaml as pkgs %}
       - vcvrack
@@ -13,5 +25,5 @@
       - vcvrack-ahornberg
       - vcvrack-aaronstatic
 {% endload %}
-{{ pamac_install("audio-synthesizer-aur", pkgs) }}
+{{ aur_install("audio-synthesizer-aur", pkgs) }}
 

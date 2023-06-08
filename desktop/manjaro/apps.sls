@@ -1,12 +1,6 @@
-{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'aur/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'python/lib.sls' import pipx_install, pipx_inject %}
-
-3d-printing:
-  pkg.installed:
-    - pkgs:
-      - cura-bin
-      - cura-resources-materials
 
 audio-effects:
   pkg.installed:
@@ -31,7 +25,7 @@ audio-workstation:
       - ardour
       - new-session-manager
 
-{{ pamac_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
+{{ pacman_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
     "c7ddd1013c324391d8a5d4151a29df0f4b2c7553e68d42dedda49748a57b293c", user=user) }}
 
 browser:
@@ -49,7 +43,7 @@ browser:
       # librewolf - Community-maintained fork of Firefox, focused on privacy, security and freedom
       - librewolf-bin
 {% endload %}
-{{ pamac_install("browser-aur", pkgs,
+{{ aur_install("browser-aur", pkgs,
     require=["test: trusted-repo-librewolf", "pkg: browser", "pkg: password", "test: password-aur"]) }}
 
 chat:
@@ -63,8 +57,9 @@ download:
     - pkgs:
       # Torrent Download Gui
       - transmission-gtk
+
       # yt-dlp - youtube-dl fork with additional features and fixes
-      - yt-dlp
+{{ pipx_install('yt-dlp', user=user) }}
 
 file-sync:
   pkg.installed:
@@ -88,17 +83,13 @@ mail-calendar-contacts:
       - evolution
       - highlight
 
-media-player:
-  pkg.installed:
-    - pkgs:
-      # kodi -  software media player and entertainment hub for digital media
-      - kodi
+
 {% load_yaml as pkgs %}
       - tabbed-git
       # quickmedia - native client for web services. youtube, soundcloud, a.o.
       - quickmedia-git
 {% endload %}
-{{ pamac_install("media-player-aur", pkgs) }}
+{{ aur_install("media-player-aur", pkgs) }}
 
 music-player:
   pkg.installed:
@@ -137,7 +128,7 @@ password:
       - chromium-keepassxc-browser
       - git-credential-keepassxc
 {% endload %}
-{{ pamac_install("password-aur", pkgs, require="pkg: password") }}
+{{ aur_install("password-aur", pkgs, require="pkg: password") }}
 
 picture:
   pkg.installed:
@@ -155,6 +146,8 @@ picture:
 # lama-cleaner - Image inpainting tool powered by SOTA AI Model
 #    Remove any unwanted object, defect, people or erase and replace any thing on your pictures.
 {{ pipx_install('lama-cleaner', user=user, pipx_opts='--system-site-packages') }}
+# ImaginAIry - AI imagined images. Pythonic generation of stable diffusion images.
+{{ pipx_install('ImaginAIry', user=user, pipx_opts='--system-site-packages') }}
 
 pixel-graphic:
   pkg.installed:
@@ -171,28 +164,28 @@ privacy:
 {% load_yaml as pkgs %}
       - metadata-cleaner
 {% endload %}
-{{ pamac_install("privacy-aur", pkgs, require="pkg: privacy") }}
+{{ aur_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
 # speech-to-text engine
 {% load_yaml as pkgs %}
       - deepspeech-bin
       - deepspeech-models
 {% endload %}
-{{ pamac_install("speech-to-text-aur", pkgs) }}
+{{ aur_install("speech-to-text-aur", pkgs) }}
 
 # text-to-speech synthesizer
 {% load_yaml as pkgs %}
       - rhvoice
       - rhvoice-voice-evgeniy-eng
 {% endload %}
-{{ pamac_install("speech-synthesizer-aur", pkgs) }}
+{{ aur_install("speech-synthesizer-aur", pkgs) }}
 
 # themes
 {% load_yaml as pkgs %}
       # kali-themes - GTK theme included with Kali Linux
       - kali-themes
 {% endload %}
-{{ pamac_install("themes-aur", pkgs) }}
+{{ aur_install("themes-aur", pkgs) }}
 
 vector-graphic:
   pkg.installed:
@@ -222,7 +215,7 @@ video-loopback:
 {% load_yaml as pkgs %}
       - akvcam-dkms
 {% endload %}
-{{ pamac_install("video-loopback-aur", pkgs) }}
+{{ aur_install("video-loopback-aur", pkgs) }}
 
 video-player:
   pkg.installed:
@@ -237,4 +230,4 @@ video-studio:
 {% load_yaml as pkgs %}
       - webcamoid
 {% endload %}
-{{ pamac_install("video-studio-aur", pkgs) }}
+{{ aur_install("video-studio-aur", pkgs) }}

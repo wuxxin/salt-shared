@@ -1,4 +1,4 @@
-{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'aur/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
@@ -40,7 +40,7 @@ development-ide:
       # ida-free - feature full dissassembler
       - ida-free
 {% endload %}
-{{ pamac_install("development-ide-aur", pkgs) }}
+{{ aur_install("development-ide-aur", pkgs) }}
 
 development-tools:
   pkg.installed:
@@ -99,7 +99,7 @@ development-tools:
       # browsh - a fully-modern text-based browser based on remote controlled firefox
       - browsh-bin
 {% endload %}
-{{ pamac_install("development-tools-aur", pkgs) }}
+{{ aur_install("development-tools-aur", pkgs) }}
 
 
 devop-tools:
@@ -116,7 +116,7 @@ devop-tools:
       - macchanger
 
 
-{{ pamac_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", 
+{{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", 
     "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
 
 {% load_yaml as pkgs %}
@@ -141,5 +141,5 @@ devop-tools:
       - fakepkg
       - fakeroot-tcp
 {% endload %}
-{{ pamac_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
+{{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 

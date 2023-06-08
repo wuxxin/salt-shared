@@ -1,4 +1,4 @@
-{% from 'manjaro/lib.sls' import pamac_install, pamac_repo_key with context %}
+{% from 'aur/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
@@ -21,4 +21,4 @@ esp-tools:
       # rshell - remote shell for working with MicroPython boards
       - rshell-micropython-git
 {% endload %}
-{{ pamac_install("micropython-tools-aur", pkgs) }}
+{{ aur_install("micropython-tools-aur", pkgs) }}

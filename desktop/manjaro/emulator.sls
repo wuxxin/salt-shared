@@ -1,4 +1,4 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'aur/lib.sls' import aur_install with context %}
 
 include:
   - qemu
@@ -22,7 +22,7 @@ emulator-qemu:
       - virtio-win
       # virtio-win - virtio drivers for Windows 7 and newer guests
 {% endload %}
-{{ pamac_install("emulator-qemu-aur", pkgs, require= ["pkg: emulator-qemu" ] ) }}
+{{ aur_install("emulator-qemu-aur", pkgs, require= ["pkg: emulator-qemu" ] ) }}
 
 emulator-libvirt:
   pkg.installed:
@@ -50,13 +50,13 @@ cross-compiler-arm:
       - android-platform-29
       - android-google-apis-playstore-x86-64-system-image-29
 {% endload %}
-{{ pamac_install("emulator-android-aur", pkgs,
+{{ aur_install("emulator-android-aur", pkgs,
     require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
 
-chown_to_main_user:
+# chown_to_main_user:
   # FIXME chwon /opt/android-sdk to mainuser:mainuser
   # FIXME as mainuser: symlink lib and lib64 to /opt/android-sdk/emulator/qemu/linux-x86_64
-  for i in lib lib64; do ln -s ../../$i /opt/android-sdk/emulator/qemu/linux-x86_64/$i; done
+  #  for i in lib lib64; do ln -s ../../$i /opt/android-sdk/emulator/qemu/linux-x86_64/$i; done
 
 emulator-arcade:
   pkg.installed:
