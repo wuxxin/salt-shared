@@ -10,7 +10,7 @@ base:
   'P@virtual:(?!physical)':
     - match: compound
     - kernel
-    - virtual
+    - hardware.virtual
 
   # any machine with a kernel (no container virtualization)
   '* and not ( P@virtual:lxc or P@virtual:systemd-nspawn )':
