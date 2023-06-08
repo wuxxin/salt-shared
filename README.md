@@ -17,13 +17,11 @@ A collection of saltstack states.
     + [hardware](hardware): hardware related packages and setup
         + [amd/rocm](hardware/amd/rocm): ROCM-HIP-SDK and hardware accelerated pytorch and tensorflow
     + [virtual](virtual): guest additions for running under qemu/libvirt, virtualbox, vmware
-    + [manjaro](manjaro): manjaro specifics
-    + [aur](aur): AUR - *A*rch/manjaro *U*ser *R*epository specifics
 
-+ [Desktop](desktop) Desktop (arch/manjaro/ubuntu) with Applications
-    + [development](desktop/development) Desktop (arch/manjaro/ubuntu) with Development Tools
-    + [python](desktop/python): arch/manjaro JupyterLab Scientific+ Machinelearning Python Stack
++ Desktop (arch/manjaro) with Applications
     + [manjaro](desktop/manjaro): Manjaro Desktop with Applications
+    + [development](desktop/manjaro/development.sls) Manjaro Desktop with Development Tools
+        + [python](desktop/python): arch/manjaro JupyterLab Scientific+ Machinelearning Python Stack
 
 + Deployment / Admin
     + [gitops](gitops): deploy and update machines from git, with webhook support
