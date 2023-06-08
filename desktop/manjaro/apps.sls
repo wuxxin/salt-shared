@@ -25,8 +25,8 @@ audio-workstation:
       - ardour
       - new-session-manager
 
-{{ pacman_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
-    "c7ddd1013c324391d8a5d4151a29df0f4b2c7553e68d42dedda49748a57b293c", user=user) }}
+{{ pacman_repo_key("librewolf", "662E3CDD6FE329002D0CA5BB40339DD82B12EF16", 
+    "ea0ded17b08c253a21ee8cc367e5a6c1914b89a1e896cdc2ecd2cfc887da9228", user=user) }}
 
 browser:
   pkg.installed:
