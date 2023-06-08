@@ -9,7 +9,7 @@ store:
   mkosi_target: /var/lib/mkosi
 
 image:
-  {% for distro in ['xenial', 'bionic', 'focal'] %}
+  {% for distro in ['focal'] %}
   {{ distro }}:
     mkosi:
       Distribution:
