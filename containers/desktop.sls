@@ -30,12 +30,12 @@ x11docker:
 
 
 {% elif grains['os'] == 'Manjaro' %}
-  {% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+  {% from 'aur/lib.sls' import aur_install, pamac_patch_install, pamac_patch_install_dir with context %}
 
 x11docker-tools:
   pkg.installed:
     - pkgs: {{ settings.pkg.manjaro.desktop }}
 
-{{ pamac_install("x11docker", ["x11docker"], require="pkg: x11docker-tools") }}
+{{ aur_install("x11docker", ["x11docker"], require="pkg: x11docker-tools") }}
 
 {% endif %}

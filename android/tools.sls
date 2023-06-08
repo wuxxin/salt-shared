@@ -2,7 +2,7 @@ include:
   - python
 
 {%- if grains['os'] == 'Manjaro' %}
-  {% from 'manjaro/lib.sls' import pamac_install, pamac_patch_install, pamac_patch_install_dir with context %}
+  {% from 'aur/lib.sls' import aur_install, pamac_patch_install, pamac_patch_install_dir with context %}
 
 android-tools:
   pkg.installed:
@@ -42,7 +42,7 @@ android-tools:
       - python-adb-enhanced 
       # - gnirehtet
 {% endload %}
-{{ pamac_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
+{{ aur_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
 
 
 {%- elif grains['os'] == 'Ubuntu' %}
