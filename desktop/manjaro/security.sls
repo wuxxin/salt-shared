@@ -1,4 +1,4 @@
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'aur/lib.sls' import aur_install with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'python/lib.sls' import pipx_install %}
 
@@ -39,7 +39,7 @@ security-tools:
 
       ### HexEdit
       # bless - High-quality, full-featured hex editor
-      bless
+      - bless
 
 {% load_yaml as pkgs %}
       ### MITM
@@ -50,9 +50,9 @@ security-tools:
       - mfoc
       ### HexEdit
       # imhex - Hex Editor for Reverse Engineers
-      imhex
+      - imhex
 {% endload %}
-{{ pamac_install("security-tools-aur", pkgs) }}
+{{ aur_install("security-tools-aur", pkgs) }}
 
 
 # security-tools-pipx
