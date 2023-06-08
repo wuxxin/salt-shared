@@ -1,6 +1,6 @@
 {# scientific python #}
 {% from 'desktop/user/lib.sls' import user with context %}
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'aur/lib.sls' import aur_install with context %}
 
 include:
   - desktop.python.development
@@ -14,10 +14,7 @@ scientific_base:
 
 # hardware optimized python packages
 # numpy - scientific computing build with CPU - multicore + CPU-extensions speedup
-{% from 'manjaro/lib.sls' import pamac_install with context %}
-{{ pamac_install('scientific_optimized', [
-    'python-numpy-openblas',
-    ]) }}
+{# aur_install('scientific_optimized', ['python-numpy-openblas',]) #}
 
 # gui components
 scientific_gui:
@@ -29,7 +26,7 @@ scientific_gui:
       # ttf-humor-sans - xkcd styled sans-serif typeface
       - ttf-humor-sans
 {% endload %}
-{{ pamac_install("scientific_gui_aur", pkgs) }}
+{{ aur_install("scientific_gui_aur", pkgs) }}
 
 
 scientific_python:
@@ -37,6 +34,8 @@ scientific_python:
     - pkgs:
       ## scientific python
       - python-scipy
+      # numpy - scientific computing
+      - python-numpy
       # pandas - data structures and data analysis
       - python-pandas
       - python-pandas-datareader
@@ -57,7 +56,7 @@ scientific_python:
       - pyside6
     - require:
       - test: scientific_base
-      - test: scientific_optimized
+      # - test: scientific_optimized
       - pkg: scientific_gui
       - test: scientific_gui_aur
 
@@ -74,5 +73,5 @@ scientific_python:
       # altair - Declarative statistical visualization library
       - python-altair
 {% endload %}
-{{ pamac_install('scientific_python_aur', pkgs,
+{{ aur_install('scientific_python_aur', pkgs,
     require='pkg: scientific_python') }}

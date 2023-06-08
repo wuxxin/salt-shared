@@ -1,16 +1,16 @@
 {# machinelearning #}
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'aur/lib.sls' import aur_install with context %}
 
 include:
   - desktop.python.scientific
   - hardware.amd.rocm.pytorch
-  - hardware.amd.rocm.tensorflow
-  - hardware.amd.rocm.jax
+  # - hardware.amd.rocm.tensorflow
+  # - hardware.amd.rocm.jax
 
 machinelearning_base:
   test.nop:
     - require:
-      - sls: desktop.manjaro.python.scientific
+      - sls: desktop.python.scientific
 
 ml_tools:
   pkg.installed:
@@ -33,17 +33,17 @@ ml_pytorch:
       - sls: hardware.amd.rocm.pytorch
       - test: machinelearning_base
 
-ml_tensorflow:
-  test.nop:
-    - require:
-      - sls: hardware.amd.rocm.tensorflow
-      - test: machinelearning_base
+# ml_tensorflow:
+#   test.nop:
+#     - require:
+#       - sls: hardware.amd.rocm.tensorflow
+#       - test: machinelearning_base
 
-ml_jax:
-  test.nop:
-    - require:
-      - sls: hardware.amd.rocm.jax
-      - test: machinelearning_base
+# ml_jax:
+#   test.nop:
+#     - require:
+#       - sls: hardware.amd.rocm.jax
+#       - test: machinelearning_base
 
 
 {% load_yaml as pkgs %}
@@ -56,13 +56,13 @@ ml_jax:
       # optuna - automatic hyperparameter optimization software framework
       - python-optuna
 {% endload %}
-{{ pamac_install('ml_tools_aur', pkgs, require='pkg: ml_tools') }}
+{{ aur_install('ml_tools_aur', pkgs, require='pkg: ml_tools') }}
 
 {% load_yaml as pkgs %}
       # Surprise - A Python scikit for building and analyzing recommender systems
       - python-scikit-surprise
 {% endload %}
-{{ pamac_install('ml_scikit_extra_aur', pkgs, require='pkg: ml_scikit') }}
+{{ aur_install('ml_scikit_extra_aur', pkgs, require='pkg: ml_scikit') }}
 
 {% load_yaml as pkgs %}
       # torchtext - data processing utilities and popular datasets for natural language
@@ -78,5 +78,5 @@ ml_jax:
       # albumentations - image augmentation to create new training samples from the existing data
       - python-albumentations
 {% endload %}
-{{ pamac_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
+{{ aur_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
 

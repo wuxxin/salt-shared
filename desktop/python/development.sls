@@ -1,6 +1,6 @@
 {% from 'python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
-{% from 'manjaro/lib.sls' import pamac_install with context %}
+{% from 'aur/lib.sls' import aur_install with context %}
 
 include:
   - python.dev
@@ -44,7 +44,7 @@ python_tools_lsp:
       - dockerfile-language-server
       - python-pylsp-rope
 {% endload %}
-{{ pamac_install('python_tools_lsp_aur', pkgs,
+{{ aur_install('python_tools_lsp_aur', pkgs,
     require='pkg: python_tools_lsp') }}
 
 python_devices_libraries:
