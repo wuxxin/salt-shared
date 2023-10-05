@@ -4,21 +4,12 @@
 include:
   - desktop.python.scientific
   - hardware.amd.rocm.pytorch
-  # - hardware.amd.rocm.tensorflow
-  # - hardware.amd.rocm.jax
+  - hardware.amd.rocm.tensorflow
 
 machinelearning_base:
   test.nop:
     - require:
       - sls: desktop.python.scientific
-
-ml_tools:
-  pkg.installed:
-    - pkgs:
-      # tensorboard - visualization and tooling needed for machine learning experimentation
-      - tensorboard
-    - require:
-      - test: machinelearning_base
 
 ml_scikit:
   pkg.installed:
@@ -33,24 +24,21 @@ ml_pytorch:
       - sls: hardware.amd.rocm.pytorch
       - test: machinelearning_base
 
-# ml_tensorflow:
-#   test.nop:
-#     - require:
-#       - sls: hardware.amd.rocm.tensorflow
-#       - test: machinelearning_base
+ml_tensorflow:
+  test.nop:
+    - require:
+      - sls: hardware.amd.rocm.tensorflow
+      - test: machinelearning_base
 
-# ml_jax:
-#   test.nop:
-#     - require:
-#       - sls: hardware.amd.rocm.jax
-#       - test: machinelearning_base
-
+ml_tools:
+  pkg.installed:
+    - pkgs:
+      # tensorboard - visualization and tooling needed for machine learning experimentation
+      - tensorboard
+    - require:
+      - test: machinelearning_base
 
 {% load_yaml as pkgs %}
-      # transformers - pretrained models to perform text, vision, and audio tasks for Jax, pytorch and tensorflow
-      - python-transformers
-      # tensorboardX - Tensorboard for PyTorch
-      - python-tensorboardx
       # spacy - library for Natural Language Processing in Python
       - python-spacy
       # optuna - automatic hyperparameter optimization software framework
@@ -73,7 +61,7 @@ ml_pytorch:
       - python-pytorch-lightning
       # functorch - JAX-like composable function transforms for PyTorch
       - python-functorch
-      # skorch - scikit-learn compatible neural network library that wraps PyTorch
+      # skorch - scikit-learn compatible neural network library that wraps PyTorchhttps://gandalf.lakera.ai/
       - python-skorch
       # albumentations - image augmentation to create new training samples from the existing data
       - python-albumentations
