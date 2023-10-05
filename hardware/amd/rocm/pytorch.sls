@@ -17,8 +17,6 @@ pytorch:
 # torchaudio - prerequisites
 {{ aur_install('python-kaldi-io', ['python-kaldi-io',], require='pkg: pytorch') }}
 
-{#
 # torchaudio - Data manipulation and transformation for audio signal processing
-# torchtext - Data loaders and abstractions for text and NLP
-# torchrec - Domain library for recommendation systems
-#}
+{{ aur_install('python-torchaudio-rocm', ['python-torchaudio-rocm', ],
+    require=['pkg: pytorch', 'pkg: python-kaldi-io']) }}
