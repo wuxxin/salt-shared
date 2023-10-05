@@ -1,4 +1,4 @@
-{% macro pacman_repo_key(name, keyid, hash, user="") %}
+{% macro pacman_repo_key(name, keyid, hash, owner="", user="") %}
 import-repo-key-{{ name }}:
   file.managed:
     - source: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ keyid }}"
