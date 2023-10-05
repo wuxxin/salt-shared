@@ -15,7 +15,7 @@ nodejs:
 
 nodejs:
   pkg.installed:
-    - name: nodejs-lts-gallium
+    - name: nodejs
 
 {% endif %}
 
