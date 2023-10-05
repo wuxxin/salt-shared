@@ -8,8 +8,6 @@ rocm-sdk:
       - rocm-hip-sdk
       - rocm-opencl-sdk
       - roctracer
-      # - hipmagma
-      - miopen-hip
       - rocminfo
     - require:
       - sls: hardware.amd.radeon
