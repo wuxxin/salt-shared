@@ -68,3 +68,8 @@ python_network_libraries:
       - python-websockets
       # paho-mqtt - Python client library for MQTT v3.1
       - python-paho-mqtt
+
+# python_tools_pipx
+
+# pywhat - Identify anything. identify emails, IP addresses, and more. Feed it a .pcap file or some text
+# github-dependents-info
