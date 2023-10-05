@@ -1,25 +1,24 @@
 ## salt-shared - useful Salt states
 
-A collection of saltstack states.
+A collection of saltstack states mostly useful for a desktop setup.
 
 + Target Platforms:
     + **Arch Linux** \& **Manjaro Linux**
-    + limited support for **Debian** \& **Ubuntu** Linux
 
 + To bootstrap a machine from scratch (including a custom storage setup), see:
     + [machine-bootstrap](https://github.com/wuxxin/machine-bootstrap)
 
 ### Features
 
++ Desktop with Applications
+    + [Desktop](desktop/manjaro): Manjaro Desktop with curated list of Applications
+    + [Development](desktop/manjaro/development.sls) Manjaro Desktop plus Development Tools
+        + [Scientific Python](desktop/python): JupyterLab Scientific & Machinelearning Python Stack
+
 + Machine / Hardware Support
     + [node](node): basic machine setup (hostname, locale, network, storage)
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
-
-+ Desktop with Applications
-    + [manjaro](desktop/manjaro): Manjaro Desktop with curated list of Applications
-    + [development](desktop/manjaro/development.sls) Manjaro Desktop with Development Tools
-        + [python](desktop/python): arch/manjaro JupyterLab Scientific+ Machinelearning Python Stack
 
 + Deployment / Admin
     + [gitops](gitops): deploy and update machines from git, with webhook support
