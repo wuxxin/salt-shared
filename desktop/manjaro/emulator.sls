@@ -3,8 +3,8 @@
 include:
   - qemu
   - libvirt
-  - android.tools
   - containers
+  - android.tools
 
 emulator-qemu:
   pkg.installed:
