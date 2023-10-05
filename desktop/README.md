@@ -12,4 +12,4 @@ include:
 
 ## Features
 
-see desktop.ubuntu , desktop.manjaro for details of packages
+see desktop.manjaro for details of packages
