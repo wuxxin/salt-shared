@@ -1,6 +1,8 @@
 {% from 'aur/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'python/lib.sls' import pipx_install, pipx_inject %}
+include:
+  - python
 
 audio-effects:
   pkg.installed:
@@ -25,8 +27,11 @@ audio-workstation:
       - ardour
       - new-session-manager
 
-{{ pacman_repo_key("librewolf", "662E3CDD6FE329002D0CA5BB40339DD82B12EF16", 
-    "ea0ded17b08c253a21ee8cc367e5a6c1914b89a1e896cdc2ecd2cfc887da9228", user=user) }}
+{{ pacman_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
+    "732945040a8bc121f75bbac65059eca52880f9f6cb7c65ef91f63c2f0f48a4ac", user=user) }}
+
+{{ pacman_repo_key("librewolf-bin", "662E3CDD6FE329002D0CA5BB40339DD82B12EF16", 
+    "25216ea95a354481503e2596ec9ea7b72006e08d3e3bbf6f932dd3ffb096bd32", user=user) }}
 
 browser:
   pkg.installed:
@@ -44,7 +49,8 @@ browser:
       - librewolf-bin
 {% endload %}
 {{ aur_install("browser-aur", pkgs,
-    require=["test: trusted-repo-librewolf", "pkg: browser", "pkg: password", "test: password-aur"]) }}
+    require=["test: trusted-repo-librewolf", "test: trusted-repo-librewolf-bin",
+        "pkg: browser", "pkg: password", "test: password-aur"]) }}
 
 chat:
   pkg.installed:
