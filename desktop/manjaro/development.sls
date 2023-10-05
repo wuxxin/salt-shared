@@ -2,8 +2,8 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - desktop.manjaro
   - desktop.python
+  - desktop.manjaro
   - desktop.manjaro.emulator
   - desktop.manjaro.iot
   - desktop.manjaro.security
@@ -17,6 +17,12 @@ language-rust:
   pkg.installed:
     - pkgs:
       - rust
+
+language-asm:
+  pkg.installed:
+    - pkgs:
+      # nasm - 80x86 assembler designed for portability and modularity
+      - nasm
 
 # development-fonts:
 #   pkg.installed:
@@ -63,6 +69,8 @@ development-tools:
       # pandoc - Conversion between markup formats, export to pdf
       - pandoc
       - pandoc-crossref
+      # marp - Markdown Presentation Ecosystem
+      - marp-cli
 
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
@@ -98,6 +106,8 @@ development-tools:
       - yj
       # browsh - a fully-modern text-based browser based on remote controlled firefox
       - browsh-bin
+      # nautilus-checksums - Add checksums to Nautilus' properties window
+      - nautilus-checksums
 {% endload %}
 {{ aur_install("development-tools-aur", pkgs) }}
 
@@ -116,8 +126,12 @@ devop-tools:
       - macchanger
 
 
-{{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", 
+{{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705",
     "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
+
+{{ pacman_repo_key("selinux", "63191CE94183098689CAB8DB7EF137EC935B0EAF",
+    "80862ce3e3de1cffa8f0a966c84a8f57296b1609f92d5696405bd2dcf038b819",
+    owner="Jason Zaman <perfinion@gentoo.org>", user=user) }}
 
 {% load_yaml as pkgs %}
       ## devop
@@ -140,6 +154,11 @@ devop-tools:
       # fakepkg - reassembles installed packages from its delivered files
       - fakepkg
       - fakeroot-tcp
+      # selinux - SELinux
+      # SELinux module tools
+      - semodule-utils
+      - checkpolicy
+
 {% endload %}
 {{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
