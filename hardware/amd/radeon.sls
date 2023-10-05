@@ -4,9 +4,6 @@
     - contents: |
         amdgpu
 
-{% if grains['os'] == 'Manjaro' %}
-# install gpu related tools
-
 vulkan:
   pkg.installed:
     - pkgs:
@@ -29,6 +26,14 @@ opencl:
       - ocl-icd
       - clinfo
 
+clblast:
+  pkg.installed:
+    - pkgs:
+      # clblast - Tuned OpenCL BLAS library
+      - clblast
+    - require:
+      - pkg: opencl
+
 vaapi:
   pkg.installed:
     - pkgs:
@@ -48,5 +53,3 @@ radeon:
     - pkgs:
       - radeontop
       - radeontool
-
-{% endif %}
