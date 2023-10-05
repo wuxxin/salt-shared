@@ -2,7 +2,6 @@
 service:
   notebook_dir: ~/lab
   port: 8888
-  # create token with: openssl_rand_-hex_24
   token:
   default_chromium: true
   default_packages: true
@@ -57,6 +56,8 @@ default:
 
     packages:
       ## jupyterlab: kernels, extensions, widgets, themes
+      # jupyter-collaboration - Jupyter Real-Time Collaboration
+      - jupyter-collaboration
       # notebook-shim - switch to Jupyter Server for their Python Web application backend
       - notebook-shim
       # hass_pyscript_kernel - Python Scripting for Home Assistant
