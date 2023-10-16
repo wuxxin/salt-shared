@@ -1,8 +1,8 @@
-{% load_yaml as defaults %}
 service:
+  # mandatory settings: token
+  # token:
   notebook_dir: ~/lab
   port: 8888
-  token:
   default_chromium: true
   default_packages: true
   default_apps: true
@@ -90,7 +90,3 @@ default:
       ## jupyterlab themes
       - theme-darcula
       - jupyterlab_materialdarker
-{% endload %}
-
-{% set settings=salt['grains.filter_by']({'default': defaults},
-    grain='default', default= 'default', merge= salt['pillar.get']('jupyter', {})) %}

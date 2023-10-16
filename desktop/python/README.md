@@ -1,6 +1,6 @@
 #  Jupyter Ecosystem for Scientific Python and Hardware accelerated Machinelearning
 
-Systemd User Service PipX based Jupyter Server \& Chromium as Desktop Web-App for the Jupyter Client.
+PipX based Systemd User Service of Jupyter Server \& Chromium as Desktop Web-App for the Jupyter Client.
 
 ### Features
 
@@ -8,7 +8,7 @@ Systemd User Service PipX based Jupyter Server \& Chromium as Desktop Web-App fo
 
 + machine wide packages
   + hardware support for **amd rocm** gpu's
-    + pytorch-rocm, torchvision-rocm, tensorflow-rocm, jax-rocm
+    + pytorch-rocm, torchvision-rocm, tensorflow-rocm, jax-rocm, deepspeed
   + python packages installed **as system packages**,
   + python packages **build from aur** installed **as system packages**
 
@@ -33,9 +33,9 @@ and a custom chromium as webapp config launch is used for the gui
 ```yaml
 jupyter:
   service:
-    notebook_dir: /home/user/code
-    # create token with "openssl rand -hex 24"
+    # create a token with "openssl rand -hex 24"
     token: {{ secrets.jupyter_notebooks_token }}
+    notebook_dir: /home/user/code
   kernels:
     lab:
       packages:
@@ -61,7 +61,6 @@ cd ~/.cache/matplotlib; rm fontlist*.json
 #### other lookworthy Packages
 
 - inference
-
   + https://github.com/Tencent/ncnn
     + ncnn is a high-performance neural network inference framework optimized for the mobile platform
     + Supports GPU acceleration via the next-generation low-overhead vulkan api
@@ -71,36 +70,23 @@ cd ~/.cache/matplotlib; rm fontlist*.json
     + A high-performance, lightweight neural network inference framework open sourced by Tencent Youtu Lab.
     + It also has many outstanding advantages such as cross-platform, high performance, model compression, and code tailoring.
 
-
 - scientific scientific_python_aur
-```
-# panel - high-level app and dashboarding solution
-- python-panel
-# holoviews - With Holoviews, your data visualizes itself
-- python-holoviews
-# numba - NumPy aware dynamic Python compiler using LLVM
-- python-numba
-```
-
-- machinelearning ml_tools_aur
-```
-# sentencepiece - unsupervised text tokenizer and detokenizer
-- python-sentencepiece-git
-```
+  - python-panel
+    - panel - high-level app and dashboarding solution
+  - python-holoviews
+    - holoviews - With Holoviews, your data visualizes itself
+  - python-numba
+    - numba - NumPy aware dynamic Python compiler using LLVM
 
 - machinelearning ml_pytorch_extra_aur
-```
-# monailabel - intelligent open source image labeling and learning tool
-- monailabel
-# kornia - classical computer vision integrated into deep learning models
-- python-kornia
-```
+  - monailabel
+    - monailabel - intelligent open source image labeling and learning tool
+  - python-kornia
+    - kornia - classical computer vision integrated into deep learning models
 
 - machinelearning ml_sklearn_aur
-```
-# sklearn-pandas - bridge between Scikit-Learn's methods and pandas-style Data Frames
-- python-sklearn-pandas
-```
+  - python-sklearn-pandas
+    - sklearn-pandas - bridge between Scikit-Learn's methods and pandas-style Data Frames
 
 - machine learning
   + streamlit.io

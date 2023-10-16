@@ -63,7 +63,7 @@ scientific_python:
       - pyside6
     - require:
       - test: scientific_base
-      - test: scientific_optimized
+      - pkg: scientific_optimized
       - pkg: scientific_gui
       - test: scientific_gui_aur
 

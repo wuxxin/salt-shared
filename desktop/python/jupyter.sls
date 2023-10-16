@@ -1,6 +1,8 @@
 {% from 'desktop/user/lib.sls' import user with context %}
-{% from "desktop/python/defaults.jinja" import settings with context %}
 {% from 'desktop/python/lib.sls' import jupyter_service, jupyter_core, create_python_kernel, register_python_kernel %}
+{% import_yaml 'desktop/python/jupyter.yaml' as defaults %}
+{% set settings=salt['grains.filter_by']({'default': defaults},
+    grain='default', default= 'default', merge= salt['pillar.get']('jupyter', {})) %}
 
 include:
   - desktop.python.scientific

@@ -41,6 +41,12 @@ ml_tools:
 {% load_yaml as pkgs %}
       # spacy - library for Natural Language Processing in Python
       - python-spacy
+      # onnx - C++ library for the open standard for machine learning interoperability
+      - onnx
+      # onnxruntime - Cross-platform, high performance scoring engine for ML models
+      - onnxruntime
+      # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
+      - python-deepspeed
       # optuna - automatic hyperparameter optimization software framework
       - python-optuna
 {% endload %}
