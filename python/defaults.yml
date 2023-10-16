@@ -63,7 +63,7 @@ python_dev:
   ### additional
   - git
   # cython - pythonic language wrapping external C libraries and fast C modules
-  - cython
+  - cython0
   - swig
   - meson
   # pipenv - Python Dev Workflow for Humans
