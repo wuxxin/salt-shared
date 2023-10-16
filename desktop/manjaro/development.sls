@@ -145,6 +145,8 @@ devop-tools:
       - q-dns-git
       # butane - Human readable Butane Configs into machine readable Ignition Configs
       - butane
+      # coreos-installer - Installer for CoreOS disk images
+      - coreos-installer
       # pixiecore - An all-in-one tool for easy netbooting (ftfp,dhcp-netboot,http)
       - pixiecore-git
       # flent - The FLExible Network Tester
