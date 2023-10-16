@@ -19,4 +19,4 @@ pytorch:
 
 # torchaudio - Data manipulation and transformation for audio signal processing
 {{ aur_install('python-torchaudio-rocm', ['python-torchaudio-rocm', ],
-    require=['pkg: pytorch', 'pkg: python-kaldi-io']) }}
+    require=['pkg: pytorch', 'test: python-kaldi-io']) }}
