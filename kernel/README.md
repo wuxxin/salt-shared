@@ -4,15 +4,15 @@
 
 install matching kernel-image, headers and tools, depending os-version
 
-+ if "kernel:keep_current:True" (default=False) or
++ if "kernel:keep_current:True" (default=True) or
     if instance running on shared kernel (eg. LXC, LXD, NSPAWN):
-    + install only matching kernel- headers and tools of the running kernel
+        + install only matching kernel- headers and tools of the running kernel
 
 ## state: kernel.server
 
 server setup; many open files, network connections, processes, containers, etc.
 
-+ kernel.running
++ kernel.headers_tools
     + make kernel headers of running kernel available, in case dkms modules need them
 + kernel.swappiness
     + configure swap usage, defaults to kernel default, for details read swappiness.sls

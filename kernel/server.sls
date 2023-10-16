@@ -1,5 +1,5 @@
 include:
-  - kernel.running
+  - kernel.headers_tools
   - kernel.sysctl
   - kernel.limits
   - kernel.swappiness

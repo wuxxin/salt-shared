@@ -1,10 +1,10 @@
 {% if grains['os'] == 'Ubuntu' %}
   {% from "kernel/defaults.jinja" import settings with context %}
-  {% if settings.keep_current|d(false) or
+  {% if settings.keep_current|d(true) or
     grains['virtual']|lower() in ['lxc', 'systemd-nspawn'] %}
 
 include:
-  - kernel.running
+  - kernel.headers_tools
 
   {% else %}
     {%- set flavor='virtual' if grains['virtual'] != "physical" else 'generic' %}
