@@ -56,8 +56,6 @@ default:
 
     packages:
       ## jupyterlab: kernels, extensions, widgets, themes
-      # jupyter-collaboration - Jupyter Real-Time Collaboration
-      - jupyter-collaboration
       # notebook-shim - switch to Jupyter Server for their Python Web application backend
       - notebook-shim
       # hass_pyscript_kernel - Python Scripting for Home Assistant
@@ -80,6 +78,10 @@ default:
       - jupyterlab-execute-time
       # ipympl - Matplotlib Jupyter Extension
       - ipympl
+      # jupyter-collaboration - Jupyter Real-Time Collaboration
+      - jupyter-collaboration
+      # jupyter-bokeh - extension for rendering Bokeh content within Jupyter.
+      - jupyter-bokeh
       # ipysheet - Spreadsheet in the jupyter notebook
       - ipysheet
       # jupyterlab-geojson - A JupyterLab extension for rendering GeoJSON
