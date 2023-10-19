@@ -79,6 +79,8 @@ cd ~/.cache/matplotlib; rm fontlist*.json
     - numba - NumPy aware dynamic Python compiler using LLVM
 
 - machinelearning ml_pytorch_extra_aur
+  - python-optuna
+    - optuna - automatic hyperparameter optimization software framework
   - monailabel
     - monailabel - intelligent open source image labeling and learning tool
   - python-kornia
