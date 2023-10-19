@@ -71,10 +71,18 @@ development-tools:
       - pandoc-crossref
       # marp - Markdown Presentation Ecosystem
       - marp-cli
+      # vhs - A tool for recording terminal GIFs
+      - vhs
 
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
       - sqlitebrowser
+
+      ## rpc
+      # grpc - High performance, open source, general RPC framework that puts mobile and HTTP/2 first
+      - grpc
+      # gRPC protocol buffers cli
+      - grpc-cli
 
       ## updates
       # topgrade - Invoke the upgrade procedure of multiple package managers
@@ -104,10 +112,14 @@ development-tools:
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       - yj
-      # browsh - a fully-modern text-based browser based on remote controlled firefox
-      - browsh-bin
+      # glow - Command-line markdown renderer
+      - glow
+      # mods - AI for the command line, built for pipelines
+      - mods
       # nautilus-checksums - Add checksums to Nautilus' properties window
       - nautilus-checksums
+      # browsh - a fully-modern text-based browser based on remote controlled firefox
+      - browsh-bin
 {% endload %}
 {{ aur_install("development-tools-aur", pkgs) }}
 
