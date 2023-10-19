@@ -68,5 +68,7 @@ python_network_libraries:
       - python-websockets
       # paho-mqtt - Python client library for MQTT v3.1
       - python-paho-mqtt
+      # python-grpcio - Python language bindings for grpc, remote procedure call (RPC) framework
+      - python-grpcio
 
 # python_tools_pipx
