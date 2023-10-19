@@ -27,7 +27,7 @@ python_kernel_{{ name }}:
     {%- endif %}
   {%- endif %}
   pip.installed:
-    - pkgs: {{ ['ipykernel'] + pkgs }}
+    - pkgs: {{ ['ipykernel', 'ipywidgets'] + pkgs }}
     - user: {{ user }}
     - cwd: {{ HOME }}
     - bin_env: {{ VIRTUAL_ENV }}
