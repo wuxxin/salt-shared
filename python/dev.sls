@@ -5,7 +5,10 @@
 
 include:
   - python
-  - python.ipython
+
+ipython:
+  pkg.installed:
+    - pkgs: {{ settings.ipython[grains['os_family']|lower] }}
 
 {% if grains['os_family']|lower == 'arch' %}
 
