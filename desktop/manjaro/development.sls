@@ -8,6 +8,12 @@ include:
   - desktop.manjaro.iot
   - desktop.manjaro.security
 
+language-asm:
+  pkg.installed:
+    - pkgs:
+      # nasm - 80x86 assembler designed for portability and modularity
+      - nasm
+
 language-go:
   pkg.installed:
     - pkgs:
@@ -17,12 +23,6 @@ language-rust:
   pkg.installed:
     - pkgs:
       - rust
-
-language-asm:
-  pkg.installed:
-    - pkgs:
-      # nasm - 80x86 assembler designed for portability and modularity
-      - nasm
 
 # development-fonts:
 #   pkg.installed:
@@ -35,6 +35,8 @@ development-ide:
     - pkgs:
       # pycharm-community-edition - Python IDE for Professional Developers
       - pycharm-community-edition
+      # bless - High-quality, full-featured hex editor
+      - bless
 
 {% load_yaml as pkgs %}
       # gnome-text-editor - Simple text editor that focuses on session management
@@ -45,38 +47,42 @@ development-ide:
       - vscodium-marketplace
       # ida-free - feature full dissassembler
       - ida-free
+      # imhex - Hex Editor for Reverse Engineers
+      - imhex
 {% endload %}
 {{ aur_install("development-ide-aur", pkgs) }}
 
 development-tools:
   pkg.installed:
     - pkgs:
-      ## linter/beautifier
-      # shfmt - Format shell programs
-      - shfmt
-
-      ## filter
-      # go-yq - Portable command-line YAML processor
-      - go-yq
-
       ## encryption
       # age - simple, modern and secure file encryption tool
       - age
       # minisign - A dead simple tool to sign files and verify digital signatures
       - minisign
 
+      ## filter
+      # go-yq - Portable command-line YAML processor
+      - go-yq
+      # ugrep - ultra fast grep with interactive TUI, fuzzy search, boolean queries, hexdumps and more
+      - ugrep
+
       ## conversion
       # pandoc - Conversion between markup formats, export to pdf
-      - pandoc
+      - pandoc-cli
       - pandoc-crossref
       # marp - Markdown Presentation Ecosystem
       - marp-cli
-      # vhs - A tool for recording terminal GIFs
-      - vhs
+      # csvkit - suite of utilities for converting to and working with CSV
+      - csvkit
 
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
       - sqlitebrowser
+
+      ## linter/beautifier
+      # shfmt - Format shell programs
+      - shfmt
 
       ## rpc
       # grpc - High performance, open source, general RPC framework that puts mobile and HTTP/2 first
@@ -88,14 +94,22 @@ development-tools:
       # topgrade - Invoke the upgrade procedure of multiple package managers
       - topgrade
 
+      ## watch
+      # urlwatch - Tool for monitoring webpages for updates
+      - urlwatch
+
       ## terminal
       # wezterm - GPU-accelerated cross-platform terminal emulator and multiplexer
       - wezterm
       # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
       - kitty
+      # vhs - A tool for recording terminal GIFs
+      - vhs
+
       ### manager
       # nnn - The fastest terminal file manager ever written
       - nnn
+
       ### viewer
       # viu - Simple terminal image viewer
       - viu
@@ -165,8 +179,9 @@ devop-tools:
       - flent
       # vault - command line tool for Hashicorp Vault
       - vault-cli
-      # fakepkg - reassembles installed packages from its delivered files
+      # fakepkg - reassembles installed packages from its delivered files (eg. while internet connection loss)
       - fakepkg
+      # fakeroot-tcp - Tool for simulating superuser privileges,with tcp ipc
       - fakeroot-tcp
       # selinux - SELinux
       # SELinux module tools
