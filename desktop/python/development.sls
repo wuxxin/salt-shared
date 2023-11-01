@@ -71,4 +71,12 @@ python_network_libraries:
       # python-grpcio - Python language bindings for grpc, remote procedure call (RPC) framework
       - python-grpcio
 
+python_conversion_libraries:
+  pkg.installed:
+    - pkgs:
+      # python-pdftotext - Simple PDF text extraction
+      - python-pdftotext
+      # python-html2text - HTML to markdown-structured text converter
+      - python-html2text
+
 # python_tools_pipx
