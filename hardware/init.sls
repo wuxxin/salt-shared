@@ -1,8 +1,7 @@
+include:
 {% if grains['virtual'] != 'physical' %}
-include:
- - hardware.virtual
+  - hardware.virtual
 {% else %}
-include:
   - hardware.acpi
 
 filesystem-tools:
@@ -20,9 +19,10 @@ storage-tools:
       - hdparm
 
   {% if grains['os_family'] in ["Debian", "Arch"] %}
-temperature-tools:
+sensor-tools:
   pkg.installed:
     - pkgs:
+      - acpi
     {% if grains['os_family'] == "Debian" %}
       - lm-sensors
     {% elif grains['os_family'] == "Arch" %}
