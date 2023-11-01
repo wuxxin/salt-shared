@@ -22,12 +22,11 @@ g810-led-git:
     - installed
 
 {% elif grains['os'] == 'Ubuntu' %}
-  {% if grains['osmajorrelease']|int > 18 %}
 g810-led:
   pkg:
     - installed
 
-  {% else %}
+{% else %}
 g810-dependencies:
   pkg.installed:
     - pkgs:
@@ -42,6 +41,5 @@ g810-led:
   cmd.run:
     - name: make bin && make install
     - cwd: /usr/local/src/g810-led
-  {% endif %}
 
 {% endif %}
