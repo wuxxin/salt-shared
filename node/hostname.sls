@@ -4,8 +4,8 @@ set_hostsfile:
   host.only:
     - name: {{ settings.network.internal.ip }}
     - hostnames:
-      - {{ settings.hostname }}
       - {{ settings.hostname.partition('.')[0] }}
+      - {{ settings.hostname.partition('.')[0] ~ "." ~ settings.network.internal.name }}
 
 set_hostname:
   cmd.run:

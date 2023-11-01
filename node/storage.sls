@@ -11,7 +11,9 @@
 include:
   - .hostname
   - .accounts
-{%- if settings.storage.filesystem.zfs|d(false) %}
+{%- if settings.storage is defined and
+       settings.storage.filesystem is defined and
+       settings.storage.filesystem.zfs is defined %}
   - zfs
 
 {# if there are any storage.filesystem.zfs entries,

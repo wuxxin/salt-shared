@@ -9,6 +9,7 @@ include:
 user_present_{{ u.name }}:
   user.present:
     - name: {{ u.name }}
+    - remove_groups: false
     {%- for name,value in u.items() %}
       {%- if name != 'name' and name != 'use_authorized_keys' %}
       {{ name }}: {{ value }}

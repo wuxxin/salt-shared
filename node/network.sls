@@ -3,9 +3,10 @@
 
 include:
   - ssh
+{% if grains['os_family'] == "Debian" %}
   - kernel.nfs
 
-{# configure nsswitch with additional systemd specific libraries #}
+{# additional systemd specific nsswitch libraries #}
 nsswitch.packages:
   pkg.installed:
     - pkgs:
@@ -13,6 +14,7 @@ nsswitch.packages:
       - libnss-mymachines
       - libnss-systemd
       - libnss-myhostname
+{% endif %}
 
 nsswitch.hosts.configure:
   file.replace:

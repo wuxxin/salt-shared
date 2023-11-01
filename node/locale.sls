@@ -3,7 +3,7 @@
 {% set additional_list=
   settings.locale.additional_lang.strip().split(' ')|join('.UTF-8 ') ~ '.UTF-8' %}
 
-/etc/default/locale:
+/etc/locale.conf:
   file.managed:
     - contents: |
         LANG={{ settings.locale.lang }}
@@ -13,8 +13,13 @@
 {%- endif %}
 
 locales:
-  pkg:
-    - installed
+  pkg.installed:
+    - pkgs:
+    {% if grains['os_family'] == "Debian" %}
+      - locales
+    {% elif grains['os_family'] == "Arch" %}
+      - glibc-locales
+    {% endif %}
 
 tzdata:
   pkg:
@@ -40,5 +45,5 @@ generate_locale:
         done
         $all_valid
     - require:
-      - file: /etc/default/locale
+      - file: /etc/locale.conf
       - pkg: locales
