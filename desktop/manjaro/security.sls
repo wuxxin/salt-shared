@@ -37,10 +37,6 @@ security-tools:
       # mitmproxy - SSL-capable man-in-the-middle HTTP proxy
       - mitmproxy
 
-      ### HexEdit
-      # bless - High-quality, full-featured hex editor
-      - bless
-
 {% load_yaml as pkgs %}
       ### MITM
       # frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
@@ -48,9 +44,6 @@ security-tools:
       ### NFC
       # mfoc - MiFare Classic Universal toolKit
       - mfoc
-      ### HexEdit
-      # imhex - Hex Editor for Reverse Engineers
-      - imhex
 {% endload %}
 {{ aur_install("security-tools-aur", pkgs) }}
 
@@ -58,4 +51,4 @@ security-tools:
 # security-tools-pipx
 
 # pywhat - Identify anything. identify emails, IP addresses, and more. Feed it a .pcap file or some text
-{{ pipx_install('pywhat', user=user) }}
+{# pipx_install('pywhat', user=user) #}
