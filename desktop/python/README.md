@@ -77,6 +77,8 @@ cd ~/.cache/matplotlib; rm fontlist*.json
     - holoviews - With Holoviews, your data visualizes itself
   - python-numba
     - numba - NumPy aware dynamic Python compiler using LLVM
+  - python-spacy
+    - spacy - library for Natural Language Processing in Python
 
 - machinelearning ml_pytorch_extra_aur
   - python-optuna

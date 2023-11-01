@@ -45,8 +45,6 @@ ml_tools:
       - onnxruntime-bin
       # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
       - python-deepspeed
-      # spacy - library for Natural Language Processing in Python
-      - python-spacy
 {% endload %}
 {{ aur_install('ml_tools_aur', pkgs, require='pkg: ml_tools') }}
 
