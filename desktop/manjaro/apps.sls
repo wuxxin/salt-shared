@@ -142,7 +142,6 @@ picture:
       - darktable
       - digikam
       - hugin
-      - qt5-imageformats
       # nautilus-image-converter - extension to rotate/resize image files
       - nautilus-image-converter
       # imv - Image viewer for Wayland and X11
