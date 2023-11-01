@@ -1,19 +1,30 @@
-openssh-client:
-  pkg:
-    - installed
+{#  SSH-Config based on https://infosec.mozilla.org/guidelines/openssh.html
+
+  snapshot of 2023-11-1: Modern (OpenSSH 6.7+)
+  removed KexAlgorithms: ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256
+  removed Ciphers: aes256-ctr,aes192-ctr,aes128-ctr
+#}
+
+openssh:
+  pkg.installed:
+    - pkgs:
+    {% if grains['os_family'] == "Debian" %}
+      - openssh-client
+      - openssh-server
+    {% elif grains['os_family'] == "Arch" %}
+      - openssh
+    {% endif %}
 
 openssh-server:
-  pkg:
-    - installed
-  service:
-    - running
-    - enable: True
+  service.running:
+    {% if grains['os_family'] == "Debian" %}
     - name: ssh
+    {% elif grains['os_family'] == "Arch" %}
+    - name: sshd
+    {% endif %}
+    - enable: True
     - require:
-      - pkg: openssh-server
-
-{# based on snapshot of 2019-11-17: Modern (OpenSSH 6.7+)
-    https://infosec.mozilla.org/guidelines/openssh.html #}
+      - pkg: openssh
 
 {% set minimum_moduli= 3071 %}
 {% for p,r in [
@@ -21,9 +32,9 @@ openssh-server:
   ("AuthenticationMethods", "AuthenticationMethods publickey"),
   ("PasswordAuthentication", "PasswordAuthentication no"),
   ("PermitRootLogin", "PermitRootLogin prohibit-password"),
-  ("KexAlgorithms", "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256"),
+  ("KexAlgorithms", "KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256"),
   ("Ciphers", "Ciphers chacha20-poly1305@openssh.com,aes128-gcm@openssh.com,aes256-gcm@openssh.com"),
-  ("MACs", "MACs umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com"),
+  ("MACs", "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com"),
   ("Subsystem\s+sftp", "Subsystem sftp  /usr/lib/ssh/sftp-server -f AUTHPRIV -l INFO"),
   ("LogLevel", "LogLevel VERBOSE"),
   ] %}
@@ -37,7 +48,7 @@ openssh-server:
         {{ r }}
     - append_if_not_found: true
     - require:
-      - pkg: openssh-server
+      - pkg: openssh
     - watch_in:
       - service: openssh-server
 {% endfor %}
@@ -58,7 +69,7 @@ filter_weak_moduli:
     - name: awk '$5 >= {{ minimum_moduli }}' /etc/ssh/moduli > /etc/ssh/moduli.tmp && mv /etc/ssh/moduli.tmp /etc/ssh/moduli
     - unless: awk '$5 < {{ minimum_moduli }}{exit 1}' /etc/ssh/moduli
     - require:
-      - pkg: openssh-server
+      - pkg: openssh
     - watch_in:
       - service: openssh-server
 
