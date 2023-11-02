@@ -1,16 +1,21 @@
 {% load_yaml as defaults %}
 # enable cyclic data scrubbing of filesystem
-# if enabled will execute 4 times scrubbing every 2nd week, then every 6 months
-autoscrub: false
+# if enabled will execute once per month for 4 months, then once every 6 months
+autoscrub: 
+  enabled: false
+  pools:
+    - rpool
 
 # enable cyclic "automatic" manual start of trimming the filesystem
-# if enabled will execute a manual trimming start once per month
-autotrim: false
+# if enabled will execute a manual trimming once per month
+autotrim: 
+  enabled: false
+  pools:
+    - rpool
 
 # enable cyclic rotating filesystem snapshots
-autosnapshot: false
-
-snapshot:
+autosnapshot: 
+  enabled: false
   # any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
   # is not false, a rotating snapshot will be taken
   # rotation intervals: keep x snapshots per interval, 0 to disable
@@ -22,13 +27,10 @@ snapshot:
   # --min-size only available from github master
   args: --quiet --syslog --default-exclude --fast --skip-scrub --min-size 1
 
-# List of pools to act on
-pools:
-  - rpool
 
 # arc_max_percent: use up to x % of memory for arc
 # arc_max_bytes: will be computed from arc_max_percent if unset
-arc_max_limit: true
+arc_max_limit: false
 arc_max_percent: 25
 {% endload %}
 
@@ -60,7 +62,7 @@ arc_max_percent: 25
   properties:
     canmount: noauto
     mountpoint: /
-{{ mksnapshot(4, frequent=true, daily=true) }}
+{{ mksnapshot(4,) }}
 
 - name: var
   properties:

@@ -9,12 +9,12 @@
 
 {% for label in ['frequent', 'hourly', 'daily', 'weekly', 'monthly'] %}
 
-zfs-snapshot-{{ label }}@.timer:
+zfs-snapshot-{{ label }}.timer:
   file.managed:
-    - name: /etc/systemd/system/zfs-snapshot-{{ label }}@.timer
+    - name: /etc/systemd/system/zfs-snapshot-{{ label }}.timer
     - contents: |
         [Unit]
-        Description=ZFS Snapshot Timer ({{ label }}) on %i
+        Description=ZFS Snapshot Timer ({{ label }})
 
         [Timer]
         OnCalendar={{ '*:0/15' if label == 'frequent' else label }}
@@ -23,23 +23,22 @@ zfs-snapshot-{{ label }}@.timer:
 
         [Install]
         WantedBy=timers.target
-
     - onchanges_in:
       - cmd: zfs-snapshot-reload-systemd
 
-zfs-snapshot-{{ label }}@.service:
+zfs-snapshot-{{ label }}.service:
   file.managed:
-    - name:  /etc/systemd/system/zfs-snapshot-{{ label }}@.service
+    - name:  /etc/systemd/system/zfs-snapshot-{{ label }}.service
     - contents: |
         [Unit]
-        Description=ZFS Snapshot Service ({{ label }}) on %i
+        Description=ZFS Snapshot Service ({{ label }})
         Requires=zfs.target
         After=zfs.target
         ConditionPathIsDirectory=/sys/module/zfs
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/local/sbin/zfs-auto-snapshot.sh {{ settings.snapshot.args }} --label={{ label }} --keep={{ settings.snapshot[label] }} //
+        ExecStart=/usr/local/sbin/zfs-auto-snapshot.sh {{ settings.autosnapshot.args }} --label={{ label }} --keep={{ settings.autosnapshot[label] }} //
     - onchanges_in:
       - cmd: zfs-snapshot-reload-systemd
 

@@ -1,40 +1,10 @@
-zpool-scrub-initial@.service:
+zpool-scrub@.timer:
   file.managed:
-    - name: /etc/systemd/system/zpool-scrub-initial@.service
+    - name: /etc/systemd/system/zpool-scrub@.timer
     - contents: |
         [Unit]
-        Description=ZFS Pool Initial Scrub Series on %i
-        Requires=zfs.target
-        After=zfs.target
-        ConditionACPower=true
-        ConditionPathIsDirectory=/sys/module/zfs
-
-        [Service]
-        ExecStartPre=-/usr/sbin/zpool scrub -s %I
-        ExecStart=/usr/sbin/zpool scrub -w %I
-
-zpool-scrub-resident@.service:
-  file.managed:
-    - name: /etc/systemd/system/zpool-scrub-resident@.service
-    - contents: |
-        [Unit]
-        Description=ZFS Pool Scrub on %i
-        Requires=zfs.target
-        After=zfs.target
-        ConditionACPower=true
-        ConditionPathIsDirectory=/sys/module/zfs
-
-        [Service]
-        ExecStartPre=-/usr/sbin/zpool scrub -s %I
-        ExecStart=/usr/sbin/zpool scrub -w %I
-
-zpool-scrub-initial@.timer:
-  file.managed:
-    - name: /etc/systemd/system/zpool-scrub-initial@.timer
-    - contents: |
-        [Unit]
-        Description=ZFS Pool Initial Scrub (8 Weeks every 2nd Sun) on %i
-
+        Description=ZFS Pool Scrub Timer on %i
+  
         [Timer]
         OnCalendar=monthly
         AccuracySec=1h
@@ -45,27 +15,26 @@ zpool-scrub-initial@.timer:
     - require:
       - file: zpool-scrub@.service
 
-zpool-scrub-resident@.timer:
+zpool-scrub@.service:
   file.managed:
-    - name: /etc/systemd/system/zpool-scrub-resident@.timer
+    - name: /etc/systemd/system/zpool-scrub@.service
     - contents: |
         [Unit]
-        Description=ZFS Pool Resident Scrub (every 6 Months on Sun) on %i
+        Description=ZFS Pool Scrub Service on %i, executes once per month for 4 months, then once every 6 months
+        Requires=zfs.target
+        After=zfs.target
+        ConditionACPower=true
+        ConditionPathIsDirectory=/sys/module/zfs
 
-        [Timer]
-        OnCalendar=monthly
-        AccuracySec=1h
-        Persistent=true
+        [Service]
+        ExecStart=/usr/bin/bash -c \
+          'count=$(cat /etc/zfs/zpool-scrub-%I.counter 2>/dev/null || echo 0); \
+           if [[ $count -lt 4 || ($count -ge 4 && $((count % 6)) == 0) ]]; then zpool scrub -w %I; fi; \
+           echo $((count + 1)) > /etc/zfs/zpool-scrub-%I.counter'
 
-        [Install]
-        WantedBy=timers.target
-    - require:
-      - file: zpool-scrub@.service
-
+zpool-scrub:
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
-      - file: zpool-scrub-initial@.service
-      - file: zpool-scrub-initial@.timer
-      - file: zpool-scrub-resident@.service
-      - file: zpool-scrub-resident@.timer
+      - file: zpool-scrub@.service
+      - file: zpool-scrub@.timer

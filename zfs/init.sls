@@ -19,32 +19,36 @@ zfs-utils:
     - absent
 {% endif %}
 
-{% for pool in settings.pools %}
+/etc/zfs/zfs-list.cache:
+  file.directory:
+    - makedirs: True
 
-zpool-scrub-initial@{{ pool }}.timer:
+{% for service in ["zfs-import-cache", "zfs-mount", "zfs.target", "zfs-zed.service"] %}
+enable_{{ service }}:
   cmd.run:
-    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub-initial@{{ pool }}.timer
-    - require:
-      - file: zpool-scrub-initial@.timer
+    - name: systemctl enable {{ service }}
+{% endfor %}
 
-zpool-scrub-resident@{{ pool }}.timer:
+{% for pool in settings.autoscrub.pools %}
+zpool-scrub@{{ pool }}.timer:
   cmd.run:
-    - name: systemctl {{ 'enable' if settings.autoscrub == true else 'disable' }} --now zpool-scrub-resident@{{ pool }}.timer
+    - name: systemctl {{ 'enable' if settings.autoscrub.enabled == true else 'disable' }} --now zpool-scrub@{{ pool }}.timer
     - require:
-      - file: zpool-scrub-resident@.timer
+      - file: zpool-scrub@.timer
+{% endfor %}
 
+{% for pool in settings.autotrim.pools %}
 zpool-trim@{{ pool }}.timer:
   cmd.run:
-    - name: systemctl {{ 'enable' if settings.autotrim == true else 'disable' }} --now zpool-trim@{{ pool }}.timer
+    - name: systemctl {{ 'enable' if settings.autotrim.enabled == true else 'disable' }} --now zpool-trim@{{ pool }}.timer
     - require:
       - file: zpool-trim@.timer
+{% endfor %}
 
-  {% for label in ['frequent', 'hourly', 'daily', 'weekly', 'monthly'] %}
-zfs-snapshot-{{ label }}@rpool.timer:
+{% for label in ['frequent', 'hourly', 'daily', 'weekly', 'monthly'] %}
+zfs-snapshot@{{ label }}.timer:
   cmd.run:
-    - name: systemctl {{ 'enable' if (settings.autosnapshot == true and settings.snapshot[label] != 0) else 'disable' }} --now zfs-snapshot-{{ label }}@rpool.timer
+    - name: systemctl {{ 'enable' if (settings.autosnapshot.enabled == true and settings.autosnapshot[label] != 0) else 'disable' }} --now zfs-snapshot-{{ label }}.timer
     - require:
-      - file: zfs-snapshot-{{ label }}@.timer
-  {% endfor %}
-
+      - file: zfs-snapshot-{{ label }}.timer
 {% endfor %}

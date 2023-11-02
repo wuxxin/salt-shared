@@ -13,8 +13,8 @@ zpool-trim@.service:
         Nice=19
         IOSchedulingClass=idle
         KillSignal=SIGINT
-        ExecStartPre=-/usr/sbin/zpool trim -c %I
-        ExecStart=/usr/sbin/zpool trim -w %I
+        ExecStartPre=-zpool trim -c %I
+        ExecStart=zpool trim -w %I
 
 zpool-trim@.timer:
   file.managed:
@@ -33,6 +33,7 @@ zpool-trim@.timer:
     - require:
       - file: zpool-trim@.service
 
+zpool-trim:
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:

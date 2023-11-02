@@ -1,14 +1,36 @@
 # zfs state
 
-see `defaults.jinja` for settings
+## Features
 
-## todo
+- autoscrub: cyclic data scrubbing of filesystem
+  - if enabled will execute once per month for 4 months, then once every 6 months
 
-+ implement non linear scrub
-  + for 8 weeks every 14days on sunday
-  + then every 6 months, but the first time after 4 months after the last 14days scan
-  + default: Scrub the second Sunday of every month.
-      +  24 0 8-14 * * root [ $(date +\%w) -eq 0 ] && [ -x /usr/lib/zfs-linux/scrub ] && /usr/lib/zfs-linux/scrub
+- autotrim: cyclic "automatic" manual start of trimming the filesystem
+  - if enabled will execute a manual trimming once per month
+
+- autosnapshot: cyclic rotating filesystem snapshots
+  - if enabled any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
+    is not false, a rotating snapshot will be taken.
+
+- arc_max_limit:
+  - if enabled, arc_max_percent will be used to calculate memory available for arc
+
+- default autoscrub and autotrim acts on rpool, for additional pools use eg.
+```yaml
+zfs:
+  autoscrub:
+    enabled: true
+    pools:
+      - rpool
+      - dpool
+  autotrim:
+    enabled: true
+    pools:
+      - rpool
+      - dpool
+```
+
+- see `defaults.jinja` for detailed settings
 
 ### snippets
 
