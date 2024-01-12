@@ -55,12 +55,18 @@ debug_tools:
       - pikaur
       # paru - Feature packed AUR helper
       - paru
+      # yay - Yet another yogurt. Pacman wrapper and AUR helper written in go
+      - yay
       # asp - downloading repo pkgbuilds
       - asp
       # devtools - build in chroot
       - devtools
+      # downgrade - Bash script for downgrading one or more packages to a version in your cache or the A.L.A.
+      - downgrade
       # aurutils - helper tools for the arch user repository
       - aurutils
+      # archosaur - a PKGBUILD management framework for the Arch User Repository
+      - archosaur
 {% endload %}
 {{ aur_install("build_tools-aur", pkgs, require="pkg: build_tools") }}
 
