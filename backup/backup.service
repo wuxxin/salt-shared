@@ -1,8 +1,10 @@
 [Unit]
 Description=Backup Service using Restic {{ '(Initial Run)' if instance_type == 'initial' }}
 After=network-online.target {{ settings.systemd.after }}
-Wants=network-online.target {{ settings.systemd.wants}}
-{% if settings.systemd.requires %}
+Wants=network-online.target {{ settings.systemd.wants }}
+{% if instance_type != 'initial' %}
+Requires=%n-initial {{ settings.systemd.requires }}
+{% elif settings.systemd.requires %}
 Requires={{ settings.systemd.requires }}
 {% endif %}
 {% if settings.systemd.onfailure %}
