@@ -30,6 +30,12 @@ python_tools_devel:
       # pylint - Analyzes Python code looking for bugs and signs of poor quality
       - python-pylint
 
+{% load_yaml as pkgs %}
+      # micromamba - C++ tiny version of mamba, the fast conda package installer
+      - micromamba
+{% endload %}
+{{ aur_install('python_tools_devel_aur', pkgs, require='pkg: python_tools_devel') }}
+
 python_tools_lsp:
   pkg.installed:
     - pkgs:
@@ -61,9 +67,7 @@ python_devices_libraries:
 
 python_network_libraries:
   pkg.installed:
-    - pkgs:
-      # requests - Python HTTP for Humans
-      - python-requests
+    - pkgs:machinelearning_base
       # websockets -  Python implementation of the WebSocket Protocol (RFC 6455)
       - python-websockets
       # paho-mqtt - Python client library for MQTT v3.1

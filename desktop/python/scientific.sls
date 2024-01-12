@@ -32,6 +32,8 @@ scientific_gui:
 {% load_yaml as pkgs %}
       # ttf-humor-sans - xkcd styled sans-serif typeface
       - ttf-humor-sans
+      # python-playwright - Python library to automate Chromium, Firefox and WebKit browsers with a single API
+      - python-playwright
 {% endload %}
 {{ aur_install("scientific_gui_aur", pkgs) }}
 
@@ -61,6 +63,15 @@ scientific_python:
       - python-seaborn
       # pyside6 - Enables the use of Qt6 APIs in Python applications
       - pyside6
+      - qt6-charts
+      - qt6-multimedia
+      - qt6-sensors
+      - qt6-serialport
+      - qt6-svg
+      - qt6-tools
+      - qt6-webchannel
+      - qt6-webengine
+      - qt6-websockets
     - require:
       - test: scientific_base
       - pkg: scientific_optimized

@@ -81,13 +81,12 @@ default:
       # jupyter-collaboration - Jupyter Real-Time Collaboration
       - jupyter-collaboration
       # jupyter-bokeh - extension for rendering Bokeh content within Jupyter.
-      - jupyter-bokeh
+      - jupyter_bokeh
       # ipysheet - Spreadsheet in the jupyter notebook
       - ipysheet
       # jupyterlab-geojson - A JupyterLab extension for rendering GeoJSON
       - jupyterlab-geojson
       - jupyterlab-system-monitor
-      - jupyterlab-bookmarks-extension
       - jupyterlab-cell-flash
       ## jupyterlab themes
       - theme-darcula
