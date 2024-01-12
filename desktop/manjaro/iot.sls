@@ -5,12 +5,14 @@ include:
   - desktop.manjaro.emulator
   - desktop.python
 
-esp-tools:
+embedded-tools:
   pkg.installed:
     - pkgs:
+      # platformio-core - An open source ecosystem for IoT development
+      - platformio-core
+      - platformio-core-udev
       # esptool - A cute Python utility to communicate with the ROM bootloader in Espressif ESP8266
       - esptool
-
 {% load_yaml as pkgs %}
       # esp-idf - Espressif IoT Development Framework. Official development framework for ESP32
       - esp-idf
@@ -21,4 +23,4 @@ esp-tools:
       # rshell - remote shell for working with MicroPython boards
       - rshell-micropython-git
 {% endload %}
-{{ aur_install("micropython-tools-aur", pkgs) }}
+{{ aur_install("embedded-tools-aur", pkgs) }}

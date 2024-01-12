@@ -27,6 +27,13 @@ manjaro-desktop:
       - manjaro-gstreamer
       - manjaro-printer
 
+manjaro-qt6:
+  pkg.installed:
+    - pkgs:
+      - qt6-base
+      - qt6-wayland
+      - qt6-multimedia-gstreamer
+
 # enable cups
 {% for s in ['service', 'socket', 'path'] %}
 cups.{{ s }}:

@@ -19,7 +19,8 @@ audio-converter:
 audio-editor:
   pkg.installed:
     - pkgs:
-      - audacity
+      # tenacity - An easy-to-use multi-track audio editor and recorder, forked from Audacity
+      - tenacity
 
 audio-workstation:
   pkg.installed:
@@ -40,9 +41,6 @@ browser:
       # - firefox
       # chromium - open source version of google-chrome web browser
       - chromium
-      # qutebrowser - keyboard-driven, vim-like browser based on PyQt5
-      - qutebrowser
-      - python-adblock
       - pdfjs
 {% load_yaml as pkgs %}
       # librewolf - Community-maintained fork of Firefox, focused on privacy, security and freedom
@@ -63,9 +61,8 @@ download:
     - pkgs:
       # Torrent Download Gui
       - transmission-gtk
-
       # yt-dlp - youtube-dl fork with additional features and fixes
-{{ pipx_install('yt-dlp', user=user) }}
+      - yt-dlp
 
 file-sync:
   pkg.installed:
@@ -131,7 +128,7 @@ password:
       - wl-clipboard
 {% load_yaml as pkgs %}
       - firefox-extension-keepassxc-browser
-      - chromium-keepassxc-browser
+      - chromium-extension-keepassxc-browser
       - git-credential-keepassxc
 {% endload %}
 {{ aur_install("password-aur", pkgs, require="pkg: password") }}
@@ -150,9 +147,6 @@ picture:
 # ### picture-pipx
 # lama-cleaner - Image inpainting tool powered by SOTA AI Model
 #    Remove any unwanted object, defect, people or erase and replace any thing on your pictures.
-{{ pipx_install('lama-cleaner', user=user, pipx_opts='--system-site-packages') }}
-# ImaginAIry - AI imagined images. Pythonic generation of stable diffusion images.
-{{ pipx_install('ImaginAIry', user=user, pipx_opts='--system-site-packages') }}
 
 pixel-graphic:
   pkg.installed:
@@ -170,6 +164,14 @@ privacy:
       - metadata-cleaner
 {% endload %}
 {{ aur_install("privacy-aur", pkgs, require="pkg: privacy") }}
+
+system-adm:
+  pkg.installed:
+    pkgs:
+      # systemd-ui - Graphical front-end for systemd
+      - systemd-ui
+      # systemdgenie - Systemd management utility (kde gui)
+      - systemdgenie
 
 # speech-to-text engine
 {% load_yaml as pkgs %}

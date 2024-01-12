@@ -19,6 +19,17 @@ language-go:
     - pkgs:
       - go
 
+language-java-runtime:
+  pkg.installed:
+    - pkgs:
+      - jre-openjdk-headless
+      - java-rhino
+
+language-java-sdk:
+  pkg.installed:
+    - pkgs:
+      - jdk
+
 language-rust:
   pkg.installed:
     - pkgs:
@@ -33,8 +44,6 @@ language-rust:
 development-ide:
   pkg.installed:
     - pkgs:
-      # pycharm-community-edition - Python IDE for Professional Developers
-      - pycharm-community-edition
       # bless - High-quality, full-featured hex editor
       - bless
 
