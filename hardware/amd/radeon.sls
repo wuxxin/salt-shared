@@ -1,3 +1,5 @@
+{% from 'aur/lib.sls' import aur_install, pamac_patch_install_dir with context %}
+
 # make system and initrd utility aware of the needed kernel modules
 /etc/modules-load.d/amd-gpu.conf:
   file.managed:
@@ -53,3 +55,9 @@ radeon:
     - pkgs:
       - radeontop
       - radeontool
+
+{% load_yaml as pkgs %}
+      # lact - AMDGPU Controller application
+      - lact
+{% endload %}
+{{ aur_install('radeon-aur', pkgs, require= 'pkg: radeon') }}
