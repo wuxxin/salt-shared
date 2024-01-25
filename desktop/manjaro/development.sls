@@ -192,10 +192,10 @@ devop-tools:
       - fakepkg
       # fakeroot-tcp - Tool for simulating superuser privileges,with tcp ipc
       - fakeroot-tcp
-      # selinux - SELinux
-      # SELinux module tools
-      - semodule-utils
-      - checkpolicy
+      # # selinux - SELinux
+      # # SELinux module tools
+      # - semodule-utils
+      # - checkpolicy
 
 {% endload %}
 {{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
