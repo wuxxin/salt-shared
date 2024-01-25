@@ -31,10 +31,14 @@ build_tools:
       - gnupg
       # cmake - cross-platform open-source make system
       - cmake
+      # ninja - Small build system with a focus on speed
+      - ninja
       # dkms - dynamic kernel modules system
       - dkms
       # archlinux-contrib - Collection of contrib scripts used in Arch Linux
       - archlinux-contrib
+      # rebuild-detector - Detects which packages need to be rebuilt
+      - rebuild-detector
       # pacman-contrib - Contributed scripts and tools for pacman systems
       - pacman-contrib
     - require:
