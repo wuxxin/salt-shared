@@ -1,4 +1,4 @@
-{% from 'aur/lib.sls' import aur_install with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 # enable aur, install group base-devel, build and debug tools
 
@@ -35,6 +35,8 @@ build_tools:
       - dkms
       # archlinux-contrib - Collection of contrib scripts used in Arch Linux
       - archlinux-contrib
+      # pacman-contrib - Contributed scripts and tools for pacman systems
+      - pacman-contrib
     - require:
       - pkg: build_essentials
 

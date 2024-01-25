@@ -1,4 +1,4 @@
-{% from 'aur/lib.sls' import aur_install, pamac_patch_install_dir with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 include:
   - hardware.amd.rocm

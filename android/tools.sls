@@ -2,7 +2,7 @@ include:
   - python
 
 {%- if grains['os'] == 'Manjaro' %}
-  {% from 'aur/lib.sls' import aur_install, pamac_patch_install, pamac_patch_install_dir with context %}
+  {% from 'arch/lib.sls' import aur_install with context %}
 
 android-tools:
   pkg.installed:

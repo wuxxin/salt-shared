@@ -1,5 +1,5 @@
 {# machinelearning #}
-{% from 'aur/lib.sls' import aur_install with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 include:
   - desktop.python.scientific

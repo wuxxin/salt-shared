@@ -1,4 +1,4 @@
-{% from 'aur/lib.sls' import aur_install with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 include:
   - qemu
@@ -41,6 +41,7 @@ cross-compiler-arm:
       - arm-none-eabi-newlib 
 
 {% load_yaml as pkgs %}
+      # android-studio-canary - The Official Android IDE (Canary branch)
       - android-studio-canary
 {% endload %}
 {{ aur_install("emulator-android-aur", pkgs,

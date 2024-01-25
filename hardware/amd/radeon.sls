@@ -1,4 +1,4 @@
-{% from 'aur/lib.sls' import aur_install, pamac_patch_install_dir with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 # make system and initrd utility aware of the needed kernel modules
 /etc/modules-load.d/amd-gpu.conf:

@@ -1,6 +1,6 @@
 {# scientific python #}
 {% from 'desktop/user/lib.sls' import user with context %}
-{% from 'aur/lib.sls' import aur_install with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 
 include:
   - desktop.python.development
