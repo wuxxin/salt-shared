@@ -11,6 +11,7 @@
 - netlink_diag
 - nf_conntrack
 - nf_nat
+- tun
 - xt_conntrack
 {% endload %}
 
