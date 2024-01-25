@@ -32,7 +32,7 @@ ml_tensorflow:
       - sls: hardware.amd.rocm.tensorflow
       - test: ml_base
 
-
+# ml_tools
 {% load_yaml as pkgs %}
       # aichat - Using ChatGPT/GPT-3.5/GPT-4 in the terminal
       - aichat
