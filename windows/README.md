@@ -3,9 +3,7 @@
 + download and install chocolatey
   + https://chocolatey.org/install
 
-+ install packages
++ install packages in administrative powershell
 ```
-choco install librewolf chromium brave tor-browser mupdf qpdf 7zip.install notepadplusplus.install  libreoffice-fresh inkscape youtube-dl vlc audacity gimp signal krita digikam kdeconnect-kde
+choco install librewolf chromium tor-browser mupdf qpdf libreoffice-fresh inkscape 7zip.install  youtube-dl vlc tenacity gimp signal krita digikam kdeconnect-kde w10privacy
 ```
-
-+ download and execute disable windows telemetry
