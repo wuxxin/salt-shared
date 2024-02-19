@@ -47,6 +47,8 @@ ml_libraries:
     - pkgs:
       # tensorboard - visualization and tooling needed for machine learning experimentation
       - tensorboard
+      # python-tiktoken - A fast BPE tokeniser for use with OpenAI's models
+      - python-tiktoken
     - require:
       - test: ml_base
 
