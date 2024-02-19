@@ -84,8 +84,6 @@ mail-calendar-contacts:
     - pkgs:
       # Mail,Calendar,Contacts,Notes
       - evolution
-      - highlight
-
 
 {% load_yaml as pkgs %}
       - tabbed-git

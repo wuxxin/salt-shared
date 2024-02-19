@@ -57,7 +57,7 @@ development-ide:
       # ida-free - feature full dissassembler
       - ida-free
       # imhex - Hex Editor for Reverse Engineers
-      - imhex
+      - imhex-bin
 {% endload %}
 {{ aur_install("development-ide-aur", pkgs) }}
 
@@ -124,8 +124,8 @@ development-tools:
       - viu
       # bat - Cat clone with syntax highlighting and git integration
       - bat
-      # moc - ncurses console audio player designed to be powerful and easy to use
-      - moc
+      # highlight - Fast and flexible source code highlighter
+      - highlight
       # mediainfo - Supplies technical and tag information about a video or audio
       - mediainfo
       # elinks - advanced and well-established feature-rich text mode web browser
@@ -137,12 +137,8 @@ development-tools:
       - yj
       # glow - Command-line markdown renderer
       - glow
-      # mods - AI for the command line, built for pipelines
-      - mods
       # nautilus-checksums - Add checksums to Nautilus' properties window
       - nautilus-checksums
-      # browsh - a fully-modern text-based browser based on remote controlled firefox
-      - browsh-bin
 {% endload %}
 {{ aur_install("development-tools-aur", pkgs) }}
 
