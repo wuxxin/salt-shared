@@ -80,8 +80,8 @@ scientific_python:
 
 {% load_yaml as pkgs %}
       ## scientific python
-      # pooch - fetching and caching data files
-      - python-pooch
+      # python-modin - Multicore Pandas Implementation - Speed up your Pandas workflows by changing a single line of code
+      - python-modin
       # scikit-image - Image processing routines for SciPy
       - python-scikit-image
       # bokeh - Interactive Web Plotting
@@ -90,6 +90,8 @@ scientific_python:
       - python-plotly
       # altair - Declarative statistical visualization library
       - python-altair
+      # pooch - fetching and caching data files
+      - python-pooch
 {% endload %}
 {{ aur_install('scientific_python_aur', pkgs,
     require='pkg: scientific_python') }}
