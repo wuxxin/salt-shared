@@ -11,7 +11,7 @@
   {%- endif %}
   {% if 'upgrade' in kwargs %}
     - upgrade: {{ kwargs['upgrade'] }}
-  {% elif python_settings['pip']['update']['automatic'] %}
+  {% elif settings['pip']['update']['automatic'] %}
     - upgrade: true
   {% endif %}
   {%- if 'bin_env' in kwargs %}
