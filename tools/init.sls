@@ -4,7 +4,7 @@ include:
   - tools.flatyaml      {# convert yaml to a flat key=value format #}
   - tools.sentry        {# sentrycat.py error reporting to sentry #}
 
-{% import_yaml 'tools.yml' as tools %}
+{% import_yaml 'tools/tools.yml' as tools %}
 
 {% if grains['os_family'] == 'Arch' %}
 base-tools:
