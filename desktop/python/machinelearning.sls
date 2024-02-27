@@ -6,41 +6,35 @@ include:
   - hardware.amd.rocm.pytorch
   - hardware.amd.rocm.tensorflow
   - hardware.amd.rocm.cupy
+  - hardware.amd.rocm.onnx
 
-ml_base:
+ml_pytorch:
   test.nop:
     - require:
+      - sls: hardware.amd.rocm.pytorch
       - sls: desktop.python.scientific
-      - sls: hardware.amd.rocm.cupy
+
+ml_tensorflow:
+  test.nop:
+    - require:
+      - sls: hardware.amd.rocm.tensorflow
+      - sls: desktop.python.scientific
 
 ml_scikit:
   pkg.installed:
     - pkgs:
       - python-scikit-learn
     - require:
-      - test: ml_base
+      - sls: desktop.python.scientific
 
-ml_pytorch:
+ml_base:
   test.nop:
     - require:
-      - sls: hardware.amd.rocm.pytorch
-      - test: ml_base
-
-ml_tensorflow:
-  test.nop:
-    - require:
-      - sls: hardware.amd.rocm.tensorflow
-      - test: ml_base
-
-# ml_tools
-{% load_yaml as pkgs %}
-      # aichat - Using ChatGPT/GPT-3.5/GPT-4 in the terminal
-      - aichat
-      # mods - AI for the command line, built for pipelines
-      - mods
-{% endload %}
-{{ aur_install('ml_tools_aur', pkgs) }}
-
+      - test: ml_pytorch
+      - test: ml_tensorflow
+      - pkg: ml_scikit
+      - sls: hardware.amd.rocm.cupy
+      - sls: hardware.amd.rocm.onnx
 
 ml_libraries:
   pkg.installed:
@@ -51,25 +45,31 @@ ml_libraries:
       - python-tiktoken
     - require:
       - test: ml_base
-
 {% load_yaml as pkgs %}
-      # onnx - C++ library for the open standard for machine learning interoperability
-      - onnx
-      # onnxruntime - Cross-platform, high performance scoring engine for ML models
-      - onnxruntime-bin
+      # python-transformers - State-of-the-art Natural Language Processing for Jax, PyTorch and TensorFlow
+      - python-transformers
       # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
       - python-deepspeed
 {% endload %}
 {{ aur_install('ml_libraries_aur', pkgs, require='pkg: ml_libraries') }}
 
+# ml_tools_aur
+{% load_yaml as pkgs %}
+      # aichat - Using ChatGPT/GPT-3.5/GPT-4 in the terminal
+      - aichat
+      # mods - AI for the command line, built for pipelines
+      - mods
+{% endload %}
+{{ aur_install('ml_tools_aur', pkgs) }}
 
+# ml_scikit_aur
 {% load_yaml as pkgs %}
       # Surprise - A Python scikit for building and analyzing recommender systems
       - python-scikit-surprise
 {% endload %}
-{{ aur_install('ml_scikit_extra_aur', pkgs, require='pkg: ml_scikit') }}
+{{ aur_install('ml_scikit_aur', pkgs, require='pkg: ml_scikit') }}
 
-
+# ml_pytorch_aur
 {% load_yaml as pkgs %}
       # torchtext - data processing utilities and popular datasets for natural language
       - python-torchtext
@@ -81,8 +81,6 @@ ml_libraries:
       - python-functorch
       # skorch - scikit-learn compatible neural network library that wraps PyTorchhttps://gandalf.lakera.ai/
       - python-skorch
-      # albumentations - image augmentation to create new training samples from the existing data
-      - python-albumentations
 {% endload %}
 {{ aur_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
 
