@@ -39,7 +39,7 @@ android-tools:
       # better-adb-sync-git - Synchronize files between a PC and an Android
       - better-adb-sync-git
       # adb-enhanced - Swiss-army knife for Android testing and development
-      - python-adb-enhanced 
+      # - python-adb-enhanced
       # - gnirehtet
 {% endload %}
 {{ aur_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
