@@ -165,18 +165,13 @@ privacy:
 
 system-adm:
   pkg.installed:
-    pkgs:
+    - pkgs:
       # systemd-ui - Graphical front-end for systemd
       - systemd-ui
       # systemdgenie - Systemd management utility (kde gui)
       - systemdgenie
 
 # speech-to-text engine
-{% load_yaml as pkgs %}
-      - deepspeech-bin
-      - deepspeech-models
-{% endload %}
-{{ aur_install("speech-to-text-aur", pkgs) }}
 
 # text-to-speech synthesizer
 {% load_yaml as pkgs %}
