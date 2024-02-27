@@ -1,14 +1,14 @@
 {# install addons for user applications #}
-{% macro addons_gnomeshell(pkglist) %}
+{% macro addons_gnomeshell(pkglist, require=None) %}
 {% endmacro %}
 
-{% macro addons_librewolf(pkglist) %}
+{% macro addons_librewolf(pkglist, require=None) %}
 {% endmacro %}
 
-{% macro addons_chromium(pkglist) %}
+{% macro addons_chromium(pkglist, require=None) %}
 {% endmacro %}
 
-{% macro addons_libreoffice(pkgdict) %}
+{% macro addons_libreoffice(pkgdict, require=None) %}
 {% endmacro %}
 
 {% macro user_install_oxt(user, identifier, url) %}
