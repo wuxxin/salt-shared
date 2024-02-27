@@ -32,7 +32,27 @@ manjaro-qt6:
     - pkgs:
       - qt6-base
       - qt6-wayland
+      - qt6-multimedia
       - qt6-multimedia-gstreamer
+      - qt6-multimedia-ffmpeg
+      - qt6-imageformats
+      - qt6-charts
+      - qt6-sensors
+      - qt6-serialport
+      - qt6-svg
+      - qt6-tools
+      - qt6-webchannel
+      - qt6-webengine
+      - qt6-websockets
+      - qt6-5compat
+
+manjaro-qt5:
+  pkg.installed:
+    - pkgs:
+      - qt5-base
+      - qt5-waylands
+      - qt5-multimedia
+      - qt5ct
 
 # enable cups
 {% for s in ['service', 'socket', 'path'] %}

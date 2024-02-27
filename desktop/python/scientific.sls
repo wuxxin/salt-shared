@@ -63,15 +63,6 @@ scientific_python:
       - python-seaborn
       # pyside6 - Enables the use of Qt6 APIs in Python applications
       - pyside6
-      - qt6-charts
-      - qt6-multimedia
-      - qt6-sensors
-      - qt6-serialport
-      - qt6-svg
-      - qt6-tools
-      - qt6-webchannel
-      - qt6-webengine
-      - qt6-websockets
     - require:
       - test: scientific_base
       - pkg: scientific_optimized
