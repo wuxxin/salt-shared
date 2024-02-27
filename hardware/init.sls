@@ -1,8 +1,7 @@
-include:
 {% if grains['virtual'] != 'physical' %}
+include:
   - hardware.virtual
 {% else %}
-  - hardware.acpi
 
 filesystem-tools:
   pkg.installed:
