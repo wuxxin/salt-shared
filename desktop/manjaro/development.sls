@@ -60,6 +60,10 @@ development-tools:
   pkg.installed:
     - pkgs:
       ## encryption
+      # gnupg - Complete and free implementation of the OpenPGP standard
+      - gnupg
+      # Secure Sockets Layer toolkit - cryptographic utility
+      - openssl
       # age - simple, modern and secure file encryption tool
       - age
       # minisign - A dead simple tool to sign files and verify digital signatures
@@ -103,6 +107,8 @@ development-tools:
       - urlwatch
 
       ## terminal
+      # tmux - terminal multiplexer like screen
+      - tmux
       # wezterm - GPU-accelerated cross-platform terminal emulator and multiplexer
       - wezterm
       # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
@@ -125,7 +131,15 @@ development-tools:
       - mediainfo
       # elinks - advanced and well-established feature-rich text mode web browser
       - elinks
-      
+
+      ### network monitor
+      - nload
+      - bmon
+      - iftop
+
+      ### task management
+      # pueue - task management for sequential and parallel execution of long-running tasks
+      - pueue
 {% load_yaml as pkgs %}
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
@@ -187,7 +201,6 @@ devop-tools:
       # # SELinux module tools
       # - semodule-utils
       # - checkpolicy
-
 {% endload %}
 {{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
