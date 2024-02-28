@@ -23,7 +23,6 @@ opengl:
 opencl:
   pkg.installed:
     - pkgs:
-      - opencl-mesa
       - opencl-headers
       - ocl-icd
       - clinfo

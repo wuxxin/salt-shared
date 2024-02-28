@@ -12,7 +12,7 @@ pytorch:
       - sls: hardware.amd.rocm
       
 # torchvision - Datasets, transforms, and models specific to computer vision
-{{ aur_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') }}
+{# aur_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') #}
 
 # torchaudio - Data manipulation and transformation for audio signal processing
-{{ aur_install('python-torchaudio-rocm', ['python-torchaudio-rocm', ], require='pkg: pytorch') }}
+{# aur_install('python-torchaudio-rocm', ['python-torchaudio-rocm', ], require='pkg: pytorch') #}
