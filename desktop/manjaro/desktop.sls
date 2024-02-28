@@ -7,6 +7,7 @@ manjaro-pipewire:
       - pipewire-jack
       - pipewire-v4l2
       - pipewire-x11-bell
+      - lib32-pipewire-jack
 
 manjaro-pulse:
   pkg.removed:
