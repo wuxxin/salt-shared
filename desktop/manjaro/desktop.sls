@@ -50,7 +50,7 @@ manjaro-qt5:
   pkg.installed:
     - pkgs:
       - qt5-base
-      - qt5-waylands
+      - qt5-wayland
       - qt5-multimedia
       - qt5ct
 
