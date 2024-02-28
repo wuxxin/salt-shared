@@ -61,14 +61,14 @@ emulator-windows:
       - wine-gecko
       # vkd3d - Direct3D 12 to Vulkan translation library By WineHQ
       - vkd3d
+
+{% load_yaml as pkgs %}
       # bottles - tailored windows configurations
       - bottles
-
-emulator-windows-games:
-  pkg.installed:
-    - pkgs:
       # arch-gaming-meta - Meta package for Gaming including Steam, Lutris, Wine, essential gaming+proprietary libraries & several other dependencies
       - arch-gaming-meta
+{% endload %}
+{# aur_install("emulator-windows-aur", pkgs, require= "pkg:emulator-windows" ) #}
 
 emulator-arcade:
   pkg.installed:
