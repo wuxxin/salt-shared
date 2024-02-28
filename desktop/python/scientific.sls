@@ -72,7 +72,7 @@ scientific_python:
 {% load_yaml as pkgs %}
       ## scientific python
       # python-modin - Multicore Pandas Implementation - Speed up your Pandas workflows by changing a single line of code
-      - python-modin
+      # - python-modin
       # scikit-image - Image processing routines for SciPy
       - python-scikit-image
       # bokeh - Interactive Web Plotting
