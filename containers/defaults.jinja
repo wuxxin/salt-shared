@@ -16,12 +16,12 @@ config:
       runroot: "/run/containers/storage"
       graphroot: "/var/lib/containers/storage"
 
-      # storage options
-      options:
-        root-auto-userns-user: containers
-        overlay:
-          mount_program: "/usr/bin/fuse-overlayfs"
-          mountopt: "nodev,metacopy=on"
+      # # storage options
+      # options:
+      #   root-auto-userns-user: containers
+      #   overlay:
+      #     mount_program: "/usr/bin/fuse-overlayfs"
+      #     mountopt: "nodev,metacopy=on"
 
   mounts:
     # /etc/containers/mounts.conf
