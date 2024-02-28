@@ -67,7 +67,7 @@ openssh-server:
 filter_weak_moduli:
   cmd.run:
     - name: awk '$5 >= {{ minimum_moduli }}' /etc/ssh/moduli > /etc/ssh/moduli.tmp && mv /etc/ssh/moduli.tmp /etc/ssh/moduli
-    - unless: awk '$5 < {{ minimum_moduli }}{exit 1}' /etc/ssh/moduli
+    - unless: grep -v "^#" /etc/ssh/moduli | awk '$5 < {{ minimum_moduli }} { exit 1 }'
     - require:
       - pkg: openssh
     - watch_in:
