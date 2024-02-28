@@ -21,11 +21,11 @@ android-tools:
       - mitmproxy
 {% load_yaml as pkgs %}
       #  android-bash-completion - Bash completion for android, adb, emulator, fastboot, and repo
-      - android-bash-completion Bash completion for android, adb, emulator, fastboot, and repo
+      - android-bash-completion
       # fdroidcl - F-Droid desktop client
       - fdroidcl
       # sndcpy-bin - Android audio forwarding (scrcpy, but for audio)
-      - sndcpy-bin
+      # - sndcpy-bin
       # gplaycli - search, install, update Android applications from the Google Play Store
       - gplaycli
       # android-apktool - tool for reengineering Android apk files
