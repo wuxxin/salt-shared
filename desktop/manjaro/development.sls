@@ -19,16 +19,11 @@ language-go:
     - pkgs:
       - go
 
-language-java-runtime:
+language-java:
   pkg.installed:
     - pkgs:
-      - jre-openjdk-headless
+      - jdk-openjdk
       - java-rhino
-
-language-java-sdk:
-  pkg.installed:
-    - pkgs:
-      - jdk
 
 language-rust:
   pkg.installed:
