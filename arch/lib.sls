@@ -37,7 +37,7 @@ trusted-repo-{{ name }}:
 
 "{{ name }}":
   cmd.run:
-    - name: pamac install --no-confirm {{ pkgs|join(' ') }}
+    - name: pamac install --no-confirm --no-upgrade {{ pkgs|join(' ') }}
     - unless: |
         test "$(comm -13 \
           <(pamac list -i -q | sort) \
