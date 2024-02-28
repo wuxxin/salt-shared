@@ -1,35 +1,6 @@
 ### system console tools
 
 pkgs:
-  arch:
-    ### network monitor
-    - nload
-    - bmon
-    - iftop
-    
-    ### disk/io monitor
-    - dstat
-    # lfs - modern df replacement
-    - lfs
-    
-    ### task management
-    # pueue - task management for sequential and parallel execution of long-running tasks
-    - pueue
-    
-    ## editor
-    # hexedit - View and edit files in hexadecimal or in ASCII
-    - hexedit
-    
-    ## encryption
-    # gnupg - Complete and free implementation of the OpenPGP standard
-    - gnupg
-    # Secure Sockets Layer toolkit - cryptographic utility
-    - openssl         
-
-    ## terminal tools
-    # tmux - terminal multiplexer like screen
-    - tmux            
-
   debian:
     ### system tools
     # alternative to "su" and "sudo"
