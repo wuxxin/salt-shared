@@ -9,6 +9,15 @@ zfs-utils:
   pkg:
     - installed
 
+{% if grains['os_family'] == "Arch" %}
+{% from 'arch/lib.sls' import aur_install with context %}
+{% load_yaml as pkgs %}
+      # zfs-undelete - an easy-to-use cli tool to recover files from zfs snapshots
+      - zfs-undelete
+{% endload %}
+{{ aur_install("audio-pipewire-aur", pkgs) }}
+{% endif %}
+
 /etc/modprobe.d/zfs.conf:
   file:
 {% if settings.arc_max_limit == true %}
