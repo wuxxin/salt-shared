@@ -1,4 +1,5 @@
 {# scientific python #}
+{% from 'python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
 {% from 'arch/lib.sls' import aur_install with context %}
 
@@ -37,6 +38,9 @@ scientific_gui:
 {% endload %}
 {{ aur_install("scientific_gui_aur", pkgs) }}
 
+# scientific_gui_pipx
+# marimo - reactive Python notebook that's reproducible, git-friendly, and deployable as scripts or apps
+{{ pipx_install('marimo', user=user) }}
 
 scientific_python:
   pkg.installed:
@@ -72,7 +76,7 @@ scientific_python:
 {% load_yaml as pkgs %}
       ## scientific python
       # python-modin - Multicore Pandas Implementation - Speed up your Pandas workflows by changing a single line of code
-      # - python-modin
+      - python-modin
       # scikit-image - Image processing routines for SciPy
       - python-scikit-image
       # bokeh - Interactive Web Plotting
