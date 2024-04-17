@@ -1,5 +1,3 @@
-{% from 'python/lib.sls' import pipx_install %}
-{% from 'desktop/user/lib.sls' import user with context %}
 {% from 'arch/lib.sls' import aur_install with context %}
 
 include:
@@ -65,6 +63,7 @@ python_linting_formatting:
       - python-ruff 
       # rope - Refactoring library
       - python-rope
+
       ## replaced formatting/linting/auditing/refactoring tools
       # yapf - code audit and reformating
       # - yapf
@@ -93,6 +92,8 @@ python_tools_lsp:
       - yaml-language-server
 {% load_yaml as pkgs %}
       ## language server languages
+      # pylyzer - fast static code analyzer & language server for Python
+      - pylyzer-git
       # python-lsp-ruff - python-lsp-server plugin for extensive and fast linting using ruff
       - python-lsp-ruff
       # python-pylsp-mypy - Static type checking for python-lsp-server with mypy
@@ -107,5 +108,3 @@ python_tools_lsp:
 {{ aur_install('python_tools_lsp_aur', pkgs,
     require='pkg: python_tools_lsp') }}
 
-
-# python_tools_pipx
