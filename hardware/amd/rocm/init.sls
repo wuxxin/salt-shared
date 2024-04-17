@@ -12,6 +12,14 @@ rocm-sdk:
       - sls: hardware.amd.radeon
       - sls: python.dev
 
+rocm-magma:
+  pkg.installed:
+    - pkgs:
+      # magma-hip - Matrix Algebra on GPU and Multicore Architectures (with ROCm/HIP)
+      - magma-hip
+    - require:
+      - pkg: rocm-sdk
+
 rocm-opencl:
   pkg.installed:
     - pkgs:
