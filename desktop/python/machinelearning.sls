@@ -7,6 +7,8 @@ include:
   - hardware.amd.rocm.tensorflow
   - hardware.amd.rocm.cupy
   - hardware.amd.rocm.onnx
+  - hardware.amd.rocm.localai
+  - hardware.amd.rocm.koboldcpp
 
 ml_pytorch:
   test.nop:
@@ -35,14 +37,16 @@ ml_base:
       - pkg: ml_scikit
       - sls: hardware.amd.rocm.cupy
       - sls: hardware.amd.rocm.onnx
+      - sls: hardware.amd.rocm.localai
+      - sls: hardware.amd.rocm.koboldcpp
 
 ml_libraries:
   pkg.installed:
     - pkgs:
-      # tensorboard - visualization and tooling needed for machine learning experimentation
-      - tensorboard
       # python-tiktoken - A fast BPE tokeniser for use with OpenAI's models
       - python-tiktoken
+      # tensorboard - visualization and tooling needed for machine learning experimentation
+      - tensorboard
     - require:
       - test: ml_base
 {% load_yaml as pkgs %}
@@ -59,6 +63,8 @@ ml_libraries:
       - aichat
       # mods - AI for the command line, built for pipelines
       - mods
+      # chatgpt.sh - Shell wrapper for OpenAI's ChatGPT, DALL-E, Whisper, and TTS.
+      - chatgpt.sh
 {% endload %}
 {{ aur_install('ml_tools_aur', pkgs) }}
 
