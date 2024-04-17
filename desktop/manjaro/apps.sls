@@ -4,11 +4,13 @@
 include:
   - python
 
-audio-effects:
+audio-pipewire:
   pkg.installed:
     - pkgs:
       - easyeffects
       - helvum
+      # coppwr - Low level PipeWire control GUI
+      - coppwr
 
 audio-converter:
   pkg.installed:
@@ -55,6 +57,7 @@ chat:
     - pkgs:
       - element-desktop
       - signal-desktop
+      - telegram-desktop
 
 download:
   pkg.installed:
@@ -118,6 +121,10 @@ paper:
     - pkgs:
       # paperwork - personal document manager, scanning, ocr, sorting, searching
       - paperwork
+      # tesseract - tesseract OCR Engine
+      - tesseract
+      - tesseract-data-eng
+      - tesseract-data-deu
 
 password:
   pkg.installed:
@@ -131,14 +138,29 @@ password:
 {% endload %}
 {{ aur_install("password-aur", pkgs, require="pkg: password") }}
 
+pdf-tools:
+  pkg.installed:
+    - pkgs:
+      # evince - Document viewer (PDF, PostScript, XPS, djvu, dvi, tiff, cbr, cbz, cb7, cbt)
+      - evince
+      # mupdf - Lightweight PDF and XPS viewer
+      - mupdf
+      - mupdf-tools
+{% load_yaml as pkgs %}
+      # sioyek - PDF viewer with a focus on textbooks and research papers
+      - sioyek
+{% endload %}
+{{ aur_install("pdf-viewer-aur", pkgs) }}
+
 picture:
   pkg.installed:
     - pkgs:
       - darktable
       - digikam
-      - hugin
       # nautilus-image-converter - extension to rotate/resize image files
       - nautilus-image-converter
+      # loupe - simple image viewer for GNOME
+      - loupe
       # imv - Image viewer for Wayland and X11
       - imv
 
@@ -227,6 +249,8 @@ video-studio:
     - pkgs:
       - obs-studio
       - sndio
+      # snapshot -  Take pictures and videos
+      - snapshot
 {% load_yaml as pkgs %}
       - webcamoid
 {% endload %}
