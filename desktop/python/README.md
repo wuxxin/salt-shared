@@ -4,11 +4,10 @@ PipX based Systemd User Service of Jupyter Server \& Chromium as Desktop Web-App
 
 ### Features
 
-+ sufficiently secure local jupyter setup
++ simple local jupyter setup
 
 + machine wide packages
   + hardware support for **amd rocm** gpu's
-    + pytorch-rocm, torchvision-rocm, tensorflow-rocm, jax-rocm, deepspeed
   + python packages installed **as system packages**,
   + python packages **build from aur** installed **as system packages**
 
@@ -23,8 +22,8 @@ PipX based Systemd User Service of Jupyter Server \& Chromium as Desktop Web-App
 
 This way all system specific hardware related base libraries and python entrypoints
 are systemwide installed, and all jupyter related is bundled in a pipx application,
-systemd user units calling this pipx app as a jupyer server,
-and a custom chromium as webapp config launch is used for the gui
+systemd user units calling this pipx app as a jupyter server,
+and a custom chromium as webapp config launch is used for the gui.
 
 
 ### Usage
@@ -45,7 +44,7 @@ jupyter:
         - fastai
 ```
 
-- start jupyter service: `sytemctl --user start jupyter-core`
+- start jupyter service: `systemctl --user start jupyter-core`
 - start chromium client: in gnome shell: Jupyter Lab
 
 ### Notes
