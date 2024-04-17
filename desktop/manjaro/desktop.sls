@@ -1,3 +1,4 @@
+{% from 'arch/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 manjaro-pipewire:
@@ -5,10 +6,31 @@ manjaro-pipewire:
     - pkgs:
       - manjaro-pipewire
       - pipewire-jack
+      - pipewire-pulse
       - pipewire-v4l2
+      - pipewire-roc
       - pipewire-x11-bell
       - lib32-pipewire-jack
+      - qemu-audio-pipewire
+      - wireplumber
 
+{% load_yaml as pkgs %}
+      # wayland-pipewire-idle-inhibit - Inhibit wayland idle when computer is playing sound
+      - wayland-pipewire-idle-inhibit
+{% endload %}
+{{ aur_install("audio-pipewire-aur", pkgs) }}
+
+enable_wayland-pipewire-idle-inhibit:
+  file.symlink:
+    - name: {{ user_home+ '/.config/systemd/user/graphical-session.target.wants/wayland-pipewire-idle-inhibit.service' }}
+    - target: /usr/lib/systemd/user/wayland-pipewire-idle-inhibit.service
+    - makedirs: true
+    - user: {{ user }}
+    - group: {{ user }}
+    - require:
+      - test: audio-pipewire-aur
+
+# remove traces of pulse audio
 manjaro-pulse:
   pkg.removed:
     - pkgs:
@@ -22,11 +44,18 @@ manjaro-pulse:
       - pulseaudio-zeroconf
       - pulseaudio
 
-manjaro-desktop:
+# remove snapd and dependencies
+manjaro-snap:
+  pkg.removed:
+    - pkgs:
+      - libpamac-snap-plugin
+      - snapd
+
+manjaro-gstreamer:
   pkg.installed:
     - pkgs:
       - manjaro-gstreamer
-      - manjaro-printer
+      - gst-plugin-pipewire
 
 manjaro-qt6:
   pkg.installed:
@@ -55,12 +84,17 @@ manjaro-qt5:
       - qt5-multimedia
       - qt5ct
 
-# enable cups
+# cups
+manjaro-printer:
+  pkg.installed:
+    - pkgs:
+      - manjaro-printer
+
 {% for s in ['service', 'socket', 'path'] %}
 cups.{{ s }}:
-  service.enabled:
+  service.disabled:
     - require:
-      - pkg: manjaro-desktop
+      - pkg: manjaro-printer
 {% endfor %}
 
 # make sure wayland as gui platform is used
