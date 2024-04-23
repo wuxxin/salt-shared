@@ -121,6 +121,8 @@ development-tools:
       - nnn
 
       ### viewer
+      # tokei - blazingly fast CLOC (Count Lines Of Code) program
+      - tokei
       # viu - Simple terminal image viewer
       - viu
       # bat - Cat clone with syntax highlighting and git integration
@@ -156,6 +158,8 @@ devop-tools:
   pkg.installed:
     - pkgs:
       ## devop
+      # jose - C-language implementation of Javascript Object Signing and Encryption
+      - jose
       # mosquitto - Open Source MQTT Broker
       - mosquitto
       # vault - A tool for managing secrets
