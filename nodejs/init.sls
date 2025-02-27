@@ -15,9 +15,8 @@ nodejs:
 
 nodejs:
   pkg.installed:
-    # - name: nodejs
-    # nodejs V20.x.x = Iron
-    - name: nodejs-lts-iron
+    - name: nodejs
+    # - name: nodejs-lts-jod
 
 {% endif %}
 
