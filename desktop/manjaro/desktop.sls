@@ -5,12 +5,16 @@ manjaro-pipewire:
   pkg.installed:
     - pkgs:
       - manjaro-pipewire
+      - pipewire-alsa
       - pipewire-jack
       - pipewire-pulse
       - pipewire-v4l2
       - pipewire-roc
       - pipewire-x11-bell
+      - pipewire-libcamera
+      - sof-firmware
       - lib32-pipewire-jack
+      - lib32-pipewire-v4l2
       - qemu-audio-pipewire
       - wireplumber
 
@@ -18,7 +22,7 @@ manjaro-pipewire:
       # wayland-pipewire-idle-inhibit - Inhibit wayland idle when computer is playing sound
       - wayland-pipewire-idle-inhibit
 {% endload %}
-{{ aur_install("audio-pipewire-aur", pkgs) }}
+{{ aur_install("manjaro-pipewire-aur", pkgs) }}
 
 enable_wayland-pipewire-idle-inhibit:
   file.symlink:
@@ -55,6 +59,7 @@ manjaro-gstreamer:
   pkg.installed:
     - pkgs:
       - manjaro-gstreamer
+      - gstreamer-vaapi
       - gst-plugin-pipewire
 
 manjaro-qt6:
