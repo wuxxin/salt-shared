@@ -50,5 +50,4 @@ security-tools:
 
 # security-tools-pipx
 
-# pywhat - Identify anything. identify emails, IP addresses, and more. Feed it a .pcap file or some text
-{# pipx_install('pywhat', user=user) #}
+{# pipx_install('xxx', user=user) #}
