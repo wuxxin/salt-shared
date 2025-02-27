@@ -24,7 +24,6 @@ server setup; many open files, network connections, processes, containers, etc.
     + not included by default: sysctl.tcp-bbr
 + kernel.lxc
     + install cgroup tools and support files for lxc powered virtualization
-+ kernel.nfs
 + kernel.network
     + activate typical used network kernel modules, install helper utilities
 + systemd.cgroup
