@@ -15,6 +15,16 @@ python_network_libraries:
       - python-paho-mqtt
       # python-grpcio - Python language bindings for grpc, remote procedure call (RPC) framework
       - python-grpcio
+      # python-aiohttp - HTTP client/server for asyncio
+      - python-aiohttp
+      # python-aiosmtpd - An asyncio based SMTP server
+      - python-aiosmtpd
+{% load_yaml as pkgs %}
+      # python-aiosmtplib - asyncio smtplib implementation
+      - python-aiosmtplib
+{% endload %}
+{{ aur_install('python_network_libraries_aur', pkgs,
+    require='pkg: python_network_libraries') }}
 
 python_devices_libraries:
   pkg.installed:
@@ -27,17 +37,18 @@ python_devices_libraries:
       - python-nfc
       # bleak - cross platform Bluetooth Low Energy Client for Python using asyncio
       - python-bleak
+{% load_yaml as pkgs %}
+      # getkey - Python library to easily read single chars and key strokes
+      - python-getkey
+{% endload %}
+{{ aur_install('python_devices_libraries_aur', pkgs,
+    require='pkg: python_devices_libraries') }}
 
 python_devel_tools:
   pkg.installed:
     - pkgs:
       # cookiecutter - creates projects from cookiecutters project templates
       - python-cookiecutter
-{% load_yaml as pkgs %}
-      # micromamba - C++ tiny version of mamba, the fast conda package installer
-      - micromamba
-{% endload %}
-{{ aur_install('python_devel_tools_aur', pkgs) }}
 
 python_conversion_libraries:
   pkg.installed:
@@ -61,8 +72,6 @@ python_linting_formatting:
       - ruff 
       # python-ruff - An extremely fast Python linter, written in Rust
       - python-ruff 
-      # rope - Refactoring library
-      - python-rope
 
       ## replaced formatting/linting/auditing/refactoring tools
       # yapf - code audit and reformating
@@ -75,6 +84,8 @@ python_linting_formatting:
       # - autopep8
       # pylint - Analyzes Python code looking for bugs and signs of poor quality
       # - python-pylint
+      # rope - Refactoring library
+      # - python-rope
 
 python_tools_lsp:
   pkg.installed:
@@ -88,22 +99,20 @@ python_tools_lsp:
       - python-lsp-black
       # bash-language-server - bash language server implementation
       - bash-language-server
-      # yaml-language-server - YAML Language Server
-      - yaml-language-server
 {% load_yaml as pkgs %}
       ## language server languages
       # pylyzer - fast static code analyzer & language server for Python
-      - pylyzer-git
+      - pylyzer
       # python-lsp-ruff - python-lsp-server plugin for extensive and fast linting using ruff
       - python-lsp-ruff
       # python-pylsp-mypy - Static type checking for python-lsp-server with mypy
       - python-pylsp-mypy
       # python-pylsp-rope - Extended refactoring capabilities for Python LSP Server using Rope
-      - python-pylsp-rope
+      # - python-pylsp-rope
       # dockerfile-language-server - Language server for Dockerfiles
-      - dockerfile-language-server
+      # - dockerfile-language-server
       # cmake-language-server - Python based cmake language server
-      - cmake-language-server
+      # - cmake-language-server
 {% endload %}
 {{ aur_install('python_tools_lsp_aur', pkgs,
     require='pkg: python_tools_lsp') }}
