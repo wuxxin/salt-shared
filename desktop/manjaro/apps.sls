@@ -7,16 +7,26 @@ include:
 audio-pipewire:
   pkg.installed:
     - pkgs:
+      # easyeffects - Audio Effects for Pipewire applications
       - easyeffects
+      # helvum - patchbay for pipewire, inspired by the JACK tool catia
       - helvum
       # coppwr - Low level PipeWire control GUI
       - coppwr
+{% load_yaml as pkgs %}
+      # Pipewire volume control for GNOME
+      - pwvucontrol
+{% endload %}
+{{ aur_install("audio-pipewire-aur", pkgs) }}
+
 
 audio-converter:
   pkg.installed:
     - pkgs:
       - sox
       - soundconverter
+      # whipper - Python CD-DA ripper preferring accuracy over speed
+      - whipper
 
 audio-editor:
   pkg.installed:
@@ -52,6 +62,14 @@ browser:
     require=["test: trusted-repo-librewolf", "test: trusted-repo-librewolf-bin",
         "pkg: browser", "pkg: password", "test: password-aur"]) }}
 
+cad:
+  pkg.installed:
+    - pkgs:
+      # freecad - Feature based parametric 3D CAD modeler
+      - freecad
+      # openscad - programmers solid 3D CAD modeller
+      - openscad
+
 chat:
   pkg.installed:
     - pkgs:
@@ -67,6 +85,19 @@ download:
       # yt-dlp - youtube-dl fork with additional features and fixes
       - yt-dlp
 
+fediverse:
+  pkg.installed:
+    - pkgs:
+      # tokodon - Mastodon client for Plasma
+      - tokodon
+      # tuba - Browse the Fediverse
+      - tuba
+{% load_yaml as pkgs %}
+      # whalebird - Single-column Fediverse client for desktop
+      - whalebird
+{% endload %}
+{{ aur_install("fediverse-aur", pkgs) }}
+
 file-sync:
   pkg.installed:
     - pkgs:
@@ -81,6 +112,12 @@ file-rename:
       # pipe-rename -  list of files as input, opens $EDITOR, then renames those files accordingly
       # eg. find . -regex ".*[][?():'\"\!,&|].*" -print0 | xargs -0 renamer
       - pipe-rename
+
+gnome-extensions:
+  pkg.installed:
+    - pkgs:
+      # gnome-browser-connector - Native browser connector for integration with extensions.gnome.org
+      - gnome-browser-connector
 
 mail-calendar-contacts:
   pkg.installed:
@@ -243,15 +280,20 @@ video-player:
   pkg.installed:
     - pkgs:
       - vlc
+{% load_yaml as pkgs %}
+      - vlc-plugin-pipewire
+{% endload %}
+{{ aur_install("video-player-aur", pkgs) }}
 
 video-studio:
   pkg.installed:
     - pkgs:
       - obs-studio
       - sndio
-      # snapshot -  Take pictures and videos
+      # snapshot - Take pictures and videos
       - snapshot
 {% load_yaml as pkgs %}
       - webcamoid
+      - obs-pipewire-audio-capture
 {% endload %}
 {{ aur_install("video-studio-aur", pkgs) }}
