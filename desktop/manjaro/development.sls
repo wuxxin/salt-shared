@@ -14,6 +14,14 @@ language-asm:
       # nasm - 80x86 assembler designed for portability and modularity
       - nasm
 
+language-js:
+  pkg.installed:
+    - pkgs:
+      # nodejs - Evented I/O for V8 javascript ("Current" release)
+      - nodejs
+      # eslint - AST-based pattern checker for JavaScript
+      - eslint
+
 language-go:
   pkg.installed:
     - pkgs:
@@ -29,6 +37,14 @@ language-rust:
   pkg.installed:
     - pkgs:
       - rust
+      # rust-analyzer - Rust compiler front-end for IDEs
+      - rust-analyzer
+
+linker-mold:
+  pkg.installed:
+    - pkgs:
+      # mold - A Modern Linker
+      - mold
 
 # development-fonts:
 #   pkg.installed:
@@ -39,16 +55,20 @@ language-rust:
 development-ide:
   pkg.installed:
     - pkgs:
+      # code - The Open Source build of Visual Studio Code (vscode) editor
+      - code
+      # zed - high-performance, multiplayer code editor from the creators of Atom and Tree-sitter
+      - zed
       # bless - High-quality, full-featured hex editor
       - bless
 
 {% load_yaml as pkgs %}
+      # code-features- Unblock some features in Code OSS
+      - code-features
+      # code-marketplace - Enable vscode marketplace in Code OSS
+      - code-marketplace
       # gnome-text-editor - Simple text editor that focuses on session management
       - gnome-text-editor
-      # vscodium - Free/Libre Open Source Software Binaries of VSCode
-      - vscodium
-      - vscodium-features
-      - vscodium-marketplace
       # ida-free - feature full dissassembler
       - ida-free
       # imhex - Hex Editor for Reverse Engineers
@@ -79,10 +99,16 @@ development-tools:
       # pandoc - Conversion between markup formats, export to pdf
       - pandoc-cli
       - pandoc-crossref
+      # pandoc pdfconversion needs lmodern.sty which is in texlive-fontrecommended
+      - texlive-fontsrecommended
       # marp - Markdown Presentation Ecosystem
       - marp-cli
       # csvkit - suite of utilities for converting to and working with CSV
       - csvkit
+
+      ## compression
+      # upx -Extendable, high-performance executable packer for several executable formats
+      - upx
 
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
@@ -168,7 +194,8 @@ devop-tools:
       - step-cli
       # macchanger - small utility to change your NIC's MAC address
       - macchanger
-
+      # kompose - Docker compose to Kubernetes transformation tool
+      - kompose
 
 {{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705",
     "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
@@ -179,7 +206,7 @@ devop-tools:
 
 {% load_yaml as pkgs %}
       ## devop
-      # mqttui - Subscribe to a MQTT Topic or publish  quickly from the terminal
+      # mqttui - Subscribe to a MQTT Topic or publish quickly from the terminal
       - mqttui
       # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
       - dns-lexicon
