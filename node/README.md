@@ -5,11 +5,9 @@ Configures hostname, users, groups, locales, location, network, storage
 + .locale
   + configure language, messages, timezone, location
 + .network
-  + add internal bridge (uses netplan or systemd or ifup depending avaiability)
+  + add netplan.yaml or systemd.netdev/network files if present in pillar
+  + add internal bridge (uses networkmanager, netplan, systemd or ifup depending avaiability)
   + configure nsswitch.conf@hosts line for dns name lookup order
-  + install and configure nfs-common (and rpcbind) to only listen to localhost
-    + use pillar: "nfs:listen_ip" to overwrite the default list
-  + add netplan or systemd.netdev/network files if present in pillar
 + .hostname
   + Configures hostname
 + .accounts
@@ -69,7 +67,7 @@ node:
   network:
     internal:
       cidr: 10.140.250.1/24
-      name: resident
+      name: internal
       # computed if empty:
       # ip, netcidr, netmask, reverse_net, short_net
     netplan: ""

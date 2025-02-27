@@ -1,5 +1,33 @@
 {% macro add_internal_bridge(bridge_name, bridge_cidr, priority=80) %}
-  {% if salt['cmd.retcode']('which netplan') == 0 %}
+  {% if salt['cmd.retcode']('which nmcli') == 0 %}
+bridge_{{ bridge_name }}:
+  file.managed:
+    - name: /etc/NetworkManager/system-connections/{{ bridge_name }}
+    - makedirs: true
+    - mode: 0600
+    - contents: |
+        [connection]
+        id={{ bridge_name }}
+        interface-name={{ bridge_name }}
+        type=bridge
+        autoconnect=true
+
+        [device]
+        type=bridge
+        name={{ bridge_name }}
+
+        [bridge]
+        stp=false
+
+        [ipv4]
+        method=manual
+        address={{ bridge_cidr }}
+  cmd.run:
+    - name: nmcli connection reload
+    - onchanges:
+      - file: bridge_{{ bridge_name }}
+
+  {% elif salt['cmd.retcode']('which netplan') == 0 %}
 bridge_{{ bridge_name }}:
   file.managed:
     - name: /etc/netplan/{{ priority }}-{{ bridge_name }}.yaml

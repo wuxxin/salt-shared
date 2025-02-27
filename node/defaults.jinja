@@ -4,8 +4,8 @@
 {% macro reverse_net(cidr) %}{{ salt['network.reverse_ip'](netcidr(cidr))|regex_replace('[^.]+\\.(.+)$', '\\1') }}{% endmacro %}
 {% macro short_net(cidr) %}{{ cidr2ip(netcidr(cidr))|regex_replace('(.+)\\.[^.]+$', '\\1') }}{% endmacro %}
 
-{% set internal_cidr = salt['pillar.get']('node:network:internal:cidr', '10.140.250.1/24') %}
-{% set internal_name = salt['pillar.get']('node:network:internal:name', 'resident') %}
+{% set internal_cidr = salt['pillar.get']('node:network:internal:cidr', '10.87.240.1/24') %}
+{% set internal_name = salt['pillar.get']('node:network:internal:name', 'internal') %}
 
 
 {# defaults #}

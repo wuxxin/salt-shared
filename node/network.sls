@@ -1,11 +1,6 @@
 {% from "node/defaults.jinja" import settings with context %}
 {% from "node/lib.sls" import add_internal_bridge %}
 
-include:
-  - ssh
-{% if grains['os_family'] == "Debian" %}
-  - kernel.nfs
-
 {# additional systemd specific nsswitch libraries #}
 nsswitch.packages:
   pkg.installed:
@@ -14,7 +9,6 @@ nsswitch.packages:
       - libnss-mymachines
       - libnss-systemd
       - libnss-myhostname
-{% endif %}
 
 nsswitch.hosts.configure:
   file.replace:
@@ -30,17 +24,10 @@ network-utils:
     - pkgs:
       - bridge-utils
 
-{# add resident bridge #}
+{# add internal bridge #}
 {{ add_internal_bridge(settings.network.internal.name,
     settings.network.internal.cidr, settings.network.priority) }}
 
-{# require bridge creation before kernel.nfs setup, so nfs can be configured to bridge also #}
-nfs.common_after_bridge:
-  test.nop:
-    - require:
-      - cmd: bridge_{{ settings.network.internal.name }}
-    - require_in:
-      - sls: kernel.nfs
 
 {# write and apply pillar netplan settings to disk if not empty, remove file otherwise #}
 default_netplan:
@@ -57,8 +44,6 @@ default_netplan:
     - name: netplan generate && netplan apply
     - onchanges:
       - file: default_netplan
-    - require_in:
-      - sls: kernel.nfs
 
 {# write and apply pillar systemd network settings to disk if not empty, remove file otherwise #}
 default_systemd.network:
@@ -75,5 +60,4 @@ default_systemd.network:
     - name: networkctl reload
     - onchanges:
       - file: default_systemd.network
-    - require_in:
-      - sls: kernel.nfs
+
