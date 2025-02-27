@@ -1,4 +1,4 @@
-#  Jupyter Ecosystem for Scientific Python and Hardware accelerated Machinelearning
+# Local Jupyter Ecosystem for Scientific Python and Hardware accelerated Machinelearning
 
 PipX based Systemd User Service of Jupyter Server \& Chromium as Desktop Web-App for the Jupyter Client.
 
@@ -19,7 +19,7 @@ PipX based Systemd User Service of Jupyter Server \& Chromium as Desktop Web-App
 
 + see defaults.jinja for system/aur package list
 
-
+Notes:
 This way all system specific hardware related base libraries and python entrypoints
 are systemwide installed, and all jupyter related is bundled in a pipx application,
 systemd user units calling this pipx app as a jupyter server,
@@ -56,6 +56,13 @@ sudo fc-cache -f -v
 cd ~/.cache/matplotlib; rm fontlist*.json
 ```
 
+#### restart with fresh environments
+
+```sh
+rm -rf ~/.local/shared/virtualenvs/*
+pipx uninstall jupyter-core
+sudo salt-call state.sls desktop.python
+```
 
 #### other lookworthy Packages
 
