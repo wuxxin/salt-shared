@@ -46,6 +46,9 @@ if [ ! -e "$config_file" ] ; then
     exit 1
 fi
 
+HASS_discovery_dir="/var/lib/homeassistant"
+HASS_discovery_base="homeassistant/device_tracker"
+HASS_discovery_guests="1"
 MQTT_host=localhost; MQTT_port=1883; MQTT_user=""; MQTT_pwd=""; MQTT_cafile=""
 . $config_file
 MQTT_client=openwrt_$interface
@@ -54,8 +57,6 @@ MQTT_topic="openwrt/$device_id/state"
 MQTT_baseurl="mqtts://${MQTT_user}:${MQTT_pwd}@${MQTT_host}:${MQTT_port}"
 MQTT_additional=""
 if [ ! -z "$MQTT_cafile" ] ; then MQTT_additional="--cafile $MQTT_cafile"; fi
-HASS_discovery_dir="/var/lib/homeassistant"
-HASS_discovery_base="homeassistant/device_tracker"
 
 if [ -e "$HASS_discovery_dir/$device_id" ] ; then
     # read device_name from HASS_discovery_payload
@@ -63,10 +64,12 @@ if [ -e "$HASS_discovery_dir/$device_id" ] ; then
         grep '"name":' | sed -r 's/ +"name": "([^"]*)",/\1/g')
 else
     # get device_name, use "guest-<device_mac>" if no fixed name can be found
-    device_name="$(echo "guest-$device_mac" | tr ":" "_")"
     var1=$(uci show dhcp | grep -oiE "host\[\d+\].mac='"$device_mac"'"|grep -oE "\[(\d+)\]")
     if [ ! -z "$var1" ] ; then
         device_name=$(uci get dhcp.@host${var1}.name)
+    else
+        if [ "$HASS_discovery_guests" != "1" ] ; then exit 0; fi
+        device_name="$(echo "guest-$device_mac" | tr ":" "_")"
     fi
     HASS_discovery_payload=$(cat << EOF
 {
