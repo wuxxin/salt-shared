@@ -10,7 +10,7 @@ python_kernel_{{ name }}:
     - group: {{ user }}
     - makedirs: true
   cmd.run:
-    - name: python -m venv {{ '--system-site-packages' if system_packages }} {{ VIRTUAL_ENV }}
+    - name: uv venv --seed {{ '--system-site-packages' if system_packages }} {{ VIRTUAL_ENV }}
     - unless: test -f {{ VIRTUAL_ENV }}/bin/activate
     - runas: {{ user }}
     - cwd: {{ HOME }}
