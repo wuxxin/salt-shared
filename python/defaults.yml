@@ -23,7 +23,10 @@ python:
   - python-pip
   - python-setuptools
   - python-virtualenv
+
   ### additional
+  # uv - An extremely fast Python package installer and resolver written in Rust
+  - uv
   # pipx - Install and execute apps from Python packages
   - python-pipx
   # jinja - simple pythonic template language written in Python
@@ -63,9 +66,11 @@ python_dev:
   ### additional
   - git
   # cython - pythonic language wrapping external C libraries and fast C modules
-  - cython0
+  - cython
   - swig
   - meson
+  # uv - extremely fast Python package installer and resolver written in Rust
+  - uv
   # pipenv - Python Dev Workflow for Humans
   - python-pipenv
   # poetry - Python packaging and dependency management made easy
