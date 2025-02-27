@@ -38,25 +38,26 @@ clblast:
 vaapi:
   pkg.installed:
     - pkgs:
-      - manjaro-vaapi
-      - gstreamer-vaapi
-      - libva-mesa-driver
       - libva-utils
 
 vdpau:
   pkg.installed:
     - pkgs:
-      - mesa-vdpau
       - vdpauinfo
 
-radeon:
+gputools:
   pkg.installed:
     - pkgs:
+      # radeontop - View GPU utilization for total activity percent and individual block
       - radeontop
+      # radeontool - Lowlevel tools to tweak register and dump state on radeon GPUs
       - radeontool
-
+      # nvtop - GPUs process monitoring for AMD, Intel and NVIDIA
+      - nvtop
 {% load_yaml as pkgs %}
       # lact - AMDGPU Controller application
       - lact
+      # amdgpu_top - Tool that shows AMD GPU utilization
+      - amdgpu_top
 {% endload %}
-{{ aur_install('radeon-aur', pkgs, require= 'pkg: radeon') }}
+{{ aur_install('gputools-aur', pkgs, require= 'pkg: gputools') }}
