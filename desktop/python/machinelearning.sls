@@ -4,11 +4,12 @@
 include:
   - desktop.python.scientific
   - hardware.amd.rocm.pytorch
-  - hardware.amd.rocm.tensorflow
+  # - hardware.amd.rocm.tensorflow
   - hardware.amd.rocm.cupy
   - hardware.amd.rocm.onnx
-  - hardware.amd.rocm.localai
+  # - hardware.amd.rocm.localai
   - hardware.amd.rocm.koboldcpp
+  - hardware.amd.rocm.ollama
 
 ml_pytorch:
   test.nop:
@@ -19,7 +20,7 @@ ml_pytorch:
 ml_tensorflow:
   test.nop:
     - require:
-      - sls: hardware.amd.rocm.tensorflow
+      # - sls: hardware.amd.rocm.tensorflow
       - sls: desktop.python.scientific
 
 ml_scikit:
@@ -33,12 +34,13 @@ ml_base:
   test.nop:
     - require:
       - test: ml_pytorch
-      - test: ml_tensorflow
+      # - test: ml_tensorflow
       - pkg: ml_scikit
       - sls: hardware.amd.rocm.cupy
       - sls: hardware.amd.rocm.onnx
-      - sls: hardware.amd.rocm.localai
+      # - sls: hardware.amd.rocm.localai
       - sls: hardware.amd.rocm.koboldcpp
+      - sls: hardware.amd.rocm.ollama
 
 ml_libraries:
   pkg.installed:
@@ -53,9 +55,28 @@ ml_libraries:
       # python-transformers - State-of-the-art Natural Language Processing for Jax, PyTorch and TensorFlow
       - python-transformers
       # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
-      - python-deepspeed
+      # - python-deepspeed
 {% endload %}
 {{ aur_install('ml_libraries_aur', pkgs, require='pkg: ml_libraries') }}
+
+# ml_pytorch_aur
+{% load_yaml as pkgs %}
+      # python-accelerate - simple way to train and use PyTorch models with multi-GPU, TPU, mixed-precision
+      - python-accelerate
+      # torchtext - data processing utilities and popular datasets for natural language
+      - python-torchtext
+      # torchdata - modular data loading primitives for easily constructing flexible and performant data pipelines
+      - python-torchdata
+      # pytorch-lightning - lightweight PyTorch wrapper for high-performance AI research
+      - python-pytorch-lightning
+      # functorch - JAX-like composable function transforms for PyTorch
+      - python-functorch
+      # skorch - scikit-learn compatible neural network library that wraps PyTorchhttps://gandalf.lakera.ai/
+      - python-skorch
+      # python-sentence-transformers - Multilingual Sentence & Image Embeddings with BERT
+      - python-sentence-transformers
+{% endload %}
+{{ aur_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
 
 # ml_tools_aur
 {% load_yaml as pkgs %}
@@ -74,19 +95,3 @@ ml_libraries:
       - python-scikit-surprise
 {% endload %}
 {{ aur_install('ml_scikit_aur', pkgs, require='pkg: ml_scikit') }}
-
-# ml_pytorch_aur
-{% load_yaml as pkgs %}
-      # torchtext - data processing utilities and popular datasets for natural language
-      - python-torchtext
-      # torchdata - modular data loading primitives for easily constructing flexible and performant data pipelines
-      - python-torchdata
-      # pytorch-lightning - lightweight PyTorch wrapper for high-performance AI research
-      - python-pytorch-lightning
-      # functorch - JAX-like composable function transforms for PyTorch
-      - python-functorch
-      # skorch - scikit-learn compatible neural network library that wraps PyTorchhttps://gandalf.lakera.ai/
-      - python-skorch
-{% endload %}
-{{ aur_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
-
