@@ -39,8 +39,10 @@ security-tools:
 
 {% load_yaml as pkgs %}
       ### MITM
-      # frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
+      # FIXME-BUILD WORKS AS USER frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
       - python-frida
+      # python-frida-tools - CLI tools for Frida. Python 3 version from PyPi
+      - python-frida-tools
       ### NFC
       # mfoc - MiFare Classic Universal toolKit
       - mfoc
