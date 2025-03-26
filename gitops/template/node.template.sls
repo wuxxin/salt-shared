@@ -22,9 +22,11 @@
 
 {% set def_route_device = salt['cmd.run_stdout']('ip -j route list default | sed -r \'s/.+dev":"([^"]+)".+/\\1/g\'', python_shell=true) %}
 {% set def_route_ip = salt['cmd.run_stdout']('ip -j addr show '+ def_route_device+ ' | sed -r \'s/.+"inet","local":"([^"]+)",.+/\\1/g\'', python_shell=true) %}
-{% set internal_cidr = '10.140.250.1/24' %}
-{% set internal_name = 'resident' %}
+{% set internal_cidr = '10.87.240.1/24' %}
+{% set internal_name = 'internal' %}
+{% set internal_type = "automatic" %}
 {% set netplan = "" %}
+{% set networkmanager = "" %}
 {% set systemd_network = "" %}
 
 {% set ssh_authorized_keys = "" %}
@@ -39,6 +41,9 @@
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/netplan.yaml') %}
   {% import_text 'netplan.yaml' as netplan %}
+{% endif %}
+{% if salt['file.file_exists'](project_basepath+ '/config/networkmanager.toml') %}
+  {% import_text 'networkmanager.toml' as networkmanager %}
 {% endif %}
 {% if salt['file.file_exists'](project_basepath+ '/config/systemd.network') %}
   {% import_text 'systemd.network' as systemd_network %}
@@ -72,6 +77,7 @@ netmask: {{ netmask(internal_cidr) }}
 ip: {{ cidr2ip(internal_cidr) }}
 reverse_net: {{ reverse_net(internal_cidr) }}
 short_net: {{ short_net(internal_cidr) }}
+type: {{ internal_type }}
 {% endload %}
 
 {% set config= {
@@ -79,6 +85,7 @@ short_net: {{ short_net(internal_cidr) }}
   "node": node,
   "network": {
       "internal": network_internal,
+      "networkmanager": network_manager,
       "netplan": netplan,
       "systemd": systemd_network,
       "def_route_device": def_route_device,

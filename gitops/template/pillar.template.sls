@@ -20,6 +20,8 @@ node:
 
   network:
     internal: {{ config.network.internal }}
+    networkmanager: |
+{{ config.network.networkmanager|indent(6, True) }}
     netplan: |
 {{ config.network.netplan|indent(6, True) }}
     systemd: |
@@ -30,7 +32,7 @@ gitops:
   home_dir: {{ config.gitops_target }}
   git:
     source: {{ config.node.gitops_source }}
-    branch: {{ config.node.gitops_branch|d('master') }}
+    branch: {{ config.node.gitops_branch|d('main') }}
     gpg_id: |
 {{ config.gitops_gpg_secret|indent(6,True)}}
     ssh_id: |
