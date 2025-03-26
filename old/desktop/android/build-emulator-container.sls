@@ -44,7 +44,7 @@ android_emulator_container_scripts:
         . ./venv/bin/activate; python3 setup.py develop
         . ./venv/bin/activate; emu-docker licenses --accept
     - cwd: sourcedir
-    - onchange:
+    - onchanges:
       - git: android_emulator_container_scripts
 
 create_android_container:
@@ -52,12 +52,12 @@ create_android_container:
     - runas: androidemubuild
     - name: . ./venv/bin/activate; emu-docker create [-h] [--extra EXTRA]
      [--dest DEST] [--tag TAG] [--repo REPO] [--push] [--gpu] [--metrics] [--no-metrics] [--start] emuzip imgzip
-    - onchange:
+    - onchanges:
       - cmd: android_emulator_container_scripts
 
 build_android_container:
   cmd.run:
     - name: podman build .
     - cwd: destcontainer
-    - onchange:
+    - onchanges:
       - cmd: create_android_container

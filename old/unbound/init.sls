@@ -45,5 +45,5 @@ unbound:
 {%- endif %}
   cmd.run:
     - name: systemctl restart systemd-resolved
-    - onchange:
+    - onchanges:
       - file: /etc/systemd/resolved.conf.d/dns_servers.conf

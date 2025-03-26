@@ -51,13 +51,13 @@ akvcam:
     - enforce_toplevel: false
     - overwrite: true
     - options: --strip-components 2 --wildcards "*/src/"
-    - onchange:
+    - onchanges:
       - file: akvcam
   cmd.run:
     - name: /usr/lib/dkms/common.postinst akvcam \
             {{ settings.external['akvcam_tar_gz']['version'] }} \
             /usr/share/akvcam
-    - onchange:
+    - onchanges:
       - archive: akvcam
     - require:
       - pkg: kernel_module_requirements
