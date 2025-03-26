@@ -11,6 +11,8 @@ python_network_libraries:
       - python-requests
       # websockets -  Python implementation of the WebSocket Protocol (RFC 6455)
       - python-websockets
+      # python-dnspython - A DNS toolkit for Python
+      - python-dnspython
       # paho-mqtt - Python client library for MQTT v3.1
       - python-paho-mqtt
       # python-grpcio - Python language bindings for grpc, remote procedure call (RPC) framework
@@ -33,13 +35,13 @@ python_devices_libraries:
       - python-sounddevice
       # pyserial - Multiplatform Serial Port Module for Python
       - python-pyserial
-      # nfc - Python bindings for libnfc
-      - python-nfc
       # bleak - cross platform Bluetooth Low Energy Client for Python using asyncio
       - python-bleak
 {% load_yaml as pkgs %}
       # getkey - Python library to easily read single chars and key strokes
       - python-getkey
+      # nfc - Python bindings for libnfc
+      - python-nfc
 {% endload %}
 {{ aur_install('python_devices_libraries_aur', pkgs,
     require='pkg: python_devices_libraries') }}
