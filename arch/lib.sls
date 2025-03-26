@@ -6,13 +6,13 @@ import-repo-key-{{ name }}:
     - name: /etc/pacman.d/{{ name }}-key.gpg
   cmd.run:
     - name: pacman-key --add /etc/pacman.d/{{ name }}-key.gpg
-    - onchange:
+    - onchanges:
       - file: import-repo-key-{{ name }}
 
 trust-repo-key-{{ name }}:
   cmd.run:
     - name: pacman-key --lsign-key "{{ keyid }}"
-    - onchange:
+    - onchanges:
       - cmd: import-repo-key-{{ name }}
 
   {% if user != "" %}
@@ -20,7 +20,7 @@ user-trust-repo-key-{{ name }}:
   cmd.run:
     - name: gpg --import /etc/pacman.d/{{ name }}-key.gpg
     - runas: {{ user }}
-    - onchange:
+    - onchanges:
       - cmd: import-repo-key-{{ name }}
     - require_in:
       - test: trusted-repo-{{ name }}

@@ -5,7 +5,7 @@ import-arch4edu-keyring:
     - name: /etc/pacman.d/arch4edu-keyring-20200805-1-any.pkg.tar.zst
   cmd.run:
     - name: pacman -U /etc/pacman.d/arch4edu-keyring-20200805-1-any.pkg.tar.zst
-    - onchange:
+    - onchanges:
       - file: import-arch4edu-keyring
 
 enable-arch4edu:
