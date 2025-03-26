@@ -30,7 +30,7 @@ include:
 {% endif %}
   cmd.run:
     - name: postmap /etc/postfix/sasl_passwd
-    - onchange:
+    - onchanges:
       - file: /etc/postfix/sasl_passwd
     - require:
       - pkg: postfix
@@ -46,7 +46,7 @@ include:
 {% endfor %}
   cmd.run:
     - name: postalias /etc/aliases
-    - onchange:
+    - onchanges:
       - file: /etc/aliases
     - require:
       - pkg: postfix

@@ -22,7 +22,7 @@ gitea_archive:
 gitea_binary:
   cmd.wait:
     - name: xz -d < {{ settings.external.gitea_binary_xz.target }} > {{ gitea_local_binary }} && chmod +x {{ gitea_local_binary }}
-    - onchange:
+    - onchanges:
       - file: gitea_archive
     - require:
       - pkg: gitea_requisites
