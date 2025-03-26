@@ -1,15 +1,6 @@
 {% from "node/defaults.jinja" import settings with context %}
 {% from "node/lib.sls" import add_internal_bridge %}
 
-{# additional systemd specific nsswitch libraries #}
-nsswitch.packages:
-  pkg.installed:
-    - pkgs:
-      - libnss-resolve
-      - libnss-mymachines
-      - libnss-systemd
-      - libnss-myhostname
-
 nsswitch.hosts.configure:
   file.replace:
     - name: /etc/nsswitch.conf
@@ -25,9 +16,8 @@ network-utils:
       - bridge-utils
 
 {# add internal bridge #}
-{{ add_internal_bridge(settings.network.internal.name,
-    settings.network.internal.cidr, settings.network.priority) }}
-
+{{ add_internal_bridge(settings.network.internal.name,settings.network.internal.cidr,
+    bridge_type=settings.network.internal.type, priority=settings.network.priority) }}
 
 {# write and apply pillar netplan settings to disk if not empty, remove file otherwise #}
 default_netplan:
@@ -49,7 +39,7 @@ default_netplan:
 default_systemd.network:
   file:
     - name: /etc/systemd/network/{{ settings.network.priority }}-default.network
-  {% if not settings.network.systemd %}
+{% if not settings.network.systemd %}
     - absent
 {% else %}
     - managed
