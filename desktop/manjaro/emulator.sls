@@ -9,7 +9,10 @@ include:
 emulator-qemu:
   pkg.installed:
     - pkgs:
+      # qemu-desktop - QEMU setup for desktop environments
       - qemu-desktop
+      # guestfs-tools - Tools for accessing and modifying guest disk images
+      - guestfs-tools
       # add arm, mips and xtensa (esp8266, esp32) emulation
       - qemu-system-arm
       - qemu-system-mips
