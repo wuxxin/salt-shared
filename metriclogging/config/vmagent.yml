@@ -1,0 +1,85 @@
+global:
+  # How frequently to scrape targets by default.
+  # scrape_interval: 1m
+  scrape_interval: 15s
+  # How long until a scrape request times out.
+  # scrape_timeout: 10s
+  # How frequently to evaluate rules.
+  # evaluation_interval: 1m
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+    site: "{{ salt['pillar.get']('appliance:domain') }}"
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+- "/etc/prometheus-rules.d/*.rules.yml"
+
+# settings related to the Alertmanager.
+alerting:
+  # use site instead of instance for alerting purpose (site=appliance:domain)
+  alert_relabel_configs:
+  - action: replace
+    source_labels: [site]
+    target_label: instance
+  - action: labeldrop
+    regex: site
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9093"
+
+# scrape configuration
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries
+  # Override the global default and scrape targets
+  # metrics_path defaults to '/metrics', scheme defaults to 'http'.
+  - job_name: prometheus
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9090"
+
+  - job_name: node
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9100"
+
+  - job_name: 'cadvisor'
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:5080"
+
+  - job_name: uwsgi
+    # uwsgi prometheus metric is exported from ecs_uwsgi-exporter_1 container
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9117"
+
+  - job_name: postgresql
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9187"
+
+  - job_name: process
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9256"
+
+  - job_name: memcached
+    # memcached prometheus metric is exported from ecs_memcached-exporter_1 container
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9150"
+
+  - job_name: redis
+    # redis prometheus metric is exported from ecs_redis_exporter_1 container
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9121"
+
+  - job_name: nginx
+    # nginx prometheus metric is exported direct from nginx using lua
+    static_configs:
+    - targets:
+      - "{{ salt['pillar.get']('docker:ip') }}:9145"

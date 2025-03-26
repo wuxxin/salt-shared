@@ -1,0 +1,20 @@
+services:
+
+  # group syslog:exporter
+  syslog-exporter:
+    networks:
+      - metric_net
+    image: grafana/promtail:latest
+
+  # group syslog:server
+  syslog-server:
+    image: grafana/loki:latest
+    networks:
+      - metric_net
+    expose:
+      - "3100"
+
+  fail2ban:
+    image:
+    networks:
+      - metric_net
