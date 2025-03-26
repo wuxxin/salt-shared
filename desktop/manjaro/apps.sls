@@ -12,7 +12,7 @@ audio-pipewire:
       # helvum - patchbay for pipewire, inspired by the JACK tool catia
       - helvum
       # coppwr - Low level PipeWire control GUI
-      - coppwr
+      # - coppwr
 {% load_yaml as pkgs %}
       # Pipewire volume control for GNOME
       - pwvucontrol
@@ -92,11 +92,6 @@ fediverse:
       - tokodon
       # tuba - Browse the Fediverse
       - tuba
-{% load_yaml as pkgs %}
-      # whalebird - Single-column Fediverse client for desktop
-      - whalebird
-{% endload %}
-{{ aur_install("fediverse-aur", pkgs) }}
 
 file-sync:
   pkg.installed:
@@ -124,13 +119,6 @@ mail-calendar-contacts:
     - pkgs:
       # Mail,Calendar,Contacts,Notes
       - evolution
-
-{% load_yaml as pkgs %}
-      - tabbed-git
-      # quickmedia - native client for web services. youtube, soundcloud, a.o.
-      - quickmedia-git
-{% endload %}
-{{ aur_install("media-player-aur", pkgs) }}
 
 music-player:
   pkg.installed:
@@ -171,6 +159,7 @@ password:
 {% load_yaml as pkgs %}
       - firefox-extension-keepassxc-browser
       - chromium-extension-keepassxc-browser
+      - librewolf-extension-keepassxc-browser
       - git-credential-keepassxc
 {% endload %}
 {{ aur_install("password-aur", pkgs, require="pkg: password") }}
@@ -238,13 +227,6 @@ system-adm:
       - rhvoice-voice-evgeniy-eng
 {% endload %}
 {{ aur_install("speech-synthesizer-aur", pkgs) }}
-
-# themes
-{% load_yaml as pkgs %}
-      # kali-themes - GTK theme included with Kali Linux
-      - kali-themes
-{% endload %}
-{{ aur_install("themes-aur", pkgs) }}
 
 vector-graphic:
   pkg.installed:
