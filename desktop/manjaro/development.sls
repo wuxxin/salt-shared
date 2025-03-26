@@ -110,6 +110,16 @@ development-tools:
       # upx -Extendable, high-performance executable packer for several executable formats
       - upx
 
+      ## trace
+      # strace - diagnostic, debugging and instructional userspace tracer
+      - strace
+      # ltrace - tracks runtime library calls in dynamically linked program
+      - ltrace
+      # gdb - debugger for eg. reading coredumps
+      - gdb
+      # inotify-tools - a set of command-line programs (eg. inotifywait) providing a simple interface to inotify
+      - inotify-tools
+
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
       - sqlitebrowser
@@ -171,7 +181,7 @@ development-tools:
 {% load_yaml as pkgs %}
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
-      - yj
+      # - yj
       # glow - Command-line markdown renderer
       - glow
       # nautilus-checksums - Add checksums to Nautilus' properties window
@@ -184,10 +194,25 @@ devop-tools:
   pkg.installed:
     - pkgs:
       ## devop
+      # gptfdisk - A text-mode partitioning tool that works on GUID Partition Table (GPT) disks
+      - gptfdisk
+      # multipath-tools - Multipath tools for Linux (including kpartx)
+      - multipath-tools
       # jose - C-language implementation of Javascript Object Signing and Encryption
       - jose
       # mosquitto - Open Source MQTT Broker
       - mosquitto
+      # nvchecker - New version checker for software releases plus optional packages
+      - nvchecker
+      # html, pypi, toml, git, json, alpm source, sort_version_key = vercmp, awesomeversion 
+      - pyalpm
+      - python-awesomeversion
+      - python-aiohttp
+      - python-lxml
+      - python-jq
+      - python-packaging
+      - python-toml
+      - git
       # vault - A tool for managing secrets
       - vault
       # step-cli - A zero trust swiss army knife for working with X509, OAuth, JWT, OATH OTP, etc.
@@ -223,7 +248,7 @@ devop-tools:
       # flent - The FLExible Network Tester
       - flent
       # vault - command line tool for Hashicorp Vault
-      - vault-cli
+      # - vault-cli
       # fakepkg - reassembles installed packages from its delivered files (eg. while internet connection loss)
       - fakepkg
       # fakeroot-tcp - Tool for simulating superuser privileges,with tcp ipc
