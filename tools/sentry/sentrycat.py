@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
 import copy
 import datetime
@@ -13,7 +13,6 @@ import re
 import socket
 import sys
 import textwrap
-import time
 
 import chardet
 import sentry_sdk
@@ -77,9 +76,7 @@ def html2text(htmltext):
     text = html.unescape(strip_tags(htmltext))
     text = "\n\n".join(re.split(r"\s*\n\s*\n\s*", text))
     text = re.sub(r"\s\s\s+", " ", text)
-    wrapper = textwrap.TextWrapper(
-        replace_whitespace=False, drop_whitespace=False, width=72
-    )
+    wrapper = textwrap.TextWrapper(replace_whitespace=False, drop_whitespace=False, width=72)
     return "\n".join(wrapper.wrap(text))
 
 
@@ -87,9 +84,7 @@ def _get_content(message_part):
     payload = message_part.get_payload(decode=True)
     if message_part.get_content_charset() is None:
         charset = chardet.detect(payload)["encoding"]
-        logger.debug(
-            "no content charset declared, detection result: {0}".format(charset)
-        )
+        logger.debug("no content charset declared, detection result: {0}".format(charset))
     else:
         charset = message_part.get_content_charset()
 
@@ -99,9 +94,7 @@ def _get_content(message_part):
         charset = "iso-8859-8"
 
     logger.debug(
-        "message-part: type: {0} charset: {1}".format(
-            message_part.get_content_type(), charset
-        )
+        "message-part: type: {0} charset: {1}".format(message_part.get_content_type(), charset)
     )
     content = str(payload, charset, "replace")
     return content
@@ -124,7 +117,7 @@ def get_uid():
 
 
 def send_message(args):
-    """ Mandatory args: message """
+    """Mandatory args: message"""
 
     margs = copy.copy(args)
     [margs.pop(i) for i in ["verbose"]]
