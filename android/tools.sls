@@ -1,8 +1,7 @@
+{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+
 include:
   - python
-
-{%- if grains['os'] == 'Manjaro' %}
-  {% from 'arch/lib.sls' import aur_install with context %}
 
 android-tools:
   pkg.installed:
@@ -21,17 +20,19 @@ android-tools:
       - mitmproxy
 {% load_yaml as pkgs %}
       #  android-bash-completion - Bash completion for android, adb, emulator, fastboot, and repo
-      - android-bash-completion
+      # - android-bash-completion
       # fdroidcl - F-Droid desktop client
       - fdroidcl
       # sndcpy-bin - Android audio forwarding (scrcpy, but for audio)
       # - sndcpy-bin
       # gplaycli - search, install, update Android applications from the Google Play Store
-      - gplaycli
+      # - gplaycli
       # android-apktool - tool for reengineering Android apk files
       - android-apktool
-      # frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
+      # FIXME-BUILD WORKS AS USER frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
       - python-frida
+      # python-frida-tools - CLI tools for Frida. Python 3 version from PyPi
+      - python-frida-tools
       # apk-mitm - prepares Android APK files for HTTPS inspection
       - apk-mitm
       # adbfs-rootless-git - fuse filesystem over adb tool for android devices
@@ -44,14 +45,22 @@ android-tools:
 {% endload %}
 {{ aur_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
 
+{{ user_home }}/.local/bin:
+  file.directory:
+    - user: {{ user }}
+    - group: {{ user }}
+    - makedirs: true
 
-{%- elif grains['os'] == 'Ubuntu' %}
+{{ user_home }}/.local/bin/launch-android.sh
+  file.managed:
+    - user: {{ user }}
+    - group: {{ user }}
+    - mode: "775"
+    - source: salt://android/launch-android.sh
 
-android-tools:
-  pkg.installed:
-    - pkgs:
-      - adb
-      - fastboot
-      - heimdall-flash
-
-{% endif %}
+{{ user_home }}/.local/bin/imei-calc.py
+  file.managed:
+    - user: {{ user }}
+    - group: {{ user }}
+    - mode: "775"
+    - source: salt://android/imei-calc.py

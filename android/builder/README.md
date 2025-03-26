@@ -1,10 +1,6 @@
-# android.builder.lib
+# android.builder
 
-## Cross-build android lineage for a set of target hardware
-
-+ `build_image(pkgdefinition, user="")`
-
-### Configure
+Cross-build android lineage for a set of target hardware
 
 ```yaml
 environment:
