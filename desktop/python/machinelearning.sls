@@ -112,4 +112,4 @@ ml_libraries:
       # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
       # - python-deepspeed
 {% endload %}
-{{ aur_install('ml_libraries_aur', pkgs, require=['pkg: ml_libraries', 'test: ml_pytorch_aur') }}
+{{ aur_install('ml_libraries_aur', pkgs, require=['pkg: ml_libraries', 'test: ml_pytorch_aur']) }}
