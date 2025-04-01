@@ -14,17 +14,17 @@ autotrim:
     - rpool
 
 # enable cyclic rotating filesystem snapshots
+# if enabled, a rotating snapshot of any fs where "com.sun:auto-snapshot" and
+# "com.sun:auto-snapshot:<interval>" is not false, will be taken
 autosnapshot: 
   enabled: false
-  # any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
-  # is not false, a rotating snapshot will be taken
   # rotation intervals: keep x snapshots per interval, 0 to disable
   frequent: 4 {# 15min  intervals for the last hour #}
-  hourly: 8   {# 1hour  intervals for the last 8 hours #}
-  daily: 8    {# 1day   intervals for the last 8 days #}
+  hourly: 4   {# 1hour  intervals for the last 4 hours #}
+  daily: 4    {# 1day   intervals for the last 4 days #}
   weekly: 0   {# 1week  intervals for the last 0 weeks #}
   monthly: 0  {# 1month intervals for the last 0 months #}
-  args: --default-exclude --debug --verbose --recursive --fast --skip-scrub --min-size 1
+  args: --default-exclude --fast --skip-scrub --min-size 1
 
 # arc_max_percent: use up to x % of memory for arc
 # arc_max_bytes: will be computed from arc_max_percent if unset
