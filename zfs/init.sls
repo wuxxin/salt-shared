@@ -15,7 +15,7 @@ zfs-utils:
       # zfs-undelete - an easy-to-use cli tool to recover files from zfs snapshots
       - zfs-undelete
 {% endload %}
-{{ aur_install("audio-pipewire-aur", pkgs) }}
+{{ aur_install("zfs-utils-aur", pkgs) }}
 {% endif %}
 
 /etc/modprobe.d/zfs.conf:
