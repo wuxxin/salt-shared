@@ -11,10 +11,10 @@ usr_local_bin:
     - group: {{ user }}
     - makedirs: true
 
-# jinja2-cli - CLI interface to Jinja2, including yaml,xml,toml support
+{# jinja2-cli - CLI interface to Jinja2, including yaml,xml,toml support #}
 {{ pipx_install('jinja2-cli[yaml,toml,xml]', user=user) }}
 
-# flatyaml.py - convert yaml to a flat key=value format
+{# flatyaml.py - convert yaml to a flat key=value format #}
 flatyaml:
   pkg.installed:
     - pkgs:
@@ -28,7 +28,7 @@ flatyaml:
     - user: {{ user }}
     - group: {{ user }}
 
-# passgen.py - speakable friendly passwort generator
+{# passgen.py - speakable friendly passwort generator #}
 passgen:
   pkg.installed:
     - name: python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
@@ -41,19 +41,19 @@ passgen:
     - user: {{ user }}
     - group: {{ user }}
 
-# gpgutils.py - Encryption/Signing, Decryption/Verifying with gnupg
+{# gpgutils.py - Encryption/Signing, Decryption/Verifying with gnupg #}
 gpgutils:
   pkg.installed:
     - pkgs:
       - gnupg
   file.managed:
     - name: {{ user_home }}/.local/bin/gpgutils.py
-    - source: salt://tools/gnupg/gpgutils.py
+    - source: salt://tools/gpgutils.py
     - mode: "0755"
     - user: {{ user }}
     - group: {{ user }}
 
-# sentrycat.py - error reporting to sentry
+{# sentrycat.py - error reporting to sentry #}
 sentrycat:
   pkg.installed:
     - pkgs:
@@ -62,20 +62,20 @@ sentrycat:
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-sentry_sdk
     - require:
       - sls: python
-file.managed:
+  file.managed:
     - name: {{ user_home }}/.local/bin/sentrycat.py
     - source: salt://tools/sentrycat.py
     - mode: "0755"
     - user: {{ user }}
     - group: {{ user }}
 
-# create a linked qrcode pdf from data, read data from linked qrcodes inside pdf
+{# create a linked qrcode pdf from data, read data from linked qrcodes inside pdf #}
 qrcode:
   pkg.installed:
     - pkgs:
       - qrencode
-      - graphicsmagick-imagemagick-compat
-      - zbar-tools
+      - imagemagick
+      - zbar
 
 {% for a in ['data2qrpdf.sh', 'qrpdf2data.sh'] %}
 {{ user_home }}/.local/bin/{{ a }}:
