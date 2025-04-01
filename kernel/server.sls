@@ -5,7 +5,6 @@ include:
   - kernel.swappiness
   - kernel.network
   - kernel.lxc
-  - qemu
   - libvirt
   - systemd.cgroup
 
