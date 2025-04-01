@@ -433,18 +433,18 @@ ZPOOLS_NOTREADY=$(echo "$ZPOOL_STATUS" | awk -F ': ' \
 
 # Get a list of datasets for which snapshots are explicitly disabled.
 NOAUTO=$(echo "$ZFS_LIST" | awk -F '\t' \
-	'tolower($2) ~ /false/ || tolower($3) ~ /false/ {print $1}')
+	'tolower($2) ~ /false|off/ || tolower($3) ~ /false|off/ {print $1}')
 
 # If the --default-exclude flag is set, then exclude all datasets that lack
 # an explicit com.sun:auto-snapshot* property. Otherwise, include them.
 if [ -n "$opt_default_exclude" ]; then
 	# Get a list of datasets for which snapshots are explicitly enabled.
 	CANDIDATES=$(echo "$ZFS_LIST" | awk -F '\t' \
-		'tolower($2) ~ /true/ || tolower($3) ~ /true/ {print $1}')
+		'tolower($2) ~ /true|on/ || tolower($3) ~ /true|on/ {print $1}')
 else
 	# Invert the NOAUTO list.
 	CANDIDATES=$(echo "$ZFS_LIST" | awk -F '\t' \
-		'tolower($2) !~ /false/ && tolower($3) !~ /false/ {print $1}')
+		'tolower($2) !~ /false|off/ && tolower($3) !~ /false|off/ {print $1}')
 fi
 
 # Initialize the list of datasets that will get a recursive snapshot.
@@ -536,8 +536,7 @@ for ii in $CANDIDATES; do
 	#   * Does not have an exclusionary property.
 	#   * Is in a pool that can currently do snapshots.
 	#
-	if [ -z "$opt_recursive" ]
-	then
+	if [ -z "$opt_recursive" ]; then
 		print_log debug "Including $ii for regular snapshot."
 		TARGETS_REGULAR="${TARGETS_REGULAR:+$TARGETS_REGULAR	}$ii" # nb: \t
 	else
