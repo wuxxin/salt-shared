@@ -64,8 +64,6 @@ development-tools:
       - pandoc-crossref
       # pandoc pdfconversion needs lmodern.sty which is in texlive-fontrecommended
       - texlive-fontsrecommended
-      # marp - Markdown Presentation Ecosystem
-      - marp-cli
       # csvkit - suite of utilities for converting to and working with CSV
       - csvkit
 
@@ -145,6 +143,8 @@ development-tools:
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       # - yj
+      # marp - Markdown Presentation Ecosystem
+      - marp-cli
       # glow - Command-line markdown renderer
       - glow
       # nautilus-checksums - Add checksums to Nautilus' properties window
