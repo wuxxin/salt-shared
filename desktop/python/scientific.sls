@@ -5,13 +5,13 @@
 
 include:
   - desktop.python.development
-  - nodejs
+  - development.nodejs
 
 scientific_base:
   test.nop:
     - require:
       - sls: desktop.python.development
-      - sls: nodejs
+      - sls: development.nodejs
 
 # scientific_optimized:
 # openblas - An optimized BLAS library based on GotoBLAS2 1.13 BSD
