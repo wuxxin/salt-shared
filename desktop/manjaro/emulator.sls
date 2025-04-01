@@ -17,7 +17,7 @@ emulator-qemu:
       - qemu-system-xtensa
       - gnome-boxes
     - require:
-      - sls: qemu
+      - sls: libvirt
 
 {% load_yaml as pkgs %}
       - virtio-win
