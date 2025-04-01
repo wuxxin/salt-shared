@@ -1,10 +1,12 @@
-# python bindings
+## gpgutils
+
+### gnupg python bindings
 
 + use official python bindings (gpgme) "python(3)-gpg" from gnupg that are comming with system
 + use Hkp4py for keyserver
 + create mime email by hand
 
-# create gpg key and encrypt with personal keychain
+### create gpg key and encrypt with personal keychain
 gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key | gpg --encrypt > ./user@email.gpg.crypted << EOF
 Key-Type: 1
 Key-Length: 2048
@@ -15,10 +17,10 @@ Name-Real: user@email
 %commit
 EOF
 
-# import newly generated key into personal keychain
+### import newly generated key into personal keychain
 cat ./user@email.gpg.crypted | gpg --decrypt | gpg --batch --yes --import
 
-# add to git-crypt keys
+### add to git-crypt keys
 git-crypt add-gpg-user user@email
 
 
