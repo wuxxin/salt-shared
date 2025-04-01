@@ -1,5 +1,5 @@
 {% from "node/defaults.jinja" import settings %}
-{% from "ssh/lib.sls" import ssh_keys_update %}
+{% from "server/ssh/lib.sls" import ssh_keys_update %}
 
 include:
   - .hostname
