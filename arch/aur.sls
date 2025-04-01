@@ -19,6 +19,10 @@ build_essentials:
   pkg.group_installed:
     - name: base-devel
 
+create_etc_doas.conf:
+  file.touch:
+    - name: /etc/doas.conf
+
 {% for value in ['permit nopass keepenv root', 'permit :wheel'] %}
 "doas__{{ value }}":
   file.replace:
@@ -90,8 +94,8 @@ build_tools_manjaro:
     - pkgs:
       # Development tools for Manjaro Linux (base tools)
       - manjaro-tools-base-git
-      # Development tools for Manjaro Linux (ISO tools)
-      - manjaro-tools-iso-git
+      # Development tools for Manjaro Linux (ISO tools) # disabled, because it depends on ubuntu snapd :(
+      # - manjaro-tools-iso-git
       # Development tools for Manjaro Linux (packaging tools, equal to arch devtools)
       - manjaro-tools-pkg-git
       # Development tools for Manjaro Linux (yaml tools)
