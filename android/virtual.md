@@ -5,14 +5,14 @@
 - Magisk Versions >= 26.x can only be proper installed with the FAKEBOOTIMG argument
 - Android 14 needs Magisk Version >= 26.x to be rooted
 
-Example: **Voxel** - a Virtual Pixel 6a with Android 14 (API 34)
+Example: **Voxel** - a Virtual Pixel 6a with Android 15 (API 35)
 
 ```yaml
 model: Pixel 6a
 name: bluejay
 type: Phone
 architecture: ARM-64Bit
-api: Android 14 (API 34) with Google Services
+api: Android 15 (API 35) with Google Services
 tac: 35598476
 # random generated imei from correct tac
 imei: 355984766831784
@@ -20,19 +20,18 @@ imei: 355984766831784
 
 ## Create Virtual Device (AVD)
 
-Voxel: Pixel 6a , API 34
+Voxel: Pixel 6a
 
 ```sh
 avdmanager create avd --name voxel --device pixel_6a \
-  --abi "google_apis_playstore/x86_64" -k "system-images;android-34;google_apis_playstore;x86_64"
+  --abi "google_apis_playstore/x86_64" -k "system-images;android-35;google_apis_playstore;x86_64"
 ```
 
 modify AVD config: ~/.android/avd/voxel/config.ini
 
 ```ini
 disk.dataPartition.size=20G
-sdcard.size=1024 MB
-PlayStore.enabled=yes
+sdcard.size=2048 MB
 avd.id=voxel
 avd.name=voxel
 fastboot.forceColdBoot=yes
@@ -75,7 +74,7 @@ Download into modules/
 execute (for each targeted android api) and follow terminal and onscreen instructions.
 
 ```sh
-./rootAVD.sh system-images/android-34/google_apis_playstore/x86_64/ramdisk.img FAKEBOOTIMG PATCHFSTAB GetUSBHPmodZ
+./rootAVD.sh system-images/android-35/google_apis_playstore/x86_64/ramdisk.img FAKEBOOTIMG PATCHFSTAB GetUSBHPmodZ
 ```
 
 add modules:
@@ -87,41 +86,31 @@ cd modules; for i in *; do adb push $i /sdcard/Download/; done; cd ..
 activate modules in magisk.
 
 
-### optional: MagiskHidePropsConf
+### optional: MagiskHidePropsConf (Hide Root/Debug and Emulator Presence)
 
-emulator traces:
+- get fingerprint of device to mimick:
+  - https://developers.google.com/android/binary_transparency/image_info.txt
 
-```java
-Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-Build.FINGERPRINT.startsWith("generic")
-Build.FINGERPRINT.startsWith("unknown")
-Build.HARDWARE.contains("goldfish")
-Build.HARDWARE.contains("ranchu")
-Build.MODEL.contains("google_sdk")
-Build.MODEL.contains("Emulator")
-Build.MODEL.contains("Android SDK built for x86")
-Build.MANUFACTURER.contains("Genymotion")
-Build.PRODUCT.contains("sdk_google")
-Build.PRODUCT.contains("google_sdk")
-Build.PRODUCT.contains("sdk")
-Build.PRODUCT.contains("sdk_x86")
-Build.PRODUCT.contains("sdk_gphone64_arm64")
-Build.PRODUCT.contains("vbox86p")
-Build.PRODUCT.contains("emulator")
-Build.PRODUCT.contains("simulator");
+- write printlist of fingerprints
+
+```printlist
+Google Pixel 6a (Android 15-250205-250301):Google:Pixel 6a=google/bluejay/bluejay:15/AP4A.250205.002/12821496:user/release-keys__2025-03-01
+Google Pixel 6a (Android 15-250305-250305):Google:Pixel 6a=google/bluejay/bluejay:15/BP1A.250305.019/13003188:user/release-keys__2025-03-05
 ```
 
-copy fingerprints
+- copy fingerprints to device
 
 ```sh
-adb push printfiles-dev.sh /data/adb/modules/MagiskHidePropsConf/printfiles/Dev.sh
+adb push printfiles /storage/self/primary/
 ```
 
-run props from MagiskHidePropsConf
+- run magiskhideprops
 
 ```sh
 adb shell
+# become root
 su -l
+# run props from MagiskHidePropsConf
 props
 ```
 

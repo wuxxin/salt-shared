@@ -1,4 +1,5 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'python/lib.sls' import pipx_install %}
 
 include:
   - python
@@ -31,8 +32,6 @@ android-tools:
       - android-apktool
       # FIXME-BUILD WORKS AS USER frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
       - python-frida
-      # python-frida-tools - CLI tools for Frida. Python 3 version from PyPi
-      - python-frida-tools
       # apk-mitm - prepares Android APK files for HTTPS inspection
       - apk-mitm
       # adbfs-rootless-git - fuse filesystem over adb tool for android devices
@@ -45,8 +44,12 @@ android-tools:
 {% endload %}
 {{ aur_install('android-tools-aur', pkgs, require='pkg: android-tools') }}
 
-{{ user_home }}/.local/bin:
+# python-frida-tools - CLI tools for Frida.
+{{ pipx_install('frida-tools', user=user) }}
+
+android-local-tools:
   file.directory:
+    - name: {{ user_home }}/.local/bin
     - user: {{ user }}
     - group: {{ user }}
     - makedirs: true
