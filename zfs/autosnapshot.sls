@@ -1,10 +1,20 @@
 {% from "zfs/defaults.jinja" import settings with context %}
 
-{# based on snapshot from commit f938d9cc1c414a54a1ee8d638cea7d0ba388ea1a #}
-{# additional changes: fix opt_verbose, reformat with shformat  #}
+{# 
+zfs-auto-snapshot.sh:
+
+- based on: zfsonlinux/zfs-auto-snapshot commit f938d9cc1c414a54a1ee8d638cea7d0ba388ea1a
+- changes:
+  - PR115: [PATCH] Accept on and off as well as true and false in zfs command outputs
+  - PR123: [PATCH] Fix #81 - further snapshots were aborted after the  pre-snapshot command failed once
+  - PR124: [PATCH] Use TARGETS_REGULAR if the recursive flag is not set
+  - fix opt_verbose
+  - reformat with shformat
+#}
+
 /usr/local/sbin/zfs-auto-snapshot.sh:
   file.managed:
-    - source: salt://zfs/zfs-autosnapshot.sh
+    - source: salt://zfs/zfs-auto-snapshot.sh
     - mode: "755"
 
 {% for label in ['frequent', 'hourly', 'daily', 'weekly', 'monthly'] %}

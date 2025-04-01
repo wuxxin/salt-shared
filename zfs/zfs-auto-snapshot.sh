@@ -166,7 +166,7 @@ do_snapshots() { # properties, flags, snapname, oldglob, [targets...]
 
 		if [ -n "$opt_do_snapshots" -a "$size_check_skip" -eq 0 ]; then
 			if [ "$opt_pre_snapshot" != "" ]; then
-				do_run "$opt_pre_snapshot $ii $NAME" || RUNSNAP=0
+				do_run "$opt_pre_snapshot $ii $NAME" && RUNSNAP=1 || RUNSNAP=0
 			fi
 			if [ $RUNSNAP -eq 1 ] && do_run "zfs snapshot $PROPS $FLAGS '$ii@$NAME'"; then
 				[ "$opt_post_snapshot" != "" ] && do_run "$opt_post_snapshot $ii $NAME"
@@ -531,15 +531,24 @@ for ii in $CANDIDATES; do
 		fi
 	done
 
-	# Append this candidate to the recursive snapshot list because it:
+	# Append this candidate to the snapshot list because it:
 	#
 	#   * Does not have an exclusionary property.
 	#   * Is in a pool that can currently do snapshots.
-	#   * Does not have an excluded descendent filesystem.
-	#   * Is not the descendant of an already included filesystem.
 	#
-	print_log debug "Including $ii for recursive snapshot."
-	TARGETS_RECURSIVE="${TARGETS_RECURSIVE:+$TARGETS_RECURSIVE	}$ii" # nb: \t
+	if [ -z "$opt_recursive" ]
+	then
+		print_log debug "Including $ii for regular snapshot."
+		TARGETS_REGULAR="${TARGETS_REGULAR:+$TARGETS_REGULAR	}$ii" # nb: \t
+	else
+		# Append this candidate to the recursive snapshot list because it additionally:
+		#
+		#   * Does not have an excluded descendent filesystem.
+		#   * Is not the descendant of an already included filesystem.
+		#
+		print_log debug "Including $ii for recursive snapshot."
+		TARGETS_RECURSIVE="${TARGETS_RECURSIVE:+$TARGETS_RECURSIVE	}$ii" # nb: \t
+	fi
 done
 
 # Linux lacks SMF and the notion of an FMRI event, but always set this property
