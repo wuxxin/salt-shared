@@ -2,49 +2,12 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
+  - development
   - desktop.python
   - desktop.manjaro
   - desktop.manjaro.emulator
   - desktop.manjaro.iot
   - desktop.manjaro.security
-
-language-asm:
-  pkg.installed:
-    - pkgs:
-      # nasm - 80x86 assembler designed for portability and modularity
-      - nasm
-
-language-js:
-  pkg.installed:
-    - pkgs:
-      # nodejs - Evented I/O for V8 javascript ("Current" release)
-      - nodejs
-      # eslint - AST-based pattern checker for JavaScript
-      - eslint
-
-language-go:
-  pkg.installed:
-    - pkgs:
-      - go
-
-language-java:
-  pkg.installed:
-    - pkgs:
-      - jdk-openjdk
-      - java-rhino
-
-language-rust:
-  pkg.installed:
-    - pkgs:
-      - rust
-      # rust-analyzer - Rust compiler front-end for IDEs
-      - rust-analyzer
-
-linker-mold:
-  pkg.installed:
-    - pkgs:
-      # mold - A Modern Linker
-      - mold
 
 # development-fonts:
 #   pkg.installed:
