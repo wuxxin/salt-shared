@@ -1,9 +1,7 @@
 {% from 'arch/lib.sls' import aur_install with context %}
 
 include:
-  - qemu
   - libvirt
-  - containers
   - android.tools
 
 emulator-qemu:
