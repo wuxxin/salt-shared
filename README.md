@@ -15,19 +15,25 @@ A collection of saltstack states mostly useful for a desktop setup.
     + [Development](desktop/manjaro/development.sls) Manjaro Desktop plus Development Tools
         + [Scientific Python](desktop/python): JupyterLab Scientific & Machinelearning Python Stack
 
-+ Machine / Hardware Support
++ Machine / Hardware / OS / Storage Support
     + [node](node): basic machine setup (hostname, locale, network, storage)
+    + [arch](arch): archlinux AUR support for arch and manjaro
     + [kernel](kernel): kernel- image,headers,tools,modifications for running big hosts
     + [hardware](hardware): hardware related packages and setup
-
-+ Deployment / Admin
-    + [gitops](gitops): deploy and update machines from git, with webhook support
-    + [tools](tools): useful set of command line tools
-    + [vcs](vcs): git, git-crypt, git-bridge, mercurial, bzr, subversion
-    + [python Language Support](python)
     + [zfs](zfs): ZFS file system and volume management (scrub, trim, snapshot)
+    + [tools](tools): useful set of command line tools
+    + [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
+    + [systemd](systemd): cgroup, CPU, CPUSET, I/O delegation, accounting limits, journald, resolved
+    + [systemd nspawn](systemd/nspawn): leightweight machine container manager
 
-+ Network
++ Mobile, Embedded \& IOT
+    + [android](android): android tools (adb,fastboot,heimdall,scrcopy)
+    + [Airrohr](embedded/airrohr) Airquality Sensor, setup and integration into homeassistant
+    + [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
+    + [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
+
++ Server & Apps
+    + [gitops](gitops): deploy and update machines from git, with webhook support
     + [http_frontend](http_frontend): https frontend using nginx, acme.sh and easyrsa
     + [oauth2proxy](oauth2proxy): OAuth2Proxy for Oauth2/oidc Authentification
     + [ssh](ssh): openssh client and server
@@ -40,31 +46,11 @@ A collection of saltstack states mostly useful for a desktop setup.
     + [coturn](coturn): STUN and TURN Server
     + [wireguard](wireguard): Wireguard VPN
     + [strongswan](strongswan): IPsec VPN
-
-+ Virtual Machines
-    + [qemu](qemu): qemu/kvm full virtualization
-    + [libvirt](libvirt): libvirt virtualization (kvm-qemu and others)
-    + [systemd nspawn](systemd/nspawn): leightweight machine container manager
-
-+ Container
     + [containers](containers): OCI container runtime glue using podman, podman-compose, x11docker
-    + [containerd](containerd): Kubernetes OCI container runtime
-    + [k3s](k3s): selfcontained, small footprint Kubernetes Distribution
-
-+ Database
     + [postgresql](postgresql): Postgresql Database
     + [mysql](mysql): MariaDB (mysql compatible) Database
-    + [redis](redis): Redis (Key/Value Store) Instances
-
-+ Mail
     + [email](email): postfix, opendkim, rspamd transactional inbound/outbound email setup
     + [getmail](getmail): fetchmail alternative
-
-+ Mobile, Embedded \& IOT
-    + [android](android): android tools (adb,fastboot,heimdall,scrcopy)
-    + [Airrohr](embedded/airrohr) Airquality Sensor, setup and integration into homeassistant
-    + [OpenWRT/Builder](embedded/openwrt) Build OpenWRT
-    + [OpenWRT/Homeassistant device_tracker](embedded/openwrt/homeassistant-device-tracker) wifi device presence to MQTT publish integration
 
 + unfinished, halfbroken, quirky, old and minimum skeleton packages
     + [android/builder](android/builder) Lineage/MicroG Android OS Builder container for building android
