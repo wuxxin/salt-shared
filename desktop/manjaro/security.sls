@@ -2,6 +2,9 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'python/lib.sls' import pipx_install %}
 
+include:
+  - android.tools
+
 security-tools:
   pkg.installed:
     - pkgs:
@@ -38,18 +41,8 @@ security-tools:
       - mitmproxy
 
 {% load_yaml as pkgs %}
-      ### MITM
-      # FIXME-BUILD WORKS AS USER frida - Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
-      - python-frida
-      # python-frida-tools - CLI tools for Frida. Python 3 version from PyPi
-      - python-frida-tools
       ### NFC
       # mfoc - MiFare Classic Universal toolKit
       - mfoc
 {% endload %}
 {{ aur_install("security-tools-aur", pkgs) }}
-
-
-# security-tools-pipx
-
-{# pipx_install('xxx', user=user) #}
