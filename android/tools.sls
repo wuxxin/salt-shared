@@ -1,4 +1,5 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+{% from 'arch/lib.sls' import aur_install with context %}
 {% from 'python/lib.sls' import pipx_install %}
 
 include:
@@ -54,14 +55,14 @@ android-local-tools:
     - group: {{ user }}
     - makedirs: true
 
-{{ user_home }}/.local/bin/launch-android.sh
+{{ user_home }}/.local/bin/launch-android.sh:
   file.managed:
     - user: {{ user }}
     - group: {{ user }}
     - mode: "775"
     - source: salt://android/launch-android.sh
 
-{{ user_home }}/.local/bin/imei-calc.py
+{{ user_home }}/.local/bin/imei-calc.py:
   file.managed:
     - user: {{ user }}
     - group: {{ user }}
