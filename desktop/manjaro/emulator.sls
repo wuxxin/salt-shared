@@ -45,13 +45,7 @@ cross-compiler-arm:
       # android-studio-canary - The Official Android IDE (Canary branch)
       - android-studio-canary
 {% endload %}
-{{ aur_install("emulator-android-aur", pkgs,
-    require= ["sls: qemu", "sls: libvirt", "sls: containers" ] ) }}
-
-# chown_to_main_user:
-  # FIXME chwon /opt/android-sdk to mainuser:mainuser
-  # FIXME as mainuser: symlink lib and lib64 to /opt/android-sdk/emulator/qemu/linux-x86_64
-  #  for i in lib lib64; do ln -s ../../$i /opt/android-sdk/emulator/qemu/linux-x86_64/$i; done
+{{ aur_install("emulator-android-aur", pkgs, require= "sls: libvirt") }}
 
 emulator-windows:
   pkg.installed:
