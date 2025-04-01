@@ -2,6 +2,7 @@
 
 /etc/systemd/resolved.conf.d/localhostipv6.conf:
   file.managed:
+    - makedirs: true
     - contents: |
         [Resolve]
         DNSStubListenerExtra=[::1]:53
