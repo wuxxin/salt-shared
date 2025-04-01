@@ -14,6 +14,22 @@ media-player:
       # kodi -  software media player and entertainment hub for digital media
       - kodi
 
+{% load_yaml as pkgs %}
+      # wayland-pipewire-idle-inhibit - Inhibit wayland idle when computer is playing sound
+      - wayland-pipewire-idle-inhibit
+{% endload %}
+{{ aur_install("manjaro-pipewire-aur", pkgs) }}
+
+enable_wayland-pipewire-idle-inhibit:
+  file.symlink:
+    - name: {{ user_home+ '/.config/systemd/user/graphical-session.target.wants/wayland-pipewire-idle-inhibit.service' }}
+    - target: /usr/lib/systemd/user/wayland-pipewire-idle-inhibit.service
+    - makedirs: true
+    - user: {{ user }}
+    - group: {{ user }}
+    - require:
+      - test: audio-pipewire-aur
+
 # paper-aur
 {% load_yaml as pkgs %}
       # paperless-ngx - supercharged paperless: scan, index and archive all your physical documents

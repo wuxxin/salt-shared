@@ -18,22 +18,6 @@ manjaro-pipewire:
       - qemu-audio-pipewire
       - wireplumber
 
-{% load_yaml as pkgs %}
-      # wayland-pipewire-idle-inhibit - Inhibit wayland idle when computer is playing sound
-      - wayland-pipewire-idle-inhibit
-{% endload %}
-{{ aur_install("manjaro-pipewire-aur", pkgs) }}
-
-enable_wayland-pipewire-idle-inhibit:
-  file.symlink:
-    - name: {{ user_home+ '/.config/systemd/user/graphical-session.target.wants/wayland-pipewire-idle-inhibit.service' }}
-    - target: /usr/lib/systemd/user/wayland-pipewire-idle-inhibit.service
-    - makedirs: true
-    - user: {{ user }}
-    - group: {{ user }}
-    - require:
-      - test: audio-pipewire-aur
-
 # remove traces of pulse audio
 manjaro-pulse:
   pkg.removed:
@@ -48,11 +32,10 @@ manjaro-pulse:
       - pulseaudio-zeroconf
       - pulseaudio
 
-# remove snapd and dependencies
+# remove snapd
 manjaro-snap:
   pkg.removed:
     - pkgs:
-      - libpamac-snap-plugin
       - snapd
 
 manjaro-gstreamer:
