@@ -80,7 +80,7 @@ filter_weak_moduli:
     - contents: |
         Defaults env_keep += "SSH_AUTH_SOCK"
 
-{% from "ssh/lib.sls" import ssh_keys_update %}
+{% from "server/ssh/lib.sls" import ssh_keys_update %}
 
 {{ ssh_keys_update('root',
     salt['pillar.get']('ssh_authorized_keys', False),

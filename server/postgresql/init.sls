@@ -1,14 +1,14 @@
-{% from "postgresql/defaults.jinja" import settings with context %}
+{% from "server/postgresql/defaults.jinja" import settings with context %}
 
 /usr/local/bin/pgtune.sh:
   file.managed:
-    - source: salt://postgresql/pgtune.sh
+    - source: salt://server/postgresql/pgtune.sh
     - mode: "0755"
 
 prepare-postgresql.service:
   file.managed:
     - name: /etc/systemd/system/prepare-postgresql.service
-    - source: salt://postgresql/prepare-postgresql.service
+    - source: salt://server/postgresql/prepare-postgresql.service
     - template: jinja
     - defaults:
         settings: {{ settings }}

@@ -1,4 +1,4 @@
-{% from "coturn/defaults.jinja" import settings with context %}
+{% from "server/coturn/defaults.jinja" import settings with context %}
 
 /etc/default/coturn:
   file.managed:
@@ -11,7 +11,7 @@
 
 /etc/turnserver.conf:
   file.managed:
-    - source: salt://coturn/turnserver.conf
+    - source: salt://server/coturn/turnserver.conf
     - template: jinja
     - defaults:
         settings: {{ settings }}

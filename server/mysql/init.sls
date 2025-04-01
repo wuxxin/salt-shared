@@ -1,9 +1,9 @@
-{% from "mysql/defaults.jinja" import settings with context %}
+{% from "server/mysql/defaults.jinja" import settings with context %}
 
 prepare-mariadb.service:
   file.managed:
     - name: /etc/systemd/system/prepare-mariadb.service
-    - source: salt://mysql/prepare-mariadb.service
+    - source: salt://server/mysql/prepare-mariadb.service
     - template: jinja
     - defaults:
         settings: {{ settings }}

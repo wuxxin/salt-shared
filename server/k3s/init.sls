@@ -1,4 +1,4 @@
-{% from "k3s/defaults.jinja" import settings with context %}
+{% from "server/k3s/defaults.jinja" import settings with context %}
 
 {# modify kernel settings for server workload #}
 {# use external containerd to gain more customization possibilities, eg. using zfs #}
@@ -65,7 +65,7 @@ k3s.binary:
 k3s.service:
   file.managed:
     - name: /etc/systemd/system/k3s.service
-    - source: salt://k3s/k3s.service
+    - source: salt://server/k3s/k3s.service
     - defaults:
         settings: {{ settings }}
     - template: jinja

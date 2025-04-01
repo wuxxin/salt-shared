@@ -1,4 +1,4 @@
-{% from "getmail/defaults.jinja" import settings with context %}
+{% from "server/getmail/defaults.jinja" import settings with context %}
 
 getmail:
   pkg:
@@ -7,7 +7,7 @@ getmail:
 app-getmail@.service:
   file.managed:
     - name: /etc/systemd/system/app-getmail@.service
-    - source: salt://email/app-getmail@.service
+    - source: salt://server/getmail/app-getmail@.service
     - template: jinja
     - defaults:
         settings: {{ settings }}

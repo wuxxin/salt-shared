@@ -1,4 +1,4 @@
-{% from "oauth2proxy/defaults.jinja" import settings with context %}
+{% from "server/oauth2proxy/defaults.jinja" import settings with context %}
 {% set local_binary = "/usr/local/bin/oauth2-proxy" %}
 {% set external = settings.external.oauth2_proxy_tar_gz %}
 
@@ -55,7 +55,7 @@ oauth2proxy_config_directory:
 
 oauth2proxy@.service:
   file.managed:
-    - source: salt://oauth2proxy/oauth2proxy@.service
+    - source: salt://server/oauth2proxy/oauth2proxy@.service
     - name: /etc/systemd/system/oauth2proxy@.service
     - template: jinja
     - defaults:

@@ -1,7 +1,7 @@
-{% from "gitea/defaults.jinja" import settings with context %}
+{% from "server/gitea/defaults.jinja" import settings with context %}
 
 include:
-  - vcs.git
+  - development.git
 
 gitea_requisites:
   pkg.installed:
@@ -9,7 +9,7 @@ gitea_requisites:
       - gnupg
       - xz-utils
     - require:
-      - sls: vcs.git
+      - sls: development.git
 
 {% set gitea_local_binary = "/usr/local/bin/gitea" %}
 
@@ -88,7 +88,7 @@ gitea_ggp_user_{{ entry.name }}:
 
 gitea_{{ entry.name }}_app.ini:
   file.managed:
-    - source: salt://gitea/app.ini.jinja
+    - source: salt://server/gitea/app.ini.jinja
     - name: {{ entry.salt.home_dir }}/gitea_{{ entry.name }}_app.ini
     - mode: "0640"
     - user: {{ entry.global.run_user }}
@@ -106,7 +106,7 @@ gitea_{{ entry.name }}_app.ini:
 
 gitea_{{ entry.name }}.service:
   file.managed:
-    - source: salt://gitea/gitea.service
+    - source: salt://server/gitea/gitea.service
     - name: /etc/systemd/system/gitea_{{ entry.name }}.service
     - template: jinja
     - defaults:
