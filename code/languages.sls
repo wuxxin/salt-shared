@@ -3,7 +3,7 @@ include:
   - code.go
   - code.java
   - code.nodejs
-  - code.python
+  - code.python.dev
   - code.rust
 
 languages_nop_req:
@@ -14,7 +14,7 @@ languages_nop_req:
       - sls: code.go
       - sls: code.java
       - sls: code.nodejs
-      - sls: code.python
+      - sls: code.python.dev
       - sls: code.rust
 
 cross-compiler-arm:

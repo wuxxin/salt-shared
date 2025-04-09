@@ -1,7 +1,7 @@
-{% import_yaml "python/defaults.yml" as defaults %}
+{% import_yaml "code/python/defaults.yml" as defaults %}
 {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
     default= 'default', merge= salt['pillar.get']('python', {})) %}
-{% from 'python/lib.sls' import pip_install %}
+{% from 'code/python/lib.sls' import pip_install %}
 
 
 python:

@@ -1,5 +1,5 @@
 {% macro pip_install(package_or_package_list) %}
-  {% import_yaml "python/defaults.yml" as defaults %}
+  {% import_yaml "code/python/defaults.yml" as defaults %}
   {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
     default= 'default', merge= salt['pillar.get']('python', {})) %}
 "python{{ '3' if grains['os'] == 'Ubuntu' }}-{{ package_or_package_list }}":
@@ -45,7 +45,7 @@
 
 
 {% macro pipx_install(package, user) %} {# pipx_suffix pipx_opts, pip_args #}
-  {% import_yaml "python/defaults.yml" as defaults %}
+  {% import_yaml "code/python/defaults.yml" as defaults %}
   {% set settings=salt['grains.filter_by']({'default': defaults}, grain='default', 
     default= 'default', merge= salt['pillar.get']('python', {})) %}
   {% set upgrade= ('upgrade' in kwargs and kwargs['upgrade']) or settings['pipx']['update']['automatic'] %}
