@@ -13,11 +13,13 @@ scientific_base:
       - sls: desktop.python.development
       - sls: development.nodejs
 
-# scientific_optimized:
-# openblas - An optimized BLAS library based on GotoBLAS2 1.13 BSD
-# optimized python packages
-# numpy - scientific computing build with CPU - multicore + CPU-extensions speedup
-{# aur_install('scientific_optimized_aur', ['python-numpy-openblas',]) #}
+scientific_optimized:
+  pkg.installed:
+    - pkgs:
+      # blas-openblas - An optimized BLAS library based on GotoBLAS2 1.13 BSD (Provides BLAS/CBLAS/LAPACK/LAPACKE system-wide)
+      - blas-openblas
+      # blas64-openblas - An optimized BLAS library based on GotoBLAS2 1.13 BSD (64-bit integers, provides BLAS/CBLAS/LAPACK/LAPACKE system-wide)
+      - blas64-openblas
 
 # gui components
 scientific_gui:
@@ -61,6 +63,7 @@ scientific_python:
       - pyside6
     - require:
       - test: scientific_base
+      - pkg: scientific_optimized
       - pkg: scientific_gui
       - test: scientific_gui_aur
 
