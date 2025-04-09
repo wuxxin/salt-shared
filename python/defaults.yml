@@ -13,27 +13,16 @@ python:
   - python3-venv
   - python3-virtualenv
   - virtualenv
-  ### additional
-  - python3-yaml
-  - python3-xmljson
-  - python3-jsonlines
 
   arch:
   - python
   - python-pip
   - python-setuptools
   - python-virtualenv
-
-  ### additional
   # uv - An extremely fast Python package installer and resolver written in Rust
   - uv
   # pipx - Install and execute apps from Python packages
   - python-pipx
-  # jinja - simple pythonic template language written in Python
-  - python-jinja
-  - python-yaml
-  - python-xmljson
-  - python-jsonlines
 
 ipython:
   debian:
@@ -56,24 +45,49 @@ python_dev:
   debian:
   - build-essential
   - python3-dev
-  ### additional
   - git
   - cython3
   - swig
 
   arch:
-  ### base-devel installed as group
-  ### additional
+  ### base-devel is installed as group on arch
+  # git - the fast distributed version control system
   - git
   # cython - pythonic language wrapping external C libraries and fast C modules
   - cython
+  # swig - Generate scripting interfaces to C/C++ code
   - swig
+  # meson - High productivity build system (depends on ninja-build)
   - meson
-  # uv - extremely fast Python package installer and resolver written in Rust
-  - uv
   # pipenv - Python Dev Workflow for Humans
   - python-pipenv
   # poetry - Python packaging and dependency management made easy
   - python-poetry
   # pyenv - Easily switch between multiple versions of Python
   - pyenv
+
+  ## python code formatting/linting/auditing/refactoring tools
+  # mypy - type check type annotations
+  - mypy
+  # pyright - Type checker for the Python language
+  - pyright
+  # black - opinionated python source code formating
+  - python-black
+  # ruff - An extremely fast Python linter, written in Rust
+  - ruff 
+  # python-ruff - An extremely fast Python linter, written in Rust
+  - python-ruff 
+
+  ## replaced formatting/linting/auditing/refactoring tools
+  # yapf - code audit and reformating
+  # - yapf
+  # pylama - code audit and reformating
+  # - pylama
+  # isort - sort imports separated into sections
+  # - python-isort
+  # autopep8 - code audit and reformating to PEP 8 style
+  # - autopep8
+  # pylint - Analyzes Python code looking for bugs and signs of poor quality
+  # - python-pylint
+  # rope - Refactoring library
+  # - python-rope

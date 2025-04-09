@@ -52,6 +52,15 @@ python_devel_tools:
       # cookiecutter - creates projects from cookiecutters project templates
       - python-cookiecutter
 
+python_templating:
+  pkg.installed:
+    - pkgs:
+      # jinja - simple pythonic template language written in Python
+      - python-jinja
+      - python-yaml
+      - python-xmljson
+      - python-jsonlines
+
 python_conversion_libraries:
   pkg.installed:
     - pkgs:
@@ -59,32 +68,3 @@ python_conversion_libraries:
       - python-pdftotext
       # python-html2text - HTML to markdown-structured text converter
       - python-html2text
-
-python_linting_formatting:
-  pkg.installed:
-    - pkgs:
-      ## python code formatting/linting/auditing/refactoring tools
-      # mypy - type check type annotations
-      - mypy
-      # pyright - Type checker for the Python language
-      - pyright
-      # black - opinionated python source code formating
-      - python-black
-      # ruff - An extremely fast Python linter, written in Rust
-      - ruff 
-      # python-ruff - An extremely fast Python linter, written in Rust
-      - python-ruff 
-
-      ## replaced formatting/linting/auditing/refactoring tools
-      # yapf - code audit and reformating
-      # - yapf
-      # pylama - code audit and reformating
-      # - pylama
-      # isort - sort imports separated into sections
-      # - python-isort
-      # autopep8 - code audit and reformating to PEP 8 style
-      # - autopep8
-      # pylint - Analyzes Python code looking for bugs and signs of poor quality
-      # - python-pylint
-      # rope - Refactoring library
-      # - python-rope

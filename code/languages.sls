@@ -17,6 +17,13 @@ languages_nop_req:
       - sls: code.python
       - sls: code.rust
 
+cross-compiler-arm:
+  pkg.installed:
+    - pkgs:
+      - arm-none-eabi-binutils
+      - arm-none-eabi-gcc
+      - arm-none-eabi-newlib
+
 linker-mold:
   pkg.installed:
     - pkgs:
