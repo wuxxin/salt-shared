@@ -1,7 +1,7 @@
 {% from 'python/lib.sls' import pip_install %}
 
 include:
-  - python
+  - code.python
   - desktop.ubuntu.video.framework
 
 dvd-css-support:

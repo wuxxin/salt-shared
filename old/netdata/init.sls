@@ -1,5 +1,5 @@
 include:
-  - python
+  - code.python
 
 netdata:
   pkg.installed:

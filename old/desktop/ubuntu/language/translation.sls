@@ -2,7 +2,7 @@
 {% from 'python/lib.sls' import pipx_install %}
 
 include:
-  - python.dev
+  - code.python.dev
 
 {# install argostranslate as pipx user package, so its isolated from others #}
 {{ pipx_install('argostranslate', user=user) }}

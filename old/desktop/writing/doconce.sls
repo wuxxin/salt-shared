@@ -1,6 +1,6 @@
 include:
   - vcs
-  - python
+  - code.python
   - python.ipython
   - desktop.writing.latex
   - desktop.writing.libreoffice

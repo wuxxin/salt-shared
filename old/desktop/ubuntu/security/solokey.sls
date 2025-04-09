@@ -2,7 +2,7 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home, user_desktop with context %}
 
 include:
-  - python.dev
+  - code.python.dev
 
 {# solo - Python library for Solo keys https://pypi.org/project/solo-python #}
 {# install as pipx user package, so its isolated from others #}

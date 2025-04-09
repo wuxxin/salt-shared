@@ -2,7 +2,7 @@
 {% from 'python/lib.sls' import pip_install %}
 
 include:
-  - python
+  - code.python
   - desktop.ubuntu.network.iperf2
   - desktop.ubuntu.network.irtt
   - desktop.ubuntu.network.netperf

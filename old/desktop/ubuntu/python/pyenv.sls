@@ -1,6 +1,6 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 include:
-  - python.dev
+  - code.python.dev
 
 {# pyenv - easily switch between multiple versions of Python #}
 pyenv:

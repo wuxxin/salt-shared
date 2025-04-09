@@ -1,7 +1,7 @@
 {% from "old/lab/appliance/zentyal/defaults.jinja" import settings with context %}
 
 include:
-  - python
+  - code.python
   - appliance
 
 {%- set password= settings.admin.password or salt['cmd.run_stdout']('openssl rand 8 -hex') %}

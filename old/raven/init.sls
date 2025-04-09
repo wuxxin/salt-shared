@@ -1,7 +1,7 @@
 {% from "python/lib.sls" import pip_install %}
 
 include:
-  - python
+  - code.python
 
 # python3 packages needed for ravencat
 python3-ravencat-req:

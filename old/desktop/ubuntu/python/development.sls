@@ -2,7 +2,7 @@
 {% from 'python/lib.sls' import pipx_install, pipx_inject %}
 
 include:
-  - python.dev
+  - code.python.dev
   - desktop.ubuntu.python.pyenv
 
 {# python code formating/linting/auditing tools #}

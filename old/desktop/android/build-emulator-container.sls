@@ -11,7 +11,7 @@ system:
 {% endload %}
 
 include:
-  - python
+  - code.python
   - desktop.android.tools
 
 download_emulator_zip:

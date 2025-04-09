@@ -2,7 +2,7 @@
 {% from 'python/lib.sls' import pipx_install %}
 
 include:
-  - python
+  - code.python
 
 {# https://github.com/mozilla/TTS #}
 

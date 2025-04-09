@@ -6,7 +6,7 @@
 {% endif %}
 
 include:
-  - python
+  - code.python
   - .ppa
   - .minion
 {% if s.master.reactor.status=="present" %}

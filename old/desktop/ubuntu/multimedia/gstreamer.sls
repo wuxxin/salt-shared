@@ -1,6 +1,6 @@
 include:
   - desktop.ubuntu.multimedia.pipewire
-  - python
+  - code.python
 
 gstreamer-packages:
   pkg.installed:

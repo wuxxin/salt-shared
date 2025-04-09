@@ -3,7 +3,7 @@
 
 include:
   - vcs
-  - python
+  - code.python
   - desktop.ubuntu.writing.latex
   - desktop.ubuntu.language.spellcheck
 

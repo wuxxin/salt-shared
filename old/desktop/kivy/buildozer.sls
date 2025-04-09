@@ -1,5 +1,5 @@
 include:
-  - python
+  - code.python
   - vcs.git
   - java.jdk
   - desktop.android.user

@@ -3,7 +3,7 @@
 
 include:
   - kernel.server
-  - python
+  - code.python
 
 {# pin docker to x.y.* release, if requested #}
 /etc/apt/preferences.d/docker-preferences:

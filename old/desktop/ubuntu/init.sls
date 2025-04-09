@@ -2,7 +2,7 @@ include:
   - desktop.ubuntu.desktop
   - desktop.user
 
-  - python
+  - code.python
   - nodejs
   - java
   - android
