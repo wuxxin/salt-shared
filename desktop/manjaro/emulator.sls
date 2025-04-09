@@ -1,51 +1,30 @@
 {% from 'arch/lib.sls' import aur_install with context %}
 
 include:
-  - libvirt
+  - code.emulator
   - android.tools
-
-emulator-qemu:
-  pkg.installed:
-    - pkgs:
-      # qemu-desktop - QEMU setup for desktop environments
-      - qemu-desktop
-      # guestfs-tools - Tools for accessing and modifying guest disk images
-      - guestfs-tools
-      # add arm, mips and xtensa (esp8266, esp32) emulation
-      - qemu-system-arm
-      - qemu-system-mips
-      - qemu-system-xtensa
-      - gnome-boxes
-    - require:
-      - sls: libvirt
-
-{% load_yaml as pkgs %}
-      - virtio-win
-      # virtio-win - virtio drivers for Windows 7 and newer guests
-{% endload %}
-{{ aur_install("emulator-qemu-aur", pkgs, require= ["pkg: emulator-qemu" ] ) }}
 
 emulator-libvirt:
   pkg.installed:
     - pkgs:
+      - gnome-boxes    
       - virt-manager
       - virt-viewer
       - spice-gtk
     - require:
-      - sls: libvirt
+      - sls: code.emulator
+{% load_yaml as pkgs %}
+      - virtio-win
+      # virtio-win - virtio drivers for Windows 7 and newer guests
+{% endload %}
+{{ aur_install("emulator-libvirt-aur", pkgs, require= ["pkg: emulator-libvirt" ] ) }}
 
-cross-compiler-arm:
-  pkg.installed:
-    - pkgs:
-      - arm-none-eabi-binutils
-      - arm-none-eabi-gcc
-      - arm-none-eabi-newlib 
 
 {% load_yaml as pkgs %}
       # android-studio-canary - The Official Android IDE (Canary branch)
       - android-studio-canary
 {% endload %}
-{{ aur_install("emulator-android-aur", pkgs, require= "sls: libvirt") }}
+{{ aur_install("emulator-android-aur", pkgs, require= "sls: code.emulator") }}
 
 emulator-windows:
   pkg.installed:
