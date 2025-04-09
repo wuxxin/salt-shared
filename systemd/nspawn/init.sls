@@ -3,7 +3,7 @@
 
 include:
   - systemd.cgroup
-  - python
+  - code.python
 
 {% if grains['os'] == 'Manjaro' %}
 nspawn:

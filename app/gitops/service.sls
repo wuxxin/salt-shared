@@ -1,6 +1,6 @@
 {% from "app/gitops/defaults.jinja" import settings with context %}
 include:
-  - python
+  - code.python
 
 # sentrycat.py - error reporting to sentry
 sentrycat_gitops:

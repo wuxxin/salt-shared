@@ -2,7 +2,7 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - python
+  - code.python
 
 usr_local_bin:
   file.directory:

@@ -1,7 +1,7 @@
 {% from 'arch/lib.sls' import aur_install with context %}
 
 include:
-  - python.dev
+  - code.python.dev
 
 
 python_network_libraries:

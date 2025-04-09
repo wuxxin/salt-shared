@@ -2,7 +2,7 @@
 
 include:
   - hardware.amd.radeon
-  - python.dev
+  - code.python.dev
 
 rocm-sdk:
   pkg.installed:

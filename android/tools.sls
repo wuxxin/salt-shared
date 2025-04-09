@@ -3,7 +3,7 @@
 {% from 'python/lib.sls' import pipx_install %}
 
 include:
-  - python
+  - code.python
 
 android-tools:
   pkg.installed:
