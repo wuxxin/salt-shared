@@ -1,6 +1,7 @@
 {% from 'arch/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
+# audio: use pipewire instead of pulse audio
 manjaro-pipewire:
   pkg.installed:
     - pkgs:
@@ -12,11 +13,12 @@ manjaro-pipewire:
       - pipewire-roc
       - pipewire-x11-bell
       - pipewire-libcamera
+      # wireplumber is a modern pipewire session manager
+      - wireplumber
       - sof-firmware
       - lib32-pipewire-jack
       - lib32-pipewire-v4l2
       - qemu-audio-pipewire
-      - wireplumber
 
 # remove traces of pulse audio
 manjaro-pulse:
@@ -32,7 +34,7 @@ manjaro-pulse:
       - pulseaudio-zeroconf
       - pulseaudio
 
-# remove snapd
+# remove snapd (is proprietary)
 manjaro-snap:
   pkg.removed:
     - pkgs:
@@ -72,15 +74,36 @@ manjaro-qt5:
       - qt5-multimedia
       - qt5ct
 
-# cups
+# printing with cups
 manjaro-printer:
   pkg.installed:
     - pkgs:
       - manjaro-printer
+      - system-config-printer
 
-{% for s in ['service', 'socket', 'path'] %}
-cups.{{ s }}:
-  service.disabled:
+# configure cups: connect only to socket, do not listen or advertise to the network, do not start webgui
+{% set print_config_list= [
+  ('Listen localhost:631', '#Listen localhost:631'),
+  ('Listen \\\\*:631', '#Listen *:631'),
+  ('Listen \\\\[::1\\\\]:631', '#Listen [::1]:631'),
+  ('Listen /run/cups/cups.sock', 'Listen /run/cups/cups.sock'),
+  ('Browsing', 'Browsing No'),
+  ('BrowseLocalProtocols', 'BrowseLocalProtocols none'),
+  ('BrowseWebIF', 'BrowseWebIF No'),
+  ('WebInterface', 'WebInterface No'),
+  ('DefaultShared', 'DefaultShared No'),
+  ]
+%}
+
+{% for pattern, repl in print_config_list %}
+"cups_{{ pattern }}":
+  file.replace:
+    - name: /etc/cups/cupsd.conf
+    - pattern: |
+        ^{{ pattern }}.*
+    - repl: |
+        {{ repl }}
+    - append_if_not_found: true
     - require:
       - pkg: manjaro-printer
 {% endfor %}
