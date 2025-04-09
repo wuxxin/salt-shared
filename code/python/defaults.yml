@@ -15,7 +15,7 @@ python:
   - virtualenv
 
   arch:
-  - code.python
+  - python
   - python-pip
   - python-setuptools
   - python-virtualenv
