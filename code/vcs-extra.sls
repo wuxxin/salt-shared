@@ -1,5 +1,5 @@
 include:
-  - development.git
+  - code.git
 
 mercurial:
   pkg:
@@ -20,7 +20,7 @@ git-bridge:
       - git-remote-bzr
       - git-svn
     - require:
-      - sls: development.git
+      - sls: code.git
       - pkg: mercurial
       - pkg: bzr
       - pkg: subversion

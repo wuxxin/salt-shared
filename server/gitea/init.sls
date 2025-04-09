@@ -1,7 +1,7 @@
 {% from "server/gitea/defaults.jinja" import settings with context %}
 
 include:
-  - development.git
+  - code.git
 
 gitea_requisites:
   pkg.installed:
@@ -9,7 +9,7 @@ gitea_requisites:
       - gnupg
       - xz-utils
     - require:
-      - sls: development.git
+      - sls: code.git
 
 {% set gitea_local_binary = "/usr/local/bin/gitea" %}
 

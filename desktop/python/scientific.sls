@@ -5,13 +5,13 @@
 
 include:
   - desktop.python.development
-  - development.nodejs
+  - code.nodejs
 
 scientific_base:
   test.nop:
     - require:
       - sls: desktop.python.development
-      - sls: development.nodejs
+      - sls: code.nodejs
 
 scientific_optimized:
   pkg.installed:

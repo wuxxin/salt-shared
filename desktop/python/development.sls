@@ -88,34 +88,3 @@ python_linting_formatting:
       # - python-pylint
       # rope - Refactoring library
       # - python-rope
-
-python_tools_lsp:
-  pkg.installed:
-    - pkgs:
-      ## language server and languages
-      # python-lsp-server - Fork of the python-language-server project
-      - python-lsp-server
-      # python-lsp-jsonrpc - Fork of the python-jsonrpc-server project
-      - python-lsp-jsonrpc
-      # python-lsp-black - Fork of pyls-black, black autoformatter language server
-      - python-lsp-black
-      # bash-language-server - bash language server implementation
-      - bash-language-server
-{% load_yaml as pkgs %}
-      ## language server languages
-      # pylyzer - fast static code analyzer & language server for Python
-      - pylyzer
-      # python-lsp-ruff - python-lsp-server plugin for extensive and fast linting using ruff
-      - python-lsp-ruff
-      # python-pylsp-mypy - Static type checking for python-lsp-server with mypy
-      - python-pylsp-mypy
-      # python-pylsp-rope - Extended refactoring capabilities for Python LSP Server using Rope
-      # - python-pylsp-rope
-      # dockerfile-language-server - Language server for Dockerfiles
-      # - dockerfile-language-server
-      # cmake-language-server - Python based cmake language server
-      # - cmake-language-server
-{% endload %}
-{{ aur_install('python_tools_lsp_aur', pkgs,
-    require='pkg: python_tools_lsp') }}
-
