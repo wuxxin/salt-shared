@@ -1,3 +1,5 @@
+{% from 'arch/lib.sls' import aur_install with context %}
+
 include:
   - hardware.amd.radeon
   - python.dev
@@ -31,10 +33,15 @@ rocm-opencl:
       - sls: hardware.amd.radeon
       - sls: python.dev
 
+# rocwmma - Library for accelerating mixed precision matrix multiplication
+{# aur_install('rocm-wmma-aur', [ 'rocwmma',], require= 'pkg: rocm-sdk') #}
+
 hardware-amd-rocm:
   test:
     - nop
     - require:
       - pkg: rocm-sdk
+      - pkg: rocm-magma
       - pkg: rocm-opencl
+      # - pkgs: rocm-wmma-aur
 
