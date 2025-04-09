@@ -114,6 +114,13 @@ su -l
 props
 ```
 
+- check safety net
+  - https://github.com/vvb2060/KeyAttestation/releases/download/v1.8.4/KeyAttestation-v1.8.4.apk
+
+```sh
+adb install KeyAttestation-v1.8.4.apk
+```
+
 ### optional: create and patch desired imei
 
 ```sh
