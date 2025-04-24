@@ -4,6 +4,8 @@
 include:
   - .hostname
 
+{# currently disabled, because "linux_shadow.py, line 74: getspnam = functools.partial(spwd.getspnam)" needs to be patched
+
 {% if settings.users %}
   {% for u in settings.users %}
 user_present_{{ u.name }}:
@@ -37,3 +39,5 @@ group_present_{{ u.name }}:
     {%- endfor %}
   {% endfor %}
 {% endif %}
+
+#}

@@ -45,8 +45,9 @@ network:
     cidr: {{ internal_cidr }}
     name: {{ internal_name }}
     # computed if empty: ip, netcidr, netmask, reverse_net, short_net; default priority
-  netplan:
-  systemd:
+  netplan: {}
+  systemd: {}
+  networkmanager: {}
   nsswitch:
     hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
   priority: 80

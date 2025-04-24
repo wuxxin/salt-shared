@@ -20,12 +20,15 @@ node:
 
   network:
     internal: {{ config.network.internal }}
-    networkmanager: |
-{{ config.network.networkmanager|indent(6, True) }}
-    netplan: |
-{{ config.network.netplan|indent(6, True) }}
-    systemd: |
-{{ config.network.systemd|indent(6, True) }}
+    netplan: {% if config.network.netplan == "" %}{}{% else %}
+      default.yaml: |
+{{ config.network.netplan|indent(8, True) }}{% endif %}
+    networkmanager: {% if config.network.networkmanager == "" %}{}{% else %}
+      default-lan.nmconnection: |
+{{ config.network.networkmanager|indent(8, True) }}{% endif %}
+    systemd: {% if config.network.systemd == "" %}{}{% else %}
+      default.network: |
+{{ config.network.systemd|indent(8, True) }}{% endif %}
 
 gitops:
   user: {{ config.gitops_user }}

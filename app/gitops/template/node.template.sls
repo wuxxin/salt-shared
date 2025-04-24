@@ -85,8 +85,8 @@ type: {{ internal_type }}
   "node": node,
   "network": {
       "internal": network_internal,
-      "networkmanager": network_manager,
       "netplan": netplan,
+      "networkmanager": network_manager,
       "systemd": systemd_network,
       "def_route_device": def_route_device,
       "def_route_ip": def_route_ip,

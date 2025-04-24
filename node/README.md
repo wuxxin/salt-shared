@@ -3,17 +3,18 @@
 Configures hostname, users, groups, locales, location, network, storage
 
 + .locale
-  + configure language, messages, timezone, location
+    + configure language, messages, timezone, location
 + .network
-  + add netplan.yaml or systemd.netdev/network files if present in pillar
-  + add internal bridge (uses networkmanager, netplan, systemd or ifup depending avaiability)
-  + configure nsswitch.conf@hosts line for dns name lookup order
+    + support netplan, systemd-networkd or Networkmanager configuration
+    + add netplan.yaml or systemd.netdev/network files, or NetworkManager nmconnection files if present in pillar
+    + add internal bridge (uses networkmanager, netplan, systemd or ifup depending avaiability)
+    + configure nsswitch.conf@hosts line for dns name lookup order
 + .hostname
-  + Configures hostname
+    + Configures hostname
 + .accounts
-  + Configure users and groups
+    + Configure users and groups
 + .storage
-  + configure filesystems, mounts and directories
+    + configure volume manager(lvm), filesystems (zfs,xfs,ext4), mounts and directories
 
 ## Example pillar
 
@@ -70,8 +71,13 @@ node:
       name: internal
       # computed if empty:
       # ip, netcidr, netmask, reverse_net, short_net
-    netplan: ""
-    systemd: ""
+    netplan: {}
+    systemd: {}
+    networkmanager:
+      # delete existing connection with "", define additional connections, will stop and restart of NetworkManager
+      default-lan.nmconnection: ""
+      my-funky-lan.nmconnection: |
+        ...
     nsswitch:
       hosts: mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
 
