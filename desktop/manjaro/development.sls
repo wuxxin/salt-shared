@@ -118,6 +118,8 @@ development-tools:
       - nnn
 
       ### viewer
+      # zenity - Display graphical dialog boxes from shell scripts
+      - zenity
       # tokei - blazingly fast CLOC (Count Lines Of Code) program
       - tokei
       # viu - Simple terminal image viewer
