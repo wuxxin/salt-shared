@@ -20,6 +20,18 @@ manjaro-pipewire:
       - lib32-pipewire-v4l2
       - qemu-audio-pipewire
 
+# pipewire is configured to be a jack daemon, install jack utils
+manjaro-jack-pipewire:
+  pkg.installed:
+    - pkgs:
+      - jack_utils
+      - jack_capture
+      - jack_delay
+      - jack-stdio
+      - jack-example-tools
+    - require:
+      - pkg: manjaro-pipewire
+
 # remove traces of pulse audio
 manjaro-pulse:
   pkg.removed:
