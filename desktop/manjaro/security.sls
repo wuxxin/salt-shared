@@ -1,6 +1,6 @@
 {% from 'arch/lib.sls' import aur_install with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
-{% from 'python/lib.sls' import pipx_install %}
+{% from 'code/python/lib.sls' import pipx_install %}
 
 include:
   - android.tools

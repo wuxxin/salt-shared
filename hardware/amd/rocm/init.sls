@@ -12,7 +12,7 @@ rocm-sdk:
       - rocminfo
     - require:
       - sls: hardware.amd.radeon
-      - sls: python.dev
+      - sls: code.python.dev
 
 rocm-magma:
   pkg.installed:
@@ -31,7 +31,7 @@ rocm-opencl:
       - rocm-opencl-runtime
     - require:
       - sls: hardware.amd.radeon
-      - sls: python.dev
+      - sls: code.python.dev
 
 # rocwmma - Library for accelerating mixed precision matrix multiplication
 {# aur_install('rocm-wmma-aur', [ 'rocwmma',], require= 'pkg: rocm-sdk') #}

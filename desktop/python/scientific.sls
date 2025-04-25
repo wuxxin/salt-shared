@@ -1,5 +1,5 @@
 {# scientific python #}
-{% from 'python/lib.sls' import pipx_install %}
+{% from 'code/python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user with context %}
 {% from 'arch/lib.sls' import aur_install with context %}
 

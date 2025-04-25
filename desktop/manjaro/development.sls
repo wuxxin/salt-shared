@@ -2,7 +2,7 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
-  - development
+  - code
   - desktop.python
   - desktop.manjaro
   - desktop.manjaro.emulator

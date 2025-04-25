@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pipx_install %}
+{% from 'code/python/lib.sls' import pipx_install %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
@@ -20,7 +20,7 @@ flatyaml:
     - pkgs:
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-yaml
     - require:
-      - sls: python
+      - sls: code.python
   file.managed:
     - name: {{ user_home }}/.local/bin/flatyaml.py
     - source: salt://tools/flatyaml.py
@@ -33,7 +33,7 @@ passgen:
   pkg.installed:
     - name: python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
     - require:
-      - sls: python
+      - sls: code.python
   file.managed:
     - name: {{ user_home }}/.local/bin/passgen.py
     - source: salt://tools/passgen.py
@@ -61,7 +61,7 @@ sentrycat:
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-chardet
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-sentry_sdk
     - require:
-      - sls: python
+      - sls: code.python
   file.managed:
     - name: {{ user_home }}/.local/bin/sentrycat.py
     - source: salt://tools/sentrycat.py

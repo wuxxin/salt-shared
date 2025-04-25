@@ -66,7 +66,7 @@ register_python_kernel_{{ name }}:
 
 
 {% macro jupyter_core(user, pkgs, apps) %}
-  {% from 'python/lib.sls' import pipx_install, pipx_inject %}
+  {% from 'code/python/lib.sls' import pipx_install, pipx_inject %}
 
 # create a pipx environment for jupyter[lab] service
 {{ pipx_install('jupyter-core', user=user, pipx_opts='--system-site-packages --pip-args="-I"') }}

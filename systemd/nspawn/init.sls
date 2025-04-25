@@ -1,5 +1,5 @@
 {% from "systemd/nspawn/defaults.jinja" import settings with context %}
-{% from 'python/lib.sls' import pip_install %}
+{% from 'code/python/lib.sls' import pip_install %}
 
 include:
   - systemd.cgroup

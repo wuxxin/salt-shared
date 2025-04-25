@@ -4,11 +4,17 @@
 {% set user_home= user_info['home'] %}
 
 {% macro add_to_groups(user, groups) %}
+
 {{ user }}-add-to-groups:
+  test.show_notification:
+    - text: |
+        WARNING: FIXME: {{ user }}-add-to-groups currently disabled, because "linux_shadow.py, line 74: getspnam = functools.partial(spwd.getspnam)" needs to be patched
+{#
   user.present:
     - name: {{ user }}
     - groups: {{ groups }}
     - remove_groups: False
+#}
 {% endmacro %}
 
 {% macro user_desktop(user, name, desktop) %}

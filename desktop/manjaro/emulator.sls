@@ -60,7 +60,7 @@ emulator-libvirt:
       # android-studio-canary - The Official Android IDE (Canary branch)
       - android-studio-canary
 {% endload %}
-{{ aur_install("emulator-android-aur", pkgs, require= "sls: code.emulator") }}
+{{ aur_install("emulator-android-aur", pkgs, require= "pkg: emulator-libvirt") }}
 
 emulator-windows:
   pkg.installed:

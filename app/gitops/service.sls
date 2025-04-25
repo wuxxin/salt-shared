@@ -10,7 +10,7 @@ sentrycat_gitops:
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-chardet
       - python{{ '3' if grains['os_family']|lower == 'debian' }}-sentry_sdk
     - require:
-      - sls: python
+      - sls: code.python
 file.managed:
     - name: /usr/local/bin/sentrycat.py
     - source: salt://tools/sentrycat.py

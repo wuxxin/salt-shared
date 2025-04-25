@@ -1,6 +1,7 @@
 {% from 'arch/lib.sls' import aur_install, pacman_repo_key with context %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
-{% from 'python/lib.sls' import pipx_install, pipx_inject %}
+{% from 'code/python/lib.sls' import pipx_install, pipx_inject %}
+
 include:
   - code.python
 
