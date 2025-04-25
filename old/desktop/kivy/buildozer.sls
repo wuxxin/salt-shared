@@ -25,7 +25,7 @@ buildozer:
     - cwd: {{ user_home }}/.buildozer
     - require:
       - file: buildozer
-      - sls: python
+      - sls: code.python
   pip.installed:
     - bin_env: {{ user_home }}/.buildozer/env
     - name: git+https://github.com/kivy/buildozer.git#egg=buildozer

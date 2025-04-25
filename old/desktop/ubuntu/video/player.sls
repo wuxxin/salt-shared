@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pip_install %}
+{% from 'code/python/lib.sls' import pip_install %}
 
 include:
   - code.python

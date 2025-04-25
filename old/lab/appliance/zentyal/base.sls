@@ -116,5 +116,5 @@ sogo-tmpreaper:
     - mode: "0755"
 
 {# ### helper to preseed zentyal redis config #}
-{% from 'python/lib.sls' import pip_install %}
+{% from 'code/python/lib.sls' import pip_install %}
 {{ pip_install('redis-dump-load') }}

@@ -39,7 +39,7 @@ caffe:
     - target: {{ workdir }}
     - user: {{ user }}
     - require:
-      - sls: python.scientific
+      - sls: code.python.scientific
       - pkg: caffe_req
       - pkg: caffe_no_recommends_req
       - file: caffe_profile

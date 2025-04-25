@@ -20,7 +20,7 @@ scrcpy-req:
       - libsdl2-dev
     - require:
       - sls: android.tools
-      - sls: python.meson
+      - sls: code.python.meson
       - sls: vcs.git
 
 scrcpy-source:

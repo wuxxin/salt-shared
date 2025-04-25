@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pipx_inject %}
+{% from 'code/python/lib.sls' import pipx_inject %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
@@ -13,7 +13,7 @@ sphinx-req:
       - zip
     - require:
       - sls: vcs
-      - sls: python
+      - sls: code.python
       - sls: desktop.ubuntu.writing.latex
       - sls: desktop.ubuntu.language.spellcheck
 

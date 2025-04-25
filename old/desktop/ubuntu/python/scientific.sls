@@ -1,11 +1,11 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home, user_desktop with context %}
-{% from 'python/lib.sls' import pipx_install, pipx_inject %}
+{% from 'code/python/lib.sls' import pipx_install, pipx_inject %}
 
 include:
   - desktop.ubuntu.python
   - nodejs
 
-{{ pipx_install('jupyterlab', require=['sls: python.dev', 'sls: nodejs'], user=user) }}
+{{ pipx_install('jupyterlab', require=['sls: code.python.dev', 'sls: nodejs'], user=user) }}
 
 {# jupyterlab kernels, widgets, extensions #}
 {{ pipx_inject('jupyterlab', [

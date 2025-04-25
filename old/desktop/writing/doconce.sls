@@ -25,7 +25,7 @@ prereq_doconce:
       - a2ps
     - require:
       - sls: vcs
-      - sls: python
+      - sls: code.python
       - sls: desktop.writing.latex
       - sls: desktop.writing.libreoffice
 
@@ -50,7 +50,7 @@ prereq_doconce:
     - installed
     - name: "{{ p }}"
     - require:
-      - sls: python
+      - sls: code.python
     - require_in:
       - cmd: doconce
 {% endfor %}

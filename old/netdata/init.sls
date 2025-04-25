@@ -8,4 +8,4 @@ netdata:
       - netdata
       - netdata-plugins-python
     - require:
-      - sls: python
+      - sls: code.python

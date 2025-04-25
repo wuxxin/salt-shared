@@ -25,7 +25,7 @@ salt-master-dependencies:
   pip.installed:
     - name: GitPython
     - require:
-      - sls: python
+      - sls: code.python
 
 salt-master:
 {% if leave_alone %}

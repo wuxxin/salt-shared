@@ -14,7 +14,7 @@ wireplumber-req:
       - libspa-0.2-dev
     - require:
       - sls: desktop.ubuntu.multimedia.pipewire
-      - sls: python.meson
+      - sls: code.python.meson
 
 wireplumber:
   file.directory:

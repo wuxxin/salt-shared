@@ -10,7 +10,7 @@ python3-ravencat-req:
       - python3-requests
       - python3-chardet
     - require:
-      - sls: python
+      - sls: code.python
 
 {{ pip_install('raven', require= 'pkg: python3-ravencat-req') }}
 

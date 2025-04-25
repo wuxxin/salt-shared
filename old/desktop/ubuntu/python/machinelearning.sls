@@ -1,4 +1,4 @@
-{% from 'python/lib.sls' import pipx_install, pipx_inject %}
+{% from 'code/python/lib.sls' import pipx_install, pipx_inject %}
 {% from 'desktop/user/lib.sls' import user, user_info, user_home, user_desktop with context %}
 
 include:
@@ -83,13 +83,13 @@ transformers
 {% if torch[torch_flavor]['links'] %}
 
 {{ pipx_inject('jupyterlab', machinelearning,
-    require='sls: python.dev', user=user,
+    require='sls: code.python.dev', user=user,
     pip_args='"-f '~ torch[torch_flavor]['links']~ '"' ) }}
 
 {% else %}
 
 {{ pipx_inject('jupyterlab', machinelearning,
-    require='sls: python.dev', user=user) }}
+    require='sls: code.python.dev', user=user) }}
 
 {% endif %}
 
@@ -126,4 +126,4 @@ https://github.com/KevinMusgrave/pytorch-metric-learning
 {% endload %}
 
 {{ pipx_inject('jupyterlab', neurophysiological,
-    require='sls: python.dev', user=user) }}
+    require='sls: code.python.dev', user=user) }}
