@@ -5,7 +5,7 @@ include:
   - desktop.python.scientific
   - hardware.amd.rocm.cupy
   - hardware.amd.rocm.koboldcpp
-  - hardware.amd.rocm.llama.cpp
+  - hardware.amd.rocm.llamacpp
   - hardware.amd.rocm.ollama
   - hardware.amd.rocm.onnx
   - hardware.amd.rocm.pytorch
@@ -40,7 +40,7 @@ ml_base:
       - pkg: ml_scikit
       - sls: hardware.amd.rocm.cupy
       - sls: hardware.amd.rocm.koboldcpp
-      - sls: hardware.amd.rocm.llama.cpp
+      - sls: hardware.amd.rocm.llamacpp
       - sls: hardware.amd.rocm.ollama
       - sls: hardware.amd.rocm.onnx
       # - sls: hardware.amd.rocm.localai
