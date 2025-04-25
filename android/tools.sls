@@ -1,6 +1,6 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'arch/lib.sls' import aur_install with context %}
-{% from 'python/lib.sls' import pipx_install %}
+{% from 'code/python/lib.sls' import pipx_install %}
 
 include:
   - code.python
@@ -47,6 +47,13 @@ android-tools:
 
 # python-frida-tools - CLI tools for Frida.
 {{ pipx_install('frida-tools', user=user) }}
+
+# tap device script needs root, put it in /usr/local/sbin so only root can modify and its safe to sudo with sudoers.d/ without password
+android-tap-device-script:
+  file.managed:
+    - name: /usr/local/sbin/tap-device.sh
+    - source: salt://android/tap-device.sh
+    - mode: "0755"
 
 android-local-tools:
   file.directory:
