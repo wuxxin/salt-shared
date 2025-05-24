@@ -3,18 +3,18 @@
 ## Features
 
 - **autoscrub**: cyclic data scrubbing of filesystem
-  - if enabled will execute once per month for 4 months, then once every 6 months
+    - if enabled will execute once per month for 4 months, then once every 6 months
 
 - **autotrim**: cyclic "automatic" manual start of trimming the filesystem
-  - if enabled will execute a manual trimming once per month
+    - if enabled will execute a manual trimming once per month
 
 - **autosnapshot**: cyclic rotating filesystem snapshots
-  - if enabled any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
-    is not false, a rotating snapshot will be taken.
-    - supported intervals are: frequent (15min), hourly, daily, weekly, monthly
+    - if enabled any fs where "com.sun:auto-snapshot" and "com.sun:auto-snapshot:<interval>"
+      is not false, a rotating snapshot will be taken.
+        - supported intervals are: frequent (15min), hourly, daily, weekly, monthly
 
 - **arc_max_limit**:
-  - if enabled, arc_max_percent will be used to calculate memory available for arc
+    - if enabled, arc_max_percent will be used to calculate memory available for arc
 
 ## Configuration
 
@@ -35,7 +35,7 @@ zfs:
 ```
 
 - as default, none of the features is enabled, you must enable them in the pillar.
-  - just including the zfs state **will not run** autoscrub, autotrim and autosnapshot.
+    - just including the zfs state **will not run** autoscrub, autotrim and autosnapshot.
 - rpool is the only default target for autoscrub and autotrim. define rpool and additional pools if needed.
 - see `defaults.jinja` for detailed settings
 
