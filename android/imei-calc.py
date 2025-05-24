@@ -4,7 +4,7 @@ import random
 import sys
 
 
-def luhn_checksum(number_string):
+def luhn_checksum(number_string: str):
     """Calculates the Luhn checksum for a given number string."""
 
     # sum of odd-positioned digits (from right)
@@ -20,18 +20,18 @@ def luhn_checksum(number_string):
     return (10 - (total_sum % 10)) % 10
 
 
-def generate_imei(tac, serial=None):
+def generate_imei(tac: str, serial: str = ""):
     """Generates an IMEI-like number string with a valid Luhn checksum.
 
-    Args:
-        tac: The 8-digit TAC string.
-        serial: Optional 6-digit serial string. If None, a random serial is generated.
+    tac:    8-digit TAC string
+    serial: 6-digit serial string, Optional
+            if empty, a random serial is generated
     """
 
     if not tac.isdigit() or len(tac) != 8:
         raise ValueError("TAC must be an 8-digit string.")
 
-    if serial is None:
+    if serial == "":
         serial = "".join(random.choices("0123456789", k=6))
     elif not serial.isdigit() or len(serial) != 6:
         raise ValueError("Serial must be a 6-digit string.")

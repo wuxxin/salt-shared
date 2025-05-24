@@ -22,9 +22,11 @@ Customized android emulator start of device <avdid>
   as <avdid>. symlink "launch-android.sh" as "avdidname.sh" for argument less usage
 
 script will parse an optional <avdid>.env in the same directory as <avdid>.ini
-put additional emulator launcher args there. Eg.:
+put additional emulator launcher args in there as ANDROID_EMULATOR_LAUNCHER_ARGS. Eg.:
 
-ANDROID_EMULATOR_LAUNCHER_ARGS="-no-snapshot -no-boot-anim -allow-host-audio -camera-back virtualscene -camera-front webcam0 -camera-hq-edge -phone-number 43664123456789 -dns-server 1.1.1.1"
+ANDROID_EMULATOR_LAUNCHER_ARGS="-no-snapshot -no-boot-anim -allow-host-audio -camera-back virtualscene -camera-front webcam0 -camera-hq-edge -phone-number 43664123456789 -dns-server 1.1.1.1 -wifi-tap tap-emulator -net-tap tap-emulator"
+ANDROID_EMULATOR_LAUNCHER_PRESTART="sudo /usr/local/sbin/tap-device.sh lan-bridge tap-emulator up"
+ANDROID_EMULATOR_LAUNCHER_POSTSTOP="sudo /usr/local/sbin/tap-device.sh lan-bridge tap-emulator down"
 
 EOF
   exit 1
@@ -58,4 +60,13 @@ if test -e "$AVDENV"; then
   echo "Info: Parsing environment file $AVDENV" >&2
   . "$AVDENV"
 fi
+
+if test "$ANDROID_EMULATOR_LAUNCHER_PRESTART" != ""; then
+  $ANDROID_EMULATOR_LAUNCHER_PRESTART
+fi
+
 $ANDROID_HOME/emulator/emulator -avd $AVDID $ANDROID_EMULATOR_LAUNCHER_ARGS "$@"
+
+if test "$ANDROID_EMULATOR_LAUNCHER_POSTSTOP" != ""; then
+  $ANDROID_EMULATOR_LAUNCHER_POSTSTOP
+fi
