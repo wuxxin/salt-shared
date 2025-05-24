@@ -82,6 +82,11 @@ ml_base:
       - mods
       # chatgpt.sh - Shell wrapper for OpenAI's ChatGPT, DALL-E, Whisper, and TTS.
       - chatgpt.sh
+      # jan - An open source alternative to ChatGPT that runs 100% offline on your computer
+      - jan
+      # oterm-git - A text-based terminal client for Ollama
+      - oterm-git
+      # claude-desktop-native (currently not working)
 {% endload %}
 {{ aur_install('ml_tools_aur', pkgs) }}
 
@@ -105,8 +110,6 @@ ml_libraries:
     - require:
       - test: ml_base
 {% load_yaml as pkgs %}
-      # python-unstructured - A library that prepares raw documents for downstream ML tasks
-      - python-unstructured
       # python-tokenizers - Fast State-of-the-Art Tokenizers optimized for Research and Production
       - python-tokenizers
       # python-transformers - State-of-the-art Natural Language Processing for Jax, PyTorch and TensorFlow
