@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# /// script
+# dependencies = [
+#   "chardet",
+#   "sentry_sdk",
+# ]
+# ///
 import argparse
 import copy
 import datetime

@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# /// script
+# dependencies = [
+#   "pyyaml",
+# ]
+# ///
+
 import sys
 import argparse
 

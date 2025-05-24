@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# /// script
+# dependencies = [
+#   "bitstring",
+# ]
+# ///
 
 """
 speakable friendly passwort generator

@@ -14,6 +14,20 @@ usr_local_bin:
 {# jinja2-cli - CLI interface to Jinja2, including yaml,xml,toml support #}
 {{ pipx_install('jinja2-cli[yaml,toml,xml]', user=user) }}
 
+{# filter-ical.py - Filter iCalendar entries based on a date range. Reads from stdin, writes to stdout #}
+filterical:
+  pkg.installed:
+    - pkgs:
+      - python{{ '3' if grains['os_family']|lower == 'debian' }}-icalendar
+    - require:
+      - sls: code.python
+file.managed:
+    - name: {{ user_home }}/.local/bin/filter-ical.py
+    - source: salt://tools/filter-ical.py
+    - mode: "0755"
+    - user: {{ user }}
+    - group: {{ user }}
+    
 {# flatyaml.py - convert yaml to a flat key=value format #}
 flatyaml:
   pkg.installed:
@@ -24,19 +38,6 @@ flatyaml:
   file.managed:
     - name: {{ user_home }}/.local/bin/flatyaml.py
     - source: salt://tools/flatyaml.py
-    - mode: "0755"
-    - user: {{ user }}
-    - group: {{ user }}
-
-{# passgen.py - speakable friendly passwort generator #}
-passgen:
-  pkg.installed:
-    - name: python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
-    - require:
-      - sls: code.python
-  file.managed:
-    - name: {{ user_home }}/.local/bin/passgen.py
-    - source: salt://tools/passgen.py
     - mode: "0755"
     - user: {{ user }}
     - group: {{ user }}
@@ -69,8 +70,28 @@ sentrycat:
     - user: {{ user }}
     - group: {{ user }}
 
-{# create a linked qrcode pdf from data, read data from linked qrcodes inside pdf #}
-qrcode:
+{# deprecated, use keepassxc as replacement for passgen.py #}
+{# passgen.py - speakable friendly passwort generator #}
+passgen:
+  pkg.installed:
+    - name: python{{ '3' if grains['os_family']|lower == 'debian' }}-bitstring
+    - require:
+      - sls: code.python
+  file.managed:
+    - name: {{ user_home }}/.local/bin/passgen.py
+    - source: salt://tools/passgen.py
+    - mode: "0755"
+    - user: {{ user }}
+    - group: {{ user }}
+
+{# qr-backup - Paper backup of files using QR codes #}
+qr-backup-replacement:
+  pkg.installed:
+    - name: qr-backup
+
+{# deprecated use qr-backup #}
+{# data2qrpdf.sh', 'qrpdf2data.sh - create a linked qrcode pdf from data, read data from linked qrcodes inside pdf #}
+qrcode-backup:
   pkg.installed:
     - pkgs:
       - qrencode
