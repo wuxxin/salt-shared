@@ -2,7 +2,7 @@ include:
   - code.asm
   - code.go
   - code.java
-  - code.nodejs
+  - code.javascript
   - code.python.dev
   - code.rust
 
@@ -13,7 +13,7 @@ languages_nop_req:
       - sls: code.asm
       - sls: code.go
       - sls: code.java
-      - sls: code.nodejs
+      - sls: code.javascript
       - sls: code.python.dev
       - sls: code.rust
 
