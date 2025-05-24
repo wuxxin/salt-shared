@@ -3,6 +3,11 @@
 include:
   - code.python.dev
 
+python_calendar_libraries:
+  pkg.installed:
+    - pkg:
+      # python-icalendar - A parser/generator of iCalendar files (RFC 2445)
+      - python-icalendar
 
 python_network_libraries:
   pkg.installed:
