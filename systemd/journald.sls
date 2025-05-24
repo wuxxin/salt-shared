@@ -1,3 +1,4 @@
+# limit maximum memory and disk usage for journal to 64m in ram and 128mb on disk
 {% for p,r in [
   ("SystemMaxUse", "SystemMaxUse=128M")
   ("RuntimeMaxUse", "RuntimeMaxUse=64M"),

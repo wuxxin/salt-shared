@@ -12,22 +12,6 @@ nspawn:
       - mkosi
       - debootstrap
 
-{% elif grains['os'] == 'Ubuntu' %}
-nspawn:
-  pkg.installed:
-    - pkgs:
-      - systemd-container
-      - libnss-mymachines
-      - bridge-utils
-      - uidmap
-      - debootstrap
-      - augeas-tools
-    - require:
-      - sls: systemd.cgroup
-
-{# mkosi is bitrotten on focal #}
-{{ pip_install('https://github.com/systemd/mkosi/archive/refs/tags/v10.tar.gz') }}
-
 {% endif %}
 
 
