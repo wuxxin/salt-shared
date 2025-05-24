@@ -17,6 +17,8 @@ audio-pipewire:
 {% load_yaml as pkgs %}
       # Pipewire volume control for GNOME
       - pwvucontrol
+      # jamesdsp - An audio effect processor for PipeWire clients
+      - jamesdsp
 {% endload %}
 {{ aur_install("audio-pipewire-aur", pkgs) }}
 
@@ -78,6 +80,18 @@ chat:
       - signal-desktop
       - telegram-desktop
 
+{% load_yaml as pkgs %}
+      # gpgfrontend - An exceptional GUI frontend for the modern GnuPG (gpg)
+      - gpgfrontend
+{% endload %}
+{{ aur_install("crypt-aur", pkgs) }}
+
+diagnostic:
+  pkg.installed:
+    - pkgs:
+      # hardinfo2 - System Information and Benchmark for Linux Systems
+      - hardinfo2
+
 download:
   pkg.installed:
     - pkgs:
@@ -85,6 +99,13 @@ download:
       - transmission-gtk
       # yt-dlp - youtube-dl fork with additional features and fixes
       - yt-dlp
+{% load_yaml as pkgs %}
+      # ytdownloader - GKT3 frontend for yt-dlp with focus on best audio and video. Uses ffmpeg for joining audio & video
+      - ytdownloader
+      # vsd - Download video streams served over HTTP from websites, HLS and DASH playlists
+      - vsd
+{% endload %}
+{{ aur_install("download-aur", pkgs) }}
 
 fediverse:
   pkg.installed:
@@ -114,6 +135,11 @@ gnome-extensions:
     - pkgs:
       # gnome-browser-connector - Native browser connector for integration with extensions.gnome.org
       - gnome-browser-connector
+{% load_yaml as pkgs %}
+      # gnome-shell-extension-tilingshell - Extend GNOME Shell with advanced tiling window management
+      - gnome-shell-extension-tilingshell
+{% endload %}
+{{ aur_install("gnome-extensions-aur", pkgs) }}
 
 mail-calendar-contacts:
   pkg.installed:
@@ -128,6 +154,11 @@ music-player:
       - lollypop
       # strawberry - music player aimed at audio enthusiasts and music collectors
       - strawberry
+{% load_yaml as pkgs %}
+      # youtube-music - YouTube Music Desktop App bundled with custom plugins (and built-in ad blocker / downloader)
+      - youtube-music
+{% endload %}
+{{ aur_install("music-player-aur", pkgs) }}
 
 music-tagger:
   pkg.installed:
@@ -212,6 +243,20 @@ privacy:
 {% endload %}
 {{ aur_install("privacy-aur", pkgs, require="pkg: privacy") }}
 
+{% load_yaml as pkgs %}
+      # gnomecast-git - A native Linux GUI for casting local files to Chromecast devices
+      - gnomecast-git
+      # mkchromecast-git - Cast Audio/Video to your Google Cast and Sonos Devices
+      - mkchromecast-git
+      # gnome-network-displays - Screencasting for GNOME. Supports the Miracast and Chromecast protocols
+      - gnome-network-displays
+      # cast_control - Control Chromecasts from Linux and D-Bus
+      - cast_control
+      # catt - Cast All The Things - Send videos from many, many online sources to your Chromecast
+      - catt
+{% endload %}
+{{ aur_install("stream-aur", pkgs) }}
+
 system-adm:
   pkg.installed:
     - pkgs:
@@ -219,6 +264,12 @@ system-adm:
       - systemd-ui
       # systemdgenie - Systemd management utility (kde gui)
       - systemdgenie
+
+# speech-to-speech
+{% load_yaml as pkgs %}
+      - dsnote-git
+{% endload %}
+{{ aur_install("speech2speech-aur", pkgs) }}
 
 # speech-to-text engine
 
@@ -228,6 +279,16 @@ system-adm:
       - rhvoice-voice-evgeniy-eng
 {% endload %}
 {{ aur_install("speech-synthesizer-aur", pkgs) }}
+
+# usage tracking
+{% load_yaml as pkgs %}
+      # activitywatch - automatically tracks how you spend time on your devices
+      # XXX use rust server instead of python server. python server currently expects older python-flask
+      - activitywatch-git
+      - aw-awatcher
+      - aw-watcher-media-player
+{% endload %}
+{{ aur_install("usage-tracking-aur", pkgs) }}
 
 vector-graphic:
   pkg.installed:
@@ -249,6 +310,14 @@ video-editor:
       - kdenlive
       - noise-suppression-for-voice
 
+{% load_yaml as pkgs %}
+      # gpu-screen-recorder - A shadowplay-like screen recorder for Linux. The fastest screen recorder for Linux
+      - gpu-screen-recorder
+      - gpu-screen-recorder-ui
+      - gpu-screen-recorder-notification
+{% endload %}
+{{ aur_install("video-screen-recorder-aur", pkgs) }}
+
 video-loopback:
   pkg.installed:
     - pkgs:
@@ -265,6 +334,14 @@ video-player:
       - vlc
 {% load_yaml as pkgs %}
       - vlc-plugin-pipewire
+      # freetube - An open source desktop YouTube player built with privacy in mind
+      - freetube
+      # hypnotix-wayland - An IPTV streaming application. (With Wayland support)
+      - hypnotix-wayland
+      # yuki-iptv - IPTV player with EPG support
+      - yuki-iptv
+      # iptv-checker - Node.js CLI tool for checking links in IPTV playlists
+      - iptv-checker
 {% endload %}
 {{ aur_install("video-player-aur", pkgs) }}
 

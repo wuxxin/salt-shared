@@ -42,6 +42,31 @@ development-ide:
 development-tools:
   pkg.installed:
     - pkgs:
+      ## compression
+      # upx - Extendable, high-performance executable packer for several executable formats
+      - upx
+      # 7zip - File archiver for extremely high compression
+      - 7zip
+      # xz - Library and command line tools for XZ and LZMA compressed files
+      - xz
+
+      ## conversion
+      # pandoc - Conversion between markup formats, export to pdf
+      - pandoc-cli
+      - pandoc-crossref
+      # poppler - PDF rendering library based on xpdf 3.0
+      - poppler
+      # imagemagick - An image viewing/manipulation program
+      - imagemagick
+      # pandoc pdfconversion needs lmodern.sty which is in texlive-fontrecommended
+      - texlive-fontsrecommended
+      # csvkit - suite of utilities for converting to and working with CSV
+      - csvkit
+
+      ## database
+      # sqlitebrowser - GUI editor for SQLite databases
+      - sqlitebrowser
+
       ## encryption
       # gnupg - Complete and free implementation of the OpenPGP standard
       - gnupg
@@ -52,56 +77,40 @@ development-tools:
       # minisign - A dead simple tool to sign files and verify digital signatures
       - minisign
 
+      ### file-manager
+      # nnn - The fastest terminal file manager ever written
+      - nnn
+      # yazi - Blazing fast terminal file manager written in Rust, based on async I/O
+      - fd
+      - fzf
+      - zoxide
+      - chafa
+      - yazi
+
       ## filter
-      # go-yq - Portable command-line YAML processor
-      - go-yq
+      # ripgrep - A search tool that combines the usability of ag with the raw speed of grep
+      - ripgrep
       # ugrep - ultra fast grep with interactive TUI, fuzzy search, boolean queries, hexdumps and more
       - ugrep
-
-      ## conversion
-      # pandoc - Conversion between markup formats, export to pdf
-      - pandoc-cli
-      - pandoc-crossref
-      # pandoc pdfconversion needs lmodern.sty which is in texlive-fontrecommended
-      - texlive-fontsrecommended
-      # csvkit - suite of utilities for converting to and working with CSV
-      - csvkit
-
-      ## compression
-      # upx -Extendable, high-performance executable packer for several executable formats
-      - upx
-
-      ## trace
-      # strace - diagnostic, debugging and instructional userspace tracer
-      - strace
-      # ltrace - tracks runtime library calls in dynamically linked program
-      - ltrace
-      # gdb - debugger for eg. reading coredumps
-      - gdb
-      # inotify-tools - a set of command-line programs (eg. inotifywait) providing a simple interface to inotify
-      - inotify-tools
-
-      ## database
-      # sqlitebrowser - GUI editor for SQLite databases
-      - sqlitebrowser
+      # jq - Command-line JSON processor
+      - jq
+      # go-yq - Portable command-line YAML processor
+      - go-yq
 
       ## linter/beautifier
       # shfmt - Format shell programs
       - shfmt
+
+      ### network-monitor
+      - nload
+      - bmon
+      - iftop
 
       ## rpc
       # grpc - High performance, open source, general RPC framework that puts mobile and HTTP/2 first
       - grpc
       # gRPC protocol buffers cli
       - grpc-cli
-
-      ## updates
-      # topgrade - Invoke the upgrade procedure of multiple package managers
-      - topgrade
-
-      ## watch
-      # urlwatch - Tool for monitoring webpages for updates
-      - urlwatch
 
       ## terminal
       # tmux - terminal multiplexer like screen
@@ -113,11 +122,25 @@ development-tools:
       # vhs - A tool for recording terminal GIFs
       - vhs
 
-      ### manager
-      # nnn - The fastest terminal file manager ever written
-      - nnn
+      ### task-management
+      # pueue - task management for sequential and parallel execution of long-running tasks
+      - pueue
 
-      ### viewer
+      ## trace
+      # strace - diagnostic, debugging and instructional userspace tracer
+      - strace
+      # ltrace - tracks runtime library calls in dynamically linked program
+      - ltrace
+      # gdb - debugger for eg. reading coredumps
+      - gdb
+      # inotify-tools - a set of command-line programs (eg. inotifywait) providing a simple interface to inotify
+      - inotify-tools
+
+      ## updates
+      # topgrade - Invoke the upgrade procedure of multiple package managers
+      - topgrade
+
+      ## viewer
       # zenity - Display graphical dialog boxes from shell scripts
       - zenity
       # tokei - blazingly fast CLOC (Count Lines Of Code) program
@@ -133,18 +156,17 @@ development-tools:
       # elinks - advanced and well-established feature-rich text mode web browser
       - elinks
 
-      ### network monitor
-      - nload
-      - bmon
-      - iftop
+      ## watch
+      # urlwatch - Tool for monitoring webpages for updates
+      - urlwatch
 
-      ### task management
-      # pueue - task management for sequential and parallel execution of long-running tasks
-      - pueue
 {% load_yaml as pkgs %}
+      ### aur
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       # - yj
+      # ast-grep - A fast and polyglot tool for code structural search, lint, rewriting at large scale
+      - ast-grep
       # marp - Markdown Presentation Ecosystem
       - marp-cli
       # glow - Command-line markdown renderer

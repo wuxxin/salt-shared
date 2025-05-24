@@ -30,13 +30,6 @@ enable_wayland-pipewire-idle-inhibit:
     - require:
       - test: audio-pipewire-aur
 
-# paper-aur
-{% load_yaml as pkgs %}
-      # paperless-ngx - supercharged paperless: scan, index and archive all your physical documents
-      - paperless-ngx
-{% endload %}
-{{ aur_install("paper-aur", pkgs) }}
-
 # audio-synthesizer-aur
 {% load_yaml as pkgs %}
       - vcvrack
