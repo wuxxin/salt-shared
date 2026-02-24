@@ -5,6 +5,17 @@
 include:
   - code.python
 
+
+application-launcher:
+pkg.installed:
+  - pkgs:
+    # rofi - A window switcher, application launcher and dmenu
+    - rofi
+    # rofi-calc - Do calculations in rofi
+    - rofi-calc
+    # rofi-emoji - A Rofi plugin for selecting emojis
+    - rofi-emoji
+
 audio-pipewire:
   pkg.installed:
     - pkgs:
@@ -43,16 +54,16 @@ audio-workstation:
       - ardour
       - new-session-manager
 
-{{ pacman_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801", 
+{{ pacman_repo_key("librewolf", "031F7104E932F7BD7416E7F6D2845E1305D6E801",
     "732945040a8bc121f75bbac65059eca52880f9f6cb7c65ef91f63c2f0f48a4ac", user=user) }}
 
-{{ pacman_repo_key("librewolf-bin", "662E3CDD6FE329002D0CA5BB40339DD82B12EF16", 
+{{ pacman_repo_key("librewolf-bin", "662E3CDD6FE329002D0CA5BB40339DD82B12EF16",
     "25216ea95a354481503e2596ec9ea7b72006e08d3e3bbf6f932dd3ffb096bd32", user=user) }}
 
 browser:
   pkg.installed:
     - pkgs:
-      # disable firefox because we use librewolf as replacement 
+      # disable firefox because we use librewolf as replacement
       # - firefox
       # chromium - open source version of google-chrome web browser
       - chromium
@@ -81,10 +92,10 @@ chat:
       - telegram-desktop
 
 {% load_yaml as pkgs %}
-      # gpgfrontend - An exceptional GUI frontend for the modern GnuPG (gpg)
-      - gpgfrontend
+    - signal-cli
+    # signal-cli - Provides a commandline and dbus interface for secure Signal messaging
 {% endload %}
-{{ aur_install("crypt-aur", pkgs) }}
+{{ aur_install("chat-aur", pkgs) }}
 
 diagnostic:
   pkg.installed:
@@ -97,9 +108,12 @@ download:
     - pkgs:
       # Torrent Download Gui
       - transmission-gtk
-      # yt-dlp - youtube-dl fork with additional features and fixes
-      - yt-dlp
+      # optional dependencies for yt-dlp
+      - python-brotlicffi
+      - python-xattr
 {% load_yaml as pkgs %}
+      # yt-dlp - youtube-dl fork with additional features and fixes
+      - yt-dlp-git
       # ytdownloader - GKT3 frontend for yt-dlp with focus on best audio and video. Uses ffmpeg for joining audio & video
       - ytdownloader
       # vsd - Download video streams served over HTTP from websites, HLS and DASH playlists
@@ -154,11 +168,9 @@ music-player:
       - lollypop
       # strawberry - music player aimed at audio enthusiasts and music collectors
       - strawberry
-{% load_yaml as pkgs %}
-      # youtube-music - YouTube Music Desktop App bundled with custom plugins (and built-in ad blocker / downloader)
-      - youtube-music
-{% endload %}
-{{ aur_install("music-player-aur", pkgs) }}
+      # tauon-music-box - A modern music player
+      - tauon-music-box
+      # to test: gapless quodlibet
 
 music-tagger:
   pkg.installed:
@@ -199,11 +211,21 @@ password:
 pdf-tools:
   pkg.installed:
     - pkgs:
-      # evince - Document viewer (PDF, PostScript, XPS, djvu, dvi, tiff, cbr, cbz, cb7, cbt)
-      - evince
+      # papers - Document viewer for PDF and other document formats aimed at the GNOME desktop
+      - papers
       # mupdf - Lightweight PDF and XPS viewer
       - mupdf
       - mupdf-tools
+      # diffpdf - Diffing pdf files visually or textually
+      - diffpdf
+      # img2pdf - Losslessly convert raster images to PDF
+      - img2pdf
+      # qpdf -  A Content-Preserving PDF Transformation System
+      - qpdf
+      # paper-clip - PDF document metadata editor
+      - paper-clip
+      # posterazor - Cut an image or PDF into pieces which can be printed and assembled to a poster
+      - posterazor
 {% load_yaml as pkgs %}
       # sioyek - PDF viewer with a focus on textbooks and research papers
       - sioyek
@@ -265,16 +287,26 @@ system-adm:
       # systemdgenie - Systemd management utility (kde gui)
       - systemdgenie
 
-# speech-to-speech
+# speech-to-speech (sts,stt,tts)
 {% load_yaml as pkgs %}
       - dsnote-git
+      # supersayer - Speech-to-text input tool for GNOME using whisper.cpp and PyGTK
+      # - supersayer
+      # speak-to-ai - Offline speech-to-text desktop application using Whisper
+      - speak-to-ai
 {% endload %}
 {{ aur_install("speech2speech-aur", pkgs) }}
 
 # speech-to-text engine
+# use whisper.cpp
 
 # text-to-speech synthesizer
 {% load_yaml as pkgs %}
+      - piper-tts
+      - piper-voices-en-us
+      - piper-voices-en-gb
+      - piper-voices-de-de
+      - piper-speak
       - rhvoice
       - rhvoice-voice-evgeniy-eng
 {% endload %}
@@ -288,7 +320,7 @@ system-adm:
       - aw-awatcher
       - aw-watcher-media-player
 {% endload %}
-{{ aur_install("usage-tracking-aur", pkgs) }}
+# aur_install("usage-tracking-aur", pkgs)
 
 vector-graphic:
   pkg.installed:
@@ -331,11 +363,14 @@ video-loopback:
 video-player:
   pkg.installed:
     - pkgs:
+      # showtime - Video player for GNOME
+      - showtime
+      # vlc - Free and open source cross-platform multimedia player and framework
       - vlc
 {% load_yaml as pkgs %}
       - vlc-plugin-pipewire
       # freetube - An open source desktop YouTube player built with privacy in mind
-      - freetube
+      - freetube-electron-git
       # hypnotix-wayland - An IPTV streaming application. (With Wayland support)
       - hypnotix-wayland
       # yuki-iptv - IPTV player with EPG support
