@@ -10,17 +10,15 @@ rocm-sdk:
       - rocm-hip-sdk
       - roctracer
       - rocminfo
+      # rocwmma - Library for accelerating mixed precision matrix multiplication
+      - rocwmma
+      # magma-hip - Matrix Algebra on GPU and Multicore Architectures (with ROCm/HIP)
+      - magma-hip
+      # amdsmi - AMD System Management Interface library
+      - amdsmi
     - require:
       - sls: hardware.amd.radeon
       - sls: code.python.dev
-
-rocm-magma:
-  pkg.installed:
-    - pkgs:
-      # magma-hip - Matrix Algebra on GPU and Multicore Architectures (with ROCm/HIP)
-      - magma-hip
-    - require:
-      - pkg: rocm-sdk
 
 rocm-opencl:
   pkg.installed:
@@ -33,15 +31,10 @@ rocm-opencl:
       - sls: hardware.amd.radeon
       - sls: code.python.dev
 
-# rocwmma - Library for accelerating mixed precision matrix multiplication
-{# aur_install('rocm-wmma-aur', [ 'rocwmma',], require= 'pkg: rocm-sdk') #}
-
 hardware-amd-rocm:
   test:
     - nop
     - require:
       - pkg: rocm-sdk
-      - pkg: rocm-magma
       - pkg: rocm-opencl
-      # - pkgs: rocm-wmma-aur
 

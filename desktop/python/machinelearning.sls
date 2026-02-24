@@ -28,6 +28,8 @@ ml_tensorflow:
 ml_scikit:
   pkg.installed:
     - pkgs:
+      - python-scikit-build
+      - python-scikit-build-core
       - python-scikit-learn
     - require:
       - sls: desktop.python.scientific
@@ -51,12 +53,14 @@ ml_base:
       - python-accelerate
       # python-bitsandbytes-rocm-git - Lightweight wrapper around CUDA custom functions, in particular 8-bit optimizers (AMD ROCm)
       - python-bitsandbytes-rocm-git
-      # python-einops - Deep learning operations reinvented (for pytorch, tensorflow, jax and others)
-      - python-einops
-      # python-lion-pytorch - Lion, new optimizer discovered by Google Brain using genetic algorithms that is purportedly better than Adam(w), in Pytorch
-      - python-lion-pytorch
+      # functorch - JAX-like composable function transforms for PyTorch
+      - python-functorch
+      # torchao - Package for applying ao techniques to GPU models
+      - python-torchao
       # torchtext - data processing utilities and popular datasets for natural language
       - python-torchtext
+      # torchcodec - PyTorch media decoding and encoding
+      - python-torchcodec
       # torchdata - modular data loading primitives for easily constructing flexible and performant data pipelines
       - python-torchdata
       # python-triton - Triton compiler
@@ -65,14 +69,23 @@ ml_base:
       - python-pytorch-lightning
       # python-peft - State-of-the-art Parameter-Efficient Fine-Tuning
       - python-peft
-      # functorch - JAX-like composable function transforms for PyTorch
-      - python-functorch
+      # python-einops - Deep learning operations reinvented (for pytorch, tensorflow, jax and others)
+      - python-einops
+      # python-lion-pytorch - Lion, new optimizer discovered by Google Brain using genetic algorithms that is purportedly better than Adam(w), in Pytorch
+      - python-lion-pytorch
       # skorch - scikit-learn compatible neural network library that wraps PyTorchhttps://gandalf.lakera.ai/
       - python-skorch
       # python-sentence-transformers - Multilingual Sentence & Image Embeddings with BERT
       - python-sentence-transformers
 {% endload %}
 {{ aur_install('ml_pytorch_aur', pkgs, require='test: ml_pytorch') }}
+
+# ml_tools
+ml_tools:
+  pkg.installed:
+    - pkgs:
+      # gemini-cli - Open-source AI agent that brings the power of Gemini directly into your terminal
+      - gemini-cli
 
 # ml_tools_aur
 {% load_yaml as pkgs %}
@@ -82,10 +95,27 @@ ml_base:
       - mods
       # chatgpt.sh - Shell wrapper for OpenAI's ChatGPT, DALL-E, Whisper, and TTS.
       - chatgpt.sh
+
+      # antigravity - An agentic development platform from Google, evolving the IDE into the agent-first era
+      - antigravity
+
+      # opencode - The AI coding agent built for the terminal
+      - opencode
+      - opencode-gemini-auth
+      - opencode-antigravity-auth
+      - opencode-pty
+      # openchamber - Desktop and web interface for OpenCode AI agent
+      - openchamber
+      # simple-code-gui - Multi-backend AI coding assistant GUI supporting Claude Code, Gemini CLI, Codex, OpenCode, and Aider
+      - simple-code-gui
+
+      # crush - A powerful terminal-based AI assistant for developers, providing intelligent coding assistance directly in your terminal
+      crush
+
       # jan - An open source alternative to ChatGPT that runs 100% offline on your computer
-      - jan
+      # - jan
       # oterm-git - A text-based terminal client for Ollama
-      - oterm-git
+      # - oterm-git
       # claude-desktop-native (currently not working)
 {% endload %}
 {{ aur_install('ml_tools_aur', pkgs) }}
@@ -110,10 +140,14 @@ ml_libraries:
     - require:
       - test: ml_base
 {% load_yaml as pkgs %}
+      # python-gguf - for writing binary files in the GGUF (GGML Universal File) format
+      - python-gguf
       # python-tokenizers - Fast State-of-the-Art Tokenizers optimized for Research and Production
       - python-tokenizers
       # python-transformers - State-of-the-art Natural Language Processing for Jax, PyTorch and TensorFlow
       - python-transformers
+      # python-vllm - high-throughput and memory-efficient inference and serving engine for LLMs
+      - python-vllm
       # python-deepspeed - DeepSpeed is a deep learning optimization library for distributed training and inference
       # - python-deepspeed
 {% endload %}

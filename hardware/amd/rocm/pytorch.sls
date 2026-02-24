@@ -10,7 +10,7 @@ pytorch:
       - python-pytorch-opt-rocm
     - require:
       - sls: hardware.amd.rocm
-      
+
 # torchvision - Datasets, transforms, and models specific to computer vision
 {{ aur_install('python-torchvision-rocm', ['python-torchvision-rocm', ], require='pkg: pytorch') }}
 
