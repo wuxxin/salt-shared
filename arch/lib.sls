@@ -1,4 +1,6 @@
 {% macro pacman_repo_key(name, keyid, hash, owner="", user="") %}
+
+
 import-repo-key-{{ name }}:
   file.managed:
     - source: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ keyid }}"
@@ -34,6 +36,7 @@ trusted-repo-{{ name }}:
 
 
 {% macro aur_install(name, pkgs=[], user="") %} {# require #}
+
 
 "{{ name }}":
   cmd.run:
@@ -74,6 +77,7 @@ trusted-repo-{{ name }}:
 
 
 {% macro pamac_patch_install(name, patches=[], require="", user="") %}
+
 
 clone-{{ name }}:
   cmd.run:
@@ -125,6 +129,7 @@ build-{{ name }}:
 
 
 {% macro pamac_patch_install_dir(name, srcdir) %} {# require, custom #}
+
 
 {%- set d = kwargs['require']|d([]) %}
 {%- set c = kwargs['custom']|d(false) %}
