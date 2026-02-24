@@ -1,4 +1,4 @@
-{% from 'arch/lib.sls' import aur_install with context %}
+# {% from 'arch/lib.sls' import aur_install with context %}
 include:
   - code.python
 
@@ -8,8 +8,6 @@ lsp_server:
       ## language server and languages
       # python-lsp-server - Fork of the python-language-server project
       - python-lsp-server
-      # python-lsp-jsonrpc - Fork of the python-jsonrpc-server project
-      - python-lsp-jsonrpc
       # python-lsp-black - Fork of pyls-black, black autoformatter language server
       - python-lsp-black
       # bash-language-server - bash language server implementation
@@ -25,12 +23,16 @@ lsp_server:
       # systemd-language-server - Language Server for Systemd unit files
       - systemd-language-server
 
-{% load_yaml as pkgs %}
+# {% load_yaml as pkgs %}
       ## language server languages
       # pylyzer - fast static code analyzer & language server for Python
       - pylyzer
       # python-lsp-ruff - python-lsp-server plugin for extensive and fast linting using ruff
       - python-lsp-ruff
+      # ty - An extremely fast Python type checker and language server, written in Rust
+      - ty
+      # basedpyright - pyright fork with various type checking improvements
+      - basedpyright
       # python-pylsp-mypy - Static type checking for python-lsp-server with mypy
       - python-pylsp-mypy
       # openscad-lsp - A LSP server for OpenSCAD
@@ -39,6 +41,6 @@ lsp_server:
       # - dockerfile-language-server
       # cmake-language-server - Python based cmake language server
       # - cmake-language-server
-{% endload %}
-{{ aur_install('lsp_server_aur', pkgs, require='pkg: lsp_server') }}
+# {% endload %}
+# {{ aur_install('lsp_server_aur', pkgs, require='pkg: lsp_server') }}
 
