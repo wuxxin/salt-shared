@@ -1,5 +1,5 @@
-{% from 'arch/lib.sls' import aur_install, pacman_repo_key with context %}
-{% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
+# {% from 'arch/lib.sls' import aur_install, pacman_repo_key with context %}
+# {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 
 include:
   - code
@@ -18,26 +18,20 @@ include:
 development-ide:
   pkg.installed:
     - pkgs:
-      # code - The Open Source build of Visual Studio Code (vscode) editor
-      - code
       # zed - high-performance, multiplayer code editor from the creators of Atom and Tree-sitter
       - zed
       # bless - High-quality, full-featured hex editor
       - bless
 
-{% load_yaml as pkgs %}
-      # code-features- Unblock some features in Code OSS
-      - code-features
-      # code-marketplace - Enable vscode marketplace in Code OSS
-      - code-marketplace
+# {% load_yaml as pkgs %}
       # gnome-text-editor - Simple text editor that focuses on session management
       - gnome-text-editor
       # ida-free - feature full dissassembler
       - ida-free
       # imhex - Hex Editor for Reverse Engineers
       - imhex-bin
-{% endload %}
-{{ aur_install("development-ide-aur", pkgs) }}
+# {% endload %}
+# {{ aur_install("development-ide-aur", pkgs) }}
 
 development-tools:
   pkg.installed:
@@ -105,6 +99,7 @@ development-tools:
       - nload
       - bmon
       - iftop
+      - btop
 
       ## rpc
       # grpc - High performance, open source, general RPC framework that puts mobile and HTTP/2 first
@@ -160,8 +155,11 @@ development-tools:
       # urlwatch - Tool for monitoring webpages for updates
       - urlwatch
 
-{% load_yaml as pkgs %}
+# {% load_yaml as pkgs %}
       ### aur
+      ## compression
+      # ratarmount -
+      - ratarmount
       ## filter
       # yj - Convert YAML <=> TOML <=> JSON <=> HCL
       # - yj
@@ -171,16 +169,24 @@ development-tools:
       - marp-cli
       # glow - Command-line markdown renderer
       - glow
+      # slidev-cli - Presentation Slides for Developers based on markdown
+      - slidev-cli
       # nautilus-checksums - Add checksums to Nautilus' properties window
       - nautilus-checksums
-{% endload %}
-{{ aur_install("development-tools-aur", pkgs) }}
+      # posting - The modern API client that lives in your terminal
+      - posting
+# {% endload %}
+# {{ aur_install("development-tools-aur", pkgs) }}
 
 
 devop-tools:
   pkg.installed:
     - pkgs:
       ## devop
+      # bubblewrap - Unprivileged sandboxing tool
+      - bubblewrap
+      # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
+      - dns-lexicon
       # gptfdisk - A text-mode partitioning tool that works on GUID Partition Table (GPT) disks
       - gptfdisk
       # multipath-tools - Multipath tools for Linux (including kpartx)
@@ -191,7 +197,7 @@ devop-tools:
       - mosquitto
       # nvchecker - New version checker for software releases plus optional packages
       - nvchecker
-      # html, pypi, toml, git, json, alpm source, sort_version_key = vercmp, awesomeversion 
+      # html, pypi, toml, git, json, alpm source, sort_version_key = vercmp, awesomeversion
       - pyalpm
       - python-awesomeversion
       - python-aiohttp
@@ -208,20 +214,16 @@ devop-tools:
       - macchanger
       # kompose - Docker compose to Kubernetes transformation tool
       - kompose
+      # tpm2-tools - Trusted Platform Module 2.0 tools based on tpm2-tss
+      - tpm2-tools
 
-{{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705",
-    "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
+# {{ pacman_repo_key("flent", "DE6162B5616BA9C9CAAC03074A55C497F744F705", "7ea640aad9ea799bef1bc04a5db884d0be8700c59b2be5f898ef35b9d7294f8a", user=user) }}
+# {{ pacman_repo_key("selinux", "63191CE94183098689CAB8DB7EF137EC935B0EAF", "80862ce3e3de1cffa8f0a966c84a8f57296b1609f92d5696405bd2dcf038b819", owner="Jason Zaman <perfinion@gentoo.org>", user=user) }}
 
-{{ pacman_repo_key("selinux", "63191CE94183098689CAB8DB7EF137EC935B0EAF",
-    "80862ce3e3de1cffa8f0a966c84a8f57296b1609f92d5696405bd2dcf038b819",
-    owner="Jason Zaman <perfinion@gentoo.org>", user=user) }}
-
-{% load_yaml as pkgs %}
+# {% load_yaml as pkgs %}
       ## devop
       # mqttui - Subscribe to a MQTT Topic or publish quickly from the terminal
       - mqttui
-      # dns-lexicon - Manipulate DNS records on various DNS providers in a standardized/agnostic way
-      - dns-lexicon
       # dnscontrol - Synchronize your DNS to multiple providers from a simple DSL
       - dnscontrol
       # q-dns - tiny command line DNS client with support for UDP, DoT, DoH, DoQ and ODoH
@@ -244,6 +246,6 @@ devop-tools:
       # # SELinux module tools
       # - semodule-utils
       # - checkpolicy
-{% endload %}
-{{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
+# {% endload %}
+# {{ aur_install("devop-tools-aur", pkgs, require="test: trusted-repo-flent") }}
 
