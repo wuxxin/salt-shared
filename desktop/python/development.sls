@@ -3,9 +3,15 @@
 include:
   - code.python.dev
 
+python_sound_libraries:
+  pkg.installed:
+    - pkgs:
+      # python-librosa - Python library for music and audio analysis
+      - python-librosa
+
 python_calendar_libraries:
   pkg.installed:
-    - pkg:
+    - pkgs:
       # python-icalendar - A parser/generator of iCalendar files (RFC 2445)
       - python-icalendar
 
@@ -26,12 +32,21 @@ python_network_libraries:
       - python-aiohttp
       # python-aiosmtpd - An asyncio based SMTP server
       - python-aiosmtpd
+      # python-curl_cffi - Python FFI binding for curl-impersonate
+      - python-curl_cffi
 {% load_yaml as pkgs %}
       # python-aiosmtplib - asyncio smtplib implementation
       - python-aiosmtplib
 {% endload %}
 {{ aur_install('python_network_libraries_aur', pkgs,
     require='pkg: python_network_libraries') }}
+
+# python_fileformat_libraries:
+{% load_yaml as pkgs %}
+      # python-pyogg - Flac, ogg, and opus python library
+      - python-pyogg
+{% endload %}
+{{ aur_install('python_fileformat_libraries_aur', pkgs) }}
 
 python_devices_libraries:
   pkg.installed:

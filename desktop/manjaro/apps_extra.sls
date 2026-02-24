@@ -2,13 +2,20 @@
 {% from 'desktop/user/lib.sls' import user, user_info, user_home with context %}
 {% from 'code/python/lib.sls' import pipx_install, pipx_inject %}
 
+3d-modelling:
+  pkg.installed:
+    - pkgs:
+        - blender
+        # hiprt - Ray tracing AMD ROCm support
+        - hiprt
+
 3d-printing:
   pkg.installed:
     - pkgs:
       - cura-bin
       - cura-resources-materials
 
-media-player:
+media-center:
   pkg.installed:
     - pkgs:
       # kodi -  software media player and entertainment hub for digital media
