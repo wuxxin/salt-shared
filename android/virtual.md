@@ -1,42 +1,50 @@
 # Virtual Android Devices
 
-- Android Emulator Image >= 11 implements on the fly translation of arm code to x86,
+- Android >= 11 Emulator Image implements on the fly translation of arm code to x86
   therefore making arm binaries from the play store available
+- Android >= 14 needs Magisk Version >= 26.x to be rooted
+- Android > 12L (api 32) can not be safetynet fixed
 - Magisk Versions >= 26.x can only be proper installed with the FAKEBOOTIMG argument
-- Android 14 needs Magisk Version >= 26.x to be rooted
 
-Example: **Voxel** - a Virtual Pixel 6a with Android 15 (API 35)
+
+## Voxel - Virtual Pixel 6 with Android 12L (API 32) and Google Play Services
+
 
 ```yaml
-model: Pixel 6a
-name: bluejay
-type: Phone
+model: Pixel 6
+model_target: oriole
+model_type: Phone
 architecture: ARM-64Bit
-api: Android 15 (API 35) with Google Services
-tac: 35598476
-# random generated imei from correct tac
-imei: 355984766831784
+api: Android 12L (API 32) with Google Play Services
+tac: 12345678
+fingerprint: google/oriole/oriole:12/SQ3A.220705.001.B2/8836500:user/release-keys
 ```
 
-## Create Virtual Device (AVD)
+### Create Virtual Device (AVD)
 
-Voxel: Pixel 6a
+Voxel: Pixel 6
 
 ```sh
-avdmanager create avd --name voxel --device pixel_6a \
-  --abi "google_apis_playstore/x86_64" -k "system-images;android-35;google_apis_playstore;x86_64"
+avdmanager create avd --name voxel --device pixel_6 \
+    --abi "google_apis_playstore/x86_64" -k "system-images;android-32;google_apis_playstore;x86_64"
 ```
 
 modify AVD config: ~/.android/avd/voxel/config.ini
 
 ```ini
+PlayStore.enabled = yes
 disk.dataPartition.size=20G
-sdcard.size=2048 MB
+image.sysdir.1=system-images/android-32/google_apis_playstore/x86_64/
 avd.id=voxel
 avd.name=voxel
+tag.display=Google Play
+tag.displaynames=Google Play
+tag.id=google_apis_playstore
+tag.ids=google_apis_playstore
 fastboot.forceColdBoot=yes
 fastboot.forceFastBoot=no
 ```
+
 
 - create symlink of android-launch.sh
 
@@ -71,13 +79,19 @@ Download into modules/
 
 ### Installation
 
-execute (for each targeted android api) and follow terminal and onscreen instructions.
+- start emulator
 
 ```sh
-./rootAVD.sh system-images/android-35/google_apis_playstore/x86_64/ramdisk.img FAKEBOOTIMG PATCHFSTAB GetUSBHPmodZ
+voxel.sh
 ```
 
-add modules:
+- execute (for each targeted android api) and follow terminal and onscreen instructions
+
+```sh
+./rootAVD.sh system-images/android-32/google_apis_playstore/x86_64/ramdisk.img FAKEBOOTIMG GetUSBHPmodZ
+```
+
+- add modules:
 
 ```sh
 cd modules; for i in *; do adb push $i /sdcard/Download/; done; cd ..
@@ -91,9 +105,10 @@ activate modules in magisk.
 - get fingerprint of device to mimick:
   - https://developers.google.com/android/binary_transparency/image_info.txt
 
-- write printlist of fingerprints
+- write printslist of fingerprints
 
-```printlist
+```printslist
+Google Pixel 6 (Android 12-220705):Google:Pixel 6=google/oriole/oriole:12/SQ3A.220705.001.B2/8836500:user/release-keys__2022-07-05
 Google Pixel 6a (Android 15-250205-250301):Google:Pixel 6a=google/bluejay/bluejay:15/AP4A.250205.002/12821496:user/release-keys__2025-03-01
 Google Pixel 6a (Android 15-250305-250305):Google:Pixel 6a=google/bluejay/bluejay:15/BP1A.250305.019/13003188:user/release-keys__2025-03-05
 ```
@@ -101,7 +116,7 @@ Google Pixel 6a (Android 15-250305-250305):Google:Pixel 6a=google/bluejay/blueja
 - copy fingerprints to device
 
 ```sh
-adb push printfiles /storage/self/primary/
+adb push printslist /storage/self/primary/
 ```
 
 - run magiskhideprops
@@ -113,6 +128,41 @@ su -l
 # run props from MagiskHidePropsConf
 props
 ```
+
+- set custom fingerprint
+```
+1 (edit device fingerprint)
+f (pick a certified)
+3 (custom)
+1,2,3 (select the matching)
+y
+y
+```
+
+- device simulation
+```
+3 (device simulation)
+s (device simulation)
+y
+1,2,3,9,10 or a (enable all)
+y
+y
+```
+
+ro.boot.serialno: EMULATOR36X2X8X0
+ro.build.characteristics: emulator
+ro.build.flavor: sdk_gphone64_x86_64-user
+ro.build.product: emulator64_x86_64_arm64
+ro.product.board: goldfish_x86_64
+ro.product.bootimage.brand: google
+ro.product.bootimage.device: emulator64_x86_64_arm64
+ro.product.bootimage.manufacturer: Google
+ro.product.bootimage.model: sdk_gphone64_x86_64
+ro.product.bootimage.name: sdk_gphone64_x86_64
+ro.product.vendor_dlkm.device]: [emulator64_x86_64_arm64]
+ 385   │ [ro.product.vendor_dlkm.manufacturer]: [Google]
+ 386   │ [ro.product.vendor_dlkm.model]: [sdk_gphone64_x86_64]
+ 387   │ [ro.product.vendor_dlkm.name]: [sdk_gphone64_x86_64]
 
 - check safety net
   - https://github.com/vvb2060/KeyAttestation/releases/download/v1.8.4/KeyAttestation-v1.8.4.apk
@@ -178,5 +228,4 @@ Accept a large scary warning
 Browse to the certificate file on the device and open it
 Confirm the certificate install
 ```
-
 
