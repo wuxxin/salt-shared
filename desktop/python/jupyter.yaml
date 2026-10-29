@@ -2,7 +2,7 @@ service:
   # mandatory settings: token
   # token:
   notebook_dir: ~/lab
-  port: 8888
+  port: 8901
   default_chromium: true
   default_packages: true
   default_apps: true
