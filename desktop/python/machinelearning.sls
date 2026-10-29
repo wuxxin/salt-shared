@@ -90,7 +90,7 @@ ml_tools:
 # ml_tools_aur
 {% load_yaml as pkgs %}
       # aichat - Using ChatGPT/GPT-3.5/GPT-4 in the terminal
-      - aichat
+      # - aichat
       # mods - AI for the command line, built for pipelines
       - mods
       # chatgpt.sh - Shell wrapper for OpenAI's ChatGPT, DALL-E, Whisper, and TTS.
@@ -98,10 +98,13 @@ ml_tools:
 
       # antigravity - An agentic development platform from Google, evolving the IDE into the agent-first era
       - antigravity
+      - antigravity-cli
+
+      # cjules - A power-user CLI for the Jules API, written in Crystal
+      - cjules
 
       # opencode - The AI coding agent built for the terminal
       - opencode
-      - opencode-gemini-auth
       - opencode-antigravity-auth
       - opencode-pty
       # openchamber - Desktop and web interface for OpenCode AI agent
@@ -110,13 +113,10 @@ ml_tools:
       - simple-code-gui
 
       # crush - A powerful terminal-based AI assistant for developers, providing intelligent coding assistance directly in your terminal
-      crush
+      - crush
 
-      # jan - An open source alternative to ChatGPT that runs 100% offline on your computer
-      # - jan
       # oterm-git - A text-based terminal client for Ollama
       # - oterm-git
-      # claude-desktop-native (currently not working)
 {% endload %}
 {{ aur_install('ml_tools_aur', pkgs) }}
 
