@@ -52,6 +52,9 @@ development-tools:
       - poppler
       # imagemagick - An image viewing/manipulation program
       - imagemagick
+      # pandoc pdfconversion can use modern latex replacement written in rust typst
+      - typst
+      - otf-libertinus
       # pandoc pdfconversion needs lmodern.sty which is in texlive-fontrecommended
       - texlive-fontsrecommended
       # csvkit - suite of utilities for converting to and working with CSV
@@ -60,6 +63,16 @@ development-tools:
       ## database
       # sqlitebrowser - GUI editor for SQLite databases
       - sqlitebrowser
+
+      ## email, calendar, contacts
+      # khal - CLI calendar application built around CalDAV
+      - khal
+      # khard - Console address book manager
+      - khard
+      # pimsync - Synchronize CalDAV, CardDAV, jmap/icalendar jmap/vcard
+      - pimsync
+      # himalaya - A CLI email client
+      - himalaya
 
       ## encryption
       # gnupg - Complete and free implementation of the OpenPGP standard
@@ -114,6 +127,8 @@ development-tools:
       - wezterm
       # kitty - modern, hackable, featureful, OpenGL-based terminal emulator
       - kitty
+      # ghostty - Fast, native, feature-rich terminal emulator pushing modern features
+      ghostty
       # vhs - A tool for recording terminal GIFs
       - vhs
 
@@ -167,6 +182,8 @@ development-tools:
       - ast-grep
       # marp - Markdown Presentation Ecosystem
       - marp-cli
+      # mermaid-cli - Generate images from Mermaid files
+      - mermaid-cli
       # glow - Command-line markdown renderer
       - glow
       # slidev-cli - Presentation Slides for Developers based on markdown

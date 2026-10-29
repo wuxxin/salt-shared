@@ -9,7 +9,7 @@ python_sound_libraries:
       # python-librosa - Python library for music and audio analysis
       - python-librosa
 
-python_calendar_libraries:
+python_caldav_carddav:
   pkg.installed:
     - pkgs:
       # python-icalendar - A parser/generator of iCalendar files (RFC 2445)
@@ -32,6 +32,10 @@ python_network_libraries:
       - python-aiohttp
       # python-aiosmtpd - An asyncio based SMTP server
       - python-aiosmtpd
+      # python-aiostream - Generator-based operators for asynchronous iteration
+      - python-aiostream
+      # python-aiohttp-oauthlib - oauthlib for aiohttp clients
+      - python-aiohttp-oauthlib
       # python-curl_cffi - Python FFI binding for curl-impersonate
       - python-curl_cffi
 {% load_yaml as pkgs %}
