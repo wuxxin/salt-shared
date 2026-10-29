@@ -129,6 +129,8 @@ development-tools:
       - kitty
       # ghostty - Fast, native, feature-rich terminal emulator pushing modern features
       ghostty
+      # chafa - Image-to-terminal viewer supporting a wide range of symbols and palettes, transparency, animations, etc.
+      - chafa
       # vhs - A tool for recording terminal GIFs
       - vhs
 
