@@ -205,6 +205,8 @@ password:
       - chromium-extension-keepassxc-browser
       - librewolf-extension-keepassxc-browser
       - git-credential-keepassxc
+      # passhole - KeePass CLI + dmenu interface
+      - passhole
 {% endload %}
 {{ aur_install("password-aur", pkgs, require="pkg: password") }}
 
@@ -289,11 +291,11 @@ system-adm:
 
 # speech-to-speech (sts,stt,tts)
 {% load_yaml as pkgs %}
-      - dsnote-git
+      # - dsnote-git
       # supersayer - Speech-to-text input tool for GNOME using whisper.cpp and PyGTK
       # - supersayer
       # speak-to-ai - Offline speech-to-text desktop application using Whisper
-      - speak-to-ai
+      # - speak-to-ai
 {% endload %}
 {{ aur_install("speech2speech-aur", pkgs) }}
 
